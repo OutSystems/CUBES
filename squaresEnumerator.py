@@ -113,20 +113,20 @@ def main(seed=None):
             # print(prog_out+str(prog).replace("@param", "table"))
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
-            if dir == "./":
+
+            print()
+            if "-nr" not in argv:
+                print("------------------------------------- R Solution ---------------------------------------\n")
+                print(problem.r_init)
+                print(interpreter.final_program)
                 print()
-                if "-nr" not in argv:
-                    print("------------------------------------- R Solution ---------------------------------------\n")
-                    print(problem.r_init)
-                    print(interpreter.final_program)
-                    print()
-                    print()
-                print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+                print()
+            print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
             robjects.r('{rscript}'.format(rscript=problem.r_init + interpreter.final_program))
             sql_query = robjects.r('sql_render({result_table})'.format(result_table=evaluation))
-            if dir == "./":
-                print(beautifier(str(sql_query)[6:]))
-                print()
+
+            print(beautifier(str(sql_query)[6:]))
+            print()
             return interpreter.final_program, beautifier(str(sql_query)[6:])
 
         else:
