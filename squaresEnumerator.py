@@ -60,11 +60,6 @@ def beautifier(sql):
 # print(sp.format(new_sql, reindent=True, keyword_case='upper'))
 
 def main(args):
-    if not debug:
-        sys.stderr = open(dir + 'output.err', 'w+')
-
-    # warnings.filterwarnings("ignore", category=RRuntimeWarning)
-    # warnings.filterwarnings('ignore')
     logger.info('Parsing specification...')
 
     problem = parse_specification(args.input)
@@ -115,11 +110,10 @@ def main(args):
                 print()
 
             print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-            robjects.r('{rscript}'.format(rscript=problem.r_init + interpreter.final_program))
-            sql_query = robjects.r('sql_render({result_table})'.format(result_table=evaluation))
+            robjects.r(f'{problem.r_init + interpreter.final_program}')
+            sql_query = robjects.r(f'sql_render({evaluation})')
 
             print(beautifier(str(sql_query)[6:]))
-            print()
             return interpreter.final_program, beautifier(str(sql_query)[6:])
 
         else:

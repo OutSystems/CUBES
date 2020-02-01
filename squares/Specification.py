@@ -1,5 +1,5 @@
 import csv
-import json
+import yaml
 import logging
 
 from rpy2 import robjects
@@ -31,7 +31,7 @@ def exec_and_return(r_script):
 def parse_specification(filename):
     f = open(filename)
 
-    spec = json.load(f)
+    spec = yaml.safe_load(f)
 
     if "inputs" not in spec:
         logger.error('Field "inputs" is required in spec')
