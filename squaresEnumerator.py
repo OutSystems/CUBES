@@ -5,45 +5,40 @@
 # Created on:	22-02-2019 15:13:15
 # Usage:	python3 squaresEnumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
-
+import argparse
 import os
 import re
 import sys
-import warnings
-from sys import argv
 
 import rpy2.robjects as robjects
 import sqlparse as sp
-from rpy2.rinterface import RRuntimeWarning
 
 import tyrell.spec as S
-from squares.Problem import parse_problem
+from squares.Specification import parse_specification
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
 from tyrell.enumerator import *
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
 
-warnings.filterwarnings("ignore", category=RRuntimeWarning)
+# warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 logger = get_logger('tyrell')
-counter_ = 0
 distinct = False
-_tables = dict()
 output_attrs = ""
-attributes = []
 robjects.r('''
-	library(dplyr)
-	library(dbplyr)
-	library(tidyr)
-	library(stringr)
-	options(warn=-1)
-   ''')
+zz <- file("r_output.log", open = "wt")
+sink(zz, type = "message")
+library(dplyr)
+library(dbplyr)
+library(tidyr)
+library(stringr)
+options(warn=-1)''')
 
 
 def eq_r(actual, expect):
     global distinct
-    _rscript = 'all.equal(lapply({lhs}, as.character),lapply({rhs}, as.character))'.format(lhs=actual, rhs=expect)
+    _rscript = f'all.equal(lapply({actual}, as.character), lapply({expect}, as.character))'
     try:
         ret_val = robjects.r(_rscript)
     except:
@@ -64,29 +59,29 @@ def beautifier(sql):
 
 # print(sp.format(new_sql, reindent=True, keyword_case='upper'))
 
-def main(seed=None):
+def main(args):
     if not debug:
         sys.stderr = open(dir + 'output.err', 'w+')
-    # os.close(sys.stderr.fileno())
-    warnings.filterwarnings("ignore", category=RRuntimeWarning)
-    warnings.filterwarnings('ignore')
-    logger.info('Parsing Spec...')
 
-    problem = parse_problem(argv[-1])
+    # warnings.filterwarnings("ignore", category=RRuntimeWarning)
+    # warnings.filterwarnings('ignore')
+    logger.info('Parsing specification...')
 
-    spec = S.parse(problem.dsl)
+    problem = parse_specification(args.input)
+
+    spec = S.parse(repr(problem.dsl))
     logger.info('Parsing succeeded')
 
     logger.info('Building synthesizer...')
     loc = 1
     while True:
         logger.info("Lines of Code: " + str(loc))
-        if argv[1] == "tree":
+        if args.tree:
             enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
         else:
-            if "-off" in argv:
+            if args.symm_off:
                 enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc)
-            elif "-on" in argv:
+            elif args.symm_on:
                 enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, break_sym_online=True)
             else:
                 enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, sym_breaker=False)
@@ -108,19 +103,17 @@ def main(seed=None):
 
         prog = synthesizer.synthesize()
         if prog is not None:
-            logger.info('Solution found: {}'.format(prog))
-            # print(prog_out+"select("+str(prog).replace("@param", "table")+","+output_attrs+")")
-            # print(prog_out+str(prog).replace("@param", "table"))
+            logger.info(f'Solution found: {prog}')
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
 
             print()
-            if "-nr" not in argv:
+            if args.r:
                 print("------------------------------------- R Solution ---------------------------------------\n")
                 print(problem.r_init)
                 print(interpreter.final_program)
                 print()
-                print()
+
             print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
             robjects.r('{rscript}'.format(rscript=problem.r_init + interpreter.final_program))
             sql_query = robjects.r('sql_render({result_table})'.format(result_table=evaluation))
@@ -137,22 +130,32 @@ def main(seed=None):
 
 debug = False
 if __name__ == '__main__':
-    if "-d" in argv:
+    parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
+
+    parser.add_argument('input', metavar='INPUT', type=str, help='input file')
+
+    parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
+
+    parser.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
+    parser.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
+
+    parser.add_argument('--r', dest='r', action='store_true', help="output R program")
+    parser.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
+    parser.set_defaults(r=True)
+
+    parser.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
+    parser.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
+    parser.set_defaults(tree=False)
+
+    args = parser.parse_args()
+
+    if args.debug:
         debug = True
-        print("Hey")
         logger.setLevel('DEBUG')
     else:
         logger.setLevel('CRITICAL')
-    seed = None
-    if "-h" in argv:
-        exit(
-            "Usage: python3 squaresEnumerator.py [tree|lines] [flags -h, ...] input.in\nflags:\n-on : computing symmetries online\n-off : computing symmetries offline\n-d : debug info\n\n-nr : only SQL solution\n\nDefault: lines enumerator and without symmetry breaking")
-    if len(argv) > 1:
-        try:
-            seed = int(argv[1])
-        except ValueError:
-            pass
-    prog = main(seed)
+
+    prog = main(args)
 
 
 class Squares(object):

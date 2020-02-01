@@ -9,22 +9,9 @@ def get_collist(sel):
 
 
 def get_type(df, index):
-    _rscript = 'sapply({df_name}, class)[{pos}]'.format(df_name=df, pos=index)
+    _rscript = f'sapply({df}, class)[{index}]'
     ret_val = robjects.r(_rscript)
     return ret_val[0]
-
-
-# get the string format to be used in filter
-def getConst(cons):
-    global attributes
-    try:
-        if int(cons):
-            return str(cons)
-    except:
-        if str(cons) == "max(n)" or cons in attributes:
-            return str(cons)
-        else:
-            return "\"" + str(cons) + "\""
 
 
 class SquaresInterpreter(PostOrderInterpreter):
@@ -34,10 +21,20 @@ class SquaresInterpreter(PostOrderInterpreter):
         self.store_program = store_program
         self.final_program = ""
 
+    # get the string format to be used in filter
+    def getConst(self, cons):
+        try:
+            if int(cons):
+                return str(cons)
+        except:
+            if str(cons) == "max(n)" or cons in self.problem.attributes:
+                return str(cons)
+            else:
+                return "\"" + str(cons) + "\""
+
     def fresh_table(self):
         name = get_fresh_name()
-        id = current_counter()
-        self.problem._tables[name] = id
+        self.problem._tables[name] = current_counter()
         return name
 
     def eval_ColInt(self, v):
@@ -72,7 +69,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         if 'str_detect' not in args[1]:
             col, op, const = args[1].split(" ")
-            _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {getConst(const)})' if const != "max(n)" else f'{name} <- filter({args[0]}, {col} {op} max(n))'
+            _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.getConst(const)})' if const != "max(n)" else f'{name} <- filter({args[0]}, {col} {op} max(n))'
         else:
             col, string = args[1].split("|")
             _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col}, "{string[:-1]}"))'
@@ -90,14 +87,14 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         if "str_detect" not in args[1]:
             col, op, const = args[1].split(" ")
-            const = getConst(const) if const != "max(n)" else "max(n)"
+            const = self.getConst(const) if const != "max(n)" else "max(n)"
             arg1 = col + " " + op + " " + const
         else:
             col, string = args[1].split("|")
             arg1 = col + ", " + "\"" + string[:-1] + "\")"
         if "str_detect" not in args[2]:
             col, op, const = args[2].split(" ")
-            const = getConst(const) if const != "max(n)" else "max(n)"
+            const = self.getConst(const) if const != "max(n)" else "max(n)"
             arg2 = col + " " + op + " " + const
         else:
             col, string = args[2].split("|")
