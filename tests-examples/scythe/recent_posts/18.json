@@ -1,0 +1,18 @@
+{
+    "inputs": [
+        "tests-examples/scythe/recent_posts/tables/18-1.txt"
+    ],
+    "output": "tests-examples/scythe/recent_posts/tables/18.out",
+    "const": [
+        "10172016",
+        "2"
+    ],
+    "aggrs": [
+        "n"
+    ],
+    "attrs": [
+        "Date"
+    ],
+    "loc": "5",
+    "comment": "#solution\n\nSELECT t1.Course, Count(t2.OrderID)\nFROM tab AS t1\nLEFT JOIN -- get all Courses for that day\n ( -- find the minimum order per customer\n   SELECT CustomerID, Min(OrderID) AS OrderID\n   FROM tab AS t2\n   WHERE Date='17.10.2016'\n   GROUP BY CustomerID\n ) AS t2\nON t1.CustomerID = t2.CustomerID \nAND t1.OrderID = t2.OrderID -- only one row per customer\nWHERE Date='17.10.2016'\nGROUP BY t1.Course\n\nsummarise(filter(inner_join(filter(summarise(dat1 %>% group_by(Course), n = n()), n >= 2), dat1), Date == 10172016) %>% group_by(Course), n = n())\n\nhttp://stackoverflow.com/questions/40102870/count-unique-customers"
+}

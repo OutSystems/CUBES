@@ -1,0 +1,14 @@
+{
+    "inputs": [
+        "tests-examples/scythe/recent_posts/tables/30-1.txt",
+        "tests-examples/scythe/recent_posts/tables/30-2.txt"
+    ],
+    "output": "tests-examples/scythe/recent_posts/tables/30.out",
+    "const": [],
+    "aggrs": [
+        "sum"
+    ],
+    "attrs": [],
+    "loc": "",
+    "comment": "#solution\n\nselect curr.item_id, curr.sales, prev.sales\nfrom (\n    SELECT t.item_id, SUM(t.qty_sold) as sales \n    FROM gnpcb.item_transactions t \n    join gnpcb.i_multiple_int_attributes a on t.item_id = a.id\n                and a.type = 'items' and a.attribute = 'previous_editions'\n    WHERE t.id_type in ('invoice', 'credit') and t.item_id IN ('18117', '17473', '17568') and t.transaction_type in ('sale', 'return', 'return_nts')\n    GROUP BY t.item_id) curr\nleft join(\n    SELECT a.id as item_id, SUM(t.qty_sold) as sales \n    FROM gnpcb.item_transactions t \n    join gnpcb.i_multiple_int_attributes a on t.item_id = a.value\n                and a.type = 'items' and a.attribute = 'previous_editions'\n    WHERE t.id_type in ('invoice', 'credit') and t.item_id IN ('18117', '17473', '17568') and t.transaction_type in ('sale', 'return', 'return_nts')\n    GROUP BY a.id) prev on curr.item_id = prev.item_id\n\nhttp://stackoverflow.com/questions/40028663/mysql-query-sum-item-using-several-ids-from-another-table"
+}

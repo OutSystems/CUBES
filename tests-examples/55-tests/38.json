@@ -1,0 +1,18 @@
+{
+    "inputs": [
+        "tests-examples/55-tests/tables/aircraft.txt",
+        "tests-examples/55-tests/tables/certified.txt"
+    ],
+    "output": "tests-examples/55-tests/tables/38.out",
+    "const": [],
+    "aggrs": [
+        "n",
+        "max"
+    ],
+    "attrs": [
+        "crusingrange"
+    ],
+    "bools": [],
+    "loc": "5",
+    "comment": "# 5.3.2 optimal solution sql modified\n\ncertified <- read.table(\"tests-examples/55-tests/tables/certified.txt\", sep =\",\", header=T)\naircraft <- read.table(\"tests-examples/55-tests/tables/aircraft.txt\", sep =\",\", header=T)\ndatout <- read.table(\"tests-examples/55-tests/tables/38.out\", sep =\",\", header=T)\ndatout\n\nout <- inner_join(\ninner_join(certified, aircraft) %>% \ngroup_by(eid) %>% summarise(maxcrusingrange = max(crusingrange)),\ninner_join(certified, aircraft) %>% \ngroup_by(eid) %>% summarise(n = n())) %>% select(eid, n, maxcrusingrange)"
+}

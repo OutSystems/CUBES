@@ -1,0 +1,15 @@
+{
+    "inputs": [
+        "tests-examples/scythe/recent_posts/tables/04-1.txt"
+    ],
+    "output": "tests-examples/scythe/recent_posts/tables/04.out",
+    "const": [
+        "2"
+    ],
+    "aggrs": [],
+    "attrs": [
+        "id"
+    ],
+    "loc": "2",
+    "comment": "#solution\n\nSELECT *\nFROM\n(SELECT SQL_CALC_FOUND_ROWS *\nFROM calls\nWHERE parent_id = '$term'\n   AND job_num != 0\nGROUP BY job_num\nUNION SELECT SQL_CALC_FOUND_ROWS *\nFROM calls\nWHERE parent_id = '$term'\n   AND job_num = 0) AS T\n\ndat0 <- read.table(\"tests-examples/scythe/recent_posts/tables/04-1.txt\", sep =\",\", header=T)\ndat0\ndatout <- read.table(\"tests-examples/scythe/recent_posts/tables/04.out\", sep =\",\", header=T)\ndatout\nselect(inner_join(dat0, filter(dat0, id >= 2)), call_ref,job_num, )\n\nhttp://stackoverflow.com/questions/40193886/mysql-group-unless-value-equals-0"
+}

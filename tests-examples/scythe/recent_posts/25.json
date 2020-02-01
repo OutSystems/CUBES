@@ -1,0 +1,18 @@
+{
+    "inputs": [
+        "tests-examples/scythe/recent_posts/tables/25-1.txt"
+    ],
+    "output": "tests-examples/scythe/recent_posts/tables/25.out",
+    "const": [
+        "NULL[num]"
+    ],
+    "aggrs": [
+        "min"
+    ],
+    "attrs": [
+        "id",
+        "gallery_id"
+    ],
+    "loc": "3",
+    "comment": "#solution\n\nselect i.*\nfrom images i\nwhere i.gallery_id is null or\n      i.id in (select min(i2.id) from images i2 group by i2.gallery_id);\n\nout <- select(\nfilter(\ninner_join(\nsummarise(dat1 %>% group_by(gallery_id), minid = min(id)),dat1),  minid == id | gallery_id == \"NULL[num]\"), id, gallery_id, path) %>% arrange(-desc(id))\n\nhttp://stackoverflow.com/questions/40058730/sql-group-by-coalesce-not-working-as-expected"
+}
