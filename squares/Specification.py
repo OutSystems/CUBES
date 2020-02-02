@@ -1,9 +1,13 @@
 import csv
+import random
+from itertools import permutations
+
 import yaml
 import logging
 
 from rpy2 import robjects
 
+from squares import util
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
 from tyrell.logger import get_logger
 
@@ -28,7 +32,7 @@ def exec_and_return(r_script):
     return r_script
 
 
-def parse_specification(filename):
+def parse_specification(filename, config):
     f = open(filename)
 
     spec = yaml.safe_load(f)
@@ -46,12 +50,12 @@ def parse_specification(filename):
             spec[field] = []
 
     return Specification(spec["inputs"], spec["output"], spec["const"], spec["aggrs"], spec["attrs"], spec["bools"],
-                         spec["loc"])
+                         spec["loc"], config)
 
 
 class Specification:
 
-    def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc):
+    def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc, config):
         self.inputs = inputs
         self.output = output
         self.consts = consts
@@ -60,6 +64,7 @@ class Specification:
         self.has_int_consts = find_consts(consts)
         self.bools = bools
         self.loc = loc
+        self._config = config
 
         self.tables = []
 
@@ -76,16 +81,16 @@ class Specification:
                 reader = csv.reader(f)
                 self.columns = self.columns.union(set(next(reader)))
 
+        self.columns = list(self.columns)
+        self.columns.sort()
+        util.random.shuffle(self.columns)
+
         self._tables['expected_output'] = next_counter()
 
         self.generate_r_init()
 
         logger.debug("Generating DSL...")
         self.generate_dsl()
-
-        if logger.isEnabledFor(logging.DEBUG):
-            with open('dsl.log', 'w') as f:
-                f.write(repr(self.dsl))
 
     def generate_r_init(self):  # TODO dirty: initializes R for the inputs
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
@@ -124,8 +129,9 @@ class Specification:
             'row(r) <= row(a)',
             'col(r) <= 3'
         ])]
-        summarise_p = [DSLPredicate('is_not_parent', ['inner_join4', 'summariseGrouped', '100']),
-                       DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100'])]
+        summarise_p = [DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100'])]
+        if 'inner_join4' not in self._config['disabled']:
+            summarise_p.append(DSLPredicate('is_not_parent', ['inner_join4', 'summariseGrouped', '100']))
 
         operators = None
         concat = None
@@ -151,7 +157,7 @@ class Specification:
         else:
             summarise_f, summarise_p = [], []
 
-        if 'max(n)' in self.aggrs:
+        if ['max(n)'] == self.aggrs:
             self.consts.append('max(n)')
             self.aggrs.remove('max(n)')
 
@@ -188,7 +194,7 @@ class Specification:
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'TableSelect')
         dsl.add_enum(DSLEnum('Cols', cols))
         dsl.add_enum(DSLEnum('Col', one_column))
-        dsl.add_enum(DSLEnum('SelectCols', output_attrs))
+        dsl.add_enum(DSLEnum('SelectCols', [','.join(output_attrs)]))
         dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if filter_conditions:
@@ -203,12 +209,30 @@ class Specification:
         dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int')]))
         dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int')]))
 
-        dsl.add_function(DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)"]))
-        dsl.add_function(
-            DSLFunction('inner_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
-                        ["col(r) <= col(a) + col(b) + col(c)"]))
-        dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
-                                     ["col(r) <= col(a) + col(b) + col(c) + col(d)"]))
+        if 'inner_join' not in self._config['disabled']:
+            dsl.add_function(
+                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)"]))
+
+            dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join']))
+            # dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join', 'anti_join', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['anti_join', 'inner_join', '100']))
+
+        if 'inner_join3' not in self._config['disabled']:
+            dsl.add_function(
+                DSLFunction('inner_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
+                            ["col(r) < col(a) + col(b) + col(c)"]))
+            dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join3']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'inner_join3', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'anti_join', '100']))
+
+        if 'inner_join4' not in self._config['disabled']:
+            dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
+                                         ["col(r) < col(a) + col(b) + col(c) + col(d)"]))
+            dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join4']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'inner_join4', '100']))
+            # dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'anti_join', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['anti_join', 'inner_join4', '100']))
+
         dsl.add_function(
             DSLFunction('anti_join', 'Table r', ['Table a', 'Table b', 'Col c'], ["col(r) == 1", 'row(r) <= row(a)']))
         dsl.add_function(
@@ -234,23 +258,11 @@ class Specification:
         for p in filters_p + summarise_p + necessary_conditions:
             dsl.add_predicate(p)
 
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join', 'inner_join3', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join', 'inner_join4', '100']))
-        # dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join', 'anti_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'inner_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'inner_join3', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'inner_join4', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join3', 'anti_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'inner_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'inner_join3', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'inner_join4', '100']))
-        # dsl.add_predicate(DSLPredicate('is_not_parent', ['inner_join4', 'anti_join', '100']))
+        for p in permutations(['inner_join', 'inner_join3', 'inner_join4'], 2):
+            if p[0] not in self._config['disabled'] and p[1] not in self._config['disabled']:
+                dsl.add_predicate(DSLPredicate('is_not_parent', list(p) + ['100']))
+
         dsl.add_predicate(DSLPredicate('is_not_parent', ['anti_join', 'anti_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['anti_join', 'inner_join', '100']))
-        dsl.add_predicate(DSLPredicate('is_not_parent', ['anti_join', 'inner_join4', '100']))
-        dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join4']))
-        dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join3']))
-        dsl.add_predicate(DSLPredicate('distinct_inputs', ['inner_join']))
         dsl.add_predicate(DSLPredicate('distinct_inputs', ['anti_join']))
 
         self.dsl = dsl
@@ -399,7 +411,7 @@ class Specification:
         for c in conds:
             if c == []:
                 break
-            predicates.append(DSLPredicate('constant_occurs', list(map(str, c))))
+            predicates.append(DSLPredicate('constant_occurs', ['"' + ','.join(map(str, c)) + '"']))
         return predicates
 
     @staticmethod
@@ -408,5 +420,5 @@ class Specification:
         for c in conds:
             if c == ():
                 break
-            predicates.append(DSLPredicate('happens_before', [str(c[0]), str(c[1])]))
+            predicates.append(DSLPredicate('happens_before', ['"' + str(c[0]) + '"', '"' + str(c[1]) + '"']))
         return predicates

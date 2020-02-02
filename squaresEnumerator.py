@@ -6,18 +6,24 @@
 # Usage:	python3 squaresEnumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
 import argparse
+import logging
 import os
 import re
 import sys
+import random
+from multiprocessing import Process
+from multiprocessing import SimpleQueue
+from time import sleep
 
 import rpy2.robjects as robjects
 import sqlparse as sp
 
 import tyrell.spec as S
+from squares import util
 from squares.Specification import parse_specification
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
-from tyrell.enumerator import *
+from tyrell.enumerator import SmtEnumerator, LinesEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
 
@@ -59,10 +65,16 @@ def beautifier(sql):
 
 # print(sp.format(new_sql, reindent=True, keyword_case='upper'))
 
-def main(args):
+def main(args, seed, id, config, queue):
+    util.seed(seed)
+
     logger.info('Parsing specification...')
 
-    problem = parse_specification(args.input)
+    problem = parse_specification(args.input, config)
+
+    if logger.isEnabledFor(logging.DEBUG):
+        with open(f'dsl{id}.log', 'w') as f:
+            f.write(repr(problem.dsl))
 
     spec = S.parse(repr(problem.dsl))
     logger.info('Parsing succeeded')
@@ -102,19 +114,11 @@ def main(args):
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
 
-            print()
-            if args.r:
-                print("------------------------------------- R Solution ---------------------------------------\n")
-                print(problem.r_init)
-                print(interpreter.final_program)
-                print()
-
-            print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
             robjects.r(f'{problem.r_init + interpreter.final_program}')
             sql_query = robjects.r(f'sql_render({evaluation})')
 
-            print(beautifier(str(sql_query)[6:]))
-            return interpreter.final_program, beautifier(str(sql_query)[6:])
+            queue.put((problem.r_init + '\n' + interpreter.final_program, beautifier(str(sql_query)[6:])))
+            return
 
         else:
             logger.info('No more queries to be tested. Solution not found!')
@@ -141,6 +145,8 @@ if __name__ == '__main__':
     parser.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
     parser.set_defaults(tree=False)
 
+    parser.add_argument('--seed', default='squares')
+
     args = parser.parse_args()
 
     if args.debug:
@@ -149,7 +155,44 @@ if __name__ == '__main__':
     else:
         logger.setLevel('CRITICAL')
 
-    prog = main(args)
+    random.seed(args.seed)
+
+    configs = [
+        {'disabled': []},
+        {'disabled': ['inner_join', 'inner_join3']},
+        {'disabled': ['inner_join', 'inner_join4']},
+        {'disabled': ['inner_join3', 'inner_join4']}
+    ]
+
+    queue = SimpleQueue()
+
+    Ps = []
+    for i in range(4):
+        P = Process(target=main, args=(args, random.randrange(2 ** 31), i, configs[i], queue))
+        P.start()
+        Ps.append(P)
+
+    done = False
+    while not done:
+        sleep(.5)
+        for p in Ps:
+            if not p.is_alive():
+                done = True
+                break
+
+    for p in Ps:
+        if p.is_alive():
+            p.terminate()
+
+    r, sql = queue.get()
+
+    print()
+    if args.r:
+        print("------------------------------------- R Solution ---------------------------------------\n")
+        print(r + '\n')
+
+    print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+    print(sql)
 
 
 class Squares(object):

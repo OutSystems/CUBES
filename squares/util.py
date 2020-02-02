@@ -1,6 +1,13 @@
 from itertools import permutations
+from random import Random
 
 counter = 0
+random = None
+
+
+def seed(s):
+    global random
+    random = Random(s)
 
 
 def next_counter():

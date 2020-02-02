@@ -52,7 +52,7 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_select(self, node, args):
         name = self.fresh_table()
 
-        _script = f'{name} <- {args[0]} %>% ungroup() %>% select({args[1]})'
+        _script = f'{name} <- {args[0]} %>% ungroup() %>% select({get_collist(args[1])})'
 
         if args[2] == "distinct":
             _script += ' %>% distinct()'
@@ -69,7 +69,10 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         if 'str_detect' not in args[1]:
             col, op, const = args[1].split(" ")
-            _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.getConst(const)})' if const != "max(n)" else f'{name} <- filter({args[0]}, {col} {op} max(n))'
+            if const != "max(n)":
+                _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.getConst(const)})'
+            else:
+                _script = f'{name} <- filter({args[0]}, {col} {op} max(n))'
         else:
             col, string = args[1].split("|")
             _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col}, "{string[:-1]}"))'
