@@ -8,11 +8,9 @@
 import argparse
 import logging
 import os
-import re
-import sys
 import random
-from multiprocessing import Process
-from multiprocessing import SimpleQueue
+import re
+from multiprocessing import Process, SimpleQueue
 from time import sleep
 
 import rpy2.robjects as robjects
@@ -20,6 +18,7 @@ import sqlparse as sp
 
 import tyrell.spec as S
 from squares import util
+from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
@@ -114,7 +113,12 @@ def main(args, seed, id, config, queue):
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
 
-            robjects.r(f'{problem.r_init + interpreter.final_program}')
+            sql_generator = SQLVisitor()
+            sql = sql_generator.eval(prog, problem.tables)
+            print(sql)
+
+            program = problem.r_init + interpreter.final_program
+            robjects.r(program)
             sql_query = robjects.r(f'sql_render({evaluation})')
 
             queue.put((problem.r_init + '\n' + interpreter.final_program, beautifier(str(sql_query)[6:])))
@@ -130,19 +134,22 @@ debug = False
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
 
-    parser.add_argument('input', metavar='INPUT', type=str, help='input file')
+    parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
 
     parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
 
-    parser.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
-    parser.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
+    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
 
-    parser.add_argument('--r', dest='r', action='store_true', help="output R program")
-    parser.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument('--r', dest='r', action='store_true', help="output R program")
+    g.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
     parser.set_defaults(r=True)
 
-    parser.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
-    parser.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
+    g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
     parser.set_defaults(tree=False)
 
     parser.add_argument('--seed', default='squares')
@@ -167,32 +174,36 @@ if __name__ == '__main__':
     queue = SimpleQueue()
 
     Ps = []
-    for i in range(4):
+    for i in range(len(configs)):
         P = Process(target=main, args=(args, random.randrange(2 ** 31), i, configs[i], queue))
         P.start()
         Ps.append(P)
 
     done = False
-    while not done:
+    while not done and Ps:
         sleep(.5)
         for p in Ps:
             if not p.is_alive():
-                done = True
-                break
+                if not queue.empty():
+                    done = True
+                    break
+                Ps.remove(p)
 
     for p in Ps:
-        if p.is_alive():
-            p.terminate()
+        p.terminate()
 
-    r, sql = queue.get()
+    if not queue.empty():
+        r, sql = queue.get()
 
-    print()
-    if args.r:
-        print("------------------------------------- R Solution ---------------------------------------\n")
-        print(r + '\n')
+        print()
+        if args.r:
+            print("------------------------------------- R Solution ---------------------------------------\n")
+            print(r + '\n')
 
-    print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-    print(sql)
+        print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+        print(sql)
+    else:
+        print("No solution found")
 
 
 class Squares(object):
