@@ -239,9 +239,9 @@ class Specification:
             DSLFunction('left_join', 'Table r', ['Table a', 'Table b'],
                         ['col(r) <= col(a) + col(b)', 'row(r) == row(a)']))
 
-        dsl.add_function(
-            DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
-                        ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)']))
+        # dsl.add_function(
+        #     DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
+        #                 ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)']))
 
         dsl.add_function(
             DSLFunction('intersect', 'Table r', ['Table a', 'Table b', 'Col c'], ['col(r) == 1', 'row(r) <= row(a)']))
