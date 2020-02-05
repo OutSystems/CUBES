@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 with open('results_' + args.name + '.csv', 'w') as f:
     writer = csv.writer(f)
-    for filename in glob.glob('tests/*.in'):
+    for filename in glob.glob('tests/**/*.yaml'):
         print(' '.join(['timeout', str(args.t), 'mytime', './squaresEnumerator.py', filename]))
         p = subprocess.Popen(['timeout', str(args.t), 'mytime', './squaresEnumerator.py', filename], stdout=subprocess.PIPE)
         p.wait()

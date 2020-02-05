@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import List, Tuple
 
+from squares import util
+
 
 class DSLElement(ABC):
     pass
@@ -10,7 +12,7 @@ class DSLEnum(DSLElement):
 
     def __init__(self, name: str, values: List[str]):
         self._name = name
-        self._values = values    
+        self._values = values
         self._wrapped = map(lambda x: f'"{x}"', values)
 
     def __repr__(self) -> str:
@@ -23,7 +25,7 @@ class DSLValue(DSLElement):
 
     def __init__(self, name: str, properties: List[Tuple[str, str]]):
         self._name = name
-        self._properties = properties    
+        self._properties = properties
 
     def __repr__(self) -> str:
         if self._properties:
@@ -40,8 +42,8 @@ class DSLFunction(DSLElement):
     def __init__(self, name: str, output: str, inputs: List[str], constraints: List[str]):
         self._name = name
         self._output = output
-        self._inputs = inputs    
-        self._constraints = constraints    
+        self._inputs = inputs
+        self._constraints = constraints
 
     def __repr__(self) -> str:
         if self._constraints:
@@ -56,7 +58,7 @@ class DSLPredicate(DSLElement):
 
     def __init__(self, name: str, arguments: List[str]):
         self._name = name
-        self._arguments = arguments    
+        self._arguments = arguments
 
     def __repr__(self) -> str:
         return f'predicate {self._name}({", ".join(self._arguments)});\n'
@@ -75,10 +77,6 @@ class DSLBuilder:
 
         self._repr = None  # for caching the string representation
 
-        # FIXME upstream trinity "bug"
-        self.add_value(DSLValue('Empty', []))
-        self.add_function(DSLFunction('empty', 'Empty', ['Empty'], []))
-
     def add_enum(self, e: DSLEnum):
         self._enums.append(e)
 
@@ -96,9 +94,22 @@ class DSLBuilder:
             return self._repr
 
         else:
-            self._repr = "\n".join(map(repr, self._enums)) + "\n" + "\n".join(
-                map(repr,
-                    self._values)) + f'\nprogram {self._name}({", ".join(self._inputs)}) -> {self._output};\n\n' + '\n'.join(
-                map(repr, self._functions)) + '\n' + ''.join(map(repr, self._predicates))
+            t = "\n".join(map(repr, self._enums)) + '\n'
+
+            if util.get_config().alt_empty_pos:
+                t += 'value Empty;\n\n'
+
+            t += "\n".join(map(repr, self._values)) + '\n'
+
+            if not util.get_config().alt_empty_pos:
+                t += 'value Empty;\n\n'
+
+            t += f'program {self._name}({", ".join(self._inputs)}) -> {self._output};\n\n'
+            t += 'func empty: Empty -> Empty;\n\n'
+
+            t += '\n'.join(map(repr, self._functions)) + '\n'
+            t += ''.join(map(repr, self._predicates))
+
+            self._repr = t
 
             return self._repr

@@ -20,6 +20,7 @@ import tyrell.spec as S
 from squares import util
 from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
+from squares.config import Config
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
 from tyrell.enumerator import SmtEnumerator, LinesEnumerator
@@ -64,12 +65,13 @@ def beautifier(sql):
 
 # print(sp.format(new_sql, reindent=True, keyword_case='upper'))
 
-def main(args, seed, id, config, queue):
+def main(args, seed, id, conf, queue):
     util.seed(seed)
+    util.store_config(conf)
 
     logger.info('Parsing specification...')
 
-    problem = parse_specification(args.input, config)
+    problem = parse_specification(args.input, conf)
 
     if logger.isEnabledFor(logging.DEBUG):
         with open(f'dsl{id}.log', 'w') as f:
@@ -113,9 +115,9 @@ def main(args, seed, id, config, queue):
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
 
-            sql_generator = SQLVisitor()
-            sql = sql_generator.eval(prog, problem.tables)
-            print(sql)
+            # sql_generator = SQLVisitor()
+            # sql = sql_generator.eval(prog, problem.tables)
+            # print(sql)
 
             program = problem.r_init + interpreter.final_program
             robjects.r(program)
@@ -165,17 +167,21 @@ if __name__ == '__main__':
     random.seed(args.seed)
 
     configs = [
-        {'disabled': []},
-        {'disabled': ['inner_join', 'inner_join3']},
-        {'disabled': ['inner_join', 'inner_join4']},
-        {'disabled': ['inner_join3', 'inner_join4']}
+        Config(),
+        Config(alt_empty_pos=True, shuffle_cols=True),
+        Config(alt_empty_pos=False, shuffle_cols=True),
+        Config(alt_empty_pos=True, shuffle_cols=True),
+        # Config(disabled=['inner_join4'])
     ]
+
+    if len(configs) > len(os.sched_getaffinity(0)):
+        logger.warn('Starting more processes than available CPU cores!')
 
     queue = SimpleQueue()
 
     Ps = []
     for i in range(len(configs)):
-        P = Process(target=main, args=(args, random.randrange(2 ** 31), i, configs[i], queue))
+        P = Process(target=main, args=(args, random.randrange(2 ** 31), i, configs[i], queue), daemon=True)
         P.start()
         Ps.append(P)
 

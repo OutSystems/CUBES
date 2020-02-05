@@ -1,8 +1,12 @@
+# NOTE: this file should be the only one allowed to use 'global'
+
 from itertools import permutations
 from random import Random
+from .config import Config
 
 counter = 0
 random = None
+config = None
 
 
 def seed(s):
@@ -33,3 +37,13 @@ def get_permutations(cols, num):
     if num == 0:
         return []
     return [", ".join(a) for a in permutations(cols, num)] + get_permutations(cols, num - 1)
+
+
+def store_config(conf):
+    global config
+    config = conf
+
+
+def get_config() -> Config:
+    global config
+    return config
