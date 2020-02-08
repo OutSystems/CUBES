@@ -40,7 +40,7 @@ class Synthesizer(ABC):
             if num_attempts % 100 == 0:
                 self._enumerator.closeLattices()
                 logger.debug('Attempts : {}'.format(num_attempts))
-            # logger.debug('Attempt : {}. Enumerator generated: {}'.format(num_attempts, prog))
+            # logger.debug('Attempt %s: %s', str(num_attempts), str(prog))
             try:
                 res = self._decider.analyze(prog)
                 if res.is_ok():

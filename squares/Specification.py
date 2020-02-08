@@ -13,7 +13,7 @@ from tyrell.logger import get_logger
 
 from squares.util import next_counter, get_permutations
 
-logger = get_logger('tyrell')
+logger = get_logger('squares')
 
 
 def find_consts(consts):
@@ -173,7 +173,7 @@ class Specification:
 
         filter_conditions, summarise_conditions, necessary_conditions, happens_before = self.find_conditions()
 
-        if filters_f == "" and filter_conditions != []:
+        if filters_f == [] and filter_conditions != []:
             filters_f = filters_f_one
             filters_p = [DSLPredicate('is_not_parent', ['filter', 'filter', '100'])]
 
@@ -239,6 +239,9 @@ class Specification:
 
         dsl.add_function(
             DSLFunction('intersect', 'Table r', ['Table a', 'Table b', 'Col c'], ['col(r) == 1', 'row(r) <= row(a)']))
+
+        if 'semi_join' not in util.get_config().disabled:
+            dsl.add_function(DSLFunction('semi_join', 'Table r', ['Table a', 'Table b'], ['col(r) == col(a)', 'row(r) <= row(a)']))
 
         dsl.add_function(DSLFunction('select', 'TableSelect r', ['Table a', 'SelectCols c', 'Distinct d'],
                                      ['row(r) <= row(a)', 'col(r) <= col(a)']))

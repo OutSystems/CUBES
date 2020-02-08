@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import re
+import sys
 from multiprocessing import Process, SimpleQueue
 from time import sleep
 
@@ -29,11 +30,13 @@ from tyrell.synthesizer import Synthesizer
 
 # warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
-logger = get_logger('tyrell')
+logger = get_logger('squares')
+logger.handlers[0]._use_stderr = False
 distinct = False
 output_attrs = ""
 robjects.r('''
 zz <- file("r_output.log", open = "wt")
+sink(zz)
 sink(zz, type = "message")
 library(dplyr)
 library(dbplyr)
@@ -68,6 +71,8 @@ def beautifier(sql):
 def main(args, seed, id, conf, queue):
     util.seed(seed)
     util.store_config(conf)
+
+    logger.handlers[0].set_identifier(f'prc{id}')
 
     logger.info('Parsing specification...')
 
@@ -121,7 +126,9 @@ def main(args, seed, id, conf, queue):
 
             program = problem.r_init + interpreter.final_program
             robjects.r(program)
-            sql_query = robjects.r(f'sql_render({evaluation})')
+            sql_query = robjects.r(f'sink(); sql_render({evaluation})')
+
+            logger.debug('Solution found using process %d: %s', id, repr(conf))
 
             queue.put((problem.r_init + '\n' + interpreter.final_program, beautifier(str(sql_query)[6:])))
             return
@@ -161,17 +168,18 @@ if __name__ == '__main__':
     if args.debug:
         debug = True
         logger.setLevel('DEBUG')
+        get_logger('tyrell').setLevel('DEBUG')
     else:
         logger.setLevel('CRITICAL')
 
     random.seed(args.seed)
 
     configs = [
-        Config(),
-        Config(alt_empty_pos=True, shuffle_cols=True),
-        Config(alt_empty_pos=False, shuffle_cols=True),
-        Config(alt_empty_pos=True, shuffle_cols=True),
-        # Config(disabled=['inner_join4'])
+        Config(disabled=['semi_join']),
+        Config(disabled=['semi_join'], z3_smt_phase=6),
+        Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
+        Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        # Config(z3_QF_FD=True, z3_sat_phase='caching', z3_sat_branching='lrb')
     ]
 
     if len(configs) > len(os.sched_getaffinity(0)):
@@ -210,6 +218,7 @@ if __name__ == '__main__':
         print(sql)
     else:
         print("No solution found")
+        exit(1)
 
 
 class Squares(object):

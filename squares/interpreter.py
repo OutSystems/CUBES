@@ -68,7 +68,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         name = self.fresh_table()
 
         if 'str_detect' not in args[1]:
-            col, op, const = args[1].split(" ")
+            col, op, const = args[1].split(" ", 2)
             if const != "max(n)":
                 _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.getConst(const)})'
             else:
@@ -89,14 +89,15 @@ class SquaresInterpreter(PostOrderInterpreter):
         name = self.fresh_table()
 
         if "str_detect" not in args[1]:
-            col, op, const = args[1].split(" ")
+            col, op, const = args[1].split(" ", 2)
             const = self.getConst(const) if const != "max(n)" else "max(n)"
             arg1 = col + " " + op + " " + const
         else:
             col, string = args[1].split("|")
             arg1 = col + ", " + "\"" + string[:-1] + "\")"
+
         if "str_detect" not in args[2]:
-            col, op, const = args[2].split(" ")
+            col, op, const = args[2].split(" ", 2)
             const = self.getConst(const) if const != "max(n)" else "max(n)"
             arg2 = col + " " + op + " " + const
         else:
@@ -228,6 +229,19 @@ class SquaresInterpreter(PostOrderInterpreter):
         name = self.fresh_table()
 
         _script = f'{name} <- intersect(select({args[0]},{get_collist(args[2])}), select({args[1]}, {get_collist(args[2])}))'
+
+        if self.store_program:
+            self.final_program += _script + "\n"
+        try:
+            robjects.r(_script)
+            return name
+        except:
+            raise GeneralError()
+
+    def eval_semi_join(self, node, args):
+        name = self.fresh_table()
+
+        _script = f'{name} <- semi_join({args[0]}, {args[1]})'
 
         if self.store_program:
             self.final_program += _script + "\n"
