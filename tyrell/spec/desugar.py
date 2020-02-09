@@ -137,6 +137,18 @@ class ProductionCollecotr(Visitor_Recursive):
                 raise ValueError(
                     'Cannot find property {} for type {}'.format(name, param_ty))
             return PropertyExpr(name, param_ety, arg)
+        elif expr_kind == 'bitwise_expr':
+            lhs = self._process_expr(index_map, type_map, tree.children[0])
+            operator = str(tree.children[1].data)
+            rhs = self._process_expr(index_map, type_map, tree.children[2])
+            if operator == 'expr_bitand':
+                operator = BinaryOperator.BAND
+            elif operator == 'expr_bitor':
+                operator = BinaryOperator.BOR
+            else:
+                raise ValueError(
+                    'Unrecognized binary operator: {}'.format(operator))
+            return BinaryExpr(operator, lhs, rhs)
         elif expr_kind == 'unary_expr':
             operand = self._process_expr(index_map, type_map, tree.children[1])
             operator = str(tree.children[0].data)

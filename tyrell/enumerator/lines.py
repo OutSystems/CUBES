@@ -407,6 +407,7 @@ class LinesEnumerator(Enumerator):
         self.z3_solver.set('sat.phase', util.get_config().z3_sat_phase)
         self.z3_solver.set('sat.restart', util.get_config().z3_sat_restart)
         self.z3_solver.set('sat.branching.heuristic', util.get_config().z3_sat_branching)
+        self.z3_solver.set('sat.threads', 6)
 
         # productions that are leaves
         self.leaf_productions = []

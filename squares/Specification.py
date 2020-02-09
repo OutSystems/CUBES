@@ -110,13 +110,13 @@ class Specification:
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
             'row(r) <= row(a)',
-            'col(r) == col(a)'
+            'col(r) == col(a)', 'col_vec(r) == col_vec(a)'
         ])]
         filters_f = filters_f_one
         filters_f_and_or = [
             DSLFunction('filters', 'Table r', ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'], [
                 'row(r) <= row(a)',
-                'col(r) == col(a)'
+                'col(r) == col(a)', 'col_vec(r) == col_vec(a)'
             ])]
 
         filters_p_one = [DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
@@ -218,21 +218,27 @@ class Specification:
         if operators:
             dsl.add_enum(operators)
 
-        dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int')]))
-        dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int')]))
+        dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int'), ('col_vec', 'int')]))
+        dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int'), ('col_vec', 'int')]))
 
         if 'inner_join' not in util.get_config().disabled:
             dsl.add_function(
-                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)"]))
+                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'],
+                            ["col(r) <= col(a) + col(b)", 'col_vec(r) == col_vec(a) | col_vec(b)', 'col_vec(a) & col_vec(b) != 0']))
 
         if 'inner_join3' not in util.get_config().disabled:
             dsl.add_function(
                 DSLFunction('inner_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
-                            ["col(r) < col(a) + col(b) + col(c)"]))
+                            ["col(r) < col(a) + col(b) + col(c)",
+                             'col_vec(r) == col_vec(a) | col_vec(b) | col_vec(c)']))
 
         if 'inner_join4' not in util.get_config().disabled:
             dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
-                                         ["col(r) < col(a) + col(b) + col(c) + col(d)"]))
+                                         ["col(r) < col(a) + col(b) + col(c) + col(d)",
+                                          'col_vec(r) == col_vec(a) | col_vec(b) | col_vec(c) | col_vec(d)',
+                                          'col_vec(a) & col_vec(b) != 0',
+                                          '(col_vec(a) | col_vec(b)) & col_vec(c) != 0',
+                                          '(col_vec(a) | col_vec(b) | col_vec(c)) & col_vec(d) != 0']))
 
         if 'anti_join' not in util.get_config().disabled:
             dsl.add_function(

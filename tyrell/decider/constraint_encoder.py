@@ -24,6 +24,8 @@ class ConstraintEncoder(GenericVisitor):
         BinaryOperator.LE: lambda x, y: x <= y,
         BinaryOperator.GT: lambda x, y: x > y,
         BinaryOperator.GE: lambda x, y: x >= y,
+        BinaryOperator.BAND: lambda x, y: z3.BV2Int(z3.Int2BV(x, 32) & z3.Int2BV(y, 32)),
+        BinaryOperator.BOR: lambda x, y: z3.BV2Int(z3.Int2BV(x, 32) | z3.Int2BV(y, 32)),
         BinaryOperator.AND: lambda x, y: z3.And(x, y),
         BinaryOperator.OR: lambda x, y: z3.Or(x, y),
         BinaryOperator.IMPLY: lambda x, y: z3.Implies(x, y)

@@ -31,6 +31,7 @@ class Z3Encoder(GenericVisitor):
         self._example = example
         self._unsat_map = dict()
         self._solver = z3.Solver()
+        self._solver.set('threads', 6)
 
     def get_z3_var(self, node: Node, pname: str, ptype: ExprType):
         node_id = self._indexer.get_id(node)
@@ -102,6 +103,8 @@ class Z3Encoder(GenericVisitor):
         # print(z3_expr)
 
     def is_unsat(self) -> bool:
+        # print(self._solver.to_smt2())
+        logger.debug('Finding reason for conflict...')
         return self._solver.check() == z3.unsat
 
     def get_blame_nodes(self):

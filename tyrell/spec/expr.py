@@ -45,6 +45,9 @@ class BinaryOperator(Enum):
     GT = ">"
     GE = ">="
 
+    BAND = '&'
+    BOR = '|'
+
     AND = "&&"
     OR = "||"
     IMPLY = "==>"
@@ -60,6 +63,8 @@ _binary_param_sig: Dict[BinaryOperator, ExprType] = {
     BinaryOperator.LE: ExprType.INT,
     BinaryOperator.GT: ExprType.INT,
     BinaryOperator.GE: ExprType.INT,
+    BinaryOperator.BAND: ExprType.INT,
+    BinaryOperator.BOR: ExprType.INT,
     BinaryOperator.AND: ExprType.BOOL,
     BinaryOperator.OR: ExprType.BOOL,
     BinaryOperator.IMPLY: ExprType.BOOL,
@@ -82,6 +87,8 @@ binary_return_sig: Dict[BinaryOperator, ExprType] = {
     BinaryOperator.LE: ExprType.BOOL,
     BinaryOperator.GT: ExprType.BOOL,
     BinaryOperator.GE: ExprType.BOOL,
+    BinaryOperator.BAND: ExprType.INT,
+    BinaryOperator.BOR: ExprType.INT,
     BinaryOperator.AND: ExprType.BOOL,
     BinaryOperator.OR: ExprType.BOOL,
     BinaryOperator.IMPLY: ExprType.BOOL,

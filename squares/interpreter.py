@@ -1,6 +1,7 @@
 from rpy2 import robjects as robjects
 from rpy2.rinterface_lib.embedded import RRuntimeError
 
+from squares import util
 from squares.util import get_fresh_name, current_counter
 from tyrell.interpreter import PostOrderInterpreter, GeneralError
 
@@ -278,5 +279,8 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         return df.ncol
 
-    def apply_name(self, val):
-        return self.problem._tables[val]
+    def apply_col_vec(self, val):
+        a = list(robjects.r(f'tbl_vars({val})'))
+        bools = list(map(lambda c: c in a, self.problem.columns))
+        i = util.boolvec2int(bools)
+        return i
