@@ -119,17 +119,23 @@ class Specification:
                 'col(r) == col(a)'
             ])]
 
-        filters_p_one = [DSLPredicate('is_not_parent', ['inner_join3', 'filter', '100']),
-                         DSLPredicate('is_not_parent', ['inner_join4', 'filter', '100']),
-                         DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
+        filters_p_one = [DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
                          DSLPredicate('distinct_inputs', ['filter'])]
+        if 'inner_join4' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join4', 'filter', '100']))
+        if 'inner_join3' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join3', 'filter', '100']))
         filters_p = filters_p_one
         filters_p_two = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
                          DSLPredicate('is_not_parent', ['filters', 'filters', '100']),
-                         DSLPredicate('is_not_parent', ['inner_join', 'filters', '100']),
-                         DSLPredicate('is_not_parent', ['inner_join3', 'filters', '100']),
-                         DSLPredicate('is_not_parent', ['inner_join4', 'filters', '100']),
                          DSLPredicate('distinct_inputs', ['filters'])]
+
+        if 'inner_join4' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join4', 'filter', '100']))
+        if 'inner_join3' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join3', 'filter', '100']))
+        if 'inner_join' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join', 'filter', '100']))
 
         summarise_f = [DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
             'row(r) <= row(a)',
@@ -228,21 +234,29 @@ class Specification:
             dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
                                          ["col(r) < col(a) + col(b) + col(c) + col(d)"]))
 
-        dsl.add_function(
-            DSLFunction('anti_join', 'Table r', ['Table a', 'Table b', 'Col c'], ["col(r) == 1", 'row(r) <= row(a)']))
-        dsl.add_function(
-            DSLFunction('left_join', 'Table r', ['Table a', 'Table b'],
-                        ['col(r) <= col(a) + col(b)', 'row(r) == row(a)']))
+        if 'anti_join' not in util.get_config().disabled:
+            dsl.add_function(
+                DSLFunction('anti_join', 'Table r', ['Table a', 'Table b', 'Col c'],
+                            ["col(r) == 1", 'row(r) <= row(a)']))
 
-        dsl.add_function(
-            DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
-                        ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)']))
+        if 'left_join' not in util.get_config().disabled:
+            dsl.add_function(
+                DSLFunction('left_join', 'Table r', ['Table a', 'Table b'],
+                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a)']))
 
-        dsl.add_function(
-            DSLFunction('intersect', 'Table r', ['Table a', 'Table b', 'Col c'], ['col(r) == 1', 'row(r) <= row(a)']))
+        if 'bind_rows' not in util.get_config().disabled:
+            dsl.add_function(
+                DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
+                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)']))
+
+        if 'intersect' not in util.get_config().disabled:
+            dsl.add_function(
+                DSLFunction('intersect', 'Table r', ['Table a', 'Table b', 'Col c'],
+                            ['col(r) == 1', 'row(r) <= row(a)']))
 
         if 'semi_join' not in util.get_config().disabled:
-            dsl.add_function(DSLFunction('semi_join', 'Table r', ['Table a', 'Table b'], ['col(r) == col(a)', 'row(r) <= row(a)']))
+            dsl.add_function(
+                DSLFunction('semi_join', 'Table r', ['Table a', 'Table b'], ['col(r) == col(a)', 'row(r) <= row(a)']))
 
         dsl.add_function(DSLFunction('select', 'TableSelect r', ['Table a', 'SelectCols c', 'Distinct d'],
                                      ['row(r) <= row(a)', 'col(r) <= col(a)']))

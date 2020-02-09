@@ -176,9 +176,14 @@ if __name__ == '__main__':
 
     configs = [
         Config(disabled=['semi_join']),
-        Config(disabled=['semi_join'], z3_smt_phase=6),
-        Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
-        Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(disabled=['semi_join', 'inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(disabled=['semi_join', 'inner_join4', 'inner_join3', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
+               z3_QF_FD=True, z3_sat_phase='random'),
+        Config(disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
+               z3_sat_phase='random'),
+        Config(disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
+               z3_sat_phase='random'),
+        # Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
         # Config(z3_QF_FD=True, z3_sat_phase='caching', z3_sat_branching='lrb')
     ]
 
