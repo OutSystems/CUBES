@@ -7,7 +7,6 @@ class FromIteratorEnumerator(Enumerator):
     '''
     A enumerator that is constructed from a python iterator.
     '''
-    _iter: Iterator[Node]
 
     def __init__(self, iter: Iterator[Node]):
         super().__init__()

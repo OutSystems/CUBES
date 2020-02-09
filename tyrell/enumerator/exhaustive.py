@@ -7,8 +7,6 @@ from .from_iterator import FromIteratorEnumerator
 
 
 class ExhaustiveIterator:
-    _builder: Builder
-    _max_depth: int
 
     def __init__(self, spec: TyrellSpec, max_depth: int):
         self._builder = Builder(spec)

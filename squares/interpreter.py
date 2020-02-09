@@ -1,4 +1,5 @@
 from rpy2 import robjects as robjects
+from rpy2.rinterface_lib.embedded import RRuntimeError
 
 from squares.util import get_fresh_name, current_counter
 from tyrell.interpreter import PostOrderInterpreter, GeneralError
@@ -22,15 +23,15 @@ class SquaresInterpreter(PostOrderInterpreter):
         self.final_program = ""
 
     # get the string format to be used in filter
-    def getConst(self, cons):
+    def transform_const(self, cons):
         try:
-            if int(cons):
-                return str(cons)
+            int(cons)
+            return str(cons)
         except:
             if str(cons) == "max(n)" or cons in self.problem.attributes:
                 return str(cons)
             else:
-                return "\"" + str(cons) + "\""
+                return '"' + str(cons) + '"'
 
     def fresh_table(self):
         name = get_fresh_name()
@@ -61,8 +62,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_filter(self, node, args):
         name = self.fresh_table()
@@ -70,7 +71,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         if 'str_detect' not in args[1]:
             col, op, const = args[1].split(" ", 2)
             if const != "max(n)":
-                _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.getConst(const)})'
+                _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.transform_const(const)})'
             else:
                 _script = f'{name} <- filter({args[0]}, {col} {op} max(n))'
         else:
@@ -82,15 +83,15 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_filters(self, node, args):
         name = self.fresh_table()
 
         if "str_detect" not in args[1]:
             col, op, const = args[1].split(" ", 2)
-            const = self.getConst(const) if const != "max(n)" else "max(n)"
+            const = self.transform_const(const) if const != "max(n)" else "max(n)"
             arg1 = col + " " + op + " " + const
         else:
             col, string = args[1].split("|")
@@ -98,7 +99,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         if "str_detect" not in args[2]:
             col, op, const = args[2].split(" ", 2)
-            const = self.getConst(const) if const != "max(n)" else "max(n)"
+            const = self.transform_const(const) if const != "max(n)" else "max(n)"
             arg2 = col + " " + op + " " + const
         else:
             col, string = args[2].split("|")
@@ -111,8 +112,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_summariseGrouped(self, node, args):
         name = self.fresh_table()
@@ -128,8 +129,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_summarise(self, node, args):
         name = self.fresh_table()
@@ -144,8 +145,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_inner_join(self, node, args):
         name = self.fresh_table()
@@ -157,8 +158,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_inner_join3(self, node, args):
         name = self.fresh_table()
@@ -170,8 +171,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_inner_join4(self, node, args):
         name = self.fresh_table()
@@ -183,8 +184,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_anti_join(self, node, args):
         name = self.fresh_table()
@@ -196,8 +197,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_left_join(self, node, args):
         name = self.fresh_table()
@@ -209,8 +210,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_bind_rows(self, node, args):
         name = self.fresh_table()
@@ -222,8 +223,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_intersect(self, node, args):
         name = self.fresh_table()
@@ -235,8 +236,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_semi_join(self, node, args):
         name = self.fresh_table()
@@ -248,8 +249,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def eval_unite(self, node, args):
         name = self.fresh_table()
@@ -261,8 +262,8 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except:
-            raise GeneralError()
+        except RRuntimeError as e:
+            raise GeneralError(str(e))
 
     def apply_row(self, val):
         df = val

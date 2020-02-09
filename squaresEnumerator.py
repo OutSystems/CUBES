@@ -10,7 +10,6 @@ import logging
 import os
 import random
 import re
-import sys
 from multiprocessing import Process, SimpleQueue
 from time import sleep
 
@@ -19,12 +18,11 @@ import sqlparse as sp
 
 import tyrell.spec as S
 from squares import util
-from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
-from tyrell.enumerator import SmtEnumerator, LinesEnumerator
+from tyrell.enumerator import LinesEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
 
@@ -98,6 +96,8 @@ def main(args, seed, id, conf, queue):
                 enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, break_sym_online=True)
             else:
                 enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, sym_breaker=False)
+
+        # enumerator = ExhaustiveEnumerator(spec, loc)
 
         synthesizer = Synthesizer(
             # loc: # of function productions

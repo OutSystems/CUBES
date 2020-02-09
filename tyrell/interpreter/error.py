@@ -14,8 +14,9 @@ class InterpreterError(RuntimeError):
 
 
 class GeneralError(InterpreterError):
-    def __init__(self, msg: str=""):
+    def __init__(self, msg: str = ""):
         super().__init__(msg)
+
 
 class AssertionViolation(InterpreterError):
     _node: Node

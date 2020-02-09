@@ -25,20 +25,6 @@ class ASTNode:
 
 # FIXME: Currently this enumerator requires an "Empty" production to function properly
 class SmtEnumerator(Enumerator):
-    # z3 solver
-    z3_solver = Solver()
-
-    # productions that are leaf
-    leaf_productions = []
-
-    # z3 variables for each production node
-    variables = []
-
-    # z3 variables to denote if a node is a function or not
-    variables_fun = []
-
-    # map from internal k-tree to nodes of program
-    program2tree = {}
 
     def initLeafProductions(self):
         for p in self.spec.productions():
@@ -282,6 +268,21 @@ class SmtEnumerator(Enumerator):
             raise RuntimeError(msg) from None
 
     def __init__(self, spec, depth=None, loc=None):
+        # z3 solver
+        self.z3_solver = Solver()
+
+        # productions that are leaf
+        self.leaf_productions = []
+
+        # z3 variables for each production node
+        self.variables = []
+
+        # z3 variables to denote if a node is a function or not
+        self.variables_fun = []
+
+        # map from internal k-tree to nodes of program
+        self.program2tree = {}
+
         self.spec = spec
         self.num_constraints = 0
         if depth <= 0:

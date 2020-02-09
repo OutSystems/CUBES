@@ -486,9 +486,7 @@ class LinesEnumerator(Enumerator):
         logger.info('Time spent encoding: {}'.format(time.time() - self.start_time))
         res = self.z3_solver.check()
         if res != sat:
-            # UNSAT
-            logger.error("UNSAT : There is no solution for current depth (loc=" + str(
-                self.loc - 1) + "), try to increase it (e.g. loc=" + str(self.loc) + ").")
+            logger.warning(f"There is no solution for current depth (loc={self.loc - 1}).")
             return
         self.model = self.z3_solver.model()
         self.getModelConstraint()
@@ -538,9 +536,11 @@ class LinesEnumerator(Enumerator):
         #     return lattices
 
     def closeLattices(self):
-        logger.info('Total Solver Time: {}'.format(self.solverTime))
-        logger.info('Total Time Symmetries: {}'.format(self.totalSymTime))
-        logger.info('Total Blocked Models: {}'.format(self.totalBlockedModels))
+        logger.debug('Total Solver Time: {}'.format(self.solverTime))
+        if self.totalSymTime != 0:
+            logger.debug('Total Time Symmetries: {}'.format(self.totalSymTime))
+        if self.totalBlockedModels != 0:
+            logger.debug('Total Blocked Models: {}'.format(self.totalBlockedModels))
         if self.loc < 6 or self.break_sym_online or not self.sym_breaker:
             return
 

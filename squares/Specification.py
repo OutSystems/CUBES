@@ -101,10 +101,11 @@ class Specification:
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
 
         for table, file in zip(self.tables, self.inputs):
-            self.r_init += exec_and_return(f'{table} <- read.table("{file}", sep=",", header=T)\n')
+            self.r_init += exec_and_return(f'{table} <- read.csv("{file}")\n')
             self.r_init += f'{table} <- copy_to(con, {table})\n'
 
         self.r_init += exec_and_return(f'expected_output <- read.table("{self.output}", sep =",", header=T)\n')
+        print(self.r_init)
 
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
