@@ -4,6 +4,10 @@ from typing import List
 
 @dataclass
 class Config:
+    seed: int
+
+    lines_force_all_inputs: bool = True
+
     disabled: List[str] = field(default_factory=list)
     alt_empty_pos: bool = False
     shuffle_cols: bool = False

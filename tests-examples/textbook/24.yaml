@@ -10,7 +10,16 @@ attrs:
 - salary
 bools: []
 loc: '4'
-comment: "# 5.3.1 optimal solution sql\n\nSELECT DISTINCT A.aname FROM aircraft A\
-  \ \nWHERE A.Aid IN (\nSELECT C.aid \nFROM certified C, employees E\nWHERE C.eid\
-  \ = E.eid AND NOT EXISTS ( SELECT * FROM employees E1 WHERE E1.eid = E.eid AND E1.salary\
-  \ < 80000))"
+comment: |
+  # 5.3.1 optimal solution sql
+
+  SELECT DISTINCT A.aname
+  FROM aircraft A
+  WHERE A.Aid IN (SELECT C.aid
+                  FROM certified C,
+                       employees E
+                  WHERE C.eid = E.eid
+                    AND NOT EXISTS (SELECT *
+                                    FROM employees E1
+                                    WHERE E1.eid = E.eid
+                                      AND E1.salary < 80000))

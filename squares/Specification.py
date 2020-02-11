@@ -32,7 +32,7 @@ def exec_and_return(r_script):
     return r_script
 
 
-def parse_specification(filename, config):
+def parse_specification(filename):
     f = open(filename)
 
     spec = yaml.safe_load(f)
@@ -48,6 +48,9 @@ def parse_specification(filename, config):
     for field in ["const", "aggrs", "attrs", "bools"]:
         if field not in spec:
             spec[field] = []
+
+    if 'loc' not in spec:
+        spec['loc'] = 1
 
     return Specification(spec["inputs"], spec["output"], spec["const"], spec["aggrs"], spec["attrs"], spec["bools"],
                          spec["loc"])
@@ -105,7 +108,6 @@ class Specification:
             self.r_init += f'{table} <- copy_to(con, {table})\n'
 
         self.r_init += exec_and_return(f'expected_output <- read.table("{self.output}", sep =",", header=T)\n')
-        print(self.r_init)
 
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [

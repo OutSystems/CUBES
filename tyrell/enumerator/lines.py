@@ -404,6 +404,9 @@ class LinesEnumerator(Enumerator):
             self.z3_solver.set('phase_selection', util.get_config().z3_smt_phase)
             self.z3_solver.set('case_split', util.get_config().z3_smt_case_split)
 
+        self.z3_solver.set('random_seed', util.get_config().seed)
+        self.z3_solver.set('sat.random_seed', util.get_config().seed)
+
         self.z3_solver.set('sat.phase', util.get_config().z3_sat_phase)
         self.z3_solver.set('sat.restart', util.get_config().z3_sat_restart)
         self.z3_solver.set('sat.branching.heuristic', util.get_config().z3_sat_branching)
@@ -474,7 +477,8 @@ class LinesEnumerator(Enumerator):
         self.addModel = 0
 
         self.modelConstraint = 0
-        self.createInputConstraints()
+        if util.get_config().lines_force_all_inputs:
+            self.createInputConstraints()
         self.createOutputConstraints()
         self.createLinesConstraints()
         self.createTypeConstraints()

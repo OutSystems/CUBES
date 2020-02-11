@@ -1,17 +1,12 @@
-#!/usr/bin/env python
 # File:	squares-enumerator.py
 # Description: An SQL Synthesizer Using Query Reverse Engineering
 # Author:	Pedro M Orvalho
 # Created on:	22-02-2019 15:13:15
 # Usage:	python3 squaresEnumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
-import argparse
 import logging
 import os
-import random
 import re
-from multiprocessing import Process, SimpleQueue
-from time import sleep
 
 import rpy2.robjects as robjects
 import sqlparse as sp
@@ -22,16 +17,14 @@ from squares.Specification import parse_specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
 from tyrell.decider import Example, ExampleConstraintPruningDecider
-from tyrell.enumerator import LinesEnumerator
+from tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
 
 # warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 logger = get_logger('squares')
-logger.handlers[0]._use_stderr = False
-distinct = False
-output_attrs = ""
+
 robjects.r('''
 zz <- file("r_output.log", open = "wt")
 sink(zz)
@@ -44,16 +37,12 @@ options(warn=-1)''')
 
 
 def eq_r(actual, expect):
-    global distinct
-    _rscript = f'all.equal(lapply({actual}, as.character), lapply({expect}, as.character))'
+    _rscript = f'all_equal(lapply({actual}, as.character), lapply({expect}, as.character))'
     try:
         ret_val = robjects.r(_rscript)
     except:
         return False
     return True == ret_val[0]
-
-
-index_table_aux = 0
 
 
 def beautifier(sql):
@@ -64,17 +53,15 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-# print(sp.format(new_sql, reindent=True, keyword_case='upper'))
-
-def main(args, seed, id, conf, queue):
-    util.seed(seed)
+def main(args, id: int, conf: Config, queue):
+    util.seed(conf.seed)
     util.store_config(conf)
 
     logger.handlers[0].set_identifier(f'prc{id}')
 
     logger.info('Parsing specification...')
 
-    problem = parse_specification(args.input, conf)
+    problem = parse_specification(args.input)
 
     if logger.isEnabledFor(logging.DEBUG):
         with open(f'dsl{id}.log', 'w') as f:
@@ -137,93 +124,6 @@ def main(args, seed, id, conf, queue):
             logger.info('No more queries to be tested. Solution not found!')
             logger.info('Increasing the number of lines of code.')
             loc = loc + 1
-
-
-debug = False
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
-
-    parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
-
-    parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
-    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--r', dest='r', action='store_true', help="output R program")
-    g.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
-    parser.set_defaults(r=True)
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
-    g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
-    parser.set_defaults(tree=False)
-
-    parser.add_argument('--seed', default='squares')
-
-    args = parser.parse_args()
-
-    if args.debug:
-        debug = True
-        logger.setLevel('DEBUG')
-        get_logger('tyrell').setLevel('DEBUG')
-    else:
-        logger.setLevel('CRITICAL')
-
-    random.seed(args.seed)
-
-    configs = [
-        Config(disabled=['semi_join']),
-        Config(disabled=['semi_join', 'inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(disabled=['semi_join', 'inner_join4', 'inner_join3', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
-               z3_QF_FD=True, z3_sat_phase='random'),
-        Config(disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
-               z3_sat_phase='random'),
-        Config(disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
-               z3_sat_phase='random'),
-        # Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(z3_QF_FD=True, z3_sat_phase='caching', z3_sat_branching='lrb')
-    ]
-
-    if len(configs) > len(os.sched_getaffinity(0)):
-        logger.warn('Starting more processes than available CPU cores!')
-
-    queue = SimpleQueue()
-
-    Ps = []
-    for i in range(len(configs)):
-        P = Process(target=main, args=(args, random.randrange(2 ** 31), i, configs[i], queue), daemon=True)
-        P.start()
-        Ps.append(P)
-
-    done = False
-    while not done and Ps:
-        sleep(.5)
-        for p in Ps:
-            if not p.is_alive():
-                if not queue.empty():
-                    done = True
-                    break
-                Ps.remove(p)
-
-    for p in Ps:
-        p.terminate()
-
-    if not queue.empty():
-        r, sql = queue.get()
-
-        print()
-        if args.r:
-            print("------------------------------------- R Solution ---------------------------------------\n")
-            print(r + '\n')
-
-        print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-        print(sql)
-    else:
-        print("No solution found")
-        exit(1)
 
 
 class Squares(object):
