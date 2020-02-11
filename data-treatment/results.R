@@ -23,5 +23,6 @@ t4 <- read.csv('try4.csv', stringsAsFactors=FALSE)
 t4$name <- str_replace(t4$name, 'tests/', '')
 t4$name <- str_replace(t4$name, '.yaml', '')
 
-tmp <- merge(t2, t4, by='name', suffixes = c("_original","_new"))
+tmp <- merge(original, t1, by='name', suffixes = c("_original","_new"))
 ggplot(tmp, aes(x=real_original, y=real_new)) + geom_point(color='red',alpha = 0.2,size=2) + scale_x_continuous(trans='log10') + scale_y_continuous(trans='log10') + geom_abline() + geom_hline(yintercept=600, linetype="dashed") + geom_vline(xintercept=600, linetype="dashed")
+
