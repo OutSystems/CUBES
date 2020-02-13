@@ -1,5 +1,4 @@
 from rpy2 import robjects as robjects
-from rpy2.rinterface_lib.embedded import RRuntimeError
 
 from squares.util import get_fresh_name, current_counter
 from tyrell.interpreter import PostOrderInterpreter, GeneralError
@@ -62,7 +61,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_filter(self, node, args):
@@ -83,7 +82,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_filters(self, node, args):
@@ -112,7 +111,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_summariseGrouped(self, node, args):
@@ -129,7 +128,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_summarise(self, node, args):
@@ -145,7 +144,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_inner_join(self, node, args):
@@ -158,7 +157,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_inner_join3(self, node, args):
@@ -171,7 +170,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_inner_join4(self, node, args):
@@ -184,7 +183,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_anti_join(self, node, args):
@@ -197,7 +196,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_left_join(self, node, args):
@@ -210,7 +209,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_bind_rows(self, node, args):
@@ -223,7 +222,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_intersect(self, node, args):
@@ -236,7 +235,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_semi_join(self, node, args):
@@ -249,7 +248,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def eval_unite(self, node, args):
@@ -262,7 +261,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         try:
             robjects.r(_script)
             return name
-        except RRuntimeError as e:
+        except Exception as e:
             raise GeneralError(str(e))
 
     def apply_row(self, val):
