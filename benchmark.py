@@ -11,7 +11,7 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
-parser.add_argument('--save-output', dest='save_output', action='store-true')
+parser.add_argument('--save-output', dest='save_output', action='store_true')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args = parser.parse_args()
