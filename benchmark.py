@@ -11,6 +11,7 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
+parser.add_argument('--save-output', dest='save_output', action='store-true')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args = parser.parse_args()
@@ -20,7 +21,12 @@ def test_file(filename: str):
     test_name = filename.replace('tests/', '', 1).replace('.yaml', '')
     out_file = f'data-treatment/{args.name}/{test_name}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
-    command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-d', filename]
+
+    command = ['runsolver', '-W', str(args.t), './squares.py', '-d', filename]
+    if args.save_output:
+        command.insert(3, out_file)
+        command.insert(3, '-o')
+
     print(' '.join(command))
     p = subprocess.run(command, capture_output=True, encoding='utf8')
 
