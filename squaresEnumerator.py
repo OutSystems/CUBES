@@ -53,7 +53,7 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-def main(args, id: int, conf: Config, queue):
+def main(args, id: int, conf: Config, queue, limit: int):
     util.seed(conf.seed)
     util.store_config(conf)
 
@@ -72,7 +72,7 @@ def main(args, id: int, conf: Config, queue):
 
     logger.info('Building synthesizer...')
     loc = 1
-    while True:
+    while loc <= limit:
         logger.info("Lines of Code: " + str(loc))
         if args.tree:
             enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
@@ -124,6 +124,8 @@ def main(args, id: int, conf: Config, queue):
             logger.info('No more queries to be tested. Solution not found!')
             logger.info('Increasing the number of lines of code.')
             loc = loc + 1
+
+    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, limit)
 
 
 class Squares(object):

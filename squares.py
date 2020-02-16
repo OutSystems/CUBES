@@ -34,6 +34,8 @@ if __name__ == '__main__':
     g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
     parser.set_defaults(tree=False)
 
+    parser.add_argument('--limit', type=int, default=7, help='maximum program size')
+
     parser.add_argument('--seed', default='squares')
 
     args = parser.parse_args()
@@ -49,15 +51,14 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['semi_join']),
+        Config(seed=seed, disabled=['semi_join']),  # original squares
         Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
         Config(seed=seed, disabled=['inner_join3'], z3_QF_FD=True, z3_sat_phase='random'),
         Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
                z3_QF_FD=True, z3_sat_phase='random'),
         Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
                z3_sat_phase='random'),
-        # Config(disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(z3_QF_FD=True, z3_sat_phase='caching', z3_sat_branching='lrb')
+        Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     ]
 
     if len(configs) > len(os.sched_getaffinity(0)):
@@ -67,7 +68,7 @@ if __name__ == '__main__':
 
     Ps = []
     for i in range(len(configs)):
-        P = Process(target=squaresEnumerator.main, args=(args, i, configs[i], queue), daemon=True)
+        P = Process(target=squaresEnumerator.main, name=str(configs[i]), args=(args, i, configs[i], queue, args.limit), daemon=True)
         P.start()
         Ps.append(P)
 
