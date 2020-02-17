@@ -91,10 +91,14 @@ if __name__ == '__main__':
         print()
         if args.r:
             print("------------------------------------- R Solution ---------------------------------------\n")
-            print(r + '\n')
+            print(r)
 
-        print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-        print(sql)
+        if sql is not None:
+            print()
+            print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+            print(sql)
+        else:
+            exit(2)
     else:
         print("No solution found")
         exit(1)

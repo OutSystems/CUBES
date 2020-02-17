@@ -10,11 +10,14 @@ class SQLVisitor(PostOrderInterpreter):
         return col
 
     def transform_const(self, const: str):
-        try:
-            float(const)
-            return const
-        except:
-            return '"' + const.replace('\\', '\\\\').replace('"', '\\"') + '"'
+        if const == 'max(n)':
+            return 'MAX(n)'
+        else:
+            try:
+                float(const)
+                return const
+            except:
+                return '"' + const.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
     def transform_bool_op(selfs, op):
         if op == '&':

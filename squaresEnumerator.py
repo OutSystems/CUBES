@@ -13,6 +13,7 @@ import sqlparse as sp
 
 import tyrell.spec as S
 from squares import util
+from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
@@ -107,13 +108,13 @@ def main(args, id: int, conf: Config, queue, limit: int):
             interpreter = SquaresInterpreter(problem, True)
             evaluation = interpreter.eval(prog, problem.tables)
 
-            # sql_generator = SQLVisitor()
-            # sql = sql_generator.eval(prog, problem.tables)
-            # print(sql)
-
-            program = problem.r_init + interpreter.final_program
-            robjects.r(program)
-            sql_query = robjects.r(f'sink(); sql_render({evaluation})')
+            try:
+                program = problem.r_init + interpreter.final_program
+                robjects.r(program)
+                sql_query = robjects.r(f'sink(); sql_render({evaluation})')
+            except Exception:
+                logger.error('Error while trying to convert R code to SQL.')
+                sql_query = None
 
             logger.debug('Solution found using process %d: %s', id, repr(conf))
 
