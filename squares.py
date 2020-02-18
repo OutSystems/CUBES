@@ -44,31 +44,26 @@ if __name__ == '__main__':
         debug = True
         logger.setLevel('DEBUG')
         get_logger('tyrell').setLevel('DEBUG')
-    else:
-        logger.setLevel('CRITICAL')
 
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['semi_join']),  # original squares
-        Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['inner_join3'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
-               z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
-               z3_sat_phase='random'),
-        Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, disabled=['semi_join']),
+        Config(seed=seed, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
+        Config(seed=seed, disabled=['semi_join'], alt_empty_pos=False, shuffle_cols=True),
+        Config(seed=seed + 1, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
     ]
 
     if len(configs) > len(os.sched_getaffinity(0)):
-        logger.warn('Starting more processes than available CPU cores!')
+        logger.warning('Starting more processes than available CPU cores!')
 
     queue = SimpleQueue()
 
     Ps = []
     for i in range(len(configs)):
-        P = Process(target=squaresEnumerator.main, name=str(configs[i]), args=(args, i, configs[i], queue, args.limit), daemon=True)
+        P = Process(target=squaresEnumerator.main, name=str(configs[i]), args=(args, i, configs[i], queue, args.limit),
+                    daemon=True)
         P.start()
         Ps.append(P)
 
@@ -86,8 +81,9 @@ if __name__ == '__main__':
         p.terminate()
 
     if not queue.empty():
-        r, sql = queue.get()
+        r, sql, process_id = queue.get()
 
+        print(f'Solution found using process {process_id}')
         print()
         if args.r:
             print("------------------------------------- R Solution ---------------------------------------\n")

@@ -11,7 +11,6 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
-parser.add_argument('--save-output', dest='save_output', action='store_true')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args = parser.parse_args()
@@ -22,10 +21,7 @@ def test_file(filename: str):
     out_file = f'data-treatment/{args.name}/{test_name}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
-    command = ['runsolver', '-W', str(args.t), './squares.py', '-d', filename]
-    if args.save_output:
-        command.insert(3, out_file)
-        command.insert(3, '-o')
+    command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', filename]
 
     print(' '.join(command))
     p = subprocess.run(command, capture_output=True, encoding='utf8')
@@ -37,6 +33,12 @@ def test_file(filename: str):
     except:
         status = None if timeout else 0
 
+    process = None
+    if not timeout:
+        with open(out_file) as f:
+            log = f.read()
+            process = int(re.search('Solution found using process (.*)', log)[1])
+
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])
     ram = int(re.search('Max. memory \(cumulated for all children\) \(KiB\): (.*)', p.stdout)[1])
@@ -44,15 +46,15 @@ def test_file(filename: str):
     with open('data-treatment/' + args.name + '.csv',
               'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
-        writer.writerow((test_name, timeout, real, cpu, ram, status))
+        writer.writerow((test_name, timeout, real, cpu, ram, process, status))
         f.flush()
 
 
 os.mkdir(f'data-treatment/{args.name}')
 with open('data-treatment/' + args.name + '.csv', 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'status'))
+    writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
     f.flush()
 
-with Pool(processes=16) as pool:
+with Pool(processes=1) as pool:
     pool.map(test_file, glob.glob('tests/**/*.yaml'), chunksize=1)

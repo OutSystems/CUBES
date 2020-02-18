@@ -7,6 +7,7 @@
 import logging
 import os
 import re
+from multiprocessing import Queue
 
 import rpy2.robjects as robjects
 import sqlparse as sp
@@ -54,7 +55,7 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-def main(args, id: int, conf: Config, queue, limit: int):
+def main(args, id: int, conf: Config, queue: Queue, limit: int):
     util.seed(conf.seed)
     util.store_config(conf)
 
@@ -116,9 +117,7 @@ def main(args, id: int, conf: Config, queue, limit: int):
                 logger.error('Error while trying to convert R code to SQL.')
                 sql_query = None
 
-            logger.debug('Solution found using process %d: %s', id, repr(conf))
-
-            queue.put((problem.r_init + '\n' + interpreter.final_program, beautifier(str(sql_query)[6:])))
+            queue.put((problem.r_init + '\n' + interpreter.final_program, None if sql_query is None else beautifier(str(sql_query)[6:]), id))
             return
 
         else:
