@@ -49,10 +49,7 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['semi_join']),
-        Config(seed=seed, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
-        Config(seed=seed, disabled=['semi_join'], alt_empty_pos=False, shuffle_cols=True),
-        Config(seed=seed + 1, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
+        Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random')
     ]
 
     if len(configs) > len(os.sched_getaffinity(0)):
@@ -94,6 +91,7 @@ if __name__ == '__main__':
             print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
             print(sql)
         else:
+            print('Failed to generate SQL query')
             exit(2)
     else:
         print("No solution found")

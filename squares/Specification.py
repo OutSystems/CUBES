@@ -156,7 +156,7 @@ class Specification:
                 filters_p = filters_p_two
                 operators = DSLEnum('Op', ['|', '&'])
         else:
-            filters_p, filters_f, self.consts = [], [], []
+            filters_p, filters_f = [], []
 
         if self.aggrs:
             for a in self.aggrs:

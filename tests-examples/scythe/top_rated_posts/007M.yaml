@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i007M.csv
+output: tests-examples/scythe/top_rated_posts/tables/o007M.csv
+aggrs:
+  - max
+attrs:
+  - datetime
+comment: |
+  SELECT tt.*
+  FROM topten tt
+  INNER JOIN
+      (SELECT home, MAX(datetime) AS MaxDateTime
+      FROM topten
+      GROUP BY home) groupedtt
+  ON tt.home = groupedtt.home
+  AND tt.datetime = groupedtt.MaxDateTime

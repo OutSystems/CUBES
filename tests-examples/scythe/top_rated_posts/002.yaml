@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i002.csv
+output: tests-examples/scythe/top_rated_posts/tables/o002.csv
+aggrs:
+  - n
+const:
+  - 1
+attrs:
+  - n
+comment: |
+  r1 <- input1 %>% group_by(EMAIL, NAME) %>% summarise(n = n())
+  r2 <- r1 %>% ungroup() %>% filter(n > 1)
+  r3 <- r2 %>% ungroup() %>% select(NAME)
+
+  SELECT NAME
+  FROM
+    (SELECT EMAIL, NAME, COUNT() AS n
+     FROM input1
+     GROUP BY EMAIL, NAME)
+  WHERE n > 1.0

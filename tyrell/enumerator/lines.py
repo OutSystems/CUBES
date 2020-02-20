@@ -315,7 +315,6 @@ class LinesEnumerator(Enumerator):
                 raise ValueError(msg)
 
     def _resolve_is_not_parent_predicate(self, pred):
-        # return
         self._check_arg_types(pred, [str, str, (int, float)])
         prod0 = self.spec.get_function_production_or_raise(pred.args[0])
         prod1 = self.spec.get_function_production_or_raise(pred.args[1])
@@ -326,6 +325,13 @@ class LinesEnumerator(Enumerator):
                 for c in r.children:
                     children.append(c.lines[s] == 1)
                 self.z3_solver.add(Implies(And(Or(children), self.roots[s].var == prod1.id), r.var != prod0.id))
+
+    # def all_sub(self, node: Node):
+    #     return [node.production.id, list(map(self.all_sub, node.children))]
+    #
+    # def _resolve_block_line(self, pred):
+    #     self.all_sub(pred.args[0][0])
+    #     pass
 
     def _resolve_distinct_inputs_predicate(self, pred):
         self._check_arg_types(pred, [str])

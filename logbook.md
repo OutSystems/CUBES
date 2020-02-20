@@ -4,9 +4,9 @@
 
 ####try1
     Config(seed=seed, disabled=['semi_join']),
-    Config(seed=seed, disabled=['semi_join'],alt_empty_pos=True, shuffle_cols=True),
-    Config(seed=seed, disabled=['semi_join'],alt_empty_pos=False, shuffle_cols=True),
-    Config(seed=seed, disabled=['semi_join'],alt_empty_pos=True, shuffle_cols=True),
+    Config(seed=seed, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
+    Config(seed=seed, disabled=['semi_join'], alt_empty_pos=False, shuffle_cols=True),
+    Config(seed=seed + 1, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
 
 ####try2
     Config(seed=seed, disabled=['semi_join']),
@@ -54,6 +54,22 @@
     Config(seed=seed, disabled=['semi_join']),  # original squares
     Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
     Config(seed=seed, disabled=['inner_join3'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
+           z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
+           z3_sat_phase='random'),
+    Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+    
+##Week 3
+
+###Interesting instances
+- 55-tests/40
+
+###Configuration attempts
+
+####try6_1
+    Config(seed=seed, disabled=['semi_join']),  # original squares
+    Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
     Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
            z3_QF_FD=True, z3_sat_phase='random'),
     Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,

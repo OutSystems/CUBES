@@ -62,7 +62,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_filter(self, node, args):
         name = self.fresh_table()
@@ -83,7 +83,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_filters(self, node, args):
         name = self.fresh_table()
@@ -112,7 +112,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_summariseGrouped(self, node, args):
         name = self.fresh_table()
@@ -129,7 +129,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_summarise(self, node, args):
         name = self.fresh_table()
@@ -145,7 +145,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_inner_join(self, node, args):
         name = self.fresh_table()
@@ -158,7 +158,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_inner_join3(self, node, args):
         name = self.fresh_table()
@@ -171,7 +171,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_inner_join4(self, node, args):
         name = self.fresh_table()
@@ -184,7 +184,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_anti_join(self, node, args):
         name = self.fresh_table()
@@ -197,7 +197,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_left_join(self, node, args):
         name = self.fresh_table()
@@ -210,7 +210,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_bind_rows(self, node, args):
         name = self.fresh_table()
@@ -223,7 +223,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_intersect(self, node, args):
         name = self.fresh_table()
@@ -236,7 +236,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_semi_join(self, node, args):
         name = self.fresh_table()
@@ -249,7 +249,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def eval_unite(self, node, args):
         name = self.fresh_table()
@@ -262,7 +262,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(_script)
             return name
         except Exception as e:
-            raise GeneralError(str(e))
+            raise GeneralError(node)
 
     def apply_row(self, val):
         df = val

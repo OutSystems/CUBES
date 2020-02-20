@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import cast, Any, Callable, Dict, List, Tuple, Set, FrozenSet
 import z3
 
+from squares import util
 from .assert_violation_handler import AssertionViolationHandler
 from .blame import Blame
 from .constraint_encoder import ConstraintEncoder
@@ -31,6 +32,8 @@ class Z3Encoder(GenericVisitor):
         self._example = example
         self._unsat_map = dict()
         self._solver = z3.Solver()
+        self._solver.set('random_seed', util.get_config().seed)
+        self._solver.set('sat.random_seed', util.get_config().seed)
 
     def get_z3_var(self, node: Node, pname: str, ptype: ExprType):
         node_id = self._indexer.get_id(node)
