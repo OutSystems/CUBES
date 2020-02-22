@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i009.csv
+output: tests-examples/scythe/top_rated_posts/tables/o009.csv
+aggrs:
+  - max
+attrs:
+  - time_stamp
+comment: |
+  SELECT u.[username]
+        ,u.[ip]
+        ,q.[time_stamp]
+  FROM [users] AS u
+  INNER JOIN (
+      SELECT [username]
+            ,MAX(time_stamp) AS [time_stamp]
+      FROM [users]
+      GROUP BY [username]) AS [q]
+  ON u.username = q.username
+  AND u.time_stamp = q.time_stamp

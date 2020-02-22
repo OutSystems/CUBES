@@ -1,7 +1,9 @@
 import csv
 import random
 from itertools import permutations
+from typing import List
 
+import pandas
 import yaml
 import logging
 
@@ -61,13 +63,26 @@ def add_is_not_parent_if_enabled(dsl, a, b):
         dsl.add_predicate(DSLPredicate('is_not_parent', [a, b, '100']))
 
 
+def symm_op(op: str):
+    if op == '>':
+        return '<'
+    elif op == '<':
+        return '>'
+    elif op == '>=':
+        return '<='
+    elif op == '<=':
+        return '>='
+    elif op == '==':
+        return '=='
+
+
 class Specification:
 
     def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc):
         self.inputs = inputs
         self.output = output
         self.consts = consts
-        self.aggrs = aggrs
+        self.aggrs = util.get_config().aggregation_functions
         self.attrs = attrs
         self.has_int_consts = find_consts(consts)
         self.bools = bools
@@ -75,18 +90,22 @@ class Specification:
 
         self.tables = []
 
+        self.data_frames = []
+
         self._tables = {}
         self.columns = set()
 
         logger.debug("Reading input files...")
         for input in inputs:
             id = next_counter()
+
             self.tables.append(f'input{id}')
             self._tables[self.tables[-1]] = id
 
-            with open(input) as f:
-                reader = csv.reader(f)
-                self.columns = self.columns.union(next(reader))
+            df = pandas.read_csv(input)
+
+            self.data_frames.append(df)
+            self.columns |= set(df.columns)
 
         self.columns = list(self.columns)
         self.columns.sort()
@@ -269,8 +288,11 @@ class Specification:
         for f in filters_f + summarise_f:
             dsl.add_function(f)
 
-        for p in summarise_p + filters_p + necessary_conditions:
+        for p in summarise_p + filters_p:
             dsl.add_predicate(p)
+
+        # for p in necessary_conditions:
+        #     dsl.add_predicate(p)
 
         add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join3')
         add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join4')
@@ -294,7 +316,7 @@ class Specification:
         self.dsl = dsl
 
     def find_filter_conditions(self, str_const, int_const, str_attr, int_attr, new_int_attr,
-                               necessary_conditions,
+                               necessary_conditions: List[List[str]],
                                summarise_conditions):
         conditions = []
         int_ops = ["==", ">", "<", ">=", "<="]
@@ -303,52 +325,58 @@ class Specification:
 
         for constant in str_const + int_const:
             necessary_conditions.append([])
-            for str_attribute in str_attr:
-                att = False
-                for input in self.inputs:
-                    if att:
-                        break
-                    with open(input) as f:
-                        reader = csv.reader(f)
-                        columns = next(reader)
-                        if str_attribute in columns:
-                            ind = columns.index(str_attribute)
-                            for row in reader:
-                                if row[ind] == constant:
-                                    att = True
-                                    break
-                        else:
-                            continue
 
-                if 'like' in self.aggrs:
+            for str_attribute in str_attr:
+
+                if util.get_config().like_comparison_enabled:
                     conditions.append(f'str_detect({str_attribute}|{constant})')
                     necessary_conditions[-1].append(conditions[-1])
 
-                if not att:
-                    continue
-                for so in str_ops:
-                    conditions.append(f'{str_attribute} {so} {constant}')
-                    necessary_conditions[-1].append(conditions[-1])
+                att = False
+                for data_frame in self.data_frames:  # check if constant appears in column 'str_attribute' in some data_frame
+                    if att:
+                        break
+
+                    if str_attribute in data_frame.columns:
+                        for row in data_frame.itertuples():
+                            if getattr(row, str_attribute) == constant:
+                                att = True
+                                break
+                    else:
+                        continue
+
+                if att:
+                    for op in str_ops:
+                        conditions.append(f'{str_attribute} {op} {constant}')
+                        necessary_conditions[-1].append(conditions[-1])
 
         for int_constant in int_const:
             necessary_conditions.append([])
+
             for int_attribute in int_attr + new_int_attr:
                 if int_constant == int_attribute:
                     continue
-                for io in int_ops:
-                    conditions.append(f'{int_attribute} {io} {int_constant}')
+
+                for op in int_ops:
+                    conditions.append(f'{int_attribute} {op} {int_constant}')
                     necessary_conditions[-1].append(conditions[-1])
                     if int_attribute == "n":
                         happens_before.append((conditions[-1], 'n = n()'))
 
-        for int_constant in new_int_attr:
-            for int_attribute in int_attr + new_int_attr:
-                if int_constant == int_attribute:
+        bc = set()
+
+        for attr1 in new_int_attr:
+            for attr2 in int_attr + new_int_attr:
+                if attr1 == attr2:
                     continue
-                for io in int_ops:
-                    conditions.append('{ia} {io} {ic}'.format(ia=int_attribute, io=io, ic=int_constant))
+                for op in int_ops:
+                    if (attr2, op, attr1) in bc or (attr1, symm_op(op), attr2) in bc:  # don't add symmetric conditions
+                        continue
+
+                    bc.add((attr2, op, attr1))
+                    conditions.append('{ia} {io} {ic}'.format(ia=attr2, io=op, ic=attr1))
                     for constant in summarise_conditions:
-                        if int_constant in constant:
+                        if attr1 in constant:
                             happens_before.append((conditions[-1], constant))
 
         necessary_conditions = list(filter(lambda a: a != [], necessary_conditions))
@@ -360,28 +388,35 @@ class Specification:
 
         return conditions, necessary_conditions, happens_before
 
-    def find_summarise_conditions(self, int_attr, str_attr, necessary_conditions):
+    def find_summarise_conditions(self, int_attr, str_attr, necessary_conditions: List[List[str]]):
         conditions = []
         new_int_attr = []
+
         for a in self.aggrs:
             if a == "like":
                 continue
+
             necessary_conditions.append([])
+
             if "n" == a:
                 conditions.append(f'{a} = {a}()')
                 necessary_conditions[-1].append(conditions[-1])
                 continue
+
             if 'concat' in a:
                 for at in int_attr + str_attr:
                     conditions.append(f'paste|{at}')
                     necessary_conditions[-1].append(conditions[-1])
                 continue
-            if "max(n)" == a:
+
+            if "max(n)" == a:  # special case: where max(n) == something without grouping
                 continue
+
             for ia in int_attr:
                 conditions.append(f'{a}{ia} = {a}({ia})')
                 necessary_conditions[-1].append(conditions[-1])
                 new_int_attr.append(f'{a}{ia}')
+
         return list(filter(lambda x: x != [], necessary_conditions)), new_int_attr, conditions
 
     def find_conditions(self):

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Tuple
 
 
 @dataclass
@@ -9,6 +9,10 @@ class Config:
     lines_force_all_inputs: bool = True
 
     disabled: List[str] = field(default_factory=list)
+    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'avg', 'n', 'sum', 'max(n)'])
+
+    like_comparison_enabled: bool = True
+
     alt_empty_pos: bool = False
     shuffle_cols: bool = False
     z3_smt_phase: int = 3

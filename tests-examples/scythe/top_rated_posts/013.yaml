@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i013.csv
+output: tests-examples/scythe/top_rated_posts/tables/o013.csv
+const:
+  - 1
+aggrs:
+  - n
+comment: |
+  SELECT o.orgName, oc.dupeCount, o.id
+  FROM organizations o
+  INNER JOIN (
+      SELECT orgName, COUNT(*) AS dupeCount
+      FROM organizations
+      GROUP BY orgName
+      HAVING COUNT(*) > 1
+  ) oc ON o.orgName = oc.orgName

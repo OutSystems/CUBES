@@ -62,6 +62,12 @@
     
 ##Week 3
 
+###Reasons why instances fail
+- Dates are not supported
+- concat as an aggregation function
+- first as an aggregation function??
+- needs INNER JOIN ON instead of NATURAL JOIN
+
 ###Interesting instances
 - 55-tests/40
 

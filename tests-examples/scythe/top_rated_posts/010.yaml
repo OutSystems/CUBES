@@ -1,0 +1,17 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i010_1.csv
+  - tests-examples/scythe/top_rated_posts/tables/i010_2.csv
+output: tests-examples/scythe/top_rated_posts/tables/o010.csv
+comment: |
+  SELECT *
+  FROM   Call
+  LEFT OUTER JOIN Phone_Book
+    ON (Call.phone_number = Phone_book.phone_number)
+    WHERE Phone_book.phone_number IS NULL;
+
+  SELECT *
+  FROM   Call
+  WHERE  NOT EXISTS
+    (SELECT *
+     FROM   Phone_book
+     WHERE  Phone_book.phone_number = Call.phone_number)

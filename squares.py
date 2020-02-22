@@ -49,7 +49,13 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random')
+        Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=['n', 'max(n)'], disabled=['semi_join'], z3_QF_FD=True,
+               z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=['max'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=['min'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=['avg'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=['sum'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random')
     ]
 
     if len(configs) > len(os.sched_getaffinity(0)):
