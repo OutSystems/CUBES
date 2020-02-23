@@ -50,16 +50,21 @@ if __name__ == '__main__':
 
     configs = [
         Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=['n', 'max(n)'], disabled=['semi_join'], z3_QF_FD=True,
-               z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=['max'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=['min'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=['avg'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=['sum'], disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random')
+        Config(seed=seed, aggregation_functions=[], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["max"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["min"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["mean"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["n"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["n", "max(n)"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["n", "max"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     ]
 
-    if len(configs) > len(os.sched_getaffinity(0)):
-        logger.warning('Starting more processes than available CPU cores!')
+    if os.name == 'nt':
+        logger.warning('Running on Windows is currently untested.')
+
+    else:
+        if len(configs) > len(os.sched_getaffinity(0)):
+            logger.warning('Starting more processes than available CPU cores!')
 
     queue = SimpleQueue()
 

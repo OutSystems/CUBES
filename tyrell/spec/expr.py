@@ -2,23 +2,28 @@ from enum import Enum, unique
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
+from z3 import BitVecVal, BitVecNumRef
+
 
 @unique
 class ExprType(Enum):
     VALUE = "value"  # We don't track the exact user-defined type here
     BOOL = "bool"
     INT = "int"
+    BV = 'bv'
 
 
 @unique
 class UnaryOperator(Enum):
     NEG = "-"
     NOT = "!"
+    BNEG = "~"
 
 
 _unary_sig: Dict[UnaryOperator, ExprType] = {
     UnaryOperator.NEG: ExprType.INT,
-    UnaryOperator.NOT: ExprType.BOOL
+    UnaryOperator.NOT: ExprType.BOOL,
+    UnaryOperator.BNEG: ExprType.BV
 }
 
 
@@ -49,6 +54,9 @@ class BinaryOperator(Enum):
     OR = "||"
     IMPLY = "==>"
 
+    BOR = '|'
+    BAND = '&'
+
 
 _binary_param_sig: Dict[BinaryOperator, ExprType] = {
     BinaryOperator.ADD: ExprType.INT,
@@ -63,6 +71,8 @@ _binary_param_sig: Dict[BinaryOperator, ExprType] = {
     BinaryOperator.AND: ExprType.BOOL,
     BinaryOperator.OR: ExprType.BOOL,
     BinaryOperator.IMPLY: ExprType.BOOL,
+    BinaryOperator.BOR: ExprType.BV,
+    BinaryOperator.BAND: ExprType.BV
 }
 
 
@@ -85,6 +95,8 @@ binary_return_sig: Dict[BinaryOperator, ExprType] = {
     BinaryOperator.AND: ExprType.BOOL,
     BinaryOperator.OR: ExprType.BOOL,
     BinaryOperator.IMPLY: ExprType.BOOL,
+    BinaryOperator.BOR: ExprType.BV,
+    BinaryOperator.BAND: ExprType.BV
 }
 
 
@@ -112,11 +124,11 @@ class Expr(ABC):
 class ConstExpr(Expr):
     _value: Union[bool, int]
 
-    def __init__(self, value: Union[bool, int]):
+    def __init__(self, value: Union[bool, int, BitVecNumRef]):
         super().__init__()
-        if not isinstance(value, bool) and not isinstance(value, int):
+        if not isinstance(value, bool) and not isinstance(value, int) and not isinstance(value, BitVecNumRef):
             raise ValueError(
-                'ConstExpr does not accept non-boolean/int constants: {}'.format(value))
+                'ConstExpr does not accept non-boolean/int/bitvec constants: {}'.format(value))
         self._value = value
 
     @property
@@ -129,6 +141,8 @@ class ConstExpr(Expr):
             return ExprType.BOOL
         elif isinstance(self._value, int):
             return ExprType.INT
+        elif isinstance(self._value, BitVecNumRef):
+            return ExprType.BV
         else:
             raise ValueError(
                 'ConstExpr found unknown value type: {}'.format(self._value))

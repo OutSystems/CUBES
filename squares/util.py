@@ -2,6 +2,8 @@
 
 from itertools import permutations
 from random import Random
+from typing import List
+
 from .config import Config
 
 counter = 0
@@ -47,3 +49,11 @@ def store_config(conf):
 def get_config() -> Config:
     global config
     return config
+
+
+def boolvec2int(bools: List[bool]) -> int:
+    result = 0
+    for i in range(len(bools)):
+        if bools[i]:
+            result += 2 ** i
+    return result

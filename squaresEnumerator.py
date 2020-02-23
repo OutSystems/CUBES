@@ -59,6 +59,10 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
     util.seed(conf.seed)
     util.store_config(conf)
 
+    if args.debug:
+        logger.setLevel('DEBUG')
+        get_logger('tyrell').setLevel('DEBUG')
+
     logger.handlers[0].set_identifier(f'prc{id}')
 
     logger.info('Parsing specification...')

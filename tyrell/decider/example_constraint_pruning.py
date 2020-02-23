@@ -31,6 +31,7 @@ class Z3Encoder(GenericVisitor):
         self._indexer = indexer
         self._example = example
         self._unsat_map = dict()
+        self._clause_map = dict()
         self._solver = z3.Solver()
         self._solver.set('random_seed', util.get_config().seed)
         self._solver.set('sat.random_seed', util.get_config().seed)
@@ -42,6 +43,8 @@ class Z3Encoder(GenericVisitor):
             return z3.Int(var_name)
         elif ptype is ExprType.BOOL:
             return z3.Bool(var_name)
+        elif ptype is ExprType.BV:
+            return z3.BitVec(var_name, util.get_config().bitvector_size)
         else:
             raise RuntimeError('Unrecognized ExprType: {}'.format(ptype))
 
@@ -56,7 +59,7 @@ class Z3Encoder(GenericVisitor):
                 'Unexpected program output type: {}'.format(ty))
         # print(ty.properties)
         for pname, pty in ty.properties:
-            # print(pname, pty)
+            #print(pname, pty)
             actual = self.get_z3_var(node, pname, pty)
             expected_expr = PropertyExpr(pname, pty, ParamExpr(index))
             expected = eval_expr(
@@ -96,6 +99,7 @@ class Z3Encoder(GenericVisitor):
             cname = self._get_constraint_var(apply_node, index)
             z3_clause = constraint_visitor.visit(constraint)
             self._unsat_map[cname] = (apply_node, index)
+            self._clause_map[cname] = z3_clause
             self._solver.assert_and_track(z3_clause, cname)
         for arg in apply_node.args:
             self.visit(arg)

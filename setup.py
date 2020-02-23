@@ -8,7 +8,7 @@ install_dependencies = [
     'z3-solver',
     "rpy2",
     'sqlparse',
-    'PyYAML'
+    'PyYAML', 'pandas', 'numpy'
 ]
 develop_dependencies = [
     'mypy',  # for type checking

@@ -8,10 +8,13 @@ class Config:
 
     lines_force_all_inputs: bool = True
 
-    disabled: List[str] = field(default_factory=list)
-    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'avg', 'n', 'sum', 'max(n)'])
+    bitvector_size: int = 16  # TODO should not be a fixed number
 
-    like_comparison_enabled: bool = True
+    disabled: List[str] = field(default_factory=list)
+    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum', 'max(n)', 'like'])
+    force_constants: bool = True
+    force_summarise: bool = False
+    force_occurs_maxn: bool = False
 
     alt_empty_pos: bool = False
     shuffle_cols: bool = False

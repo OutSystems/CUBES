@@ -56,5 +56,5 @@ with open('data-treatment/' + args.name + '.csv', 'w') as f:
     writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
     f.flush()
 
-with Pool(processes=1) as pool:
+with Pool(processes=16) as pool:
     pool.map(test_file, glob.glob('tests/**/*.yaml'), chunksize=1)

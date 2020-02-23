@@ -1,5 +1,7 @@
 from rpy2 import robjects as robjects
+from z3 import BitVecVal
 
+from squares import util
 from squares.util import get_fresh_name, current_counter
 from tyrell.interpreter import PostOrderInterpreter, GeneralError
 
@@ -277,5 +279,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
         return df.ncol
 
-    def apply_name(self, val):
-        return self.problem._tables[val]
+    def apply_columns(self, val):
+        a = list(robjects.r(f'tbl_vars({val})'))
+        bools = list(map(lambda c: c in a, self.problem.all_columns))
+        return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)

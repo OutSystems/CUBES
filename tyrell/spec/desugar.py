@@ -1,5 +1,9 @@
 from ast import literal_eval
 from typing import List, cast
+
+from z3 import BitVecVal
+
+from squares import util
 from .spec import TypeSpec, ProductionSpec, ProgramSpec, PredicateSpec, TyrellSpec
 from .type import Type, EnumType, ValueType
 from .expr import *
@@ -41,6 +45,8 @@ class TypeCollector(Visitor_Recursive):
                 ptype = ExprType.BOOL
             elif ptype_name == 'expr_int':
                 ptype = ExprType.INT
+            elif ptype_name == 'expr_bv':
+                ptype = ExprType.BV
             else:
                 msg = 'Unknown property type: {}'.format(ptype_name)
                 raise ParseTreeProcessingError(msg)
@@ -120,6 +126,9 @@ class ProductionCollecotr(Visitor_Recursive):
         elif expr_kind == 'expr_intlit':
             value = int(tree.children[0])
             return ConstExpr(value)
+        elif expr_kind == 'expr_bitveclit':
+            value = BitVecVal(int(tree.children[0][1:], base=2), util.get_config().bitvector_size)
+            return ConstExpr(value)
         elif expr_kind == 'expr_var':
             name = str(tree.children[0])
             index = index_map.get(name, None)
@@ -144,6 +153,8 @@ class ProductionCollecotr(Visitor_Recursive):
                 operator = UnaryOperator.NEG
             elif operator == 'expr_not':
                 operator = UnaryOperator.NOT
+            elif operator == 'expr_bneg':
+                operator = UnaryOperator.BNEG
             else:
                 raise ValueError(
                     'Unrecognized unary operator: {}'.format(operator))
@@ -213,6 +224,14 @@ class ProductionCollecotr(Visitor_Recursive):
             false_val = self._process_expr(
                 index_map, type_map, tree.children[2])
             return CondExpr(cond, true_val, false_val)
+        elif expr_kind == 'bor_expr':
+            lhs = self._process_expr(index_map, type_map, tree.children[0])
+            rhs = self._process_expr(index_map, type_map, tree.children[1])
+            return BinaryExpr(BinaryOperator.BOR, lhs, rhs)
+        elif expr_kind == 'band_expr':
+            lhs = self._process_expr(index_map, type_map, tree.children[0])
+            rhs = self._process_expr(index_map, type_map, tree.children[1])
+            return BinaryExpr(BinaryOperator.BAND, lhs, rhs)
         else:
             msg = 'Unrecognized expr kind: {}'.format(expr_kind)
             raise NotImplementedError(msg)

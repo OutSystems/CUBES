@@ -59,8 +59,8 @@ func_constraint_items: func_constraint_item func_constraint_item*
 ?and_expr: cmp_expr
   | and_expr "&&" cmp_expr
 
-?cmp_expr: term_expr
-  | cmp_expr cmp_op term_expr
+?cmp_expr: bor_expr
+  | cmp_expr cmp_op bor_expr
 
 ?cmp_op: "==" -> expr_eq
   | "!=" -> expr_ne
@@ -68,6 +68,15 @@ func_constraint_items: func_constraint_item func_constraint_item*
   | "<=" -> expr_le
   | ">" -> expr_gt
   | ">=" -> expr_ge
+
+?bor_expr: bxor_expr
+  | bor_expr "|" bxor_expr
+
+?bxor_expr: band_expr
+  | bxor_expr "^" band_expr
+
+?band_expr: term_expr
+  | band_expr "&" term_expr
 
 ?term_expr: factor_expr
   | term_expr term_op factor_expr
@@ -87,6 +96,7 @@ func_constraint_items: func_constraint_item func_constraint_item*
 
 ?unary_op: "-" -> expr_neg
   | "!" -> expr_not
+  | "~" -> expr_bneg
 
 ?atom_expr: const_expr
   | var_expr
@@ -96,6 +106,7 @@ func_constraint_items: func_constraint_item func_constraint_item*
 ?const_expr: INT -> expr_intlit
   | "true" -> expr_true
   | "false" -> expr_false
+  | BITVEC -> expr_bitveclit
 
 ?var_expr: var_name -> expr_var
 
@@ -122,6 +133,7 @@ pred_arg: var_name -> pred_var
 ?enum_item: STRLIT
 ?expr_type_name: "bool" -> expr_bool
   | "int" -> expr_int
+  | "bv" -> expr_bv
 
 ?type_name: NAME
 ?var_name: NAME
@@ -129,6 +141,8 @@ pred_arg: var_name -> pred_var
 
 COMMENT: "#" /.*/ "\n"
   | "(*" /(.|\n)+/ "*)"
+
+BITVEC: /\*[01]+/
 
 %import common.ESCAPED_STRING -> STRLIT
 %import common.CNAME -> NAME

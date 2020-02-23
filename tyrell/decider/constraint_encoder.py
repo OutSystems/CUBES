@@ -10,7 +10,8 @@ class ConstraintEncoder(GenericVisitor):
 
     _unary_dispatch_table: ClassVar[Dict[UnaryOperator, Callable[[Any], Any]]] = {
         UnaryOperator.NOT: lambda x: z3.Not(x),
-        UnaryOperator.NEG: lambda x: -x
+        UnaryOperator.NEG: lambda x: -x,
+        UnaryOperator.BNEG: lambda x: ~x
     }
     _binary_dispatch_table: ClassVar[Dict[BinaryOperator, Callable[[Any, Any], Any]]] = {
         BinaryOperator.ADD: lambda x, y: x + y,
@@ -26,7 +27,9 @@ class ConstraintEncoder(GenericVisitor):
         BinaryOperator.GE: lambda x, y: x >= y,
         BinaryOperator.AND: lambda x, y: z3.And(x, y),
         BinaryOperator.OR: lambda x, y: z3.Or(x, y),
-        BinaryOperator.IMPLY: lambda x, y: z3.Implies(x, y)
+        BinaryOperator.IMPLY: lambda x, y: z3.Implies(x, y),
+        BinaryOperator.BAND: lambda x, y: x & y,
+        BinaryOperator.BOR: lambda x, y: x | y
     }
 
     def __init__(self, encode_property: Callable[[PropertyExpr], z3.ExprRef]):

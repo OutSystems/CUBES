@@ -112,6 +112,8 @@ class Specification:
         if util.get_config().shuffle_cols:
             util.random.shuffle(self.columns)
 
+        self.all_columns = self.columns.copy()
+
         self._tables['expected_output'] = next_counter()
 
         self.generate_r_init()
@@ -131,13 +133,15 @@ class Specification:
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
             'row(r) <= row(a)',
-            'col(r) == col(a)'
+            'col(r) == col(a)',
+            # 'columns(r) == columns(a)'
         ])]
         filters_f = filters_f_one
         filters_f_and_or = [
             DSLFunction('filters', 'Table r', ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'], [
                 'row(r) <= row(a)',
-                'col(r) == col(a)'
+                'col(r) == col(a)',
+                # 'columns(r) == columns(a)'
             ])]
 
         filters_p_one = [DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
@@ -239,21 +243,37 @@ class Specification:
         if operators:
             dsl.add_enum(operators)
 
-        dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int')]))
-        dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int')]))
+        dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int'),
+                                         # ('columns', 'bv')
+                                         ]))
+        dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int'),
+                                               # ('columns', 'bv')
+                                               ]))
 
         if 'inner_join' not in util.get_config().disabled:
             dsl.add_function(
-                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)"]))
+                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)",
+                                                                              # "columns(r) == columns(a) | columns(b)",
+                                                                              # f"columns(a) & columns(b) != *0"
+                                                                              ]))
 
         if 'inner_join3' not in util.get_config().disabled:
             dsl.add_function(
                 DSLFunction('inner_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
-                            ["col(r) < col(a) + col(b) + col(c)"]))
+                            ["col(r) < col(a) + col(b) + col(c)",
+                             # "columns(r) == columns(a) | columns(b) | columns(c)",
+                             # f"columns(a) & columns(b) != *0",
+                             # f"(columns(a) | columns(b)) & columns(c) != *0"
+                             ]))
 
         if 'inner_join4' not in util.get_config().disabled:
             dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
-                                         ["col(r) < col(a) + col(b) + col(c) + col(d)"]))
+                                         ["col(r) < col(a) + col(b) + col(c) + col(d)",
+                                          # "columns(r) == columns(a) | columns(b) | columns(c) | columns(d)",
+                                          # f"columns(a) & columns(b) != *0",
+                                          # f"(columns(a) | columns(b)) & columns(c) != *0",
+                                          # f"(columns(a) | columns(b) | columns(c)) & columns(d) != *0"
+                                          ]))
 
         if 'anti_join' not in util.get_config().disabled:
             dsl.add_function(
@@ -263,12 +283,16 @@ class Specification:
         if 'left_join' not in util.get_config().disabled:
             dsl.add_function(
                 DSLFunction('left_join', 'Table r', ['Table a', 'Table b'],
-                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a)']))
+                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a)',
+                             # "columns(r) == columns(a) | columns(b)"
+                             ]))
 
         if 'bind_rows' not in util.get_config().disabled:
             dsl.add_function(
                 DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
-                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)']))
+                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)',
+                             # "columns(r) == columns(a) | columns(b)"
+                             ]))
 
         if 'intersect' not in util.get_config().disabled:
             dsl.add_function(
@@ -280,7 +304,10 @@ class Specification:
                 DSLFunction('semi_join', 'Table r', ['Table a', 'Table b'], ['col(r) == col(a)', 'row(r) <= row(a)']))
 
         dsl.add_function(DSLFunction('select', 'TableSelect r', ['Table a', 'SelectCols c', 'Distinct d'],
-                                     ['row(r) <= row(a)', 'col(r) <= col(a)']))
+                                     ['row(r) <= row(a)', 'col(r) <= col(a)',
+                                      # f"columns(r) & columns(a) != *0",
+                                      # f"columns(r) & ~columns(a) == *0",
+                                      ]))
 
         if concat:
             dsl.add_function(concat)
@@ -291,8 +318,8 @@ class Specification:
         for p in summarise_p + filters_p:
             dsl.add_predicate(p)
 
-        # for p in necessary_conditions:
-        #     dsl.add_predicate(p)
+        for p in necessary_conditions:
+            dsl.add_predicate(p)
 
         add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join3')
         add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join4')
@@ -328,7 +355,7 @@ class Specification:
 
             for str_attribute in str_attr:
 
-                if util.get_config().like_comparison_enabled:
+                if 'like' in util.get_config().aggregation_functions:
                     conditions.append(f'str_detect({str_attribute}|{constant})')
                     necessary_conditions[-1].append(conditions[-1])
 
@@ -384,7 +411,8 @@ class Specification:
         if 'max(n)' in self.aggrs:
             conditions.append('n == max(n)')
             happens_before.append((conditions[-1], 'n = n()'))
-            necessary_conditions.append([conditions[-1]])
+            if util.get_config().force_occurs_maxn:
+                necessary_conditions.append([conditions[-1]])
 
         return conditions, necessary_conditions, happens_before
 
@@ -416,6 +444,7 @@ class Specification:
                 conditions.append(f'{a}{ia} = {a}({ia})')
                 necessary_conditions[-1].append(conditions[-1])
                 new_int_attr.append(f'{a}{ia}')
+                self.all_columns.append(f'{a}{ia}')
 
         return list(filter(lambda x: x != [], necessary_conditions)), new_int_attr, conditions
 
@@ -426,6 +455,9 @@ class Specification:
 
         necessary_conditions, new_int_attr, sum_cond = self.find_summarise_conditions(int_attr, str_attr,
                                                                                       necessary_conditions)
+
+        if not util.get_config().force_summarise:
+            necessary_conditions = []
 
         filt_cond, necessary_conditions, happens_before = self.find_filter_conditions(str_const, int_const, str_attr,
                                                                                       int_attr,
@@ -468,6 +500,9 @@ class Specification:
 
     @staticmethod
     def find_necessary_conditions(conds):
+        if not util.get_config().force_constants:
+            return []
+
         predicates = []
         for c in conds:
             if c == []:
