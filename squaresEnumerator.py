@@ -18,7 +18,7 @@ from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
-from tyrell.decider import Example, ExampleConstraintPruningDecider
+from tyrell.decider import Example, ExampleConstraintPruningDecider, ExampleConstraintDecider
 from tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
@@ -95,8 +95,8 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
         synthesizer = Synthesizer(
             # loc: # of function productions
             enumerator=enumerator,
-            # decider=ExampleConstraintDecider(
-            decider=ExampleConstraintPruningDecider(
+            decider=ExampleConstraintDecider(
+            # decider=ExampleConstraintPruningDecider(
                 spec=spec,
                 interpreter=SquaresInterpreter(problem, False),
                 examples=[

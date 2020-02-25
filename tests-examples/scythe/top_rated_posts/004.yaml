@@ -6,10 +6,14 @@ aggrs:
 attrs:
   - rev
 comment: |
-  SELECT a.id, a.rev, a.contents
+  SELECT a.id, a.rev, a.content
   FROM YourTable a
   INNER JOIN (
-      SELECT id, MAX(rev) rev
+      SELECT id, MAX(rev) AS maxrev
       FROM YourTable
       GROUP BY id
-  ) b ON a.id = b.id AND a.rev = b.rev
+  ) b ON a.id = b.id AND a.rev = b.maxrev
+
+  df1 <- input1 %>% group_by(id) %>% summarise(maxrev = max(rev))
+  df2 <- inner_join(input1, df1, by=c('id' = 'id','rev' = 'maxrev'))
+  o   <- df2 %>% ungroup() %>% select(id,rev,content) %>% distinct()

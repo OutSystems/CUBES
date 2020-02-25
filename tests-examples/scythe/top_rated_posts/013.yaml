@@ -14,3 +14,8 @@ comment: |
       GROUP BY orgName
       HAVING COUNT(*) > 1
   ) oc ON o.orgName = oc.orgName
+
+  df1 <- input1 %>% group_by(orgName) %>% summarise(n = n())
+  df2 <- inner_join(input1, df1)
+  df3 <- df2 %>% ungroup() %>% filter(n > 1)
+  out <- df3 %>% ungroup() %>% select(orgName,n,id)

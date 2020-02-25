@@ -1,19 +1,19 @@
 import csv
-import random
-from itertools import permutations, combinations
+from itertools import combinations, product
 from typing import List, Tuple
 
+import numpy
 import pandas
 import yaml
-import logging
-
+from ordered_set import OrderedSet
 from rpy2 import robjects
 
 from squares import util
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
+from squares.util import next_counter, get_permutations
 from tyrell.logger import get_logger
 
-from squares.util import next_counter, get_permutations
+PANDAS_INT64 = pandas.api.types.pandas_dtype(numpy.int64)
 
 logger = get_logger('squares')
 
@@ -76,17 +76,6 @@ def symm_op(op: str):
         return '=='
 
 
-def find_pairs(cols: List[str]) -> List[Tuple[List, List]]:
-    cols = list(map(lambda x: list(map(lambda y: y.strip(), x.split(','))), cols))  # TODO assumes col doesn't have withspace
-    for c1, c2 in combinations(cols, 2):
-        if len(c1) == len(c2) and c1 != c2:
-            yield c1, c2
-
-
-def generate_on_conditions(conditions: List[Tuple[List, List]]) -> List[str]:
-    return list(map(lambda t: ','.join(map(lambda t_: f"'{t_[0]}' = '{t_[1]}'", zip(t[0], t[1]))), conditions))
-
-
 class Specification:
 
     def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc):
@@ -108,6 +97,8 @@ class Specification:
 
         self._tables = {}
         self.columns = set()
+        self.generated_columns = {}
+        self.columns_by_type = {}
 
         logger.debug("Reading input files...")
         for input in inputs:
@@ -117,6 +108,18 @@ class Specification:
             self._tables[self.tables[-1]] = id
 
             df = pandas.read_csv(input)
+            df = df.convert_dtypes()
+
+            for col in df:  # try to coerce columns to datetime
+                if all(util.is_date(elem) for elem in df[col]):
+                    df[col] = pandas.to_datetime(df[col])
+
+            logger.info('Inferred data types for table %s: %s', input, str(list(map(str, df.dtypes.values))))
+
+            for column, type in df.dtypes.items():
+                if type not in self.columns_by_type:
+                    self.columns_by_type[type] = OrderedSet()
+                self.columns_by_type[type].add(column)
 
             self.data_frames.append(df)
             self.columns |= set(df.columns)
@@ -164,22 +167,29 @@ class Specification:
             filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'filter', '100']))
         if 'natural_join3' not in util.get_config().disabled:
             filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join3', 'filter', '100']))
+        if 'natural_join' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join', 'filter', '100']))
+        if 'inner_join' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join', 'filter', '100']))
         filters_p = filters_p_one
         filters_p_two = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
                          DSLPredicate('is_not_parent', ['filters', 'filters', '100']),
                          DSLPredicate('distinct_inputs', ['filters'])]
 
         if 'natural_join4' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join4', 'filter', '100']))
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join4', 'filters', '100']))
         if 'natural_join3' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join3', 'filter', '100']))
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join3', 'filters', '100']))
         if 'natural_join' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join', 'filter', '100']))
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join', 'filters', '100']))
+        if 'inner_join' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join', 'filters', '100']))
 
         summarise_f = [DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
             'row(r) <= row(a)',
             'col(r) <= 3'
         ])]
+        # summarise_p = []
         summarise_p = [DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100'])]
         if 'natural_join4' not in util.get_config().disabled:
             summarise_p.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'summariseGrouped', '100']))
@@ -217,7 +227,7 @@ class Specification:
         elif 'n' in self.aggrs:
             self.attrs.append('n')
 
-        filter_conditions, summarise_conditions, necessary_conditions, happens_before = self.find_conditions()
+        filter_conditions, summarise_conditions, on_conditions, necessary_conditions, happens_before = self.find_conditions()
 
         if filters_f == [] and filter_conditions != []:
             filters_f = filters_f_one
@@ -244,7 +254,10 @@ class Specification:
 
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'TableSelect')
         dsl.add_enum(DSLEnum('Cols', cols))
-        dsl.add_enum(DSLEnum('OnCondition', generate_on_conditions(find_pairs(get_permutations(self.all_columns, 2)))))
+
+        if 'inner_join' not in util.get_config().disabled:
+            dsl.add_enum(DSLEnum('JoinCondition', on_conditions))
+
         dsl.add_enum(DSLEnum('Col', one_column))
         dsl.add_enum(DSLEnum('SelectCols', [','.join(output_attrs)]))
         dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
@@ -291,7 +304,7 @@ class Specification:
                                           ]))
 
         if 'inner_join' not in util.get_config().disabled:
-            dsl.add_function(DSLFunction('inner_join', 'Table r', ['Table a', 'Table b', 'OnCondition c'],
+            dsl.add_function(DSLFunction('inner_join', 'Table r', ['Table a', 'Table b', 'JoinCondition c'],
                                          ["col(r) <= col(a) + col(b)"]))
 
         if 'anti_join' not in util.get_config().disabled:
@@ -447,6 +460,7 @@ class Specification:
 
             if "n" == a:
                 conditions.append(f'{a} = {a}()')
+                self.columns_by_type[PANDAS_INT64].append(f'n')
                 necessary_conditions[-1].append(conditions[-1])
                 continue
 
@@ -464,8 +478,30 @@ class Specification:
                 necessary_conditions[-1].append(conditions[-1])
                 new_int_attr.append(f'{a}{ia}')
                 self.all_columns.append(f'{a}{ia}')
+                self.columns_by_type[PANDAS_INT64].append(f'{a}{ia}')
+                self.generated_columns[f'{a}{ia}'] = f'{a}{ia} = {a}({ia})'
 
         return list(filter(lambda x: x != [], necessary_conditions)), new_int_attr, conditions
+
+    def find_inner_join_conditions(self) -> Tuple[List[str], List[Tuple]]:
+        column_pairs = []
+        for cols in self.columns_by_type.values():
+            column_pairs += product(cols, repeat=2)
+
+        on_conditions = list(combinations(column_pairs, 2)) + list(combinations(column_pairs, 1))
+        on_conditions = list(filter(lambda t: any(map(lambda cond: cond[0] != cond[1], t)), on_conditions))
+
+        str_conditions = []
+        happens_before = []
+        for on_condition in on_conditions:
+            str_conditions.append(','.join(map(lambda x: f"'{x[0]}' = '{x[1]}'", on_condition)))
+
+            for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
+                for col in col_pairs:
+                    if col in self.generated_columns.keys():
+                        happens_before.append((str_conditions[-1], self.generated_columns[col]))
+
+        return str_conditions, happens_before
 
     def find_conditions(self):
         necessary_conditions = []
@@ -482,8 +518,10 @@ class Specification:
                                                                                       int_attr,
                                                                                       new_int_attr,
                                                                                       necessary_conditions, sum_cond)
+        on_conditions, happens_before_1 = self.find_inner_join_conditions()
+
         self.attributes = int_attr + new_int_attr
-        return filt_cond, sum_cond, necessary_conditions, happens_before
+        return filt_cond, sum_cond, on_conditions, necessary_conditions, happens_before + happens_before_1
 
     def divide_int_str_constants(self):
         str_const, int_const = [], []

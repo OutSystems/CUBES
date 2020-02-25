@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i017.csv
+output: tests-examples/scythe/top_rated_posts/tables/o017.csv
+aggrs:
+  - min
+  - like
+attrs:
+  - ID
+  - SKU
+const:
+  - "FOO-%"
+comment: |
+  SELECT t.*
+  FROM TestData t
+  INNER JOIN (SELECT
+                  MIN(ID) as MinID
+                  FROM TestData
+                  WHERE SKU LIKE 'FOO-%'
+             ) dt ON t.ID=dt.MinID

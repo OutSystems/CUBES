@@ -13,3 +13,7 @@ comment: |
               FROM messages
               GROUP BY name) AS b
   ON a.id = b.maxid
+
+  df1 <- input1 %>% group_by(Name) %>% summarise(maxId = max(Id))
+  df2 <- inner_join(input1, df1, by=c('Id' = 'maxId','Name' = 'Name'))
+  out <- df2 %>% ungroup() %>% select(Id,Name,Other_Columns)
