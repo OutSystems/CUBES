@@ -16,9 +16,7 @@ class DSLEnum(DSLElement):
         self._wrapped = map(lambda x: f'"{x}"', values)
 
     def __repr__(self) -> str:
-        return f'enum {self._name} {{\n' \
-               f'\t{", ".join(self._wrapped)}\n' \
-               f'}}\n'
+        return 'enum {} {{\n\t{}\n}}\n'.format(self._name, ",\n\t".join(self._wrapped))
 
 
 class DSLValue(DSLElement):

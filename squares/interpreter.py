@@ -16,6 +16,10 @@ def get_type(df, index):
     return ret_val[0]
 
 
+def cols_to_c_vector(col_list):
+    return 'c(' + ','.join(map(lambda x: f'"{x}"', col_list.split(','))) + ')'
+
+
 class SquaresInterpreter(PostOrderInterpreter):
 
     def __init__(self, problem, store_program):
@@ -152,6 +156,19 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_inner_join(self, node, args):
         name = self.fresh_table()
 
+        _script = f'{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}))'
+
+        if self.store_program:
+            self.final_program += _script + "\n"
+        try:
+            robjects.r(_script)
+            return name
+        except Exception as e:
+            raise GeneralError(node)
+
+    def eval_natural_join(self, node, args):
+        name = self.fresh_table()
+
         _script = f'{name} <- inner_join({args[0]}, {args[1]})'
 
         if self.store_program:
@@ -162,7 +179,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         except Exception as e:
             raise GeneralError(node)
 
-    def eval_inner_join3(self, node, args):
+    def eval_natural_join3(self, node, args):
         name = self.fresh_table()
 
         _script = f'{name} <- inner_join(inner_join({args[0]}, {args[1]}), {args[2]})'
@@ -175,7 +192,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         except Exception as e:
             raise GeneralError(node)
 
-    def eval_inner_join4(self, node, args):
+    def eval_natural_join4(self, node, args):
         name = self.fresh_table()
 
         _script = f'{name} <- inner_join(inner_join(inner_join({args[0]}, {args[1]}), {args[2]}), {args[3]})'

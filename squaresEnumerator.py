@@ -70,7 +70,7 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
     problem = parse_specification(args.input)
 
     if logger.isEnabledFor(logging.DEBUG):
-        with open(f'dsl{id}.log', 'w') as f:
+        with open(f'dsl{id}.tyrell', 'w') as f:
             f.write(repr(problem.dsl))
 
     spec = S.parse(repr(problem.dsl))

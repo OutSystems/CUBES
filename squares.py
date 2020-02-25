@@ -49,15 +49,11 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=[], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["max"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["min"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["mean"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["n"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["n", "max(n)"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, aggregation_functions=["n", "max"], force_summarise=True, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
-    ]
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
+        Config(seed=seed+1, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed+1, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
+        ]
 
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')

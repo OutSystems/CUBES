@@ -12,6 +12,7 @@ class Config:
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum', 'max(n)', 'like'])
+    ignore_aggrs: bool = True
     force_constants: bool = True
     force_summarise: bool = False
     force_occurs_maxn: bool = False

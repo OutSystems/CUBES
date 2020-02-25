@@ -1,7 +1,7 @@
 import csv
 import random
-from itertools import permutations
-from typing import List
+from itertools import permutations, combinations
+from typing import List, Tuple
 
 import pandas
 import yaml
@@ -76,13 +76,27 @@ def symm_op(op: str):
         return '=='
 
 
+def find_pairs(cols: List[str]) -> List[Tuple[List, List]]:
+    cols = list(map(lambda x: list(map(lambda y: y.strip(), x.split(','))), cols))  # TODO assumes col doesn't have withspace
+    for c1, c2 in combinations(cols, 2):
+        if len(c1) == len(c2) and c1 != c2:
+            yield c1, c2
+
+
+def generate_on_conditions(conditions: List[Tuple[List, List]]) -> List[str]:
+    return list(map(lambda t: ','.join(map(lambda t_: f"'{t_[0]}' = '{t_[1]}'", zip(t[0], t[1]))), conditions))
+
+
 class Specification:
 
     def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc):
         self.inputs = inputs
         self.output = output
         self.consts = consts
-        self.aggrs = util.get_config().aggregation_functions
+        if util.get_config().ignore_aggrs:
+            self.aggrs = util.get_config().aggregation_functions
+        else:
+            self.aggrs = aggrs
         self.attrs = attrs
         self.has_int_consts = find_consts(consts)
         self.bools = bools
@@ -146,29 +160,29 @@ class Specification:
 
         filters_p_one = [DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
                          DSLPredicate('distinct_inputs', ['filter'])]
-        if 'inner_join4' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join4', 'filter', '100']))
-        if 'inner_join3' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join3', 'filter', '100']))
+        if 'natural_join4' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'filter', '100']))
+        if 'natural_join3' not in util.get_config().disabled:
+            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join3', 'filter', '100']))
         filters_p = filters_p_one
         filters_p_two = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
                          DSLPredicate('is_not_parent', ['filters', 'filters', '100']),
                          DSLPredicate('distinct_inputs', ['filters'])]
 
-        if 'inner_join4' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join4', 'filter', '100']))
-        if 'inner_join3' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join3', 'filter', '100']))
-        if 'inner_join' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join', 'filter', '100']))
+        if 'natural_join4' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join4', 'filter', '100']))
+        if 'natural_join3' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join3', 'filter', '100']))
+        if 'natural_join' not in util.get_config().disabled:
+            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join', 'filter', '100']))
 
         summarise_f = [DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
             'row(r) <= row(a)',
             'col(r) <= 3'
         ])]
         summarise_p = [DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100'])]
-        if 'inner_join4' not in util.get_config().disabled:
-            summarise_p.insert(0, DSLPredicate('is_not_parent', ['inner_join4', 'summariseGrouped', '100']))
+        if 'natural_join4' not in util.get_config().disabled:
+            summarise_p.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'summariseGrouped', '100']))
 
         operators = None
         concat = None
@@ -230,6 +244,7 @@ class Specification:
 
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'TableSelect')
         dsl.add_enum(DSLEnum('Cols', cols))
+        dsl.add_enum(DSLEnum('OnCondition', generate_on_conditions(find_pairs(get_permutations(self.all_columns, 2)))))
         dsl.add_enum(DSLEnum('Col', one_column))
         dsl.add_enum(DSLEnum('SelectCols', [','.join(output_attrs)]))
         dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
@@ -250,30 +265,34 @@ class Specification:
                                                # ('columns', 'bv')
                                                ]))
 
-        if 'inner_join' not in util.get_config().disabled:
+        if 'natural_join' not in util.get_config().disabled:
             dsl.add_function(
-                DSLFunction('inner_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)",
-                                                                              # "columns(r) == columns(a) | columns(b)",
-                                                                              # f"columns(a) & columns(b) != *0"
-                                                                              ]))
+                DSLFunction('natural_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)",
+                                                                                # "columns(r) == columns(a) | columns(b)",
+                                                                                # f"columns(a) & columns(b) != *0"
+                                                                                ]))
 
-        if 'inner_join3' not in util.get_config().disabled:
+        if 'natural_join3' not in util.get_config().disabled:
             dsl.add_function(
-                DSLFunction('inner_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
+                DSLFunction('natural_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
                             ["col(r) < col(a) + col(b) + col(c)",
                              # "columns(r) == columns(a) | columns(b) | columns(c)",
                              # f"columns(a) & columns(b) != *0",
                              # f"(columns(a) | columns(b)) & columns(c) != *0"
                              ]))
 
-        if 'inner_join4' not in util.get_config().disabled:
-            dsl.add_function(DSLFunction('inner_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
+        if 'natural_join4' not in util.get_config().disabled:
+            dsl.add_function(DSLFunction('natural_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
                                          ["col(r) < col(a) + col(b) + col(c) + col(d)",
                                           # "columns(r) == columns(a) | columns(b) | columns(c) | columns(d)",
                                           # f"columns(a) & columns(b) != *0",
                                           # f"(columns(a) | columns(b)) & columns(c) != *0",
                                           # f"(columns(a) | columns(b) | columns(c)) & columns(d) != *0"
                                           ]))
+
+        if 'inner_join' not in util.get_config().disabled:
+            dsl.add_function(DSLFunction('inner_join', 'Table r', ['Table a', 'Table b', 'OnCondition c'],
+                                         ["col(r) <= col(a) + col(b)"]))
 
         if 'anti_join' not in util.get_config().disabled:
             dsl.add_function(
@@ -321,22 +340,22 @@ class Specification:
         for p in necessary_conditions:
             dsl.add_predicate(p)
 
-        add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join3')
-        add_is_not_parent_if_enabled(dsl, 'inner_join', 'inner_join4')
-        # add_is_not_parent_if_enabled(dsl, self._config, 'inner_join', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'inner_join3', 'inner_join')
-        add_is_not_parent_if_enabled(dsl, 'inner_join3', 'inner_join3')
-        add_is_not_parent_if_enabled(dsl, 'inner_join3', 'inner_join4')
-        add_is_not_parent_if_enabled(dsl, 'inner_join3', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'inner_join4', 'inner_join')
-        add_is_not_parent_if_enabled(dsl, 'inner_join4', 'inner_join3')
-        add_is_not_parent_if_enabled(dsl, 'inner_join4', 'inner_join4')
-        # add_is_not_parent_if_enabled(dsl, self._config, 'inner_join4', 'anti_join')
+        add_is_not_parent_if_enabled(dsl, 'natural_join', 'natural_join3')
+        add_is_not_parent_if_enabled(dsl, 'natural_join', 'natural_join4')
+        # add_is_not_parent_if_enabled(dsl, self._config, 'natural_join', 'anti_join')
+        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join')
+        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join3')
+        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join4')
+        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'anti_join')
+        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join')
+        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join3')
+        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join4')
+        # add_is_not_parent_if_enabled(dsl, self._config, 'natural_join4', 'anti_join')
         add_is_not_parent_if_enabled(dsl, 'anti_join', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'anti_join', 'inner_join')
-        add_is_not_parent_if_enabled(dsl, 'anti_join', 'inner_join4')
+        add_is_not_parent_if_enabled(dsl, 'anti_join', 'natural_join')
+        add_is_not_parent_if_enabled(dsl, 'anti_join', 'natural_join4')
 
-        for join in ['inner_join4', 'inner_join3', 'inner_join', 'anti_join']:
+        for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join']:
             if join not in util.get_config().disabled:
                 dsl.add_predicate(DSLPredicate('distinct_inputs', [join]))
 
