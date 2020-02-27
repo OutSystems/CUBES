@@ -4,8 +4,6 @@ from itertools import permutations
 from random import Random
 from typing import List
 
-import dateutil
-
 from .config import Config
 
 counter = 0
@@ -59,20 +57,3 @@ def boolvec2int(bools: List[bool]) -> int:
         if bools[i]:
             result += 2 ** i
     return result
-
-
-def is_date(string):
-    """
-    Return whether the string can be interpreted as a date.
-
-    :param string: str, string to check for date
-    """
-    if not isinstance(string, str):
-        return False
-
-    try:
-        dateutil.parser.parse(string)
-        return True
-
-    except ValueError:
-        return False

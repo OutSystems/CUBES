@@ -5,6 +5,7 @@ aggrs:
   - max
 attrs:
   - DateCreated
+dateorder: mdy
 comment: |
   SELECT * FROM DocumentStatusLogs D1 JOIN
       (
@@ -19,3 +20,7 @@ comment: |
         D2.DocumentID=D1.DocumentID
       AND
         D2.MaxDate=D1.DateCreated
+
+  df1 <- input1 %>% group_by(DocumentID) %>% summarise(maxDateCreated = max(DateCreated))
+  df2 <- inner_join(input1, df1, by=c('DocumentID' = 'DocumentID','DateCreated' = 'maxDateCreated'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(DocumentID,Status,DateCreated)

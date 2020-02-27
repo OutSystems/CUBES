@@ -40,7 +40,6 @@ class SquaresInterpreter(PostOrderInterpreter):
 
     def fresh_table(self):
         name = get_fresh_name()
-        self.problem._tables[name] = current_counter()
         return name
 
     def eval_ColInt(self, v):
@@ -156,7 +155,7 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_inner_join(self, node, args):
         name = self.fresh_table()
 
-        _script = f'{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}))'
+        _script = f'{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}), suffix = c("", ".other"))'
 
         if self.store_program:
             self.final_program += _script + "\n"

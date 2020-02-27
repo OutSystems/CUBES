@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i034.csv
+output: tests-examples/scythe/top_rated_posts/tables/o034.csv
+aggrs:
+  - max
+attrs:
+  - Time
+comment: |
+  SELECT t.Train, t.Dest, r.MaxTime
+  FROM (
+        SELECT Train, MAX(Time) as MaxTime
+        FROM TrainTable
+        GROUP BY Train
+  ) r
+  INNER JOIN TrainTable t
+  ON t.Train = r.Train AND t.Time = r.MaxTime

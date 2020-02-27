@@ -1,19 +1,17 @@
 import csv
 from itertools import combinations, product
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
-import numpy
 import pandas
 import yaml
 from ordered_set import OrderedSet
 from rpy2 import robjects
 
-from squares import util
+import squares.types
+from squares import util, types
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
 from squares.util import next_counter, get_permutations
 from tyrell.logger import get_logger
-
-PANDAS_INT64 = pandas.api.types.pandas_dtype(numpy.int64)
 
 logger = get_logger('squares')
 
@@ -34,6 +32,19 @@ def exec_and_return(r_script):
     return r_script
 
 
+def read_table(path):
+    df = pandas.read_csv(path)
+    df = df.convert_dtypes(convert_integer=False)
+
+    for col in df:  # try to coerce columns to datetime
+        if all(squares.types.is_date(elem) for elem in df[col]):
+            df[col] = pandas.to_datetime(df[col])
+
+    logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
+
+    return df
+
+
 def parse_specification(filename):
     f = open(filename)
 
@@ -51,11 +62,13 @@ def parse_specification(filename):
         if field not in spec:
             spec[field] = []
 
+    if 'dateorder' not in spec:
+        spec['dateorder'] = 'dmy'
+
     if 'loc' not in spec:
         spec['loc'] = 1
 
-    return Specification(spec["inputs"], spec["output"], spec["const"], spec["aggrs"], spec["attrs"], spec["bools"],
-                         spec["loc"])
+    return Specification(spec)
 
 
 def add_is_not_parent_if_enabled(dsl, a, b):
@@ -78,50 +91,41 @@ def symm_op(op: str):
 
 class Specification:
 
-    def __init__(self, inputs, output, consts, aggrs, attrs, bools, loc):
-        self.inputs = inputs
-        self.output = output
-        self.consts = consts
+    def __init__(self, spec):
+        self.inputs = spec['inputs']
+        self.output = spec['output']
+        self.consts = spec['const']
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
-            self.aggrs = aggrs
-        self.attrs = attrs
-        self.has_int_consts = find_consts(consts)
-        self.bools = bools
-        self.loc = loc
+            self.aggrs = spec['aggrs']
+        self.attrs = spec['attrs']
+        self.has_int_consts = find_consts(self.consts)
+        self.bools = spec['bools']
+        self.dateorder = spec['dateorder']
+        self.loc = spec['loc']
 
         self.tables = []
+        self.data_frames = {}
 
-        self.data_frames = []
-
-        self._tables = {}
         self.columns = set()
         self.generated_columns = {}
-        self.columns_by_type = {}
+        self.columns_by_type = types.empty_type_map()
+        self.types_by_const = {}
+        self.consts_by_type = types.empty_type_map()
 
         logger.debug("Reading input files...")
-        for input in inputs:
+        for input in self.inputs:
             id = next_counter()
-
-            self.tables.append(f'input{id}')
-            self._tables[self.tables[-1]] = id
-
-            df = pandas.read_csv(input)
-            df = df.convert_dtypes()
-
-            for col in df:  # try to coerce columns to datetime
-                if all(util.is_date(elem) for elem in df[col]):
-                    df[col] = pandas.to_datetime(df[col])
-
-            logger.info('Inferred data types for table %s: %s', input, str(list(map(str, df.dtypes.values))))
+            table_name = f'input{id}'
+            self.tables.append(table_name)
+            df = read_table(input)
 
             for column, type in df.dtypes.items():
-                if type not in self.columns_by_type:
-                    self.columns_by_type[type] = OrderedSet()
+                type = types.get_type(type)
                 self.columns_by_type[type].add(column)
 
-            self.data_frames.append(df)
+            self.data_frames[table_name] = df
             self.columns |= set(df.columns)
 
         self.columns = list(self.columns)
@@ -131,7 +135,15 @@ class Specification:
 
         self.all_columns = self.columns.copy()
 
-        self._tables['expected_output'] = next_counter()
+        self.data_frames['expected_output'] = read_table(self.output)
+
+        for const in self.consts:
+            self.types_by_const[const] = []
+
+            for type in types.Type:
+                if types.is_type(const, type):
+                    self.types_by_const[const].append(type)
+                    self.consts_by_type[type].append(const)
 
         self.generate_r_init()
 
@@ -142,10 +154,22 @@ class Specification:
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
 
         for table, file in zip(self.tables, self.inputs):
-            self.r_init += exec_and_return(f'{table} <- read.csv("{file}")\n')
+            df = self.data_frames[table]
+            self.r_init += exec_and_return(
+                f'{table} <- read_csv("{file}", col_types = cols({types.get_r_types(df.dtypes)}))\n')
+
+            for col, dtype in zip(df.columns, df.dtypes):  # parse dates
+                if types.get_type(dtype) == types.DATETIME:
+                    self.r_init += exec_and_return(f'{table}${col} <- {self.dateorder}({table}${col})\n')
+
             self.r_init += f'{table} <- copy_to(con, {table})\n'
 
-        self.r_init += exec_and_return(f'expected_output <- read.table("{self.output}", sep =",", header=T)\n')
+        output_df = self.data_frames['expected_output']
+        self.r_init += exec_and_return(
+            f'expected_output <- read_csv("{self.output}", col_types = cols({types.get_r_types(output_df.dtypes)}))\n')
+        for col, dtype in zip(output_df.columns, output_df.dtypes):  # parse dates
+            if types.get_type(dtype) == types.DATETIME:
+                self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
 
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
@@ -374,58 +398,58 @@ class Specification:
 
         self.dsl = dsl
 
-    def find_filter_conditions(self, str_const, int_const, str_attr, int_attr, new_int_attr,
-                               necessary_conditions: List[List[str]],
-                               summarise_conditions):
+    def find_filter_conditions(self, necessary_conditions: List[List[str]]):
         conditions = []
         int_ops = ["==", ">", "<", ">=", "<="]
         str_ops = ["==", "!="]
         happens_before = []
 
-        for constant in str_const + int_const:
+        frozen_columns = self.filter_columns(self.columns_by_type)
+
+        for constant in self.consts_by_type[types.STRING]:
             necessary_conditions.append([])
+            for column in frozen_columns[types.STRING]:
 
-            for str_attribute in str_attr:
-
-                if 'like' in util.get_config().aggregation_functions:
-                    conditions.append(f'str_detect({str_attribute}|{constant})')
+                if util.get_config().like_enabled:
+                    conditions.append(f'str_detect({column}|{constant})')
                     necessary_conditions[-1].append(conditions[-1])
 
                 att = False
-                for data_frame in self.data_frames:  # check if constant appears in column 'str_attribute' in some data_frame
+                for input in self.tables:
+                    data_frame = self.data_frames[input]
                     if att:
                         break
 
-                    if str_attribute in data_frame.columns:
-                        for row in data_frame.itertuples():
-                            if getattr(row, str_attribute) == constant:
-                                att = True
-                                break
+                    if column in data_frame.columns:
+                        if constant in data_frame[column].values:
+                            att = True
+                            break
                     else:
                         continue
 
                 if att:
                     for op in str_ops:
-                        conditions.append(f'{str_attribute} {op} {constant}')
+                        conditions.append(f'{column} {op} {constant}')
                         necessary_conditions[-1].append(conditions[-1])
 
-        for int_constant in int_const:
+        for constant in self.consts_by_type[types.INT] | self.consts_by_type[types.FLOAT]:
             necessary_conditions.append([])
 
-            for int_attribute in int_attr + new_int_attr:
-                if int_constant == int_attribute:
+            for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+                if constant == column:
+                    raise Exception('Oi?')
                     continue
 
                 for op in int_ops:
-                    conditions.append(f'{int_attribute} {op} {int_constant}')
+                    conditions.append(f'{column} {op} {constant}')
                     necessary_conditions[-1].append(conditions[-1])
-                    if int_attribute == "n":
-                        happens_before.append((conditions[-1], 'n = n()'))
+                    if column in self.generated_columns.keys():
+                        happens_before.append((conditions[-1], self.generated_columns[column]))
 
         bc = set()
 
-        for attr1 in new_int_attr:
-            for attr2 in int_attr + new_int_attr:
+        for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+            for attr2 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 if attr1 == attr2:
                     continue
                 for op in int_ops:
@@ -434,13 +458,15 @@ class Specification:
 
                     bc.add((attr2, op, attr1))
                     conditions.append('{ia} {io} {ic}'.format(ia=attr2, io=op, ic=attr1))
-                    for constant in summarise_conditions:
-                        if attr1 in constant:
-                            happens_before.append((conditions[-1], constant))
+                    if attr1 in self.generated_columns.keys():
+                        happens_before.append((conditions[-1], self.generated_columns[attr1]))
+                    if attr2 in self.generated_columns.keys():
+                        happens_before.append((conditions[-1], self.generated_columns[attr2]))
 
         necessary_conditions = list(filter(lambda a: a != [], necessary_conditions))
         # if "max" in aggrs and "n" in aggrs or "max(n)" in aggrs:
         if 'max(n)' in self.aggrs:
+            raise NotImplemented
             conditions.append('n == max(n)')
             happens_before.append((conditions[-1], 'n = n()'))
             if util.get_config().force_occurs_maxn:
@@ -448,40 +474,44 @@ class Specification:
 
         return conditions, necessary_conditions, happens_before
 
-    def find_summarise_conditions(self, int_attr, str_attr, necessary_conditions: List[List[str]]):
+    def find_summarise_conditions(self):
         conditions = []
-        new_int_attr = []
+        necessary_conditions = []
 
-        for a in self.aggrs:
-            if a == "like":
-                continue
+        frozen_columns = self.filter_columns(self.columns_by_type)
 
+        for aggr in self.aggrs:
             necessary_conditions.append([])
 
-            if "n" == a:
-                conditions.append(f'{a} = {a}()')
-                self.columns_by_type[PANDAS_INT64].append(f'n')
+            if "n" == aggr:
+                conditions.append('n = n()')
+                self.columns_by_type[types.INT].append('n')
+                self.generated_columns['n'] = 'n = n()'
                 necessary_conditions[-1].append(conditions[-1])
-                continue
 
-            if 'concat' in a:
-                for at in int_attr + str_attr:
-                    conditions.append(f'paste|{at}')
+            if aggr in ['concat']:
+                for column in frozen_columns[types.STRING]:
+                    conditions.append(f'paste|{column}')
                     necessary_conditions[-1].append(conditions[-1])
-                continue
 
-            if "max(n)" == a:  # special case: where max(n) == something without grouping
-                continue
+            if aggr in ['min', 'max', 'mean', 'sum']:
+                for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+                    conditions.append(f'{aggr}{column} = {aggr}({column})')
+                    necessary_conditions[-1].append(conditions[-1])
+                    self.all_columns.append(f'{aggr}{column}')
+                    self.columns_by_type[types.INT].append(f'{aggr}{column}')
+                    self.columns_by_type[types.FLOAT].append(f'{aggr}{column}')  # todo
+                    self.generated_columns[f'{aggr}{column}'] = f'{aggr}{column} = {aggr}({column})'
 
-            for ia in int_attr:
-                conditions.append(f'{a}{ia} = {a}({ia})')
-                necessary_conditions[-1].append(conditions[-1])
-                new_int_attr.append(f'{a}{ia}')
-                self.all_columns.append(f'{a}{ia}')
-                self.columns_by_type[PANDAS_INT64].append(f'{a}{ia}')
-                self.generated_columns[f'{a}{ia}'] = f'{a}{ia} = {a}({ia})'
+            if aggr in ['min', 'max']:
+                for column in frozen_columns[types.DATETIME]:
+                    conditions.append(f'{aggr}{column} = {aggr}({column})')
+                    necessary_conditions[-1].append(conditions[-1])
+                    self.all_columns.append(f'{aggr}{column}')
+                    self.columns_by_type[types.DATETIME].append(f'{aggr}{column}')
+                    self.generated_columns[f'{aggr}{column}'] = f'{aggr}{column} = {aggr}({column})'
 
-        return list(filter(lambda x: x != [], necessary_conditions)), new_int_attr, conditions
+        return list(filter(lambda x: x != [], necessary_conditions)), conditions
 
     def find_inner_join_conditions(self) -> Tuple[List[str], List[Tuple]]:
         column_pairs = []
@@ -504,56 +534,19 @@ class Specification:
         return str_conditions, happens_before
 
     def find_conditions(self):
-        necessary_conditions = []
-        str_const, int_const = self.divide_int_str_constants()
-        str_attr, int_attr = self.divide_int_str_attributes()
-
-        necessary_conditions, new_int_attr, sum_cond = self.find_summarise_conditions(int_attr, str_attr,
-                                                                                      necessary_conditions)
+        necessary_conditions, sum_cond = self.find_summarise_conditions()
 
         if not util.get_config().force_summarise:
             necessary_conditions = []
 
-        filt_cond, necessary_conditions, happens_before = self.find_filter_conditions(str_const, int_const, str_attr,
-                                                                                      int_attr,
-                                                                                      new_int_attr,
-                                                                                      necessary_conditions, sum_cond)
-        on_conditions, happens_before_1 = self.find_inner_join_conditions()
+        filt_cond, necessary_conditions, happens_before = self.find_filter_conditions(necessary_conditions)
 
-        self.attributes = int_attr + new_int_attr
+        if 'inner_join' not in util.get_config().disabled:
+            on_conditions, happens_before_1 = self.find_inner_join_conditions()
+        else:
+            on_conditions, happens_before_1 = [], []
+
         return filt_cond, sum_cond, on_conditions, necessary_conditions, happens_before + happens_before_1
-
-    def divide_int_str_constants(self):
-        str_const, int_const = [], []
-        for c in self.consts:
-            try:
-                int(c)
-                int_const.append(c)
-            except:
-                str_const.append(c)
-        return str_const, int_const
-
-    def divide_int_str_attributes(self):
-        str_attr, int_attr = [], []
-        for a in self.attrs:
-            if a == "n":
-                if a not in int_attr:
-                    int_attr.append(a)
-            for input in self.inputs:
-                with open(input) as f:
-                    reader = csv.reader(f)
-                    columns = next(reader)
-                    if a in columns:
-                        ind = columns.index(a)
-                        line = next(reader)
-                        try:  # if int
-                            int(line[ind])
-                            if a not in int_attr:
-                                int_attr.append(a)
-                        except:
-                            if a not in str_attr:
-                                str_attr.append(a)
-        return str_attr, int_attr
 
     @staticmethod
     def find_necessary_conditions(conds):
@@ -575,3 +568,14 @@ class Specification:
                 break
             predicates.append(DSLPredicate('happens_before', ['"' + str(c[0]) + '"', '"' + str(c[1]) + '"']))
         return predicates
+
+    def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
+        d = {}
+
+        for type in columns_map.keys():
+            d[type] = OrderedSet()
+            for column in columns_map[type]:
+                if column in self.attrs or util.get_config().ignore_attrs:
+                    d[type].add(column)
+
+        return d

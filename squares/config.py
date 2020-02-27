@@ -13,9 +13,11 @@ class Config:
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum', 'max(n)', 'like'])
     ignore_aggrs: bool = True
+    ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = False
     force_occurs_maxn: bool = False
+    like_enabled: bool = True
 
     alt_empty_pos: bool = False
     shuffle_cols: bool = False

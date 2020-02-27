@@ -5,6 +5,7 @@ aggrs:
   - max
 attrs:
   - SERVICEMONTH
+dateorder: mdy
 comment: |
   SELECT
     CHARGEID,
@@ -12,3 +13,6 @@ comment: |
     MAX(SERVICEMONTH) AS "MostRecentServiceMonth"
   FROM INVOICE
   GROUP BY CHARGEID, CHARGETYPE
+
+  df1 <- input1 %>% group_by(CHARGETYPE, CHARGEID) %>% summarise(maxSERVICEMONTH = max(SERVICEMONTH))
+  out <- df1 %>% ungroup() %>% select(CHARGEID,CHARGETYPE,maxSERVICEMONTH) %>% distinct()

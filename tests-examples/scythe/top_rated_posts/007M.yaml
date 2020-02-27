@@ -5,6 +5,7 @@ aggrs:
   - max
 attrs:
   - datetime
+dateorder: mdy
 comment: |
   SELECT tt.*
   FROM topten tt
@@ -14,3 +15,7 @@ comment: |
       GROUP BY home) groupedtt
   ON tt.home = groupedtt.home
   AND tt.datetime = groupedtt.MaxDateTime
+
+  df1 <- input1 %>% group_by(home, player) %>% summarise(maxdatetime = max(datetime))
+  df2 <- inner_join(input1, df1, by=c('home' = 'home','datetime' = 'maxdatetime'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(id,home,datetime,player,resource) %>% distinct()

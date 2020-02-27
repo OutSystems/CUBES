@@ -51,7 +51,7 @@ if __name__ == '__main__':
     configs = [
         # Config(seed=seed, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
         # Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'anti_join', 'semi_joib', 'left_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'anti_join', 'semi_join', 'left_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
         # Config(seed=seed+2, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
         # Config(seed=seed+3, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
         # Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
