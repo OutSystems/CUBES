@@ -355,7 +355,7 @@ class LinesEnumerator(Enumerator):
             # print(Implies(r.var==prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
 
     def _resolve_constant_occurs_predicate(self, pred):
-        conditions = pred.args[0].split(",")
+        conditions = pred.args
         lst = []
         for c in conditions:
             for p in self.spec.productions():

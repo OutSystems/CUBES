@@ -107,3 +107,7 @@
 ## Week 4
 ###Reasons why instances fail
 - Extracting parts of the date
+
+###Different solutions
+- 55-tests/2
+- 55-tests/4

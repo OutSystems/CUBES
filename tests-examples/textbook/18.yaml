@@ -1,20 +1,20 @@
 inputs:
-- tests-examples/textbook/tables/18-1.txt
-- tests-examples/textbook/tables/18-3.txt
+  - tests-examples/textbook/tables/18-1.txt
+  - tests-examples/textbook/tables/18-3.txt
 output: tests-examples/textbook/tables/18.out
-const: []
 aggrs:
-- max
+  - max
 attrs:
-- cost
+  - cost
 bools:
-- ==
-loc: '4'
+  - ==
+loc: 4
 comment: |
-  # 5.2.6 optimal solution
+  5.2.6 optimal solution
 
-  df1 = inner_join(catalog,suppliers) %>% group_by(P_id) %>% summarise (max = max(cost))
-  out <- inner_join(catalog,suppliers) %>% inner_join(df1) %>%
-         filter(max == cost) %>% select(P_id, S_name)
+  df1 <- input1 %>% group_by(P_id) %>% summarise(maxcost = max(cost)) %>% ungroup()
+  df2 <- inner_join(inner_join(df1, input1), input2)
+  df3 <- df2 %>% filter(maxcost == cost)
+  out <- df3 %>% select(P_id, S_name) %>% distinct()
 
   NOT USED tests-examples/textbook/tables/18-2.txt

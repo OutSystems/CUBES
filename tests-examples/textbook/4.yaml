@@ -1,17 +1,19 @@
 inputs:
-- tests-examples/textbook/tables/4-1.txt
-- tests-examples/textbook/tables/4-2.txt
-- tests-examples/textbook/tables/4-3.txt
+  - tests-examples/textbook/tables/4-1.txt
+  - tests-examples/textbook/tables/4-2.txt
+  - tests-examples/textbook/tables/4-3.txt
 output: tests-examples/textbook/tables/4.out
 const:
-- '2'
+  - 2
 aggrs:
-- n
-attrs: []
+  - n
 bools:
-- ==
-loc: '3'
-comment: "# 5.1.4 optimal solution\n\ninner_join(class,enroll) %>% inner_join(student)\
-  \ %>% \ngroup_by(S_name,meets_at) %>% summarize(n = n()) %>% \nfilter(n == 2) %>%\
-  \ select(S_name) \n\nfilters(summariseGrouped(inner_join3(@param0, @param1, @param2),\
-  \ n = n(), S_name, meets_at), n > 2, n == 2, |)"
+  - ==
+loc: 3
+comment: |
+  5.1.4 optimal solution
+
+  df1 <- inner_join(inner_join(input1, input2), input3)
+  df2 <- df1 %>% group_by(meets_at, S_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == 2)
+  out <- df3 %>% select(S_name)

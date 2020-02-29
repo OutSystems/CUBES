@@ -1,19 +1,23 @@
 inputs:
-- tests-examples/55-tests/tables/15-1.txt
-- tests-examples/55-tests/tables/15-2.txt
-- tests-examples/55-tests/tables/15-3.txt
+  - tests-examples/55-tests/tables/15-1.txt
+  - tests-examples/55-tests/tables/15-2.txt
+  - tests-examples/55-tests/tables/15-3.txt
 output: tests-examples/55-tests/tables/15.out
 const:
-- red
+  - red
 aggrs:
-- n
-- max(n)
+  - n
+filters:
+  - max(n)
 attrs:
-- n
-- color
+  - color
 bools:
-- ==
+  - ==
 loc: '3'
-comment: "# 5.2.3 optimal solution\n\ninner_join(parts,catalog) %>% inner_join(suppliers)\
-  \ %>%\ngroup_by(sname,color) %>% summarise(n=n()) %>% \nungroup() %>% filter(color\
-  \ == \"red\" & n == max(n)) %>% select(sname)"
+comment: |
+  5.2.3 optimal solution
+
+  df1 <- inner_join(inner_join(input3, input1), input2)
+  df2 <- df1 %>% group_by(color, S_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == max(n) & color == 'red')
+  out <- df3 %>% select(S_name)

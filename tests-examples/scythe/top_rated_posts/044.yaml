@@ -1,0 +1,15 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i044.csv
+output: tests-examples/scythe/top_rated_posts/tables/o044.csv
+aggrs:
+  - sum
+attrs:
+  - count
+comment: |
+  SELECT t.id,
+         t.count,
+         (SELECT SUM(x.count)
+            FROM TABLE x
+           WHERE x.id <= t.id) AS cumulative_sum
+  FROM TABLE t
+  ORDER BY t.id

@@ -8,7 +8,7 @@ attrs:
   - ID
   - SKU
 const:
-  - "FOO-%"
+  - "FOO-"
 comment: |
   SELECT t.*
   FROM TestData t
@@ -17,3 +17,8 @@ comment: |
                   FROM TestData
                   WHERE SKU LIKE 'FOO-%'
              ) dt ON t.ID=dt.MinID
+
+  df1 <- input1 %>% filter(str_detect(SKU, 'FOO-'))
+  df2 <- input1 %>% group_by(PRODUCT) %>% summarise(minID = min(ID)) %>% ungroup()
+  df3 <- inner_join(df1, df2, by=c('ID' = 'minID','minID' = 'minID'), suffix = c("", ".other"))
+  out <- df3 %>% select(ID, SKU, PRODUCT) %>% distinct()

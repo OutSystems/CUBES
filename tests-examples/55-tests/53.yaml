@@ -1,17 +1,18 @@
 inputs:
-- tests-examples/55-tests/tables/17-1.txt
-- tests-examples/55-tests/tables/17-3.txt
+  - tests-examples/55-tests/tables/17-1.txt
+  - tests-examples/55-tests/tables/17-3.txt
 output: tests-examples/55-tests/tables/53.out
-const: []
 aggrs:
-- min
+  - min
 attrs:
-- cost
+  - cost
 bools:
-- ==
-loc: '4'
-comment: "# 5.2.5 optimal solution\n\ncatalog <- read.table(\"tests-examples/55-tests/tables/17-1.txt\"\
-  , sep =\",\", header=T)\ncatalog\nsuppliers <- read.table(\"tests-examples/55-tests/tables/17-3.txt\"\
-  , sep =\",\", header=T)\nsuppliers\n\n\ndf1=inner_join(catalog,suppliers) %>%\n\t\
-  group_by(P_id) %>% summarise(mincost = min(cost))\nout <- inner_join(catalog,suppliers)\
-  \ %>% inner_join(df1) %>% \nfilter(cost == mincost) %>% select(P_id,S_name)"
+  - ==
+loc: 4
+comment: |
+  5.2.5 optimal solution
+
+  df1 <- input1 %>% group_by(P_id) %>% summarise(mincost = min(cost)) %>% ungroup()
+  df2 <- inner_join(inner_join(df1, input1), input2)
+  df3 <- df2 %>% filter(mincost == cost)
+  out <- df3 %>% select(P_id, S_name) %>% distinct()

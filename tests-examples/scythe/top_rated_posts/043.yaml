@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i043.csv
+output: tests-examples/scythe/top_rated_posts/tables/o043.csv
+aggrs:
+  - n
+const:
+  - 1
+comment: |
+  SELECT EmailAddress, CustomerName
+  FROM Customers
+  WHERE EmailAddress IN
+  (SELECT EmailAddress
+   FROM Customers
+   GROUP BY EmailAddress
+   HAVING COUNT(*) > 1)
+
+
+  df1 <- input1 %>% group_by(EmailAddress) %>% summarise(n = n())
+  df2 <- df1 %>% ungroup() %>% filter(n < 1 | n > 1)
+  df3 <- inner_join(input1, df2)
+  out <- df3 %>% ungroup() %>% select(CustomerName,EmailAddress) %>% distinct()

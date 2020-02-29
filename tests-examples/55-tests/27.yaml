@@ -1,15 +1,18 @@
 inputs:
-- tests-examples/55-tests/tables/17-1.txt
-- tests-examples/55-tests/tables/17-2.txt
+  - tests-examples/55-tests/tables/17-1.txt
+  - tests-examples/55-tests/tables/17-2.txt
 output: tests-examples/55-tests/tables/27.out
-const: []
 aggrs:
-- mean
+  - mean
 attrs:
-- cost
+  - cost
 bools:
-- <=
-loc: '4'
-comment: "# 5.2.5 optimal solution modified\n\ndf1 <- inner_join(catalog,parts) %>%\n\
-  \    group_by(P_id) %>% summarise(mean = mean(cost))\nout <- inner_join(catalog,parts)\
-  \ %>% inner_join(df1) %>% \n    filter(cost <= mean) %>% select(P_id,S_name)"
+  - <=
+loc: 4
+comment: |
+  5.2.5 optimal solution modified
+
+  df1 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df2 <- inner_join(inner_join(input1, input2), df1)
+  df3 <- df2 %>% filter(meancost <= cost)
+  out <- df3 %>% select(P_id, S_name)

@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i036.csv
+output: tests-examples/scythe/top_rated_posts/tables/o036.csv
+aggrs:
+  - max
+attrs:
+  - date
+dateorder: ymd
+comment: |
+  SELECT t.username, t.date, t.value
+  FROM MyTable t
+  INNER JOIN (
+      SELECT username, MAX(date) AS MaxDate
+      FROM MyTable
+      GROUP BY username
+  ) tm ON t.username = tm.username AND t.date = tm.MaxDate
+
+  df1 <- input1 %>% group_by(username) %>% summarise(maxdate = max(date))
+  df2 <- inner_join(input1, df1, by=c('username' = 'username','date' = 'maxdate'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(username,date,value) %>% distinct()

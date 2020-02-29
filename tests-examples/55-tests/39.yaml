@@ -1,17 +1,27 @@
 inputs:
-- tests-examples/55-tests/tables/aircraft.txt
-- tests-examples/55-tests/tables/employees.txt
-- tests-examples/55-tests/tables/certified.txt
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/employees.txt
+  - tests-examples/55-tests/tables/certified.txt
 output: tests-examples/55-tests/tables/39.out
 const:
-- '80000'
-- '120000'
-aggrs: []
+  - 80000
+  - 120000
 attrs:
-- salary
+  - salary
 bools:
-- <
-- '>='
-loc: '4'
-comment: "# 5.3.1 modified optimal solution sql \n\nselect(anti_join(\nfilter(\ninner_join(inner_join(dat2,\
-  \ dat0), dat1), salary >= 80000), \nfilter(dat1, salary < 120000)), aname) %>% distinct()"
+  - <
+  - '>='
+loc: 4
+comment: |
+  5.3.1 modified optimal solution sql
+
+  select(anti_join(
+  filter(
+  inner_join(inner_join(dat2, dat0), dat1), salary >= 80000),
+  filter(dat1, salary < 120000)), aname) %>% distinct()
+
+  ALTERNATIVE SOLUTION?
+
+  df1 <- input2 %>% filter(salary >= 120000 | salary == 80000)
+  df2 <- inner_join(inner_join(input1, input3), df1)
+  out <- df2 %>% select(aname) %>% distinct()

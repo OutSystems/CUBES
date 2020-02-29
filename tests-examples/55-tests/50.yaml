@@ -1,16 +1,17 @@
 inputs:
-- tests-examples/55-tests/tables/aircraft.txt
-- tests-examples/55-tests/tables/employees.txt
-- tests-examples/55-tests/tables/certified.txt
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/employees.txt
+  - tests-examples/55-tests/tables/certified.txt
 output: tests-examples/55-tests/tables/50.out
 const:
-- '100000'
-- '150000'
-aggrs: []
+  - 100000
+  - 150000
 attrs:
-- salary
-bools: []
-loc: '5'
-comment: "# 5.3.1 modified optimal solution sql \n\nselect(inner_join(\nfilter(\n\
-  inner_join(dat1, inner_join(dat2, dat0)), salary > 100000), \nfilter(\ninner_join(dat1,\
-  \ inner_join(dat2, dat0)), salary <= 150000)),ename) %>% distinct()"
+  - salary
+loc: 5
+comment: |
+  5.3.1 modified optimal solution sql
+
+  df1 <- input2 %>% filter(salary > 100000 & salary <= 150000)
+  df2 <- inner_join(inner_join(inner_join(df1, input3), input1), input2)
+  out <- df2 %>% select(eid, ename) %>% distinct()

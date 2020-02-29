@@ -15,6 +15,7 @@ class Type(Enum):
     DATETIME = 4
     BOOL = 5
 
+
 INT = Type.INT
 STRING = Type.STRING
 FLOAT = Type.FLOAT

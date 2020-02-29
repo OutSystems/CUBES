@@ -6,18 +6,20 @@ from typing import List, Tuple
 class Config:
     seed: int
 
-    lines_force_all_inputs: bool = True
+    lines_force_all_inputs: bool = False
 
     bitvector_size: int = 16  # TODO should not be a fixed number
 
+    max_column_combinations: int = 2
+
     disabled: List[str] = field(default_factory=list)
-    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum', 'max(n)', 'like'])
+    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
     ignore_aggrs: bool = True
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = False
     force_occurs_maxn: bool = False
-    like_enabled: bool = True
+    like_enabled: bool = False
 
     alt_empty_pos: bool = False
     shuffle_cols: bool = False

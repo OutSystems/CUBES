@@ -1,16 +1,16 @@
 inputs:
-- tests-examples/55-tests/tables/aircraft.txt
-- tests-examples/55-tests/tables/certified.txt
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/certified.txt
 output: tests-examples/55-tests/tables/25.out
 const:
-- '3'
+  - 3
 aggrs:
-- n
-- max
+  - n
+  - max
 attrs:
-- crusingrange
+  - crusingrange
 bools:
-- '>'
+  - '>'
 loc: '6'
 comment: |
   5.3.2 optimal solution sql
@@ -31,7 +31,15 @@ comment: |
 
   ALTERNATIVE SOLUTION?
 
-  RET_DF10192 <- bind_rows(input2, input1)
-  RET_DF10193 <- RET_DF10192 %>% group_by(aname, eid) %>% summarise(n = n())
-  RET_DF10194 <- RET_DF10193 %>% ungroup() %>% filter(n > 3)
-  RET_DF10195 <- RET_DF10194 %>% ungroup() %>% select(eid)
+  df1 <- bind_rows(input2, input1)
+  df2 <- df1 %>% group_by(aname, eid) %>% summarise(n = n())
+  df3 <- df2 %>% ungroup() %>% filter(n > 3)
+  out <- df3 %>% ungroup() %>% select(eid)
+
+  ALTERNATIVE SOLUTION?
+
+  df1 <- input2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(inner_join(df1, input2), input1)
+  df3 <- df2 %>% filter(n > 3 | crusingrange <= 3)
+  df4 <- df3 %>% group_by(crusingrange, eid) %>% summarise(maxcrusingrange = max(crusingrange)) %>% ungroup()
+  out <- df4 %>% select(eid) %>% distinct()

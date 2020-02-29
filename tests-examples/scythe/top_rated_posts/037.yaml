@@ -1,0 +1,18 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i037.csv
+output: tests-examples/scythe/top_rated_posts/tables/o037.csv
+aggrs:
+  - min
+attrs:
+  - c1
+comment: |
+  select t1.*
+  (select c2, min(c1) minc1
+   from c2
+   group by c2) t1
+  join t2
+  on t1.minc1 = t2.c1
+
+  df1 <- input1 %>% group_by(c2) %>% summarise(minc1 = min(c1))
+  df2 <- inner_join(input1, df1, by=c('c1' = 'minc1','minc1' = 'minc1'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(c1,c2,c3)

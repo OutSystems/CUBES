@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i038.csv
+output: tests-examples/scythe/top_rated_posts/tables/o038.csv
+aggrs:
+  - n
+const:
+  - 1
+comment: |
+  select s.id, t.*
+  from [stuff] s
+  join (
+      select name, city, count(*) as qty
+      from [stuff]
+      group by name, city
+      having count(*) > 1
+  ) t on s.name = t.name and s.city = t.city
+
+  df1 <- input1 %>% group_by(name, city) %>% summarise(n = n())
+  df2 <- inner_join(input1, df1)
+  df3 <- df2 %>% ungroup() %>% filter(n > 1)
+  out <- df3 %>% ungroup() %>% select(id,name,city)

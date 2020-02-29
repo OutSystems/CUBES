@@ -5,16 +5,14 @@ aggrs:
   - n
 const:
   - 1
-attrs:
-  - n
 comment: |
-  r1 <- input1 %>% group_by(EMAIL, NAME) %>% summarise(n = n())
-  r2 <- r1 %>% ungroup() %>% filter(n > 1)
-  r3 <- r2 %>% ungroup() %>% select(NAME)
-
   SELECT NAME
   FROM
     (SELECT EMAIL, NAME, COUNT() AS n
      FROM input1
      GROUP BY EMAIL, NAME)
   WHERE n > 1.0
+
+  df1 <- input1 %>% group_by(NAME, EMAIL) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n > 1)
+  out <- df2 %>% select(NAME) %>% distinct()

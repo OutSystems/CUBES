@@ -1,6 +1,6 @@
 # NOTE: this file should be the only one allowed to use 'global'
 
-from itertools import permutations
+from itertools import permutations, combinations
 from random import Random
 from typing import List
 
@@ -28,17 +28,13 @@ def current_counter():
 
 
 def get_fresh_name():
-    return 'RET_DF' + str(next_counter())
+    return 'df' + str(next_counter())
 
 
-def get_fresh_col():
-    return 'COL' + str(next_counter())
-
-
-def get_permutations(cols, num):
+def get_combinations(cols, num):
     if num == 0:
         return []
-    return [", ".join(a) for a in permutations(cols, num)] + get_permutations(cols, num - 1)
+    return [", ".join(a) for a in combinations(cols, num)] + get_combinations(cols, num - 1)
 
 
 def store_config(conf):

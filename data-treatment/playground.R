@@ -1,13 +1,15 @@
 library(dplyr)
 library(readr)
 library(lubridate)
+library(dbplyr)
+library(tidyr)
+library(stringr)
 
-input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i034.csv", col_types = cols(Train = col_integer(),Dest = col_character(),Time = col_time()))
-input1$Time <- lubridate::hm(input1$Time)
-expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o034.csv", col_types = cols(Trainj = col_character(),Destj = col_character(),Time = col_character()))
-expected_output$Time <- dmy(expected_output$Time)
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/19-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
 
-t <- input1 %>% group_by(cname) %>% summarise(maxavg = max(avg))
-o <- inner_join(t, input1, by=c('cname' = 'cname', 'maxavg' = 'avg'))
+input2 <- read_csv("tests-examples/55-tests/tables/19-2.txt", col_types = cols(P_id = col_character(),color = col_character()))
 
-all_equal(o, expected_output)
+input3 <- read_csv("tests-examples/55-tests/tables/19-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+
+expected_output <- read_csv("tests-examples/55-tests/tables/20.out", col_types = cols(S_key = col_character(),P_id = col_character(),S_name = col_character(),color = col_character()))

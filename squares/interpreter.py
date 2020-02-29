@@ -33,7 +33,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             int(cons)
             return str(cons)
         except:
-            if str(cons) == "max(n)" or cons in self.problem.attributes:
+            if str(cons) == "max(n)" or cons in self.problem.all_columns:
                 return str(cons)
             else:
                 return '"' + str(cons) + '"'
@@ -57,7 +57,7 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_select(self, node, args):
         name = self.fresh_table()
 
-        _script = f'{name} <- {args[0]} %>% ungroup() %>% select({get_collist(args[1])})'
+        _script = f'{name} <- {args[0]} %>% select({get_collist(args[1])})'
 
         if args[2] == "distinct":
             _script += ' %>% distinct()'
@@ -71,16 +71,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
     def eval_filter(self, node, args):
         name = self.fresh_table()
-
-        if 'str_detect' not in args[1]:
-            col, op, const = args[1].split(" ", 2)
-            if const != "max(n)":
-                _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col} {op} {self.transform_const(const)})'
-            else:
-                _script = f'{name} <- filter({args[0]}, {col} {op} max(n))'
-        else:
-            col, string = args[1].split("|")
-            _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({col}, "{string[:-1]}"))'
+        _script = f'{name} <- {args[0]} %>% filter({args[1]})'
 
         if self.store_program:
             self.final_program += _script + "\n"
@@ -92,24 +83,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
     def eval_filters(self, node, args):
         name = self.fresh_table()
-
-        if "str_detect" not in args[1]:
-            col, op, const = args[1].split(" ", 2)
-            const = self.transform_const(const) if const != "max(n)" else "max(n)"
-            arg1 = col + " " + op + " " + const
-        else:
-            col, string = args[1].split("|")
-            arg1 = col + ", " + "\"" + string[:-1] + "\")"
-
-        if "str_detect" not in args[2]:
-            col, op, const = args[2].split(" ", 2)
-            const = self.transform_const(const) if const != "max(n)" else "max(n)"
-            arg2 = col + " " + op + " " + const
-        else:
-            col, string = args[2].split("|")
-            arg2 = col + ", " + "\"" + string[:-1] + "\")"
-
-        _script = f'{name} <- {args[0]} %>% ungroup() %>% filter({arg1} {args[3]} {arg2})'
+        _script = f'{name} <- {args[0]} %>% filter({args[1]} {args[3]} {args[2]})'
 
         if self.store_program:
             self.final_program += _script + "\n"
@@ -126,23 +100,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             args[1] = '{at} = paste({at}, collapse=:)'.format(at=args[1].split("|")[1])
         args[1] = args[1].replace(':', '":"')
 
-        _script = f'{name} <- {args[0]} %>% group_by({get_collist(args[2])}) %>% summarise({args[1]})'
-
-        if self.store_program:
-            self.final_program += _script + "\n"
-        try:
-            robjects.r(_script)
-            return name
-        except Exception as e:
-            raise GeneralError(node)
-
-    def eval_summarise(self, node, args):
-        name = self.fresh_table()
-
-        if "paste" in args[1]:
-            args[1] = '{at} = paste({at}, collapse=":")'.format(at=args[1].split("|")[1])
-
-        _script = f'{name} <- {args[0]} %>% summarise({args[1]})'
+        _script = f'{name} <- {args[0]} %>% group_by({get_collist(args[2])}) %>% summarise({args[1]}) %>% ungroup()'
 
         if self.store_program:
             self.final_program += _script + "\n"
@@ -207,7 +165,7 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_anti_join(self, node, args):
         name = self.fresh_table()
 
-        _script = f'{name} <- anti_join(select({args[0]},{get_collist(args[2])}), select({args[1]}, {get_collist(args[2])}))'
+        _script = f'{name} <- anti_join({args[0]}, {args[1]})'
 
         if self.store_program:
             self.final_program += _script + "\n"

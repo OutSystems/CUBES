@@ -1,4 +1,5 @@
 import csv
+import re
 from itertools import combinations, product
 from typing import List, Tuple, Dict
 
@@ -10,7 +11,8 @@ from rpy2 import robjects
 import squares.types
 from squares import util, types
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
-from squares.util import next_counter, get_permutations
+from squares.exceptions import SquaresException
+from squares.util import next_counter, get_combinations
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
@@ -38,7 +40,10 @@ def read_table(path):
 
     for col in df:  # try to coerce columns to datetime
         if all(squares.types.is_date(elem) for elem in df[col]):
-            df[col] = pandas.to_datetime(df[col])
+            try:
+                df[col] = pandas.to_datetime(df[col])
+            except Exception:
+                pass
 
     logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
 
@@ -58,7 +63,7 @@ def parse_specification(filename):
         logger.error('Field "output" is required in spec')
         exit()
 
-    for field in ["const", "aggrs", "attrs", "bools"]:
+    for field in ["const", "aggrs", "attrs", "bools", 'filters']:
         if field not in spec:
             spec[field] = []
 
@@ -104,11 +109,12 @@ class Specification:
         self.bools = spec['bools']
         self.dateorder = spec['dateorder']
         self.loc = spec['loc']
+        self.filters = spec['filters']
 
         self.tables = []
         self.data_frames = {}
 
-        self.columns = set()
+        self.columns = OrderedSet()
         self.generated_columns = {}
         self.columns_by_type = types.empty_type_map()
         self.types_by_const = {}
@@ -126,12 +132,7 @@ class Specification:
                 self.columns_by_type[type].add(column)
 
             self.data_frames[table_name] = df
-            self.columns |= set(df.columns)
-
-        self.columns = list(self.columns)
-        self.columns.sort()
-        if util.get_config().shuffle_cols:
-            util.random.shuffle(self.columns)
+            self.columns |= df.columns
 
         self.all_columns = self.columns.copy()
 
@@ -251,13 +252,13 @@ class Specification:
         elif 'n' in self.aggrs:
             self.attrs.append('n')
 
-        filter_conditions, summarise_conditions, on_conditions, necessary_conditions, happens_before = self.find_conditions()
+        filter_conditions, summarise_conditions, on_conditions, predicates = self.find_conditions()
 
         if filters_f == [] and filter_conditions != []:
             filters_f = filters_f_one
             filters_p = [DSLPredicate('is_not_parent', ['filter', 'filter', '100'])]
 
-        if len(necessary_conditions) > 1:
+        if len(filter_conditions) > 1:
             filters_f = filters_f_one + filters_f_and_or
             filters_p = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
                          DSLPredicate('is_not_parent', ['filters', 'filter', '100']),
@@ -266,25 +267,18 @@ class Specification:
                          DSLPredicate('is_not_parent', ['filters', 'filters', '100'])]
             operators = DSLEnum('Op', ['|', '&'])
 
-        necessary_conditions = self.find_necessary_conditions(necessary_conditions)
-        necessary_conditions += self.happens_before(happens_before)
-
         with open(self.output) as f:
             reader = csv.reader(f)
             output_attrs = next(reader)
 
-        cols = get_permutations(self.columns, 2)
-        one_column = get_permutations(self.columns, 1)
-
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'TableSelect')
-        dsl.add_enum(DSLEnum('Cols', cols))
+        dsl.add_enum(DSLEnum('Cols', get_combinations(self.columns, util.get_config().max_column_combinations)))
+        dsl.add_enum(DSLEnum('Col', list(self.columns)))
+        dsl.add_enum(DSLEnum('SelectCols', [', '.join(output_attrs)]))
+        dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if 'inner_join' not in util.get_config().disabled:
             dsl.add_enum(DSLEnum('JoinCondition', on_conditions))
-
-        dsl.add_enum(DSLEnum('Col', one_column))
-        dsl.add_enum(DSLEnum('SelectCols', [','.join(output_attrs)]))
-        dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if filter_conditions:
             dsl.add_enum(DSLEnum('FilterCondition', filter_conditions))
@@ -333,7 +327,7 @@ class Specification:
 
         if 'anti_join' not in util.get_config().disabled:
             dsl.add_function(
-                DSLFunction('anti_join', 'Table r', ['Table a', 'Table b', 'Col c'],
+                DSLFunction('anti_join', 'Table r', ['Table a', 'Table b'],
                             ["col(r) == 1", 'row(r) <= row(a)']))
 
         if 'left_join' not in util.get_config().disabled:
@@ -374,7 +368,7 @@ class Specification:
         for p in summarise_p + filters_p:
             dsl.add_predicate(p)
 
-        for p in necessary_conditions:
+        for p in predicates:
             dsl.add_predicate(p)
 
         add_is_not_parent_if_enabled(dsl, 'natural_join', 'natural_join3')
@@ -398,56 +392,48 @@ class Specification:
 
         self.dsl = dsl
 
-    def find_filter_conditions(self, necessary_conditions: List[List[str]]):
-        conditions = []
+    def find_filter_conditions(self, predicates=None):
+        if predicates is None:
+            predicates = []
+
         int_ops = ["==", ">", "<", ">=", "<="]
         str_ops = ["==", "!="]
-        happens_before = []
 
+        conditions = []
         frozen_columns = self.filter_columns(self.columns_by_type)
 
         for constant in self.consts_by_type[types.STRING]:
-            necessary_conditions.append([])
+            current_predicate = []
+
             for column in frozen_columns[types.STRING]:
-
                 if util.get_config().like_enabled:
-                    conditions.append(f'str_detect({column}|{constant})')
-                    necessary_conditions[-1].append(conditions[-1])
+                    conditions.append(f"str_detect({column}, '{constant}')")
+                    current_predicate.append(f'"str_detect({column}, \'{constant}\')"')
 
-                att = False
-                for input in self.tables:
-                    data_frame = self.data_frames[input]
-                    if att:
-                        break
-
-                    if column in data_frame.columns:
-                        if constant in data_frame[column].values:
-                            att = True
-                            break
-                    else:
-                        continue
-
-                if att:
+                if self.constant_occurs(column, constant):
                     for op in str_ops:
-                        conditions.append(f'{column} {op} {constant}')
-                        necessary_conditions[-1].append(conditions[-1])
+                        conditions.append(f"{column} {op} '{constant}'")
+                        current_predicate.append(f'"{column} {op} \'{constant}\'"')
+
+            if current_predicate:
+                predicates.append(DSLPredicate('constant_occurs', current_predicate))
 
         for constant in self.consts_by_type[types.INT] | self.consts_by_type[types.FLOAT]:
-            necessary_conditions.append([])
+            current_predicate = []
 
             for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                if constant == column:
-                    raise Exception('Oi?')
-                    continue
-
                 for op in int_ops:
                     conditions.append(f'{column} {op} {constant}')
-                    necessary_conditions[-1].append(conditions[-1])
+                    current_predicate.append(f'"{column} {op} {constant}"')
                     if column in self.generated_columns.keys():
-                        happens_before.append((conditions[-1], self.generated_columns[column]))
+                        predicates.append(
+                            DSLPredicate('happens_before',
+                                         [f'"{column} {op} {constant}"', self.generated_columns[column]]))
 
-        bc = set()
+            if current_predicate:
+                predicates.append(DSLPredicate('constant_occurs', current_predicate))
 
+        bc = set()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
             for attr2 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 if attr1 == attr2:
@@ -455,65 +441,110 @@ class Specification:
                 for op in int_ops:
                     if (attr2, op, attr1) in bc or (attr1, symm_op(op), attr2) in bc:  # don't add symmetric conditions
                         continue
-
                     bc.add((attr2, op, attr1))
-                    conditions.append('{ia} {io} {ic}'.format(ia=attr2, io=op, ic=attr1))
+                    conditions.append(f'{attr2} {op} {attr1}')
                     if attr1 in self.generated_columns.keys():
-                        happens_before.append((conditions[-1], self.generated_columns[attr1]))
+                        predicates.append(
+                            DSLPredicate('happens_before', [f'"{attr2} {op} {attr1}"', self.generated_columns[attr1]]))
                     if attr2 in self.generated_columns.keys():
-                        happens_before.append((conditions[-1], self.generated_columns[attr2]))
+                        predicates.append(
+                            DSLPredicate('happens_before', [f'"{attr2} {op} {attr1}"', self.generated_columns[attr2]]))
 
-        necessary_conditions = list(filter(lambda a: a != [], necessary_conditions))
-        # if "max" in aggrs and "n" in aggrs or "max(n)" in aggrs:
         if 'max(n)' in self.aggrs:
-            raise NotImplemented
-            conditions.append('n == max(n)')
-            happens_before.append((conditions[-1], 'n = n()'))
-            if util.get_config().force_occurs_maxn:
-                necessary_conditions.append([conditions[-1]])
+            raise SquaresException('max(n) is not a valid aggregator. Use a filter instead.')
 
-        return conditions, necessary_conditions, happens_before
+        for filter in self.filters:
+            current_predicate = []
 
-    def find_summarise_conditions(self):
+            match = re.match('[a-zA-Z_][a-zA-Z_]*\(([a-zA-Z_][a-zA-Z_]*)\)', filter)
+            if match:
+                col = match[1]
+                matching_types = []
+                for type in types.Type:
+                    if col in self.columns_by_type[type]:
+                        matching_types.append(type)
+                for type in matching_types:
+                    for other_col in self.columns_by_type[type]:
+                        conditions.append(f'{other_col} == {filter}')
+                        current_predicate.append(f'"{other_col} == {filter}"')
+                        if col in self.generated_columns.keys():
+                            predicates.append(DSLPredicate('happens_before',
+                                                           [f'"{other_col} == {filter}"', self.generated_columns[col]]))
+                        if other_col in self.generated_columns.keys():
+                            predicates.append(DSLPredicate('happens_before', [f'"{other_col} == {filter}"',
+                                                                              self.generated_columns[other_col]]))
+
+            if current_predicate:
+                predicates.append(DSLPredicate('constant_occurs', current_predicate))
+
+        return conditions, predicates
+
+    def constant_occurs(self, column, constant):
+        att = False
+        for input in self.tables:
+            data_frame = self.data_frames[input]
+            if att:
+                break
+
+            if column in data_frame.columns:
+                if constant in data_frame[column].values:
+                    att = True
+                    break
+            else:
+                continue
+        return att
+
+    def find_summarise_conditions(self, predicates=None):
+        if predicates is None:
+            predicates = []
+
         conditions = []
-        necessary_conditions = []
-
         frozen_columns = self.filter_columns(self.columns_by_type)
 
         for aggr in self.aggrs:
-            necessary_conditions.append([])
+            current_predicate = []
 
             if "n" == aggr:
                 conditions.append('n = n()')
+                current_predicate.append('"n = n()"')
+                self.all_columns.append('n')
                 self.columns_by_type[types.INT].append('n')
-                self.generated_columns['n'] = 'n = n()'
-                necessary_conditions[-1].append(conditions[-1])
+                self.generated_columns['n'] = '"n = n()"'
 
             if aggr in ['concat']:
                 for column in frozen_columns[types.STRING]:
                     conditions.append(f'paste|{column}')
-                    necessary_conditions[-1].append(conditions[-1])
+                    current_predicate.append(f'"paste|{column}"')
 
             if aggr in ['min', 'max', 'mean', 'sum']:
                 for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                     conditions.append(f'{aggr}{column} = {aggr}({column})')
-                    necessary_conditions[-1].append(conditions[-1])
+                    current_predicate.append(f'"{aggr}{column} = {aggr}({column})"')
                     self.all_columns.append(f'{aggr}{column}')
                     self.columns_by_type[types.INT].append(f'{aggr}{column}')
                     self.columns_by_type[types.FLOAT].append(f'{aggr}{column}')  # todo
-                    self.generated_columns[f'{aggr}{column}'] = f'{aggr}{column} = {aggr}({column})'
+                    self.generated_columns[f'{aggr}{column}'] = f'"{aggr}{column} = {aggr}({column})"'
+                    if column in self.generated_columns.keys():
+                        predicates.append(DSLPredicate('happens_before', [f'"{aggr}{column} = {aggr}({column})"',
+                                                                          self.generated_columns[column]]))
 
             if aggr in ['min', 'max']:
                 for column in frozen_columns[types.DATETIME]:
                     conditions.append(f'{aggr}{column} = {aggr}({column})')
-                    necessary_conditions[-1].append(conditions[-1])
+                    current_predicate.append(f'"{aggr}{column} = {aggr}({column})"')
                     self.all_columns.append(f'{aggr}{column}')
                     self.columns_by_type[types.DATETIME].append(f'{aggr}{column}')
-                    self.generated_columns[f'{aggr}{column}'] = f'{aggr}{column} = {aggr}({column})'
+                    self.generated_columns[f'{aggr}{column}'] = f'"{aggr}{column} = {aggr}({column})"'
 
-        return list(filter(lambda x: x != [], necessary_conditions)), conditions
+            if util.get_config().force_summarise and current_predicate:
+                predicates.append(DSLPredicate('constant_occurs', current_predicate))
 
-    def find_inner_join_conditions(self) -> Tuple[List[str], List[Tuple]]:
+        return conditions, predicates
+
+    def find_inner_join_conditions(self, predicates=None) -> Tuple[List[str], List[Tuple]]:
+        if predicates is None:
+            predicates = []
+
         column_pairs = []
         for cols in self.columns_by_type.values():
             column_pairs += product(cols, repeat=2)
@@ -522,52 +553,27 @@ class Specification:
         on_conditions = list(filter(lambda t: any(map(lambda cond: cond[0] != cond[1], t)), on_conditions))
 
         str_conditions = []
-        happens_before = []
         for on_condition in on_conditions:
             str_conditions.append(','.join(map(lambda x: f"'{x[0]}' = '{x[1]}'", on_condition)))
 
             for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
                 for col in col_pairs:
                     if col in self.generated_columns.keys():
-                        happens_before.append((str_conditions[-1], self.generated_columns[col]))
+                        predicates.append(
+                            DSLPredicate('happens_before', [f'"{str_conditions[-1]}"', self.generated_columns[col]]))
 
-        return str_conditions, happens_before
+        return str_conditions, predicates
 
     def find_conditions(self):
-        necessary_conditions, sum_cond = self.find_summarise_conditions()
-
-        if not util.get_config().force_summarise:
-            necessary_conditions = []
-
-        filt_cond, necessary_conditions, happens_before = self.find_filter_conditions(necessary_conditions)
+        sum_cond, predicates = self.find_summarise_conditions()
+        filt_cond, predicates = self.find_filter_conditions(predicates)
 
         if 'inner_join' not in util.get_config().disabled:
-            on_conditions, happens_before_1 = self.find_inner_join_conditions()
+            on_conditions, predicates = self.find_inner_join_conditions(predicates)
         else:
-            on_conditions, happens_before_1 = [], []
+            on_conditions = []
 
-        return filt_cond, sum_cond, on_conditions, necessary_conditions, happens_before + happens_before_1
-
-    @staticmethod
-    def find_necessary_conditions(conds):
-        if not util.get_config().force_constants:
-            return []
-
-        predicates = []
-        for c in conds:
-            if c == []:
-                break
-            predicates.append(DSLPredicate('constant_occurs', ['"' + ','.join(map(str, c)) + '"']))
-        return predicates
-
-    @staticmethod
-    def happens_before(conds):
-        predicates = []
-        for c in conds:
-            if c == ():
-                break
-            predicates.append(DSLPredicate('happens_before', ['"' + str(c[0]) + '"', '"' + str(c[1]) + '"']))
-        return predicates
+        return filt_cond, sum_cond, on_conditions, predicates
 
     def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
         d = {}
@@ -575,7 +581,7 @@ class Specification:
         for type in columns_map.keys():
             d[type] = OrderedSet()
             for column in columns_map[type]:
-                if column in self.attrs or util.get_config().ignore_attrs:
+                if column in self.attrs or util.get_config().ignore_attrs or column in self.generated_columns.keys():
                     d[type].add(column)
 
         return d

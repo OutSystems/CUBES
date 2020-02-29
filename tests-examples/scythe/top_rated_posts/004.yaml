@@ -14,6 +14,6 @@ comment: |
       GROUP BY id
   ) b ON a.id = b.id AND a.rev = b.maxrev
 
-  df1 <- input1 %>% group_by(id) %>% summarise(maxrev = max(rev))
-  df2 <- inner_join(input1, df1, by=c('id' = 'id','rev' = 'maxrev'))
-  o   <- df2 %>% ungroup() %>% select(id,rev,content) %>% distinct()
+  df1 <- input1 %>% group_by(id) %>% summarise(maxrev = max(rev)) %>% ungroup()
+  df2 <- inner_join(input1, df1, by=c('id' = 'id','rev' = 'maxrev'), suffix = c("", ".other"))
+  out <- df2 %>% select(id, rev, content) %>% distinct()

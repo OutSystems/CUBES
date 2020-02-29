@@ -1,17 +1,15 @@
 inputs:
-- tests-examples/sqlsynthesizer/tables/02-1.txt
+  - tests-examples/sqlsynthesizer/tables/02-1.txt
 output: tests-examples/sqlsynthesizer/tables/02.out
-const: []
 aggrs:
-- sum
+  - sum
 attrs:
-- invoice_amount
-loc: '1'
-comment: '#solution
-
-
+  - invoice_amount
+loc: 1
+comment: |
   Select project_code, Sum(t2.invoice_amount) As sum_invoice_amount
-
   From input1
+  Group By project_code
 
-  Group By project_code'
+  df1 <- input1 %>% group_by(project_code) %>% summarise(suminvoice_amount = sum(invoice_amount)) %>% ungroup()
+  out <- df1 %>% select(project_code, suminvoice_amount)

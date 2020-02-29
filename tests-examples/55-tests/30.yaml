@@ -1,20 +1,23 @@
 inputs:
-- tests-examples/55-tests/tables/19-1.txt
-- tests-examples/55-tests/tables/19-2.txt
-- tests-examples/55-tests/tables/19-3.txt
+  - tests-examples/55-tests/tables/19-1.txt
+  - tests-examples/55-tests/tables/19-2.txt
+  - tests-examples/55-tests/tables/19-3.txt
 output: tests-examples/55-tests/tables/30.out
 const:
-- red
-- S5
+  - red
+  - S5
 aggrs:
-- n
+  - n
 attrs:
-- color
-- S_key
+  - color
+  - S_key
 bools:
-- ==
-loc: '6'
-comment: "# 5.2.7 optimal solution modified\n\ndf1=inner_join(catalog,suppliers) %>%\
-  \ inner_join(parts) %>% \n\tfilter(color == \"red\")\ndf2=inner_join(catalog,suppliers)\
-  \ %>% inner_join(parts) %>% \n\tfilter(S_key == \"S5\")\ninner_join(df1,df2) %>%\n\
-  group_by(P_id) %>% summarise(n = n())"
+  - ==
+loc: 6
+comment: |
+  5.2.7 optimal solution modified
+
+  df1 <- input2 %>% group_by(P_id, color) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(inner_join(input1, input3), df1)
+  df3 <- df2 %>% filter(S_key == 'S5' & color == 'red')
+  out <- df3 %>% select(P_id, n)
