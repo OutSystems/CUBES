@@ -5,11 +5,11 @@ library(dbplyr)
 library(tidyr)
 library(stringr)
 
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-input1 <- read_csv("tests-examples/55-tests/tables/19-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
+concat <- function(s,v) {
+  Reduce(function(x, y) paste(x, y, sep = s), v)
+}
 
-input2 <- read_csv("tests-examples/55-tests/tables/19-2.txt", col_types = cols(P_id = col_character(),color = col_character()))
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
 
-input3 <- read_csv("tests-examples/55-tests/tables/19-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
-
-expected_output <- read_csv("tests-examples/55-tests/tables/20.out", col_types = cols(S_key = col_character(),P_id = col_character(),S_name = col_character(),color = col_character()))
+df1 <- input1 %>% group_by(UserId) %>% summarise(concatAlias = concat(', ', Alias))

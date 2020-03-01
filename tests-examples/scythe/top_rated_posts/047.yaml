@@ -1,0 +1,25 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i047.csv
+output: tests-examples/scythe/top_rated_posts/tables/o047.csv
+aggrs:
+  - max
+attrs:
+  - time
+comment: |
+  SELECT t1.*
+  FROM lms_attendance t1
+  WHERE t1.time = (SELECT MAX(t2.time)
+                   FROM lms_attendance t2
+                   WHERE t2.user = t1.user);
+
+  SELECT t1.*
+  FROM lms_attendance t1
+  join (SELECT user, MAX(time) maxTime
+        FROM lms_attendance
+        GROUP BY user) t2
+  WHERE t1.time = t2.maxTime
+    AND t1.user = t2.user
+
+  df1 <- input1 %>% group_by(user) %>% summarise(maxtime = max(time)) %>% ungroup()
+  df2 <- inner_join(input1, df1, by=c('user' = 'user','time' = 'maxtime'), suffix = c("", ".other"))
+  out <- df2 %>% select(id, user, time, io) %>% distinct()

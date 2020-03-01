@@ -107,6 +107,14 @@
 ## Week 4
 ###Reasons why instances fail
 - Extracting parts of the date
+- mutate is needed sometimes (eg. cumulative sums)
+- renaming columns (some very simple cases are already supported by using the new inner join)
+
+###New things
+- Inner join is finished
+- Dates are now supported (kind of? too many formats...)
+- concat as an aggregation function is now supported
+- 'max(n)' is no longer a special case with lots of exceptions. Any R expression can be used as a filter condition
 
 ###Different solutions
 - 55-tests/2

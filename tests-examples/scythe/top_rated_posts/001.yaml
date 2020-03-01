@@ -9,3 +9,8 @@ comment: |
   SELECT SubjectID, CONCAT(StudentName)
   FROM SubjectID
   GROUP BY SubjectID
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- input1 %>% group_by(SubjectID) %>% summarise(concatStudentName = string_agg(StudentName, ', ')) %>% ungroup()
+  out <- df1 %>% select(SubjectID, concatStudentName) %>% distinct()

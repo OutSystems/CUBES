@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i055.csv
+output: tests-examples/scythe/top_rated_posts/tables/o055.csv
+aggrs:
+  - concat
+attrs:
+  - PageURL
+comment: |
+  select User, Activity, concat(PageURL)
+  from input
+  group by User, Activity
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- input1 %>% group_by(User, Activity) %>% summarise(concatPageURL = string_agg(PageURL, ' ')) %>% ungroup()
+  out <- df1 %>% select(User, Activity, concatPageURL)

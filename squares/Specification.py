@@ -172,6 +172,9 @@ class Specification:
             if types.get_type(dtype) == types.DATETIME:
                 self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
 
+        if 'concat' in self.aggrs:
+            self.r_init += exec_and_return('\nstring_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}\n')
+
     def generate_dsl(self):
         filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
             'row(r) <= row(a)',
@@ -233,7 +236,6 @@ class Specification:
         if self.aggrs:
             for a in self.aggrs:
                 if a == 'concat':
-                    self.aggrs.remove(a)
                     concat = DSLFunction('unite', 'Table r', ['Table a', 'Col c', 'Col d'], [
                         'row(r) <= row(a)',
                         'col(r) <= col(a)'
@@ -511,10 +513,14 @@ class Specification:
                 self.columns_by_type[types.INT].append('n')
                 self.generated_columns['n'] = '"n = n()"'
 
-            if aggr in ['concat']:
+            if aggr == 'concat':
                 for column in frozen_columns[types.STRING]:
-                    conditions.append(f'paste|{column}')
-                    current_predicate.append(f'"paste|{column}"')
+                    for separator in ['', ' ', ',', ', ']:
+                        conditions.append(f"{aggr}{column} = string_agg({column}, '{separator}')")
+                        current_predicate.append(f"\"{aggr}{column} = string_agg({column}, '{separator}')\"")
+                    self.all_columns.append(f'{aggr}{column}')
+                    self.columns_by_type[types.STRING].append(f'{aggr}{column}')
+                    # TODO generated columns (both ways)
 
             if aggr in ['min', 'max', 'mean', 'sum']:
                 for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
