@@ -358,15 +358,20 @@ class LinesEnumerator(Enumerator):
         conditions = pred.args
         lst = []
         for c in conditions:
-            if c in self._production_id_cache:
-                for l in self.leafs:
-                    lst.append(l.var == self._production_id_cache[c])
+            for p in self.spec.productions():
+                if p.is_enum() and p.rhs[0] == c:
+                    for l in self.leafs:
+                        lst.append(l.var == p.id)
 
         self.z3_solver.add(Or(lst))
 
     def _resolve_happens_before_predicate(self, pred):
-        pos = 0 if pred.args[0] not in self._production_id_cache else self._production_id_cache[pred.args[0]]
-        pre = 0 if pred.args[1] not in self._production_id_cache else self._production_id_cache[pred.args[1]]
+        pos = pre = 0
+        for p in self.spec.productions():
+            if p.is_enum() and p.rhs[0] == pred.args[0]:
+                pos = p.id
+            if p.is_enum() and p.rhs[0] == pred.args[1]:
+                pre = p.id
 
         for r_i in range(len(self.roots)):
             previous_roots = []
@@ -407,6 +412,7 @@ class LinesEnumerator(Enumerator):
 
         self.z3_solver.set('random_seed', util.get_config().seed)
         self.z3_solver.set('sat.random_seed', util.get_config().seed)
+        print(util.get_config().seed)
 
         self.z3_solver.set('sat.phase', util.get_config().z3_sat_phase)
         self.z3_solver.set('sat.restart', util.get_config().z3_sat_restart)

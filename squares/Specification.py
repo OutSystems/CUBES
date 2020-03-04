@@ -13,7 +13,7 @@ import squares.types
 from squares import util, types
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
 from squares.exceptions import SquaresException
-from squares.util import next_counter, get_combinations, add_osdict
+from squares.util import next_counter, get_combinations, add_osdict, get_permutations
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
@@ -124,6 +124,7 @@ class Specification:
             self.data_frames[table_name] = df
             self.columns |= df.columns
 
+        self.columns = OrderedSet(sorted(self.columns))
         self.all_columns = self.columns.copy()
 
         self.data_frames['expected_output'] = read_table(self.output)
@@ -187,6 +188,9 @@ class Specification:
 
         if summarise_conditions:
             dsl.add_enum(DSLEnum('SummariseCondition', summarise_conditions))
+
+        if util.get_config().filters_function_enabled and len(filter_conditions) > 1:
+            dsl.add_enum(DSLEnum('Op', ['|', '&']))
 
         dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int'),
                                          # ('columns', 'bv')
@@ -271,6 +275,13 @@ class Specification:
                 # 'columns(r) == columns(a)'
             ]))
 
+            if util.get_config().filters_function_enabled and len(filter_conditions) > 1:
+                dsl.add_function(DSLFunction('filters', 'Table r', ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'], [
+                    'row(r) <= row(a)',
+                    'col(r) == col(a)'
+                    # 'columns(r) == columns(a)'
+                ]))
+
         if summarise_conditions:
             dsl.add_function(DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
                 'row(r) <= row(a)',
@@ -281,13 +292,19 @@ class Specification:
             add_is_not_parent_if_enabled(dsl, 'natural_join4', 'summariseGrouped')
             dsl.add_predicate(DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100']))
 
-        if filter_conditions:
+        if len(filter_conditions) == 1:
             add_is_not_parent_if_enabled(dsl, 'inner_join', 'filter')
             add_is_not_parent_if_enabled(dsl, 'natural_join', 'filter')
             add_is_not_parent_if_enabled(dsl, 'natural_join3', 'filter')
             add_is_not_parent_if_enabled(dsl, 'natural_join4', 'filter')
             dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
             dsl.add_predicate(DSLPredicate('distinct_inputs', ['filter']))
+        elif len(filter_conditions) > 1 and util.get_config().filters_function_enabled:
+            dsl.add_predicate(DSLPredicate('distinct_filters', ['filters', '1', '2']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['filters', 'filter', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filters', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['filters', 'filters', '100']))
 
         for p in predicates:
             dsl.add_predicate(p)

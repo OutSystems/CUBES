@@ -39,6 +39,12 @@ def get_combinations(cols, num):
     return [", ".join(a) for a in combinations(cols, num)] + get_combinations(cols, num - 1)
 
 
+def get_permutations(cols, num):
+    if num == 0:
+        return []
+    return [", ".join(a) for a in permutations(cols, num)] + get_permutations(cols, num - 1)
+
+
 def store_config(conf):
     global config
     config = conf

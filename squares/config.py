@@ -6,12 +6,14 @@ from typing import List, Tuple
 class Config:
     seed: int
 
-    lines_force_all_inputs: bool = False
+    lines_force_all_inputs: bool = True
 
     bitvector_size: int = 16  # TODO should not be a fixed number
 
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
+
+    filters_function_enabled: bool = False
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
@@ -19,7 +21,6 @@ class Config:
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = False
-    force_occurs_maxn: bool = False
     like_enabled: bool = False
 
     alt_empty_pos: bool = False

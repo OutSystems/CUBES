@@ -24,9 +24,10 @@ t6 <- read.csv('try6.csv', header=T, stringsAsFactors=FALSE)
 t6_1 <- read.csv('try6_1.csv', header=T, stringsAsFactors=FALSE)
 t7 <- read.csv('try7.csv', header=T, stringsAsFactors=FALSE)
 t8 <- read.csv('try8.csv', header=T, stringsAsFactors=FALSE)
+t9 <- read.csv('try9.csv', header=T, stringsAsFactors=FALSE)
 
 # times scatter plot
-A <- 'original';B <- 't7';tmp <- merge(eval(parse(text = A)), eval(parse(text = B)), by='name', suffixes = c("_A", "_B"));ggplot(tmp, aes(x=real_A, y=real_B)) + geom_point(color='red', alpha = 0.4, size=2) + scale_x_continuous(trans='log10') + scale_y_continuous(trans='log10') + geom_abline() + geom_hline(yintercept=600, linetype="dashed") + geom_vline(xintercept=600, linetype="dashed") + labs(y=B, x = A) + ggtitle('Real Time')
+A <- 't2';B <- 't9';tmp <- merge(eval(parse(text = A)), eval(parse(text = B)), by='name', suffixes = c("_A", "_B"));ggplot(tmp, aes(x=real_A, y=real_B)) + geom_point(color='red', alpha = 0.4, size=2) + scale_x_continuous(trans='log10') + scale_y_continuous(trans='log10') + geom_abline() + geom_hline(yintercept=600, linetype="dashed") + geom_vline(xintercept=600, linetype="dashed") + labs(y=B, x = A) + ggtitle('Real Time')
 
 # process distribution
 ggplot(t8, aes(x=factor(process))) + geom_bar(fill="turquoise")

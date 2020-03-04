@@ -67,6 +67,19 @@ class SquaresInterpreter(PostOrderInterpreter):
         except Exception as e:
             raise GeneralError(node)
 
+    def eval_filters(self, node, args):
+        name = self.fresh_table()
+
+        _script = f'{name} <- {args[0]} %>% filter({args[1]} {args[3]} {args[2]})'
+
+        if self.store_program:
+            self.final_program += _script + "\n"
+        try:
+            robjects.r(_script)
+            return name
+        except Exception as e:
+            raise GeneralError(node)
+
     def eval_summariseGrouped(self, node, args):
         name = self.fresh_table()
 
