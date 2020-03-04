@@ -11,6 +11,7 @@ class Config:
     bitvector_size: int = 16  # TODO should not be a fixed number
 
     max_column_combinations: int = 2
+    max_filter_combinations: int = 2
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])

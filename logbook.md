@@ -107,14 +107,16 @@
 ## Week 4
 ###Reasons why instances fail
 - Extracting parts of the date
-- mutate is needed sometimes (eg. cumulative sums)
+- mutate (eg. SELECT sqrt(a-b) AS c) is needed sometimes (eg. cumulative sums)
 - renaming columns (some very simple cases are already supported by using the new inner join)
 
 ###New things
 - Inner join is finished
 - Dates are now supported (kind of? too many formats...)
 - concat as an aggregation function is now supported
-- 'max(n)' is no longer a special case with lots of exceptions. Any R expression can be used as a filter condition
+- 'max(n)' is no longer a special case with lots of exceptions. Most R expressions can be used as filter conditions
+- Removed redundant group by conditions (a, b) and (b, a)
+- Removed redundant filter conditions (eg. n > 5 | n >= 5)   \[might be slightly slower for simple programs?\]
 
 ###Different solutions
 - 55-tests/2

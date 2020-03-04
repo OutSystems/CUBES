@@ -9,35 +9,13 @@ from time import sleep
 import squaresEnumerator
 
 from squares.config import Config
+from squares.util import create_argparser
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
-
-    parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
-
-    parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
-    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--r', dest='r', action='store_true', help="output R program")
-    g.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
-    parser.set_defaults(r=True)
-
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
-    g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
-    parser.set_defaults(tree=False)
-
-    parser.add_argument('--limit', type=int, default=7, help='maximum program size')
-
-    parser.add_argument('--seed', default='squares')
-
+    parser = create_argparser()
     args = parser.parse_args()
 
     if args.debug:
@@ -49,14 +27,9 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        # Config(seed=seed, ignore_aggrs=False, force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'bind_rows', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'anti_join', 'semi_join', 'left_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(seed=seed+2, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(seed=seed+3, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        # Config(seed=seed, ignore_aggrs=False, disabled=['natural_join', 'natural_join3', 'natural_join4', 'intersect', 'bind_rows', 'left_join', 'anti_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
-        ]
+        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+       ]
 
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')

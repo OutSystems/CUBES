@@ -358,20 +358,15 @@ class LinesEnumerator(Enumerator):
         conditions = pred.args
         lst = []
         for c in conditions:
-            for p in self.spec.productions():
-                if p.is_enum() and p.rhs[0] == c:
-                    for l in self.leafs:
-                        lst.append(l.var == p.id)
+            if c in self._production_id_cache:
+                for l in self.leafs:
+                    lst.append(l.var == self._production_id_cache[c])
 
         self.z3_solver.add(Or(lst))
 
     def _resolve_happens_before_predicate(self, pred):
-        pos = pre = 0
-        for p in self.spec.productions():
-            if p.is_enum() and p.rhs[0] == pred.args[0]:
-                pos = p.id
-            if p.is_enum() and p.rhs[0] == pred.args[1]:
-                pre = p.id
+        pos = 0 if pred.args[0] not in self._production_id_cache else self._production_id_cache[pred.args[0]]
+        pre = 0 if pred.args[1] not in self._production_id_cache else self._production_id_cache[pred.args[1]]
 
         for r_i in range(len(self.roots)):
             previous_roots = []
@@ -489,6 +484,10 @@ class LinesEnumerator(Enumerator):
         self.createLinesConstraints()
         self.createTypeConstraints()
         self.createChildrenConstraints()
+        self._production_id_cache = {}
+        for p in self.spec.productions():
+            if p.is_enum():
+                self._production_id_cache[p._get_rhs()] = p.id
         self.resolve_predicates()
         logger.info('Number of Nodes: {} '.format(len(self.roots + self.leafs)))
         logger.info('Number of Variables: {}'.format(len(self.variables + self.typeVars + self.linesVars)))
@@ -715,7 +714,7 @@ class LinesEnumerator(Enumerator):
     def blockModelAux(self, model):
         # block the model using only the variables that correspond to productions (nodes = leafs + roots)
         # TIME cicle_time = time.time()
-        const = substitute(self.modelConstraint, [(Int('val_' + str(x)), model[x]) for x in self.variables])
+        const = substitute(self.modelConstraint, [(Int(f'val_{str(x)}'), model[x]) for x in self.variables])
         # TIME  self.blockCicle += time.time() - cicle_time
 
         # TIME  add_time = time.time()

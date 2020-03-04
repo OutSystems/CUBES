@@ -6,8 +6,10 @@
 # Python version:	3.6.4
 import logging
 import os
+import random
 import re
 from multiprocessing import Queue
+from multiprocessing import SimpleQueue
 
 import rpy2.robjects as robjects
 import sqlparse as sp
@@ -18,6 +20,7 @@ from squares.SQLVisitor import SQLVisitor
 from squares.Specification import parse_specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
+from squares.util import create_argparser
 from tyrell.decider import Example, ExampleConstraintPruningDecider, ExampleConstraintDecider
 from tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from tyrell.logger import get_logger
@@ -98,7 +101,7 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
             # loc: # of function productions
             enumerator=enumerator,
             decider=ExampleConstraintDecider(
-            # decider=ExampleConstraintPruningDecider(
+                # decider=ExampleConstraintPruningDecider(
                 spec=spec,
                 interpreter=SquaresInterpreter(problem, False),
                 examples=[
@@ -123,7 +126,8 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
                 logger.error('Error while trying to convert R code to SQL.')
                 sql_query = None
 
-            queue.put((problem.r_init + '\n' + interpreter.final_program, None if sql_query is None else beautifier(str(sql_query)[6:]), id))
+            queue.put((problem.r_init + '\n' + interpreter.final_program,
+                       None if sql_query is None else beautifier(str(sql_query)[6:]), id))
             return
 
         else:
@@ -134,89 +138,17 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
     logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, limit)
 
 
-class Squares(object):
-    """docstring for Squares."""
+if __name__ == '__main__':
+    parser = create_argparser()
+    args = parser.parse_args()
 
-    def __init__(self):
-        super(Squares, self).__init__()
-        self.template = "inputs: {inputs}\noutput: {output}\nconst: {const}\naggrs: {aggrs}\nattrs: {attrs}\nbools:\nloc: {loc}\n"
+    if args.debug:
+        debug = True
+        logger.setLevel('DEBUG')
+        get_logger('tyrell').setLevel('DEBUG')
 
-    def synthesize(self, inputs, output_ex, const="", aggrs="", attrs="", loc=0):
-        """docstring for Squares."""
-        global argv, dir
-        dir = "../"
-        ins = list([])
-        temp = self.template
+    random.seed(args.seed)
+    seed = random.randrange(2 ** 16)
 
-        try:
-            path, dirs, files = next(os.walk("../users/files"))
-        except:
-            path, dirs, files = next(os.walk("users/files"))
-            dir = "./"
-        file_count = str(len(files) + 1)
-
-        i_c = 0
-        for i in inputs:
-            input = open(dir + "users/tables/" + "i" + str(file_count) + str(i_c), "w+")
-            input.write(i)
-            input.close()
-            ins.append(dir + "users/tables/" + "i" + str(file_count) + str(i_c))
-            i_c += 1
-        output = open(dir + "users/tables/" + "o" + str(file_count), "w+")
-        output.write(output_ex)
-        output.close()
-        output = dir + "users/tables/o" + str(file_count)
-
-        input_file_name = dir + "users/files/" + "f" + str(file_count)
-        input_file = open(input_file_name, "w+")
-        inputs = str(ins).replace("\'", "").replace("]", "").replace("[", "")
-        input_file.write(
-            temp.format(inputs=inputs, output=output, const="\"" + const.replace(",", "\",\"").replace(" ", "") + "\"",
-                        aggrs="\"" + aggrs.replace(",", "\",\"").replace(" ", "") + "\"",
-                        attrs="\"" + attrs.replace(",", "\",\"").replace(" ", "") + "\"", loc=str(loc)).replace("\"\"",
-                                                                                                                ""))
-        input_file.close()
-
-        argv = []
-        argv.append("lines")
-        argv.append(input_file_name)
-        return main()
-
-# # not used
-# def beautifier_aux(tokens):
-# 	# print(tokens)
-# 	global index_table_aux
-# 	sub_query = ""
-# 	left_index = right_index = None
-# 	for t in tokens:
-# 		if "(SELECT" in str(t):
-# 			if "AS `TBL_RIGHT`" == str(t)[-13:]:
-# 				right_index = index_table_aux
-# 				index_table_aux += 1
-# 			elif "AS `TBL_LEFT`" == str(t)[-13:]:
-# 				left_index = index_table_aux
-# 				index_table_aux += 1
-# 		if "`TBL_LEFT`" in str(t):
-# 			left_index = index_table_aux
-# 			index_table_aux += 1
-# 		if "`TBL_RIGHT`" in str(t):
-# 			right_index = index_table_aux
-# 			index_table_aux += 1
-# 	for t in tokens:
-# 		if "(SELECT" in str(t):
-# 			# print(t)
-# 			if "AS `TBL_RIGHT`" == str(t)[-13:]:
-# 				aux_str = str(t).split("AS `TBL_RIGHT`")
-# 				new_input = sp.parse(aux_str[0])[0]
-# 				# print("RIGHT", t, "-->", new_input)
-# 				sub_query += beautifier_aux(new_input) + " AS " + "table_"+str(right_index)
-# 			elif "AS `TBL_LEFT`" == str(t)[-13:]:
-# 				aux_str = str(t).split("AS `TBL_LEFT`")
-# 				new_input = sp.parse(aux_str[0])[0]
-# 				# print("LEFT", t, "-->", new_input)
-# 				sub_query += beautifier_aux(new_input) + " AS " + "table_"+str(left_index)
-# 			else:
-# 				sub_query += beautifier_aux(t)
-# 		else:
-# 			sub_query += str(t).replace("`TBL_LEFT`", "table_"+str(left_index)).replace("`TBL_RIGHT`", "table_"+str(right_index))
-# 	return sub_query
+    main(args, 1, Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'bind_rows', 'semi_join'], force_summarise=True,
+                      z3_QF_FD=True, z3_sat_phase='random'), SimpleQueue(), 7)

@@ -1,5 +1,6 @@
 import csv
 import re
+from collections import OrderedDict
 from itertools import combinations, product
 from typing import List, Tuple, Dict
 
@@ -12,7 +13,7 @@ import squares.types
 from squares import util, types
 from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
 from squares.exceptions import SquaresException
-from squares.util import next_counter, get_combinations
+from squares.util import next_counter, get_combinations, add_osdict
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
@@ -120,6 +121,9 @@ class Specification:
         self.types_by_const = {}
         self.consts_by_type = types.empty_type_map()
 
+        if 'max(n)' in self.aggrs:
+            raise SquaresException('max(n) is not a valid aggregator. Use a filter instead.')
+
         logger.debug("Reading input files...")
         for input in self.inputs:
             id = next_counter()
@@ -173,101 +177,11 @@ class Specification:
                 self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
 
         if 'concat' in self.aggrs:
-            self.r_init += exec_and_return('\nstring_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}\n')
+            self.r_init += exec_and_return(
+                '\nstring_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}\n')
 
     def generate_dsl(self):
-        filters_f_one = [DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
-            'row(r) <= row(a)',
-            'col(r) == col(a)',
-            # 'columns(r) == columns(a)'
-        ])]
-        filters_f = filters_f_one
-        filters_f_and_or = [
-            DSLFunction('filters', 'Table r', ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'], [
-                'row(r) <= row(a)',
-                'col(r) == col(a)',
-                # 'columns(r) == columns(a)'
-            ])]
-
-        filters_p_one = [DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
-                         DSLPredicate('distinct_inputs', ['filter'])]
-        if 'natural_join4' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'filter', '100']))
-        if 'natural_join3' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join3', 'filter', '100']))
-        if 'natural_join' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['natural_join', 'filter', '100']))
-        if 'inner_join' not in util.get_config().disabled:
-            filters_p_one.insert(0, DSLPredicate('is_not_parent', ['inner_join', 'filter', '100']))
-        filters_p = filters_p_one
-        filters_p_two = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
-                         DSLPredicate('is_not_parent', ['filters', 'filters', '100']),
-                         DSLPredicate('distinct_inputs', ['filters'])]
-
-        if 'natural_join4' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join4', 'filters', '100']))
-        if 'natural_join3' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join3', 'filters', '100']))
-        if 'natural_join' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['natural_join', 'filters', '100']))
-        if 'inner_join' not in util.get_config().disabled:
-            filters_p_two.insert(2, DSLPredicate('is_not_parent', ['inner_join', 'filters', '100']))
-
-        summarise_f = [DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
-            'row(r) <= row(a)',
-            'col(r) <= 3'
-        ])]
-        # summarise_p = []
-        summarise_p = [DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100'])]
-        if 'natural_join4' not in util.get_config().disabled:
-            summarise_p.insert(0, DSLPredicate('is_not_parent', ['natural_join4', 'summariseGrouped', '100']))
-
-        operators = None
-        concat = None
-
-        if self.consts:
-            if len(self.consts) > 1:
-                filters_f = filters_f_and_or
-                filters_p = filters_p_two
-                operators = DSLEnum('Op', ['|', '&'])
-        else:
-            filters_p, filters_f = [], []
-
-        if self.aggrs:
-            for a in self.aggrs:
-                if a == 'concat':
-                    concat = DSLFunction('unite', 'Table r', ['Table a', 'Col c', 'Col d'], [
-                        'row(r) <= row(a)',
-                        'col(r) <= col(a)'
-                    ])
-            if len(self.aggrs) == 1 and "like" in self.aggrs:
-                summarise_f, summarise_p = [], []
-        else:
-            summarise_f, summarise_p = [], []
-
-        if ['max(n)'] == self.aggrs:
-            self.consts.append('max(n)')
-            self.aggrs.remove('max(n)')
-
-        if self.attrs:
-            self.attrs = (self.attrs + ["n"]) if "n" in self.aggrs and self.has_int_consts else self.attrs
-        elif 'n' in self.aggrs:
-            self.attrs.append('n')
-
-        filter_conditions, summarise_conditions, on_conditions, predicates = self.find_conditions()
-
-        if filters_f == [] and filter_conditions != []:
-            filters_f = filters_f_one
-            filters_p = [DSLPredicate('is_not_parent', ['filter', 'filter', '100'])]
-
-        if len(filter_conditions) > 1:
-            filters_f = filters_f_one + filters_f_and_or
-            filters_p = [DSLPredicate('distinct_filters', ['filters', '1', '2']),
-                         DSLPredicate('is_not_parent', ['filters', 'filter', '100']),
-                         DSLPredicate('is_not_parent', ['filter', 'filters', '100']),
-                         DSLPredicate('is_not_parent', ['filter', 'filter', '100']),
-                         DSLPredicate('is_not_parent', ['filters', 'filters', '100'])]
-            operators = DSLEnum('Op', ['|', '&'])
+        filter_conditions, summarise_conditions, join_conditions, predicates = self.find_conditions()
 
         with open(self.output) as f:
             reader = csv.reader(f)
@@ -280,16 +194,13 @@ class Specification:
         dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if 'inner_join' not in util.get_config().disabled:
-            dsl.add_enum(DSLEnum('JoinCondition', on_conditions))
+            dsl.add_enum(DSLEnum('JoinCondition', join_conditions))
 
         if filter_conditions:
             dsl.add_enum(DSLEnum('FilterCondition', filter_conditions))
 
         if summarise_conditions:
             dsl.add_enum(DSLEnum('SummariseCondition', summarise_conditions))
-
-        if operators:
-            dsl.add_enum(operators)
 
         dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int'),
                                          # ('columns', 'bv')
@@ -361,14 +272,36 @@ class Specification:
                                       # f"columns(r) & ~columns(a) == *0",
                                       ]))
 
-        if concat:
-            dsl.add_function(concat)
+        if 'concat' in self.aggrs:
+            dsl.add_function(DSLFunction('unite', 'Table r', ['Table a', 'Col c', 'Col d'], [
+                'row(r) <= row(a)',
+                'col(r) <= col(a)'
+            ]))
 
-        for f in filters_f + summarise_f:
-            dsl.add_function(f)
+        if filter_conditions:
+            dsl.add_function(DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
+                'row(r) <= row(a)',
+                'col(r) == col(a)',
+                # 'columns(r) == columns(a)'
+            ]))
 
-        for p in summarise_p + filters_p:
-            dsl.add_predicate(p)
+        if summarise_conditions:
+            dsl.add_function(DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
+                'row(r) <= row(a)',
+                'col(r) <= ' + str(util.get_config().max_column_combinations + 1)
+            ]))
+
+        if summarise_conditions:
+            add_is_not_parent_if_enabled(dsl, 'natural_join4', 'summariseGrouped')
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100']))
+
+        if filter_conditions:
+            add_is_not_parent_if_enabled(dsl, 'inner_join', 'filter')
+            add_is_not_parent_if_enabled(dsl, 'natural_join', 'filter')
+            add_is_not_parent_if_enabled(dsl, 'natural_join3', 'filter')
+            add_is_not_parent_if_enabled(dsl, 'natural_join4', 'filter')
+            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
+            dsl.add_predicate(DSLPredicate('distinct_inputs', ['filter']))
 
         for p in predicates:
             dsl.add_predicate(p)
@@ -401,39 +334,23 @@ class Specification:
         int_ops = ["==", ">", "<", ">=", "<="]
         str_ops = ["==", "!="]
 
-        conditions = []
+        filter_parts = OrderedDict()
+
         frozen_columns = self.filter_columns(self.columns_by_type)
 
         for constant in self.consts_by_type[types.STRING]:
-            current_predicate = []
-
             for column in frozen_columns[types.STRING]:
                 if util.get_config().like_enabled:
-                    conditions.append(f"str_detect({column}, '{constant}')")
-                    current_predicate.append(f'"str_detect({column}, \'{constant}\')"')
+                    add_osdict(filter_parts, frozenset((column, constant)), f"str_detect({column}, '{constant}')")
 
                 if self.constant_occurs(column, constant):
                     for op in str_ops:
-                        conditions.append(f"{column} {op} '{constant}'")
-                        current_predicate.append(f'"{column} {op} \'{constant}\'"')
-
-            if current_predicate:
-                predicates.append(DSLPredicate('constant_occurs', current_predicate))
+                        add_osdict(filter_parts, frozenset((column, constant)), f"{column} {op} '{constant}'")
 
         for constant in self.consts_by_type[types.INT] | self.consts_by_type[types.FLOAT]:
-            current_predicate = []
-
             for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 for op in int_ops:
-                    conditions.append(f'{column} {op} {constant}')
-                    current_predicate.append(f'"{column} {op} {constant}"')
-                    if column in self.generated_columns.keys():
-                        predicates.append(
-                            DSLPredicate('happens_before',
-                                         [f'"{column} {op} {constant}"', self.generated_columns[column]]))
-
-            if current_predicate:
-                predicates.append(DSLPredicate('constant_occurs', current_predicate))
+                    add_osdict(filter_parts, frozenset((column, constant)), f'{column} {op} {constant}')
 
         bc = set()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
@@ -444,20 +361,9 @@ class Specification:
                     if (attr2, op, attr1) in bc or (attr1, symm_op(op), attr2) in bc:  # don't add symmetric conditions
                         continue
                     bc.add((attr2, op, attr1))
-                    conditions.append(f'{attr2} {op} {attr1}')
-                    if attr1 in self.generated_columns.keys():
-                        predicates.append(
-                            DSLPredicate('happens_before', [f'"{attr2} {op} {attr1}"', self.generated_columns[attr1]]))
-                    if attr2 in self.generated_columns.keys():
-                        predicates.append(
-                            DSLPredicate('happens_before', [f'"{attr2} {op} {attr1}"', self.generated_columns[attr2]]))
-
-        if 'max(n)' in self.aggrs:
-            raise SquaresException('max(n) is not a valid aggregator. Use a filter instead.')
+                    add_osdict(filter_parts, frozenset((attr2, attr1)), f'{attr2} {op} {attr1}')
 
         for filter in self.filters:
-            current_predicate = []
-
             match = re.match('[a-zA-Z_][a-zA-Z_]*\(([a-zA-Z_][a-zA-Z_]*)\)', filter)
             if match:
                 col = match[1]
@@ -467,17 +373,48 @@ class Specification:
                         matching_types.append(type)
                 for type in matching_types:
                     for other_col in self.columns_by_type[type]:
-                        conditions.append(f'{other_col} == {filter}')
-                        current_predicate.append(f'"{other_col} == {filter}"')
-                        if col in self.generated_columns.keys():
-                            predicates.append(DSLPredicate('happens_before',
-                                                           [f'"{other_col} == {filter}"', self.generated_columns[col]]))
-                        if other_col in self.generated_columns.keys():
-                            predicates.append(DSLPredicate('happens_before', [f'"{other_col} == {filter}"',
-                                                                              self.generated_columns[other_col]]))
+                        add_osdict(filter_parts, ((col, other_col, filter)), f'{other_col} == {filter}')
 
-            if current_predicate:
-                predicates.append(DSLPredicate('constant_occurs', current_predicate))
+        conditions = []
+        condition_map = {}
+
+        for n in range(1, util.get_config().max_filter_combinations + 1):
+            for keys in combinations(filter_parts.keys(), n):
+                parts = list(map(lambda k: filter_parts[k], keys))
+                keyss = list(map(lambda k: [k] * len(filter_parts[k]), keys))
+
+                for part_combo, k in zip(product(*parts), product(*keyss)):
+                    cols = frozenset([col for cols in k for col in cols])
+
+                    if len(part_combo) == 1:
+                        conditions.append(part_combo[0])
+                        add_osdict(condition_map, cols, conditions[-1])
+                        for col in cols:
+                            if col in self.generated_columns.keys():
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
+
+                    else:
+                        conditions.append(' & '.join(part_combo))
+                        conditions.append(' | '.join(part_combo))
+                        add_osdict(condition_map, cols, conditions[-1])
+                        add_osdict(condition_map, cols, conditions[-2])
+
+                        for col in cols:
+                            if col in self.generated_columns.keys():
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-2]}"', self.generated_columns[col]]))
+
+        for spec_part in [self.consts, self.filters]:
+            for constant in spec_part:
+                current_predicate = []
+                for key, value in condition_map.items():
+                    if constant in key:
+                        current_predicate += list(map(lambda v: f'"{v}"', value))
+                if current_predicate:
+                    predicates.append(DSLPredicate('constant_occurs', current_predicate))
 
         return conditions, predicates
 
