@@ -121,3 +121,10 @@
 ###Different solutions
 - 55-tests/2
 - 55-tests/4
+
+###Configuration attempts
+From this point onward the new filter, summarise and join condition code is used.
+
+####try8 - knows args
+    Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),

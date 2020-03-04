@@ -19,17 +19,6 @@ from tyrell.logger import get_logger
 logger = get_logger('squares')
 
 
-def find_consts(consts):
-    for c in consts:
-        try:
-            int(c)
-            return True
-        except:
-            pass
-
-    return False
-
-
 def exec_and_return(r_script):
     robjects.r(r_script)
     return r_script
@@ -106,10 +95,7 @@ class Specification:
         else:
             self.aggrs = spec['aggrs']
         self.attrs = spec['attrs']
-        self.has_int_consts = find_consts(self.consts)
-        self.bools = spec['bools']
         self.dateorder = spec['dateorder']
-        self.loc = spec['loc']
         self.filters = spec['filters']
 
         self.tables = []
@@ -327,112 +313,6 @@ class Specification:
 
         self.dsl = dsl
 
-    def find_filter_conditions(self, predicates=None):
-        if predicates is None:
-            predicates = []
-
-        int_ops = ["==", ">", "<", ">=", "<="]
-        str_ops = ["==", "!="]
-
-        filter_parts = OrderedDict()
-
-        frozen_columns = self.filter_columns(self.columns_by_type)
-
-        for constant in self.consts_by_type[types.STRING]:
-            for column in frozen_columns[types.STRING]:
-                if util.get_config().like_enabled:
-                    add_osdict(filter_parts, frozenset((column, constant)), f"str_detect({column}, '{constant}')")
-
-                if self.constant_occurs(column, constant):
-                    for op in str_ops:
-                        add_osdict(filter_parts, frozenset((column, constant)), f"{column} {op} '{constant}'")
-
-        for constant in self.consts_by_type[types.INT] | self.consts_by_type[types.FLOAT]:
-            for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                for op in int_ops:
-                    add_osdict(filter_parts, frozenset((column, constant)), f'{column} {op} {constant}')
-
-        bc = set()  # this set is used to ensure no redundant operations are created
-        for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-            for attr2 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                if attr1 == attr2:
-                    continue
-                for op in int_ops:
-                    if (attr2, op, attr1) in bc or (attr1, symm_op(op), attr2) in bc:  # don't add symmetric conditions
-                        continue
-                    bc.add((attr2, op, attr1))
-                    add_osdict(filter_parts, frozenset((attr2, attr1)), f'{attr2} {op} {attr1}')
-
-        for filter in self.filters:
-            match = re.match('[a-zA-Z_][a-zA-Z_]*\(([a-zA-Z_][a-zA-Z_]*)\)', filter)
-            if match:
-                col = match[1]
-                matching_types = []
-                for type in types.Type:
-                    if col in self.columns_by_type[type]:
-                        matching_types.append(type)
-                for type in matching_types:
-                    for other_col in self.columns_by_type[type]:
-                        add_osdict(filter_parts, ((col, other_col, filter)), f'{other_col} == {filter}')
-
-        conditions = []
-        condition_map = {}
-
-        for n in range(1, util.get_config().max_filter_combinations + 1):
-            for keys in combinations(filter_parts.keys(), n):
-                parts = list(map(lambda k: filter_parts[k], keys))
-                keyss = list(map(lambda k: [k] * len(filter_parts[k]), keys))
-
-                for part_combo, k in zip(product(*parts), product(*keyss)):
-                    cols = frozenset([col for cols in k for col in cols])
-
-                    if len(part_combo) == 1:
-                        conditions.append(part_combo[0])
-                        add_osdict(condition_map, cols, conditions[-1])
-                        for col in cols:
-                            if col in self.generated_columns.keys():
-                                predicates.append(DSLPredicate('happens_before',
-                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
-
-                    else:
-                        conditions.append(' & '.join(part_combo))
-                        conditions.append(' | '.join(part_combo))
-                        add_osdict(condition_map, cols, conditions[-1])
-                        add_osdict(condition_map, cols, conditions[-2])
-
-                        for col in cols:
-                            if col in self.generated_columns.keys():
-                                predicates.append(DSLPredicate('happens_before',
-                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
-                                predicates.append(DSLPredicate('happens_before',
-                                                               [f'"{conditions[-2]}"', self.generated_columns[col]]))
-
-        for spec_part in [self.consts, self.filters]:
-            for constant in spec_part:
-                current_predicate = []
-                for key, value in condition_map.items():
-                    if constant in key:
-                        current_predicate += list(map(lambda v: f'"{v}"', value))
-                if current_predicate:
-                    predicates.append(DSLPredicate('constant_occurs', current_predicate))
-
-        return conditions, predicates
-
-    def constant_occurs(self, column, constant):
-        att = False
-        for input in self.tables:
-            data_frame = self.data_frames[input]
-            if att:
-                break
-
-            if column in data_frame.columns:
-                if constant in data_frame[column].values:
-                    att = True
-                    break
-            else:
-                continue
-        return att
-
     def find_summarise_conditions(self, predicates=None):
         if predicates is None:
             predicates = []
@@ -484,6 +364,97 @@ class Specification:
 
         return conditions, predicates
 
+    def find_filter_conditions(self, predicates=None):
+        if predicates is None:
+            predicates = []
+
+        int_ops = ["==", ">", "<", ">=", "<="]
+        str_ops = ["==", "!="]
+
+        filter_parts = OrderedDict()
+
+        frozen_columns = self.filter_columns(self.columns_by_type)
+
+        for constant in self.consts_by_type[types.STRING]:
+            for column in frozen_columns[types.STRING]:
+                if util.get_config().like_enabled:
+                    add_osdict(filter_parts, frozenset((column, constant)), f"str_detect({column}, '{constant}')")
+
+                if self.constant_occurs(column, constant):
+                    for op in str_ops:
+                        add_osdict(filter_parts, frozenset((column, constant)), f"{column} {op} '{constant}'")
+
+        for constant in self.consts_by_type[types.INT] | self.consts_by_type[types.FLOAT]:
+            for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+                for op in int_ops:
+                    add_osdict(filter_parts, frozenset((column, constant)), f'{column} {op} {constant}')
+
+        bc = set()  # this set is used to ensure no redundant operations are created
+        for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+            for attr2 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
+                if attr1 == attr2:
+                    continue
+                for op in int_ops:
+                    if (attr2, op, attr1) in bc or (attr1, symm_op(op), attr2) in bc:  # don't add symmetric conditions
+                        continue
+                    bc.add((attr2, op, attr1))
+                    add_osdict(filter_parts, frozenset((attr2, attr1)), f'{attr2} {op} {attr1}')
+
+        for filter in self.filters:
+            match = re.match(r'[a-zA-Z_][a-zA-Z_]*\(([a-zA-Z_][a-zA-Z_]*)\)', filter)
+            if match:
+                col = match[1]
+                matching_types = []
+                for type in types.Type:
+                    if col in self.columns_by_type[type]:
+                        matching_types.append(type)
+                for type in matching_types:
+                    for other_col in self.columns_by_type[type]:
+                        add_osdict(filter_parts, frozenset((col, other_col, filter)), f'{other_col} == {filter}')
+
+        conditions = []
+        condition_map = {}
+
+        for n in range(1, util.get_config().max_filter_combinations + 1):
+            for keys in combinations(filter_parts.keys(), n):
+                parts = list(map(lambda k: filter_parts[k], keys))
+                keyss = list(map(lambda k: [k] * len(filter_parts[k]), keys))
+
+                for part_combo, k in zip(product(*parts), product(*keyss)):
+                    cols = frozenset([col for cols in k for col in cols])
+
+                    if len(part_combo) == 1:
+                        conditions.append(part_combo[0])
+                        add_osdict(condition_map, cols, conditions[-1])
+                        for col in cols:
+                            if col in self.generated_columns.keys():
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
+
+                    else:
+                        conditions.append(' & '.join(part_combo))
+                        conditions.append(' | '.join(part_combo))
+                        add_osdict(condition_map, cols, conditions[-1])
+                        add_osdict(condition_map, cols, conditions[-2])
+
+                        for col in cols:
+                            if col in self.generated_columns.keys():
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-1]}"', self.generated_columns[col]]))
+                                predicates.append(DSLPredicate('happens_before',
+                                                               [f'"{conditions[-2]}"', self.generated_columns[col]]))
+
+        for spec_part in [self.consts, self.filters]:
+            for constant in spec_part:
+                current_predicate = []
+                for key, value in condition_map.items():
+                    if constant in key:
+                        current_predicate += list(map(lambda v: f'"{v}"', value))
+                if current_predicate:
+                    predicates.append(DSLPredicate('constant_occurs', current_predicate))
+
+        return conditions, predicates
+
     def find_inner_join_conditions(self, predicates=None) -> Tuple[List[str], List[Tuple]]:
         if predicates is None:
             predicates = []
@@ -520,11 +491,24 @@ class Specification:
 
     def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
         d = {}
-
         for type in columns_map.keys():
             d[type] = OrderedSet()
             for column in columns_map[type]:
                 if column in self.attrs or util.get_config().ignore_attrs or column in self.generated_columns.keys():
                     d[type].add(column)
-
         return d
+
+    def constant_occurs(self, column, constant):
+        att = False
+        for input in self.tables:
+            data_frame = self.data_frames[input]
+            if att:
+                break
+
+            if column in data_frame.columns:
+                if constant in data_frame[column].values:
+                    att = True
+                    break
+            else:
+                continue
+        return att

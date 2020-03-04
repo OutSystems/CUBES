@@ -27,9 +27,10 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
+        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True),
         Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-       ]
+        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
+    ]
 
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')
