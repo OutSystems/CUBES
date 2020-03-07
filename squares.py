@@ -28,12 +28,17 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['inner_join', 'semi_join']),  # original squares
-        Config(seed=seed, disabled=['inner_join', 'natural_join4'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['inner_join', 'natural_join3'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['inner_join', 'semi_join', 'natural_join4', 'anti_join', 'left_join', 'bind_rows',
-                                    'intersect'], z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, disabled=['inner_join', 'semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'semi_join']),
+        # original squares
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'natural_join4'],
+               z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'natural_join3'],
+               z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True,
+               disabled=['inner_join', 'semi_join', 'natural_join4', 'anti_join', 'left_join', 'bind_rows',
+                         'intersect'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True,
+               disabled=['inner_join', 'semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
                z3_QF_FD=True, z3_sat_phase='random'),
         Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'natural_join4'],
                z3_QF_FD=True, z3_sat_phase='random', max_column_combinations=1, max_filter_combinations=1,
