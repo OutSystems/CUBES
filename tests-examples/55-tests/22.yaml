@@ -15,15 +15,9 @@ loc: 5
 comment: |
   5.2.5 optimal solution modified (17)
 
-  catalog <- read.table("tests-examples/55-tests/tables/17-1.txt"  , sep =",", header=T)
-  catalog
-  suppliers <- read.table("tests-examples/55-tests/tables/17-3.txt"  , sep =",", header=T)
-  suppliers
-  datout <- read.table("tests-examples/55-tests/tables/22.out"  , sep =",", header=T)
-  datout
-
-  df1=inner_join(catalog,suppliers) %>%
-  filter(S_name  != "SN1") %>%
-  group_by(P_id) %>% summarise(mean = mean(cost))
-  out <- inner_join(catalog,suppliers)  %>% inner_join(df1) %>%
-  filter(cost > mean) %>% select(P_id,S_name)"
+  df1 <- inner_join(input1, input2)
+  df2 <- df1 %>% filter(S_name != 'SN1')
+  df3 <- df2 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df4 <- inner_join(inner_join(input2, input1), df3)
+  df5 <- df4 %>% filter(meancost < cost)
+  out <- df5 %>% select(P_id, S_name)

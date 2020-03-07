@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import os
 
 install_dependencies = [
     'Click',
@@ -8,8 +7,13 @@ install_dependencies = [
     'z3-solver',
     "rpy2",
     'sqlparse',
-    'PyYAML', 'pandas', 'numpy', 'ordered-set', 'python-dateutil'
+    'PyYAML',
+    'pandas',
+    'numpy',
+    'ordered-set',
+    'python-dateutil'
 ]
+
 develop_dependencies = [
     'mypy',  # for type checking
     'rpy2',  # for Morpheus. TODO: This should really belong to the client package
@@ -34,5 +38,3 @@ setup(
         ],
     },
 )
-
-os.system("conda install -c r r-dplyr r-dbplyr r-tidyr r-stringr")

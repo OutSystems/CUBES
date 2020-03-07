@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
-import argparse
 import os
-from multiprocessing import Process, SimpleQueue
 import random
+from multiprocessing import Process, SimpleQueue
 from time import sleep
 
 import squaresEnumerator
-
 from squares.config import Config
-from squares.util import create_argparser
+from squares.util import create_argparser, parse_specification
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
@@ -23,13 +21,27 @@ if __name__ == '__main__':
         logger.setLevel('DEBUG')
         get_logger('tyrell').setLevel('DEBUG')
 
+    logger.info('Parsing specification...')
+    spec = parse_specification(args.input)
+
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True),
-        # Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='random'),
-        Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'semi_join'], force_summarise=True, z3_QF_FD=True, z3_sat_phase='caching'),
+        Config(seed=seed, disabled=['inner_join', 'semi_join']),  # original squares
+        Config(seed=seed, disabled=['inner_join', 'natural_join4'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, disabled=['inner_join', 'natural_join3'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, disabled=['inner_join', 'semi_join', 'natural_join4', 'anti_join', 'left_join', 'bind_rows',
+                                    'intersect'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, disabled=['inner_join', 'semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
+               z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'natural_join4'],
+               z3_QF_FD=True, z3_sat_phase='random', max_column_combinations=1, max_filter_combinations=1,
+               starting_loc=6),
+        Config(seed=seed, ignore_aggrs=False, force_summarise=True, disabled=['inner_join', 'natural_join4'],
+               z3_QF_FD=True, z3_sat_phase='random', max_column_combinations=1, starting_loc=5),
+        Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True, z3_QF_FD=True,
+               z3_sat_phase='random'),
     ]
 
     if os.name == 'nt':
@@ -43,7 +55,8 @@ if __name__ == '__main__':
 
     Ps = []
     for i in range(len(configs)):
-        P = Process(target=squaresEnumerator.main, name=str(configs[i]), args=(args, i, configs[i], queue, args.limit),
+        P = Process(target=squaresEnumerator.main, name=str(configs[i]),
+                    args=(args, spec, i, configs[i], queue, args.limit),
                     daemon=True)
         P.start()
         Ps.append(P)

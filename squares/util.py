@@ -2,11 +2,16 @@
 import argparse
 from itertools import permutations, combinations
 from random import Random
-from typing import List, Dict, Any, Iterable, Sequence
+from typing import List, Dict, Any
 
+import yaml
 from ordered_set import OrderedSet
 
+from tyrell.logger import get_logger
+
 from .config import Config
+
+logger = get_logger('squares')
 
 counter = 0
 random = None
@@ -21,11 +26,6 @@ def seed(s):
 def next_counter():
     global counter  # FIXME
     counter += 1
-    return counter
-
-
-def current_counter():
-    global counter
     return counter
 
 
@@ -86,5 +86,30 @@ def create_argparser():
     parser.set_defaults(tree=False)
     parser.add_argument('--limit', type=int, default=7, help='maximum program size')
     parser.add_argument('--seed', default='squares')
-
     return parser
+
+
+def parse_specification(filename):
+    f = open(filename)
+
+    spec = yaml.safe_load(f)
+
+    if "inputs" not in spec:
+        logger.error('Field "inputs" is required in spec')
+        exit()
+
+    if "output" not in spec:
+        logger.error('Field "output" is required in spec')
+        exit()
+
+    for field in ["const", "aggrs", "attrs", "bools", 'filters']:
+        if field not in spec:
+            spec[field] = []
+
+    if 'dateorder' not in spec:
+        spec['dateorder'] = 'dmy'
+
+    if 'loc' not in spec:
+        spec['loc'] = 1
+
+    return spec

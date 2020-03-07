@@ -5,15 +5,14 @@ from itertools import combinations, product
 from typing import List, Tuple, Dict
 
 import pandas
-import yaml
 from ordered_set import OrderedSet
 from rpy2 import robjects
 
 import squares.types
-from squares import util, types
-from squares.DSLBuilder import DSLFunction, DSLPredicate, DSLEnum, DSLBuilder, DSLValue
+from squares import util, types, dsl_library
+from squares.DSLBuilder import DSLPredicate, DSLEnum, DSLBuilder
 from squares.exceptions import SquaresException
-from squares.util import next_counter, get_combinations, add_osdict, get_permutations
+from squares.util import next_counter, get_combinations, add_osdict
 from tyrell.logger import get_logger
 
 logger = get_logger('squares')
@@ -38,32 +37,6 @@ def read_table(path):
     logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
 
     return df
-
-
-def parse_specification(filename):
-    f = open(filename)
-
-    spec = yaml.safe_load(f)
-
-    if "inputs" not in spec:
-        logger.error('Field "inputs" is required in spec')
-        exit()
-
-    if "output" not in spec:
-        logger.error('Field "output" is required in spec')
-        exit()
-
-    for field in ["const", "aggrs", "attrs", "bools", 'filters']:
-        if field not in spec:
-            spec[field] = []
-
-    if 'dateorder' not in spec:
-        spec['dateorder'] = 'dmy'
-
-    if 'loc' not in spec:
-        spec['loc'] = 1
-
-    return Specification(spec)
 
 
 def add_is_not_parent_if_enabled(dsl, a, b):
@@ -178,7 +151,10 @@ class Specification:
         dsl.add_enum(DSLEnum('Cols', get_combinations(self.columns, util.get_config().max_column_combinations)))
         dsl.add_enum(DSLEnum('Col', list(self.columns)))
         dsl.add_enum(DSLEnum('SelectCols', [', '.join(output_attrs)]))
-        dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
+        dsl.add_enum(DSLEnum('Distinct', [
+            # 'distinct',
+            ''
+        ]))
 
         if 'inner_join' not in util.get_config().disabled:
             dsl.add_enum(DSLEnum('JoinCondition', join_conditions))
@@ -192,101 +168,49 @@ class Specification:
         if util.get_config().filters_function_enabled and len(filter_conditions) > 1:
             dsl.add_enum(DSLEnum('Op', ['|', '&']))
 
-        dsl.add_value(DSLValue('Table', [('col', 'int'), ('row', 'int'),
-                                         # ('columns', 'bv')
-                                         ]))
-        dsl.add_value(DSLValue('TableSelect', [('col', 'int'), ('row', 'int'),
-                                               # ('columns', 'bv')
-                                               ]))
+        dsl.add_value(dsl_library.table_value)
+        dsl.add_value(dsl_library.table_select_value)
 
         if 'natural_join' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('natural_join', 'Table r', ['Table a', 'Table b'], ["col(r) <= col(a) + col(b)",
-                                                                                # "columns(r) == columns(a) | columns(b)",
-                                                                                # f"columns(a) & columns(b) != *0"
-                                                                                ]))
+            dsl.add_function(dsl_library.natural_join_function)
 
         if 'natural_join3' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('natural_join3', 'Table r', ['Table a', 'Table b', 'Table c'],
-                            ["col(r) < col(a) + col(b) + col(c)",
-                             # "columns(r) == columns(a) | columns(b) | columns(c)",
-                             # f"columns(a) & columns(b) != *0",
-                             # f"(columns(a) | columns(b)) & columns(c) != *0"
-                             ]))
+            dsl.add_function(dsl_library.natural_join3_function)
 
         if 'natural_join4' not in util.get_config().disabled:
-            dsl.add_function(DSLFunction('natural_join4', 'Table r', ['Table a', 'Table b', 'Table c', 'Table d'],
-                                         ["col(r) < col(a) + col(b) + col(c) + col(d)",
-                                          # "columns(r) == columns(a) | columns(b) | columns(c) | columns(d)",
-                                          # f"columns(a) & columns(b) != *0",
-                                          # f"(columns(a) | columns(b)) & columns(c) != *0",
-                                          # f"(columns(a) | columns(b) | columns(c)) & columns(d) != *0"
-                                          ]))
+            dsl.add_function(dsl_library.natural_join4_function)
 
         if 'inner_join' not in util.get_config().disabled:
-            dsl.add_function(DSLFunction('inner_join', 'Table r', ['Table a', 'Table b', 'JoinCondition c'],
-                                         ["col(r) <= col(a) + col(b)"]))
+            dsl.add_function(dsl_library.inner_join_function)
 
         if 'anti_join' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('anti_join', 'Table r', ['Table a', 'Table b'],
-                            ["col(r) == 1", 'row(r) <= row(a)']))
+            dsl.add_function(dsl_library.anti_join_function)
 
         if 'left_join' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('left_join', 'Table r', ['Table a', 'Table b'],
-                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a)',
-                             # "columns(r) == columns(a) | columns(b)"
-                             ]))
+            dsl.add_function(dsl_library.left_join_function)
 
         if 'bind_rows' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('bind_rows', 'Table r', ['Table a', 'Table b'],
-                            ['col(r) <= col(a) + col(b)', 'row(r) == row(a) + row(b)',
-                             # "columns(r) == columns(a) | columns(b)"
-                             ]))
+            dsl.add_function(dsl_library.bind_rows_function)
 
         if 'intersect' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('intersect', 'Table r', ['Table a', 'Table b', 'Col c'],
-                            ['col(r) == 1', 'row(r) <= row(a)']))
+            dsl.add_function(dsl_library.intersect_function)
 
         if 'semi_join' not in util.get_config().disabled:
-            dsl.add_function(
-                DSLFunction('semi_join', 'Table r', ['Table a', 'Table b'], ['col(r) == col(a)', 'row(r) <= row(a)']))
+            dsl.add_function(dsl_library.semi_join_function)
 
-        dsl.add_function(DSLFunction('select', 'TableSelect r', ['Table a', 'SelectCols c', 'Distinct d'],
-                                     ['row(r) <= row(a)', 'col(r) <= col(a)',
-                                      # f"columns(r) & columns(a) != *0",
-                                      # f"columns(r) & ~columns(a) == *0",
-                                      ]))
+        dsl.add_function(dsl_library.select_function)
 
         if 'concat' in self.aggrs:
-            dsl.add_function(DSLFunction('unite', 'Table r', ['Table a', 'Col c', 'Col d'], [
-                'row(r) <= row(a)',
-                'col(r) <= col(a)'
-            ]))
+            dsl.add_function(dsl_library.unite_function)
 
         if filter_conditions:
-            dsl.add_function(DSLFunction('filter', 'Table r', ['Table a', 'FilterCondition f'], [
-                'row(r) <= row(a)',
-                'col(r) == col(a)',
-                # 'columns(r) == columns(a)'
-            ]))
+            dsl.add_function(dsl_library.filter_function)
 
             if util.get_config().filters_function_enabled and len(filter_conditions) > 1:
-                dsl.add_function(DSLFunction('filters', 'Table r', ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'], [
-                    'row(r) <= row(a)',
-                    'col(r) == col(a)'
-                    # 'columns(r) == columns(a)'
-                ]))
+                dsl.add_function(dsl_library.filters_function)
 
         if summarise_conditions:
-            dsl.add_function(DSLFunction('summariseGrouped', 'Table r', ['Table a', 'SummariseCondition s', 'Cols b'], [
-                'row(r) <= row(a)',
-                'col(r) <= ' + str(util.get_config().max_column_combinations + 1)
-            ]))
+            dsl.add_function(dsl_library.summarise_grouped_function)
 
         if summarise_conditions:
             add_is_not_parent_if_enabled(dsl, 'natural_join4', 'summariseGrouped')

@@ -15,7 +15,8 @@ loc: 4
 comment: |
   5.3.4 optimal solution sql MODIFIED
 
-  inner_join(inner_join(aircraft, certified), employees) %>%
-  filter(crusingrange > 1000) %>%
-  group_by(eid) %>% summarise(n = n())
-  %>% filter(n == max(n))
+  df1 <- input1 %>% filter(crusingrange >= 1000)
+  df2 <- inner_join(inner_join(input2, input3), df1)
+  df3 <- df2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df4 <- df3 %>% filter(n == max(n))
+  out <- df4 %>% select(eid, n)

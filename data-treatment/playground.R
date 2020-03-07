@@ -9,7 +9,18 @@ concat <- function(s,v) {
   Reduce(function(x, y) paste(x, y, sep = s), v)
 }
 
-input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
-expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
+catalog <- read_csv("tests-examples/55-tests/tables/17-1.txt")
+catalog
+suppliers <- read_csv("tests-examples/55-tests/tables/17-3.txt")
+suppliers
+datout <- read_csv("tests-examples/55-tests/tables/22.out")
+datout
 
-df1 <- input1 %>% group_by(UserId) %>% summarise(concatAlias = concat(', ', Alias))
+df1 <- inner_join(catalog,suppliers)
+df2 <- df1 %>% filter(S_name  != "SN1")
+df3 <- df2 %>% group_by(P_id) %>% summarise(meancost = mean(cost))
+df4 <- inner_join(inner_join(catalog, suppliers), df3)
+df5 <- df4 %>% filter(cost > meancost)
+out <- df5 %>% select(P_id, S_name)
+
+all_equal(datout, out)

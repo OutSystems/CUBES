@@ -5,7 +5,6 @@
 # Usage:	python3 squaresEnumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
 import logging
-import os
 import random
 import re
 from multiprocessing import Queue
@@ -16,12 +15,11 @@ import sqlparse as sp
 
 import tyrell.spec as S
 from squares import util
-from squares.SQLVisitor import SQLVisitor
-from squares.Specification import parse_specification
+from squares.Specification import Specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter
 from squares.util import create_argparser
-from tyrell.decider import Example, ExampleConstraintPruningDecider, ExampleConstraintDecider
+from tyrell.decider import Example, ExampleConstraintDecider
 from tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
@@ -60,7 +58,7 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-def main(args, id: int, conf: Config, queue: Queue, limit: int):
+def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
     util.seed(conf.seed)
     util.store_config(conf)
 
@@ -70,19 +68,18 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
 
     logger.handlers[0].set_identifier(f'prc{id}')
 
-    logger.info('Parsing specification...')
-
-    problem = parse_specification(args.input)
+    logger.info('Creating specification instance...')
+    specification = Specification(spec)
 
     if logger.isEnabledFor(logging.DEBUG):
         with open(f'dsl{id}.tyrell', 'w') as f:
-            f.write(repr(problem.dsl))
+            f.write(repr(specification.dsl))
 
-    spec = S.parse(repr(problem.dsl))
+    spec = S.parse(repr(specification.dsl))
     logger.info('Parsing succeeded')
 
     logger.info('Building synthesizer...')
-    loc = 1
+    loc = conf.starting_loc
     while loc <= limit:
         logger.info("Lines of Code: " + str(loc))
         if args.tree:
@@ -103,9 +100,9 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
             decider=ExampleConstraintDecider(
                 # decider=ExampleConstraintPruningDecider(
                 spec=spec,
-                interpreter=SquaresInterpreter(problem, False),
+                interpreter=SquaresInterpreter(specification, False),
                 examples=[
-                    Example(input=problem.tables, output='expected_output'),
+                    Example(input=specification.tables, output='expected_output'),
                 ],
                 equal_output=eq_r
             )
@@ -115,18 +112,18 @@ def main(args, id: int, conf: Config, queue: Queue, limit: int):
         prog = synthesizer.synthesize()
         if prog is not None:
             logger.info(f'Solution found: {prog}')
-            interpreter = SquaresInterpreter(problem, True)
-            evaluation = interpreter.eval(prog, problem.tables)
+            interpreter = SquaresInterpreter(specification, True)
+            evaluation = interpreter.eval(prog, specification.tables)
 
             try:
-                program = problem.r_init + interpreter.final_program
+                program = specification.r_init + interpreter.final_program
                 robjects.r(program)
                 sql_query = robjects.r(f'sink(); sql_render({evaluation})')
             except Exception:
                 logger.error('Error while trying to convert R code to SQL.')
                 sql_query = None
 
-            queue.put((problem.r_init + '\n' + interpreter.final_program,
+            queue.put((specification.r_init + '\n' + interpreter.final_program,
                        None if sql_query is None else beautifier(str(sql_query)[6:]), id))
             return
 

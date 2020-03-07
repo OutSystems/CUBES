@@ -1,7 +1,6 @@
-from typing import Optional
+import logging
 
 import click
-import logging
 
 
 class _ColorFormatter(logging.Formatter):
@@ -55,6 +54,3 @@ def get_logger(name):
     logger.handlers = [_click_handler]
     logger.propagate = False
     return logger
-
-
-

@@ -84,15 +84,6 @@
   - However there is still some variation in the results...
 
 ###Configuration attempts
-
-####try6_1
-    Config(seed=seed, disabled=['semi_join']),  # original squares
-    Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
-           z3_QF_FD=True, z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
-           z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     
 ####try7 - first try without knowing aggrs
     Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
