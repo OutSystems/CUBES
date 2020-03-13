@@ -113,3 +113,7 @@ def parse_specification(filename):
         spec['loc'] = 1
 
     return spec
+
+
+def quote_str(string: str) -> str:
+    return f'"{string}"'

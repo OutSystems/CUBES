@@ -217,10 +217,10 @@ class Specification:
             dsl.add_predicate(DSLPredicate('is_not_parent', ['summariseGrouped', 'summariseGrouped', '100']))
 
         if len(filter_conditions) == 1:
-            add_is_not_parent_if_enabled(dsl, 'inner_join', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join3', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join4', 'filter')
+            # add_is_not_parent_if_enabled(dsl, 'inner_join', 'filter')
+            # add_is_not_parent_if_enabled(dsl, 'natural_join', 'filter')
+            # add_is_not_parent_if_enabled(dsl, 'natural_join3', 'filter')
+            # add_is_not_parent_if_enabled(dsl, 'natural_join4', 'filter')
             dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
             dsl.add_predicate(DSLPredicate('distinct_inputs', ['filter']))
         elif len(filter_conditions) > 1 and util.get_config().filters_function_enabled:

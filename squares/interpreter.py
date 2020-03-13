@@ -153,3 +153,12 @@ class SquaresInterpreter(PostOrderInterpreter):
         a = list(robjects.r(f'tbl_vars({val})'))
         bools = list(map(lambda c: c in a, self.problem.all_columns))
         return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)
+
+
+def eq_r(actual, expect):
+    _rscript = f'all_equal(lapply({actual}, as.character), lapply({expect}, as.character))'
+    try:
+        ret_val = robjects.r(_rscript)
+    except:
+        return False
+    return True == ret_val[0]

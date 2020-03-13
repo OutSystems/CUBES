@@ -17,7 +17,7 @@ import tyrell.spec as S
 from squares import util
 from squares.Specification import Specification
 from squares.config import Config
-from squares.interpreter import SquaresInterpreter
+from squares.interpreter import SquaresInterpreter, eq_r
 from squares.util import create_argparser
 from tyrell.decider import Example, ExampleConstraintDecider
 from tyrell.enumerator import LinesEnumerator, SmtEnumerator
@@ -39,15 +39,6 @@ library(stringr)
 library(readr)
 library(lubridate)
 options(warn=-1)''')
-
-
-def eq_r(actual, expect):
-    _rscript = f'all_equal(lapply({actual}, as.character), lapply({expect}, as.character))'
-    try:
-        ret_val = robjects.r(_rscript)
-    except:
-        return False
-    return True == ret_val[0]
 
 
 def beautifier(sql):
@@ -147,5 +138,6 @@ if __name__ == '__main__':
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    main(args, 1, Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'bind_rows', 'semi_join'], force_summarise=True,
-                      z3_QF_FD=True, z3_sat_phase='random'), SimpleQueue(), 7)
+    main(args, 1,
+         Config(seed=seed, ignore_aggrs=False, disabled=['inner_join', 'bind_rows', 'semi_join'], force_summarise=True,
+                z3_QF_FD=True, z3_sat_phase='random'), SimpleQueue(), 7)

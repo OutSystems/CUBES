@@ -13,7 +13,7 @@ class DSLEnum(DSLElement):
     def __init__(self, name: str, values: List[str]):
         self._name = name
         self._values = values
-        self._wrapped = map(lambda x: f'"{x}"', values)
+        self._wrapped = list(map(util.quote_str, values))
 
     def __repr__(self) -> str:
         return 'enum {} {{\n\t{}\n}}\n'.format(self._name, ",\n\t".join(self._wrapped))

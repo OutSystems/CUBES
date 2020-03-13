@@ -428,12 +428,10 @@ class LinesEnumerator(Enumerator):
         self.sym_breaker = sym_breaker
         self.break_sym_online = break_sym_online
         if depth <= 0:
-            raise ValueError(
-                'Depth cannot be non-positive: {}'.format(depth))
+            raise ValueError(f'Depth cannot be non-positive: {depth}')
         self.depth = depth
         if loc <= 0:
-            raise ValueError(
-                'LOC cannot be non-positive: {}'.format(loc))
+            raise ValueError(f'LOC cannot be non-positive: {loc}')
         self.start_time = time.time()
         self.loc = loc
 
