@@ -17,14 +17,13 @@ class Config:
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
-    ignore_aggrs: bool = True
+    ignore_aggrs: bool = False
     ignore_attrs: bool = False
     force_constants: bool = True
-    force_summarise: bool = False
-    like_enabled: bool = False
+    force_summarise: bool = True
 
     alt_empty_pos: bool = False
-    shuffle_cols: bool = False
+
     z3_smt_phase: int = 3
     z3_smt_case_split: int = 1
     z3_sat_phase: str = 'caching'

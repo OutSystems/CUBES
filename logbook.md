@@ -3,15 +3,15 @@
 ###Configuration attempts
 
 ####try1
-    Config(seed=seed, disabled=['semi_join']),
-    Config(seed=seed, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
-    Config(seed=seed, disabled=['semi_join'], alt_empty_pos=False, shuffle_cols=True),
-    Config(seed=seed + 1, disabled=['semi_join'], alt_empty_pos=True, shuffle_cols=True),
+    Config(seed=seed, disabled=['inner_join', semi_join']),
+    Config(seed=seed, disabled=['inner_join', semi_join'], alt_empty_pos=True, shuffle_cols=True),
+    Config(seed=seed, disabled=['inner_join', semi_join'], alt_empty_pos=False, shuffle_cols=True),
+    Config(seed=seed + 1, disabled=['inner_join', semi_join'], alt_empty_pos=True, shuffle_cols=True),
 
 ####try2
-    Config(seed=seed, disabled=['semi_join']),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='caching'),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='random')
+    Config(seed=seed, disabled=['inner_join', 'semi_join']),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random')
 
 ####try3
     Config(seed=seed, disabled=['semi_join']),

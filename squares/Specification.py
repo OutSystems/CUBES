@@ -318,7 +318,7 @@ class Specification:
 
         for constant in self.consts_by_type[types.STRING]:
             for column in frozen_columns[types.STRING]:
-                if util.get_config().like_enabled:
+                if 'str_detect' in self.filters or 'like' in self.filters:
                     add_osdict(filter_parts, frozenset((column, constant)), f"str_detect({column}, '{constant}')")
 
                 if self.constant_occurs(column, constant):
