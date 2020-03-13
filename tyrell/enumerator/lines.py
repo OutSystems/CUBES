@@ -178,14 +178,17 @@ class LinesEnumerator(Enumerator):
         return v
 
     def createLeafVariables(self, nb, parent):
-        name = 'n' + str(nb)
+        name = f'n{nb}'
         v = Int(name)
         self.variables.append(v)
         ctr = []
 
-        values = self.leaf_productions + [i for a in range(0, parent - 1) for i in self.line_productions[a]]
-        for p in values:
+        for p in self.leaf_productions:
             ctr.append(v == p.id)
+
+        for a in range(0, parent - 1):
+            for p in self.line_productions[a]:
+                ctr.append(v == p.id)
 
         # ENCODING print(Or(ctr))
         self.z3_solver.add(Or(ctr))

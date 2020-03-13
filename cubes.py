@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import cProfile
 import multiprocessing
 import random
 import re
@@ -17,7 +18,7 @@ from squares.config import Config
 from squares.dc import generate_cubes, CubeConstraint
 from squares.interpreter import SquaresInterpreter, eq_r
 from squares.util import create_argparser, parse_specification
-from tyrell.decider import Example, ExampleConstraintDecider
+from tyrell.decider import Example, ExampleConstraintDecider, ExampleConstraintPruningDecider
 from tyrell.enumerator import LinesEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
@@ -49,8 +50,7 @@ def process_start(loc_, config, speci: Specification):
     tyrell_spec = S.parse(repr(specification.dsl))
     loc = loc_
     logger.handlers[0].set_identifier(multiprocessing.current_process().name)
-    decider = ExampleConstraintDecider(
-        # decider=ExampleConstraintPruningDecider(
+    decider = ExampleConstraintPruningDecider(
         spec=tyrell_spec,
         interpreter=SquaresInterpreter(specification, False),
         examples=[
@@ -58,15 +58,17 @@ def process_start(loc_, config, speci: Specification):
         ],
         equal_output=eq_r
     )
+    logger.debug('Creating enumerator instance...')
     enumerator = LinesEnumerator(tyrell_spec, loc + 1, loc, sym_breaker=False)
+
+
+def profile_process_start(loc_, config, speci):
+    cProfile.runctx('process_start(loc_, config, speci)', globals(), locals(),
+                    'profile-%s.out' % multiprocessing.current_process().name)
 
 
 def solve_cube(cube: List[CubeConstraint]):
     global tyrell_spec, specification, enumerator
-
-    logger.info('Starting cube %s', repr(cube))
-
-    # enumerator = LinesEnumerator(tyrell_spec, loc + 1, loc, sym_breaker=False)
 
     enumerator.z3_solver.push()
 

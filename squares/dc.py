@@ -37,7 +37,6 @@ def move(production_list, name, position):
 
 
 def generate_cubes(spec, loc: int, prefilled: int):
-    n = 0
 
     table_productions = list(
         filter(lambda x: not isinstance(x.rhs[0], int), spec._prod_spec._get_productions_with_lhs('Table')))
@@ -52,6 +51,4 @@ def generate_cubes(spec, loc: int, prefilled: int):
         for i, p in enumerate(a):
             constraints.append(LineConstraint(i, p.name))
         constraints.append(LineConstraint(loc - 1, 'select'))
-        n += 1
-        print(n)
         yield constraints

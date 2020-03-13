@@ -19,7 +19,7 @@ from squares.Specification import Specification
 from squares.config import Config
 from squares.interpreter import SquaresInterpreter, eq_r
 from squares.util import create_argparser
-from tyrell.decider import Example, ExampleConstraintDecider
+from tyrell.decider import Example, ExampleConstraintDecider, ExampleConstraintPruningDecider
 from tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
@@ -88,8 +88,7 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
         synthesizer = Synthesizer(
             # loc: # of function productions
             enumerator=enumerator,
-            decider=ExampleConstraintDecider(
-                # decider=ExampleConstraintPruningDecider(
+            decider=ExampleConstraintPruningDecider(
                 spec=spec,
                 interpreter=SquaresInterpreter(specification, False),
                 examples=[
