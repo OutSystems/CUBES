@@ -8,7 +8,6 @@ from multiprocessing import Pool
 from typing import List
 
 import sqlparse as sp
-
 from rpy2 import robjects
 
 import tyrell.spec as S
@@ -18,7 +17,7 @@ from squares.config import Config
 from squares.dc import generate_cubes, CubeConstraint
 from squares.interpreter import SquaresInterpreter, eq_r
 from squares.util import create_argparser, parse_specification
-from tyrell.decider import Example, ExampleConstraintDecider, ExampleConstraintPruningDecider
+from tyrell.decider import Example, ExampleConstraintPruningDecider
 from tyrell.enumerator import LinesEnumerator
 from tyrell.logger import get_logger
 from tyrell.synthesizer import Synthesizer
@@ -72,16 +71,15 @@ def solve_cube(cube: List[CubeConstraint]):
 
     enumerator.z3_solver.push()
 
-    for lit in cube:
-        enumerator.z3_solver.add(lit.realize_constraint(tyrell_spec, enumerator))
+    for constraint in cube:
+        enumerator.z3_solver.add(constraint.realize_constraint(tyrell_spec, enumerator))
 
     synthesizer = Synthesizer(
-        # loc: # of function productions
         enumerator=enumerator,
         decider=decider
     )
-    logger.info('Synthesizing programs...')
 
+    logger.info('Synthesizing programs...')
     prog = synthesizer.synthesize()
     enumerator.z3_solver.pop()
     return prog

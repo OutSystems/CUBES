@@ -1,8 +1,8 @@
+from collections import defaultdict
+from itertools import permutations
 from typing import (
     cast,
     Tuple,
-    Optional,
-    List,
     Set,
     FrozenSet,
     Mapping,
@@ -11,21 +11,22 @@ from typing import (
     Callable,
     Iterator
 )
-from collections import defaultdict
-from itertools import permutations
+
 import z3
-from ..interpreter import Interpreter, InterpreterError
+
+from squares import util
+from .assert_violation_handler import AssertionViolationHandler
+from .blame import Blame
+from .constraint_encoder import ConstraintEncoder
+from .eval_expr import eval_expr
+from .example_base import Example, ExampleDecider
+from .result import ok, bad
 from ..dsl import Node, AtomNode, ParamNode, ApplyNode, NodeIndexer
+from ..interpreter import Interpreter, InterpreterError
+from ..logger import get_logger
 from ..spec import Production, ValueType, TyrellSpec
 from ..spec.expr import *
-from ..logger import get_logger
 from ..visitor import GenericVisitor
-from .example_base import Example, ExampleDecider
-from .blame import Blame
-from .assert_violation_handler import AssertionViolationHandler
-from .eval_expr import eval_expr
-from .constraint_encoder import ConstraintEncoder
-from .result import ok, bad
 
 logger = get_logger('tyrell.synthesizer.constraint')
 ImplyMap = Mapping[Tuple[Production, Expr], List[Production]]
@@ -45,6 +46,8 @@ class Z3Encoder(GenericVisitor):
         self._example = example
         self._unsat_map = dict()
         self._solver = z3.Solver()
+        self._solver.set('random_seed', util.get_config().seed)
+        self._solver.set('sat.random_seed', util.get_config().seed)
 
     def get_z3_var(self, node: Node, pname: str, ptype: ExprType):
         node_id = self._indexer.get_id(node)
@@ -195,6 +198,8 @@ class ExampleConstraintDecider(ExampleDecider):
         constraint_visitor = ConstraintEncoder(encode_property)
 
         z3_solver = z3.Solver()
+        z3_solver.set('random_seed', util.get_config().seed)
+        z3_solver.set('sat.random_seed', util.get_config().seed)
         z3_pre = constraint_visitor.visit(pre)
         z3_post = constraint_visitor.visit(post)
         z3_solver.add(z3.Not(z3.Implies(z3_pre, z3_post)))

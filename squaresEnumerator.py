@@ -88,7 +88,7 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
         synthesizer = Synthesizer(
             # loc: # of function productions
             enumerator=enumerator,
-            decider=ExampleConstraintPruningDecider(
+            decider=ExampleConstraintDecider(
                 spec=spec,
                 interpreter=SquaresInterpreter(specification, False),
                 examples=[

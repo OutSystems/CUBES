@@ -11,7 +11,7 @@ test_filter <- '55-tests'
 squares <- read.csv('squares.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
 
 single <- read.csv('single.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
-single_qffd_r_n <- read.csv('qffd_r_n.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
+qffd_r_n <- read.csv('qffd_r_n.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
 
 t1 <- read.csv('try1.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
 t2 <- read.csv('try2.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
@@ -24,7 +24,7 @@ t8 <- read.csv('try8.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_dete
 t9 <- read.csv('try9.csv', header=T, stringsAsFactors=FALSE) %>% filter(str_detect(name, test_filter))
 
 # times scatter plot
-A <- 'qffd_r_n';B <- 't6_n'; merge(eval(parse(text = A)), eval(parse(text = B)), by='name', suffixes = c("_A", "_B")) %>% filter(timeout_A == 'False' | timeout_B == 'False') %>% ggplot(aes(x=real_A, y=real_B)) + geom_point(color='red', alpha = 0.4, size=2) + scale_x_continuous(trans='log10') + scale_y_continuous(trans='log10') + geom_abline() + geom_hline(yintercept=600, linetype="dashed") + geom_vline(xintercept=600, linetype="dashed") + labs(y=B, x = A) + ggtitle('Real Time')
+A <- 'squares';B <- 'qffd_r_n'; merge(eval(parse(text = A)), eval(parse(text = B)), by='name', suffixes = c("_A", "_B")) %>% filter(timeout_A == 'False' | timeout_B == 'False') %>% ggplot(aes(x=real_A, y=real_B)) + geom_point(color='red', alpha = 0.4, size=2) + scale_x_continuous(trans='log10') + scale_y_continuous(trans='log10') + geom_abline() + geom_hline(yintercept=600, linetype="dashed") + geom_vline(xintercept=600, linetype="dashed") + labs(y=B, x = A) + ggtitle('Real Time')
 
 # process distribution
 ggplot(t9, aes(x=factor(process))) + geom_bar(fill="turquoise")

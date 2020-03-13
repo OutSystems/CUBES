@@ -29,6 +29,6 @@ class Config:
     z3_sat_phase: str = 'caching'
     z3_sat_restart: str = 'ema'
     z3_sat_branching: str = 'vsids'
-    z3_QF_FD: bool = False
+    z3_QF_FD: bool = True
 
     starting_loc: int = 1
