@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES 
 parser.add_argument('-t', default=600, type=int, help='timeout')
 parser.add_argument('-j', default=-2, type=int, help='#sub-processes')
 parser.add_argument('-p', default=1, type=int, help='#processes')
+parser.add_argument('--cubes', action='store_true', help='use cubes')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args = parser.parse_args()
@@ -23,7 +24,10 @@ def test_file(filename: str):
     out_file = f'data-treatment/{args.name}/{test_name}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
-    command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-j', str(args.j), filename]
+    if not args.cubes:
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-j', str(args.j), filename]
+    else:
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', '-j', str(args.j), filename]
 
     print(' '.join(command))
     p = subprocess.run(command, capture_output=True, encoding='utf8')
