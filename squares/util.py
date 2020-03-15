@@ -72,17 +72,22 @@ def create_argparser():
     parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
     parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
     parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
+
     g = parser.add_mutually_exclusive_group()
     g.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
     g.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
+
     g = parser.add_mutually_exclusive_group()
     g.add_argument('--r', dest='r', action='store_true', help="output R program")
     g.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
     parser.set_defaults(r=True)
+
     g = parser.add_mutually_exclusive_group()
     g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
     g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
     parser.set_defaults(tree=False)
+
+    parser.add_argument('-j', type=int, default=-2, help='number of processes to use')
     parser.add_argument('--limit', type=int, default=7, help='maximum program size')
     parser.add_argument('--seed', default='squares')
     return parser

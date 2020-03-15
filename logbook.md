@@ -147,3 +147,10 @@ From this point onward the new filter, summarise and join condition code is used
            z3_QF_FD=True, z3_sat_phase='random', max_column_combinations=1, starting_loc=5),
     Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True, z3_QF_FD=True,
            z3_sat_phase='random'),
+           
+## Week 6
+
+### Configuration attempts
+
+#### cubes1
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False)

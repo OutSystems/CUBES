@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import cProfile
 import multiprocessing
+import os
 import random
 import re
 from itertools import count
@@ -10,7 +11,7 @@ from typing import List
 
 import sqlparse as sp
 from rpy2 import robjects
-from tyrell.decider import ExampleDecider
+from squares.tyrell.decider import ExampleDecider
 
 from squares import util
 from squares.specification import Specification
@@ -119,8 +120,13 @@ def main():
     specification = Specification(spec)
     tyrell_spec = S.parse(repr(specification.dsl))
 
+    if args.j > 0:
+        processes = args.j
+    else:
+        processes = os.cpu_count() + args.j
+
     for loc in count(start=1):
-        with Pool(8, initializer=process_start, initargs=(loc, config, specification)) as pool:
+        with Pool(processes, initializer=process_start, initargs=(loc, config, specification)) as pool:
             for program in pool.imap_unordered(solve_cube, generate_cubes(tyrell_spec, loc, loc - 1)):
                 if program is not None:
                     pool.terminate()
