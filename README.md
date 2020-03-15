@@ -1,80 +1,77 @@
 # SQUARES - A SQL Synthesizer Using Query Reverse Engineering
 
-Given a set of input-output examples (tables), SQUARES returns the desired query in R and in SQL. SQUARES is built on top of [Trinity](https://github.com/fredfeng/Trinity). Therefore, the same packages are required.
+Given a set of input-output examples (tables), SQUARES returns the desired query in R and in SQL. SQUARES is built on top of [Trinity](https://github.com/fredfeng/Trinity).
 
-- Prerequisite:
-    - python 3.6+
     
-How to use:
+# Usage
 
-+ using  Jupyter Notebook:
+## Using Jupyter Notebook:
     - Go to jupyter-notebook folder and launch the jupyter notebook and select demo.ipynb:
         ```
         jupyter notebook
         ```
   
-+ using [Google Colab](https://colab.research.google.com/drive/1wPwP1iWBLqmNTk9ffxNPR0mj3GbbUZr2):
+## Using [Google Colab](https://colab.research.google.com/drive/1wPwP1iWBLqmNTk9ffxNPR0mj3GbbUZr2):
     - save the google colab doc to your account and run it.
 
-+ using terminal:
+## Using CLI:
 ```
-python3 squaresEnumerator.py [tree|lines] [flags -h, ...] input.in
+usage: squares [-h] [-d] [--symm-on | --symm-off] [--r | --no-r] [--tree | --lines] [--limit LIMIT] [--seed SEED] SPECIFICATION
+
+A SQL Synthesizer Using Query Reverse Engineering
+
+positional arguments:
+  SPECIFICATION  specification file
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -d, --debug    Print debug info.
+  --symm-on      compute symmetries online
+  --symm-off     compute symmetries offline
+  --r            output R program
+  --no-r         don't output R program
+  --tree         use tree encoding
+  --lines        use line encoding
+  --limit LIMIT  maximum program size
+  --seed SEED
 ```
 
-    -  Flags:
-    + -h : help
-    + -on : computing symmetries online
-    + -off : computing symmetries offline
-    + -nr : only SQL query
-    + -d : debug info
 
-    Default: lines enumerator and without symmetry breaking
+#Installation
 
-    -- Input Files (.in): Some examples can be found in tests-examples folder
+### Prerequisites
+- Python 3.6+
+- R
 
--- Files required to integrate SQUARES in Trinity:
- + tyrell/enumerator/lines.py
- + tyrell/enumerator/lattices
- + tyrell/enumerator/gen_lattices.py
- + squares-enumerator.py
- + setup.py (modified)
+## Using [anaconda](https://www.anaconda.com)
 
-Instalation: You can either use (1) anaconda or (2) python and R packages.
-
-(1)
-
-+ Install [anaconda](https://www.anaconda.com)
-+ run 
+- Install [anaconda](https://www.anaconda.com)
+- run 
   ```
-  chmod +x config.sh
-  bash config.sh
-  conda activate squares
-  chmod +x config_squares.sh
-  bash config_squares.sh
+  TODO
   ```
  
-every time before using SQUARES run:
+- every time before using SQUARES run:
     ```
     conda activate squares
     ```
 
-or
+## Using `setup.py` and `setup.r`
 
-(2)
+- Create a new virtual environment (strongly recommended):
+  ```
+  python3 -m venv env
+  ```
 
--- Python packages (install using pip or conda):
- + sqlparse
- + z3-solver
- + sexpdata
- + click
- + rpy2
-
--- R packages (install using conda or R console):
- + dplyr
- + dbplyr
- + tidyr
- + stringr
-
+- Install python dependencies:
+  ```
+  pip install .
+  ```
+  
+- Install R dependencies:
+  ```
+  Rscript setup.r
+  ```
 
 References
 
@@ -83,5 +80,4 @@ References
  - Ruben Martins, Jia Chen, Yanju Chen, Yu Feng, Isil Dillig. Trinity: An Extensible Synthesis Framework for Data Science. VLDB'19
 - Yu Feng, Ruben Martins, Osbert Bastani, Isil Dillig. Program Synthesis using Conflict-Driven Learning. PLDI'18.
  - Yu Feng, Ruben Martins, Jacob Van Geffen, Isil Dillig, Swarat Chaudhuri. Component-based Synthesis of Table Consolidation and Transformation Tasks from Examples. PLDI'17
-
 

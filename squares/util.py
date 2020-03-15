@@ -7,9 +7,8 @@ from typing import List, Dict, Any
 import yaml
 from ordered_set import OrderedSet
 
-from tyrell.logger import get_logger
-
 from .config import Config
+from .tyrell.logger import get_logger
 
 logger = get_logger('squares')
 

@@ -1,4 +1,4 @@
-from squares.DSLBuilder import *
+from .DSLBuilder import *
 
 table_value = DSLValue('Table',
                        [

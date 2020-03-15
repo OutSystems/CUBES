@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import List, Tuple
 
-from squares import util
+from . import util
 
 
 class DSLElement(ABC):

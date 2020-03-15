@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List
 
 
 @dataclass
@@ -21,6 +21,8 @@ class Config:
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = True
+
+    is_not_parent_enabled: bool = True
 
     alt_empty_pos: bool = False
 

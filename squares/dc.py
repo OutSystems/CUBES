@@ -1,8 +1,9 @@
 from abc import ABC
 from itertools import product
+from typing import List
 
-from tyrell.spec import TyrellSpec
-from tyrell.enumerator.lines import LinesEnumerator
+from .tyrell.enumerator.lines import LinesEnumerator
+from .tyrell.spec import TyrellSpec
 
 
 class CubeConstraint(ABC):
@@ -37,7 +38,6 @@ def move(production_list, name, position):
 
 
 def generate_cubes(spec, loc: int, prefilled: int):
-
     table_productions = list(
         filter(lambda x: not isinstance(x.rhs[0], int), spec._prod_spec._get_productions_with_lhs('Table')))
 
@@ -46,9 +46,16 @@ def generate_cubes(spec, loc: int, prefilled: int):
     if find_production(table_productions, 'summariseGrouped'):
         move(table_productions, 'summariseGrouped', 3)
 
-    for a in product(table_productions, repeat=prefilled):
-        constraints = []
-        for i, p in enumerate(a):
-            constraints.append(LineConstraint(i, p.name))
-        constraints.append(LineConstraint(loc - 1, 'select'))
-        yield constraints
+    yield from sequential_generator(table_productions, prefilled)
+
+
+def sequential_generator(production_list, n: int, i: int = 0, lines: List = None):
+    if lines is None:
+        lines = []
+
+    if n == 0:
+        yield lines
+        return
+
+    for production in production_list:
+        yield from sequential_generator(production_list, n - 1, i + 1, lines + [LineConstraint(i, production.name)])

@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+import setuptools
 
 install_dependencies = [
     'Click',
@@ -15,26 +15,27 @@ install_dependencies = [
 ]
 
 develop_dependencies = [
-    'mypy',  # for type checking
     'rpy2',  # for Morpheus. TODO: This should really belong to the client package
     'lark-parser',  # for parsing
     'sphinx',  # for documentation generation
     'sqlparse',
 ]
 
-setup(
-    name='tyrell',
-    version='0.1dev',
-    packages=find_packages(),
-    license='LICENSE.txt',
+setuptools.setup(
+    name='squares',
+    version='1.0',
+    packages=setuptools.find_packages(),
+    license='LICENSE',
     description='Deduction-based synthesis framework',
     install_requires=install_dependencies,
     extras_require={
         'dev': develop_dependencies
     },
+    python_requires='>=3.6',
     entry_points={
         'console_scripts': [
-            'parse-tyrell-spec=tyrell.parse_tyrell_spec:cli',
+            'squares=squares:main',
+            'cubes=cubes:main',
         ],
     },
 )

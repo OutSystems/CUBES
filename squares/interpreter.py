@@ -1,9 +1,9 @@
 from rpy2 import robjects as robjects
 from z3 import BitVecVal
 
-from squares import util
-from squares.util import get_fresh_name
-from tyrell.interpreter import PostOrderInterpreter, GeneralError
+from . import util
+from .tyrell.interpreter import PostOrderInterpreter, GeneralError
+from .util import get_fresh_name
 
 
 def get_type(df, index):

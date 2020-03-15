@@ -3,21 +3,22 @@
 import os
 import random
 from multiprocessing import Process, SimpleQueue
-from time import sleep
+from time import sleep, time
 
-import squaresEnumerator
+from squares import squares_enumerator
 from squares.config import Config
+from squares.tyrell.logger import get_logger
 from squares.util import create_argparser, parse_specification
-from tyrell.logger import get_logger
 
 logger = get_logger('squares')
 
-if __name__ == '__main__':
+
+def main():
+    start = time()
     parser = create_argparser()
     args = parser.parse_args()
 
     if args.debug:
-        debug = True
         logger.setLevel('DEBUG')
         get_logger('tyrell').setLevel('DEBUG')
 
@@ -28,9 +29,7 @@ if __name__ == '__main__':
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['inner_join', 'semi_join']),
-        Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
-        Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random')
+        Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     ]
 
     if os.name == 'nt':
@@ -44,7 +43,7 @@ if __name__ == '__main__':
 
     Ps = []
     for i in range(len(configs)):
-        P = Process(target=squaresEnumerator.main, name=str(configs[i]),
+        P = Process(target=squares_enumerator.main, name=str(configs[i]),
                     args=(args, spec, i, configs[i], queue, args.limit),
                     daemon=True)
         P.start()
@@ -66,6 +65,7 @@ if __name__ == '__main__':
     if not queue.empty():
         r, sql, process_id = queue.get()
 
+        print('Time: ', time() - start)
         print(f'Solution found using process {process_id}')
         print()
         if args.r:
@@ -82,3 +82,7 @@ if __name__ == '__main__':
     else:
         print("No solution found")
         exit(1)
+
+
+if __name__ == '__main__':
+    main()

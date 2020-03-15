@@ -5,22 +5,24 @@ import random
 import re
 from itertools import count
 from multiprocessing import Pool
+from time import time
 from typing import List
 
 import sqlparse as sp
 from rpy2 import robjects
+from tyrell.decider import ExampleDecider
 
-import tyrell.spec as S
 from squares import util
-from squares.Specification import Specification
+from squares.specification import Specification
 from squares.config import Config
 from squares.dc import generate_cubes, CubeConstraint
 from squares.interpreter import SquaresInterpreter, eq_r
+from squares.tyrell import spec as S
+from squares.tyrell.decider import Example, ExampleConstraintPruningDecider, ExampleConstraintDecider
+from squares.tyrell.enumerator import LinesEnumerator, ExhaustiveEnumerator
+from squares.tyrell.logger import get_logger
+from squares.tyrell.synthesizer import Synthesizer
 from squares.util import create_argparser, parse_specification
-from tyrell.decider import Example, ExampleConstraintPruningDecider
-from tyrell.enumerator import LinesEnumerator
-from tyrell.logger import get_logger
-from tyrell.synthesizer import Synthesizer
 
 robjects.r('''
 zz <- file("r_output.log", open = "wt")
@@ -40,24 +42,24 @@ logger = get_logger('squares')
 def process_start(loc_, config, speci: Specification):
     global tyrell_spec, specification, loc, decider, enumerator
 
+    logger.handlers[0].set_identifier(multiprocessing.current_process().name)
     logger.setLevel('DEBUG')
-    get_logger('tyrell').setLevel('DEBUG')
+
+    logger.debug('Initialising process for %d lines of code.', loc_)
 
     util.store_config(config)
     speci.generate_r_init()  # must initialize R
     specification = speci
     tyrell_spec = S.parse(repr(specification.dsl))
     loc = loc_
-    logger.handlers[0].set_identifier(multiprocessing.current_process().name)
-    decider = ExampleConstraintPruningDecider(
-        spec=tyrell_spec,
+
+    decider = ExampleDecider(
         interpreter=SquaresInterpreter(specification, False),
         examples=[
             Example(input=specification.tables, output='expected_output'),
         ],
         equal_output=eq_r
     )
-    logger.debug('Creating enumerator instance...')
     enumerator = LinesEnumerator(tyrell_spec, loc + 1, loc, sym_breaker=False)
 
 
@@ -68,6 +70,8 @@ def profile_process_start(loc_, config, speci):
 
 def solve_cube(cube: List[CubeConstraint]):
     global tyrell_spec, specification, enumerator
+
+    logger.debug('Solving cube %s', repr(cube))
 
     enumerator.z3_solver.push()
 
@@ -93,14 +97,15 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-if __name__ == '__main__':
+def main():
+    start = time()
+
     parser = create_argparser()
     args = parser.parse_args()
 
     if args.debug:
-        debug = True
         logger.setLevel('DEBUG')
-        get_logger('tyrell').setLevel('DEBUG')
+        # get_logger('tyrell').setLevel('DEBUG')
 
     logger.info('Parsing specification...')
     spec = parse_specification(args.input)
@@ -108,16 +113,15 @@ if __name__ == '__main__':
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, ignore_aggrs=False, disabled=['semi_join'], force_summarise=True,
-                    z3_QF_FD=True, z3_sat_phase='random')
+    config = Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False)
     util.store_config(config)
 
     specification = Specification(spec)
     tyrell_spec = S.parse(repr(specification.dsl))
 
     for loc in count(start=1):
-        with Pool(initializer=process_start, initargs=(loc, config, specification)) as pool:
-            for program in pool.imap_unordered(solve_cube, generate_cubes(tyrell_spec, loc, loc - 1), chunksize=5):
+        with Pool(8, initializer=process_start, initargs=(loc, config, specification)) as pool:
+            for program in pool.imap_unordered(solve_cube, generate_cubes(tyrell_spec, loc, loc - 1)):
                 if program is not None:
                     pool.terminate()
 
@@ -133,6 +137,7 @@ if __name__ == '__main__':
                         logger.error('Error while trying to convert R code to SQL.')
                         sql_query = None
 
+                    print('Time: ', time() - start)
                     print()
                     if args.r:
                         print(
@@ -151,3 +156,7 @@ if __name__ == '__main__':
 
     print("No solution found")
     exit(1)
+
+
+if __name__ == '__main__':
+    main()
