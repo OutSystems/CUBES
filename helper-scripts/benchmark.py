@@ -40,7 +40,7 @@ def test_file(filename: str):
         status = None if timeout else 0
 
     process = None
-    if not timeout:
+    if not timeout and not args.cubes:
         with open(out_file) as f:
             log = f.read()
             process = int(re.search('Solution found using process (.*)', log)[1])
