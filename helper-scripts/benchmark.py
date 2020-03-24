@@ -25,7 +25,7 @@ def test_file(filename: str):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-j', str(args.j), filename]
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', filename]
     else:
         command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', '-j', str(args.j), filename]
 
@@ -62,5 +62,9 @@ with open('data-treatment/' + args.name + '.csv', 'w') as f:
     writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
     f.flush()
 
-with Pool(processes=args.p) as pool:
-    pool.map(test_file, glob.glob('tests/**/*.yaml', recursive=True), chunksize=1)
+if args.p == 1:
+    for file in glob.glob('tests/**/*.yaml', recursive=True):
+        test_file(file)
+else:
+    with Pool(processes=args.p) as pool:
+        pool.map(test_file, glob.glob('tests/**/*.yaml', recursive=True), chunksize=1)

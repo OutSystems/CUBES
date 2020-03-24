@@ -9,9 +9,9 @@
     Config(seed=seed + 1, disabled=['inner_join', semi_join'], alt_empty_pos=True, shuffle_cols=True),
 
 ####try2
-    Config(seed=seed, disabled=['inner_join', 'semi_join']),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], filters_function_enabled=True, max_filter_combinations=1),
     Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
-    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random')
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
 
 ####try3
     Config(seed=seed, disabled=['semi_join']),
@@ -19,17 +19,17 @@
     Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='random'),
 
 ####try4:
-    Config(seed=seed, disabled=['semi_join']),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='always_false'),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='caching'),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='always_true'),
-    Config(seed=seed, disabled=['semi_join'],z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], max_filter_combinations=1, filters_function_enabled=True),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='always_false'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='always_true'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
 
 ####try5:
-    Config(seed=seed, disabled=['semi_join']),
-    Config(seed=seed, disabled=['semi_join'], z3_smt_phase=6),
-    Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
-    Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], max_filter_combinations=1, filters_function_enabled=True),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_smt_phase=6),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='caching'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
 
 ##Week 2
 
@@ -51,14 +51,12 @@
 ###Configuration attempts
 
 ####try6
-    Config(seed=seed, disabled=['semi_join']),  # original squares
-    Config(seed=seed, disabled=['inner_join4'], z3_QF_FD=True, z3_sat_phase='random'),
-    Config(seed=seed, disabled=['inner_join3'], z3_QF_FD=True, z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join', 'inner_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'],
-           z3_QF_FD=True, z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True,
-           z3_sat_phase='random'),
-    Config(seed=seed, disabled=['semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], filters_function_enabled=True, max_filter_combinations=1),
+    Config(seed=seed, disabled=['inner_join', 'natural_join4'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'natural_join3'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join', 'natural_join4', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join', 'anti_join', 'left_join', 'bind_rows', 'intersect'], z3_QF_FD=True, z3_sat_phase='random'),
+    Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     
 ##Week 3
 
@@ -149,6 +147,9 @@ From this point onward the new filter, summarise and join condition code is used
            z3_sat_phase='random'),
            
 ## Week 6
+
+###New
+- Added very basic space splitting. Using the first n-1 lines and only fixing the function (not the arguments)
 
 ### Configuration attempts
 

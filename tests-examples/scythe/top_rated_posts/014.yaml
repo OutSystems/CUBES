@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i014.csv
+output: tests-examples/scythe/top_rated_posts/tables/o014.csv
+aggrs:
+  - concat
+attrs:
+  - string
+comment: |
+  SELECT id, GROUP_CONCAT(string SEPARATOR ' ')
+  FROM table
+  GROUP BY id;
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- input1 %>% group_by(id) %>% summarise(concatstring = string_agg(string, ', ')) %>% ungroup()
+  out <- df1 %>% select(id, concatstring) %>% distinct()

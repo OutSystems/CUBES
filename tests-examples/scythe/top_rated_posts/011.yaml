@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i011_1.csv
+  - tests-examples/scythe/top_rated_posts/tables/i011_2.csv
+output: tests-examples/scythe/top_rated_posts/tables/o011.csv
+aggrs:
+  - concat
+attrs:
+  - City
+comment: |
+  select t1.VehicleID, t1.Name, t2.concatLocations
+  from (select VehicleID, concat(City) As concatLocations
+        from  t2
+        group by VehicleID)
+  join t1
+  on t1.VehicleID = t2.VehicleID
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- left_join(input1, input2)
+  df2 <- df1 %>% group_by(Name, VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+  out <- df2 %>% select(VehicleID, Name, concatCity) %>% distinct()

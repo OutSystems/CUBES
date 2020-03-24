@@ -1,0 +1,18 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i028_1.csv
+  - tests-examples/scythe/top_rated_posts/tables/i028_2.csv
+output: tests-examples/scythe/top_rated_posts/tables/o028.csv
+aggrs:
+  - concat
+attrs:
+  - Desc
+comment: |
+  SELECT pid, LISTAGG(Desc, ' ') WITHIN GROUP (ORDER BY seq) AS desc
+  FROM   B
+  GROUP BY pid;
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- inner_join(input2, input1)
+  df2 <- df1 %>% group_by(PID) %>% summarise(concatDesc = string_agg(Desc, ' ')) %>% ungroup()
+  out <- df2 %>% select(PID, concatDesc)

@@ -1,28 +1,19 @@
 #!/usr/bin/env python
-import cProfile
-import multiprocessing
 import os
 import random
 import re
-from itertools import count
-from multiprocessing import Pool
 from time import time
-from typing import List
 
 import sqlparse as sp
 from rpy2 import robjects
-from squares.tyrell.decider import ExampleDecider
 
 from squares import util
-from squares.specification import Specification
 from squares.config import Config
-from squares.dc import generate_cubes, CubeConstraint
-from squares.interpreter import SquaresInterpreter, eq_r
-from squares.tyrell import spec as S
-from squares.tyrell.decider import Example, ExampleConstraintPruningDecider, ExampleConstraintDecider
-from squares.tyrell.enumerator import LinesEnumerator, ExhaustiveEnumerator
+from squares.interpreter import SquaresInterpreter
+from squares.parallel_synthesizer import ParallelSynthesizer
+from squares.specification import Specification
 from squares.tyrell.logger import get_logger
-from squares.tyrell.synthesizer import Synthesizer
+from squares.tyrell import spec as S
 from squares.util import create_argparser, parse_specification
 
 robjects.r('''
@@ -38,56 +29,6 @@ library(lubridate)
 options(warn=-1)''')
 
 logger = get_logger('squares')
-
-
-def process_start(loc_, config, speci: Specification):
-    global tyrell_spec, specification, loc, decider, enumerator
-
-    logger.handlers[0].set_identifier(multiprocessing.current_process().name)
-    logger.setLevel('DEBUG')
-
-    logger.debug('Initialising process for %d lines of code.', loc_)
-
-    util.store_config(config)
-    speci.generate_r_init()  # must initialize R
-    specification = speci
-    tyrell_spec = S.parse(repr(specification.dsl))
-    loc = loc_
-
-    decider = ExampleDecider(
-        interpreter=SquaresInterpreter(specification, False),
-        examples=[
-            Example(input=specification.tables, output='expected_output'),
-        ],
-        equal_output=eq_r
-    )
-    enumerator = LinesEnumerator(tyrell_spec, loc + 1, loc, sym_breaker=False)
-
-
-def profile_process_start(loc_, config, speci):
-    cProfile.runctx('process_start(loc_, config, speci)', globals(), locals(),
-                    'profile-%s.out' % multiprocessing.current_process().name)
-
-
-def solve_cube(cube: List[CubeConstraint]):
-    global tyrell_spec, specification, enumerator
-
-    logger.debug('Solving cube %s', repr(cube))
-
-    enumerator.z3_solver.push()
-
-    for constraint in cube:
-        enumerator.z3_solver.add(constraint.realize_constraint(tyrell_spec, enumerator))
-
-    synthesizer = Synthesizer(
-        enumerator=enumerator,
-        decider=decider
-    )
-
-    logger.info('Synthesizing programs...')
-    prog = synthesizer.synthesize()
-    enumerator.z3_solver.pop()
-    return prog
 
 
 def beautifier(sql):
@@ -114,7 +55,7 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False)
+    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False, disabled=['inner_join'])
     util.store_config(config)
 
     specification = Specification(spec)
@@ -125,40 +66,38 @@ def main():
     else:
         processes = os.cpu_count() + args.j
 
-    for loc in count(start=1):
-        with Pool(processes, initializer=process_start, initargs=(loc, config, specification)) as pool:
-            for program in pool.imap_unordered(solve_cube, generate_cubes(tyrell_spec, loc, loc - 1)):
-                if program is not None:
-                    pool.terminate()
+    synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
+    program = synthesizer.synthesize()
 
-                    logger.info(f'Solution found: {program}')
-                    interpreter = SquaresInterpreter(specification, True)
-                    evaluation = interpreter.eval(program, specification.tables)
+    if program is not None:
+        logger.info(f'Solution found: {program}')
+        interpreter = SquaresInterpreter(specification, True)
+        evaluation = interpreter.eval(program, specification.tables)
 
-                    try:
-                        program = specification.r_init + interpreter.final_program
-                        robjects.r(program)
-                        sql_query = robjects.r(f'sink(); sql_render({evaluation})')
-                    except Exception:
-                        logger.error('Error while trying to convert R code to SQL.')
-                        sql_query = None
+        try:
+            program = specification.r_init + interpreter.final_program
+            robjects.r(program)
+            sql_query = robjects.r(f'sink(); sql_render({evaluation})')
+        except Exception:
+            logger.error('Error while trying to convert R code to SQL.')
+            sql_query = None
 
-                    print('Time: ', time() - start)
-                    print()
-                    if args.r:
-                        print(
-                            "------------------------------------- R Solution ---------------------------------------\n")
-                        print(specification.r_init + '\n' + interpreter.final_program)
+        print('Time: ', time() - start)
+        print()
+        if args.r:
+            print(
+                "------------------------------------- R Solution ---------------------------------------\n")
+            print(specification.r_init + '\n' + interpreter.final_program)
 
-                    if sql_query is not None:
-                        print()
-                        print(
-                            "+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-                        print(beautifier(str(sql_query)[6:]))
-                        exit()
-                    else:
-                        print('Failed to generate SQL query')
-                        exit(2)
+        if sql_query is not None:
+            print()
+            print(
+                "+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+            print(beautifier(str(sql_query)[6:]))
+            exit()
+        else:
+            print('Failed to generate SQL query')
+            exit(2)
 
     print("No solution found")
     exit(1)

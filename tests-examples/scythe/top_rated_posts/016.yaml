@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i016.csv
+output: tests-examples/scythe/top_rated_posts/tables/o016.csv
+aggrs:
+  - concat
+attrs:
+  - EMPLOYEE
+comment: |
+  SELECT company_id, array_to_string(array_agg(employee), ', ')
+  FROM mytable
+  GROUP BY company_id;
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- input1 %>% group_by(COMPANY_ID) %>% summarise(concatEMPLOYEE = string_agg(EMPLOYEE, ', ')) %>% ungroup()
+  out <- df1 %>% select(COMPANY_ID, concatEMPLOYEE) %>% distinct()

@@ -150,10 +150,7 @@ class Specification:
         dsl.add_enum(DSLEnum('Cols', get_combinations(self.columns, util.get_config().max_column_combinations)))
         dsl.add_enum(DSLEnum('Col', list(self.columns)))
         dsl.add_enum(DSLEnum('SelectCols', [', '.join(output_attrs)]))
-        dsl.add_enum(DSLEnum('Distinct', [
-            # 'distinct',
-            ''
-        ]))
+        dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if 'inner_join' not in util.get_config().disabled:
             dsl.add_enum(DSLEnum('JoinCondition', join_conditions))

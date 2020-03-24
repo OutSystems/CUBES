@@ -2,7 +2,7 @@
 import argparse
 from itertools import permutations, combinations
 from random import Random
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Iterable
 
 import yaml
 from ordered_set import OrderedSet
@@ -121,3 +121,10 @@ def parse_specification(filename):
 
 def quote_str(string: str) -> str:
     return f'"{string}"'
+
+
+def count(iter: Iterable) -> int:
+    try:
+        return len(iter)
+    except TypeError:
+        return sum(1 for _ in iter)

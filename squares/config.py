@@ -6,7 +6,10 @@ from typing import List
 class Config:
     seed: int
 
+    starting_loc: int = 1
+
     lines_force_all_inputs: bool = True
+    is_not_parent_enabled: bool = True
 
     bitvector_size: int = 16  # TODO should not be a fixed number
 
@@ -17,12 +20,11 @@ class Config:
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
+
     ignore_aggrs: bool = False
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = True
-
-    is_not_parent_enabled: bool = True
 
     alt_empty_pos: bool = False
 
@@ -32,5 +34,3 @@ class Config:
     z3_sat_restart: str = 'ema'
     z3_sat_branching: str = 'vsids'
     z3_QF_FD: bool = True
-
-    starting_loc: int = 1

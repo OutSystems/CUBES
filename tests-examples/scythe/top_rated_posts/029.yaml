@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i029.csv
+output: tests-examples/scythe/top_rated_posts/tables/o029.csv
+aggrs:
+  - concat
+attrs:
+  - Person
+comment: |
+  select TicketId, listagg(Person, ', ') People
+  from table
+  group by TicketId
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- input1 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
+  out <- df1 %>% select(TicketID, concatPerson)

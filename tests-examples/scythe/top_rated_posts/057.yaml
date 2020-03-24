@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i057.csv
+output: tests-examples/scythe/top_rated_posts/tables/o057.csv
+aggrs:
+  - min
+attrs:
+  - Birthyear
+comment: |
+  SELECT Name, City, Birthyear, COUNT(*) AS ct
+  FROM table
+  WHERE Birthyear IN (SELECT MIN(Birthyear)
+                 FROM table
+                 GROUP by City)
+  GROUP BY City
+  ORDER BY Birthyear DESC LIMIT 3;
+
+  df1 <- input1 %>% group_by(City) %>% summarise(minBirthyear = min(Birthyear)) %>% ungroup()
+  df2 <- inner_join(df1, input1, by=c('minBirthyear' = 'Birthyear','City' = 'City'), suffix = c('', '.other'))
+  out <- df2 %>% select(Name, City, minBirthyear)
