@@ -8,6 +8,8 @@ class Config:
 
     starting_loc: int = 1
 
+    optimal: bool = False
+
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True
 
@@ -25,6 +27,8 @@ class Config:
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = True
+
+    solution_use_last_line: bool = False
 
     alt_empty_pos: bool = False
 

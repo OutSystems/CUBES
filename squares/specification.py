@@ -69,6 +69,12 @@ class Specification:
         self.attrs = spec['attrs']
         self.dateorder = spec['dateorder']
         self.filters = spec['filters']
+        if 'solution' in spec:
+            self.solution = spec['solution']
+        else:
+            self.solution = None
+
+        self.min_loc = 1 + len(self.aggrs) + (1 if self.filters or self.consts else 0)
 
         self.tables = []
         self.data_frames = {}

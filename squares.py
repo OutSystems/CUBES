@@ -29,7 +29,13 @@ def main():
     seed = random.randrange(2 ** 16)
 
     configs = [
-        Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, disabled=['inner_join', 'semi_join'], ignore_aggrs=True, force_summarise=False, z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=[], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["max"], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["min"], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["mean"], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["n"], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
+        Config(seed=seed, aggregation_functions=["n", "max"], ignore_aggrs=True, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random'),
     ]
 
     if os.name == 'nt':

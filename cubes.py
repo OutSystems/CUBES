@@ -55,7 +55,7 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False, disabled=['inner_join'])
+    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False, disabled=['inner_join', 'semi_join'], optimal=True)
     util.store_config(config)
 
     specification = Specification(spec)
@@ -85,6 +85,7 @@ def main():
         print('Time: ', time() - start)
         print()
         if args.r:
+            pass
             print(
                 "------------------------------------- R Solution ---------------------------------------\n")
             print(specification.r_init + '\n' + interpreter.final_program)

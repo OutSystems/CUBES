@@ -1,6 +1,8 @@
 # NOTE: this file should be the only one allowed to use 'global'
 import argparse
+import multiprocessing
 from itertools import permutations, combinations
+from multiprocessing import Queue
 from random import Random
 from typing import List, Dict, Any, Iterable
 
@@ -128,3 +130,10 @@ def count(iter: Iterable) -> int:
         return len(iter)
     except TypeError:
         return sum(1 for _ in iter)
+
+
+def get_all(queue: Queue) -> List:
+    acum = []
+    while not queue.empty():
+        acum.append(queue.get())
+    return acum

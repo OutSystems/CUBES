@@ -5,24 +5,21 @@
 # Usage:	python3 squares_enumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
 import logging
-import random
 import re
 from multiprocessing import Queue
-from multiprocessing import SimpleQueue
 
 import rpy2.robjects as robjects
 import sqlparse as sp
 
 from . import util
-from .specification import Specification
 from .config import Config
 from .interpreter import SquaresInterpreter, eq_r
+from .specification import Specification
 from .tyrell import spec as S
-from .tyrell.decider import Example, ExampleConstraintDecider, ExampleConstraintPruningDecider
+from .tyrell.decider import Example, ExampleConstraintDecider
 from .tyrell.enumerator import LinesEnumerator, SmtEnumerator
 from .tyrell.logger import get_logger
 from .tyrell.synthesizer import Synthesizer
-from .util import create_argparser
 
 # warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
@@ -77,11 +74,11 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
             enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
         else:
             if args.symm_off:
-                enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc)
+                enumerator = LinesEnumerator(spec, loc=loc)
             elif args.symm_on:
-                enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, break_sym_online=True)
+                enumerator = LinesEnumerator(spec, loc=loc, break_sym_online=True)
             else:
-                enumerator = LinesEnumerator(spec, depth=loc + 1, loc=loc, sym_breaker=False)
+                enumerator = LinesEnumerator(spec, loc=loc, sym_breaker=False)
 
         # enumerator = ExhaustiveEnumerator(spec, loc)
 

@@ -2,6 +2,7 @@ from rpy2 import robjects as robjects
 from z3 import BitVecVal
 
 from . import util
+from .exceptions import REvaluationError
 from .tyrell.interpreter import PostOrderInterpreter, GeneralError
 from .util import get_fresh_name
 
@@ -34,7 +35,7 @@ class SquaresInterpreter(PostOrderInterpreter):
             robjects.r(script)
             return name
         except Exception as e:
-            raise GeneralError(node)
+            raise REvaluationError(node, e)
 
     def eval_select(self, node, args):
         name = self.fresh_table()

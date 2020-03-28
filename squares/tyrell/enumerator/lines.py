@@ -401,7 +401,7 @@ class LinesEnumerator(Enumerator):
             msg = 'Failed to resolve predicates. {}'.format(e)
             raise RuntimeError(msg) from None
 
-    def __init__(self, spec, depth=None, loc=None, sym_breaker=True, break_sym_online=False):
+    def __init__(self, spec, loc=None, sym_breaker=True, break_sym_online=False):
 
         if util.get_config().z3_QF_FD:
             self.z3_solver = SolverFor('QF_FD')  # TODO SMTFD might be better when it eventually gets released
@@ -433,9 +433,6 @@ class LinesEnumerator(Enumerator):
         self.num_variables = 0
         self.sym_breaker = sym_breaker
         self.break_sym_online = break_sym_online
-        if depth <= 0:
-            raise ValueError(f'Depth cannot be non-positive: {depth}')
-        self.depth = depth
         if loc <= 0:
             raise ValueError(f'LOC cannot be non-positive: {loc}')
         self.start_time = time.time()
@@ -519,7 +516,7 @@ class LinesEnumerator(Enumerator):
     def findLattices(self):
         # lattices = dict()
         # try:
-        lats = open("tyrell/enumerator/lattices/loc-" + str(self.loc), "r+")
+        lats = open("squares/tyrell/enumerator/lattices/loc-" + str(self.loc), "r+")
         lats = lats.readlines()
         for l in lats:
             # print(l)
@@ -557,7 +554,7 @@ class LinesEnumerator(Enumerator):
         if self.loc < 6 or self.break_sym_online or not self.sym_breaker:
             return
 
-        lats = open("tyrell/enumerator/lattices/loc-" + str(self.loc), "w+")
+        lats = open("squares/tyrell/enumerator/lattices/loc-" + str(self.loc), "w+")
 
         for l, mdls in self.lattices.items():
             st = l + ":"
@@ -859,18 +856,17 @@ class LinesEnumerator(Enumerator):
     #             exit()
 
     def next(self):
-        while True:
-            start_time = time.time()
-            res = self.z3_solver.check()
-            # logger.error('Solver Check Time: {}'.format(time.time()-start_time))
-            self.solverTime += time.time() - start_time
-            if res != sat:
-                return None
-            model_time = time.time()
-            self.model = self.z3_solver.model()
-            # logger.error('Solver Model Time: {}'.format(time.time()-model_time))
+        start_time = time.time()
+        res = self.z3_solver.check()
+        # logger.error('Solver Check Time: {}'.format(time.time()-start_time))
+        self.solverTime += time.time() - start_time
+        if res != sat:
+            return None
+        model_time = time.time()
+        self.model = self.z3_solver.model()
+        # logger.error('Solver Model Time: {}'.format(time.time()-model_time))
 
-            if self.model is not None:
-                return self.constructProgram()
-            else:
-                return None
+        if self.model is not None:
+            return self.constructProgram()
+        else:
+            return None
