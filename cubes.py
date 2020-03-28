@@ -55,7 +55,7 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False, disabled=['inner_join', 'semi_join'], optimal=True)
+    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', disabled=['inner_join', 'semi_join'])
     util.store_config(config)
 
     specification = Specification(spec)

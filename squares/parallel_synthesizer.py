@@ -91,7 +91,10 @@ def run_process(pipe: Pipe, config: Config, specification: Specification, blackl
             for constraint in object:
                 enumerator.z3_solver.add(constraint.realize_constraint(tyrell_specification, enumerator))
 
-            prog = synthesize(enumerator, decider, blacklist_queue)
+            try:
+                prog = synthesize(enumerator, decider, blacklist_queue)
+            except Exception:
+                prog = None
             enumerator.z3_solver.pop()
             pipe.send(prog)
 
@@ -138,17 +141,17 @@ class ParallelSynthesizer:
             ready_pipes, _, _ = select(pipes, [], [])
 
             for pipe in ready_pipes:
-                print(locs.values())
                 process_loc = locs[pipe]
 
                 program = pipe.recv()
-                print(program)
                 if solution_loc and solution_loc <= min(locs.values()):
                     return solution
 
+                if solution_loc:
+                    locs[pipe] = solution_loc
+
                 if program:
-                    if process_loc == min(locs.values()) or not util.get_config().optimal:
-                        print(process_loc, min(locs.values()), locs.values())
+                    if process_loc <= min(locs.values()) or not util.get_config().optimal:
                         return program
 
                     logger.info('Waiting for loc %d to finish before returning solution of loc %d', min(locs.values()), process_loc)

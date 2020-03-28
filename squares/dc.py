@@ -72,7 +72,7 @@ class Atom:
         return spec.get_enum_production(self.lhs, self.rhs).id
 
     def __repr__(self) -> str:
-        return f'{self.rhs}:{self.lhs}'
+        return f'{self.rhs}'
 
 
 def map_node(node):

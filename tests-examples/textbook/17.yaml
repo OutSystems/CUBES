@@ -19,4 +19,9 @@ comment: |
   inner_join(catalog,suppliers) %>% inner_join(df1) %>%
   filter(cost > mean) %>% select(part_key,sname)
 
+  df1 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df2 <- inner_join(inner_join(input2, input1), df1)
+  df3 <- df2 %>% filter(meancost < cost)
+  out <- df3 %>% select(P_id, S_name) %>% distinct()
+
   # not used tests-examples/textbook/tables/17-2.txt
