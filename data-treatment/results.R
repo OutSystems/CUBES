@@ -24,7 +24,7 @@ load_result_squares <- function(file) {
 }
 
 load_result_file <- function(file) {
-  read_csv(file, col_types = cols(
+  t <- read_csv(file, col_types = cols(
     name = col_character(),
     timeout = col_logical(),
     real = col_double(),
@@ -32,7 +32,10 @@ load_result_file <- function(file) {
     ram = col_double(),
     process = col_character(),
     status = col_factor(levels = status)
-  )) %>% filter(str_detect(name, test_filter))
+  )) %>%
+    filter(str_detect(name, test_filter))
+  t$status[t$timeout == T] <- NA
+  t
 }
 
 scatter <- function(A, B) {
@@ -135,6 +138,11 @@ t6 <- load_result_file('try6.csv')
 # t8 <- load_result_file('try8.csv')
 # t9 <- load_result_file('try9.csv')
 
+c0_2 <- load_result_file('cubes0_2.csv')
+c0_4 <- load_result_file('cubes0_4.csv')
+c0_8 <- load_result_file('cubes0_8.csv')
+c0_16 <- load_result_file('cubes0_16.csv')
+
 c1_2 <- load_result_file('cubes1_2.csv')
 c1_4 <- load_result_file('cubes1_4.csv')
 c1_8 <- load_result_file('cubes1_8.csv')
@@ -162,12 +170,12 @@ ggplot(t6, aes(x = factor(process))) + geom_bar(fill = "turquoise")
 
 # ggplot(c1_2, aes(x = real)) + geom_histogram()
 
-bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
+bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
 bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
 bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)
 
-boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
+boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
 boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
-boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)
+boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
 
 boxplot_ram(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)

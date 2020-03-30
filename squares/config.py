@@ -17,12 +17,14 @@ class Config:
 
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
+    max_columns: int = 6
 
     filters_function_enabled: bool = False
 
     disabled: List[str] = field(default_factory=list)
     aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
 
+    ignore_cols: bool = False
     ignore_aggrs: bool = False
     ignore_attrs: bool = False
     force_constants: bool = True

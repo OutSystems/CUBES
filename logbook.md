@@ -155,3 +155,15 @@ From this point onward the new filter, summarise and join condition code is used
 
 #### cubes1
     Config(seed=seed, disabled=['inner_join', 'semi_join'], z3_QF_FD=True, z3_sat_phase='random', is_not_parent_enabled=False)
+    
+## Week 8
+
+## 55-tests/22
+- last line: 41m56 (30 processes)
+- 2 last lines: 2m40 (30 processes)
+
+## 55-tests/43
+- last line: 1m20 (just 5 lines, weird solution) (30 processes)
+
+## 55-tests/46
+- last line: 1h+ timeout (30 processes)

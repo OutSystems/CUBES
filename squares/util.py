@@ -1,8 +1,10 @@
 # NOTE: this file should be the only one allowed to use 'global'
 import argparse
 import multiprocessing
+import pickle
 from itertools import permutations, combinations
 from multiprocessing import Queue
+from multiprocessing.connection import Connection
 from random import Random
 from typing import List, Dict, Any, Iterable
 
@@ -17,6 +19,8 @@ logger = get_logger('squares')
 counter = 0
 random = None
 config = None
+
+BUFFER_SIZE = 4 * 1024
 
 
 def seed(s):
@@ -137,3 +141,24 @@ def get_all(queue: Queue) -> List:
     while not queue.empty():
         acum.append(queue.get())
     return acum
+
+
+def pipe_write(pipe: Connection, ret: Any):
+    data = pickle.dumps(ret, protocol=-1)
+    size = len(data)
+    pipe.send(size)
+    counter = 0
+    while counter < size:
+        pipe.send_bytes(data, counter, min(size - counter, BUFFER_SIZE))
+        counter += min(size - counter, BUFFER_SIZE)
+
+
+def pipe_read(pipe: Connection) -> Any:
+    size = pipe.recv()
+    print(size)
+    data = bytearray(size)
+    counter = 0
+    while counter < size:
+        counter += pipe.recv_bytes_into(data, counter)
+
+    return pickle.loads(data)

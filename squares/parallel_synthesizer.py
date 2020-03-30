@@ -1,7 +1,11 @@
+import base64
 import multiprocessing
+import pickle
 from collections import defaultdict
 from multiprocessing import Process, Pipe, Queue
 from select import select
+
+import setproctitle
 
 from . import util
 from .config import Config
@@ -14,6 +18,7 @@ from .tyrell.decider import Example, ExampleDecider
 from .tyrell.enumerator import LinesEnumerator
 from .tyrell.interpreter import InterpreterError
 from .tyrell.logger import get_logger
+from .util import pipe_write, pipe_read
 
 logger = get_logger('squares.synthesizer')
 
@@ -25,12 +30,9 @@ def synthesize(enumerator, decider, blacklist_queue):
     prog = enumerator.next()
     while prog is not None:
         num_attempts += 1
-        if num_attempts % 500 == 0:
-            enumerator.closeLattices()
         try:
             res = decider.analyze(prog)
             if res.is_ok():
-                enumerator.closeLattices()
                 return prog
 
             else:
@@ -41,7 +43,7 @@ def synthesize(enumerator, decider, blacklist_queue):
 
         except REvaluationError as e:
             if all(map(lambda arg: arg.children == [], e.args[0][0].args)):
-                blacklist_queue.put(e.args[0][0])
+                blacklist_queue.put(e.args[0][0], timeout=1)
             num_failed += 1
             info = decider.analyze_interpreter_error(e)
             enumerator.update(info)
@@ -53,11 +55,11 @@ def synthesize(enumerator, decider, blacklist_queue):
             enumerator.update(info)
             prog = enumerator.next()
 
-    enumerator.closeLattices()
     return None
 
 
 def run_process(pipe: Pipe, config: Config, specification: Specification, blacklist_queue: Queue):
+    setproctitle.setproctitle(multiprocessing.current_process().name)
     logger.handlers[0].set_identifier(multiprocessing.current_process().name)
     logger.setLevel('DEBUG')
 
@@ -73,33 +75,35 @@ def run_process(pipe: Pipe, config: Config, specification: Specification, blackl
         equal_output=eq_r
     )
 
-    pipe.send(None)
-
     while True:
         action, object = pipe.recv()
 
         if action == 'init':
             logger.debug('Initialising process for %d lines of code.', object)
             enumerator = LinesEnumerator(tyrell_specification, object, sym_breaker=False)
-            pipe.send(None)
 
         elif action == 'solve':
             logger.debug('Solving cube %s', repr(object))
 
-            enumerator.z3_solver.push()
-
-            for constraint in object:
-                enumerator.z3_solver.add(constraint.realize_constraint(tyrell_specification, enumerator))
-
             try:
-                prog = synthesize(enumerator, decider, blacklist_queue)
-            except Exception:
-                prog = None
-            enumerator.z3_solver.pop()
-            pipe.send(prog)
+                enumerator.z3_solver.push()
+
+                for constraint in object:
+                    enumerator.z3_solver.add(constraint.realize_constraint(tyrell_specification, enumerator))
+
+                ret = synthesize(enumerator, decider, blacklist_queue)
+                if ret:
+                    print(ret)
+                pipe_write(pipe, ret)
+
+            except:
+                logger.error('Exception while enumerating cube %s', repr(object))
+
+            finally:
+                enumerator.z3_solver.pop()
 
         else:
-            raise NotImplementedError()
+            logger.error('Unrecognized action %s', action)
 
 
 class ParallelSynthesizer:
@@ -110,9 +114,6 @@ class ParallelSynthesizer:
         self.j = j
 
     def synthesize(self):
-        tries = 0
-        cubes = 0
-
         processes = {}
         locs = {}
         pipes = []
@@ -138,42 +139,48 @@ class ParallelSynthesizer:
         loc = self.specification.min_loc
         generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc - 1, blacklist)
         while True:
-            ready_pipes, _, _ = select(pipes, [], [])
+            if solution_loc and solution_loc <= min(locs.values()):
+                return solution
 
-            for pipe in ready_pipes:
+            readable, writable, _ = select(pipes, pipes, [])
+
+            for pipe in readable:
+                process_loc = locs[pipe]
+                program = pipe_read(pipe)
+
+                fails = util.get_all(blacklist_queue)
+                for fail in fails:
+                    blacklist[fail.name].add(tuple(map(map_node, fail.children)))
+
+                if program is None:
+                    continue
+
+                if process_loc <= min(locs.values()) or not util.get_config().optimal:
+                    return program
+
+                logger.info('Waiting for loc %d to finish before returning solution of loc %d', min(locs.values()), process_loc)
+                if solution_loc is None or process_loc < solution_loc:
+                    solution = program
+                    solution_loc = process_loc
+
+            for pipe in writable:
+                if solution is not None:
+                    pipes.remove(pipe)
+                    locs[pipe] = solution_loc  # TODO hack
+                    continue
+
                 process_loc = locs[pipe]
 
-                program = pipe.recv()
-                if solution_loc and solution_loc <= min(locs.values()):
-                    return solution
+                cube = None
+                while cube is None:
+                    try:
+                        cube = next(generator)
+                    except StopIteration:
+                        loc += 1
+                        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc - 1, blacklist)
 
-                if solution_loc:
-                    locs[pipe] = solution_loc
+                if process_loc < loc:
+                    locs[pipe] = loc
+                    pipe.send(('init', loc))
 
-                if program:
-                    if process_loc <= min(locs.values()) or not util.get_config().optimal:
-                        return program
-
-                    logger.info('Waiting for loc %d to finish before returning solution of loc %d', min(locs.values()), process_loc)
-                    if solution_loc is None or process_loc < solution_loc:
-                        solution = program
-                        solution_loc = process_loc
-
-                if solution is None:
-                    fails = util.get_all(blacklist_queue)
-                    for fail in fails:
-                        blacklist[fail.name].add(tuple(map(map_node, fail.children)))
-
-                    cube = None
-                    while cube is None:
-                        try:
-                            cube = next(generator)
-                        except StopIteration:
-                            loc += 1
-                            generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc - 1, blacklist)
-
-                    if process_loc < loc:
-                        locs[pipe] = loc
-                        pipe.send(('init', loc))
-
-                    pipe.send(('solve', cube))
+                pipe.send(('solve', cube))

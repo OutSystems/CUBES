@@ -40,7 +40,16 @@ class SquaresInterpreter(PostOrderInterpreter):
     def eval_select(self, node, args):
         name = self.fresh_table()
 
-        _script = f'{name} <- {args[0]} %>% select({args[1]})'
+        if util.get_config().ignore_cols:
+            tbl_cols = list(robjects.r(f'colnames({args[0]})'))
+            col_order = list(map(int, args[1].split(',')))
+
+            try:
+                _script = f'{name} <- {args[0]} %>% select({", ".join(list(map(lambda x: f"{x[0]} = {tbl_cols[x[1]]}", zip(self.problem.output_cols, col_order))))})'
+            except:
+                raise GeneralError()
+        else:
+            _script = f'{name} <- {args[0]} %>% select({args[1]})'
 
         if args[2] == 'distinct':
             _script += ' %>% distinct()'
@@ -157,7 +166,7 @@ class SquaresInterpreter(PostOrderInterpreter):
 
 
 def eq_r(actual, expect):
-    _rscript = f'all_equal(lapply({actual}, as.character), lapply({expect}, as.character))'
+    _rscript = f'all_equal({actual}, {expect}, convert=T)'
     try:
         ret_val = robjects.r(_rscript)
     except:

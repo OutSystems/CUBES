@@ -148,7 +148,7 @@ class CubeGenerator(Iterable):
         return cube
 
     def current(self) -> List[FunctionProduction]:
-        cube = [line[0] for line in self.line_stack]
+        cube = [line[0] for line in self.line_stack if line]
         return cube
 
     def filtered_productions(self):
@@ -159,6 +159,9 @@ class CubeGenerator(Iterable):
         if util.get_config().solution_use_last_line and self.specification.solution and len(lines) == self.n_lines - 1:
             productions = [p for p in productions if p.name == self.specification.solution[-2]]
 
+        # if util.get_config().solution_use_last_line and self.specification.solution and len(lines) == self.n_lines - 2:
+        #     productions = [p for p in productions if p.name == self.specification.solution[-3]]
+
         if find_production(productions, 'filter'):
             move(productions, 'filter', 3)
         if find_production(productions, 'summariseGrouped'):
@@ -166,8 +169,8 @@ class CubeGenerator(Iterable):
         if find_production(productions, 'inner_join'):
             move(productions, 'inner_join', len(productions))
 
-        if len(self.specification.aggrs) - count(l for l in lines if l.name == 'summariseGrouped') >= self.loc - len(
-                self.line_stack) - 1:
+        if util.get_config().force_summarise and len(self.specification.aggrs) - count(
+                l for l in lines if l.name == 'summariseGrouped') >= self.loc - len(self.line_stack) - 1:
             productions = list(filter(lambda p: p.name == 'summariseGrouped', productions))
 
         if (self.specification.consts or self.specification.filters) and count(l for l in lines if l.name == 'filter') == 0 and len(

@@ -11,7 +11,8 @@ install_dependencies = [
     'pandas',
     'numpy',
     'ordered-set',
-    'python-dateutil'
+    'python-dateutil',
+    'setproctitle'
 ]
 
 develop_dependencies = [

@@ -1,4 +1,3 @@
-import csv
 import re
 from collections import OrderedDict
 from itertools import combinations, product
@@ -74,7 +73,7 @@ class Specification:
         else:
             self.solution = None
 
-        self.min_loc = 1 + len(self.aggrs) + (1 if self.filters or self.consts else 0)
+        self.min_loc = 1 + (len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0)
 
         self.tables = []
         self.data_frames = {}
@@ -106,6 +105,7 @@ class Specification:
         self.all_columns = self.columns.copy()
 
         self.data_frames['expected_output'] = read_table(self.output)
+        self.output_cols = self.data_frames['expected_output'].columns
 
         for const in self.consts:
             self.types_by_const[const] = []
@@ -148,14 +148,13 @@ class Specification:
     def generate_dsl(self):
         filter_conditions, summarise_conditions, join_conditions, predicates = self.find_conditions()
 
-        with open(self.output) as f:
-            reader = csv.reader(f)
-            output_attrs = next(reader)
-
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'TableSelect')
         dsl.add_enum(DSLEnum('Cols', get_combinations(self.columns, util.get_config().max_column_combinations)))
         dsl.add_enum(DSLEnum('Col', list(self.columns)))
-        dsl.add_enum(DSLEnum('SelectCols', [', '.join(output_attrs)]))
+        if util.get_config().ignore_cols:
+            dsl.add_enum(DSLEnum('SelectCols', [','.join(map(str, agrs)) for agrs in combinations(range(util.get_config().max_columns), len(self.output_cols))]))
+        else:
+            dsl.add_enum(DSLEnum('SelectCols', [', '.join(self.output_cols)]))
         dsl.add_enum(DSLEnum('Distinct', ['distinct', '']))
 
         if 'inner_join' not in util.get_config().disabled:

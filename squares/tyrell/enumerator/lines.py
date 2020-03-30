@@ -380,7 +380,7 @@ class LinesEnumerator(Enumerator):
                 for c in self.roots[r_ia].children:
                     previous_roots.append(c.var == pre)
 
-            self.z3_solver.add(Implies(Or([c.var == pos for c in self.roots[r_i].children]), Or(previous_roots)))
+            self.z3_solver.add(Implies(Or(*(c.var == pos for c in self.roots[r_i].children)), Or(previous_roots)))
 
     def resolve_predicates(self):
         try:
