@@ -25,5 +25,5 @@ class Enumerator(ABC):
         '''
         pass
 
-    def closeLattices(self):
+    def close_lattices(self):
         pass

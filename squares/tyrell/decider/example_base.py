@@ -10,9 +10,6 @@ Example = NamedTuple('Example', [
 
 
 class ExampleDecider(Decider):
-    _interpreter: Interpreter
-    _examples: List[Example]
-    _equal_output: Callable[[Any, Any], bool]
 
     def __init__(self,
                  interpreter: Interpreter,
@@ -20,8 +17,7 @@ class ExampleDecider(Decider):
                  equal_output: Callable[[Any, Any], bool] = lambda x, y: x == y):
         self._interpreter = interpreter
         if len(examples) == 0:
-            raise ValueError(
-                'ExampleDecider cannot take an empty list of examples')
+            raise ValueError('ExampleDecider cannot take an empty list of examples')
         self._examples = examples
         self._equal_output = equal_output
 

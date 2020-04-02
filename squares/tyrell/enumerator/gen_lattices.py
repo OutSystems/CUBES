@@ -58,7 +58,7 @@ def printModels(models):
 def writeLattice(node):
     string = str(node.nb)
     for c in node.children:
-        string += writeLattice(c)
+        string += write_lattice(c)
     return string
 
 
@@ -240,8 +240,8 @@ class LatticeBuilder(object):
             last_line.h = 0
             self.createLattice(last_line, root, model)
             models = self.sym_finder.findSymmetries(last_line)
-            print(writeLattice(last_line), file=sys.stderr)
-            print(writeLattice(last_line) + ":" + printModels(models))
+            print(write_lattice(last_line), file=sys.stderr)
+            print(write_lattice(last_line) + ":" + printModels(models))
 
 
 if __name__ == '__main__':

@@ -36,13 +36,13 @@ class Synthesizer(ABC):
         while prog is not None:
             num_attempts += 1
             if num_attempts % 500 == 0:
-                self._enumerator.closeLattices()
+                self._enumerator.close_lattices()
                 logger.info('Attempts: %d. Rejected: %d. Failed: %d.', num_attempts, num_rejected, num_failed)
             # logger.debug('Attempt %s: %s', str(num_attempts), str(prog))
             try:
                 res = self._decider.analyze(prog)
                 if res.is_ok():
-                    self._enumerator.closeLattices()
+                    self._enumerator.close_lattices()
                     logger.info('Program accepted after %d attempts (%d rejected, %d failed)', num_attempts,
                                 num_rejected, num_failed)
                     logger.debug('Total Time: %f', time.time() - start_time)
@@ -64,5 +64,5 @@ class Synthesizer(ABC):
 
         logger.debug('Enumerator is exhausted after %d attempts', num_attempts)
         logger.debug('Total Time: %f', time.time() - start_time)
-        self._enumerator.closeLattices()
+        self._enumerator.close_lattices()
         return None

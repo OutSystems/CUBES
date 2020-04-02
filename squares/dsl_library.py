@@ -1,4 +1,4 @@
-from .DSLBuilder import *
+from .dsl_builder import *
 
 table_value = DSLValue('Table',
                        [

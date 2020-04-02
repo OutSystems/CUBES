@@ -2,8 +2,8 @@ library(ggplot2)
 library(stringr)
 library(dplyr)
 library(scales)
-library(readr)
 library(RColorBrewer)
+library(readr)
 
 setwd('./data-treatment')
 
@@ -148,8 +148,15 @@ c1_4 <- load_result_file('cubes1_4.csv')
 c1_8 <- load_result_file('cubes1_8.csv')
 c1_16 <- load_result_file('cubes1_16.csv')
 
+c2_2 <- load_result_file('cubes2_2.csv')
+c2_4 <- load_result_file('cubes2_4.csv')
 c2_8 <- load_result_file('cubes2_8.csv')
 c2_16 <- load_result_file('cubes2_16.csv')
+
+c2_2_o <- load_result_file('cubes2_2_o.csv')
+c2_4_o <- load_result_file('cubes2_4_o.csv')
+c2_8_o <- load_result_file('cubes2_8_o.csv')
+c2_16_o <- load_result_file('cubes2_16_o.csv')
 
 scatter('scythe', 'c1_16')
 scatter('single', 'qffd_r')
@@ -162,6 +169,17 @@ scatter_ram('squares', 'single')
 scatter('qffd_r_n_no_prune', 't6')
 scatter('qffd_r_n_no_prune', 'c1_2')
 scatter('qffd_r_n_no_prune', 'c1_16')
+
+scatter('c1_2', 'c2_2')
+scatter('c1_4', 'c2_4')
+scatter('c1_8', 'c2_8')
+scatter('c1_16', 'c2_16')
+scatter('squares', 'c2_16_o')
+scatter('squares', 'c2_16')
+
+scatter('c2_2', 'c2_2_o')
+scatter('c2_4', 'c2_4_o')
+scatter('c2_16', 'c2_16_o')
 scatter('c2_8', 'c2_16')
 
 scatter('t6', 'c1_8')
@@ -170,12 +188,12 @@ ggplot(t6, aes(x = factor(process))) + geom_bar(fill = "turquoise")
 
 # ggplot(c1_2, aes(x = real)) + geom_histogram()
 
-bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
+bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
 bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)
 
-boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
+boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
 boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
 
-boxplot_ram(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)
+boxplot_ram(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_16_o = c2_16_o)

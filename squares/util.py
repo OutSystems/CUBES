@@ -1,7 +1,8 @@
 # NOTE: this file should be the only one allowed to use 'global'
 import argparse
-import multiprocessing
 import pickle
+import time
+from collections import defaultdict
 from itertools import permutations, combinations
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
@@ -19,8 +20,10 @@ logger = get_logger('squares')
 counter = 0
 random = None
 config = None
+solution = None
+program_queue = None
 
-BUFFER_SIZE = 4 * 1024
+BUFFER_SIZE = 8 * 4 * 1024
 
 
 def seed(s):
@@ -58,6 +61,25 @@ def store_config(conf):
 def get_config() -> Config:
     global config
     return config
+
+
+def store_solution(sol):
+    global solution
+    solution = sol
+
+
+def get_current_solution() -> Config:
+    global solution
+    return solution
+
+
+def set_program_queue(q):
+    global program_queue
+    program_queue = q
+
+
+def get_program_queue():
+    return program_queue
 
 
 def boolvec2int(bools: List[bool]) -> int:
@@ -149,13 +171,14 @@ def pipe_write(pipe: Connection, ret: Any):
     pipe.send(size)
     counter = 0
     while counter < size:
+        while not pipe.writable:
+            time.sleep(0.1)
         pipe.send_bytes(data, counter, min(size - counter, BUFFER_SIZE))
         counter += min(size - counter, BUFFER_SIZE)
 
 
 def pipe_read(pipe: Connection) -> Any:
     size = pipe.recv()
-    print(size)
     data = bytearray(size)
     counter = 0
     while counter < size:

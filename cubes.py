@@ -2,6 +2,7 @@
 import os
 import random
 import re
+import signal
 from time import time
 
 import sqlparse as sp
@@ -31,6 +32,10 @@ options(warn=-1)''')
 logger = get_logger('squares')
 
 
+def handle_sigint(signal, stackframe):
+    print_solution(util.get_current_solution())
+
+
 def beautifier(sql):
     # parsed = sp.parse(sql)
     # new_sql = beautifier_aux(parsed[0])
@@ -39,36 +44,7 @@ def beautifier(sql):
     return sp.format(sql, reindent=True, keyword_case='upper')
 
 
-def main():
-    start = time()
-
-    parser = create_argparser()
-    args = parser.parse_args()
-
-    if args.debug:
-        logger.setLevel('DEBUG')
-        # get_logger('tyrell').setLevel('DEBUG')
-
-    logger.info('Parsing specification...')
-    spec = parse_specification(args.input)
-
-    random.seed(args.seed)
-    seed = random.randrange(2 ** 16)
-
-    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', disabled=['inner_join', 'semi_join'])
-    util.store_config(config)
-
-    specification = Specification(spec)
-    tyrell_spec = S.parse(repr(specification.dsl))
-
-    if args.j > 0:
-        processes = args.j
-    else:
-        processes = os.cpu_count() + args.j
-
-    synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
-    program = synthesizer.synthesize()
-
+def print_solution(program):
     if program is not None:
         logger.info(f'Solution found: {program}')
         interpreter = SquaresInterpreter(specification, True)
@@ -102,6 +78,43 @@ def main():
 
     print("No solution found")
     exit(1)
+
+
+def main():
+    global specification, args, start
+    start = time()
+
+    parser = create_argparser()
+    args = parser.parse_args()
+
+    if args.debug:
+        logger.setLevel('DEBUG')
+        # get_logger('tyrell').setLevel('DEBUG')
+
+    logger.info('Parsing specification...')
+    spec = parse_specification(args.input)
+
+    random.seed(args.seed)
+    seed = random.randrange(2 ** 16)
+
+    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', disabled=['inner_join', 'semi_join'], optimal=True)
+    util.store_config(config)
+
+    specification = Specification(spec)
+    tyrell_spec = S.parse(repr(specification.dsl))
+
+    if args.j > 0:
+        processes = args.j
+    else:
+        processes = os.cpu_count() + args.j
+
+    signal.signal(signal.SIGINT, handle_sigint)
+    signal.signal(signal.SIGTERM, handle_sigint)
+
+    synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
+    program = synthesizer.synthesize()
+
+    print_solution(program)
 
 
 if __name__ == '__main__':

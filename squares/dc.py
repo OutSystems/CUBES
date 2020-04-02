@@ -29,7 +29,7 @@ class LineConstraint(CubeConstraint):
                      self.arguments))
 
     def __repr__(self) -> str:
-        return f'lines[{self.line}] = {self.production}({",".join(map(str, self.arguments))})'
+        return f'l{self.line} = {self.production}({",".join(map(str, self.arguments))})'
 
 
 class Param:
@@ -50,7 +50,7 @@ class Param:
         return spec.get_param_production(self.n).id
 
     def __repr__(self) -> str:
-        return f'@param{self.n}'
+        return f'@{self.n}'
 
 
 class Atom:
@@ -124,7 +124,7 @@ class CubeGenerator(Iterable):
 
         if self.n_lines == 0 and self.exahusted == False:
             self.exahusted = True
-            return []
+            return tuple()
         elif self.n_lines == 0:
             raise StopIteration
 
@@ -143,8 +143,8 @@ class CubeGenerator(Iterable):
 
         return cube
 
-    def collect_current(self) -> List[LineConstraint]:
-        cube = [LineConstraint(i, line[0].name, self.blacklist[line[0].name]) for i, line in enumerate(self.line_stack)]
+    def collect_current(self) -> Tuple[LineConstraint]:
+        cube = tuple(LineConstraint(i, line[0].name, self.blacklist[line[0].name]) for i, line in enumerate(self.line_stack))
         return cube
 
     def current(self) -> List[FunctionProduction]:

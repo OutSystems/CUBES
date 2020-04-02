@@ -43,8 +43,10 @@ class EnumType(Type):
 
     _domain: List[Any]
 
-    def __init__(self, name: str, domain: List[Any] = []):
+    def __init__(self, name: str, domain=None):
         super().__init__(name)
+        if domain is None:
+            domain = []
         self._domain = domain
 
     @property
@@ -64,8 +66,10 @@ class EnumType(Type):
 class ValueType(Type):
     _properties: Dict[str, ExprType]
 
-    def __init__(self, name: str, properties: List[Tuple[str, ExprType]] = []):
+    def __init__(self, name: str, properties=None):
         super().__init__(name)
+        if properties is None:
+            properties = []
         self._properties = dict()
         for name, ty in properties:
             if name in self._properties:

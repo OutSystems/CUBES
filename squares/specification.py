@@ -8,7 +8,7 @@ from ordered_set import OrderedSet
 from rpy2 import robjects
 
 from . import util, types, dsl_library
-from .DSLBuilder import DSLPredicate, DSLEnum, DSLBuilder
+from .dsl_builder import DSLPredicate, DSLEnum, DSLBuilder
 from .exceptions import SquaresException
 from .tyrell.logger import get_logger
 from .util import next_counter, get_combinations, add_osdict

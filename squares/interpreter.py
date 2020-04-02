@@ -1,10 +1,15 @@
+import logging
+
 from rpy2 import robjects as robjects
 from z3 import BitVecVal
 
 from . import util
 from .exceptions import REvaluationError
 from .tyrell.interpreter import PostOrderInterpreter, GeneralError
+from .tyrell.logger import get_logger
 from .util import get_fresh_name
+
+logger = get_logger('squares.interpreter')
 
 
 def get_type(df, index):
@@ -165,7 +170,14 @@ class SquaresInterpreter(PostOrderInterpreter):
         return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)
 
 
-def eq_r(actual, expect):
+def eq_r(actual, expect, prog=None):
+    if logger.isEnabledFor(logging.DEBUG):
+        a_dim = tuple(robjects.r(f'dim({actual})'))
+        e_dim = tuple(robjects.r(f'dim({expect})'))
+        logger.debug('Testing equality. Shapes: %s, %s', repr(a_dim), repr(e_dim))
+        if a_dim[0] == e_dim[0] or a_dim[1] == e_dim[1]:
+            logger.debug('\tdimensions match!')
+            util.get_program_queue().put([r.production.name for r in prog])
     _rscript = f'all_equal({actual}, {expect}, convert=T)'
     try:
         ret_val = robjects.r(_rscript)
