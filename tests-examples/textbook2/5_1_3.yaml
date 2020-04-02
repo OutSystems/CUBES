@@ -1,0 +1,22 @@
+inputs:
+  - 'tests-examples/textbook2/tables/student.csv'
+  - 'tests-examples/textbook2/tables/class.csv'
+  - 'tests-examples/textbook2/tables/enrolled.csv'
+  - 'tests-examples/textbook2/tables/faculty.csv'
+output: 'tests-examples/textbook2/tables/5_1_3.csv'
+const:
+  - R128
+  - 5
+attrs:
+  - room
+aggrs:
+  - n
+loc: 2
+comment: |
+  SELECT C.name
+  FROM Class C
+  WHERE C.room = 'R128'
+     OR C.name IN (SELECT E.cname
+                   FROM Enrolled E
+                   GROUP BY E.cname
+                   HAVING COUNT(*) >= 5)
