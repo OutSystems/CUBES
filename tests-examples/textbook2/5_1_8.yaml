@@ -1,0 +1,23 @@
+inputs:
+  - 'tests-examples/textbook2/tables/student.csv'
+  - 'tests-examples/textbook2/tables/class.csv'
+  - 'tests-examples/textbook2/tables/enrolled.csv'
+  - 'tests-examples/textbook2/tables/faculty.csv'
+output: 'tests-examples/textbook2/tables/5_1_8.csv'
+const:
+  - JR
+aggrs:
+  - mean
+attrs:
+  - level
+  - age
+loc: 2
+comment: |
+  SELECT S.level, AVG(S.age)
+  FROM Student S
+  WHERE S.level <> 'JR'
+  GROUP BY S.level
+
+  df1 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+  df2 <- df1 %>% filter(level != 'JR')
+  out <- df2 %>% select(level, meanage)
