@@ -1,0 +1,19 @@
+[    1.6027][cube-solver-0][warning] There is no solution for current loc (1).
+[    2.0242][main][error] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/textbook/tables/28.out", col_types = cols(ename = col_character()))
+
+df4 <- inner_join(input1, input3) %>% inner_join(input2)
+df5 <- df4 %>% filter(str_detect(aname, 'Boeing'))
+out <- df5 %>% select(ename) %>% distinct()
+
+Failed to generate SQL query

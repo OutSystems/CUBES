@@ -1,0 +1,22 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/182.csv", col_types = cols(Id = col_integer(),Email = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/182_o.csv", col_types = cols(Email = col_character()))
+
+df2 <- input1 %>% group_by(Email) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 1)
+out <- df3 %>% select(Email)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Email`
+FROM
+  (SELECT `Email`,
+          COUNT() AS `n`
+   FROM `input1`
+   GROUP BY `Email`)
+WHERE (`n` > 1.0)

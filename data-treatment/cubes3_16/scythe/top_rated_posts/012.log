@@ -1,0 +1,34 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i012.csv", col_types = cols(ID = col_integer(),DocumentID = col_integer(),Status = col_character(),DateCreated = col_character()))
+input1$DateCreated <- mdy(input1$DateCreated)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o012.csv", col_types = cols(DocumentID = col_integer(),Status = col_character(),DateCreated = col_character()))
+expected_output$DateCreated <- mdy(expected_output$DateCreated)
+
+df2 <- input1 %>% group_by(DocumentID) %>% summarise(maxDateCreated = max(DateCreated)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+df4 <- df3 %>% filter(maxDateCreated == DateCreated)
+out <- df4 %>% select(DocumentID, Status, DateCreated)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `DocumentID`,
+       `Status`,
+       `DateCreated`
+FROM
+  (SELECT `DocumentID`,
+          `maxDateCreated`,
+          `ID`,
+          `Status`,
+          `DateCreated`
+   FROM
+     (SELECT `DocumentID`,
+             MAX(`DateCreated`) AS `maxDateCreated`
+      FROM `input1`
+      GROUP BY `DocumentID`) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`DocumentID` = `RHS`.`DocumentID`))
+WHERE (`maxDateCreated` = `DateCreated`)

@@ -1,0 +1,13 @@
+[    1.6544][main][error] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/042.csv", col_types = cols(id = col_integer(),name = col_character(),school = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/042_o.csv", col_types = cols(id = col_integer(),name = col_character()))
+
+df2 <- bind_rows(input1, input1)
+out <- df2 %>% select(id, name) %>% distinct()
+
+Failed to generate SQL query

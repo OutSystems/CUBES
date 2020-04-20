@@ -1,0 +1,29 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+
+df2 <- input1 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(id, rev, content)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `rev`,
+       `content`
+FROM
+  (SELECT `id`,
+          `rev`,
+          `content`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `id`,
+             MAX(`rev`) AS `rev`
+      FROM `input1`
+      GROUP BY `id`) AS `RHS` ON (`LHS`.`id` = `RHS`.`id`
+                                  AND `LHS`.`rev` = `RHS`.`rev`))

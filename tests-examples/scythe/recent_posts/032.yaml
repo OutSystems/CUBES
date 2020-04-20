@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/032.csv
+output: tests-examples/scythe/recent_posts/tables/032_o.csv
+aggrs:
+  - max
+attrs:
+  - Id
+comment: |
+  select e.crit1, e.crit2, e.value
+  from MyEntity e
+  where e.id in (select max(sub.id) from MyEntity sub group by sub.crit1, sub.crit2)
+  order by e.crit1, e.crit2
+
+  df2 <- input1 %>% group_by(crit1, crit2) %>% summarise(Id = max(Id)) %>% ungroup()
+  df3 <- inner_join(input1, df2)
+  out <- df3 %>% select(crit1)

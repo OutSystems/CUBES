@@ -1,0 +1,15 @@
+[    1.9417][main][error] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/596.csv", col_types = cols(student = col_character(),class = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/596_o.csv", col_types = cols(class = col_character()))
+
+df2 <- input1 %>% group_by(class) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 5)
+df4 <- bind_rows(df3, df3)
+out <- df4 %>% select(class) %>% distinct()
+
+Failed to generate SQL query

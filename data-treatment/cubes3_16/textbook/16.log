@@ -1,0 +1,45 @@
+[    1.8705][cube-solver-0][warning] There is no solution for current loc (2).
+[    1.9239][cube-solver-1][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/16-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/16-2.txt", col_types = cols(P_id = col_character(),P_name = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/textbook/tables/16-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/textbook/tables/16.out", col_types = cols(P_name = col_character()))
+
+df4 <- input2 %>% group_by(P_id, P_name) %>% summarise(n = n()) %>% ungroup()
+df5 <- inner_join(input1, input3)
+df6 <- df5 %>% filter(S_name != 'AWS')
+df7 <- anti_join(df4, df6)
+out <- df7 %>% select(P_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `P_name`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `P_id`,
+             `P_name`,
+             COUNT() AS `n`
+      FROM `input2`
+      GROUP BY `P_id`,
+               `P_name`) AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT `S_key`,
+                     `P_id`,
+                     `S_name`
+              FROM `input1` AS `LHS`
+              INNER JOIN `input3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+           WHERE (`S_name` != 'AWS')) AS `RHS`
+        WHERE (`LHS`.`P_id` = `RHS`.`P_id`) ))

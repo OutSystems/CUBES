@@ -1,0 +1,20 @@
+inputs:
+#  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/33.out
+aggrs:
+  - mean
+attrs:
+  - salary
+comment: |
+  5.3.10 optimal solution sql
+
+  SELECT Temp1.avg - Temp2.avg
+  FROM (SELECT AVG(E.salary) AS avg
+        FROM Employees E
+        WHERE E.eid IN (SELECT DISTINCT C.eid
+                        FROM Certified C)) AS Temp1,
+       (SELECT AVG(E1.salary) AS avg
+        FROM Employees E1) AS Temp2

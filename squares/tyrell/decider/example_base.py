@@ -13,13 +13,11 @@ class ExampleDecider(Decider):
 
     def __init__(self,
                  interpreter: Interpreter,
-                 examples: List[Example],
-                 equal_output: Callable[[Any, Any], bool] = lambda x, y: x == y):
+                 examples: List[Example]):
         self._interpreter = interpreter
         if len(examples) == 0:
             raise ValueError('ExampleDecider cannot take an empty list of examples')
         self._examples = examples
-        self._equal_output = equal_output
 
     @property
     def interpreter(self):
@@ -29,17 +27,13 @@ class ExampleDecider(Decider):
     def examples(self):
         return self._examples
 
-    @property
-    def equal_output(self):
-        return self._equal_output
-
     def get_failed_examples(self, prog):
         '''
         Test the program on all examples provided.
         Return a list of failed examples.
         '''
         return list(filter(
-            lambda x: not self._equal_output(
+            lambda x: not self._interpreter.equals(
                 self.interpreter.eval(prog, x.input), x.output),
             self._examples
         ))
@@ -49,7 +43,7 @@ class ExampleDecider(Decider):
         Test whether the given program would fail on any of the examples provided.
         '''
         return any(
-            not self._equal_output(
+            not self._interpreter.equals(
                 self.interpreter.eval(prog, x.input), x.output)
             for x in self._examples
         )

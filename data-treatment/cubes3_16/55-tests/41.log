@@ -1,0 +1,41 @@
+[    2.2257][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/41.out", col_types = cols(ename = col_character()))
+
+df4 <- inner_join(input2, input3)
+df5 <- df4 %>% filter(salary > 100000 & eid <= 550000000)
+df6 <- left_join(df5, input1)
+out <- df6 %>% select(ename) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `ename`
+FROM
+  (SELECT `eid`,
+          `ename`,
+          `salary`,
+          `aid`,
+          `aname`,
+          `crusingrange`
+   FROM
+     (SELECT *
+      FROM
+        (SELECT `eid`,
+                `ename`,
+                `salary`,
+                `aid`
+         FROM `input2` AS `LHS`
+         INNER JOIN `input3` AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`))
+      WHERE (`salary` > 100000.0
+             AND `eid` <= 550000000.0)) AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`))

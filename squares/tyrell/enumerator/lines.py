@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from copy import deepcopy
 
 from z3 import *
@@ -125,6 +126,7 @@ class LinesEnumerator(Enumerator):
         self.init_line_productions()
         self.linesVars = []
         self.typeVars = []
+        self.line_vars_by_line = defaultdict(list)
         self.roots, self.leafs = self.build_trees()
         self.model = None
         # Times
@@ -203,7 +205,6 @@ class LinesEnumerator(Enumerator):
                 child.var = self.create_leaf_variables(nb, n.id)
                 children.append(child)
                 leafs.append(child)
-            self.propagate_empty(children)
             n.children = children
             n.type = self.create_type_variables(n.id)
             nodes.append(n)
@@ -216,6 +217,7 @@ class LinesEnumerator(Enumerator):
             name = f'l{str(nb)}_{str(x)}'
             var = Int(name)
             self.linesVars.append(var)
+            self.line_vars_by_line[x].append(var)
             lines.append(var)
             # variable range constraints
             self.z3_solver.add(Or(var == 0, var == 1))
@@ -223,8 +225,7 @@ class LinesEnumerator(Enumerator):
         return lines
 
     def create_type_variables(self, nb):
-        name = f't{str(nb)}'
-        var = Int(name)
+        var = Int(f't{str(nb)}')
         # variable range constraints
         self.typeVars.append(var)
         self.z3_solver.add(And(var >= 0, var < self.num_types))
@@ -261,51 +262,42 @@ class LinesEnumerator(Enumerator):
         self.parentId[nb] = parent
         return var
 
-    def propagate_empty(self, children):
-        for c in range(len(children) - 1):
-            self.z3_solver.add(Implies(children[c].var == 0, children[c + 1].var == 0))
-            self.num_constraints += 1
-
     def create_output_constraints(self):
         """The output production matches the output type"""
         ctr = []
         var = self.roots[-1].var  # last line corresponds to the output line
         for p in self.spec.get_productions_with_lhs(self.spec.output):
             ctr.append(var == p.id)
-            for r in range(len(self.roots) - 1):
-                self.z3_solver.add(self.roots[r].var != p.id)
         self.z3_solver.add(Or(ctr))
         self.num_constraints += 1
 
     def create_lines_constraints(self):
-        """Each line is used exactly once in the program"""
+        """Each line is used at least once in the program"""
         for r in range(1, len(self.roots)):
             ctr = None
-            for l in range(len(self.leafs)):
-                for v in self.leafs[l].lines:
-                    if int(str(v).split("_")[-1]) == r:
-                        if ctr is None:
-                            ctr = v
-                        else:
-                            ctr += v
-            ctr_fun = ctr == 1
-            self.z3_solver.add(ctr_fun)
+            for line_var in self.line_vars_by_line[r]:
+                if ctr is None:
+                    ctr = line_var
+                else:
+                    ctr += line_var
+
+            self.z3_solver.add(ctr >= 1)
             self.num_constraints += 1
 
     def create_input_constraints(self):
         """Each input will appear at least once in the program"""
         input_productions = self.spec.get_param_productions()
-        for x in range(0, len(input_productions)):
+        for prod in input_productions:
             ctr = []
             for y in self.leafs:
-                ctr.append(y.var == input_productions[x].id)
+                ctr.append(y.var == prod.id)
             self.z3_solver.add(Or(ctr))
             self.num_constraints += 1
 
     def create_type_constraints(self):
         """If a production is used in a node, then the nodes' type is equal to the production's type"""
         for r in self.roots:
-            for t in range(len(self.types)):
+            for t in range(len(self.types)):  # todo one of the fors can be removed
                 if self.types[t] == 'Empty':
                     continue
                 for p in self.spec.productions():
@@ -321,24 +313,23 @@ class LinesEnumerator(Enumerator):
                 aux = r.var == p.id
                 for c in range(len(r.children)):
                     ctr = []
-                    if len(p.rhs) == c:
-                        ctr.append(r.children[c].var == self.leaf_productions[0].id)
+                    if c >= len(p.rhs):
                         self.num_constraints += 1
-                        self.z3_solver.add(Implies(aux, Or(*ctr)))
-                        break
+                        self.z3_solver.add(Implies(aux, r.children[c].var == self.leaf_productions[0].id))
+                        continue
 
-                    for t in self.leaf_productions:
-                        if t.lhs.name == p.rhs[c].name:
-                            ctr.append(r.children[c].var == t.id)
+                    for leaf_production in self.leaf_productions:
+                        if leaf_production.lhs.name == p.rhs[c].name:
+                            ctr.append(r.children[c].var == leaf_production.id)
 
                     for l in range(r.id - 1):
-                        for t in self.line_productions[l]:
-                            if t.lhs.name == p.rhs[c].name:
-                                ctr.append(r.children[c].var == t.id)
+                        for line_production in self.line_productions[l]:
+                            if line_production.lhs.name == p.rhs[c].name:
+                                ctr.append(r.children[c].var == line_production.id)
                                 # if a previous line is used, then its flag must be true
                                 line_var = r.children[c].lines[l]
-                                self.z3_solver.add(Implies(line_var == 1, r.children[c].var == t.id))
-                                self.z3_solver.add(Implies(r.children[c].var == t.id, line_var == 1))
+                                self.z3_solver.add(Implies(line_var == 1, r.children[c].var == line_production.id))
+                                self.z3_solver.add(Implies(r.children[c].var == line_production.id, line_var == 1))
                                 self.num_constraints += 2
 
                     self.num_constraints += 1
@@ -379,14 +370,14 @@ class LinesEnumerator(Enumerator):
 
     def _resolve_distinct_inputs_predicate(self, pred):
         self._check_arg_types(pred, [str])
-        prod0 = self.spec.get_function_production_or_raise(pred.args[0])
+        production = self.spec.get_function_production_or_raise(pred.args[0])
         for r in self.roots:
-            for c_1 in range(len(r.children)):
-                child_1 = r.children[c_1]
-                for c_2 in range(c_1 + 1, len(r.children)):
-                    child_2 = r.children[c_2]
+            for c1 in range(len(r.children)):
+                child1 = r.children[c1]
+                for c2 in range(c1 + 1, len(r.children)):
+                    child2 = r.children[c2]
                     # this works because even a inner_join between two filters, the children will have different values for the variables because of the lines produtions
-                    self.z3_solver.add(Implies(r.var == prod0.id, Or(child_1.var != child_2.var, And(child_1.var == 0, child_2.var == 0))))
+                    self.z3_solver.add(Implies(r.var == production.id, Or(child1.var != child2.var, And(child1.var == 0, child2.var == 0))))
 
     def _resolve_distinct_filters_predicate(self, pred):
         self._check_arg_types(pred, [str])
@@ -687,7 +678,7 @@ class LinesEnumerator(Enumerator):
                     r.children[c] = roots[root]
             self.make_node(r, builder_nodes, builder)
 
-        self.current_roots = roots # TODO hack
+        self.current_roots = roots  # TODO hack
         return builder_nodes[roots[-1].nb - 1]
 
     def next(self):

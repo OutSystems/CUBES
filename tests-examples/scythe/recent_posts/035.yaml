@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/035.csv
+output: tests-examples/scythe/recent_posts/tables/035_o.csv
+aggrs:
+  - n
+comment: |
+  SELECT zoom,x,y,
+         amount,
+         ( amount / Cast(Sum(amount) OVER(partition BY zoom) AS FLOAT) ) * 100 as amt_percentage
+  FROM   (SELECT zoom,x, y,
+                 Count(*) AS amount
+          FROM   percentage
+          GROUP  BY zoom,x,y) a
+
+
+  SELECT zoom,x,y,
+         Count(*) AS amount,
+         ( Count(*) / Cast(Sum(Count(*))OVER(partition BY zoom) AS FLOAT) ) * 100 AS amt_percentage
+  FROM   percentage
+  GROUP  BY zoom,x,y

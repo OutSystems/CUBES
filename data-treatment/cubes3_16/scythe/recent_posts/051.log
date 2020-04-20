@@ -1,0 +1,36 @@
+[    2.9989][main][warning] Using integers larger than 32 bits! Converting column isbn to string.
+[    3.0053][main][warning] Using integers larger than 32 bits! Converting column isbn to string.
+[    3.0113][main][warning] Using integers larger than 32 bits! Converting column isbn to string.
+[    3.4125][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/051_1.csv", col_types = cols(isbn = col_character(),title = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/051_2.csv", col_types = cols(isbn = col_character(),Author = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/051_o.csv", col_types = cols(isbn = col_character(),title = col_character(),author = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df3 <- input2 %>% group_by(isbn) %>% summarise(concatAuthor = string_agg(Author, ', ')) %>% ungroup()
+df4 <- inner_join(input1, df3)
+out <- df4 %>% select(isbn, title, author = concatAuthor)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `isbn`,
+       `title`,
+       `concatAuthor` AS `author`
+FROM
+  (SELECT `isbn`,
+          `title`,
+          `concatAuthor`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `isbn`,
+             string_agg(`Author`, ', ') AS `concatAuthor`
+      FROM `input2`
+      GROUP BY `isbn`) AS `RHS` ON (`LHS`.`isbn` = `RHS`.`isbn`))

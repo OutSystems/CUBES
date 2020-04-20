@@ -1,0 +1,23 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i014.csv", col_types = cols(id = col_integer(),string = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o014.csv", col_types = cols(id = col_integer(),concatstring = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(id) %>% summarise(concatstring = string_agg(string, ', ')) %>% ungroup()
+out <- df2 %>% select(id, concatstring)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `concatstring`
+FROM
+  (SELECT `id`,
+          string_agg(`string`, ', ') AS `concatstring`
+   FROM `input1`
+   GROUP BY `id`)

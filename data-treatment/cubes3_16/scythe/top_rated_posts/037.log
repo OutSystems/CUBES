@@ -1,0 +1,29 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i037.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o037.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_character()))
+
+df2 <- input1 %>% group_by(c2) %>% summarise(c1 = min(c1)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(c1, c2, c3)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `c1`,
+       `c2`,
+       `c3`
+FROM
+  (SELECT `c1`,
+          `c2`,
+          `c3`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `c2`,
+             MIN(`c1`) AS `c1`
+      FROM `input1`
+      GROUP BY `c2`) AS `RHS` ON (`LHS`.`c1` = `RHS`.`c1`
+                                  AND `LHS`.`c2` = `RHS`.`c2`))

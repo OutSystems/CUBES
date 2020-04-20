@@ -23,3 +23,15 @@ comment: |
         from t
         group by c) t2
   on t1.maxcnt = t2.cnt
+
+  df2 <- left_join(input1, input1)
+  df3 <- df2 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df4 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df5 <- anti_join(df3, df4, by=c())
+  out <- df5 %>% select(c)
+
+  df2 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df3 <- bind_rows(df2, df2)
+  df4 <- df3 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df5 <- inner_join(df3, df4) %>% inner_join(df2)
+  out <- df5 %>% select(c) %>% distinct()

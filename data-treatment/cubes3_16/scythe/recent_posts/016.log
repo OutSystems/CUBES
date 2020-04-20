@@ -1,0 +1,44 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/016_2.csv", col_types = cols(CustomerId = col_character(),ReportDt = col_character()))
+input1$ReportDt <- mdy(input1$ReportDt)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/016_o.csv", col_types = cols(c1 = col_character(),c2 = col_character(),c3 = col_integer()))
+expected_output$c2 <- mdy(expected_output$c2)
+
+df2 <- input1 %>% group_by(CustomerId) %>% summarise(maxReportDt = max(ReportDt)) %>% ungroup()
+df3 <- input1 %>% group_by(CustomerId) %>% summarise(n = n()) %>% ungroup()
+df4 <- inner_join(input1, df2) %>% inner_join(df3)
+df5 <- df4 %>% filter(n > 1 & ReportDt > mdy('10/19/2016'))
+out <- df5 %>% select(c1 = CustomerId, c2 = maxReportDt, c3 = n) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `CustomerId` AS `c1`,
+                `maxReportDt` AS `c2`,
+                `n` AS `c3`
+FROM
+  (SELECT `CustomerId`,
+          `ReportDt`,
+          `maxReportDt`,
+          `n`
+   FROM
+     (SELECT `CustomerId`,
+             `ReportDt`,
+             `maxReportDt`
+      FROM `input1` AS `LHS`
+      INNER JOIN
+        (SELECT `CustomerId`,
+                MAX(`ReportDt`) AS `maxReportDt`
+         FROM `input1`
+         GROUP BY `CustomerId`) AS `RHS` ON (`LHS`.`CustomerId` = `RHS`.`CustomerId`)) AS `LHS`
+   INNER JOIN
+     (SELECT `CustomerId`,
+             COUNT() AS `n`
+      FROM `input1`
+      GROUP BY `CustomerId`) AS `RHS` ON (`LHS`.`CustomerId` = `RHS`.`CustomerId`))
+WHERE (`n` > 1.0
+       AND `ReportDt` > mdy('10/19/2016'))

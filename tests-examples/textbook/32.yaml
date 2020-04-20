@@ -1,0 +1,42 @@
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/32.out
+comment: |
+  5.3.9 optimal solution sql
+
+  SELECT F.departs
+  FROM Flights F
+  WHERE F.flno IN ((SELECT F0.flno
+                    FROM Flights F0
+                    WHERE F0.origin = 'Madison'
+                      AND F0.destination = 'New York'
+                      AND F0.arrives < '18:00')
+                   UNION
+                   (
+                       SELECT F0.flno
+                       FROM Flights F0,
+                            Flights F1
+                       WHERE F0.origin = 'Madison'
+                         AND F0.destination <> 'New York'
+                         AND F0.destination = F1.origin
+                         AND F1.destination = 'New York'
+                         AND F1.departs > F0.arrives
+                         AND F1.arrives < '18:00')
+                   UNION
+                   (
+                       SELECT F0.flno
+                       FROM Flights F0,
+                            Flights F1,
+                            Flights F2
+                       WHERE F0.origin = 'Madison'
+                         AND F0.destination = F1.origin
+                         AND F1.destination = F2.origin
+                         AND F2.destination = 'New York'
+                         AND F0.destination <> 'New York'
+                         AND F1.destination <> 'New York'
+                         AND F1.departs > F0.arrives
+                         AND F2.departs > F1.arrives
+                         AND F2.arrives < '18:00'))

@@ -1,0 +1,26 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/046.csv
+output: tests-examples/scythe/recent_posts/tables/046_o.csv
+const:
+  - Z01
+  - Z09
+attrs:
+  - Type
+comment: |
+  select *
+  from table
+  where type = `Z01`
+  union all
+  select *
+  from table
+  where type = `Z09`
+  and not exists (
+      select 1
+      from table
+      where id = t.id and type = 'Z01')
+
+  df2 <- input1 %>% filter(Type == 'Z01')
+  df3 <- input1 %>% filter(Type == 'Z01' | Type != 'Z09')
+  df4 <- anti_join(input1, df3, by=c('ID'))
+  df5 <- bind_rows(df2, df4)
+  out <- df5 %>% select(Id = ID, Type, Value)

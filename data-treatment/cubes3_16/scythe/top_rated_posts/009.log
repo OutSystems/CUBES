@@ -1,0 +1,30 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+
+df2 <- input1 %>% group_by(username) %>% summarise(time_stamp = max(time_stamp)) %>% ungroup()
+df3 <- semi_join(input1, df2)
+out <- df3 %>% select(username, ip, time_stamp)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `username`,
+       `ip`,
+       `time_stamp`
+FROM
+  (SELECT *
+   FROM `input1` AS `LHS`
+   WHERE EXISTS
+       (SELECT 1
+        FROM
+          (SELECT `username`,
+                  MAX(`time_stamp`) AS `time_stamp`
+           FROM `input1`
+           GROUP BY `username`) AS `RHS`
+        WHERE (`LHS`.`username` = `RHS`.`username`
+               AND `LHS`.`time_stamp` = `RHS`.`time_stamp`) ))

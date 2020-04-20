@@ -1,0 +1,19 @@
+[    1.7797][cube-solver-1][warning] There is no solution for current loc (2).
+[    1.8809][cube-solver-0][warning] There is no solution for current loc (2).
+[    2.8101][main][error] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/3-1.txt", col_types = cols(ID_key = col_character(),Room = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/3-2.txt", col_types = cols(ID_key_student = col_character(),ID_key = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/textbook/tables/3.out", col_types = cols(ID_key = col_character()))
+
+df3 <- input2 %>% group_by(ID_key) %>% summarise(n = n()) %>% ungroup()
+df4 <- bind_rows(input1, df3)
+df5 <- df4 %>% filter(Room == 'R128' | n > 4)
+out <- df5 %>% select(ID_key)
+
+Failed to generate SQL query

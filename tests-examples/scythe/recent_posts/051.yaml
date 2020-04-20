@@ -1,0 +1,17 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/051_1.csv
+  - tests-examples/scythe/recent_posts/tables/051_2.csv
+output: tests-examples/scythe/recent_posts/tables/051_o.csv
+attrs:
+  - Author
+aggrs:
+  - concat
+comment: |
+  Select a.isbn, a.title, group_concat(b.author )
+  from Book_title,
+  INNER JOIN Book_authoron a.isbn = b.isbn_id
+  group by a.isbn, a.title
+
+  df3 <- inner_join(input2, input1)
+  df4 <- df3 %>% group_by(isbn, title) %>% summarise(concatAuthor = string_agg(Author, ', ')) %>% ungroup()
+  out <- df4 %>% select(isbn, title, author = concatAuthor)

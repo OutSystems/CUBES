@@ -11,12 +11,16 @@ attrs:
 bools:
   - ==
 loc: 5
+solution:
+  - natural_join3
+  - filter
+  - filter
+  - inner_join
 comment: |
   # 5.2.8 optimal solution
-  df1 = inner_join(parts,catalog) %>% inner_join(suppliers) %>%
-        filter(color == "green") %>% select(sname)
-  df2 = inner_join(parts,catalog) %>%inner_join(suppliers) %>%
-        filter(color == "red") %>% select(sname)
-  intersect(df1, df2)
 
-  INTERSECT W/ SELECT
+  df4 <- inner_join(input1, input2) %>% inner_join(input3)
+  df5 <- df4 %>% filter(color == 'red')
+  df6 <- df4 %>% filter(color == 'green')
+  df7 <- inner_join(df5, df6, by=c('S_key','S_name'), suffix = c('', '.other'))
+  out <- df7 %>% select(S_name) %>% distinct() %>% arrange(S_name)

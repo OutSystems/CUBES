@@ -1,0 +1,34 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i032.csv", col_types = cols(Section = col_character(),Status = col_character(),Count = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o032.csv", col_types = cols(Section = col_character(),Count = col_integer(),Count.other = col_integer()))
+
+df2 <- input1 %>% filter(Status != 'Inactive')
+df3 <- input1 %>% filter(Status != 'Active' & Status == 'Inactive')
+df4 <- inner_join(df2, df3, by=c('Section' = 'Section','Status' = 'Section'), suffix = c('', '.other'))
+out <- df4 %>% select(Section, Count, Count.other)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Section`,
+       `Count`,
+       `Count.other`
+FROM
+  (SELECT `Section`,
+          `Status`,
+          `Count`,
+          `Status.other`,
+          `Count.other`
+   FROM
+     (SELECT *
+      FROM `input1`
+      WHERE (`Status` != 'Inactive')) AS `LHS`
+   INNER JOIN
+     (SELECT *
+      FROM `input1`
+      WHERE (`Status` != 'Active'
+             AND `Status` = 'Inactive')) AS `RHS` ON (`LHS`.`Section` = `RHS`.`Section`))

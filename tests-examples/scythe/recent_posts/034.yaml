@@ -1,0 +1,28 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/034.csv
+output: tests-examples/scythe/recent_posts/tables/034_o.csv
+aggrs:
+  - max
+attrs:
+  - DATE_UPDATE
+dateorder: ymd
+comment: |
+  select * from ( SELECT
+    t1.[MFG_PART_NUMBER]
+   ,t2.[DISCO_DATE]
+    , DATE_UPDATE
+
+    FROM Test.dbo.SKU  where DATE_UPDATE=   @maxdate)   t1
+    LEFT JOIN Test.dbo.Tbl_Disco_Dates t2
+     ON t1.[MFG_PART_NUMBER] = t2.[MATERIAL]
+
+    WHERE t1.[MFG_PART_NUMBER] = 'T6C25AW#ABC'
+
+    group by
+   t1.[MFG_PART_NUMBER]
+   ,t2.[DISCO_DATE]
+
+  df2 <- input1 %>% group_by(MATERIAL) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
+  df3 <- input1 %>% group_by(DATE_UPDATE) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
+  df4 <- inner_join(input1, df2) %>% inner_join(df3)
+  out <- df4 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE)

@@ -6,9 +6,17 @@ from typing import List
 class Config:
     seed: int
 
-    starting_loc: int = 1
+    print_r: bool
+    cache_ops: bool
+
+    minimum_loc: int = 1
+    maximum_loc: int = 256
 
     optimal: bool = False
+    advance_processes: bool = False
+    advance_percentage = .4
+
+    programs_per_cube_threshold: int = 3500
 
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True
@@ -17,19 +25,20 @@ class Config:
 
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
+    max_join_combinations: int = 2
     max_columns: int = 6
 
     filters_function_enabled: bool = False
 
     disabled: List[str] = field(default_factory=list)
-    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum'])
+    aggregation_functions: List[str] = field(default_factory=lambda: ['max', 'min', 'mean', 'n', 'sum', 'concat'])
 
-    ignore_cols: bool = False
     ignore_aggrs: bool = False
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = True
 
+    solution_use_first_line: bool = False
     solution_use_last_line: bool = False
 
     alt_empty_pos: bool = False
@@ -40,3 +49,5 @@ class Config:
     z3_sat_restart: str = 'ema'
     z3_sat_branching: str = 'vsids'
     z3_QF_FD: bool = True
+
+    h_unlikely_two_natural_joins: bool = True

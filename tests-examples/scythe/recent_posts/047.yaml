@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/047.csv
+output: tests-examples/scythe/recent_posts/tables/047_o.csv
+aggrs:
+  - max
+attrs:
+  - Time
+dateorder: ymd
+comment: |
+  select id, payment_type, time
+  from (select id, payment_type, time, count(*) as cnt,
+               row_number() over (partition by id order by time desc, cnt desc) as seqnum
+        from t
+        group by id, payment_type, time
+       ) ipt
+  where seqnum = 1;
+
+  df2 <- input1 %>% group_by(ID) %>% summarise(maxTime = max(Time)) %>% ungroup()
+  df3 <- inner_join(input1, df2)
+  df4 <- df3 %>% filter(maxTime == Time)
+  out <- df4 %>% select(ID, Payment_type) %>% distinct()

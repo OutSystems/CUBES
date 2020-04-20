@@ -1,0 +1,32 @@
+inputs:
+#  - tests-examples/scythe/recent_posts/tables/022_1.csv
+  - tests-examples/scythe/recent_posts/tables/022_2.csv
+output: tests-examples/scythe/recent_posts/tables/022_o.csv
+aggrs:
+  - n
+  - max
+attrs:
+  - c1
+const:
+  - 3
+comment: |
+  SELECT [t0].[TrackId], [t0].[UserId], (
+      SELECT [t3].[FolloweeId]
+      FROM (
+          SELECT TOP (1) [t2].[FolloweeId]
+          FROM (
+              SELECT COUNT(*) AS [value], [t1].[FolloweeId]
+              FROM [Followers] AS [t1]
+              GROUP BY [t1].[FolloweeId]
+              ) AS [t2]
+          ORDER BY [t2].[value] DESC
+          ) AS [t3]
+      ) AS [MostPopularFolloweeId]
+  FROM [Tracks] AS [t0]
+  WHERE [t0].[TrackId] = @p0
+
+  df2 <- input1 %>% group_by(c2) %>% summarise(c1 = max(c1)) %>% ungroup()
+  df3 <- inner_join(input1, df2)
+  df4 <- df3 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
+  df5 <- df4 %>% filter(n == 3 | n >= c1)
+  out <- df5 %>% select(c3 = c1)

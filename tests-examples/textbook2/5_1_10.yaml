@@ -1,0 +1,24 @@
+inputs:
+    - 'tests-examples/textbook2/tables/student.csv'
+#  - 'tests-examples/textbook2/tables/class.csv'
+    - 'tests-examples/textbook2/tables/enrolled.csv'
+#  - 'tests-examples/textbook2/tables/faculty.csv'
+output: 'tests-examples/textbook2/tables/5_1_10.csv'
+aggrs:
+  - n
+filters:
+  - max(n)
+comment: |
+  SELECT DISTINCT S.sname
+  FROM Student S
+  WHERE S.snum IN (SELECT E.snum
+  FROM Enrolled E
+  GROUP BY E.snum
+  HAVING COUNT (*) >= ALL (SELECT COUNT (*)
+  FROM Enrolled E2
+  GROUP BY E2.snum ))
+
+  df1 <- inner_join(input1, input2)
+  df2 <- df1 %>% group_by(sname, snum) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == max(n))
+  out <- df3 %>% select(sname)

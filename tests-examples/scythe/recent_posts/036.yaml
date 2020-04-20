@@ -1,0 +1,13 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/036_1.csv
+  - tests-examples/scythe/recent_posts/tables/036_2.csv
+output: tests-examples/scythe/recent_posts/tables/036_o.csv
+
+comment: |
+  SELECT m.Account, k.Name FROM Table_1 m
+  INNER JOIN Table_2 k ON k.ID = m.Sen1 OR k.ID = m.Sen2
+
+  df1 <- bind_rows(input2, input1)
+  df2 <- inner_join(df1, df1, by=c('Account' = 'ID','ID' = 'Sen1'), suffix = c('', '.other'))
+  df3 <- inner_join(df1, df2, by=c('ID' = 'Account','ID' = 'Sen1'), suffix = c('', '.other'))
+  out <- df3 %>% select(Account, Name = Name.other)

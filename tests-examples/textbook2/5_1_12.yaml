@@ -1,0 +1,24 @@
+inputs:
+  - 'tests-examples/textbook2/tables/student.csv'
+#  - 'tests-examples/textbook2/tables/class.csv'
+#  - 'tests-examples/textbook2/tables/enrolled.csv'
+#  - 'tests-examples/textbook2/tables/faculty.csv'
+output: 'tests-examples/textbook2/tables/5_1_12.csv'
+aggrs:
+  - n
+  - max
+attrs:
+  - level
+  - n
+comment: |
+  SELECT S.age, S.level
+  FROM Student S
+  GROUP BY S.age, S.level,
+  HAVING S.level IN (SELECT S1.level
+                     FROM Student S1
+                     WHERE S1.age = S.age
+                     GROUP BY S1.level, S1.age
+                     HAVING COUNT (*) >= ALL (SELECT COUNT (*)
+                                              FROM Student S2
+                                              WHERE s1.age = S2.age
+                                              GROUP BY S2.level, S2.age))

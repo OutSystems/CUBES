@@ -289,9 +289,8 @@ class ExampleConstraintPruningDecider(ExampleDecider):
     def __init__(self,
                  spec: TyrellSpec,
                  interpreter: Interpreter,
-                 examples: List[Example],
-                 equal_output: Callable[[Any, Any], bool] = lambda x, y: x == y):
-        super().__init__(interpreter, examples, equal_output)
+                 examples: List[Example]):
+        super().__init__(interpreter, examples)
         self._assert_handler = AssertionViolationHandler(spec, interpreter)
 
     def analyze_interpreter_error(self, error: InterpreterError):

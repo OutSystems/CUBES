@@ -158,12 +158,183 @@ From this point onward the new filter, summarise and join condition code is used
     
 ## Week 8
 
-## 55-tests/22
+### 55-tests/22
 - last line: 41m56 (30 processes)
 - 2 last lines: 2m40 (30 processes)
 
-## 55-tests/43
+### 55-tests/43
 - last line: 1m20 (just 5 lines, weird solution) (30 processes)
 
-## 55-tests/46
+### 55-tests/46
 - last line: 2h+ timeout (30 processes)
+
+## Week 9
+
+### 55-tests/22
+Stats after 300s (16 threads):
+
+    [  299.2467][main][info] Statistics:
+    [  299.2467][main][info]        Generated cubes: 224
+    [  299.2467][main][info]        Attempted programs: 187316
+    [  299.2467][main][info]                Rejected: 18104
+    [  299.2467][main][info]                Failed: 169212
+    [  299.2467][main][info]        Blacklist clauses: 62
+    [  299.2469][main][info] Priting statistics for good programs of size 4
+    [  299.2484][main][info]        0: Counter({'summariseGrouped': 1624, 'filter': 232, 'natural_join': 16, 'left_join': 16, 'bind_rows': 16})
+    [  299.2500][main][info]        1: Counter({'natural_join3': 1344, 'filter': 208, 'summariseGrouped': 208, 'bind_rows': 112, 'left_join': 16, 'natural_join': 16})
+    [  299.2506][main][info]        2: Counter({'filter': 1464, 'natural_join3': 288, 'summariseGrouped': 72, 'bind_rows': 48, 'natural_join': 16, 'left_join': 16})
+    [  299.2512][main][info]        3: Counter({'select': 1904})
+    [  299.2512][main][info] Priting statistics for good programs of size 5
+    [  299.2579][main][info]        0: Counter({'natural_join': 15714, 'summariseGrouped': 4309})
+    [  299.2627][main][info]        1: Counter({'summariseGrouped': 12986, 'natural_join': 4091, 'filter': 2568, 'natural_join3': 218, 'left_join': 64, 'bind_rows': 64, 'semi_join': 32})
+    [  299.2670][main][info]        2: Counter({'filter': 5189, 'natural_join3': 4624, 'left_join': 3274, 'bind_rows': 2571, 'summariseGrouped': 2402, 'natural_join': 1664, 'anti_join': 192, 'semi_join': 107})
+    [  299.2710][main][info]        3: Counter({'filter': 12320, 'natural_join3': 3711, 'natural_join': 1208, 'bind_rows': 1061, 'left_join': 977, 'summariseGrouped': 328, 'semi_join': 210, 'anti_join': 208})
+    [  299.2747][main][info]        4: Counter({'select': 20023})
+    No solution found
+
+### 55-tests/46
+Stats after 300s (16 threads):
+
+    [  299.1345][main][info] Statistics:
+    [  299.1345][main][info]        Generated cubes: 72
+    [  299.1345][main][info]        Attempted programs: 0
+    [  299.1345][main][info]                Rejected: 0
+    [  299.1345][main][info]                Failed: 0
+    [  299.1345][main][info]        Blacklist clauses: 86
+    [  299.1348][main][info] Priting statistics for good programs of size 4
+    [  299.1365][main][info]        0: Counter({'summariseGrouped': 1616, 'natural_join3': 907})
+    [  299.1376][main][info]        1: Counter({'natural_join3': 1081, 'summariseGrouped': 907, 'filter': 535})
+    [  299.1383][main][info]        2: Counter({'filter': 1988, 'natural_join4': 451, 'natural_join3': 84})
+    [  299.1390][main][info]        3: Counter({'select': 2523})
+    [  299.1391][main][info] Priting statistics for good programs of size 5
+    [  299.1409][main][info]        0: Counter({'natural_join': 7995})
+    [  299.1426][main][info]        1: Counter({'summariseGrouped': 7995})
+    [  299.1443][main][info]        2: Counter({'filter': 2754, 'natural_join3': 1811, 'left_join': 1392, 'natural_join': 1300, 'anti_join': 738})
+    [  299.1460][main][info]        3: Counter({'filter': 5241, 'bind_rows': 916, 'natural_join4': 880, 'natural_join': 291, 'left_join': 263, 'natural_join3': 201, 'semi_join': 123, 'anti_join': 80})
+    [  299.1477][main][info]        4: Counter({'select': 7995})
+    No solution found
+    
+## Week 10
+
+### Unsupported
+- Union with selects (scythe/recent_posts/001)
+- Complex join (scythe/recent_posts/013, scythe/recent_posts/036, scythe/recent_posts/048, leetcode/181)
+- Left join with const (scythe/recent_posts/021)
+- Top n (scythe/recent_posts/022, leetcode/185)
+- Float comparison? (scythe/recent_posts/24)
+- Mutate / summarise with mutate (scythe/recent_posts/24, scythe/recent_posts/33, scythe/recent_posts/35, leetcode/262)
+- Mutate (scythe/recent_posts/26, leetcode/178)
+- Date part + date arithmetic (scythe/recent_posts/27)
+- Join with different names (scythe/recent_posts/28)
+- full outer join? (scythe/recent_posts/029)
+- self filter ?? (scythe/recent_posts/043)
+
+#### Unknown reason
+- scythe/recent_posts/007
+- scythe/recent_posts/023
+- scythe/recent_posts/037 (evil)
+
+### Requires inner_join
+- scythe/recent_posts/003
+- others
+
+### Should sort
+- scythe/recent_posts/003
+- scythe/recent_posts/014
+- scythe/recent_posts/028
+- scythe/recent_posts/032
+- scythe/recent_posts/042
+- scythe/recent_posts/048
+- leetcode/178
+
+### Pivots
+- scythe/recent_posts/008
+- scythe/recent_posts/015
+
+### Hard but possibly solvable
+- scythe/recent_posts/046
+
+## Week 11
+
+### Possible extension
+- union distinct
+
+### Unsolved instances
+
+#### Supported
+- 55-tests/46
+- scythe/recent_posts/006
+- scythe/recent_posts/019
+- scythe/recent_posts/036
+- scythe/recent_posts/046
+- textbook/20
+- textbook/22
+
+#### Unsure if supported?
+- scythe/recent_posts/001
+- scythe/recent_posts/185
+- textbook/23
+
+#### Not supported
+
+##### Mutate
+- scythe/recent_posts/002 (lead)
+- scythe/recent_posts/024 (percentage)
+- scythe/recent_posts/026 (predicates to bool cols)
+- scythe/recent_posts/027 (date arithmetic)
+- scythe/recent_posts/033 (date arithmetic)
+- scythe/recent_posts/035 (percentage)
+- scythe/recent_posts/039 (sum)
+- scythe/recent_posts/050 (coalesce)
+- scythe/top_rated_posts/003 (concat)
+- scythe/top_rated_posts/023 (row_number)
+- scythe/top_rated_posts/044 (cumsum)
+- scythe/top_rated_posts/050 (sum?)
+- leetcode/178 (rank)
+- leetcode/180 (lead, lag)
+- leetcode/197 (date arithmetic)
+- leetcode/262 (percentage)
+- textbook/26 (min)
+- textbook/29 (min)
+- textbook/32 (min)
+- textbook/33 (avg, arithmetic)
+- textbook/34 (avg)
+
+##### Grouped filter
+- textbook/36 (all)
+- textbook/37 (all, any)
+
+##### Complex Join
+- scythe/recent_posts/013
+- scythe/recent_posts/021
+- scythe/recent_posts/023 (chained left join)
+- scythe/recent_posts/028
+- scythe/recent_posts/043 (self join)
+- scythe/recent_posts/048 (self join)
+- scythe/recent_posts/050
+- scythe/top_rated_posts/018
+- scythe/top_rated_posts/030
+- scythe/top_rated_posts/054
+- leetcode/181
+- leetcode/197
+- textbook/27
+
+##### Distinct
+- scythe/recent_posts/017 (distinct with .keep=T) (would still be 6 lines + select) (scythe supports because instance is underspecified)
+
+##### Float comparison
+- scythe/recent_posts/024
+
+##### Gather / Spread
+- scythe/recent_posts/008
+- scythe/recent_posts/015
+- scythe/top_rated_posts/015
+- scythe/top_rated_posts/033
+- scythe/top_rated_posts/035
+
+##### Unknown reason
+- scythe/recent_posts/029 (full outer join?)
+
+##### Too complex to ever support?
+- scythe/recent_posts/030 (IN sets)
+- scythe/recent_posts/037 (SQL windows??)

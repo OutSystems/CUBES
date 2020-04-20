@@ -1,0 +1,26 @@
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/35.out
+const:
+  - 1000
+attrs:
+  - crusingrange
+comment: |
+  5.3.12 optimal solution sql
+
+  SELECT E.ename
+  FROM Employees E,
+       Certified C,
+       Aircraft A
+  WHERE C.aid = A.aid
+    AND E.eid = C.eid
+  GROUP BY E.eid, E.ename
+  HAVING EVERY(A.crusingrange > 1000)
+
+  df4 <- inner_join(input3, input2) %>% inner_join(input1)
+  df5 <- df4 %>% filter(crusingrange < 1000)
+  df6 <- anti_join(df4, df5, by=c('eid', 'ename'))
+  out <- df6 %>% select(ename) %>% distinct() %>% arrange(ename)

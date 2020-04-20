@@ -1,0 +1,35 @@
+[    1.2550][main][warning] Using integers larger than 32 bits! Converting column phone_number to string.
+[    1.2631][main][warning] Using integers larger than 32 bits! Converting column phone_number to string.
+[    1.2703][main][warning] Using integers larger than 32 bits! Converting column phone_number to string.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i010_1.csv", col_types = cols(id = col_character(),name = col_character(),phone_number = col_character()))
+input1$id <- dmy(input1$id)
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i010_2.csv", col_types = cols(id = col_character(),date = col_character(),phone_number = col_character()))
+input2$id <- dmy(input2$id)
+input2$date <- dmy(input2$date)
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o010.csv", col_types = cols(id = col_character(),date = col_character(),phone_number = col_character()))
+expected_output$id <- dmy(expected_output$id)
+expected_output$date <- dmy(expected_output$date)
+
+df3 <- anti_join(input2, input1)
+out <- df3 %>% select(id, date, phone_number)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `date`,
+       `phone_number`
+FROM
+  (SELECT *
+   FROM `input2` AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM `input1` AS `RHS`
+        WHERE (`LHS`.`id` = `RHS`.`id`
+               AND `LHS`.`phone_number` = `RHS`.`phone_number`) ))

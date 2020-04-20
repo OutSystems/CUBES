@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/031_1.csv
+  - tests-examples/scythe/recent_posts/tables/031_2.csv
+output: tests-examples/scythe/recent_posts/tables/031_o.csv
+const:
+  - public
+  - Dave
+attrs:
+  - type
+  - accountID
+comment: |
+  SELECT (stuff)
+  FROM ChatChannels CC
+  WHERE CC.type = 'Public'
+    AND CC.channelID NOT IN
+    (SELECT channelID FROM ChatChannelMembers WHERE AccountID = 'Dave')
+
+  df3 <- left_join(input2, input1)
+  df4 <- df3 %>% filter(type == 'public' & accountID == 'Dave')
+  out <- df4 %>% select(c1 = channelID, c2 = accountID, c3 = role)

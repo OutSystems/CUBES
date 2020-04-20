@@ -1,0 +1,23 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/019.csv
+output: tests-examples/scythe/recent_posts/tables/019_o.csv
+aggrs:
+  - max
+const:
+  - 0
+attrs:
+  - Balance
+  - Date
+dateorder: mdy
+comment: |
+  select *
+  from tablename t1
+  where not exists (select * from tablename t2
+                    where t2.Balance > 0
+                      and t2.date > t1.date)
+
+  df2 <- input1 %>% filter(Balance >= 0)
+  df3 <- df2 %>% group_by(CustomerID) %>% summarise(maxDate = max(Date)) %>% ungroup()
+  df4 <- inner_join(df3, input1)
+  df5 <- df4 %>% filter(maxDate < Date)
+  out <- df5 %>% select(CustomerID, Balance, Date)

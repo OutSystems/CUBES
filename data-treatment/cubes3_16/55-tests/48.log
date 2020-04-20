@@ -1,0 +1,38 @@
+[    1.6447][cube-solver-1][warning] There is no solution for current loc (2).
+[    1.8395][cube-solver-0][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/17-1.txt", col_types = cols(S_key = col_character(),P_id = col_character(),cost = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/17-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/48.out", col_types = cols(P_id = col_character(),S_name = col_character(),n = col_integer()))
+
+df3 <- input2 %>% group_by(S_key, S_name) %>% summarise(n = n()) %>% ungroup()
+df4 <- inner_join(input1, df3)
+df5 <- df4 %>% filter(S_name != 'SN1')
+out <- df5 %>% select(P_id, S_name, n)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `P_id`,
+       `S_name`,
+       `n`
+FROM
+  (SELECT `S_key`,
+          `P_id`,
+          `cost`,
+          `S_name`,
+          `n`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `S_key`,
+             `S_name`,
+             COUNT() AS `n`
+      FROM `input2`
+      GROUP BY `S_key`,
+               `S_name`) AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+WHERE (`S_name` != 'SN1')

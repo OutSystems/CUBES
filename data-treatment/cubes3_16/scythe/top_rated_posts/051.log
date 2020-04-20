@@ -1,0 +1,33 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i051.csv", col_types = cols(id = col_integer(),category = col_character(),date = col_character()))
+input1$date <- ymd(input1$date)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o051.csv", col_types = cols(id = col_integer(),category = col_character(),date = col_character()))
+expected_output$date <- ymd(expected_output$date)
+
+df2 <- input1 %>% group_by(category) %>% summarise(maxdate = max(date)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+df4 <- df3 %>% filter(maxdate == date)
+out <- df4 %>% select(id, category, date)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `category`,
+       `date`
+FROM
+  (SELECT `id`,
+          `category`,
+          `date`,
+          `maxdate`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `category`,
+             MAX(`date`) AS `maxdate`
+      FROM `input1`
+      GROUP BY `category`) AS `RHS` ON (`LHS`.`category` = `RHS`.`category`))
+WHERE (`maxdate` = `date`)

@@ -21,10 +21,8 @@ comment: |
   GROUP BY C.eid
   HAVING   COUNT(*) > 3
 
-
-  out <- inner_join(
-  inner_join(certified, aircraft) %>%
-  group_by(eid) %>% summarise(maxcrusingrange = max(crusingrange)),
-  filter(
-  inner_join(certified, aircraft) %>%
-  group_by(eid) %>% summarise(n = n()), n >3)) %>% select(eid)
+  df3 <- input2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df4 <- inner_join(df3, input2) %>% inner_join(input1)
+  df5 <- df4 %>% filter(crusingrange <= 3 | n > 3)
+  df6 <- df5 %>% group_by(eid) %>% summarise(crusingrange = max(crusingrange)) %>% ungroup()
+  out <- df6 %>% select(eid, maxcrusingrange = crusingrange) %>% arrange(eid)

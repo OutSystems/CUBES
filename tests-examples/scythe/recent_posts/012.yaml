@@ -1,0 +1,15 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/012.csv
+output: tests-examples/scythe/recent_posts/tables/012_o.csv
+aggrs:
+  - concat
+attrs:
+  - variants
+  - variants_value
+comment: |
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df2 <- input1 %>% group_by(product_name, product_variants_id) %>% summarise(concatvariants = string_agg(variants, ', ')) %>% ungroup()
+  df3 <- input1 %>% group_by(code, product_variants_id) %>% summarise(concatvariants_value = string_agg(variants_value, ', ')) %>% ungroup()
+  df4 <- left_join(df2, df3)
+  out <- df4 %>% select(code, product_variants_id, product_name, variants = concatvariants, variants_value = concatvariants_value) %>% arrange(code)

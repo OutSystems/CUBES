@@ -1,0 +1,45 @@
+[    1.8799][cube-solver-0][warning] There is no solution for current loc (2).
+[    1.9666][cube-solver-1][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/9-1.txt", col_types = cols(ID_class = col_character(),ID_key = col_character(),Room = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/9-2.txt", col_types = cols(ID_key = col_character(),F_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/9.out", col_types = cols(F_name = col_character(),n = col_integer()))
+
+df3 <- inner_join(input1, input2)
+df4 <- df3 %>% group_by(F_name, ID_key) %>% summarise(n = n()) %>% ungroup()
+df5 <- input1 %>% filter(Room != 'R128')
+df6 <- anti_join(df4, df5)
+out <- df6 %>% select(F_name, n)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `F_name`,
+       `n`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `F_name`,
+             `ID_key`,
+             COUNT() AS `n`
+      FROM
+        (SELECT `ID_class`,
+                `ID_key`,
+                `Room`,
+                `F_name`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`ID_key` = `RHS`.`ID_key`))
+      GROUP BY `F_name`,
+               `ID_key`) AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM `input1`
+           WHERE (`Room` != 'R128')) AS `RHS`
+        WHERE (`LHS`.`ID_key` = `RHS`.`ID_key`) ))

@@ -1,0 +1,42 @@
+[    3.1678][cube-solver-1][warning] There is no solution for current loc (2).
+[    3.2219][cube-solver-0][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/6-1.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/6-2.txt", col_types = cols(C_name = col_character(),F_key = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/textbook/tables/6-3.txt", col_types = cols(F_key = col_character(),F_name = col_character()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/textbook/tables/6.out", col_types = cols(F_name = col_character()))
+
+df4 <- inner_join(input1, input2) %>% inner_join(input3)
+df5 <- df4 %>% group_by(F_key, F_name) %>% summarise(n = n()) %>% ungroup()
+df6 <- df5 %>% filter(n <= 5)
+out <- df6 %>% select(F_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `F_name`
+FROM
+  (SELECT `F_key`,
+          `F_name`,
+          COUNT() AS `n`
+   FROM
+     (SELECT `S_key`,
+             `C_name`,
+             `F_key`,
+             `F_name`
+      FROM
+        (SELECT `S_key`,
+                `C_name`,
+                `F_key`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`C_name` = `RHS`.`C_name`)) AS `LHS`
+      INNER JOIN `input3` AS `RHS` ON (`LHS`.`F_key` = `RHS`.`F_key`))
+   GROUP BY `F_key`,
+            `F_name`)
+WHERE (`n` <= 5.0)

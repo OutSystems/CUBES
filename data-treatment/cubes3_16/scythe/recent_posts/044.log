@@ -1,0 +1,32 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/044_1.csv", col_types = cols(OriginalID = col_integer(),Area = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/044_2.csv", col_types = cols(Part = col_character(),OriginalID = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/044_o.csv", col_types = cols(OriginalID = col_integer(),Area = col_character()))
+
+df3 <- inner_join(input1, input2, by=c('OriginalID' = 'OriginalID','Area' = 'Part'), suffix = c('', '.other'))
+df4 <- anti_join(input1, df3)
+out <- df4 %>% select(OriginalID, Area)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `OriginalID`,
+       `Area`
+FROM
+  (SELECT *
+   FROM `input1` AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT `OriginalID`,
+                  `Area`
+           FROM `input1` AS `LHS`
+           INNER JOIN `input2` AS `RHS` ON (`LHS`.`OriginalID` = `RHS`.`OriginalID`
+                                            AND `LHS`.`Area` = `RHS`.`Part`)) AS `RHS`
+        WHERE (`LHS`.`OriginalID` = `RHS`.`OriginalID`
+               AND `LHS`.`Area` = `RHS`.`Area`) ))

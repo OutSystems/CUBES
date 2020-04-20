@@ -1,0 +1,28 @@
+inputs:
+#  - tests-examples/scythe/recent_posts/tables/016_1.csv
+  - tests-examples/scythe/recent_posts/tables/016_2.csv
+output: tests-examples/scythe/recent_posts/tables/016_o.csv
+const:
+  - 10/19/2016
+  - 1
+aggrs:
+  - max
+  - n
+attrs:
+  - ReportDt
+dateorder: mdy
+comment: |
+  SELECT C.Id,
+         MAX(RP.PullDt) as LastReportPullDt,
+         COUNT(*) AS ReportCount
+  FROM Customer C
+  INNER JOIN ReportPull RP ON C.CustomerId = RP.CustomerId
+  GROUP BY C.CustomerId
+  HAVING COUNT(*) > 1
+  AND MAX(RP.PullDt) >= "10/19/2016"
+
+  df2 <- input1 %>% group_by(CustomerId) %>% summarise(maxReportDt = max(ReportDt)) %>% ungroup()
+  df3 <- input1 %>% group_by(CustomerId) %>% summarise(n = n()) %>% ungroup()
+  df4 <- inner_join(df2, df3) %>% inner_join(input1)
+  df5 <- df4 %>% filter(n > 1 & ReportDt > mdy('10/19/2016'))
+  out <- df5 %>% select(c1 = CustomerId, c2 = maxReportDt, c3 = n) %>% distinct()

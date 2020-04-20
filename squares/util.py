@@ -41,16 +41,24 @@ def get_fresh_name():
     return 'df' + str(next_counter())
 
 
+def powerset_except_empty(cols, num=None):
+    if num is None:
+        num = len(cols)
+    if num == 0:
+        return []
+    return powerset_except_empty(cols, num - 1) + [a for a in combinations(cols, num)]
+
+
 def get_combinations(cols, num):
     if num == 0:
         return []
-    return [", ".join(a) for a in combinations(cols, num)] + get_combinations(cols, num - 1)
+    return get_combinations(cols, num - 1) + [", ".join(a) for a in combinations(cols, num)]
 
 
 def get_permutations(cols, num):
     if num == 0:
         return []
-    return [", ".join(a) for a in permutations(cols, num)] + get_permutations(cols, num - 1)
+    return get_permutations(cols, num - 1) + [", ".join(a) for a in permutations(cols, num)]
 
 
 def store_config(conf):
@@ -61,16 +69,6 @@ def store_config(conf):
 def get_config() -> Config:
     global config
     return config
-
-
-def store_solution(sol):
-    global solution
-    solution = sol
-
-
-def get_current_solution() -> Config:
-    global solution
-    return solution
 
 
 def set_program_queue(q):
@@ -88,12 +86,6 @@ def boolvec2int(bools: List[bool]) -> int:
         if bools[i]:
             result += 2 ** i
     return result
-
-
-def add_osdict(d: Dict[Any, OrderedSet], key: Any, value: Any):
-    if key not in d:
-        d[key] = OrderedSet()
-    d[key].add(value)
 
 
 def create_argparser():
@@ -115,8 +107,25 @@ def create_argparser():
     g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
     parser.set_defaults(tree=False)
 
+    parser.add_argument('--optimal', action='store_true')
+    parser.add_argument('--cache-operations', dest='cache_ops', action='store_true',
+                        help='increased memory usage, but possibly faster results')
+    parser.add_argument('--h-split-search', dest='split_search', action='store_true',
+                        help='use an heuristic to determine if search should be split among multiple lines of code.')
+    parser.add_argument('--h-split-search-threshold', dest='split_search_h', type=int, default=4000)
+
+    parser.add_argument('--disable', nargs='+', default=[])
+
+    parser.add_argument('--max-filter-combo', dest='max_filter_combo', type=int, default=2)
+    parser.add_argument('--max-cols-combo', dest='max_cols_combo', type=int, default=2)
+    parser.add_argument('--max-join-combo', dest='max_join_combo', type=int, default=2)
+
+    parser.add_argument('--use-solution-first-line', dest='use_first', action='store_true')
+    parser.add_argument('--use-solution-last-line', dest='use_last', action='store_true')
+
     parser.add_argument('-j', type=int, default=-2, help='number of processes to use')
-    parser.add_argument('--limit', type=int, default=7, help='maximum program size')
+    parser.add_argument('--max-lines', dest='max_lines', type=int, default=8, help='maximum program size')
+    parser.add_argument('--min-lines', dest='min_lines', type=int, default=1, help='minimum program size')
     parser.add_argument('--seed', default='squares')
     return parser
 
@@ -149,6 +158,10 @@ def parse_specification(filename):
 
 def quote_str(string: str) -> str:
     return f'"{string}"'
+
+
+def single_quote_str(string: str) -> str:
+    return f"'{string}'"
 
 
 def count(iter: Iterable) -> int:
@@ -185,3 +198,12 @@ def pipe_read(pipe: Connection) -> Any:
         counter += pipe.recv_bytes_into(data, counter)
 
     return pickle.loads(data)
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]

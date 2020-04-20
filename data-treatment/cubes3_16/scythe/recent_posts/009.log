@@ -1,0 +1,35 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/009.csv", col_types = cols(c1 = col_integer(),c2 = col_integer(),c3 = col_character(),c4 = col_character(),c5 = col_integer()))
+input1$c3 <- dmy(input1$c3)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/009_o.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_integer()))
+
+df2 <- input1 %>% group_by(c2, c4) %>% summarise(n = n()) %>% ungroup()
+df3 <- left_join(df2, input1)
+out <- df3 %>% select(c1 = c2, c2 = c4, c3 = n) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `c2` AS `c1`,
+                `c4` AS `c2`,
+                `n` AS `c3`
+FROM
+  (SELECT `c2`,
+          `c4`,
+          `n`,
+          `c1`,
+          `c3`,
+          `c5`
+   FROM
+     (SELECT `c2`,
+             `c4`,
+             COUNT() AS `n`
+      FROM `input1`
+      GROUP BY `c2`,
+               `c4`) AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`c2` = `RHS`.`c2`
+                                   AND `LHS`.`c4` = `RHS`.`c4`))

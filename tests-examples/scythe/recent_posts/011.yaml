@@ -1,0 +1,17 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/011.csv
+output: tests-examples/scythe/recent_posts/tables/011_o.csv
+aggrs:
+  - concat
+attrs:
+  - Value
+comment: |
+  select ID, Name, concat(Value)
+  from t
+  group by ID
+
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df2 <- input1 %>% group_by(ID) %>% summarise(concatValue = string_agg(Value, ', ')) %>% ungroup()
+  out <- df2 %>% select(ID, Value = concatValue)
+

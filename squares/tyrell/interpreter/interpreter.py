@@ -15,6 +15,13 @@ class Interpreter(ABC):
         '''
         raise NotImplementedError
 
+    @abstractmethod
+    def equals(self, actual, expected, *args) -> bool:
+        """
+        Tests if a given output is equal to the expected output
+        """
+        raise NotImplementedError
+
     def assertArg(
             self,
             node: Node,

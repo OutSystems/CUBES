@@ -1,0 +1,69 @@
+[    2.2447][cube-solver-0][warning] There is no solution for current loc (1).
+[    2.5445][cube-solver-4][warning] There is no solution for current loc (2).
+[    2.5567][cube-solver-8][warning] There is no solution for current loc (2).
+[    2.5638][cube-solver-7][warning] There is no solution for current loc (2).
+[    2.5681][cube-solver-11][warning] There is no solution for current loc (2).
+[    2.5721][cube-solver-12][warning] There is no solution for current loc (2).
+[    2.5751][cube-solver-13][warning] There is no solution for current loc (2).
+[    2.5961][cube-solver-5][warning] There is no solution for current loc (2).
+[    2.6012][cube-solver-6][warning] There is no solution for current loc (2).
+[    2.6154][cube-solver-10][warning] There is no solution for current loc (2).
+[    2.6785][cube-solver-1][warning] There is no solution for current loc (2).
+[    2.6864][cube-solver-2][warning] There is no solution for current loc (2).
+[    2.6891][cube-solver-15][warning] There is no solution for current loc (2).
+[    2.7530][cube-solver-3][warning] There is no solution for current loc (2).
+[    2.7694][cube-solver-9][warning] There is no solution for current loc (2).
+[    2.9302][cube-solver-14][warning] There is no solution for current loc (2).
+[    4.0472][cube-solver-0][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/28.out", col_types = cols(aname = col_character()))
+
+df4 <- input2 %>% filter(salary <= 100000 | salary >= 120000)
+df5 <- inner_join(input3, input2) %>% inner_join(input1) %>% inner_join(df4)
+df6 <- df5 %>% filter(salary >= 80000 & salary <= 120000)
+out <- df6 %>% select(aname)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `aname`
+FROM
+  (SELECT `eid`,
+          `aid`,
+          `ename`,
+          `salary`,
+          `aname`,
+          `crusingrange`
+   FROM
+     (SELECT `eid`,
+             `aid`,
+             `ename`,
+             `salary`,
+             `aname`,
+             `crusingrange`
+      FROM
+        (SELECT `eid`,
+                `aid`,
+                `ename`,
+                `salary`
+         FROM `input3` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`)) AS `LHS`
+      INNER JOIN `input1` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`)) AS `LHS`
+   INNER JOIN
+     (SELECT *
+      FROM `input2`
+      WHERE (`salary` <= 100000.0
+             OR `salary` >= 120000.0)) AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`
+                                                    AND `LHS`.`ename` = `RHS`.`ename`
+                                                    AND `LHS`.`salary` = `RHS`.`salary`))
+WHERE (`salary` >= 80000.0
+       AND `salary` <= 120000.0)

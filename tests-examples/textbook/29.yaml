@@ -3,20 +3,17 @@ inputs:
   - tests-examples/textbook/tables/flights.txt
 output: tests-examples/textbook/tables/29.out
 const:
-  - Chicago
-  - Los Angeles
-aggrs:
-  - min
+  - Boeing
+filters:
+  - like
 attrs:
-  - distance
-  - crusingrange
+  - aname
 loc: 3
 comment: |
-  5.3.5 optimal solution sql
+  5.3.6 optimal solution sql
 
   SELECT A.aid
-  FROM aircraft A
-  WHERE A.crusingrange > (SELECT MIN(F.distance)
-                          FROM flights F
-                          WHERE F.from = "Los Angeles"
-                            AND F.to = "Chicago")
+  FROM Aircraft A
+  WHERE A.crusingrange > ( SELECT MIN (F.distance)
+                            FROM Flights F
+                            WHERE F.origin = 'Los Angeles' AND F.destination = 'Chicago' )

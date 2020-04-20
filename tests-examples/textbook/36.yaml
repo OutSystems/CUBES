@@ -1,0 +1,25 @@
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/36.out
+aggrs:
+  - n
+const:
+  - 1000
+  - 1
+attrs:
+  - crusingrange
+comment: |
+  5.3.13 optimal solution sql
+
+  SELECT E.ename
+  FROM Employees E,
+       Certified C,
+       Aircraft A
+  WHERE C.aid = A.aid
+    AND E.eid = C.eid
+  GROUP BY E.eid, E.ename
+  HAVING EVERY(A.crusingrange > 1000)
+     AND COUNT(*) > 1

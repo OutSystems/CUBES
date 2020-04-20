@@ -15,18 +15,9 @@ loc: 7
 comment: |
   5.2.10 optimal solution
 
-  catalog <- read.table("tests-examples/textbook/tables/17-1.txt", sep =",", header=T)
-  catalog
-  suppliers <- read.table("tests-examples/textbook/tables/17-3.txt", sep =",", header=T)
-  suppliers
-  datout <- read.table("tests-examples/textbook/tables/22.out", sep =",", header=T)
-  datout
-
-  input=inner_join(parts,catalog) %>% inner_join(suppliers)
-  df1=input %>%
-  filter(color != "green") %>% select(sname)
-  df2=input %>% select(sname)
-  df3=anti_join(df2,df1)
-  df4=input %>%
-      group_by(sname) %>% summarise(n = n())
-  inner_join(df4,df3)
+  df4 <- inner_join(input2, input1)
+  df5 <- df4 %>% group_by(S_key) %>% summarise(n = n()) %>% ungroup()
+  df6 <- inner_join(input3, df5) %>% inner_join(input1)
+  df7 <- df4 %>% filter(color != 'green')
+  df8 <- anti_join(df6, df7, by=c('S_key'))
+  out <- df8 %>% select(S_name, n) %>% arrange(S_name)

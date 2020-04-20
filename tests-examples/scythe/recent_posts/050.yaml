@@ -1,0 +1,27 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/050_1.csv
+  - tests-examples/scythe/recent_posts/tables/050_2.csv
+  - tests-examples/scythe/recent_posts/tables/050_3.csv
+output: tests-examples/scythe/recent_posts/tables/050_o.csv
+aggrs:
+  - coalesce
+const:
+  - A
+  - B
+attrs:
+  - role_type
+comment: |
+  SELECT t1.role_id,
+         t1.role_type,
+         t1.company,
+         t1.ref_id,
+         COALESCE(e.employee_name, o.org_id) AS ref_name,
+         e.joining_date                      AS ref_joining_date,
+         o.org_max                           AS ref_org_max
+  FROM   roles t1
+         LEFT JOIN employee
+                ON e.employee_id = t1.ref_id
+                   AND t1.role_type = 'A'
+         LEFT JOIN organisations o
+                ON o.org_id = t1.ref_id
+                   AND t1.role_type = 'B'

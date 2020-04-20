@@ -1,0 +1,36 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i021.csv", col_types = cols(ID = col_integer(),CHARGEID = col_integer(),CHARGETYPE = col_character(),SERVICEMONTH = col_character()))
+input1$SERVICEMONTH <- mdy(input1$SERVICEMONTH)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o021.csv", col_types = cols(CHARGEID = col_integer(),CHARGETYPE = col_character(),maxSERVICEMONTH = col_character()))
+expected_output$maxSERVICEMONTH <- mdy(expected_output$maxSERVICEMONTH)
+
+df2 <- left_join(input1, input1)
+df3 <- df2 %>% group_by(CHARGEID, CHARGETYPE) %>% summarise(maxSERVICEMONTH = max(SERVICEMONTH)) %>% ungroup()
+out <- df3 %>% select(CHARGEID, CHARGETYPE, maxSERVICEMONTH)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `CHARGEID`,
+       `CHARGETYPE`,
+       `maxSERVICEMONTH`
+FROM
+  (SELECT `CHARGEID`,
+          `CHARGETYPE`,
+          MAX(`SERVICEMONTH`) AS `maxSERVICEMONTH`
+   FROM
+     (SELECT `ID`,
+             `CHARGEID`,
+             `CHARGETYPE`,
+             `SERVICEMONTH`
+      FROM `input1` AS `LHS`
+      LEFT JOIN `input1` AS `RHS` ON (`LHS`.`ID` = `RHS`.`ID`
+                                      AND `LHS`.`CHARGEID` = `RHS`.`CHARGEID`
+                                      AND `LHS`.`CHARGETYPE` = `RHS`.`CHARGETYPE`
+                                      AND `LHS`.`SERVICEMONTH` = `RHS`.`SERVICEMONTH`))
+   GROUP BY `CHARGEID`,
+            `CHARGETYPE`)

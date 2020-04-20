@@ -1,0 +1,15 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/024.csv
+output: tests-examples/scythe/recent_posts/tables/024_o.csv
+const:
+  - blue
+comment: |
+  SELECT BALL.Month, avg(BALL.Color='Blue')
+  FROM BALL
+  GROUP BY BALL.Month;
+
+  select t1.month,ifnull(t2.occur/t1.tot,0) as percentage from
+  (select month, count(*) as tot from ball group by month) as t1
+  left join
+  (select month, count(*) as occur from ball where color="blue" group by month) as t2
+  on t1.month=t2.month

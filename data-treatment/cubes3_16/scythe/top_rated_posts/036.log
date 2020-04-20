@@ -1,0 +1,31 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i036.csv", col_types = cols(username = col_character(),date = col_character(),value = col_double()))
+input1$date <- ymd(input1$date)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o036.csv", col_types = cols(username = col_character(),date = col_character(),value = col_double()))
+expected_output$date <- ymd(expected_output$date)
+
+df2 <- input1 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
+df3 <- inner_join(df2, input1, by=c('maxdate' = 'date'), suffix = c('', '.other'))
+out <- df3 %>% select(username, date = maxdate, value)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `username`,
+       `maxdate` AS `date`,
+       `value`
+FROM
+  (SELECT `username`,
+          `maxdate`,
+          `username.other`,
+          `value`
+   FROM
+     (SELECT `username`,
+             MAX(`date`) AS `maxdate`
+      FROM `input1`
+      GROUP BY `username`) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`maxdate` = `RHS`.`date`))

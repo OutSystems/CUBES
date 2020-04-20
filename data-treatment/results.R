@@ -7,20 +7,24 @@ library(readr)
 
 setwd('./data-treatment')
 
-status <- c(0, 2, 143, NA, 1)
-status_meanings <- c('R & SQL', 'Just R', '???', 'Timeout', 'Fail')
+status <- c(0, 3, 2, 4, 143, NA, 1)
+status_meanings <- c('R & SQL', 'Non optimal', 'Just R', 'Just R non optimal', '???', 'Timeout', 'Fail')
 
 timelimit <- 600
 
 load_result_squares <- function(file) {
-  read_csv(file, col_types = cols(
+  t <- read_csv(file, col_types = cols(
     name = col_character(),
     timeout = col_logical(),
     real = col_double(),
     cpu = col_double(),
     ram = col_double(),
     status = col_factor(levels = status)
-  )) %>% filter(str_detect(name, test_filter))
+  )) %>%
+    mutate(benchmark = str_sub(str_extract(name, '.*/'), end = -2)) %>%
+    filter(!(benchmark %in% test_filter))
+  t$status[t$timeout == T] <- NA
+  t
 }
 
 load_result_file <- function(file) {
@@ -33,16 +37,17 @@ load_result_file <- function(file) {
     process = col_character(),
     status = col_factor(levels = status)
   )) %>%
-    filter(str_detect(name, test_filter))
+    mutate(benchmark = str_sub(str_extract(name, '.*/'), end = -2)) %>%
+    filter(!(benchmark %in% test_filter))
   t$status[t$timeout == T] <- NA
   t
 }
 
 scatter <- function(A, B) {
   merge(eval(parse(text = A)), eval(parse(text = B)), by = 'name', suffixes = c("_A", "_B")) %>%
-    filter(timeout_A == F | timeout_B == F) %>%
-    mutate(timeout_A = ifelse(status_A == 1, timelimit, timeout_A)) %>%
-    mutate(timeout_B = ifelse(status_B == 1, timelimit, timeout_B)) %>%
+    filter((timeout_A == F | timeout_B == F) & (status_A != 1 | status_B != 1)) %>%
+    mutate(real_A = ifelse(status_A == 1, timelimit, real_A)) %>%
+    mutate(real_B = ifelse(status_B == 1, timelimit, real_B)) %>%
     ggplot(aes(x = real_A, y = real_B)) +
     geom_point(color = 'red', alpha = 0.4, size = 2) +
     scale_x_continuous(trans = 'log10') +
@@ -75,28 +80,29 @@ bars <- function(...) {
   results <- factor(solved$status, levels = status, labels = status_meanings, exclude = NULL)
   ggplot(solved, aes(x = factor(try, levels = names(tries)), fill = results)) +
     geom_bar(position = "stack") +
+    scale_y_continuous(breaks = pretty_breaks()) +
+    facet_wrap(~benchmark, scales = "free") +
     scale_fill_brewer(palette = 'Dark2') +
     labs(x = 'configuration', y = 'instances') +
-    theme(axis.text.x =element_text(size=12), legend.text =element_text(size=12))
+    theme(axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12), legend.text = element_text(size = 12), text = element_text(size = 12))
 }
 
 boxplot <- function(func, ...) {
   tries <- list(...)
   bind_rows(tries, .id = 'try') %>%
     group_by(name) %>%
-    filter(func(timeout != T)) %>%
+    mutate(real = ifelse(status == 1, timelimit, real)) %>%
+    filter(func(timeout != T & status != 1)) %>%
     # filter(timeout != T) %>%
     ggplot(aes(x = factor(try, levels = names(tries)), y = real)) +
     geom_boxplot(position = "dodge2", outlier.shape = NA) +
+    facet_wrap(~benchmark, scales = "free") +
     scale_y_continuous(trans = 'log10') +
     geom_hline(yintercept = timelimit, linetype = "dashed") +
     labs(x = 'configuration', y = 'time') +
-    geom_jitter(aes(fill = factor(try, levels = names(tries)),
-                    col = factor(try, levels = names(tries))),
-                show.legend = FALSE,
-                width = .15) +
-    scale_color_manual(values = colorRampPalette(brewer.pal(name="Dark2", n = 8))(length(tries))) +
-    theme(axis.text.x =element_text(size=12), legend.text =element_text(size=12))
+    geom_jitter(aes(fill = factor(try, levels = names(tries)), col = factor(try, levels = names(tries))), show.legend = FALSE, width = .15) +
+    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(length(tries))) +
+    theme(axis.text.x = element_text(size = 12), legend.text = element_text(size = 12))
 }
 
 boxplot_ram <- function(...) {
@@ -107,56 +113,65 @@ boxplot_ram <- function(...) {
     geom_boxplot(position = "dodge2", outlier.shape = NA) +
     scale_y_continuous(trans = 'log10', labels = label_bytes()) +
     labs(x = 'configuration', y = 'time') +
-    geom_jitter(aes(fill = factor(try, levels = names(tries)),
-                    col = factor(try, levels = names(tries))),
-                show.legend = FALSE,
-                width = .15) +
-    scale_color_manual(values = colorRampPalette(brewer.pal(name="Dark2", n = 8))(length(tries))) +
-    theme(axis.text.x =element_text(size=12), legend.text =element_text(size=12))
+    geom_jitter(aes(fill = factor(try, levels = names(tries)), col = factor(try, levels = names(tries))), show.legend = FALSE, width = .15) +
+    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(length(tries))) +
+    theme(axis.text.x = element_text(size = 12), legend.text = element_text(size = 12))
 }
 
-test_filter <- '55-tests'
+test_filter <- c('scythe/demo_example', 'scythe/sqlsynthesizer', 'scythe/test_examples', 'scythe/newposts')
 
-squares <- load_result_squares('squares.csv')
-scythe <- load_result_squares('scythe.csv')
+  {
+  squares <- load_result_squares('squares.csv')
+  scythe <- load_result_squares('scythe.csv')
 
-single <- load_result_file('single.csv')
-single_no_prune <- load_result_file('single_no_prune.csv')
+  single <- load_result_file('single.csv')
+  single_no_prune <- load_result_file('single_no_prune.csv')
 
-qffd_r <- load_result_file('qffd_r.csv')
-qffd_r_no_prune <- load_result_file('qffd_r_no_prune.csv')
+  qffd_r <- load_result_file('qffd_r.csv')
+  qffd_r_no_prune <- load_result_file('qffd_r_no_prune.csv')
 
-# old_f_qffd_r_no_prune <- load_result_file('old_f_qffd_r_no_prune.csv')
+  # old_f_qffd_r_no_prune <- load_result_file('old_f_qffd_r_no_prune.csv')
 
-# t1 <- load_result_file('try1.csv')
-t2 <- load_result_file('try2.csv')
-# t3 <- load_result_file('try3.csv')
-t4 <- load_result_file('try4.csv')
-t5 <- load_result_file('try5.csv')
-t6 <- load_result_file('try6.csv')
-# t7 <- load_result_file('try7.csv')
-# t8 <- load_result_file('try8.csv')
-# t9 <- load_result_file('try9.csv')
+  # t1 <- load_result_file('try1.csv')
+  t2 <- load_result_file('try2.csv')
+  # t3 <- load_result_file('try3.csv')
+  t4 <- load_result_file('try4.csv')
+  t5 <- load_result_file('try5.csv')
+  t6 <- load_result_file('try6.csv')
+  # t7 <- load_result_file('try7.csv')
+  # t8 <- load_result_file('try8.csv')
+  # t9 <- load_result_file('try9.csv')
 
-c0_2 <- load_result_file('cubes0_2.csv')
-c0_4 <- load_result_file('cubes0_4.csv')
-c0_8 <- load_result_file('cubes0_8.csv')
-c0_16 <- load_result_file('cubes0_16.csv')
+  c0_2 <- load_result_file('cubes0_2.csv')
+  c0_4 <- load_result_file('cubes0_4.csv')
+  c0_8 <- load_result_file('cubes0_8.csv')
+  c0_16 <- load_result_file('cubes0_16.csv')
 
-c1_2 <- load_result_file('cubes1_2.csv')
-c1_4 <- load_result_file('cubes1_4.csv')
-c1_8 <- load_result_file('cubes1_8.csv')
-c1_16 <- load_result_file('cubes1_16.csv')
+  c1_2 <- load_result_file('cubes1_2.csv')
+  c1_4 <- load_result_file('cubes1_4.csv')
+  c1_8 <- load_result_file('cubes1_8.csv')
+  c1_16 <- load_result_file('cubes1_16.csv')
 
-c2_2 <- load_result_file('cubes2_2.csv')
-c2_4 <- load_result_file('cubes2_4.csv')
-c2_8 <- load_result_file('cubes2_8.csv')
-c2_16 <- load_result_file('cubes2_16.csv')
+  c2_2 <- load_result_file('cubes2_2.csv')
+  c2_4 <- load_result_file('cubes2_4.csv')
+  c2_8 <- load_result_file('cubes2_8.csv')
+  c2_16 <- load_result_file('cubes2_16.csv')
 
-c2_2_o <- load_result_file('cubes2_2_o.csv')
-c2_4_o <- load_result_file('cubes2_4_o.csv')
-c2_8_o <- load_result_file('cubes2_8_o.csv')
-c2_16_o <- load_result_file('cubes2_16_o.csv')
+  c2_2_o <- load_result_file('cubes2_2_o.csv')
+  c2_4_o <- load_result_file('cubes2_4_o.csv')
+  c2_8_o <- load_result_file('cubes2_8_o.csv')
+  c2_16_o <- load_result_file('cubes2_16_o.csv')
+
+  c3_2 <- load_result_file('cubes3_2.csv')
+  c3_4 <- load_result_file('cubes3_4.csv')
+  c3_8 <- load_result_file('cubes3_8.csv')
+  c3_16 <- load_result_file('cubes3_16.csv')
+
+  c4_8 <- load_result_file('cubes4_8.csv')
+  c4_16 <- load_result_file('cubes4_16.csv')
+
+  c4_16_h <- load_result_file('cubes4_16_h.csv')
+}
 
 scatter('scythe', 'c1_16')
 scatter('single', 'qffd_r')
@@ -182,18 +197,27 @@ scatter('c2_4', 'c2_4_o')
 scatter('c2_16', 'c2_16_o')
 scatter('c2_8', 'c2_16')
 
-scatter('t6', 'c1_8')
+scatter('c2_8', 'c3_8')
+scatter('squares', 'c2_2')
+scatter('squares', 'c2_16')
+
+scatter('c4_16', 'c4_16_h')
 
 ggplot(t6, aes(x = factor(process))) + geom_bar(fill = "turquoise")
 
+a <- c4_16_h %>% filter(timeout == T | status == 1)
+
 # ggplot(c1_2, aes(x = real)) + geom_histogram()
 
-bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
-bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
-bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16)
+bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o, c3_16 = c3_16)
+bars(scythe = scythe, squares = squares, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c3_2 = c3_2, c3_4 = c3_4, c3_8 = c3_8, c3_16 = c3_16, c4_16 = c4_16, c4_16_h = c4_16_h)
+bars(scythe = scythe, squares = squares, c3_8 = c3_8, c3_16 = c3_16)
+bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 
 boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
-boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6)
-boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_8 = c2_8, c2_16 = c2_16)
+boxplot(func = any, scythe = scythe, squares = squares, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c3_2 = c3_2, c3_4 = c3_4, c3_8 = c3_8, c3_16 = c3_16)
+boxplot(func = any, scythe = scythe, squares = squares, c3_8 = c3_8, c3_16 = c3_16)
+boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 
 boxplot_ram(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_16_o = c2_16_o)
+boxplot_ram(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)

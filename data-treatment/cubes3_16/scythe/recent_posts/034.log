@@ -1,0 +1,35 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/034.csv", col_types = cols(MATERIAL = col_character(),DISCO_DATE = col_character(),DATE_UPDATE = col_character()))
+input1$DISCO_DATE <- ymd(input1$DISCO_DATE)
+input1$DATE_UPDATE <- ymd(input1$DATE_UPDATE)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/034_o.csv", col_types = cols(c1 = col_character(),c2 = col_character(),c3 = col_character()))
+expected_output$c2 <- ymd(expected_output$c2)
+expected_output$c3 <- ymd(expected_output$c3)
+
+df2 <- input1 %>% group_by(MATERIAL) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+df4 <- df3 %>% filter(maxDATE_UPDATE == DATE_UPDATE)
+out <- df4 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `MATERIAL` AS `c1`,
+       `DISCO_DATE` AS `c2`,
+       `DATE_UPDATE` AS `c3`
+FROM
+  (SELECT `MATERIAL`,
+          `maxDATE_UPDATE`,
+          `DISCO_DATE`,
+          `DATE_UPDATE`
+   FROM
+     (SELECT `MATERIAL`,
+             MAX(`DATE_UPDATE`) AS `maxDATE_UPDATE`
+      FROM `input1`
+      GROUP BY `MATERIAL`) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`MATERIAL` = `RHS`.`MATERIAL`))
+WHERE (`maxDATE_UPDATE` = `DATE_UPDATE`)

@@ -15,10 +15,9 @@ loc: 5
 solution:
   - natural_join
   - filter
-  - summariseGrouped
+  - summarise
   - natural_join3
   - filter
-  - select
 comment: |
   5.2.5 optimal solution modified (17)
 
@@ -28,3 +27,10 @@ comment: |
   df4 <- inner_join(inner_join(input2, input1), df3)
   df5 <- df4 %>% filter(meancost < cost)
   out <- df5 %>% select(P_id, S_name)
+
+  df3 <- inner_join(input1, input2)
+  df4 <- df3 %>% group_by(P_id, S_name) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df5 <- inner_join(input1, df4)
+  df6 <- df5 %>% filter(meancost > cost)
+  df7 <- df6 %>% filter(S_name == 'SN1' | meancost >= cost)
+  out <- df7 %>% select(P_id, S_name) %>% distinct()

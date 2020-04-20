@@ -1,0 +1,49 @@
+[    3.8315][cube-solver-0][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/38.out", col_types = cols(eid = col_integer(),n = col_integer(),maxcrusingrange = col_integer()))
+
+df3 <- inner_join(input1, input2)
+df4 <- df3 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+df5 <- df3 %>% group_by(eid) %>% summarise(crusingrange = max(crusingrange)) %>% ungroup()
+df6 <- left_join(df4, df5)
+out <- df6 %>% select(eid, n, maxcrusingrange = crusingrange)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `eid`,
+       `n`,
+       `crusingrange` AS `maxcrusingrange`
+FROM
+  (SELECT `eid`,
+          `n`,
+          `crusingrange`
+   FROM
+     (SELECT `eid`,
+             COUNT() AS `n`
+      FROM
+        (SELECT `aid`,
+                `aname`,
+                `crusingrange`,
+                `eid`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`))
+      GROUP BY `eid`) AS `LHS`
+   LEFT JOIN
+     (SELECT `eid`,
+             MAX(`crusingrange`) AS `crusingrange`
+      FROM
+        (SELECT `aid`,
+                `aname`,
+                `crusingrange`,
+                `eid`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`))
+      GROUP BY `eid`) AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`))

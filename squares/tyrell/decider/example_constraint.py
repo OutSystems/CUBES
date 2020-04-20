@@ -179,9 +179,8 @@ class ExampleConstraintDecider(ExampleDecider):
     def __init__(self,
                  spec: TyrellSpec,
                  interpreter: Interpreter,
-                 examples: List[Example],
-                 equal_output: Callable[[Any, Any], bool] = lambda x, y: x == y):
-        super().__init__(interpreter, examples, equal_output)
+                 examples: List[Example]):
+        super().__init__(interpreter, examples)
         self._imply_map = self._build_imply_map(spec)
         self._assert_handler = AssertionViolationHandler(spec, interpreter)
 

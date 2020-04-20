@@ -1,0 +1,35 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/037.csv
+output: tests-examples/scythe/recent_posts/tables/037_o.csv
+comment: |
+  WITH CTE_DataIslands  -- First CTE determine the start of each new data island
+  AS
+  (
+      SELECT           Region
+                      ,Area
+                      ,StartDate
+                      ,EndDate
+                      ,(
+                          CASE
+                              WHEN DATEADD(DAY, 1, LAG(EndDate, 1) OVER  (PARTITION BY Region, Area ORDER BY StartDate ASC)) < (StartDate) THEN 1 -- If prev record's end date + 1 day  is not equal to current record's start date then it is the start of a new data island.
+                              ELSE 0
+                          END
+                       ) AS [IsNewDataIsland]
+      FROM            @SourceData
+  )
+  , CTE_GenerateGroupingID
+  AS
+  (
+      SELECT  Region
+              ,Area
+              ,StartDate
+              ,EndDate
+              ,SUM([IsNewDataIsland]) OVER (PARTITION BY Region, Area ORDER BY StartDate ASC ROWS UNBOUNDED PRECEDING) AS GroupingID  -- Create a running total of the IsNewDataIsland column this will create a grouping id we can now group on
+      FROM    CTE_DataIslands
+  )
+  SELECT      Region
+              ,Area
+              ,MIN(StartDate) AS StartDate
+              ,MAX(EndDate) AS StartDate
+  FROM        CTE_GenerateGroupingID
+  GROUP BY    Region, Area, GroupingID

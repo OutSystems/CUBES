@@ -1,20 +1,19 @@
 #!/usr/bin/env python
+import logging
 import os
 import random
-import re
 import signal
 from time import time
 
-import sqlparse as sp
 from rpy2 import robjects
 
 from squares import util
 from squares.config import Config
-from squares.interpreter import SquaresInterpreter
 from squares.parallel_synthesizer import ParallelSynthesizer
-from squares.specification import Specification
-from squares.tyrell.logger import get_logger
+from squares.results import ResultsHolder
+from squares.dsl.specification import Specification
 from squares.tyrell import spec as S
+from squares.tyrell.logger import get_logger
 from squares.util import create_argparser, parse_specification
 
 robjects.r('''
@@ -33,51 +32,9 @@ logger = get_logger('squares')
 
 
 def handle_sigint(signal, stackframe):
-    print_solution(util.get_current_solution())
-
-
-def beautifier(sql):
-    # parsed = sp.parse(sql)
-    # new_sql = beautifier_aux(parsed[0])
-    sql = re.sub('`TBL_LEFT`\.`[^,`]*` AS |`LHS`\.`[^,`]*` AS ', "", sql)
-    sql = re.sub('`TBL_RIGHT`\.`[^,`]*` AS |`RHS`\.`[^,`]*` AS ', "", sql)
-    return sp.format(sql, reindent=True, keyword_case='upper')
-
-
-def print_solution(program):
-    if program is not None:
-        logger.info(f'Solution found: {program}')
-        interpreter = SquaresInterpreter(specification, True)
-        evaluation = interpreter.eval(program, specification.tables)
-
-        try:
-            program = specification.r_init + interpreter.final_program
-            robjects.r(program)
-            sql_query = robjects.r(f'sink(); sql_render({evaluation})')
-        except Exception:
-            logger.error('Error while trying to convert R code to SQL.')
-            sql_query = None
-
-        print('Time: ', time() - start)
-        print()
-        if args.r:
-            pass
-            print(
-                "------------------------------------- R Solution ---------------------------------------\n")
-            print(specification.r_init + '\n' + interpreter.final_program)
-
-        if sql_query is not None:
-            print()
-            print(
-                "+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-            print(beautifier(str(sql_query)[6:]))
-            exit()
-        else:
-            print('Failed to generate SQL query')
-            exit(2)
-
-    print("No solution found")
-    exit(1)
+    print()
+    ResultsHolder().print()
+    exit(ResultsHolder().exit_code)
 
 
 def main():
@@ -97,11 +54,23 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, z3_QF_FD=True, z3_sat_phase='random', disabled=['inner_join', 'semi_join'], optimal=True)
+    config = Config(seed=seed, print_r=args.r, cache_ops=args.cache_ops, optimal=args.optimal, solution_use_first_line=args.use_first,
+                    solution_use_last_line=args.use_last, advance_processes=args.split_search,
+                    programs_per_cube_threshold=args.split_search_h, minimum_loc=args.min_lines, maximum_loc=args.max_lines,
+                    max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
+                    max_join_combinations=args.max_join_combo,
+                    z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 
     specification = Specification(spec)
+
+    if logger.isEnabledFor(logging.DEBUG):
+        with open('dsl.tyrell', 'w') as f:
+            f.write(repr(specification.dsl))
+
     tyrell_spec = S.parse(repr(specification.dsl))
+
+    ResultsHolder().specification = specification
 
     if args.j > 0:
         processes = args.j
@@ -114,7 +83,9 @@ def main():
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
     program = synthesizer.synthesize()
 
-    print_solution(program)
+    ResultsHolder().store_solution(program, True)
+    ResultsHolder().print()
+    exit(ResultsHolder().exit_code)
 
 
 if __name__ == '__main__':

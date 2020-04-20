@@ -1,0 +1,22 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/033_1.csv
+  - tests-examples/scythe/recent_posts/tables/033_2.csv
+output: tests-examples/scythe/recent_posts/tables/033_o.csv
+aggrs:
+  - max
+attrs:
+  - Id
+comment: |
+  select t1.id,
+        t1.user_id,
+        t1.current_total_value,
+        t2.last_week_value,
+        (t1.current_total_value - t2.last_week_value) as difference
+  from user_current_value_stats t1
+  left outer join (
+        select v.user_id, sum(v.value_awarded) as last_week_value
+        from value_awarded_stats_history v
+        where v.date > (current_date - '1 week')
+        group by v.user_id
+  ) t2
+    on t2.user_id = t1.user_id

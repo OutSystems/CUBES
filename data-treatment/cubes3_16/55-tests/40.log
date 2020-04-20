@@ -1,0 +1,40 @@
+[    1.8725][cube-solver-1][warning] There is no solution for current loc (2).
+[    2.0786][cube-solver-0][warning] There is no solution for current loc (2).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/40.out", col_types = cols(eid = col_integer(),aname = col_character()))
+
+df3 <- input2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+df4 <- inner_join(df3, input2) %>% inner_join(input1)
+df5 <- df4 %>% filter(n < 3)
+out <- df5 %>% select(eid, aname)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `eid`,
+       `aname`
+FROM
+  (SELECT `eid`,
+          `n`,
+          `aid`,
+          `aname`,
+          `crusingrange`
+   FROM
+     (SELECT `eid`,
+             `n`,
+             `aid`
+      FROM
+        (SELECT `eid`,
+                COUNT() AS `n`
+         FROM `input2`
+         GROUP BY `eid`) AS `LHS`
+      INNER JOIN `input2` AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`)) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`))
+WHERE (`n` < 3.0)

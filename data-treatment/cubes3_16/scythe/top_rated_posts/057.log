@@ -1,0 +1,30 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i057.csv", col_types = cols(ID = col_integer(),Name = col_character(),City = col_character(),Birthyear = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o057.csv", col_types = cols(Name = col_character(),City = col_character(),minBirthyear = col_integer()))
+
+df2 <- input1 %>% group_by(City) %>% summarise(Birthyear = min(Birthyear)) %>% ungroup()
+df3 <- semi_join(input1, df2)
+out <- df3 %>% select(Name, City, minBirthyear = Birthyear)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Name`,
+       `City`,
+       `Birthyear` AS `minBirthyear`
+FROM
+  (SELECT *
+   FROM `input1` AS `LHS`
+   WHERE EXISTS
+       (SELECT 1
+        FROM
+          (SELECT `City`,
+                  MIN(`Birthyear`) AS `Birthyear`
+           FROM `input1`
+           GROUP BY `City`) AS `RHS`
+        WHERE (`LHS`.`City` = `RHS`.`City`
+               AND `LHS`.`Birthyear` = `RHS`.`Birthyear`) ))

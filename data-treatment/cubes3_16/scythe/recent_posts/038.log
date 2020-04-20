@@ -1,0 +1,25 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/038_1.csv", col_types = cols(Date = col_double(),Sold = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/038_2.csv", col_types = cols(Date = col_double(),Tapped = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/038_o.csv", col_types = cols(Date = col_double(),Tapped = col_integer(),Sold = col_double()))
+
+df3 <- left_join(input2, input1)
+out <- df3 %>% select(Date, Tapped, Sold)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Date`,
+       `Tapped`,
+       `Sold`
+FROM
+  (SELECT `Date`,
+          `Tapped`,
+          `Sold`
+   FROM `input2` AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`Date` = `RHS`.`Date`))

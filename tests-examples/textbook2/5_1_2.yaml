@@ -5,15 +5,14 @@ inputs:
   - 'tests-examples/textbook2/tables/faculty.csv'
 output: 'tests-examples/textbook2/tables/5_1_2.csv'
 const:
-  - 'Ivana Teach'
+  - Ivana Teach
   - History
 attrs:
   - fname
-  - cname
   - age
+  - major
 aggrs:
   - max
-loc: 2
 comment: |
   SELECT MAX(S.age)
   FROM Student S
@@ -26,7 +25,7 @@ comment: |
                      AND C.fid = F.fid
                      AND F.fname = 'Ivana Teach')
 
-  df1 <- inner_join(inner_join(inner_join(input3, input1), input2), input4)
-  df2 <- df1 %>% filter(fname == 'Ivana Teach')
-  df3 <- df2 %>% group_by(deptid) %>% summarise(maxage = max(age)) %>% ungroup()
-  out <- df3 %>% select(maxage) %>% distinct()
+  df1 <- inner_join(inner_join(inner_join(input3, input2), input4), input1)
+  df2 <- df1 %>% filter(fname == 'Ivana Teach' | major == 'History')
+  df3 <- df2 %>% group_by(cname) %>% summarise(maxage = max(age)) %>% ungroup()
+  out <- df3 %>% select(maxage)

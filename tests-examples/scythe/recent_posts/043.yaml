@@ -1,0 +1,29 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/043.csv
+output: tests-examples/scythe/recent_posts/tables/043_o.csv
+comment: |
+  with cte as (
+      select *
+      from myTable
+      where id = 1
+      union all
+      select t.*
+      from myTable t
+      cross join cte
+      where t.id = (
+          select id
+          from (
+              select id, row_number() over (order by id) rn
+              from myTable
+              where entrytime > cte.resulttime) z
+          where rn = 1)
+      )
+  select * from cte;
+
+  select *
+  from @t t1
+  where not exists (
+      select 1
+      from @t t2
+      where t2.id < t1.id and t2.resultDate > t1.entryDate
+  )

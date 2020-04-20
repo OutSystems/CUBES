@@ -5,22 +5,35 @@ library(dbplyr)
 library(tidyr)
 library(stringr)
 
-concat <- function(s,v) {
+string_agg <- function(v, s) {
   Reduce(function(x, y) paste(x, y, sep = s), v)
 }
 
-catalog <- read_csv("tests-examples/55-tests/tables/17-1.txt")
-catalog
-suppliers <- read_csv("tests-examples/55-tests/tables/17-3.txt")
-suppliers
-datout <- read_csv("tests-examples/55-tests/tables/22.out")
-datout
+mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 
-df1 <- inner_join(catalog,suppliers)
-df2 <- df1 %>% filter(S_name  != "SN1")
-df3 <- df2 %>% group_by(P_id) %>% summarise(meancost = mean(cost))
-df4 <- inner_join(inner_join(catalog, suppliers), df3)
-df5 <- df4 %>% filter(cost > meancost)
-out <- df5 %>% select(P_id, S_name)
+setwd('..')
+setwd('SQUARES')
 
-all_equal(datout, out)
+aircraft <- read_csv('tests-examples/textbook/tables/aircraft.txt')
+certified <- read_csv('tests-examples/textbook/tables/certified.txt')
+
+student <- read_csv("tests-examples/textbook2/tables/student.csv", col_types = cols(snum = col_integer(), sname = col_character(), major = col_character(), level = col_character(), age = col_integer()))
+enrolled <- read_csv("tests-examples/textbook2/tables/enrolled.csv", col_types = cols(snum = col_integer(), cname = col_character()))
+class <- read_csv('tests-examples/textbook2/tables/class.csv')
+faculty <- read_csv('tests-examples/textbook2/tables/faculty.csv')
+
+input1 <- read_csv("tests-examples/textbook/tables/employees.txt")
+input2 <- read_csv("tests-examples/textbook/tables/flights.txt")
+input3 <- read_csv("tests-examples/textbook/tables/23-3.txt")
+expected_output <- read_csv("tests-examples/textbook/tables/26.out")
+
+df1 <- input2 %>%
+
+df1 <- left_join(input1, input2)
+df2 <- df1 %>% group_by(OrderID) %>% summarise_all(first) %>% ungroup()
+out <- df2 %>% select(OrderNumber, Quantity, Description)
+
+all_equal(out, expected_output, convert = T)

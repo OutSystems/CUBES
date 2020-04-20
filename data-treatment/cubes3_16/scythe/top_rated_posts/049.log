@@ -1,0 +1,23 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o049.csv", col_types = cols(UserId = col_integer(),concatAlias = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(UserId) %>% summarise(concatAlias = string_agg(Alias, ', ')) %>% ungroup()
+out <- df2 %>% select(UserId, concatAlias)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `UserId`,
+       `concatAlias`
+FROM
+  (SELECT `UserId`,
+          string_agg(`Alias`, ', ') AS `concatAlias`
+   FROM `input1`
+   GROUP BY `UserId`)

@@ -3,17 +3,20 @@ import multiprocessing
 import select
 import signal
 import traceback
-from collections import defaultdict, Counter
+from collections import defaultdict
 from enum import Enum
+from math import ceil
 from multiprocessing import Process, Pipe, Queue
+from threading import Thread
 
 from . import util
 from .config import Config
-from .dc import CubeGenerator, map_node
 from .decider import InstrumentedDecider
+from .dsl.dc import CubeGenerator, map_node
+from .dsl.interpreter import SquaresInterpreter
+from .dsl.specification import Specification
 from .exceptions import REvaluationError
-from .interpreter import SquaresInterpreter, eq_r
-from .specification import Specification
+from .results import ResultsHolder
 from .tyrell import spec as S
 from .tyrell.decider import Example
 from .tyrell.enumerator import LinesEnumerator
@@ -62,12 +65,12 @@ def synthesize(enumerator, decider, blacklist_queue):
     return None, attempts, rejected, failed
 
 
-def run_process(pipe: Pipe, config: Config, specification: Specification, blacklist_queue: Queue, program_queue: Queue):
+def run_process(pipe: Pipe, config: Config, specification: Specification, blacklist_queue: Queue, program_queue: Queue, logger_level):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     logger.handlers[0].set_identifier(multiprocessing.current_process().name)
-    logger.setLevel('DEBUG')
+    logger.setLevel(logger_level)
 
     util.store_config(config)
     util.set_program_queue(program_queue)
@@ -78,8 +81,7 @@ def run_process(pipe: Pipe, config: Config, specification: Specification, blackl
         interpreter=SquaresInterpreter(specification, False),
         examples=[
             Example(input=specification.tables, output='expected_output'),
-        ],
-        equal_output=eq_r
+        ]
     )
 
     while True:
@@ -121,44 +123,33 @@ class ParallelSynthesizer:
         self.tyrell_specification = tyrell_specification
         self.specification = specification
         self.j = j
+        self.alternate_j = round(self.j * util.get_config().advance_percentage)
 
     def synthesize(self):
-        cubes = 0
-        programs = 0
-        rejected = 0
-        failed = 0
-
-        program_dict = defaultdict(list)
-
-        def log_statistics():
-            logger.info('Statistics:\n'
-                        '\tGenerated cubes: %d\n'
-                        '\tAttempted programs: %d\n'
-                        '\t\tRejected: %d\n'
-                        '\t\tFailed: %d\n'
-                        '\tBlacklist clauses: %d',
-                        cubes, programs, rejected, failed, sum(map(len, blacklist.values())))
-
-            for l in program_dict.keys():
-                logger.info('Priting statistics for good programs of size %d', l)
-                for i in range(l):
-                    distribution = Counter(map(lambda prog: prog[i],program_dict[l]))
-                    logger.info('\t%d: %s', i, str(distribution))
-
         processes = {}
         locs = {}
         pipes = {}
+        alternates = []
 
         blacklist_queue = multiprocessing.Queue()
         poll = select.epoll()
 
         program_queue = multiprocessing.Queue()
+        if logger.isEnabledFor(logging.DEBUG):
+            def collect_programs():
+                while True:
+                    p = program_queue.get()
+                    ResultsHolder().store_program(p)
+
+            t = Thread(target=collect_programs, daemon=True)
+            t.start()
 
         logger.info('Creating %d processes', self.j)
         for i in range(self.j):
             pipe, pipe_child = Pipe()
             process = Process(target=run_process, name=f'cube-solver-{i}',
-                              args=(pipe_child, util.get_config(), self.specification, blacklist_queue, program_queue), daemon=True)
+                              args=(pipe_child, util.get_config(), self.specification, blacklist_queue, program_queue,
+                                    logger.getEffectiveLevel()), daemon=True)
             process.start()
 
             processes[pipe.fileno()] = process
@@ -169,14 +160,18 @@ class ParallelSynthesizer:
         blacklist = defaultdict(set)
         queue = {}
 
+        ResultsHolder().blacklist = blacklist
+
         solution_loc = None
         solution = None
 
         loc = self.specification.min_loc
-        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc - 1, blacklist)
+        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
+        alternate_generator = None
+        alternated = False
+        left_to_assign = None
         while True:
             if solution_loc and solution_loc <= min(locs.values()):
-                log_statistics()
                 return solution
 
             events = poll.poll()
@@ -186,27 +181,28 @@ class ParallelSynthesizer:
                 process_loc = locs[fd]
 
                 if event & select.EPOLLIN:
-                    program, att, rjc, fld = pipe_read(pipe)
+                    try:
+                        program, att, rjc, fld = pipe_read(pipe)
+                    except EOFError:  # this is needed because runsolver kills processes bottom-up
+                        continue
                     poll.modify(fd, select.EPOLLIN | select.EPOLLOUT)
 
-                    programs += att
-                    rejected += rjc
-                    failed += fld
+                    if util.get_config().advance_processes and att >= util.get_config().programs_per_cube_threshold:
+                        if not alternated:
+                            logger.info('Hard problem!')
+                            alternated = True
+                            left_to_assign = self.alternate_j
 
-                    if logger.isEnabledFor(logging.DEBUG):
-                        good_programs = util.get_all(program_queue)
-                        for prog in good_programs:
-                            program_dict[len(prog)].append(prog)
+                    ResultsHolder().increment_attempts(att, rjc, fld)
 
                     if program:
                         if process_loc <= min(locs.values()) or not util.get_config().optimal:
-                            log_statistics()
                             return program
 
                         logger.info('Waiting for loc %d to finish before returning solution of loc %d', min(locs.values()), process_loc)
                         if solution_loc is None or process_loc < solution_loc:
                             solution = program
-                            util.store_solution(solution)
+                            ResultsHolder().store_solution(solution)
                             solution_loc = process_loc
 
                             for fd in processes.keys():  # TODO not tested
@@ -231,19 +227,44 @@ class ParallelSynthesizer:
                         pipe.send((Message.SOLVE, cube))
                         poll.modify(fd, select.EPOLLIN)
                     else:
-                        cube = None
-                        while cube is None:
-                            try:
-                                cube = next(generator)
-                                cubes += 1
-                            except StopIteration:
-                                loc += 1
-                                logger.debug('Increasing generator loc to %d', loc)
-                                generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc - 1, blacklist)
 
-                        if process_loc < loc:
-                            locs[fd] = loc
-                            pipe.send((Message.INIT, loc))
+                        if alternated and left_to_assign > 0:
+                            alternates.append(fd)
+                            left_to_assign -= 1
+
+                        if fd in alternates:
+                            cube = None
+                            while cube is None:
+                                try:
+                                    cube = next(alternate_generator)
+                                    ResultsHolder().increment_cubes()
+                                except (StopIteration, TypeError):
+                                    logger.debug('Increasing alternate_generator loc to %d', loc + 1)
+                                    alternate_generator = CubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
+                                                                        blacklist)
+                        else:
+                            cube = None
+                            while cube is None:
+                                try:
+                                    cube = next(generator)
+                                    ResultsHolder().increment_cubes()
+                                except StopIteration:
+                                    if loc + 1 > util.get_config().maximum_loc:
+                                        break
+                                    loc += 1
+                                    logger.debug('Increasing generator loc to %d', loc)
+                                    if not alternated:
+                                        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
+                                    else:
+                                        generator = alternate_generator
+                                        alternate_generator = CubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
+                                                                            blacklist)
+
+                        this_loc = loc if fd not in alternates else loc + 1
+
+                        if process_loc < this_loc:
+                            locs[fd] = this_loc
+                            pipe.send((Message.INIT, this_loc))
                             poll.modify(fd, select.EPOLLIN)
                             queue[fd] = cube  # save this cube for later
                         else:

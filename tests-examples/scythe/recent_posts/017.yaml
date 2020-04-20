@@ -1,0 +1,29 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/017.csv
+output: tests-examples/scythe/recent_posts/tables/017_o.csv
+const:
+  - HMCPR
+aggrs:
+  - min
+attrs:
+  - emp_grp
+  - emp_sal
+dateorder: mdy
+comment: |
+  https://stackoverflow.com/questions/40118180/retrieve-table-data-based-on-specific-condition-in-teradata
+
+  select emp_id,emp_sal,emp_grp
+  from (
+  select e.*,
+  row_number() over(partition by emp_id
+                    order by case when emp_grp = 'HMCPR' then 0 else 1 end,emp_sal) as rn
+  from db_wrk.emp_sin e
+  ) t
+  where rn = 1;
+
+  df1 <- input1 %>% filter(emp_grp == 'HMCPR')
+  df2 <- df1 %>% group_by(emp_id) %>% summarise(emp_sal = min(emp_sal)) %>% ungroup()
+  df3 <- input1 %>% group_by(emp_id) %>% summarise(emp_sal = min(emp_sal)) %>% ungroup()
+  df4 <- bind_rows(df2, df3) %>% distinct(emp_id, .keep_all = TRUE)
+  df5 <- input1 %>% inner_join(df4, by=c('emp_id', 'emp_sal'), suffix = c('', '.other'))
+  out <- df5 %>% select(emp_id, emp_sal, emp_grp)

@@ -8,7 +8,10 @@ attrs:
   - FromDate
   - ToDate
 dateorder: mdy
-loc: 2
+solution:
+  - summarise
+  - summarise
+  - natural_join3
 comment: |
   select t1.Employee, t1.mindt, t2.maxdt, t1.code
   from
@@ -21,7 +24,7 @@ comment: |
   group by Employee, Code) t2
   on t1.code = t2.code
 
-  df1 <- input1 %>% group_by(Code) %>% summarise(minFromDate = min(FromDate)) %>% ungroup()
-  df2 <- input1 %>% group_by(Code) %>% summarise(maxToDate = max(ToDate)) %>% ungroup()
-  df3 <- inner_join(inner_join(input1, df1), df2)
-  out <- df3 %>% select(Employee, minFromDate, maxToDate, Code) %>% distinct()
+  df2 <- input1 %>% group_by(Code) %>% summarise(minFromDate = min(FromDate)) %>% ungroup()
+  df3 <- input1 %>% group_by(Code, Employee) %>% summarise(maxToDate = max(ToDate)) %>% ungroup()
+  df4 <- inner_join(df2, df3)
+  out <- df4 %>% select(Employee, FromDate = minFromDate, ToDate = maxToDate, Code) %>% arrange(Employee)

@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/014_1.csv
+  - tests-examples/scythe/recent_posts/tables/014_2.csv
+output: tests-examples/scythe/recent_posts/tables/014_o.csv
+comment: |
+  select      id
+             ,name
+             ,unique_id
+  from        (           select 2,id,parent_id,name,null      from child
+              union all   select 1,id,id       ,name,unique_id from parent
+              ) t (source_order,id,pid,name,unique_id)
+  order by    pid
+             ,source_order
+             ,id
+  ;
+
+  df3 <- inner_join(input1, input2, by=c('PARENT_ID' = 'ID','UNIQUE_ID' = 'ID'), suffix = c('', '.other'))
+  df4 <- bind_rows(df3, input2)
+  out <- df4 %>% select(ID, NAME, PARENT_ID = UNIQUE_ID) %>% arrange(ID)

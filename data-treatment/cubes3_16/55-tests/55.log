@@ -1,0 +1,50 @@
+[    2.5295][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/26.out", col_types = cols(ename = col_character()))
+
+df4 <- input2 %>% filter(salary > 150000 & eid >= 550000000)
+df5 <- inner_join(input1, input3) %>% inner_join(df4) %>% inner_join(input2)
+out <- df5 %>% select(ename) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `ename`
+FROM
+  (SELECT `aid`,
+          `aname`,
+          `crusingrange`,
+          `eid`,
+          `ename`,
+          `salary`
+   FROM
+     (SELECT `aid`,
+             `aname`,
+             `crusingrange`,
+             `eid`,
+             `ename`,
+             `salary`
+      FROM
+        (SELECT `aid`,
+                `aname`,
+                `crusingrange`,
+                `eid`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input3` AS `RHS` ON (`LHS`.`aid` = `RHS`.`aid`)) AS `LHS`
+      INNER JOIN
+        (SELECT *
+         FROM `input2`
+         WHERE (`salary` > 150000.0
+                AND `eid` >= 550000000.0)) AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`)) AS `LHS`
+   INNER JOIN `input2` AS `RHS` ON (`LHS`.`eid` = `RHS`.`eid`
+                                    AND `LHS`.`ename` = `RHS`.`ename`
+                                    AND `LHS`.`salary` = `RHS`.`salary`))

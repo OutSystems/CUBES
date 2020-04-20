@@ -11,12 +11,12 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
-parser.add_argument('-j', default=-2, type=int, help='#sub-processes')
 parser.add_argument('-p', default=1, type=int, help='#processes')
+parser.add_argument('--append', action='store_true', help='append to file')
 parser.add_argument('--cubes', action='store_true', help='use cubes')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
-args = parser.parse_args()
+args, other_args = parser.parse_known_args()
 
 
 def test_file(filename: str):
@@ -27,7 +27,9 @@ def test_file(filename: str):
     if not args.cubes:
         command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', '-j', str(args.j), filename]
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', filename]
+
+    command += other_args
 
     print(' '.join(command))
     p = subprocess.run(command, capture_output=True, encoding='utf8')
@@ -56,11 +58,12 @@ def test_file(filename: str):
         f.flush()
 
 
-os.mkdir(f'data-treatment/{args.name}')
-with open('data-treatment/' + args.name + '.csv', 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
-    f.flush()
+if not args.append:
+    os.mkdir(f'data-treatment/{args.name}')
+    with open('data-treatment/' + args.name + '.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
+        f.flush()
 
 if args.p == 1:
     for file in glob.glob('tests/**/*.yaml', recursive=True):

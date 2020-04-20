@@ -1,0 +1,31 @@
+[    3.4820][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/031_1.csv", col_types = cols(channelID = col_integer(),accountID = col_character(),role = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/031_2.csv", col_types = cols(channelID = col_integer(),channelName = col_character(),type = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/031_o.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_integer()))
+
+df3 <- left_join(input2, input1)
+df4 <- df3 %>% filter(type == 'public' & accountID == 'Dave')
+out <- df4 %>% select(c1 = channelID, c2 = accountID, c3 = role)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `channelID` AS `c1`,
+       `accountID` AS `c2`,
+       `role` AS `c3`
+FROM
+  (SELECT `channelID`,
+          `channelName`,
+          `type`,
+          `accountID`,
+          `role`
+   FROM `input2` AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`channelID` = `RHS`.`channelID`))
+WHERE (`type` = 'public'
+       AND `accountID` = 'Dave')

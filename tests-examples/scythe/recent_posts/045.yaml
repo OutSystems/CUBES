@@ -1,0 +1,18 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/045_1.csv
+  - tests-examples/scythe/recent_posts/tables/045_2.csv
+output: tests-examples/scythe/recent_posts/tables/045_o.csv
+aggrs:
+  - sum
+attrs:
+  - Quantity
+comment: |
+  SELECT menu.name, sum(orderregel.quantity)    as quantity
+    FROM `menu`
+    LEFT JOIN orderregel
+    on menu.menu_id = orderregel. menu_id
+    group by menu_id
+
+  df3 <- input2 %>% group_by(Menu_id) %>% summarise(sumQuantity = sum(Quantity)) %>% ungroup()
+  df4 <- left_join(input1, df3)
+  out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity)

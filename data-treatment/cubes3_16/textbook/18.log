@@ -1,0 +1,38 @@
+[    1.8245][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/18-1.txt", col_types = cols(S_key = col_character(),P_id = col_character(),cost = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/18-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/textbook/tables/18.out", col_types = cols(P_id = col_character(),S_name = col_character()))
+
+df3 <- input1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
+df4 <- inner_join(input1, input2) %>% inner_join(df3)
+out <- df4 %>% select(P_id, S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `P_id`,
+       `S_name`
+FROM
+  (SELECT `S_key`,
+          `P_id`,
+          `cost`,
+          `S_name`
+   FROM
+     (SELECT `S_key`,
+             `P_id`,
+             `cost`,
+             `S_name`
+      FROM `input1` AS `LHS`
+      INNER JOIN `input2` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   INNER JOIN
+     (SELECT `P_id`,
+             MAX(`cost`) AS `cost`
+      FROM `input1`
+      GROUP BY `P_id`) AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`
+                                    AND `LHS`.`cost` = `RHS`.`cost`))

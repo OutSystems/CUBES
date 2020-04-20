@@ -5,6 +5,7 @@ import click
 
 start = time.time()
 
+
 class _ColorFormatter(logging.Formatter):
     colors = {
         'error': dict(fg='red'),
@@ -24,7 +25,7 @@ class _ColorFormatter(logging.Formatter):
             level = record.levelname.lower()
             msg = record.getMessage()
             if level in self.colors:
-                id = f'[{str(round(time.time() - start, 5)).ljust(9)}][{self.id}]'
+                id = f'[{time.time() - start:10.4f}][{self.id}]'
                 prefix = click.style(f'[{level}] ',
                                      **self.colors[level])
                 msg = '\n'.join(id + prefix + x for x in msg.splitlines())

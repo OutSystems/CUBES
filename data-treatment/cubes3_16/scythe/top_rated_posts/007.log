@@ -1,0 +1,55 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i007.csv", col_types = cols(id = col_integer(),home = col_integer(),datetime = col_character(),player = col_character(),resource = col_integer()))
+input1$datetime <- mdy(input1$datetime)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o007.csv", col_types = cols(id = col_integer(),home = col_integer(),datetime = col_character(),player = col_character(),resource = col_integer()))
+expected_output$datetime <- mdy(expected_output$datetime)
+
+df2 <- input1 %>% group_by(datetime, resource) %>% summarise(maxdatetime = max(datetime)) %>% ungroup()
+df3 <- input1 %>% group_by(home, player) %>% summarise(maxdatetime = max(datetime)) %>% ungroup()
+df4 <- inner_join(input1, df2) %>% inner_join(df3)
+out <- df4 %>% select(id, home, datetime, player, resource)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `home`,
+       `datetime`,
+       `player`,
+       `resource`
+FROM
+  (SELECT `id`,
+          `home`,
+          `datetime`,
+          `player`,
+          `resource`,
+          `maxdatetime`
+   FROM
+     (SELECT `id`,
+             `home`,
+             `datetime`,
+             `player`,
+             `resource`,
+             `maxdatetime`
+      FROM `input1` AS `LHS`
+      INNER JOIN
+        (SELECT `datetime`,
+                `resource`,
+                MAX(`datetime`) AS `maxdatetime`
+         FROM `input1`
+         GROUP BY `datetime`,
+                  `resource`) AS `RHS` ON (`LHS`.`datetime` = `RHS`.`datetime`
+                                           AND `LHS`.`resource` = `RHS`.`resource`)) AS `LHS`
+   INNER JOIN
+     (SELECT `home`,
+             `player`,
+             MAX(`datetime`) AS `maxdatetime`
+      FROM `input1`
+      GROUP BY `home`,
+               `player`) AS `RHS` ON (`LHS`.`home` = `RHS`.`home`
+                                      AND `LHS`.`player` = `RHS`.`player`
+                                      AND `LHS`.`maxdatetime` = `RHS`.`maxdatetime`))

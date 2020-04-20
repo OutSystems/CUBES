@@ -1,8 +1,8 @@
 inputs:
-  - 'tests-examples/textbook2/tables/student.csv'
+#  - 'tests-examples/textbook2/tables/student.csv'
   - 'tests-examples/textbook2/tables/class.csv'
   - 'tests-examples/textbook2/tables/enrolled.csv'
-  - 'tests-examples/textbook2/tables/faculty.csv'
+#  - 'tests-examples/textbook2/tables/faculty.csv'
 output: 'tests-examples/textbook2/tables/5_1_3.csv'
 const:
   - R128
@@ -20,3 +20,8 @@ comment: |
                    FROM Enrolled E
                    GROUP BY E.cname
                    HAVING COUNT(*) >= 5)
+
+  df1 <- input2 %>% group_by(cname) %>% summarise(n = n()) %>% ungroup()
+  df2 <- left_join(input1, df1)
+  df3 <- df2 %>% filter(room == 'R128' | n >= 5)
+  out <- df3 %>% select(cname)

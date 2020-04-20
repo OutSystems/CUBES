@@ -1,0 +1,31 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/004.csv", col_types = cols(id = col_integer(),call_ref = col_integer(),job_num = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/004_o.csv", col_types = cols(call_ref = col_integer(),job_num = col_integer()))
+
+df2 <- input1 %>% group_by(job_num) %>% summarise(maxcall_ref = max(call_ref)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+df4 <- df3 %>% filter(job_num == 0 | maxcall_ref == call_ref)
+out <- df4 %>% select(call_ref, job_num)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `call_ref`,
+       `job_num`
+FROM
+  (SELECT `id`,
+          `call_ref`,
+          `job_num`,
+          `maxcall_ref`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `job_num`,
+             MAX(`call_ref`) AS `maxcall_ref`
+      FROM `input1`
+      GROUP BY `job_num`) AS `RHS` ON (`LHS`.`job_num` = `RHS`.`job_num`))
+WHERE (`job_num` = 0.0
+       OR `maxcall_ref` = `call_ref`)

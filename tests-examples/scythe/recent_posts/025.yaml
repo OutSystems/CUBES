@@ -1,0 +1,24 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/025.csv
+output: tests-examples/scythe/recent_posts/tables/025_o.csv
+const:
+  - ~
+attrs:
+  - gallery_id
+  - id
+aggrs:
+  - min
+comment: |
+  SELECT * FROM `images` where gallery_id is not null group by gallery_id
+  UNION
+  SELECT * FROM `images` where gallery_id is null;
+
+  select i.*
+  from images i
+  where i.gallery_id is null or
+        i.id in (select min(i2.id) from images i2 group by i2.gallery_id);
+
+  df2 <- input1 %>% group_by(gallery_id) %>% summarise(minid = min(id)) %>% ungroup()
+  df3 <- inner_join(input1, df2)
+  df4 <- df3 %>% filter(is.na(gallery_id) | minid == id)
+  out <- df4 %>% select(id, gallery_id, path)

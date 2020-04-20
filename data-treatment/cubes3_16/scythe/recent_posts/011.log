@@ -1,0 +1,30 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/011.csv", col_types = cols(ID = col_integer(),Name = col_character(),Value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/011_o.csv", col_types = cols(ID = col_integer(),Value = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(ID) %>% summarise(concatValue = string_agg(Value, ', ')) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(ID, Value = concatValue) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `ID`,
+                `concatValue` AS `Value`
+FROM
+  (SELECT `ID`,
+          `concatValue`,
+          `Name`,
+          `Value`
+   FROM
+     (SELECT `ID`,
+             string_agg(`Value`, ', ') AS `concatValue`
+      FROM `input1`
+      GROUP BY `ID`) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`ID` = `RHS`.`ID`))

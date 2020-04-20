@@ -5,16 +5,15 @@
 # Usage:	python3 squares_enumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
 import logging
-import re
 from multiprocessing import Queue
 
 import rpy2.robjects as robjects
-import sqlparse as sp
 
 from . import util
 from .config import Config
-from .interpreter import SquaresInterpreter, eq_r
-from .specification import Specification
+from squares.dsl.interpreter import SquaresInterpreter
+from .results import ResultsHolder
+from squares.dsl.specification import Specification
 from .tyrell import spec as S
 from .tyrell.decider import Example, ExampleConstraintDecider
 from .tyrell.enumerator import LinesEnumerator, SmtEnumerator
@@ -38,26 +37,19 @@ library(lubridate)
 options(warn=-1)''')
 
 
-def beautifier(sql):
-    # parsed = sp.parse(sql)
-    # new_sql = beautifier_aux(parsed[0])
-    sql = re.sub('`TBL_LEFT`\.`[^,`]*` AS |`LHS`\.`[^,`]*` AS ', "", sql)
-    sql = re.sub('`TBL_RIGHT`\.`[^,`]*` AS |`RHS`\.`[^,`]*` AS ', "", sql)
-    return sp.format(sql, reindent=True, keyword_case='upper')
-
-
 def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
     util.seed(conf.seed)
     util.store_config(conf)
 
     if args.debug:
         logger.setLevel('DEBUG')
-        get_logger('tyrell').setLevel('DEBUG')
 
     logger.handlers[0].set_identifier(f'prc{id}')
 
     logger.info('Creating specification instance...')
     specification = Specification(spec)
+
+    ResultsHolder().specification = specification
 
     if logger.isEnabledFor(logging.DEBUG):
         with open(f'dsl{id}.tyrell', 'w') as f:
@@ -66,8 +58,13 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
     spec = S.parse(repr(specification.dsl))
     logger.info('Parsing succeeded')
 
+    decider = ExampleConstraintDecider(spec=spec,
+                                       interpreter=SquaresInterpreter(specification, False),
+                                       examples=[Example(input=specification.tables, output='expected_output')],
+                                       )
+
     logger.info('Building synthesizer...')
-    loc = conf.starting_loc
+    loc = max(specification.min_loc, conf.starting_loc)
     while loc <= limit:
         logger.info("Lines of Code: " + str(loc))
         if args.tree:
@@ -80,38 +77,15 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
             else:
                 enumerator = LinesEnumerator(spec, loc=loc, sym_breaker=False)
 
-        # enumerator = ExhaustiveEnumerator(spec, loc)
+        synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
-        synthesizer = Synthesizer(
-            # loc: # of function productions
-            enumerator=enumerator,
-            decider=ExampleConstraintDecider(
-                spec=spec,
-                interpreter=SquaresInterpreter(specification, False),
-                examples=[
-                    Example(input=specification.tables, output='expected_output'),
-                ],
-                equal_output=eq_r
-            )
-        )
         logger.info('Synthesizing programs...')
-
         prog = synthesizer.synthesize()
-        if prog is not None:
+        if prog:
             logger.info(f'Solution found: {prog}')
-            interpreter = SquaresInterpreter(specification, True)
-            evaluation = interpreter.eval(prog, specification.tables)
-
-            try:
-                program = specification.r_init + interpreter.final_program
-                robjects.r(program)
-                sql_query = robjects.r(f'sink(); sql_render({evaluation})')
-            except Exception:
-                logger.error('Error while trying to convert R code to SQL.')
-                sql_query = None
-
-            queue.put((specification.r_init + '\n' + interpreter.final_program,
-                       None if sql_query is None else beautifier(str(sql_query)[6:]), id))
+            ResultsHolder().store_solution(prog, True)
+            ResultsHolder().print()
+            queue.put(ResultsHolder().exit_code)
             return
 
         else:

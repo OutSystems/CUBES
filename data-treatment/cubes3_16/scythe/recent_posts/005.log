@@ -1,0 +1,39 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/005.csv", col_types = cols(g_event_id = col_integer(),prim_cid = col_integer(),event_id = col_integer(),event_time = col_character()))
+input1$event_time <- dmy(input1$event_time)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/005_o.csv", col_types = cols(g_event_id = col_integer(),prim_cid = col_integer(),event_id = col_integer(),event_time = col_character()))
+expected_output$event_time <- dmy(expected_output$event_time)
+
+df2 <- input1 %>% group_by(event_time, prim_cid) %>% summarise(maxevent_id = max(event_id)) %>% ungroup()
+df3 <- left_join(input1, df2)
+df4 <- df3 %>% filter(event_id == 17 & maxevent_id == 17)
+out <- df4 %>% select(g_event_id, prim_cid, event_id, event_time)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `g_event_id`,
+       `prim_cid`,
+       `event_id`,
+       `event_time`
+FROM
+  (SELECT `g_event_id`,
+          `prim_cid`,
+          `event_id`,
+          `event_time`,
+          `maxevent_id`
+   FROM `input1` AS `LHS`
+   LEFT JOIN
+     (SELECT `event_time`,
+             `prim_cid`,
+             MAX(`event_id`) AS `maxevent_id`
+      FROM `input1`
+      GROUP BY `event_time`,
+               `prim_cid`) AS `RHS` ON (`LHS`.`prim_cid` = `RHS`.`prim_cid`
+                                        AND `LHS`.`event_time` = `RHS`.`event_time`))
+WHERE (`event_id` = 17.0
+       AND `maxevent_id` = 17.0)

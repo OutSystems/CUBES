@@ -1,0 +1,38 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/029_1.csv
+  - tests-examples/scythe/recent_posts/tables/029_2.csv
+output: tests-examples/scythe/recent_posts/tables/029_o.csv
+aggrs:
+  - concat
+attrs:
+  - fl
+comment: |
+  SELECT
+      t1.pre,
+      t1.ba,
+      t1.pre-ba,
+      t1.kgs,
+      t1.f1 & "&" & t2.f1
+  FROM
+      table1 as t1
+      LEFT OUTER JOIN table2 as t2 ON
+          t1.pre = t2.pre AND
+          t1.ba = t2.ba AND
+          t1.pre-ba = t2.pre-ba AND
+          t1.kgs = t2.kgs
+  UNION ALL
+  SELECT
+      t2.pre,
+      t2.ba,
+      t2.pre-ba,
+      t2.kgs,
+      t2.f2 & "&" & t1.f2
+  FROM
+      table2 as t2
+      LEFT OUTER JOIN table1 as t1 ON
+          t2.pre = t1.pre AND
+          t2.ba = t1.ba AND
+          t2.pre-ba = t1.pre-ba AND
+          t2.kgs = t1.kgs
+
+  According to comment in stackoverflow, a simpler query with FULL OUTER JOIN is possible

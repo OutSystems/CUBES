@@ -1,0 +1,22 @@
+inputs:
+#  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/34.out
+aggrs:
+  - mean
+attrs:
+  - salary
+comment: |
+  5.3.11 optimal solution sql
+
+  SELECT E.ename, E.salary
+  FROM Employees E
+  WHERE E.eid NOT IN (SELECT DISTINCT C.eid
+                      FROM Certified C)
+    AND E.salary > (SELECT AVG(E1.salary)
+                    FROM Employees E1
+                    WHERE E1.eid IN
+                          (SELECT DISTINCT C1.eid
+                           FROM Certified C1))

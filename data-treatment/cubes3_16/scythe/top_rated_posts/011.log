@@ -1,0 +1,33 @@
+[    3.5474][cube-solver-0][warning] There is no solution for current loc (1).
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_1.csv", col_types = cols(VehicleID = col_integer(),Name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_2.csv", col_types = cols(LocationID = col_integer(),VehicleID = col_integer(),City = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o011.csv", col_types = cols(VehicleID = col_integer(),Name = col_character(),concatCity = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df3 <- input2 %>% group_by(VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+df4 <- left_join(input1, df3)
+out <- df4 %>% select(VehicleID, Name, concatCity)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `VehicleID`,
+       `Name`,
+       `concatCity`
+FROM
+  (SELECT `VehicleID`,
+          `Name`,
+          `concatCity`
+   FROM `input1` AS `LHS`
+   LEFT JOIN
+     (SELECT `VehicleID`,
+             string_agg(`City`, ', ') AS `concatCity`
+      FROM `input2`
+      GROUP BY `VehicleID`) AS `RHS` ON (`LHS`.`VehicleID` = `RHS`.`VehicleID`))

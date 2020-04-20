@@ -1,0 +1,33 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/032.csv", col_types = cols(Id = col_integer(),crit1 = col_integer(),crit2 = col_integer(),value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/032_o.csv", col_types = cols(crit1 = col_integer(),crit2 = col_integer(),value = col_character()))
+
+df2 <- input1 %>% group_by(crit1, crit2) %>% summarise(Id = max(Id)) %>% ungroup()
+df3 <- left_join(df2, input1)
+out <- df3 %>% select(crit1, crit2, value)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `crit1`,
+       `crit2`,
+       `value`
+FROM
+  (SELECT `crit1`,
+          `crit2`,
+          `Id`,
+          `value`
+   FROM
+     (SELECT `crit1`,
+             `crit2`,
+             MAX(`Id`) AS `Id`
+      FROM `input1`
+      GROUP BY `crit1`,
+               `crit2`) AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`crit1` = `RHS`.`crit1`
+                                   AND `LHS`.`crit2` = `RHS`.`crit2`
+                                   AND `LHS`.`Id` = `RHS`.`Id`))

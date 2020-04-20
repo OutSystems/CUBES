@@ -1,0 +1,35 @@
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/31.out
+const:
+  - 3000
+  - Boeing
+filters:
+  - like
+attrs:
+  - aname
+  - crusingrange
+loc: 5
+comment: |
+  5.3.8 optimal solution sql
+
+  SELECT DISTINCT E.ename
+  FROM Employees E
+  WHERE E.eid IN (SELECT C.eid
+                  FROM Certified C
+                  WHERE EXISTS(SELECT A.aid
+                               FROM Aircraft A
+                               WHERE A.aid = C.aid
+                                 AND A.crusingrange > 3000)
+                    AND NOT EXISTS(SELECT A1.aid
+                                   FROM Aircraft A1
+                                   WHERE A1.aid = C.aid
+                                     AND A1.aname LIKE 'Boeing%'))
+
+  df4 <- inner_join(input3, input2) %>% inner_join(input1)
+  df5 <- df4 %>% filter(str_detect(aname, 'Boeing') | crusingrange <= 3000)
+  df6 <- anti_join(df4, df5, by=c('crusingrange', 'salary'))
+  out <- df6 %>% select(ename) %>% distinct() %>% arrange(ename)

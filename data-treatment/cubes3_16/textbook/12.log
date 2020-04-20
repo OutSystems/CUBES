@@ -1,0 +1,16 @@
+[  200.7571][main][error] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/12-1.txt", col_types = cols(S_key = col_character(),age = col_integer(),level = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/textbook/tables/12.out", col_types = cols(age = col_integer(),level = col_character()))
+
+df2 <- input1 %>% group_by(age, level) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(age != max(n) | n == max(n))
+df4 <- df3 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
+df5 <- inner_join(df3, df4) %>% inner_join(input1)
+out <- df5 %>% select(age, level) %>% distinct()
+
+Failed to generate SQL query

@@ -1,0 +1,31 @@
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/8-1.txt", col_types = cols(S_key = col_character(),level = col_character(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/8.out", col_types = cols(level = col_character(),meanage = col_integer()))
+
+df2 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+df4 <- df3 %>% filter(level != 'JR' & meanage > age)
+out <- df4 %>% select(level, meanage)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `level`,
+       `meanage`
+FROM
+  (SELECT `S_key`,
+          `level`,
+          `age`,
+          `meanage`
+   FROM `input1` AS `LHS`
+   INNER JOIN
+     (SELECT `level`,
+             AVG(`age`) AS `meanage`
+      FROM `input1`
+      GROUP BY `level`) AS `RHS` ON (`LHS`.`level` = `RHS`.`level`))
+WHERE (`level` != 'JR'
+       AND `meanage` > `age`)
