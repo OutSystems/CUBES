@@ -1,6 +1,11 @@
 inputs:
   - tests-examples/leetcode/tables/180.csv
 output: tests-examples/leetcode/tables/180_o.csv
+functions:
+  - lead
+  - lag
+columns:
+  - Num
 comment:
   SELECT DISTINCT num
   FROM
@@ -9,5 +14,10 @@ comment:
   FROM cons_test
   )t
   WHERE num=lead and num=lag;
+
+  df2 <- input1 %>% mutate(lagNum = lag(Num))
+  df3 <- df2 %>% filter(lagNum > Num)
+  df4 <- df3 %>% mutate(leadNum = lead(Num))
+  out <- df4 %>% select(ConsecutiveNums = Num) %>% arrange(ConsecutiveNums)
 
 

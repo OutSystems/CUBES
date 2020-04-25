@@ -3,10 +3,26 @@ inputs:
   - tests-examples/leetcode/tables/262_2.csv
 output: tests-examples/leetcode/tables/262_o.csv
 dateorder: ymd
-const:
+filters:
+  - like
+constants:
   - No
   - 2013-10-1
   - 2013-10-3
+  - cancelled
+columns:
+  - Request_at
+  - Status
+  - Banned
 comment:
+  df1 <- input2 %>% filter(Banned == 'No')
+  df2 <- inner_join(input1, df1, by=c('Client_Id' = 'Users_Id', 'Driver_Id' = 'Users_Id'))
+  df3 <- df2 %>% filter(Request_at >= ymd('2013-10-1') & Request_at <= ymd('2013-10-3'))
+  df4 <- df3 %>% filter(str_detect(Status, 'cancelled'))
+  df5 <- df4 %>% group_by(Request_at) %>% summarise(n = n()) %>% ungroup()
+  df6 <- df2 %>% group_by(Request_at) %>% summarise(n = n()) %>% ungroup()
+  df7 <- left_join(df6, df5, by='Request_at')
+  df8 <- df7 %>% mutate(perc = replace_na(n.y, 0) / n.x)
+  out <- df8 %>% select(Day = Request_at, CancellationRate = perc)
 
 

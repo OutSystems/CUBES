@@ -1,0 +1,31 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/010.csv
+output: tests-examples/scythe/recent_posts/tables/010_o.csv
+dateorder: ymd
+comment: |
+  with Src as(
+  SELECT  ROW_NUMBER() Over(Partition by Robot_ID, Certif_ID order by StartDate, EndDate) as RN
+                  ,a.*
+          FROM @certif_span as a
+  )
+
+    , Islands as(
+          SELECT RN, Robot_ID, Certif_ID, StartDate, EndDate, 0 as islandNo, EndDate AS MovingEnd
+          FROM Src as a WHERE a.RN=1
+          UNION ALL
+          SELECT a.RN, a.Robot_ID, a.Certif_ID, a.StartDate, a.EndDate
+               , b.islandNo + CASE WHEN DATEDIFF(d, a.StartDate, b.MovingEnd)>=-1 THEN 0 ELSE 1 END as IslandNO
+               , CASE WHEN a.EndDate>b.MovingEnd THEN a.EndDate ELSE b.MovingEnd END as MovingEnd
+          FROM Src as a
+          INNER JOIN Islands as b on a.Robot_ID=b.Robot_ID and a.Certif_ID=b.Certif_ID and a.RN=b.RN+1
+      )   --  SELECT * FROM Islands order by Robot_ID, Certif_ID, IslandNo
+
+    , LastIsland as(
+          SELECT Robot_ID, Certif_ID, islandNo, MIN(StartDate) as startDate, MAX(EndDate) as EndDate
+                ,ROW_NUMBER() over(partition by Robot_ID, Certif_ID order by IslandNO desc) as RN
+          FROM Islands
+          Group by Robot_ID, Certif_ID, islandNo
+  )
+      SELECT Robot_ID, Certif_ID, startDate, EndDate
+      FROM   LastIsland
+      where  RN=1

@@ -1,9 +1,9 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i044.csv
 output: tests-examples/scythe/top_rated_posts/tables/o044.csv
-aggrs:
-  - sum
-attrs:
+functions:
+  - cumsum
+columns:
   - count
 comment: |
   SELECT t.id,
@@ -13,3 +13,6 @@ comment: |
            WHERE x.id <= t.id) AS cumulative_sum
   FROM TABLE t
   ORDER BY t.id
+
+  df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
+  out <- df2 %>% select(id, count, sumcount = cumsumcount) %>% arrange(id)

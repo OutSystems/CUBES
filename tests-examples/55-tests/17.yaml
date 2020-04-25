@@ -1,20 +1,24 @@
 inputs:
   - tests-examples/55-tests/tables/17-1.txt
+  #  - not used tests-examples/55-tests/tables/17-2.txt
   - tests-examples/55-tests/tables/17-3.txt
 output: tests-examples/55-tests/tables/17.out
-aggrs:
+functions:
   - mean
-attrs:
+columns:
   - cost
 bools:
   - '>'
-loc: '4'
+solution:
+  - summarise
+  - natural_join3
+  - filter
 comment: |
   5.2.5 optimal solution
 
-  df1 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
-  df2 <- inner_join(inner_join(input2, input1), df1)
-  df3 <- df2 %>% filter(meancost < cost)
-  out <- df3 %>% select(P_id,S_name)
+  df3 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df4 <- inner_join(input1, input2) %>% inner_join(df3)
+  df5 <- df4 %>% filter(meancost < cost)
+  out <- df5 %>% select(P_id, S_name) %>% arrange(P_id)
 
-  # not used tests-examples/55-tests/tables/17-2.txt,"
+

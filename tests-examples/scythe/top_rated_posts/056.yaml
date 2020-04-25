@@ -1,0 +1,24 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i056.csv
+output: tests-examples/scythe/top_rated_posts/tables/o056.csv
+comment: |
+  select [1],[2],[3],[4],[5] -- for N columns, this goes to N*2-1
+  from
+  (
+      select value,
+          targetRow = row+col-1,
+          targetCol = ROW_NUMBER() over (partition by row+col-1 order by row)
+      from
+      (
+          select *,
+              row = DENSE_RANK() over (order by id),
+              col = ROW_NUMBER() over (partition by id order by
+                  CASE source when 'colA' then 3 -- number in reverse
+                              when 'colX' then 2
+                              when 'colZ' then 1 end)
+          from t45
+          unpivot (value for source in (colA,colX,colZ)) upv
+      ) x
+  ) p                                -- for N columns, this goes to N*2-1
+  pivot (max(value) for targetCol in ([1],[2],[3],[4],[5])) pv
+  order by targetRow

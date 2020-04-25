@@ -1,9 +1,9 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/002.csv
 output: tests-examples/scythe/recent_posts/tables/002_o.csv
-const:
+constants:
   - ~ # YAML null canonical representation
-attrs:
+columns:
   - Start
 comment: |
   select start, lead(start) over (order by start)
@@ -15,4 +15,10 @@ comment: |
   where start is not null
   order by start;
 
-
+  df1 <- input1 %>% select(Start)
+  df2 <- input1 %>% select(Start = End)
+  df3 <- df1 %>% bind_rows(df2)
+  df4 <- df3 %>% arrange(Start)
+  df5 <- df4 %>% mutate(End = lead(Start))
+  df6 <- df5 %>% filter(!is.na(Start) & !is.na(End))
+  out <- df6 %>% select(Start, End)

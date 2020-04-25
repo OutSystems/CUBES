@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i042.csv
+output: tests-examples/scythe/top_rated_posts/tables/o042.csv
+comment: |
+  select name, [Red], [Green], [Blue]
+  from
+  (
+    select color, name, value
+    from yourtable
+    unpivot
+    (
+      value for name in (Paul, John, Tim, Eric)
+    ) unpiv
+  ) src
+  pivot
+  (
+    sum(value)
+    for color in ([Red], [Green], [Blue])
+  ) piv
