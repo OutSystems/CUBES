@@ -14,6 +14,10 @@ mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+cross_join <- function(a, b) {
+  full_join(a %>% mutate(tmp.col=1), b %>% mutate(tmp.col=1), by='tmp.col') %>% select(-tmp.col)
+}
+
 setwd('..')
 setwd('SQUARES')
 
@@ -25,15 +29,31 @@ enrolled <- read_csv("tests-examples/textbook2/tables/enrolled.csv", col_types =
 class <- read_csv('tests-examples/textbook2/tables/class.csv')
 faculty <- read_csv('tests-examples/textbook2/tables/faculty.csv')
 
-input1 <- read_csv("tests-examples/textbook/tables/employees.txt")
-input2 <- read_csv("tests-examples/textbook/tables/flights.txt")
-input3 <- read_csv("tests-examples/textbook/tables/23-3.txt")
-expected_output <- read_csv("tests-examples/textbook/tables/26.out")
+input1 <- read_csv("tests-examples/textbook/tables/certified.txt")
+# input1$date = dmy(input1$date)
+input2 <- read_csv("tests-examples/textbook/tables/employees.txt")
+input3 <- read_csv("tests-examples/scythe/recent_posts/tables/050_3.csv")
+expected_output <- read_csv("tests-examples/textbook/tables/33.out")
 
-df1 <- input2 %>%
+mean(input2$salary)
 
-df1 <- left_join(input1, input2)
-df2 <- df1 %>% group_by(OrderID) %>% summarise_all(first) %>% ungroup()
-out <- df2 %>% select(OrderNumber, Quantity, Description)
+df1 <- input2 %>% inner_join(input1)
+df1
+df2 <- df1 %>% mutate(a = mean(salary))
+df2
+df3 <- input2 %>% mutate(b = mean(salary))
+df3
+df4 <- inner_join(df2, df3)
+df4
+df5 <- df4 %>% mutate(c = a - b)
+df5
+df6 <- df2 %>% group_by(Request_at) %>% summarise(n = n()) %>% ungroup()
+df6
+df7 <- left_join(df6, df5, by='Request_at')
+df7
+df8 <- df7 %>% mutate(perc = replace_na(n.y, 0) / n.x)
+df8
+out <- df8 %>% select(Day = Request_at, CancellationRate = perc)
+out
 
 all_equal(out, expected_output, convert = T)

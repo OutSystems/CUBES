@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict, Counter
 from enum import IntEnum
+from logging import getLogger
 from typing import Sequence
 
 import sqlparse
@@ -8,10 +9,9 @@ from rpy2 import robjects
 
 from . import util
 from squares.dsl.interpreter import SquaresInterpreter
-from .tyrell.logger import get_logger
 from .util import Singleton
 
-logger = get_logger('squares')
+logger = getLogger('squares')
 
 
 class ExitCode(IntEnum):
@@ -20,6 +20,7 @@ class ExitCode(IntEnum):
     ERROR = 1
     SQL_FAILED = 2
     SQL_FAILED_NON_OPTIMAL = 4
+    END_SEARCH_SPACE = 5
 
 
 def beautifier(sql):
@@ -39,14 +40,15 @@ class ResultsHolder(metaclass=Singleton):
         self.n_rejects = 0
         self.n_fails = 0
         self.exit_code = ExitCode.ERROR
+        self.exceeded_max_loc = False
 
     def print(self):
         logger.info('Statistics:')
         if self.n_cubes:
             logger.info('\tGenerated cubes: %d', self.n_cubes)
-        logger.info('\tAttempted programs: %d\n'
-                    '\t\tRejected: %d\n'
-                    '\t\tFailed: %d\n', self.n_attempts, self.n_rejects, self.n_fails)
+        logger.info('\tAttempted programs: %d', self.n_attempts)
+        logger.info('\t\tRejected: %d', self.n_rejects)
+        logger.info('\t\tFailed: %d', self.n_fails)
         if self.blacklist:
             logger.info('\tBlacklist clauses: %d', sum(map(len, self.blacklist.values())))
 
@@ -85,6 +87,9 @@ class ResultsHolder(metaclass=Singleton):
             else:
                 print('Failed to generate SQL query')
         else:
+            if self.exceeded_max_loc:
+                self.exit_code = ExitCode.END_SEARCH_SPACE
+
             print("No solution found")
 
     def increment_attempts(self, attempts, rejects, fails):

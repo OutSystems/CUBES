@@ -1,17 +1,17 @@
-import logging
-from itertools import combinations, permutations
-
 import re
+from itertools import permutations
+from logging import getLogger
+
+import logging
 from rpy2 import robjects as robjects
 from z3 import BitVecVal
 
 from squares import util
 from squares.exceptions import REvaluationError
 from squares.tyrell.interpreter import PostOrderInterpreter, InterpreterError
-from squares.tyrell.logger import get_logger
 from squares.util import get_fresh_name, get_permutations
 
-logger = get_logger('squares.interpreter')
+logger = getLogger('squares.interpreter')
 
 
 def get_type(df, index):
@@ -38,6 +38,7 @@ def cached(func):
             except InterpreterError as e:
                 args[0].op_cache[(args[1], tuple(args[2]))] = e
                 raise e
+
     return wrap
 
 
@@ -83,6 +84,11 @@ class SquaresInterpreter(PostOrderInterpreter):
             _script = f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()'
         else:
             _script = f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise({args[1]}) %>% ungroup()'
+        return self.save_and_try_execute(_script, name, node)
+
+    def eval_mutate(self, node, args):
+        name = self.fresh_table()
+        _script = f'{name} <- {args[0]} %>% mutate({args[1]})'
         return self.save_and_try_execute(_script, name, node)
 
     @cached
@@ -140,6 +146,12 @@ class SquaresInterpreter(PostOrderInterpreter):
         return self.save_and_try_execute(_script, name, node)
 
     @cached
+    def eval_cross_join(self, node, args):
+        name = self.fresh_table()
+        _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col" %>% select(-tmp.col))'
+        return self.save_and_try_execute(_script, name, node)
+
+    @cached
     def eval_unite(self, node, args):
         name = self.fresh_table()
         _script = f'{name} <- unite({args[0]}, {args[1]}, {args[1]}, {args[2]}, sep=":")'
@@ -187,15 +199,15 @@ class SquaresInterpreter(PostOrderInterpreter):
         if logger.isEnabledFor(logging.DEBUG):
             a_dim = tuple(robjects.r(f'dim({actual})'))
             e_dim = tuple(robjects.r(f'dim({expect})'))
-            # if a_dim[0] == e_dim[0] or a_dim[1] == e_dim[1]:
-            #     if util.get_program_queue():
-            #         util.get_program_queue().put(tuple(r.production.name for r in args[0]))
+            if a_dim[0] == e_dim[0] or a_dim[1] == e_dim[1]:
+                if util.get_program_queue():
+                    util.get_program_queue().put(tuple(r.production.name for r in args[0]))
 
         if not keep_order:
             _script = f'all_equal({actual}, {expect}, convert=T)'
         else:
             _script = f'all_equal({actual}, {expect}, convert=T, ignore_row_order=T)'
         try:
-            return True == robjects.r(_script)[0]  # TODO this tests if the result is actually True, and not just True-like
+            return robjects.r(_script)[0] is True
         except:
             return False

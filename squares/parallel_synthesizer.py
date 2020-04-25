@@ -1,13 +1,14 @@
-import logging
 import multiprocessing
 import select
 import signal
 import traceback
 from collections import defaultdict
 from enum import Enum
-from math import ceil
+from logging import getLogger
 from multiprocessing import Process, Pipe, Queue
 from threading import Thread
+
+import logging
 
 from . import util
 from .config import Config
@@ -21,11 +22,10 @@ from .tyrell import spec as S
 from .tyrell.decider import Example
 from .tyrell.enumerator import LinesEnumerator
 from .tyrell.interpreter import InterpreterError
-from .tyrell.logger import get_logger
 from .tyrell.spec import TyrellSpec
 from .util import pipe_write, pipe_read
 
-logger = get_logger('squares.synthesizer')
+logger = getLogger('squares.synthesizer')
 
 
 class Message(Enum):
@@ -69,7 +69,6 @@ def run_process(pipe: Pipe, config: Config, specification: Specification, blackl
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
-    logger.handlers[0].set_identifier(multiprocessing.current_process().name)
     logger.setLevel(logger_level)
 
     util.store_config(config)

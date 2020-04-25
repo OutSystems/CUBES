@@ -1,4 +1,5 @@
 from collections import defaultdict
+from logging import getLogger
 from typing import cast, Any, Callable, Tuple
 
 import z3
@@ -11,13 +12,12 @@ from .example_base import Example, ExampleDecider
 from .result import ok, bad
 from ..dsl import Node, AtomNode, ParamNode, ApplyNode, NodeIndexer, dfs
 from ..interpreter import Interpreter, InterpreterError
-from ..logger import get_logger
 from ..spec import TyrellSpec, ValueType
 from ..spec.expr import *
 from ..visitor import GenericVisitor
 from ... import util
 
-logger = get_logger('tyrell.decider.example_constraint_pruning')
+logger = getLogger('tyrell.decider.example_constraint_pruning')
 
 
 class Z3Encoder(GenericVisitor):
@@ -211,7 +211,7 @@ class ConstraintInterpreter(GenericVisitor):
             raise PruningException(
                 'Solver returns unsat when evaluating {}'.format(apply_node),
                 apply_node
-            )
+                )
 
         return method_output
 
@@ -274,7 +274,7 @@ class BlameFinder:
                 base_nodes = list(blame_nodes.keys())
                 self._blames_collection.add(
                     frozenset([(n, n.production) for n in base_nodes])
-                )
+                    )
             return False
         else:
             # If abstract semantics is satisfiable, start interpretation

@@ -1,12 +1,12 @@
 import time
 from abc import ABC
+from logging import getLogger
 
 from ..decider import Decider
 from ..enumerator import Enumerator
 from ..interpreter import InterpreterError
-from ..logger import get_logger
 
-logger = get_logger('tyrell.synthesizer')
+logger = getLogger('tyrell.synthesizer')
 
 
 class Synthesizer(ABC):
