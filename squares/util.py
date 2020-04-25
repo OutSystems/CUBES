@@ -2,20 +2,21 @@
 import argparse
 import pickle
 import time
-from collections import defaultdict
 from itertools import permutations, combinations
+from logging import getLogger
 from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from random import Random
-from typing import List, Dict, Any, Iterable
+from typing import List, Any, Iterable
 
 import yaml
-from ordered_set import OrderedSet
 
 from .config import Config
-from .tyrell.logger import get_logger
+from .tyrell.logger import setup_logger
 
-logger = get_logger('squares')
+setup_logger('squares')
+setup_logger('tyrell')
+logger = getLogger('squares')
 
 counter = 0
 random = None
@@ -47,6 +48,14 @@ def powerset_except_empty(cols, num=None):
     if num == 0:
         return []
     return powerset_except_empty(cols, num - 1) + [a for a in combinations(cols, num)]
+
+
+def all_permutations(cols, num=None):
+    if num is None:
+        num = len(cols)
+    if num == 0:
+        return []
+    return all_permutations(cols, num - 1) + [a for a in permutations(cols, num)]
 
 
 def get_combinations(cols, num):
@@ -91,16 +100,13 @@ def boolvec2int(bools: List[bool]) -> int:
 def create_argparser():
     parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
     parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
-    parser.add_argument('-d', '--debug', action='store_true', help="Print debug info.")
+    parser.add_argument('-v', '--verbose', action='count', default=0, help='using this flag multiple times further increases verbosity')
 
     g = parser.add_mutually_exclusive_group()
-    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="compute symmetries online")
-    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="compute symmetries offline")
+    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="enable online symmetry breaking")
+    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="enable offline symmetry breaking")
 
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--r', dest='r', action='store_true', help="output R program")
-    g.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
-    parser.set_defaults(r=True)
+    parser.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
 
     g = parser.add_mutually_exclusive_group()
     g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
@@ -111,7 +117,7 @@ def create_argparser():
     parser.add_argument('--cache-operations', dest='cache_ops', action='store_true',
                         help='increased memory usage, but possibly faster results')
     parser.add_argument('--h-split-search', dest='split_search', action='store_true',
-                        help='use an heuristic to determine if search should be split among multiple lines of code.')
+                        help='use an heuristic to determine if search should be split among multiple lines of code')
     parser.add_argument('--h-split-search-threshold', dest='split_search_h', type=int, default=4000)
 
     parser.add_argument('--disable', nargs='+', default=[])
@@ -120,7 +126,7 @@ def create_argparser():
     parser.add_argument('--max-cols-combo', dest='max_cols_combo', type=int, default=2)
     parser.add_argument('--max-join-combo', dest='max_join_combo', type=int, default=2)
 
-    parser.add_argument('--use-solution-first-line', dest='use_first', action='store_true')
+    parser.add_argument('--use-solution-line', dest='use_lines', type=int, action='append', default=[])
     parser.add_argument('--use-solution-last-line', dest='use_last', action='store_true')
 
     parser.add_argument('-j', type=int, default=-2, help='number of processes to use')
@@ -135,23 +141,32 @@ def parse_specification(filename):
 
     spec = yaml.safe_load(f)
 
-    if "inputs" not in spec:
+    if 'inputs' not in spec:
         logger.error('Field "inputs" is required in spec')
         exit()
 
-    if "output" not in spec:
+    if 'output' not in spec:
         logger.error('Field "output" is required in spec')
         exit()
 
-    for field in ["const", "aggrs", "attrs", "bools", 'filters']:
+    if 'attrs' in spec:
+        logger.warning('"attrs" field is deprecated. Please use "columns"')
+        spec['columns'] = spec['attrs']
+
+    if 'aggrs' in spec:
+        logger.warning('"aggrs" field is deprecated. Please use "functions"')
+        spec['functions'] = spec['aggrs']
+
+    if 'const' in spec:
+        logger.warning('"const" field is deprecated. Please use "constants"')
+        spec['constants'] = spec['const']
+
+    for field in ['constants', 'functions', 'columns', 'filters']:
         if field not in spec:
             spec[field] = []
 
     if 'dateorder' not in spec:
         spec['dateorder'] = 'dmy'
-
-    if 'loc' not in spec:
-        spec['loc'] = 1
 
     return spec
 

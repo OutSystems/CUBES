@@ -38,7 +38,7 @@ class Config:
     force_constants: bool = True
     force_summarise: bool = True
 
-    solution_use_first_line: bool = False
+    solution_use_lines: List[int] = field(default_factory=list)
     solution_use_last_line: bool = False
 
     alt_empty_pos: bool = False

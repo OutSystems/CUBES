@@ -1,14 +1,14 @@
 import time
 from collections import deque
+from logging import getLogger
 
 from z3 import *
 
 from .enumerator import Enumerator
 from .optimizer import Optimizer
 from .. import dsl as D
-from ..logger import get_logger
 
-logger = get_logger('tyrell.enumerator.smt')
+logger = getLogger('tyrell.enumerator.smt')
 
 
 class AST:

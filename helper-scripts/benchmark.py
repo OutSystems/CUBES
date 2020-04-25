@@ -25,9 +25,9 @@ def test_file(filename: str):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', filename]
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-vv', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', filename]
+        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', '-vv', filename]
 
     command += other_args
 

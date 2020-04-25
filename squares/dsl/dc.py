@@ -26,8 +26,9 @@ class LineConstraint(CubeConstraint):
     def realize_constraint(self, spec, enumerator):
         return And(
             enumerator.roots[self.line].var == spec.get_function_production(self.production).id,
-            *(Or(*(enumerator.roots[self.line].children[i].var != arg.get_id(spec) for i, arg in enumerate(args))) for args in self.arguments)
-        )
+            *(Or(*(enumerator.roots[self.line].children[i].var != arg.get_id(spec) for i, arg in enumerate(args))) for args in
+              self.arguments)
+            )
 
     def __repr__(self) -> str:
         return f'l{self.line} = {self.production}({"[" + str(len(self.arguments)) + "]" if self.arguments else ""})'
@@ -154,8 +155,8 @@ class CubeGenerator(Iterable):
         productions = [p for p in self.tyrell_specification.get_productions_with_lhs('Table') if p.is_function()]
         lines = self.current()
 
-        if util.get_config().solution_use_first_line and self.specification.solution and len(lines) == 0:
-            productions = [p for p in productions if p.name == self.specification.solution[0]]
+        if self.specification.solution and len(lines) + 1 in util.get_config().solution_use_lines:
+            productions = [p for p in productions if p.name == self.specification.solution[len(lines)]]
 
         if util.get_config().solution_use_last_line and self.specification.solution and len(lines) == self.n_lines - 1:
             productions = [p for p in productions if p.name == self.specification.solution[-1]]
@@ -164,14 +165,17 @@ class CubeGenerator(Iterable):
             move(productions, 'filter', 3)
         if find_production(productions, 'summarise'):
             move(productions, 'summarise', 3)
+        if find_production(productions, 'mutate'):
+            move(productions, 'mutate', len(productions))
         if find_production(productions, 'inner_join'):
             move(productions, 'inner_join', len(productions))
 
         if util.get_config().force_summarise and \
-                len(self.specification.aggrs) - count(l for l in lines if l.name == 'summarise') >= self.loc - len(self.line_stack):
-            productions = list(filter(lambda p: p.name == 'summarise', productions))
+                len(self.specification.aggrs) - count(l for l in lines if l.name == 'summarise' or l.name == 'mutate') >= self.loc - len(
+            self.line_stack):
+            productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
 
-        if (self.specification.consts or self.specification.filters) and \
+        if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters) and \
                 count(l for l in lines if l.name == 'filter') == 0 and \
                 len(self.line_stack) == self.loc - 1:
             productions = list(filter(lambda p: p.name == 'filter', productions))

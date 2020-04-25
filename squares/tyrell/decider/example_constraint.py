@@ -1,5 +1,6 @@
 from collections import defaultdict
 from itertools import permutations
+from logging import getLogger
 from typing import (
     cast,
     Tuple,
@@ -22,13 +23,12 @@ from .example_base import Example, ExampleDecider
 from .result import ok, bad
 from ..dsl import Node, AtomNode, ParamNode, ApplyNode, NodeIndexer
 from ..interpreter import Interpreter, InterpreterError
-from ..logger import get_logger
 from ..spec import Production, ValueType, TyrellSpec
 from ..spec.expr import *
 from ..visitor import GenericVisitor
 from ... import util
 
-logger = get_logger('tyrell.synthesizer.constraint')
+logger = getLogger('tyrell.synthesizer.constraint')
 ImplyMap = Mapping[Tuple[Production, Expr], List[Production]]
 MutableImplyMap = MutableMapping[Tuple[Production, Expr], List[Production]]
 

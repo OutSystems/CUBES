@@ -5,14 +5,14 @@ table_value = DSLValue('Table',
                            ('col', 'int'),
                            ('row', 'int'),
                            # ('columns', 'bv')
-                       ])
+                           ])
 
 table_select_value = DSLValue('TableSelect',
                               [
                                   ('col', 'int'),
                                   ('row', 'int'),
                                   # ('columns', 'bv')
-                              ])
+                                  ])
 
 natural_join_function = DSLFunction('natural_join',
                                     'Table r',
@@ -21,7 +21,7 @@ natural_join_function = DSLFunction('natural_join',
                                         "col(r) <= col(a) + col(b)",
                                         # "columns(r) == columns(a) | columns(b)",
                                         # f"columns(a) & columns(b) != *0"
-                                    ])
+                                        ])
 
 natural_join3_function = DSLFunction('natural_join3',
                                      'Table r',
@@ -31,7 +31,7 @@ natural_join3_function = DSLFunction('natural_join3',
                                          # "columns(r) == columns(a) | columns(b) | columns(c)",
                                          # f"columns(a) & columns(b) != *0",
                                          # f"(columns(a) | columns(b)) & columns(c) != *0"
-                                     ])
+                                         ])
 
 natural_join4_function = DSLFunction('natural_join4',
                                      'Table r',
@@ -42,14 +42,14 @@ natural_join4_function = DSLFunction('natural_join4',
                                          # f"columns(a) & columns(b) != *0",
                                          # f"(columns(a) | columns(b)) & columns(c) != *0",
                                          # f"(columns(a) | columns(b) | columns(c)) & columns(d) != *0"
-                                     ])
+                                         ])
 
 inner_join_function = DSLFunction('inner_join',
                                   'Table r',
                                   ['Table a', 'Table b', 'JoinCondition c'],
                                   [
                                       "col(r) <= col(a) + col(b)"
-                                  ])
+                                      ])
 
 anti_join_function = DSLFunction('anti_join',
                                  'Table r',
@@ -57,7 +57,7 @@ anti_join_function = DSLFunction('anti_join',
                                  [
                                      "col(r) == 1",
                                      'row(r) <= row(a)'
-                                 ])
+                                     ])
 
 left_join_function = DSLFunction('left_join',
                                  'Table r',
@@ -66,7 +66,7 @@ left_join_function = DSLFunction('left_join',
                                      'col(r) <= col(a) + col(b)',
                                      'row(r) == row(a)',
                                      # "columns(r) == columns(a) | columns(b)"
-                                 ])
+                                     ])
 
 union_function = DSLFunction('union',
                              'Table r',
@@ -75,7 +75,7 @@ union_function = DSLFunction('union',
                                  'col(r) <= col(a) + col(b)',
                                  'row(r) == row(a) + row(b)',
                                  # "columns(r) == columns(a) | columns(b)"
-                             ])
+                                 ])
 
 intersect_function = DSLFunction('intersect',
                                  'Table r',
@@ -83,7 +83,7 @@ intersect_function = DSLFunction('intersect',
                                  [
                                      'col(r) == 1',
                                      'row(r) <= row(a)'
-                                 ])
+                                     ])
 
 semi_join_function = DSLFunction('semi_join',
                                  'Table r',
@@ -91,7 +91,14 @@ semi_join_function = DSLFunction('semi_join',
                                  [
                                      'col(r) == col(a)',
                                      'row(r) <= row(a)'
-                                 ])
+                                     ])
+
+cross_join_function = DSLFunction('cross_join',
+                                  'Table r',
+                                  ['Table a', 'Table b'],
+                                  [
+                                      'col(r) <= col(a) + col(b)'
+                                      ])
 
 select_function = DSLFunction('select',
                               'TableSelect r',
@@ -101,7 +108,7 @@ select_function = DSLFunction('select',
                                   'col(r) <= col(a)',
                                   # f"columns(r) & columns(a) != *0",
                                   # f"columns(r) & ~columns(a) == *0",
-                              ])
+                                  ])
 
 unite_function = DSLFunction('unite',
                              'Table r',
@@ -109,7 +116,7 @@ unite_function = DSLFunction('unite',
                              [
                                  'row(r) <= row(a)',
                                  'col(r) <= col(a)'
-                             ])
+                                 ])
 
 filter_function = DSLFunction('filter',
                               'Table r',
@@ -118,7 +125,7 @@ filter_function = DSLFunction('filter',
                                   'row(r) <= row(a)',
                                   'col(r) == col(a)',
                                   # 'columns(r) == columns(a)'
-                              ])
+                                  ])
 
 filters_function = DSLFunction('filters',
                                'Table r',
@@ -127,12 +134,20 @@ filters_function = DSLFunction('filters',
                                    'row(r) <= row(a)',
                                    'col(r) == col(a)'
                                    # 'columns(r) == columns(a)'
-                               ])
+                                   ])
 
-summarise_grouped_function = DSLFunction('summarise',
-                                         'Table r',
-                                         ['Table a', 'SummariseCondition s', 'Cols b'],
-                                         [
-                                             'row(r) <= row(a)',
-                                             'col(r) <= 3'
-                                         ])
+summarise_function = DSLFunction('summarise',
+                                 'Table r',
+                                 ['Table a', 'SummariseCondition s', 'Cols b'],
+                                 [
+                                     'row(r) <= row(a)',
+                                     'col(r) <= 3'
+                                     ])
+
+mutate_function = DSLFunction('mutate',
+                              'Table r',
+                              ['Table a', 'MutateCondition s'],
+                              [
+                                  'row(r) <= row(a)',
+                                  'col(r) <= 3'
+                                  ])

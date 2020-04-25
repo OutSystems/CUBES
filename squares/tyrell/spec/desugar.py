@@ -1,4 +1,5 @@
 from ast import literal_eval
+from logging import getLogger
 from typing import cast
 
 from z3 import BitVecVal
@@ -9,9 +10,8 @@ from .parser import Visitor_Recursive
 from .spec import TypeSpec, ProductionSpec, ProgramSpec, PredicateSpec, TyrellSpec
 from .type import Type, EnumType, ValueType
 from .util import enum_set_domain
-from ..logger import get_logger
 
-logger = get_logger('tyrell.desugar')
+logger = getLogger('tyrell.desugar')
 
 
 class ParseTreeProcessingError(RuntimeError):

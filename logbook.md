@@ -254,51 +254,56 @@ Stats after 300s (16 threads):
 ### Hard but possibly solvable
 - scythe/recent_posts/046
 
-## Week 11
+## Weeks 11, 12
 
 ### Possible extension
 - union distinct
 
+### Underspecified instances
+- leetcode/180
+
 ### Unsolved instances
 
 #### Supported
+- 55-tests/22
 - 55-tests/46
 - scythe/recent_posts/006
+- scythe/recent_posts/012
 - scythe/recent_posts/019
 - scythe/recent_posts/036
+- scythe/recent_posts/046
 - scythe/recent_posts/046
 - textbook/20
 - textbook/22
 
 #### Unsure if supported?
 - scythe/recent_posts/001
-- scythe/recent_posts/185
+- scythe/recent_posts/039
+- leetcode/185
 - textbook/23
+- textbook/26
+- textbook/29
+- textbook/32
+- textbook/34
 
 #### Not supported
 
 ##### Mutate
-- scythe/recent_posts/002 (lead)
-- scythe/recent_posts/024 (percentage)
+- scythe/recent_posts/020 (concat, array_agg)
+- scythe/recent_posts/024 (arithmetic)
 - scythe/recent_posts/026 (predicates to bool cols)
-- scythe/recent_posts/027 (date arithmetic)
-- scythe/recent_posts/033 (date arithmetic)
-- scythe/recent_posts/035 (percentage)
-- scythe/recent_posts/039 (sum)
-- scythe/recent_posts/050 (coalesce)
-- scythe/top_rated_posts/003 (concat)
-- scythe/top_rated_posts/023 (row_number)
-- scythe/top_rated_posts/044 (cumsum)
-- scythe/top_rated_posts/050 (sum?)
-- leetcode/178 (rank)
-- leetcode/180 (lead, lag)
-- leetcode/197 (date arithmetic)
-- leetcode/262 (percentage)
-- textbook/26 (min)
-- textbook/29 (min)
-- textbook/32 (min)
-- textbook/33 (avg, arithmetic)
-- textbook/34 (avg)
+- scythe/recent_posts/027 (date arithmetic: hour(ts)*2 + minute(ts) %/% 30)
+- scythe/recent_posts/033 (arithmetic)
+- scythe/top_rated_posts/024 (year(date), month(date, label=T))
+- scythe/top_rated_posts/052 (arithmetic)
+- scythe/top_rated_posts/053 (case when)
+- leetcode/197 (arithmetic)
+- leetcode/262 (replace_na(n.y, 0) / n.x)
+- textbook/33 (arithmetic)
+
+##### Grouped mutate
+- scythe/recent_posts/024
+- scythe/recent_posts/035 (n / sum(n) * 100)
 
 ##### Grouped filter
 - textbook/36 (all)
@@ -319,21 +324,35 @@ Stats after 300s (16 threads):
 - leetcode/197
 - textbook/27
 
+##### Complex Constant
+- scythe/recent_posts/033 (ymd('2016-10-13') - weeks(1))
+
 ##### Distinct
 - scythe/recent_posts/017 (distinct with .keep=T) (would still be 6 lines + select) (scythe supports because instance is underspecified)
 
+##### Union select
+- scythe/recent_posts/002
+
 ##### Float comparison
 - scythe/recent_posts/024
+- scythe/recent_posts/035
+- leetcode/262
 
 ##### Gather / Spread
 - scythe/recent_posts/008
 - scythe/recent_posts/015
 - scythe/top_rated_posts/015
+- scythe/top_rated_posts/026
 - scythe/top_rated_posts/033
 - scythe/top_rated_posts/035
+- scythe/top_rated_posts/042 (transpose)
 
-##### Unknown reason
+##### Others
+- scythe/recent_posts/010 (???)
 - scythe/recent_posts/029 (full outer join?)
+- scythe/top_rated_posts/041 (recursive query)
+- scythe/top_rated_posts/046 (custom order, multiple filters)
+- scythe/top_rated_posts/056 (rotate table 45 degrees?????????????????????????)
 
 ##### Too complex to ever support?
 - scythe/recent_posts/030 (IN sets)

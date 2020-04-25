@@ -17,6 +17,13 @@ if __name__ == '__main__':
     result += 'inputs: ' + ', '.join(spec['inputs']) + '\n'
     result += 'output: ' + spec['output'] + '\n'
 
+    if 'constants' in spec:
+        spec['const'] = spec['constants']
+    if 'functions' in spec:
+        spec['aggrs'] = spec['functions']
+    if 'columns' in spec:
+        spec['attrs'] = spec['columns']
+
     for a in ['const', 'aggrs', 'attrs', 'bools']:
         if a in spec:
             result += a + ': ' + ', '.join(map(lambda x: f'"{x}"', spec[a])) + '\n'

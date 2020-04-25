@@ -1,16 +1,17 @@
 import time
 from collections import defaultdict
 from copy import deepcopy
+from logging import getLogger
 
+from ordered_set import OrderedSet
 from z3 import *
 
 from .enumerator import Enumerator
 from .gen_lattices import SymmetryFinder
 from .. import dsl as D
-from ..logger import get_logger
 from ... import util
 
-logger = get_logger('tyrell.enumerator.smt')
+logger = getLogger('tyrell.enumerator.smt')
 
 
 class Node(object):
@@ -143,10 +144,10 @@ class LinesEnumerator(Enumerator):
         self.create_lines_constraints()
         self.create_type_constraints()
         self.create_children_constraints()
-        self._production_id_cache = {}
+        self._production_id_cache = defaultdict(OrderedSet)
         for p in self.spec.productions():
             if p.is_enum():
-                self._production_id_cache[p._get_rhs()] = p.id
+                self._production_id_cache[p._get_rhs()].append(p.id)
         self.resolve_predicates()
         logger.info('Number of Nodes: {} '.format(len(self.roots + self.leafs)))
         logger.info('Number of Variables: {}'.format(len(self.variables + self.typeVars + self.linesVars)))
@@ -389,22 +390,23 @@ class LinesEnumerator(Enumerator):
         conditions = pred.args
         lst = []
         for c in conditions:
-            if c in self._production_id_cache:
+            for id in self._production_id_cache[c]:
                 for l in self.leafs:
-                    lst.append(l.var == self._production_id_cache[c])
+                    lst.append(l.var == id)
         self.z3_solver.add(Or(lst))
 
     def _resolve_happens_before_predicate(self, pred):
-        pos = 0 if pred.args[0] not in self._production_id_cache else self._production_id_cache[pred.args[0]]
-        pre = 0 if pred.args[1] not in self._production_id_cache else self._production_id_cache[pred.args[1]]
+        pres = self._production_id_cache[pred.args[1]]
 
-        for r_i in range(len(self.roots)):
-            previous_roots = []
-            for r_ia in range(r_i):
-                for c in self.roots[r_ia].children:
-                    previous_roots.append(c.var == pre)
+        for pos in self._production_id_cache[pred.args[0]]:
+            for r_i in range(len(self.roots)):
+                previous_roots = []
+                for r_ia in range(r_i):
+                    for c in self.roots[r_ia].children:
+                        for pre in pres:
+                            previous_roots.append(c.var == pre)
 
-            self.z3_solver.add(Implies(Or(*(c.var == pos for c in self.roots[r_i].children)), Or(previous_roots)))
+                self.z3_solver.add(Implies(Or(*(c.var == pos for c in self.roots[r_i].children)), Or(previous_roots)))
 
     def resolve_predicates(self):
         try:

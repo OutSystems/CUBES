@@ -1,19 +1,19 @@
 #!/usr/bin/env python
-import logging
 import os
 import random
 import signal
+from logging import getLogger
 from time import time
 
+import logging
 from rpy2 import robjects
 
 from squares import util
 from squares.config import Config
+from squares.dsl.specification import Specification
 from squares.parallel_synthesizer import ParallelSynthesizer
 from squares.results import ResultsHolder
-from squares.dsl.specification import Specification
 from squares.tyrell import spec as S
-from squares.tyrell.logger import get_logger
 from squares.util import create_argparser, parse_specification
 
 robjects.r('''
@@ -28,7 +28,7 @@ library(readr)
 library(lubridate)
 options(warn=-1)''')
 
-logger = get_logger('squares')
+logger = getLogger('squares')
 
 
 def handle_sigint(signal, stackframe):
@@ -44,9 +44,12 @@ def main():
     parser = create_argparser()
     args = parser.parse_args()
 
-    if args.debug:
+    if args.verbose >= 1:
+        logger.setLevel('INFO')
+    if args.verbose >= 2:
         logger.setLevel('DEBUG')
-        # get_logger('tyrell').setLevel('DEBUG')
+    if args.verbose >= 3:
+        getLogger('tyrell').setLevel('DEBUG')
 
     logger.info('Parsing specification...')
     spec = parse_specification(args.input)
@@ -54,7 +57,7 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, print_r=args.r, cache_ops=args.cache_ops, optimal=args.optimal, solution_use_first_line=args.use_first,
+    config = Config(seed=seed, print_r=args.r, cache_ops=args.cache_ops, optimal=args.optimal, solution_use_lines=args.use_lines,
                     solution_use_last_line=args.use_last, advance_processes=args.split_search,
                     programs_per_cube_threshold=args.split_search_h, minimum_loc=args.min_lines, maximum_loc=args.max_lines,
                     max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
