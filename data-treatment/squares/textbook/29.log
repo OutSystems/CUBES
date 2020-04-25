@@ -1,0 +1,417 @@
+R[write to console]: 
+Attaching package: ‘dplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+
+R[write to console]: The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+R[write to console]: 
+Attaching package: ‘dbplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:dplyr’:
+
+    ident, sql
+
+
+# First, specify the types that will be used
+
+enum Cols {
+  "aid, aname", "aid, arrives", "aid, crusingrange", "aid, departs", "aid, destination", "aid, distance", "aid, flno", "aid, origin", "aid, price", "aname, aid", "aname, arrives", "aname, crusingrange", "aname, departs", "aname, destination", "aname, distance", "aname, flno", "aname, origin", "aname, price", "arrives, aid", "arrives, aname", "arrives, crusingrange", "arrives, departs", "arrives, destination", "arrives, distance", "arrives, flno", "arrives, origin", "arrives, price", "crusingrange, aid", "crusingrange, aname", "crusingrange, arrives", "crusingrange, departs", "crusingrange, destination", "crusingrange, distance", "crusingrange, flno", "crusingrange, origin", "crusingrange, price", "departs, aid", "departs, aname", "departs, arrives", "departs, crusingrange", "departs, destination", "departs, distance", "departs, flno", "departs, origin", "departs, price", "destination, aid", "destination, aname", "destination, arrives", "destination, crusingrange", "destination, departs", "destination, distance", "destination, flno", "destination, origin", "destination, price", "distance, aid", "distance, aname", "distance, arrives", "distance, crusingrange", "distance, departs", "distance, destination", "distance, flno", "distance, origin", "distance, price", "flno, aid", "flno, aname", "flno, arrives", "flno, crusingrange", "flno, departs", "flno, destination", "flno, distance", "flno, origin", "flno, price", "origin, aid", "origin, aname", "origin, arrives", "origin, crusingrange", "origin, departs", "origin, destination", "origin, distance", "origin, flno", "origin, price", "price, aid", "price, aname", "price, arrives", "price, crusingrange", "price, departs", "price, destination", "price, distance", "price, flno", "price, origin", "aid", "aname", "arrives", "crusingrange", "departs", "destination", "distance", "flno", "origin", "price"
+}
+
+enum Col {
+  "aid", "aname", "arrives", "crusingrange", "departs", "destination", "distance", "flno", "origin", "price"
+}
+
+enum SelectCols{
+  "aid"
+}
+
+enum Distinct {
+	"distinct", ""
+}
+
+enum FilterCondition{
+"distance == mindistance", "distance > mindistance", "distance < mindistance", "distance >= mindistance", "distance <= mindistance", "crusingrange == mindistance", "crusingrange > mindistance", "crusingrange < mindistance", "crusingrange >= mindistance", "crusingrange <= mindistance", "mincrusingrange == mindistance", "mincrusingrange > mindistance", "mincrusingrange < mindistance", "mincrusingrange >= mindistance", "mincrusingrange <= mindistance", "distance == mincrusingrange", "distance > mincrusingrange", "distance < mincrusingrange", "distance >= mincrusingrange", "distance <= mincrusingrange", "crusingrange == mincrusingrange", "crusingrange > mincrusingrange", "crusingrange < mincrusingrange", "crusingrange >= mincrusingrange", "crusingrange <= mincrusingrange", "mindistance == mincrusingrange", "mindistance > mincrusingrange", "mindistance < mincrusingrange", "mindistance >= mincrusingrange", "mindistance <= mincrusingrange"
+}
+
+enum SummariseCondition{
+"mindistance = min(distance)", "mincrusingrange = min(crusingrange)"
+}
+
+enum Op{
+ "|", "&"
+}
+
+value Table {
+  col: int;
+  row: int;
+}
+
+value TableSelect {
+  col: int;
+  row: int;
+}
+
+value Empty;
+
+# Next, specify the input/output of the synthesized program
+program Squares(Table, Table) -> TableSelect;
+
+# Finally, specify the production rules
+func empty: Empty -> Empty;
+
+func inner_join: Table r -> Table a, Table b
+{
+  col(r) <= col(a) + col(b);
+}
+
+func inner_join3: Table r -> Table a, Table b, Table c
+{
+  col(r) < col(a) + col(b) + col(c);
+}
+
+func inner_join4: Table r -> Table a, Table b, Table c, Table d {
+  col(r) < col(a) + col(b) + col(c) + col(d);
+}
+
+func anti_join: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func left_join: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a);
+}
+
+func bind_rows: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a) + row(b);
+}
+
+func intersect: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func select: TableSelect r -> Table a, SelectCols c, Distinct d{
+	row(r) <= row(a);
+	col(r) <= col(a);
+}
+
+
+
+
+func filters: Table r -> Table a, FilterCondition f, FilterCondition g, Op o {
+ row(r) <= row(a);
+ col(r) == col(a);
+}
+
+
+func summariseGrouped: Table r -> Table a, SummariseCondition s, Cols b {
+ row(r) <= row(a);
+ col(r) <= 3;
+}
+
+predicate is_not_parent(inner_join4, summariseGrouped, 100);
+predicate is_not_parent(summariseGrouped, summariseGrouped, 100);
+predicate distinct_filters(filters, 1, 2);
+predicate is_not_parent(filters, filters, 100);
+predicate is_not_parent(inner_join, filters, 100);
+predicate is_not_parent(inner_join3, filters, 100);
+predicate is_not_parent(inner_join4, filters, 100);
+predicate distinct_inputs(filters);
+
+predicate constant_occurs("mindistance = min(distance),mincrusingrange = min(crusingrange)");
+predicate happens_before("distance == mindistance","mindistance = min(distance)");
+predicate happens_before("distance > mindistance","mindistance = min(distance)");
+predicate happens_before("distance < mindistance","mindistance = min(distance)");
+predicate happens_before("distance >= mindistance","mindistance = min(distance)");
+predicate happens_before("distance <= mindistance","mindistance = min(distance)");
+predicate happens_before("crusingrange == mindistance","mindistance = min(distance)");
+predicate happens_before("crusingrange > mindistance","mindistance = min(distance)");
+predicate happens_before("crusingrange < mindistance","mindistance = min(distance)");
+predicate happens_before("crusingrange >= mindistance","mindistance = min(distance)");
+predicate happens_before("crusingrange <= mindistance","mindistance = min(distance)");
+predicate happens_before("mincrusingrange == mindistance","mindistance = min(distance)");
+predicate happens_before("mincrusingrange > mindistance","mindistance = min(distance)");
+predicate happens_before("mincrusingrange < mindistance","mindistance = min(distance)");
+predicate happens_before("mincrusingrange >= mindistance","mindistance = min(distance)");
+predicate happens_before("mincrusingrange <= mindistance","mindistance = min(distance)");
+predicate happens_before("distance == mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("distance > mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("distance < mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("distance >= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("distance <= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("crusingrange == mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("crusingrange > mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("crusingrange < mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("crusingrange >= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("crusingrange <= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("mindistance == mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("mindistance > mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("mindistance < mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("mindistance >= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate happens_before("mindistance <= mincrusingrange","mincrusingrange = min(crusingrange)");
+predicate is_not_parent(inner_join, inner_join3, 100);
+predicate is_not_parent(inner_join, inner_join4, 100);
+#predicate is_not_parent(inner_join, anti_join, 100);
+predicate is_not_parent(inner_join3, inner_join, 100);
+predicate is_not_parent(inner_join3, inner_join3, 100);
+predicate is_not_parent(inner_join3, inner_join4, 100);
+predicate is_not_parent(inner_join3, anti_join, 100);
+predicate is_not_parent(inner_join4, inner_join, 100);
+predicate is_not_parent(inner_join4, inner_join3, 100);
+predicate is_not_parent(inner_join4, inner_join4, 100);
+#predicate is_not_parent(inner_join4, anti_join, 100);
+predicate is_not_parent(anti_join, anti_join, 100);
+predicate is_not_parent(anti_join, inner_join, 100);
+predicate is_not_parent(anti_join, inner_join4, 100);
+predicate distinct_inputs(inner_join4);
+predicate distinct_inputs(inner_join3);
+predicate distinct_inputs(inner_join);
+predicate distinct_inputs(anti_join);
+
+Joining, by = "origin"
+Joining, by = c("distance", "flno")
+Joining, by = c("distance", "arrives")
+Joining, by = c("price", "destination")
+Joining, by = c("origin", "flno")
+Joining, by = c("price", "flno")
+Joining, by = c("departs", "flno")
+Joining, by = "flno"
+Joining, by = c("destination", "distance")
+Joining, by = c("distance", "departs")
+Joining, by = c("destination", "origin")
+Joining, by = "distance"
+Joining, by = c("departs", "destination")
+Joining, by = c("price", "origin")
+Joining, by = c("distance", "destination")
+Joining, by = c("origin", "departs")
+Joining, by = "destination"
+Joining, by = "price"
+Joining, by = c("departs", "arrives")
+Joining, by = c("destination", "flno")
+Joining, by = c("origin", "distance")
+Joining, by = c("destination", "departs")
+Joining, by = c("arrives", "origin")
+Joining, by = c("origin", "destination")
+Joining, by = c("flno", "arrives")
+Joining, by = c("departs", "origin")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = c("price", "departs")
+Joining, by = c("departs", "distance")
+Joining, by = c("origin", "price")
+Joining, by = c("arrives", "distance")
+Joining, by = "departs"
+Joining, by = c("origin", "arrives")
+Joining, by = c("arrives", "destination")
+Joining, by = c("arrives", "price")
+Joining, by = c("flno", "distance")
+Joining, by = "arrives"
+Joining, by = c("departs", "price")
+Joining, by = c("price", "arrives")
+Joining, by = c("destination", "price")
+Joining, by = c("distance", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "destination")
+Joining, by = c("arrives", "departs")
+Joining, by = c("destination", "arrives")
+Joining, by = c("arrives", "flno")
+Joining, by = c("price", "distance")
+Joining, by = c("distance", "origin")
+Joining, by = "origin"
+Joining, by = c("distance", "flno")
+Joining, by = c("distance", "arrives")
+Joining, by = c("price", "destination")
+Joining, by = c("origin", "flno")
+Joining, by = c("price", "flno")
+Joining, by = c("departs", "flno")
+Joining, by = "flno"
+Joining, by = c("destination", "distance")
+Joining, by = c("distance", "departs")
+Joining, by = c("destination", "origin")
+Joining, by = "distance"
+Joining, by = c("departs", "destination")
+Joining, by = c("price", "origin")
+Joining, by = c("distance", "destination")
+Joining, by = c("origin", "departs")
+Joining, by = "destination"
+Joining, by = "price"
+Joining, by = c("departs", "arrives")
+Joining, by = c("destination", "flno")
+Joining, by = c("origin", "distance")
+Joining, by = c("destination", "departs")
+Joining, by = c("arrives", "origin")
+Joining, by = c("origin", "destination")
+Joining, by = c("flno", "arrives")
+Joining, by = c("departs", "origin")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = c("price", "departs")
+Joining, by = c("departs", "distance")
+Joining, by = c("origin", "price")
+Joining, by = c("arrives", "distance")
+Joining, by = "departs"
+Joining, by = c("origin", "arrives")
+Joining, by = c("arrives", "destination")
+Joining, by = c("arrives", "price")
+Joining, by = c("flno", "distance")
+Joining, by = "arrives"
+Joining, by = c("departs", "price")
+Joining, by = c("price", "arrives")
+Joining, by = c("destination", "price")
+Joining, by = c("distance", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "destination")
+Joining, by = c("arrives", "departs")
+Joining, by = c("destination", "arrives")
+Joining, by = c("arrives", "flno")
+Joining, by = c("price", "distance")
+Joining, by = c("distance", "origin")
+Joining, by = "origin"
+Joining, by = c("flno", "distance")
+Joining, by = c("distance", "arrives")
+Joining, by = c("destination", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = "flno"
+Joining, by = c("destination", "distance")
+Joining, by = c("distance", "departs")
+Joining, by = c("origin", "destination")
+Joining, by = "distance"
+Joining, by = c("destination", "departs")
+Joining, by = c("origin", "price")
+Joining, by = c("destination", "distance")
+Joining, by = c("origin", "departs")
+Joining, by = "destination"
+Joining, by = "price"
+Joining, by = c("departs", "arrives")
+Joining, by = c("flno", "destination")
+Joining, by = c("origin", "distance")
+Joining, by = c("destination", "departs")
+Joining, by = c("origin", "arrives")
+Joining, by = c("origin", "destination")
+Joining, by = c("flno", "arrives")
+Joining, by = c("origin", "departs")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = c("departs", "price")
+Joining, by = c("distance", "departs")
+Joining, by = c("origin", "price")
+Joining, by = c("distance", "arrives")
+Joining, by = "departs"
+Joining, by = c("origin", "arrives")
+Joining, by = c("destination", "arrives")
+Joining, by = c("arrives", "price")
+Joining, by = c("flno", "distance")
+Joining, by = "arrives"
+Joining, by = c("departs", "price")
+Joining, by = c("arrives", "price")
+Joining, by = c("destination", "price")
+Joining, by = c("distance", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "destination")
+Joining, by = c("departs", "arrives")
+Joining, by = c("destination", "arrives")
+Joining, by = c("flno", "arrives")
+Joining, by = c("distance", "price")
+Joining, by = c("origin", "distance")
+Joining, by = "origin"
+Joining, by = c("flno", "distance")
+Joining, by = c("distance", "arrives")
+Joining, by = c("destination", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = "flno"
+Joining, by = c("destination", "distance")
+Joining, by = c("distance", "departs")
+Joining, by = c("origin", "destination")
+Joining, by = "distance"
+Joining, by = c("destination", "departs")
+Joining, by = c("origin", "price")
+Joining, by = c("destination", "distance")
+Joining, by = c("origin", "departs")
+Joining, by = "destination"
+Joining, by = "price"
+Joining, by = c("departs", "arrives")
+Joining, by = c("flno", "destination")
+Joining, by = c("origin", "distance")
+Joining, by = c("destination", "departs")
+Joining, by = c("origin", "arrives")
+Joining, by = c("origin", "destination")
+Joining, by = c("flno", "arrives")
+Joining, by = c("origin", "departs")
+Joining, by = c("flno", "price")
+Joining, by = c("flno", "departs")
+Joining, by = c("departs", "price")
+Joining, by = c("distance", "departs")
+Joining, by = c("origin", "price")
+Joining, by = c("distance", "arrives")
+Joining, by = "departs"
+Joining, by = c("origin", "arrives")
+Joining, by = c("destination", "arrives")
+Joining, by = c("arrives", "price")
+Joining, by = c("flno", "distance")
+Joining, by = "arrives"
+Joining, by = c("departs", "price")
+Joining, by = c("arrives", "price")
+Joining, by = c("destination", "price")
+Joining, by = c("distance", "price")
+Joining, by = c("flno", "origin")
+Joining, by = c("flno", "destination")
+Joining, by = c("departs", "arrives")
+Joining, by = c("destination", "arrives")
+Joining, by = c("flno", "arrives")
+Joining, by = c("distance", "price")
+Joining, by = c("origin", "distance")
+Joining, by = "crusingrange"
+Joining, by = "aname"
+Joining, by = "aid"
+Joining, by = c("aid", "aname")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("aid", "aname")
+Joining, by = "crusingrange"
+Joining, by = "aname"
+Joining, by = "aid"
+Joining, by = c("aid", "aname")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("aid", "aname")
+Joining, by = "crusingrange"
+Joining, by = "aname"
+Joining, by = "aid"
+Joining, by = c("aid", "aname")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("crusingrange", "aid")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("crusingrange", "aname")
+Joining, by = c("aname", "aid")
+Joining, by = "crusingrange"
+Joining, by = "aname"
+Joining, by = "aid"
+Joining, by = c("aid", "aname")
+Joining, by = c("aname", "crusingrange")
+Joining, by = c("crusingrange", "aid")
+Joining, by = c("aid", "crusingrange")
+Joining, by = c("crusingrange", "aname")
+Joining, by = c("aname", "aid")

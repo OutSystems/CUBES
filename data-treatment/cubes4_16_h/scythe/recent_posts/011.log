@@ -1,0 +1,61 @@
+[     3.514][MainProcess][INFO] Parsing specification...
+[     3.516][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.516][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.517][MainProcess][DEBUG] Reading input files...
+[     3.525][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011.csv: ['int64', 'string', 'string']
+[     3.530][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011_o.csv: ['int64', 'string']
+[     3.573][MainProcess][DEBUG] Generating DSL...
+[     3.609][MainProcess][INFO] Creating 16 processes
+[     3.682][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.682][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.682][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.683][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.683][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.683][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.683][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.685][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.692][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     3.693][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     3.698][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     3.702][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     3.705][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     3.722][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     3.723][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     3.727][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     3.731][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     3.870][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.895][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.949][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     3.951][MainProcess][INFO] Statistics:
+[     3.951][MainProcess][INFO] 	Generated cubes: 16
+[     3.951][MainProcess][INFO] 	Attempted programs: 1
+[     3.951][MainProcess][INFO] 		Rejected: 0
+[     3.952][MainProcess][INFO] 		Failed: 0
+[     3.952][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.952][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     3.953][MainProcess][DEBUG] 	0: Counter({'mutate': 2, 'summarise': 1})
+[     3.953][MainProcess][INFO] Solution found: summarise(@param0, concatValue = string_agg(Value, ', '), ID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/011.csv", col_types = cols(ID = col_integer(),Name = col_character(),Value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/011_o.csv", col_types = cols(ID = col_integer(),Value = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(ID) %>% summarise(concatValue = string_agg(Value, ', ')) %>% ungroup()
+out <- df2 %>% select(ID, Value = concatValue) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `ID`,
+       `concatValue` AS `Value`
+FROM
+  (SELECT `ID`,
+          string_agg(`Value`, ', ') AS concatValue
+   FROM input1
+   GROUP BY ID)
+ORDER BY ID

@@ -1,0 +1,86 @@
+[     1.583][MainProcess][INFO] Parsing specification...
+[     1.585][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.586][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.586][MainProcess][DEBUG] Reading input files...
+[     1.595][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/595.csv: ['string', 'string', 'int64', 'int64', 'int64']
+[     1.600][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/595_o.csv: ['string', 'int64', 'int64']
+[     1.625][MainProcess][DEBUG] Generating DSL...
+[     1.674][MainProcess][INFO] Creating 16 processes
+[     1.736][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.748][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.752][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.756][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.757][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.763][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.765][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.765][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.769][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.772][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.776][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.780][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.783][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.785][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.788][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.796][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.804][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     2.456][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     3.190][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter())
+[     3.198][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter())
+[     3.198][cube-solver-1][DEBUG] Solving cube (l0 = left_join(), l1 = filter())
+[     3.201][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter())
+[     3.205][cube-solver-5][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     3.206][cube-solver-3][DEBUG] Solving cube (l0 = union(), l1 = filter())
+[     3.206][cube-solver-2][DEBUG] Solving cube (l0 = intersect(), l1 = filter())
+[     3.214][cube-solver-8][DEBUG] Solving cube (l0 = filter(), l1 = anti_join())
+[     3.214][cube-solver-5][DEBUG] Solving cube (l0 = semi_join(), l1 = filter())
+[     3.216][cube-solver-4][DEBUG] Solving cube (l0 = filter(), l1 = natural_join())
+[     3.216][cube-solver-9][DEBUG] Solving cube (l0 = filter(), l1 = left_join())
+[     3.222][cube-solver-11][DEBUG] Solving cube (l0 = filter(), l1 = intersect())
+[     3.228][cube-solver-7][DEBUG] Solving cube (l0 = filter(), l1 = filter())
+[     3.232][cube-solver-10][DEBUG] Solving cube (l0 = filter(), l1 = union())
+[     3.233][cube-solver-13][DEBUG] Solving cube (l0 = filter(), l1 = cross_join())
+[     3.252][cube-solver-12][DEBUG] Solving cube (l0 = filter(), l1 = semi_join())
+[     3.253][cube-solver-14][DEBUG] Solving cube (l0 = filter(), l1 = inner_join())
+[     3.298][cube-solver-15][DEBUG] Solving cube (l0 = anti_join(), l1 = filter())
+[     3.305][cube-solver-15][DEBUG] Solving cube (l0 = cross_join(), l1 = filter())
+[     3.612][cube-solver-6][DEBUG] Solving cube (l0 = filter(), l1 = natural_join4())
+[     3.621][cube-solver-6][DEBUG] Solving cube (l0 = inner_join(), l1 = filter())
+[     4.464][cube-solver-7][DEBUG] Found solution with cube (l0 = filter(), l1 = filter())
+[     4.465][MainProcess][INFO] Statistics:
+[     4.466][MainProcess][INFO] 	Generated cubes: 22
+[     4.466][MainProcess][INFO] 	Attempted programs: 2
+[     4.466][MainProcess][INFO] 		Rejected: 1
+[     4.466][MainProcess][INFO] 		Failed: 0
+[     4.466][MainProcess][INFO] 	Blacklist clauses: 1
+[     4.466][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     4.467][MainProcess][DEBUG] 	0: Counter({'filter': 211})
+[     4.467][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     4.468][MainProcess][DEBUG] 	0: Counter({'filter': 848, 'semi_join': 143, 'left_join': 113, 'union': 113, 'inner_join': 84})
+[     4.469][MainProcess][DEBUG] 	1: Counter({'filter': 582, 'semi_join': 148, 'anti_join': 145, 'union': 114, 'natural_join': 113, 'left_join': 103, 'inner_join': 96})
+[     4.469][MainProcess][INFO] Solution found: filter(filter(@param0, population >= 3000000 | population >= 25000000), population > 3000000 & population > 25000000)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/595.csv", col_types = cols(name = col_character(),continent = col_character(),area = col_integer(),population = col_integer(),gdp = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/595_o.csv", col_types = cols(name = col_character(),area = col_integer(),population = col_integer()))
+
+df2 <- input1 %>% filter(population >= 3000000 | population >= 25000000)
+df3 <- df2 %>% filter(population > 3000000 & population > 25000000)
+out <- df3 %>% select(name, area, population) %>% arrange(name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT name,
+       area,
+       population
+FROM
+  (SELECT *
+   FROM input1
+   WHERE (population >= 3000000.0
+          OR population >= 25000000.0))
+WHERE (population > 3000000.0
+       AND population > 25000000.0)
+ORDER BY name

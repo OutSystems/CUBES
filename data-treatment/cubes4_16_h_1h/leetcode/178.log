@@ -1,0 +1,54 @@
+[     3.106][MainProcess][INFO] Parsing specification...
+[     3.117][MainProcess][DEBUG] Reading input files...
+[     3.135][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/178.csv: ['int64', 'float64']
+[     3.141][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/178_o.csv: ['float64', 'int64']
+[     3.170][MainProcess][DEBUG] Generating DSL...
+[     3.230][MainProcess][INFO] Creating 16 processes
+[     3.301][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.326][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.328][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.331][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.333][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.345][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.347][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     3.348][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.352][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     3.357][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     3.364][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     3.366][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     3.368][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.370][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     3.377][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     3.382][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     3.440][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     3.703][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.706][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.777][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     3.778][MainProcess][INFO] Statistics:
+[     3.778][MainProcess][INFO] 	Generated cubes: 16
+[     3.778][MainProcess][INFO] 	Attempted programs: 1
+[     3.778][MainProcess][INFO] 		Rejected: 0
+[     3.778][MainProcess][INFO] 		Failed: 0
+[     3.779][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.779][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     3.779][MainProcess][DEBUG] 	0: Counter({'mutate': 7, 'summarise': 6})
+[     3.779][MainProcess][INFO] Solution found: mutate(@param0, rankdScore = dense_rank(desc(Score)))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/178.csv", col_types = cols(Id = col_integer(),Score = col_double()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/178_o.csv", col_types = cols(Score = col_double(),Rank = col_integer()))
+
+df2 <- input1 %>% mutate(rankdScore = dense_rank(desc(Score)))
+out <- df2 %>% select(Score, Rank = rankdScore) %>% arrange(Score)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Score,
+       DENSE_RANK() OVER (
+                          ORDER BY Score DESC) AS Rank
+FROM input1
+ORDER BY Score

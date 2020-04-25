@@ -1,0 +1,121 @@
+[     1.653][MainProcess][INFO] Parsing specification...
+[     1.656][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.657][MainProcess][DEBUG] Reading input files...
+[     1.666][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/12-1.txt: ['string', 'int64', 'string']
+[     1.671][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/12.out: ['int64', 'string']
+[     1.696][MainProcess][DEBUG] Generating DSL...
+[     1.726][MainProcess][INFO] Creating 16 processes
+[     1.794][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.794][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.794][MainProcess][DEBUG] Increasing generator loc to 3
+[     1.794][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.794][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.795][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     1.795][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     1.795][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     1.796][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     1.799][cube-solver-8][DEBUG] Initialising process for 3 lines of code.
+[     1.801][cube-solver-9][DEBUG] Initialising process for 3 lines of code.
+[     1.812][cube-solver-11][DEBUG] Initialising process for 3 lines of code.
+[     1.814][cube-solver-10][DEBUG] Initialising process for 3 lines of code.
+[     1.816][cube-solver-12][DEBUG] Initialising process for 3 lines of code.
+[     1.824][cube-solver-14][DEBUG] Initialising process for 3 lines of code.
+[     1.827][cube-solver-15][DEBUG] Initialising process for 3 lines of code.
+[     1.835][cube-solver-13][DEBUG] Initialising process for 3 lines of code.
+[     2.038][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     2.077][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     2.079][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     2.162][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     2.164][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     2.227][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     2.228][cube-solver-8][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[     2.232][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4(), l2 = filter())
+[     2.234][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[     2.237][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[     2.242][cube-solver-6][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[     2.245][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = natural_join3())
+[     2.249][cube-solver-9][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise())
+[     2.251][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = natural_join4())
+[     2.253][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = summarise())
+[     2.253][cube-solver-14][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[     2.256][cube-solver-4][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     2.257][cube-solver-14][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = filter())
+[     2.258][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = anti_join())
+[     2.259][cube-solver-15][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[     2.263][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = left_join())
+[     2.298][cube-solver-6][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = natural_join3())
+[     2.300][MainProcess][INFO] Statistics:
+[     2.300][MainProcess][INFO] 	Generated cubes: 27
+[     2.300][MainProcess][INFO] 	Attempted programs: 1
+[     2.300][MainProcess][INFO] 		Rejected: 0
+[     2.300][MainProcess][INFO] 		Failed: 0
+[     2.300][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.300][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     2.300][MainProcess][DEBUG] 	0: Counter({'mutate': 29, 'summarise': 1})
+[     2.300][MainProcess][DEBUG] 	1: Counter({'filter': 30})
+[     2.300][MainProcess][DEBUG] Priting statistics for good programs of size 3
+[     2.301][MainProcess][DEBUG] 	0: Counter({'summarise': 2})
+[     2.301][MainProcess][DEBUG] 	1: Counter({'filter': 2})
+[     2.301][MainProcess][DEBUG] 	2: Counter({'natural_join3': 2})
+[     2.301][MainProcess][INFO] Solution found: natural_join3(summarise(@param0, n = n(), age, level), @param0, filter(summarise(@param0, n = n(), age, level), age != max(n) & n == max(n)))
+[     2.526][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[     2.550][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/12-1.txt", col_types = cols(S_key = col_character(),age = col_integer(),level = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/12.out", col_types = cols(age = col_integer(),level = col_character()))
+
+df2 <- input1 %>% group_by(age, level) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(age != max(n) & n == max(n))
+df4 <- inner_join(df2, input1) %>% inner_join(df3)
+out <- df4 %>% select(age, level) %>% distinct() %>% arrange(age)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT age,
+                LEVEL
+FROM
+  (SELECT LHS.age AS age,
+          LHS.level AS LEVEL,
+          LHS.n AS n,
+          LHS.S_key AS S_key
+   FROM
+     (SELECT LHS.age AS age,
+             LHS.level AS LEVEL,
+             LHS.n AS n,
+             RHS.S_key AS S_key
+      FROM
+        (SELECT age,
+                LEVEL,
+                COUNT() AS n
+         FROM input1
+         GROUP BY age,
+                  LEVEL) AS LHS
+      INNER JOIN input1 AS RHS ON (LHS.age = RHS.age
+                                   AND LHS.level = RHS.level)) AS LHS
+   INNER JOIN
+     (SELECT age,
+             LEVEL,
+             n
+      FROM
+        (SELECT age,
+                LEVEL,
+                n,
+                MAX(n) OVER () AS zzz2,
+                            MAX(n) OVER () AS zzz3
+         FROM
+           (SELECT age,
+                   LEVEL,
+                   COUNT() AS n
+            FROM input1
+            GROUP BY age,
+                     LEVEL))
+      WHERE (age != zzz2
+             AND n = zzz3)) AS RHS ON (LHS.age = RHS.age
+                                       AND LHS.level = RHS.level
+                                       AND LHS.n = RHS.n))
+ORDER BY age

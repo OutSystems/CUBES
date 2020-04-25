@@ -1,0 +1,73 @@
+[     1.678][MainProcess][INFO] Parsing specification...
+[     1.681][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.681][MainProcess][DEBUG] Reading input files...
+[     1.688][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i040.csv: ['string', 'string']
+[     1.693][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o040.csv: ['string', 'string', 'int64']
+[     1.720][MainProcess][DEBUG] Generating DSL...
+[     1.734][MainProcess][INFO] Creating 16 processes
+[     1.806][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.806][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.807][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.807][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.807][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.811][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.816][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.820][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.825][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.826][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.835][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.847][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.899][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.916][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.933][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     1.935][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     1.936][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     1.936][cube-solver-13][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     1.941][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     1.943][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     1.945][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     1.955][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     1.955][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     1.955][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     1.957][MainProcess][INFO] Statistics:
+[     1.957][MainProcess][INFO] 	Generated cubes: 18
+[     1.957][MainProcess][INFO] 	Attempted programs: 2
+[     1.957][MainProcess][INFO] 		Rejected: 1
+[     1.957][MainProcess][INFO] 		Failed: 0
+[     1.957][MainProcess][INFO] 	Blacklist clauses: 0
+[     1.957][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.958][MainProcess][DEBUG] 	0: Counter({'summarise': 1})
+[     1.958][MainProcess][INFO] Solution found: summarise(@param0, n = n(), group, subGroup)
+[     1.996][cube-solver-3][DEBUG] Found solution with cube (l0 = summarise(), l1 = semi_join())
+[     2.199][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     2.207][cube-solver-13][DEBUG] Found solution with cube (l0 = summarise(), l1 = left_join())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i040.csv", col_types = cols(group = col_character(),subGroup = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o040.csv", col_types = cols(group = col_character(),subGroup = col_character(),n = col_integer()))
+
+df2 <- input1 %>% group_by(group, subGroup) %>% summarise(n = n()) %>% ungroup()
+out <- df2 %>% select(group, subGroup, n) %>% arrange(group)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT GROUP,
+       subGroup,
+       n
+FROM
+  (SELECT GROUP,
+          subGroup,
+          COUNT() AS n
+   FROM input1
+   GROUP BY GROUP,
+            subGroup)
+ORDER BY GROUP

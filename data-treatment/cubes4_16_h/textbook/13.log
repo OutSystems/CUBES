@@ -1,0 +1,85 @@
+[     1.622][MainProcess][INFO] Parsing specification...
+[     1.625][MainProcess][DEBUG] Reading input files...
+[     1.632][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/13-1.txt: ['string', 'string']
+[     1.636][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/13-2.txt: ['string', 'string']
+[     1.640][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/13.out: ['string']
+[     1.668][MainProcess][DEBUG] Generating DSL...
+[     1.680][MainProcess][INFO] Creating 16 processes
+[     1.741][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-2][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-3][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-5][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-4][DEBUG] Initialising process for 1 lines of code.
+[     1.741][cube-solver-6][DEBUG] Initialising process for 1 lines of code.
+[     1.741][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.742][cube-solver-7][DEBUG] Initialising process for 1 lines of code.
+[     1.745][cube-solver-8][DEBUG] Initialising process for 1 lines of code.
+[     1.750][cube-solver-9][DEBUG] Initialising process for 1 lines of code.
+[     1.752][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.762][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.767][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.768][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.774][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.781][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.808][cube-solver-8][DEBUG] Solving cube (l0 = cross_join(),)
+[     1.810][cube-solver-6][DEBUG] Solving cube (l0 = intersect(),)
+[     1.812][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(),)
+[     1.814][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.820][cube-solver-9][DEBUG] Solving cube (l0 = inner_join(),)
+[     1.839][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.853][cube-solver-3][DEBUG] Solving cube (l0 = anti_join(),)
+[     1.863][cube-solver-4][DEBUG] Solving cube (l0 = left_join(),)
+[     1.863][cube-solver-7][DEBUG] Solving cube (l0 = semi_join(),)
+[     1.863][cube-solver-5][DEBUG] Solving cube (l0 = union(),)
+[     1.863][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(),)
+[     1.864][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(),)
+[     1.866][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.889][cube-solver-10][DEBUG] Solving cube (l0 = natural_join(), l1 = anti_join([2]))
+[     1.895][cube-solver-10][DEBUG] Solving cube (l0 = natural_join(), l1 = natural_join4())
+[     1.897][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = anti_join([3]))
+[     1.902][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = left_join())
+[     1.904][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = union())
+[     1.906][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = intersect())
+[     1.908][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = semi_join())
+[     1.910][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = cross_join([2]))
+[     1.913][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = inner_join([3]))
+[     1.917][cube-solver-10][DEBUG] Solving cube (l0 = natural_join3(), l1 = natural_join())
+[     1.917][cube-solver-7][DEBUG] Found solution with cube (l0 = semi_join(),)
+[     1.918][MainProcess][INFO] Statistics:
+[     1.919][MainProcess][INFO] 	Generated cubes: 28
+[     1.919][MainProcess][INFO] 	Attempted programs: 3
+[     1.919][MainProcess][INFO] 		Rejected: 0
+[     1.919][MainProcess][INFO] 		Failed: 2
+[     1.919][MainProcess][INFO] 	Blacklist clauses: 8
+[     1.919][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.920][MainProcess][DEBUG] 	0: Counter({'inner_join': 6, 'semi_join': 3, 'union': 2, 'left_join': 2, 'natural_join': 2})
+[     1.920][MainProcess][INFO] Solution found: semi_join(@param1, @param0)
+[     1.927][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join(),)
+[     2.019][cube-solver-4][DEBUG] Found solution with cube (l0 = left_join(),)
+[     2.145][cube-solver-9][DEBUG] Found solution with cube (l0 = inner_join(),)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/13-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/13-2.txt", col_types = cols(P_id = col_character(),P_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/textbook/tables/13.out", col_types = cols(P_name = col_character()))
+
+df3 <- semi_join(input2, input1)
+out <- df3 %>% select(P_name) %>% arrange(P_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT P_name
+FROM
+  (SELECT *
+   FROM input2 AS LHS
+   WHERE EXISTS
+       (SELECT 1
+        FROM input1 AS RHS
+        WHERE (LHS.P_id = RHS.P_id) ))
+ORDER BY P_name

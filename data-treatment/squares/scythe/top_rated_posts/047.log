@@ -1,0 +1,914 @@
+R[write to console]: 
+Attaching package: ‘dplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+
+R[write to console]: The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+R[write to console]: 
+Attaching package: ‘dbplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:dplyr’:
+
+    ident, sql
+
+
+# First, specify the types that will be used
+
+enum Cols {
+  "id, io", "id, time", "id, user", "io, id", "io, time", "io, user", "time, id", "time, io", "time, user", "user, id", "user, io", "user, time", "id", "io", "time", "user"
+}
+
+enum Col {
+  "id", "io", "time", "user"
+}
+
+enum SelectCols{
+  "id,user,time,io"
+}
+
+enum Distinct {
+	"distinct", ""
+}
+
+enum FilterCondition{
+"time == maxtime", "time > maxtime", "time < maxtime", "time >= maxtime", "time <= maxtime"
+}
+
+enum SummariseCondition{
+"maxtime = max(time)"
+}
+
+
+
+value Table {
+  col: int;
+  row: int;
+}
+
+value TableSelect {
+  col: int;
+  row: int;
+}
+
+value Empty;
+
+# Next, specify the input/output of the synthesized program
+program Squares(Table) -> TableSelect;
+
+# Finally, specify the production rules
+func empty: Empty -> Empty;
+
+func inner_join: Table r -> Table a, Table b
+{
+  col(r) <= col(a) + col(b);
+}
+
+func inner_join3: Table r -> Table a, Table b, Table c
+{
+  col(r) < col(a) + col(b) + col(c);
+}
+
+func inner_join4: Table r -> Table a, Table b, Table c, Table d {
+  col(r) < col(a) + col(b) + col(c) + col(d);
+}
+
+func anti_join: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func left_join: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a);
+}
+
+func bind_rows: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a) + row(b);
+}
+
+func intersect: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func select: TableSelect r -> Table a, SelectCols c, Distinct d{
+	row(r) <= row(a);
+	col(r) <= col(a);
+}
+
+
+
+
+func filter: Table r -> Table a, FilterCondition f {
+ row(r) <= row(a);
+ col(r) == col(a);
+}
+
+
+func summariseGrouped: Table r -> Table a, SummariseCondition s, Cols b {
+ row(r) <= row(a);
+ col(r) <= 3;
+}
+
+predicate is_not_parent(inner_join4, summariseGrouped, 100);
+predicate is_not_parent(summariseGrouped, summariseGrouped, 100);
+
+predicate is_not_parent(filter, filter, 100);
+
+predicate constant_occurs("maxtime = max(time)");
+predicate happens_before("time == maxtime","maxtime = max(time)");
+predicate happens_before("time > maxtime","maxtime = max(time)");
+predicate happens_before("time < maxtime","maxtime = max(time)");
+predicate happens_before("time >= maxtime","maxtime = max(time)");
+predicate happens_before("time <= maxtime","maxtime = max(time)");
+predicate is_not_parent(inner_join, inner_join3, 100);
+predicate is_not_parent(inner_join, inner_join4, 100);
+#predicate is_not_parent(inner_join, anti_join, 100);
+predicate is_not_parent(inner_join3, inner_join, 100);
+predicate is_not_parent(inner_join3, inner_join3, 100);
+predicate is_not_parent(inner_join3, inner_join4, 100);
+predicate is_not_parent(inner_join3, anti_join, 100);
+predicate is_not_parent(inner_join4, inner_join, 100);
+predicate is_not_parent(inner_join4, inner_join3, 100);
+predicate is_not_parent(inner_join4, inner_join4, 100);
+#predicate is_not_parent(inner_join4, anti_join, 100);
+predicate is_not_parent(anti_join, anti_join, 100);
+predicate is_not_parent(anti_join, inner_join, 100);
+predicate is_not_parent(anti_join, inner_join4, 100);
+predicate distinct_inputs(inner_join4);
+predicate distinct_inputs(inner_join3);
+predicate distinct_inputs(inner_join);
+predicate distinct_inputs(anti_join);
+
+Joining, by = c("time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "time")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = "user"
+Joining, by = c("time", "id")
+Joining, by = c("id", "user")
+Joining, by = c("io", "id")
+Joining, by = c("io", "user")
+Joining, by = c("time", "user")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = c("user", "id")
+Joining, by = c("io", "time")
+Joining, by = c("id", "io")
+Joining, by = c("time", "id")
+Joining, by = c("id", "user")
+Joining, by = c("io", "id")
+Joining, by = c("io", "user")
+Joining, by = c("time", "user")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = c("user", "id")
+Joining, by = c("io", "time")
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("time", "id")
+Joining, by = c("id", "user")
+Joining, by = c("io", "id")
+Joining, by = c("time", "user")
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("time", "id")
+Joining, by = c("id", "user")
+Joining, by = c("io", "id")
+Joining, by = c("io", "user")
+Joining, by = c("time", "user")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("io", "time")
+Joining, by = c("user", "id")
+Joining, by = c("user", "id")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user")
+Joining, by = c("id", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user")
+Joining, by = c("id", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user")
+Joining, by = c("id", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user")
+Joining, by = c("id", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "io")
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = c("id", "io")
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = c("time", "io")
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = c("id", "time")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user")
+Joining, by = c("user", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user")
+Joining, by = c("user", "time")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = c("user", "time")
+Joining, by = c("user", "io")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = "user"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = c("user", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "io"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "time"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "io", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "id")
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "user")
+Joining, by = c("io", "user", "id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "user")
+Joining, by = c("time", "user", "id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("time", "io", "id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "time")
+Joining, by = c("io", "time", "id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "time", "id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "io", "id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "io"
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "time"
+Joining, by = c("time", "id", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "id")
+Joining, by = c("user", "id", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "id")
+Joining, by = c("time", "id", "user", "io")
+Joining, by = "time"
+Joining, by = c("io", "time")
+Joining, by = "io"
+Joining, by = c("io", "time")
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = c("io", "id")
+Joining, by = "id"
+Joining, by = c("user", "id")
+Joining, by = "id"
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = c("id", "io")
+Joining, by = "id"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = c("id", "time")
+Joining, by = "time"
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = "time"
+Joining, by = "time"
+Joining, by = c("time", "user")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = "io"
+Joining, by = c("id", "io")
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "user"
+Joining, by = c("io", "user")
+Joining, by = "user"
+Joining, by = c("time", "user")
+Joining, by = "user"
+Joining, by = c("user", "id")
+Joining, by = "user"
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = c("io", "id")
+Joining, by = "io"
+Joining, by = c("time", "io")
+Joining, by = "io"
+Joining, by = c("io", "user")
+Joining, by = "id"
+Joining, by = c("time", "id")
+Joining, by = "time"
+Joining, by = c("time", "id")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("user", "io", "id", "time")
+Joining, by = c("user", "io")
+Joining, by = c("user", "io", "id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "user")
+Joining, by = c("time", "user", "id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "time"
+Joining, by = c("time", "id", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "user")
+Joining, by = c("io", "user", "id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "id")
+Joining, by = c("user", "id", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "time", "id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("time", "io", "id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "time")
+Joining, by = c("io", "time", "id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "id")
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("time", "io")
+Joining, by = c("time", "io", "id", "user")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("io", "user")
+Joining, by = c("io", "user", "id", "time")
+Joining, by = c("user", "id")
+Joining, by = c("user", "id", "time", "io")
+Joining, by = "time"
+Joining, by = c("time", "id", "user", "io")
+Joining, by = c("user", "time")
+Joining, by = c("user", "time", "id", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "time", "user", "io")
+Joining, by = c("time", "user")
+Joining, by = c("time", "user", "id", "io")
+Joining, by = c("io", "time")
+Joining, by = c("io", "time", "id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "time"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "time"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = c("user", "id", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = c("user", "id", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "io"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("io", "id")
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("user", "io")
+Joining, by = c("time", "id")
+Joining, by = c("time", "id", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("time", "id")
+Joining, by = c("time", "id", "user", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "io"
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = c("id", "io", "user", "time")
+Joining, by = "io"
+Joining, by = c("io", "id", "user", "time")
+Joining, by = c("id", "io")
+Joining, by = c("id", "io", "user", "time")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = "io"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "io")
+Joining, by = "io"
+Joining, by = c("id", "time")
+Joining, by = "time"
+Joining, by = c("id", "time")
+Joining, by = "user"
+Joining, by = c("id", "time")
+Joining, by = "id"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = c("user", "time")
+Joining, by = "io"
+Joining, by = c("time", "io")
+Joining, by = "io"
+Joining, by = c("id", "user")
+Joining, by = "io"
+Joining, by = c("user", "time")
+Joining, by = "io"
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = "io"
+Joining, by = c("id", "user")
+Joining, by = "time"
+Joining, by = c("user", "io")
+Joining, by = "user"
+Joining, by = c("user", "io")
+Joining, by = "id"
+Joining, by = c("user", "io")
+Joining, by = "time"
+Joining, by = c("id", "user")
+Joining, by = "time"
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = "time"
+Joining, by = "time"
+Joining, by = c("id", "user")
+Joining, by = "time"
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = "user"
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("time", "io")
+Joining, by = "user"
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = "time"
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = "id"
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = c("time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = c("time", "io")
+Joining, by = "io"
+Joining, by = c("time", "io")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = "user"
+Joining, by = c("time", "io")
+Joining, by = "id"
+Joining, by = c("id", "io")
+Joining, by = "io"
+Joining, by = c("id", "io")
+Joining, by = "time"
+Joining, by = c("id", "io")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = "id"
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = c("user", "io")
+Joining, by = "time"
+Joining, by = c("user", "io")
+Joining, by = "user"
+Joining, by = c("user", "io")
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "io"
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "io"
+Joining, by = "io"
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = "io"
+Joining, by = "user"
+Joining, by = "io"
+Joining, by = "id"
+Joining, by = c("id", "io")
+Joining, by = "id"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = c("id", "io")
+Joining, by = "time"
+Joining, by = c("id", "io")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = "io"
+Joining, by = c("id", "time")
+Joining, by = "time"
+Joining, by = c("id", "time")
+Joining, by = "user"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = "user"
+Joining, by = "time"
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = c("id", "user")
+Joining, by = "io"
+Joining, by = c("time", "io")
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = "io"
+Joining, by = c("user", "time")
+Joining, by = "io"
+Joining, by = c("time", "user")
+Joining, by = "io"
+Joining, by = c("id", "time")
+Joining, by = "io"
+Joining, by = c("io", "user")
+Joining, by = "io"
+Joining, by = c("user", "id")
+Joining, by = "io"
+Joining, by = c("io", "time")
+Joining, by = "io"
+Joining, by = c("io", "id")
+Joining, by = "io"
+Joining, by = c("user", "io")
+Joining, by = "io"
+Joining, by = "id"
+Joining, by = "io"
+Joining, by = "io"
+Joining, by = "io"
+Joining, by = c("id", "io")
+Joining, by = "io"
+Joining, by = c("time", "id")
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = "time"
+Joining, by = c("user", "time")
+Joining, by = "time"
+Joining, by = c("time", "io")
+Joining, by = "time"
+Joining, by = c("time", "user")
+Joining, by = "time"
+Joining, by = c("id", "user")
+Joining, by = "time"
+Joining, by = c("id", "time")
+Joining, by = "time"
+Joining, by = c("io", "user")
+Joining, by = "time"
+Joining, by = c("user", "id")
+Joining, by = "time"
+Joining, by = c("io", "time")
+Joining, by = "time"
+Joining, by = c("io", "id")
+Joining, by = "time"
+Joining, by = c("user", "io")
+Joining, by = "time"
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = c("time", "user")
+Joining, by = "user"
+Joining, by = "time"
+Joining, by = "user"
+Joining, by = c("time", "io")
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "user"
+Joining, by = c("id", "user")
+Joining, by = "user"
+Joining, by = c("id", "time")
+Joining, by = "user"
+Joining, by = c("io", "user")
+Joining, by = "user"
+Joining, by = c("user", "id")
+Joining, by = "user"
+Joining, by = c("io", "time")
+Joining, by = "user"
+Joining, by = c("io", "id")
+Joining, by = "user"
+Joining, by = c("user", "io")
+Joining, by = "user"
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = c("user", "time")
+Joining, by = "id"
+Joining, by = c("time", "user")
+Joining, by = "id"
+Joining, by = c("time", "io")
+Joining, by = "id"
+Joining, by = c("id", "user")
+Joining, by = "id"
+Joining, by = "time"
+Joining, by = "id"
+Joining, by = c("id", "time")
+Joining, by = "id"
+Joining, by = c("io", "user")
+Joining, by = "id"
+Joining, by = c("user", "id")
+Joining, by = "id"
+Joining, by = c("io", "time")
+Joining, by = "id"
+Joining, by = c("io", "id")
+Joining, by = "id"
+Joining, by = c("user", "io")
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "id"
+Joining, by = "io"
+Joining, by = "time"
+Joining, by = "io"
+Joining, by = "user"
+Joining, by = "io"
+Joining, by = "id"
+Joining, by = c("id", "io")
+Joining, by = "time"
+Joining, by = c("id", "io")
+Joining, by = "user"
+Joining, by = c("id", "io")
+Joining, by = "id"
+Joining, by = c("time", "id")
+Joining, by = "time"
+Joining, by = "user"
+Joining, by = "io"
+Joining, by = "user"
+Joining, by = "time"
+Joining, by = c("time", "id")
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = "user"
+Joining, by = c("time", "id")
+Joining, by = "id"
+Joining, by = "user"
+Joining, by = "id"
+Joining, by = c("user", "maxtime")
+Joining, by = c("id", "user", "io")
+Joining, by = "maxtime"
+Joining, by = c("id", "user", "time", "io")
+Joining, by = c("id", "maxtime")
+Joining, by = c("id", "user")
+Joining, by = c("user", "maxtime")
+Joining, by = c("id", "user")
+Joining, by = c("user", "maxtime")
+Joining, by = c("id", "user")
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input0 <- read.table("tests-examples/scythe/top_rated_posts/tables/i047.csv", sep =",", header=T)
+input0
+input0 <- copy_to(con,input0)
+expected_output <- read.table("tests-examples/scythe/top_rated_posts/tables/o047.csv", sep =",", header=T)
+expected_output
+
+RET_DF1900 <- input0 %>% group_by(id, user) %>% summarise(maxtime = max(time))
+RET_DF1901 <- input0 %>% group_by(user) %>% summarise(maxtime = max(time))
+RET_DF1902 <- inner_join(inner_join(RET_DF1900, RET_DF1901), input0)
+RET_DF1903 <- RET_DF1902 %>% ungroup() %>% select(id,user,time,io)
+
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+Joining, by = c("user", "maxtime")
+Joining, by = c("id", "user")
+SELECT `id`,
+       `user`,
+       `time`,
+       `io`
+FROM
+  (SELECT `id`,
+          `user`,
+          `maxtime`,
+          `time`,
+          `io`
+   FROM
+     (SELECT `id`,
+             `user`,
+             `maxtime`
+      FROM
+        (SELECT `id`,
+                `user`,
+                MAX(`time`) AS `maxtime`
+         FROM `input0`
+         GROUP BY `id`,
+                  `user`) AS `LHS`
+      INNER JOIN
+        (SELECT `user`,
+                MAX(`time`) AS `maxtime`
+         FROM `input0`
+         GROUP BY `user`) AS `RHS` ON (`LHS`.`user` = `RHS`.`user`
+                                       AND `LHS`.`maxtime` = `RHS`.`maxtime`)) AS `LHS`
+   INNER JOIN `input0` AS `RHS` ON (`LHS`.`id` = `RHS`.`id`
+                                    AND `LHS`.`user` = `RHS`.`user`))
+

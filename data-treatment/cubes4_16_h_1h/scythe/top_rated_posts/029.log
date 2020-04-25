@@ -1,0 +1,76 @@
+[     1.572][MainProcess][INFO] Parsing specification...
+[     1.575][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.575][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.576][MainProcess][DEBUG] Reading input files...
+[     1.583][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i029.csv: ['string', 'string']
+[     1.587][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o029.csv: ['string', 'string']
+[     1.613][MainProcess][DEBUG] Generating DSL...
+[     1.633][MainProcess][INFO] Creating 16 processes
+[     1.693][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.693][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.693][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.694][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.694][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.694][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.694][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.698][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.700][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.707][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.711][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.714][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.719][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.729][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.735][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.739][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.870][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.872][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.948][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     1.949][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     1.950][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     1.950][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     1.951][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     1.953][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = unite())
+[     1.954][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     1.955][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     1.957][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     1.960][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[     1.962][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     1.962][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     1.965][cube-solver-10][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[     1.967][cube-solver-10][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[     1.969][cube-solver-10][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[     1.970][cube-solver-12][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     1.979][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     1.983][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     1.987][cube-solver-11][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[     2.026][cube-solver-6][DEBUG] Found solution with cube (l0 = summarise(), l1 = unite())
+[     2.028][MainProcess][INFO] Statistics:
+[     2.028][MainProcess][INFO] 	Generated cubes: 25
+[     2.028][MainProcess][INFO] 	Attempted programs: 1
+[     2.028][MainProcess][INFO] 		Rejected: 0
+[     2.028][MainProcess][INFO] 		Failed: 0
+[     2.029][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.029][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     2.030][MainProcess][DEBUG] 	0: Counter({'mutate': 10, 'summarise': 7})
+[     2.030][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     2.030][MainProcess][DEBUG] 	0: Counter({'summarise': 5, 'left_join': 1})
+[     2.030][MainProcess][DEBUG] 	1: Counter({'mutate': 3, 'semi_join': 1, 'natural_join': 1, 'unite': 1})
+[     2.030][MainProcess][INFO] Solution found: unite(summarise(@param0, concatPerson = string_agg(Person, ' '), TicketID), TicketID, TicketID)
+[     2.303][cube-solver-10][DEBUG] Found solution with cube (l0 = left_join(), l1 = summarise())
+[     2.347][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i029.csv", col_types = cols(TicketID = col_character(),Person = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o029.csv", col_types = cols(TicketID = col_character(),concatPerson = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
+df3 <- unite(df2, TicketID, TicketID, TicketID, sep=":")
+out <- df3 %>% select(TicketID, concatPerson) %>% arrange(TicketID)
+
+Failed to generate SQL query

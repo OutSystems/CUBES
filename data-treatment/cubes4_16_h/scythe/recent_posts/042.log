@@ -1,0 +1,61 @@
+[     1.585][MainProcess][INFO] Parsing specification...
+[     1.588][MainProcess][DEBUG] Reading input files...
+[     1.595][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042.csv: ['int64', 'string', 'string']
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042_o.csv: ['int64', 'string']
+[     1.625][MainProcess][DEBUG] Generating DSL...
+[     1.637][MainProcess][INFO] Creating 16 processes
+[     1.707][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-4][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-5][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-2][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-7][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-6][DEBUG] Initialising process for 1 lines of code.
+[     1.707][cube-solver-8][DEBUG] Initialising process for 1 lines of code.
+[     1.707][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.707][cube-solver-3][DEBUG] Initialising process for 1 lines of code.
+[     1.710][cube-solver-9][DEBUG] Initialising process for 1 lines of code.
+[     1.717][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.721][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.732][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.734][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.736][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.747][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.757][cube-solver-8][DEBUG] Solving cube (l0 = cross_join(),)
+[     1.761][cube-solver-9][DEBUG] Solving cube (l0 = inner_join(),)
+[     1.771][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.790][cube-solver-9][DEBUG] Found solution with cube (l0 = inner_join(),)
+[     1.791][MainProcess][INFO] Statistics:
+[     1.791][MainProcess][INFO] 	Generated cubes: 17
+[     1.791][MainProcess][INFO] 	Attempted programs: 2
+[     1.791][MainProcess][INFO] 		Rejected: 0
+[     1.791][MainProcess][INFO] 		Failed: 1
+[     1.791][MainProcess][INFO] 	Blacklist clauses: 1
+[     1.791][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.792][MainProcess][DEBUG] 	0: Counter({'inner_join': 1})
+[     1.792][MainProcess][INFO] Solution found: inner_join(@param0, @param0, 'id','school')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/042.csv", col_types = cols(id = col_integer(),name = col_character(),school = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/042_o.csv", col_types = cols(id = col_integer(),name = col_character()))
+
+df2 <- inner_join(input1, input1, by=c('id','school'), suffix = c('', '.other'))
+out <- df2 %>% select(id, name) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       name
+FROM
+  (SELECT LHS.id AS id,
+          LHS.name AS name,
+          LHS.school AS school,
+          RHS.name AS name.other
+   FROM input1 AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.id = RHS.id
+                                AND LHS.school = RHS.school))
+ORDER BY id

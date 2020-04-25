@@ -1,0 +1,94 @@
+[     1.589][MainProcess][INFO] Parsing specification...
+[     1.593][MainProcess][DEBUG] Reading input files...
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i050.csv: ['int64', 'int64', 'int64', 'int64']
+[     1.604][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o050.csv: ['int64', 'int64', 'int64', 'int64', 'int64']
+[     1.629][MainProcess][DEBUG] Generating DSL...
+[     1.748][MainProcess][INFO] Creating 16 processes
+[     1.811][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.975][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.986][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.988][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.988][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.991][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.996][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.996][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.997][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.001][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     2.001][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     2.002][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     2.007][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     2.012][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     2.012][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     2.015][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     2.018][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     3.109][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.109][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.583][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     4.929][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     4.936][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     4.942][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     4.944][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     4.945][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     4.947][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     4.948][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     4.951][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     4.955][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     4.956][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     4.958][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     4.960][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     4.961][cube-solver-6][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     4.968][cube-solver-5][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     4.970][cube-solver-11][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[     4.975][cube-solver-14][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     4.976][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     4.978][cube-solver-11][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[     4.980][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     4.987][cube-solver-11][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[     4.987][cube-solver-7][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[     4.993][cube-solver-12][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     5.017][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     5.018][MainProcess][INFO] Statistics:
+[     5.019][MainProcess][INFO] 	Generated cubes: 27
+[     5.019][MainProcess][INFO] 	Attempted programs: 71
+[     5.019][MainProcess][INFO] 		Rejected: 70
+[     5.019][MainProcess][INFO] 		Failed: 0
+[     5.019][MainProcess][INFO] 	Blacklist clauses: 0
+[     5.019][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     5.019][MainProcess][DEBUG] 	0: Counter({'mutate': 227})
+[     5.020][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     5.020][MainProcess][DEBUG] 	0: Counter({'summarise': 1, 'filter': 1})
+[     5.020][MainProcess][DEBUG] 	1: Counter({'natural_join': 1, 'mutate': 1})
+[     5.020][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, pmin = pmin(Col1,Col2,Col3), Col2))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i050.csv", col_types = cols(ID = col_integer(),Col1 = col_integer(),Col2 = col_integer(),Col3 = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o050.csv", col_types = cols(ID = col_integer(),Col1 = col_integer(),Col2 = col_integer(),Col3 = col_integer(),TheMin = col_integer()))
+
+df2 <- input1 %>% group_by(Col2) %>% summarise(pmin = pmin(Col1,Col2,Col3)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(ID, Col1, Col2, Col3, TheMin = pmin) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       Col1,
+       Col2,
+       Col3,
+       pmin AS TheMin
+FROM
+  (SELECT LHS.ID AS ID,
+          LHS.Col1 AS Col1,
+          LHS.Col2 AS Col2,
+          LHS.Col3 AS Col3,
+          RHS.pmin AS pmin
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT Col2,
+             MIN(Col1, Col2, Col3) AS pmin
+      FROM input1
+      GROUP BY Col2) AS RHS ON (LHS.Col2 = RHS.Col2))
+ORDER BY ID
