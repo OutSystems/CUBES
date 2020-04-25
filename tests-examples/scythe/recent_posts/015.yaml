@@ -1,0 +1,22 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/015.csv
+output: tests-examples/scythe/recent_posts/tables/015_o.csv
+comment: |
+  DECLARE
+    @cols AS NVARCHAR(MAX),
+    @query  AS NVARCHAR(MAX)
+
+  SET @cols = STUFF((SELECT distinct ',' + QUOTENAME(Module_Title)
+              FROM Standards_Coverage_Pivot_Data
+              FOR XML PATH(''), TYPE
+              ).value('.', 'NVARCHAR(MAX)')
+          ,1,1,'')
+
+  set @query = 'SELECT KSB_Requirement, ' + @cols + ' from
+              Standards_Coverage_Pivot_Data
+              pivot
+              (
+                  Count(CriteriaID)
+                  for Module_Title in (' + @cols + ')
+              ) p '
+   execute(@query);

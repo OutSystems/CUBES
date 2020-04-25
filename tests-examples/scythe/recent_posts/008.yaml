@@ -1,0 +1,35 @@
+inputs:
+  - tests-examples/scythe/recent_posts/tables/008.csv
+output: tests-examples/scythe/recent_posts/tables/008_o.csv
+comment: |
+  declare @inspectyear as nvarchar(max), @calc as nvarchar(max), @query as nvarchar(max);
+
+  set @inspectyear = STUFF((select distinct ',' + quotename(InspectYear) from ##t2 c
+                    for XML path(''), type).value('.','NVARCHAR(MAX)'),1,1,'')
+
+  select @calc = ', ' + quotename(Max(InspectYear)) + '  - ' + quotename(Max(InspectYear)-2)
+           + ' as Calc1, ' + quotename(Max(InspectYear)) + ' - ' + quotename(min(InspectYear))
+           + ' as Calc2' from #t2;
+
+  set @query =
+  ';with data as
+  (
+        select      inspectyear,
+                    partno, Pos, number
+        from #t2
+        unpivot
+        (
+              number
+              for Pos in ([Pos1], [Pos2], [Pos3], [Pos4])
+        ) unpvt
+  )
+  select * ' + @calc + ' into ##temp
+  from data
+  pivot
+  (
+        sum(number)
+        for inspectyear in (' + @inspectyear + ')
+  ) pvt
+  order by partno';
+
+  exec(@query);

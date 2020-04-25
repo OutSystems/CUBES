@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i025.csv
+output: tests-examples/scythe/top_rated_posts/tables/o025.csv
+constants:
+  - 3
+  - 5
+functions:
+  - row_number
+comment: |
+  WITH NumberedMyTable AS
+  (
+      SELECT Id, Value, ROW_NUMBER() OVER (ORDER BY Id) AS RowNumber
+      FROM MyTable
+  )
+  SELECT Id, Value
+  FROM NumberedMyTable
+  WHERE RowNumber BETWEEN @From AND @To
+
+  df2 <- input1 %>% mutate(row_number = row_number())
+  df3 <- df2 %>% filter(row_number >= 3 & row_number < 5)
+  out <- df3 %>% select(Id, Value) %>% arrange(Id)

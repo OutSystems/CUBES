@@ -1,0 +1,25 @@
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i026.csv
+output: tests-examples/scythe/top_rated_posts/tables/o026.csv
+comment: |
+  SET @cols = STUFF((SELECT distinct ',' + QUOTENAME(c.category)
+              FROM temp c
+              FOR XML PATH(''), TYPE
+              ).value('.', 'NVARCHAR(MAX)')
+          ,1,1,'')
+
+  set @query = 'SELECT date, ' + @cols + ' from
+              (
+                  select date
+                      , amount
+                      , category
+                  from temp
+             ) x
+              pivot
+              (
+                   max(amount)
+                  for category in (' + @cols + ')
+              ) p '
+
+
+  execute(@query)

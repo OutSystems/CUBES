@@ -1,10 +1,13 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i023.csv
 output: tests-examples/scythe/top_rated_posts/tables/o023.csv
-aggrs:
-  - n
+functions:
+  - row_number
 comment: |
   SELECT @rank:=@rank+1 AS rank, itemID, COUNT(*) as ordercount
     FROM orders
     GROUP BY itemID
     ORDER BY ordercount DESC;
+
+  df2 <- input1 %>% mutate(row_number = row_number())
+  out <- df2 %>% select(rank = row_number, itemID, ordercount) %>% arrange(rank)

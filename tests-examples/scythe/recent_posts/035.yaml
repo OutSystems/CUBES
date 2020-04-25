@@ -1,7 +1,7 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/035.csv
 output: tests-examples/scythe/recent_posts/tables/035_o.csv
-aggrs:
+functions:
   - n
 comment: |
   SELECT zoom,x,y,
@@ -18,3 +18,9 @@ comment: |
          ( Count(*) / Cast(Sum(Count(*))OVER(partition BY zoom) AS FLOAT) ) * 100 AS amt_percentage
   FROM   percentage
   GROUP  BY zoom,x,y
+
+  df1 <- input1 %>% group_by(zoom, x, y) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% group_by(zoom) %>% mutate(perc = n / sum(n) * 100) %>% ungroup()
+  df3 <- df2 %>% left_join(input1, by='user_id')
+  df4 <- df3 %>% mutate(diff = current_total_value - mvalue)
+  out <- df2 %>% select(zoom, x, y, amount = n, percentage = perc)

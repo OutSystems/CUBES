@@ -2,10 +2,13 @@ inputs:
   - tests-examples/scythe/recent_posts/tables/033_1.csv
   - tests-examples/scythe/recent_posts/tables/033_2.csv
 output: tests-examples/scythe/recent_posts/tables/033_o.csv
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - Id
+constants:
+  - 2016-10-13
+dateorder: ymd
 comment: |
   select t1.id,
         t1.user_id,
@@ -20,3 +23,9 @@ comment: |
         group by v.user_id
   ) t2
     on t2.user_id = t1.user_id
+
+  df1 <- input2 %>% filter(date > ymd('2016-10-13') - weeks(1))
+  df2 <- df1 %>% group_by(user_id) %>% summarise(mvalue = sum(value_awarded)) %>% ungroup()
+  df3 <- df2 %>% left_join(input1, by='user_id')
+  df4 <- df3 %>% mutate(diff = current_total_value - mvalue)
+  out <- df4 %>% select(id, user_id, current_total_value, last_week_value = mvalue, difference=diff)

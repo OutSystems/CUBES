@@ -14,3 +14,8 @@ comment: |
       ) m
       group by m.s_no, m.bucket_window
   ) M1
+
+  df1 <- input1 %>% mutate(bucket = hour(ts)*2 + minute(ts) %/% 30)
+  df2 <- df1 %>% group_by(s_no, bucket) %>% summarise(ts = max(ts)) %>% ungroup()
+  df3 <- df2 %>% inner_join(input1)
+  out <- df3 %>% select(s_no, bucket_window = bucket, ts, calls)

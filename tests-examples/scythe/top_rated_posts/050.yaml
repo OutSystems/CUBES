@@ -1,40 +1,18 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i050.csv
 output: tests-examples/scythe/top_rated_posts/tables/o050.csv
-aggrs:
-  - min
-attrs:
+functions:
+  - pmin
+columns:
   - Col1
   - Col2
   - Col3
 comment: |
-  with cte (ID, Col1, Col2, Col3)
-  as
-  (
-      select ID, Col1, Col2, Col3
-      from TestTable
-  )
-  select cte.ID, Col1, Col2, Col3, TheMin from cte
-  join
-  (
-      select
-          ID, min(Amount) as TheMin
-      from
-          cte
-          UNPIVOT (Amount for AmountCol in (Col1, Col2, Col3)) as unpvt
-      group by ID
-  ) as minValues
-  on cte.ID = minValues.ID;
-
-  Select Id,
-         Case When Col1 < Col2 And Col1 < Col3 Then Col1
-              When Col2 < Col1 And Col2 < Col3 Then Col2
-              Else Col3
-              End As TheMin
-  From   YourTableNameHere;
-
   SELECT ID, Col1, Col2, Col3, MinValue
   FROM YourTable
   CROSS APPLY (SELECT MIN(d) MinValue FROM (VALUES (Col1), (Col2), (Col3)) AS a(d)) A;
 
   select least(col1, col2, col3) FROM yourtable;
+
+  df2 <- input1 %>% mutate(pminCol1Col2Col3 = pmin(Col1,Col2,Col3))
+  out <- df2 %>% select(ID, Col1, Col2, Col3, TheMin = pminCol1Col2Col3) %>% arrange(ID)
