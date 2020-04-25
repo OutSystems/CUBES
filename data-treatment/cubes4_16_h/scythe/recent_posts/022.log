@@ -1,0 +1,75 @@
+[     1.658][MainProcess][INFO] Parsing specification...
+[     1.661][MainProcess][DEBUG] Reading input files...
+[     1.667][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/022_2.csv: ['int64', 'int64']
+[     1.669][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/022_o.csv: ['int64']
+[     1.694][MainProcess][DEBUG] Generating DSL...
+[     1.892][MainProcess][INFO] Creating 16 processes
+[     1.960][MainProcess][DEBUG] Increasing generator loc to 4
+[     2.122][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     2.123][cube-solver-3][DEBUG] Initialising process for 3 lines of code.
+[     2.126][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     2.130][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     2.134][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     2.134][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     2.139][cube-solver-8][DEBUG] Initialising process for 3 lines of code.
+[     2.147][cube-solver-10][DEBUG] Initialising process for 3 lines of code.
+[     2.150][cube-solver-11][DEBUG] Initialising process for 3 lines of code.
+[     2.155][cube-solver-12][DEBUG] Initialising process for 4 lines of code.
+[     2.156][cube-solver-13][DEBUG] Initialising process for 4 lines of code.
+[     2.167][cube-solver-9][DEBUG] Initialising process for 3 lines of code.
+[     2.167][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     2.183][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     2.198][cube-solver-15][DEBUG] Initialising process for 4 lines of code.
+[     2.207][cube-solver-14][DEBUG] Initialising process for 4 lines of code.
+[    10.825][cube-solver-4][DEBUG] Solving cube (l0 = filter(), l1 = summarise(), l2 = summarise())
+[    10.831][cube-solver-11][DEBUG] Solving cube (l0 = mutate(), l1 = mutate(), l2 = filter())
+[    10.831][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = mutate(), l2 = filter())
+[    10.836][cube-solver-4][DEBUG] Initialising process for 4 lines of code.
+[    10.839][cube-solver-5][DEBUG] Solving cube (l0 = filter(), l1 = summarise(), l2 = mutate())
+[    10.839][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = mutate())
+[    10.863][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = summarise())
+[    10.888][cube-solver-10][DEBUG] Solving cube (l0 = mutate(), l1 = filter(), l2 = mutate())
+[    10.952][cube-solver-8][DEBUG] Solving cube (l0 = mutate(), l1 = summarise(), l2 = filter())
+[    10.960][cube-solver-7][DEBUG] Solving cube (l0 = filter(), l1 = mutate(), l2 = mutate())
+[    10.963][cube-solver-6][DEBUG] Solving cube (l0 = filter(), l1 = mutate(), l2 = summarise())
+[    11.005][cube-solver-9][DEBUG] Solving cube (l0 = mutate(), l1 = filter(), l2 = summarise())
+[    11.089][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[    11.101][cube-solver-0][DEBUG] Initialising process for 4 lines of code.
+[    12.187][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = mutate())
+[    12.189][MainProcess][INFO] Statistics:
+[    12.190][MainProcess][INFO] 	Generated cubes: 19
+[    12.190][MainProcess][INFO] 	Attempted programs: 46
+[    12.190][MainProcess][INFO] 		Rejected: 37
+[    12.190][MainProcess][INFO] 		Failed: 8
+[    12.190][MainProcess][INFO] 	Blacklist clauses: 2
+[    12.190][MainProcess][DEBUG] Priting statistics for good programs of size 3
+[    12.191][MainProcess][DEBUG] 	0: Counter({'mutate': 419, 'filter': 378, 'summarise': 304})
+[    12.191][MainProcess][DEBUG] 	1: Counter({'mutate': 511, 'filter': 439, 'summarise': 151})
+[    12.192][cube-solver-7][DEBUG] Initialising process for 4 lines of code.
+[    12.192][MainProcess][DEBUG] 	2: Counter({'mutate': 549, 'filter': 284, 'summarise': 268})
+[    12.192][MainProcess][INFO] Solution found: mutate(filter(summarise(@param0, n = n(), c1), c1 < 3 | n == 3), maxc1 = max(c1))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/022_2.csv", col_types = cols(c1 = col_integer(),c2 = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/022_o.csv", col_types = cols(c3 = col_integer()))
+
+df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(c1 < 3 | n == 3)
+df4 <- df3 %>% mutate(maxc1 = max(c1))
+out <- df4 %>% select(c3 = maxc1) %>% distinct() %>% arrange(c3)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT MAX(c1) OVER () AS c3
+FROM
+  (SELECT c1,
+          COUNT() AS n
+   FROM input1
+   GROUP BY c1)
+WHERE (c1 < 3.0
+       OR n = 3.0)
+ORDER BY c3

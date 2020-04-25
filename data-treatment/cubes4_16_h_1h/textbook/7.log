@@ -1,0 +1,85 @@
+[     1.583][MainProcess][INFO] Parsing specification...
+[     1.586][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.586][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.587][MainProcess][DEBUG] Reading input files...
+[     1.594][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/7-1.txt: ['string', 'string', 'int64']
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/7.out: ['string', 'int64']
+[     1.624][MainProcess][DEBUG] Generating DSL...
+[     1.639][MainProcess][INFO] Creating 16 processes
+[     1.702][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.702][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.702][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.703][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.703][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.709][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.710][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.718][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.721][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.722][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.733][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.738][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.775][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.821][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.864][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     1.865][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     1.866][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     1.866][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     1.870][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[     1.872][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     1.875][cube-solver-12][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     1.879][cube-solver-13][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     1.885][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     1.886][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     1.908][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     1.909][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     1.912][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     1.912][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     1.955][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     1.957][MainProcess][INFO] Statistics:
+[     1.957][MainProcess][INFO] 	Generated cubes: 21
+[     1.957][MainProcess][INFO] 	Attempted programs: 1
+[     1.957][MainProcess][INFO] 		Rejected: 0
+[     1.957][MainProcess][INFO] 		Failed: 0
+[     1.958][MainProcess][INFO] 	Blacklist clauses: 0
+[     1.958][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.958][MainProcess][DEBUG] 	0: Counter({'mutate': 17, 'summarise': 8})
+[     1.958][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     1.959][MainProcess][DEBUG] 	0: Counter({'summarise': 15})
+[     1.959][MainProcess][DEBUG] 	1: Counter({'semi_join': 6, 'filter': 3, 'union': 3, 'natural_join': 2, 'inner_join': 1})
+[     1.959][MainProcess][INFO] Solution found: natural_join(summarise(@param0, meanage = mean(age), level), @param0)
+[     2.012][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.056][cube-solver-5][DEBUG] Found solution with cube (l0 = summarise(), l1 = semi_join())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/7-1.txt", col_types = cols(S_key = col_character(),level = col_character(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/textbook/tables/7.out", col_types = cols(level = col_character(),meanage = col_integer()))
+
+df2 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(level, meanage) %>% distinct() %>% arrange(level)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT LEVEL,
+                meanage
+FROM
+  (SELECT LHS.level AS LEVEL,
+          LHS.meanage AS meanage,
+          RHS.S_key AS S_key,
+          RHS.age AS age
+   FROM
+     (SELECT LEVEL,
+             AVG(age) AS meanage
+      FROM input1
+      GROUP BY LEVEL) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.level = RHS.level))
+ORDER BY LEVEL

@@ -1,0 +1,87 @@
+[     3.155][MainProcess][INFO] Parsing specification...
+[     3.159][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.160][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.160][MainProcess][DEBUG] Reading input files...
+[     3.168][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i049.csv: ['int64', 'string']
+[     3.174][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o049.csv: ['int64', 'string']
+[     3.205][MainProcess][DEBUG] Generating DSL...
+[     3.226][MainProcess][INFO] Creating 16 processes
+[     3.306][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.306][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.306][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.307][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.307][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.307][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.307][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     3.307][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.307][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.308][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     3.316][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     3.324][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     3.328][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     3.329][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     3.338][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     3.343][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     3.354][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     3.439][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.441][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.467][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     3.469][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     3.478][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     3.478][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     3.480][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     3.483][cube-solver-13][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     3.491][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     3.491][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     3.493][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = unite())
+[     3.493][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     3.494][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     3.497][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     3.510][cube-solver-15][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     3.527][cube-solver-5][DEBUG] Found solution with cube (l0 = summarise(), l1 = semi_join())
+[     3.528][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     3.529][MainProcess][INFO] Statistics:
+[     3.529][MainProcess][INFO] 	Generated cubes: 21
+[     3.529][MainProcess][INFO] 	Attempted programs: 1
+[     3.529][MainProcess][INFO] 		Rejected: 0
+[     3.529][MainProcess][INFO] 		Failed: 0
+[     3.529][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.529][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     3.529][MainProcess][DEBUG] 	0: Counter({'mutate': 4, 'summarise': 1})
+[     3.529][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     3.530][MainProcess][DEBUG] 	0: Counter({'summarise': 1})
+[     3.530][MainProcess][DEBUG] 	1: Counter({'semi_join': 1})
+[     3.530][MainProcess][INFO] Solution found: semi_join(summarise(@param0, concatAlias = string_agg(Alias, ', '), UserId), @param0)
+[     3.565][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     3.587][cube-solver-13][DEBUG] Found solution with cube (l0 = summarise(), l1 = left_join())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i049.csv", col_types = cols(UserId = col_integer(),Alias = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o049.csv", col_types = cols(UserId = col_integer(),concatAlias = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(UserId) %>% summarise(concatAlias = string_agg(Alias, ', ')) %>% ungroup()
+df3 <- semi_join(df2, input1)
+out <- df3 %>% select(UserId, concatAlias) %>% arrange(UserId)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `UserId`,
+       `concatAlias`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `UserId`,
+             string_agg(`Alias`, ', ') AS concatAlias
+      FROM input1
+      GROUP BY UserId) AS LHS
+   WHERE EXISTS
+       (SELECT 1
+        FROM input1 AS RHS
+        WHERE (LHS.UserId = RHS.UserId) ))
+ORDER BY UserId

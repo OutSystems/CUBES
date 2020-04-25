@@ -1,0 +1,62 @@
+[     1.665][MainProcess][INFO] Parsing specification...
+[     1.668][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.668][MainProcess][DEBUG] Reading input files...
+[     1.678][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     1.683][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009_o.csv: ['int64', 'string', 'int64']
+[     1.714][MainProcess][DEBUG] Generating DSL...
+[     1.743][MainProcess][INFO] Creating 16 processes
+[     1.812][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.812][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.813][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.813][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.813][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.814][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.819][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.822][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.830][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.836][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.837][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.842][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.846][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.847][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.851][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.856][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.885][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     2.030][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     2.079][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     2.206][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.207][MainProcess][INFO] Statistics:
+[     2.207][MainProcess][INFO] 	Generated cubes: 16
+[     2.207][MainProcess][INFO] 	Attempted programs: 2
+[     2.207][MainProcess][INFO] 		Rejected: 1
+[     2.207][MainProcess][INFO] 		Failed: 0
+[     2.207][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.208][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     2.208][MainProcess][DEBUG] 	0: Counter({'mutate': 15, 'summarise': 13})
+[     2.208][MainProcess][INFO] Solution found: summarise(@param0, n = n(), c2, c4)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/009.csv", col_types = cols(c1 = col_integer(),c2 = col_integer(),c3 = col_character(),c4 = col_character(),c5 = col_integer()))
+input1$c3 <- dmy(input1$c3)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/009_o.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_integer()))
+
+df2 <- input1 %>% group_by(c2, c4) %>% summarise(n = n()) %>% ungroup()
+out <- df2 %>% select(c1 = c2, c2 = c4, c3 = n) %>% arrange(c1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT c2 AS c1,
+       c4 AS c2,
+       n AS c3
+FROM
+  (SELECT c2,
+          c4,
+          COUNT() AS n
+   FROM input1
+   GROUP BY c2,
+            c4)
+ORDER BY c1

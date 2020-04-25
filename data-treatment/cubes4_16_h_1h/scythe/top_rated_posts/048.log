@@ -1,0 +1,78 @@
+[     1.582][MainProcess][INFO] Parsing specification...
+[     1.585][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.585][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.586][MainProcess][DEBUG] Reading input files...
+[     1.593][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i048.csv: ['string', 'int64', 'string']
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o048.csv: ['string', 'int64', 'string']
+[     1.624][MainProcess][DEBUG] Generating DSL...
+[     1.643][MainProcess][INFO] Creating 16 processes
+[     1.707][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.707][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.708][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.708][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.708][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.708][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.709][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.708][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.709][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.711][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.716][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.726][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.728][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.728][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.731][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.741][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.752][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.825][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.866][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.908][cube-solver-8][DEBUG] Solving cube (l0 = summarise([1]), l1 = natural_join())
+[     1.924][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     1.926][cube-solver-3][DEBUG] Solving cube (l0 = summarise([1]), l1 = intersect())
+[     1.927][cube-solver-13][DEBUG] Solving cube (l0 = summarise([1]), l1 = anti_join())
+[     1.928][cube-solver-9][DEBUG] Solving cube (l0 = summarise([1]), l1 = natural_join3())
+[     1.930][cube-solver-9][DEBUG] Solving cube (l0 = summarise([1]), l1 = semi_join())
+[     1.936][cube-solver-15][DEBUG] Solving cube (l0 = summarise([1]), l1 = union())
+[     1.951][cube-solver-12][DEBUG] Solving cube (l0 = summarise([1]), l1 = filter())
+[     1.963][cube-solver-8][DEBUG] Found solution with cube (l0 = summarise([1]), l1 = natural_join())
+[     1.964][MainProcess][INFO] Statistics:
+[     1.965][MainProcess][INFO] 	Generated cubes: 18
+[     1.965][MainProcess][INFO] 	Attempted programs: 1
+[     1.965][MainProcess][INFO] 		Rejected: 0
+[     1.965][MainProcess][INFO] 		Failed: 0
+[     1.965][MainProcess][INFO] 	Blacklist clauses: 1
+[     1.965][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.966][MainProcess][DEBUG] 	0: Counter({'summarise': 7, 'mutate': 5})
+[     1.966][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     1.966][MainProcess][DEBUG] 	0: Counter({'summarise': 2})
+[     1.966][MainProcess][DEBUG] 	1: Counter({'natural_join': 1, 'semi_join': 1})
+[     1.966][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, AddressID = min(AddressID), CName))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i048.csv", col_types = cols(CName = col_character(),AddressID = col_integer(),AddressLine = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o048.csv", col_types = cols(CName = col_character(),minAddressID = col_integer(),AddressLine = col_character()))
+
+df2 <- input1 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CName,
+       AddressID AS minAddressID,
+       AddressLine
+FROM
+  (SELECT LHS.CName AS CName,
+          LHS.AddressID AS AddressID,
+          LHS.AddressLine AS AddressLine
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT CName,
+             MIN(AddressID) AS AddressID
+      FROM input1
+      GROUP BY CName) AS RHS ON (LHS.CName = RHS.CName
+                                 AND LHS.AddressID = RHS.AddressID))
+ORDER BY CName

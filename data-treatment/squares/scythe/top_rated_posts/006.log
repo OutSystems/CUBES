@@ -1,0 +1,311 @@
+R[write to console]: 
+Attaching package: ‘dplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+
+R[write to console]: The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+R[write to console]: 
+Attaching package: ‘dbplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:dplyr’:
+
+    ident, sql
+
+
+# First, specify the types that will be used
+
+enum Cols {
+  "Id, Name", "Id, Other_Columns", "Name, Id", "Name, Other_Columns", "Other_Columns, Id", "Other_Columns, Name", "Id", "Name", "Other_Columns"
+}
+
+enum Col {
+  "Id", "Name", "Other_Columns"
+}
+
+enum SelectCols{
+  "Id,Name,Other_Columns"
+}
+
+enum Distinct {
+	"distinct", ""
+}
+
+enum FilterCondition{
+"Id == maxId", "Id > maxId", "Id < maxId", "Id >= maxId", "Id <= maxId"
+}
+
+enum SummariseCondition{
+"maxId = max(Id)"
+}
+
+
+
+value Table {
+  col: int;
+  row: int;
+}
+
+value TableSelect {
+  col: int;
+  row: int;
+}
+
+value Empty;
+
+# Next, specify the input/output of the synthesized program
+program Squares(Table) -> TableSelect;
+
+# Finally, specify the production rules
+func empty: Empty -> Empty;
+
+func inner_join: Table r -> Table a, Table b
+{
+  col(r) <= col(a) + col(b);
+}
+
+func inner_join3: Table r -> Table a, Table b, Table c
+{
+  col(r) < col(a) + col(b) + col(c);
+}
+
+func inner_join4: Table r -> Table a, Table b, Table c, Table d {
+  col(r) < col(a) + col(b) + col(c) + col(d);
+}
+
+func anti_join: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func left_join: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a);
+}
+
+func bind_rows: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a) + row(b);
+}
+
+func intersect: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func select: TableSelect r -> Table a, SelectCols c, Distinct d{
+	row(r) <= row(a);
+	col(r) <= col(a);
+}
+
+
+
+
+func filter: Table r -> Table a, FilterCondition f {
+ row(r) <= row(a);
+ col(r) == col(a);
+}
+
+
+func summariseGrouped: Table r -> Table a, SummariseCondition s, Cols b {
+ row(r) <= row(a);
+ col(r) <= 3;
+}
+
+predicate is_not_parent(inner_join4, summariseGrouped, 100);
+predicate is_not_parent(summariseGrouped, summariseGrouped, 100);
+
+predicate is_not_parent(filter, filter, 100);
+
+predicate constant_occurs("maxId = max(Id)");
+predicate happens_before("Id == maxId","maxId = max(Id)");
+predicate happens_before("Id > maxId","maxId = max(Id)");
+predicate happens_before("Id < maxId","maxId = max(Id)");
+predicate happens_before("Id >= maxId","maxId = max(Id)");
+predicate happens_before("Id <= maxId","maxId = max(Id)");
+predicate is_not_parent(inner_join, inner_join3, 100);
+predicate is_not_parent(inner_join, inner_join4, 100);
+#predicate is_not_parent(inner_join, anti_join, 100);
+predicate is_not_parent(inner_join3, inner_join, 100);
+predicate is_not_parent(inner_join3, inner_join3, 100);
+predicate is_not_parent(inner_join3, inner_join4, 100);
+predicate is_not_parent(inner_join3, anti_join, 100);
+predicate is_not_parent(inner_join4, inner_join, 100);
+predicate is_not_parent(inner_join4, inner_join3, 100);
+predicate is_not_parent(inner_join4, inner_join4, 100);
+#predicate is_not_parent(inner_join4, anti_join, 100);
+predicate is_not_parent(anti_join, anti_join, 100);
+predicate is_not_parent(anti_join, inner_join, 100);
+predicate is_not_parent(anti_join, inner_join4, 100);
+predicate distinct_inputs(inner_join4);
+predicate distinct_inputs(inner_join3);
+predicate distinct_inputs(inner_join);
+predicate distinct_inputs(anti_join);
+
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = "Other_Columns"
+Joining, by = c("Id", "Other_Columns")
+Joining, by = "Name"
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = "Id"
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Other_Columns"
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Name"
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = "Id"
+Joining, by = c("Id", "Name")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = "Id"
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Other_Columns"
+Joining, by = "Name"
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Other_Columns"
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Id"
+Joining, by = "Name"
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = "Id"
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Other_Columns", "Id")
+Joining, by = "Name"
+Joining, by = c("Other_Columns", "Name")
+Joining, by = "Other_Columns"
+Joining, by = c("Other_Columns", "Name")
+Joining, by = c("Other_Columns", "Name")
+Joining, by = c("Other_Columns", "Name")
+Joining, by = "Id"
+Joining, by = "Other_Columns"
+Joining, by = "Name"
+Joining, by = c("Id", "Name")
+Joining, by = c("Other_Columns", "Id")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Other_Columns", "Id")
+Joining, by = c("Other_Columns", "Id")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "Other_Columns")
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "Name")
+Joining, by = c("Id", "Name")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = c("Id", "Name", "Other_Columns")
+Joining, by = "Name"
+Joining, by = c("Name", "Id")
+Joining, by = "Id"
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "maxId")
+Joining, by = c("Name", "Id", "Other_Columns")
+Joining, by = c("Id", "maxId")
+Joining, by = c("Name", "Id")
+Joining, by = c("Name", "Id", "maxId")
+Joining, by = c("Name", "Id")
+Joining, by = c("Id", "maxId")
+Joining, by = c("Name", "Id", "Other_Columns")
+Joining, by = "maxId"
+Joining, by = c("Name", "Id", "Other_Columns")
+Joining, by = c("Name", "maxId")
+Joining, by = c("Name", "Id")
+Joining, by = c("Name", "maxId")
+Joining, by = c("Name", "Id")
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input0 <- read.table("tests-examples/scythe/top_rated_posts/tables/i006.csv", sep =",", header=T)
+input0
+input0 <- copy_to(con,input0)
+expected_output <- read.table("tests-examples/scythe/top_rated_posts/tables/o006.csv", sep =",", header=T)
+expected_output
+
+RET_DF853 <- input0 %>% group_by(Name, Id) %>% summarise(maxId = max(Id))
+RET_DF854 <- input0 %>% group_by(Name) %>% summarise(maxId = max(Id))
+RET_DF855 <- inner_join(inner_join(RET_DF853, RET_DF854), input0)
+RET_DF856 <- RET_DF855 %>% ungroup() %>% select(Id,Name,Other_Columns) %>% distinct()
+
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+Joining, by = c("Name", "maxId")
+Joining, by = c("Name", "Id")
+SELECT DISTINCT `Id`,
+                `Name`,
+                `Other_Columns`
+FROM
+  (SELECT `Name`,
+          `Id`,
+          `maxId`,
+          `Other_Columns`
+   FROM
+     (SELECT `Name`,
+             `Id`,
+             `maxId`
+      FROM
+        (SELECT `Name`,
+                `Id`,
+                MAX(`Id`) AS `maxId`
+         FROM `input0`
+         GROUP BY `Name`,
+                  `Id`) AS `LHS`
+      INNER JOIN
+        (SELECT `Name`,
+                MAX(`Id`) AS `maxId`
+         FROM `input0`
+         GROUP BY `Name`) AS `RHS` ON (`LHS`.`Name` = `RHS`.`Name`
+                                       AND `LHS`.`maxId` = `RHS`.`maxId`)) AS `LHS`
+   INNER JOIN `input0` AS `RHS` ON (`LHS`.`Name` = `RHS`.`Name`
+                                    AND `LHS`.`Id` = `RHS`.`Id`))
+

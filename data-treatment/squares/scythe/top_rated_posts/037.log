@@ -1,0 +1,311 @@
+R[write to console]: 
+Attaching package: ‘dplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+
+R[write to console]: The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+R[write to console]: 
+Attaching package: ‘dbplyr’
+
+
+R[write to console]: The following objects are masked from ‘package:dplyr’:
+
+    ident, sql
+
+
+# First, specify the types that will be used
+
+enum Cols {
+  "c1, c2", "c1, c3", "c2, c1", "c2, c3", "c3, c1", "c3, c2", "c1", "c2", "c3"
+}
+
+enum Col {
+  "c1", "c2", "c3"
+}
+
+enum SelectCols{
+  "c1,c2,c3"
+}
+
+enum Distinct {
+	"distinct", ""
+}
+
+enum FilterCondition{
+"c1 == minc1", "c1 > minc1", "c1 < minc1", "c1 >= minc1", "c1 <= minc1"
+}
+
+enum SummariseCondition{
+"minc1 = min(c1)"
+}
+
+
+
+value Table {
+  col: int;
+  row: int;
+}
+
+value TableSelect {
+  col: int;
+  row: int;
+}
+
+value Empty;
+
+# Next, specify the input/output of the synthesized program
+program Squares(Table) -> TableSelect;
+
+# Finally, specify the production rules
+func empty: Empty -> Empty;
+
+func inner_join: Table r -> Table a, Table b
+{
+  col(r) <= col(a) + col(b);
+}
+
+func inner_join3: Table r -> Table a, Table b, Table c
+{
+  col(r) < col(a) + col(b) + col(c);
+}
+
+func inner_join4: Table r -> Table a, Table b, Table c, Table d {
+  col(r) < col(a) + col(b) + col(c) + col(d);
+}
+
+func anti_join: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func left_join: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a);
+}
+
+func bind_rows: Table r ->  Table a, Table b{
+  col(r) <= col(a) + col(b);
+  row(r) == row(a) + row(b);
+}
+
+func intersect: Table r ->  Table a, Table b, Col c {
+  #col(r) <= col(a) + col(b);
+  col(r) == 1;
+  row(r) <= row(a);
+}
+
+func select: TableSelect r -> Table a, SelectCols c, Distinct d{
+	row(r) <= row(a);
+	col(r) <= col(a);
+}
+
+
+
+
+func filter: Table r -> Table a, FilterCondition f {
+ row(r) <= row(a);
+ col(r) == col(a);
+}
+
+
+func summariseGrouped: Table r -> Table a, SummariseCondition s, Cols b {
+ row(r) <= row(a);
+ col(r) <= 3;
+}
+
+predicate is_not_parent(inner_join4, summariseGrouped, 100);
+predicate is_not_parent(summariseGrouped, summariseGrouped, 100);
+
+predicate is_not_parent(filter, filter, 100);
+
+predicate constant_occurs("minc1 = min(c1)");
+predicate happens_before("c1 == minc1","minc1 = min(c1)");
+predicate happens_before("c1 > minc1","minc1 = min(c1)");
+predicate happens_before("c1 < minc1","minc1 = min(c1)");
+predicate happens_before("c1 >= minc1","minc1 = min(c1)");
+predicate happens_before("c1 <= minc1","minc1 = min(c1)");
+predicate is_not_parent(inner_join, inner_join3, 100);
+predicate is_not_parent(inner_join, inner_join4, 100);
+#predicate is_not_parent(inner_join, anti_join, 100);
+predicate is_not_parent(inner_join3, inner_join, 100);
+predicate is_not_parent(inner_join3, inner_join3, 100);
+predicate is_not_parent(inner_join3, inner_join4, 100);
+predicate is_not_parent(inner_join3, anti_join, 100);
+predicate is_not_parent(inner_join4, inner_join, 100);
+predicate is_not_parent(inner_join4, inner_join3, 100);
+predicate is_not_parent(inner_join4, inner_join4, 100);
+#predicate is_not_parent(inner_join4, anti_join, 100);
+predicate is_not_parent(anti_join, anti_join, 100);
+predicate is_not_parent(anti_join, inner_join, 100);
+predicate is_not_parent(anti_join, inner_join4, 100);
+predicate distinct_inputs(inner_join4);
+predicate distinct_inputs(inner_join3);
+predicate distinct_inputs(inner_join);
+predicate distinct_inputs(anti_join);
+
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = "c3"
+Joining, by = c("c1", "c3")
+Joining, by = "c2"
+Joining, by = c("c1", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = "c1"
+Joining, by = c("c2", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = "c3"
+Joining, by = c("c2", "c3")
+Joining, by = "c2"
+Joining, by = c("c2", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c1", "c3")
+Joining, by = c("c1", "c3")
+Joining, by = "c1"
+Joining, by = c("c1", "c2")
+Joining, by = c("c1", "c3")
+Joining, by = "c1"
+Joining, by = c("c1", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = "c3"
+Joining, by = "c2"
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = "c3"
+Joining, by = c("c1", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = "c1"
+Joining, by = "c2"
+Joining, by = c("c1", "c3")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = "c1"
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "c3")
+Joining, by = c("c3", "c1")
+Joining, by = "c2"
+Joining, by = c("c3", "c2")
+Joining, by = "c3"
+Joining, by = c("c3", "c2")
+Joining, by = c("c3", "c2")
+Joining, by = c("c3", "c2")
+Joining, by = "c1"
+Joining, by = "c3"
+Joining, by = "c2"
+Joining, by = c("c1", "c2")
+Joining, by = c("c3", "c1")
+Joining, by = c("c2", "c3")
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "c3")
+Joining, by = c("c3", "c1")
+Joining, by = c("c3", "c1")
+Joining, by = c("c1", "c3")
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "c3")
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "c2")
+Joining, by = c("c1", "c2")
+Joining, by = c("c2", "c3")
+Joining, by = c("c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = c("c1", "c2", "c3")
+Joining, by = "c2"
+Joining, by = c("c2", "c1")
+Joining, by = "c1"
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "minc1")
+Joining, by = c("c2", "c1", "c3")
+Joining, by = c("c1", "minc1")
+Joining, by = c("c2", "c1")
+Joining, by = c("c2", "c1", "minc1")
+Joining, by = c("c2", "c1")
+Joining, by = c("c1", "minc1")
+Joining, by = c("c2", "c1", "c3")
+Joining, by = "minc1"
+Joining, by = c("c2", "c1", "c3")
+Joining, by = c("c2", "minc1")
+Joining, by = c("c2", "c1")
+Joining, by = c("c2", "minc1")
+Joining, by = c("c2", "c1")
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input0 <- read.table("tests-examples/scythe/top_rated_posts/tables/i037.csv", sep =",", header=T)
+input0
+input0 <- copy_to(con,input0)
+expected_output <- read.table("tests-examples/scythe/top_rated_posts/tables/o037.csv", sep =",", header=T)
+expected_output
+
+RET_DF853 <- input0 %>% group_by(c2, c1) %>% summarise(minc1 = min(c1))
+RET_DF854 <- input0 %>% group_by(c2) %>% summarise(minc1 = min(c1))
+RET_DF855 <- inner_join(inner_join(RET_DF853, RET_DF854), input0)
+RET_DF856 <- RET_DF855 %>% ungroup() %>% select(c1,c2,c3) %>% distinct()
+
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+Joining, by = c("c2", "minc1")
+Joining, by = c("c2", "c1")
+SELECT DISTINCT `c1`,
+                `c2`,
+                `c3`
+FROM
+  (SELECT `c2`,
+          `c1`,
+          `minc1`,
+          `c3`
+   FROM
+     (SELECT `c2`,
+             `c1`,
+             `minc1`
+      FROM
+        (SELECT `c2`,
+                `c1`,
+                MIN(`c1`) AS `minc1`
+         FROM `input0`
+         GROUP BY `c2`,
+                  `c1`) AS `LHS`
+      INNER JOIN
+        (SELECT `c2`,
+                MIN(`c1`) AS `minc1`
+         FROM `input0`
+         GROUP BY `c2`) AS `RHS` ON (`LHS`.`c2` = `RHS`.`c2`
+                                     AND `LHS`.`minc1` = `RHS`.`minc1`)) AS `LHS`
+   INNER JOIN `input0` AS `RHS` ON (`LHS`.`c2` = `RHS`.`c2`
+                                    AND `LHS`.`c1` = `RHS`.`c1`))
+

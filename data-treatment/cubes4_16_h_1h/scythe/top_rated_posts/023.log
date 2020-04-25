@@ -1,0 +1,73 @@
+[     1.580][MainProcess][INFO] Parsing specification...
+[     1.583][MainProcess][DEBUG] Reading input files...
+[     1.589][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i023.csv: ['int64', 'int64']
+[     1.593][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o023.csv: ['int64', 'int64', 'int64']
+[     1.619][MainProcess][DEBUG] Generating DSL...
+[     1.638][MainProcess][INFO] Creating 16 processes
+[     1.695][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.696][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.695][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.696][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.696][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.696][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.696][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.696][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.702][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.707][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.708][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.709][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.724][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.727][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.727][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.731][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.739][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.840][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.863][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.933][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     1.934][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([1]))
+[     1.935][cube-solver-5][DEBUG] Solving cube (l0 = summarise([1]), l1 = semi_join())
+[     1.936][cube-solver-10][DEBUG] Solving cube (l0 = summarise([1]), l1 = natural_join4())
+[     1.937][cube-solver-6][DEBUG] Solving cube (l0 = summarise([1]), l1 = cross_join())
+[     1.940][cube-solver-10][DEBUG] Solving cube (l0 = summarise([1]), l1 = mutate())
+[     1.942][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     1.944][cube-solver-7][DEBUG] Solving cube (l0 = summarise([1]), l1 = inner_join())
+[     1.944][cube-solver-9][DEBUG] Solving cube (l0 = summarise([1]), l1 = natural_join3())
+[     1.946][cube-solver-9][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise([1]))
+[     1.948][cube-solver-9][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[     1.949][cube-solver-9][DEBUG] Solving cube (l0 = left_join(), l1 = summarise([1]))
+[     1.950][cube-solver-13][DEBUG] Solving cube (l0 = summarise([1]), l1 = left_join())
+[     1.959][cube-solver-15][DEBUG] Solving cube (l0 = summarise([1]), l1 = intersect())
+[     1.959][cube-solver-8][DEBUG] Solving cube (l0 = summarise([1]), l1 = natural_join())
+[     2.000][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     2.006][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     2.007][MainProcess][INFO] Statistics:
+[     2.007][MainProcess][INFO] 	Generated cubes: 24
+[     2.007][MainProcess][INFO] 	Attempted programs: 4
+[     2.007][MainProcess][INFO] 		Rejected: 2
+[     2.007][MainProcess][INFO] 		Failed: 1
+[     2.008][MainProcess][INFO] 	Blacklist clauses: 1
+[     2.008][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     2.008][MainProcess][DEBUG] 	0: Counter({'summarise': 12, 'mutate': 9})
+[     2.008][MainProcess][DEBUG] Priting statistics for good programs of size 2
+[     2.008][MainProcess][DEBUG] 	0: Counter({'summarise': 4})
+[     2.008][MainProcess][DEBUG] 	1: Counter({'inner_join': 2, 'mutate': 1, 'left_join': 1})
+[     2.009][MainProcess][INFO] Solution found: mutate(@param0, row_number = row_number())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i023.csv", col_types = cols(itemID = col_integer(),ordercount = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o023.csv", col_types = cols(rank = col_integer(),itemID = col_integer(),ordercount = col_integer()))
+
+df2 <- input1 %>% mutate(row_number = row_number())
+out <- df2 %>% select(rank = row_number, itemID, ordercount) %>% arrange(rank)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ROW_NUMBER() OVER () AS rank,
+                         itemID,
+                         ordercount
+FROM input1
+ORDER BY rank

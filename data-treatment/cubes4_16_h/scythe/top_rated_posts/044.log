@@ -1,0 +1,54 @@
+[     1.596][MainProcess][INFO] Parsing specification...
+[     1.600][MainProcess][DEBUG] Reading input files...
+[     1.605][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i044.csv: ['int64', 'int64']
+[     1.610][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o044.csv: ['int64', 'int64', 'int64']
+[     1.635][MainProcess][DEBUG] Generating DSL...
+[     1.654][MainProcess][INFO] Creating 16 processes
+[     1.724][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.724][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.724][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.725][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.727][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.728][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.733][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.737][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.748][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.749][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.755][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.758][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     1.764][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.899][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.899][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.939][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     1.940][MainProcess][INFO] Statistics:
+[     1.940][MainProcess][INFO] 	Generated cubes: 16
+[     1.941][MainProcess][INFO] 	Attempted programs: 1
+[     1.941][MainProcess][INFO] 		Rejected: 0
+[     1.941][MainProcess][INFO] 		Failed: 0
+[     1.941][MainProcess][INFO] 	Blacklist clauses: 0
+[     1.941][MainProcess][DEBUG] Priting statistics for good programs of size 1
+[     1.941][MainProcess][DEBUG] 	0: Counter({'mutate': 1, 'summarise': 1})
+[     1.941][MainProcess][INFO] Solution found: mutate(@param0, cumsumcount = cumsum(count))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i044.csv", col_types = cols(id = col_integer(),count = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o044.csv", col_types = cols(id = col_integer(),count = col_integer(),sumcount = col_integer()))
+
+df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
+out <- df2 %>% select(id, count, sumcount = cumsumcount) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       COUNT,
+       SUM(COUNT) OVER (ROWS UNBOUNDED PRECEDING) AS sumcount
+FROM input1
+ORDER BY id
