@@ -2,6 +2,10 @@ inputs:
   - tests-examples/scythe/recent_posts/tables/013_1.csv
   - tests-examples/scythe/recent_posts/tables/013_2.csv
 output: tests-examples/scythe/recent_posts/tables/013_o.csv
+columns:
+  - Name
+  - Company_group
+  - ID
 comment: |
   select t1.ID,
          t1.Name,
@@ -13,3 +17,7 @@ comment: |
   join tbl_1 t1_b
     on t1_b.Name = t2.Company_group
   where t1.ID <> t1_b.ID
+
+  df3 <- inner_join(input2, input1)
+  df4 <- full_join(df3 %>% mutate(tmp.col=1), df3 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(ID != ID.other & Name.other == Company_group)
+  out <- df4 %>% select(ID, Name, RootName = Company_group, RootId = ID.other) %>% arrange(ID)

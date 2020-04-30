@@ -1,0 +1,52 @@
+[     3.349][MainProcess][INFO] Parsing specification...
+[     3.355][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.355][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.356][MainProcess][DEBUG] Reading input files...
+[     3.367][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i055.csv: ['int64', 'string', 'string', 'string']
+[     3.374][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o055.csv: ['string', 'string', 'string']
+[     3.414][MainProcess][DEBUG] Generating DSL...
+[     3.486][MainProcess][INFO] Creating 4 processes
+[     3.506][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.569][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.574][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.580][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.581][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     4.022][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.050][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.479][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     4.480][MainProcess][INFO] Statistics:
+[     4.481][MainProcess][INFO] 	Generated cubes: 4
+[     4.481][MainProcess][INFO] 	Attempted programs: 12
+[     4.481][MainProcess][INFO] 		Rejected: 11
+[     4.481][MainProcess][INFO] 		Failed: 0
+[     4.481][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.481][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.482][MainProcess][DEBUG] 	0: Counter({'mutate': 67, 'summarise': 41})
+[     4.483][MainProcess][INFO] Solution found: summarise(@param0, concatPageURL = string_agg(PageURL, ' '), Activity, User)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i055.csv", col_types = cols(ID = col_integer(),User = col_character(),Activity = col_character(),PageURL = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o055.csv", col_types = cols(User = col_character(),Activity = col_character(),concatPageURL = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(Activity, User) %>% summarise(concatPageURL = string_agg(PageURL, ' ')) %>% ungroup()
+out <- df2 %>% select(User, Activity, concatPageURL) %>% arrange(User)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `User`,
+       `Activity`,
+       `concatPageURL`
+FROM
+  (SELECT `Activity`,
+          `User`,
+          string_agg(`PageURL`, ' ') AS concatPageURL
+   FROM input1
+   GROUP BY Activity,
+            USER)
+ORDER BY USER

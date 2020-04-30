@@ -21,16 +21,8 @@ solution:
 comment: |
   5.2.5 optimal solution modified (17)
 
-  df1 <- inner_join(input1, input2)
-  df2 <- df1 %>% filter(S_name != 'SN1')
-  df3 <- df2 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
-  df4 <- inner_join(inner_join(input2, input1), df3)
-  df5 <- df4 %>% filter(meancost < cost)
-  out <- df5 %>% select(P_id, S_name)
-
-  df3 <- inner_join(input1, input2)
+  df3 <- inner_join(input2, input1)
   df4 <- df3 %>% group_by(P_id, S_name) %>% summarise(meancost = mean(cost)) %>% ungroup()
-  df5 <- inner_join(input1, df4)
-  df6 <- df5 %>% filter(meancost > cost)
-  df7 <- df6 %>% filter(S_name == 'SN1' | meancost >= cost)
-  out <- df7 %>% select(P_id, S_name) %>% distinct()
+  df5 <- inner_join(df3, df4, by=c('P_id' = 'P_id','S_name' = 'P_id'), suffix = c('', '.other'))
+  df6 <- df5 %>% filter(S_name != 'SN1' & meancost > cost)
+  out <- df6 %>% select(P_id, S_name = S_name.other) %>% distinct() %>% arrange(P_id)

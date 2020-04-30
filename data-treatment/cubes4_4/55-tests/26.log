@@ -1,0 +1,83 @@
+[     3.253][MainProcess][INFO] Parsing specification...
+[     3.258][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.258][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     3.259][MainProcess][DEBUG] Reading input files...
+[     3.266][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     3.271][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/employees.txt: ['int64', 'string', 'int64']
+[     3.275][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/certified.txt: ['int64', 'int64']
+[     3.279][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/26.out: ['string']
+[     3.311][MainProcess][DEBUG] Generating DSL...
+[     3.507][MainProcess][INFO] Creating 4 processes
+[     3.527][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.704][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.709][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.712][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.733][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     6.790][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     6.792][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     6.801][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[    14.446][cube-solver-0][DEBUG] Solving cube (l0 = filter(), l1 = natural_join())
+[    14.491][cube-solver-0][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[    19.235][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter([104]))
+[    19.319][cube-solver-1][DEBUG] Solving cube (l0 = filter([109]), l1 = natural_join4())
+[    19.470][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter([116]))
+[    19.489][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter([120]))
+[    19.631][cube-solver-3][DEBUG] Solving cube (l0 = filter([124]), l1 = filter([124]))
+[    19.775][cube-solver-3][DEBUG] Solving cube (l0 = filter([140]), l1 = anti_join())
+[    19.952][cube-solver-3][DEBUG] Solving cube (l0 = filter([258]), l1 = left_join())
+[    20.121][cube-solver-3][DEBUG] Solving cube (l0 = filter([262]), l1 = union())
+[    20.333][cube-solver-3][DEBUG] Solving cube (l0 = filter([266]), l1 = intersect())
+[    20.520][cube-solver-3][DEBUG] Solving cube (l0 = filter([273]), l1 = semi_join())
+[    20.690][cube-solver-3][DEBUG] Solving cube (l0 = filter([277]), l1 = cross_join())
+[    20.911][cube-solver-3][DEBUG] Solving cube (l0 = filter([294]), l1 = inner_join())
+[    21.095][cube-solver-3][DEBUG] Solving cube (l0 = anti_join(), l1 = filter([313]))
+[    21.269][cube-solver-2][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = filter([116]))
+[    21.272][MainProcess][INFO] Statistics:
+[    21.272][MainProcess][INFO] 	Generated cubes: 17
+[    21.272][MainProcess][INFO] 	Attempted programs: 26
+[    21.272][MainProcess][INFO] 		Rejected: 21
+[    21.272][MainProcess][INFO] 		Failed: 4
+[    21.272][MainProcess][INFO] 	Blacklist clauses: 331
+[    21.272][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    21.273][MainProcess][DEBUG] 	0: Counter({'filter': 365, 'natural_join3': 256})
+[    21.273][MainProcess][DEBUG] 	1: Counter({'filter': 256, 'natural_join3': 221, 'natural_join4': 144})
+[    21.273][MainProcess][INFO] Solution found: filter(natural_join3(@param1, @param2, @param0), salary > 150000 & eid > 550000000)
+[    21.299][cube-solver-3][DEBUG] Solving cube (l0 = left_join(), l1 = filter([330]))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/26.out", col_types = cols(ename = col_character()))
+
+df4 <- inner_join(input2, input3) %>% inner_join(input1)
+df5 <- df4 %>% filter(salary > 150000 & eid > 550000000)
+out <- df5 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT ename
+FROM
+  (SELECT LHS.eid AS eid,
+          LHS.ename AS ename,
+          LHS.salary AS salary,
+          LHS.aid AS aid,
+          RHS.aname AS aname,
+          RHS.crusingrange AS crusingrange
+   FROM
+     (SELECT LHS.eid AS eid,
+             LHS.ename AS ename,
+             LHS.salary AS salary,
+             RHS.aid AS aid
+      FROM input2 AS LHS
+      INNER JOIN input3 AS RHS ON (LHS.eid = RHS.eid)) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.aid = RHS.aid))
+WHERE (salary > 150000.0
+       AND eid > 550000000.0)
+ORDER BY ename

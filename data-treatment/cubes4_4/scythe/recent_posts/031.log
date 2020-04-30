@@ -1,0 +1,76 @@
+[     2.845][MainProcess][INFO] Parsing specification...
+[     2.850][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.850][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     2.851][MainProcess][DEBUG] Reading input files...
+[     2.859][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_1.csv: ['int64', 'string', 'int64']
+[     2.865][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_2.csv: ['int64', 'string', 'string']
+[     2.870][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_o.csv: ['int64', 'string', 'int64']
+[     2.900][MainProcess][DEBUG] Generating DSL...
+[     2.936][MainProcess][INFO] Creating 4 processes
+[     2.954][MainProcess][DEBUG] Increasing generator loc to 2
+[     2.994][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.997][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     2.999][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.000][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.368][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     3.369][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     3.370][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.698][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter())
+[     3.712][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     3.720][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter())
+[     3.725][cube-solver-3][DEBUG] Solving cube (l0 = filter(), l1 = natural_join4())
+[     3.730][cube-solver-3][DEBUG] Solving cube (l0 = filter([1]), l1 = filter([1]))
+[     3.733][cube-solver-3][DEBUG] Solving cube (l0 = filter([1]), l1 = anti_join())
+[     3.744][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter([3]))
+[     4.111][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = natural_join())
+[     4.125][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = left_join())
+[     4.134][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = union())
+[     4.142][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = intersect())
+[     4.150][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = semi_join())
+[     4.158][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = cross_join())
+[     4.171][cube-solver-0][DEBUG] Solving cube (l0 = filter([16]), l1 = inner_join())
+[     4.181][cube-solver-0][DEBUG] Solving cube (l0 = anti_join(), l1 = filter([16]))
+[     4.362][cube-solver-2][DEBUG] Solving cube (l0 = left_join(), l1 = filter([16]))
+[     6.635][cube-solver-3][DEBUG] Solving cube (l0 = union(), l1 = filter([16]))
+[     6.736][cube-solver-2][DEBUG] Found solution with cube (l0 = left_join(), l1 = filter([16]))
+[     6.739][MainProcess][INFO] Statistics:
+[     6.739][MainProcess][INFO] 	Generated cubes: 18
+[     6.740][MainProcess][INFO] 	Attempted programs: 580
+[     6.740][MainProcess][INFO] 		Rejected: 3
+[     6.740][MainProcess][INFO] 		Failed: 576
+[     6.740][MainProcess][INFO] 	Blacklist clauses: 44
+[     6.740][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     6.741][MainProcess][DEBUG] 	0: Counter({'natural_join': 504, 'left_join': 377, 'anti_join': 191, 'union': 13})
+[     6.742][MainProcess][DEBUG] 	1: Counter({'filter': 1085})
+[     6.742][MainProcess][INFO] Solution found: filter(left_join(@param1, @param0), type == 'public' & accountID == 'Dave')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/031_1.csv", col_types = cols(channelID = col_integer(),accountID = col_character(),role = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/031_2.csv", col_types = cols(channelID = col_integer(),channelName = col_character(),type = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/031_o.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_integer()))
+
+df3 <- left_join(input2, input1)
+df4 <- df3 %>% filter(type == 'public' & accountID == 'Dave')
+out <- df4 %>% select(c1 = channelID, c2 = accountID, c3 = role) %>% arrange(c1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `channelID` AS `c1`,
+       `accountID` AS `c2`,
+       `role` AS `c3`
+FROM
+  (SELECT `LHS`.`channelID` AS `channelID`,
+          `LHS`.`channelName` AS `channelName`,
+          `LHS`.`type` AS `type`,
+          `RHS`.`accountID` AS `accountID`,
+          `RHS`.`role` AS `role`
+   FROM `input2` AS `LHS`
+   LEFT JOIN `input1` AS `RHS` ON (`LHS`.`channelID` = `RHS`.`channelID`))
+WHERE (`type` = 'public'
+       AND `accountID` = 'Dave')
+ORDER BY c1

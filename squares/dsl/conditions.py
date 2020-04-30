@@ -1,12 +1,13 @@
 import re
 from collections import defaultdict
+from copy import deepcopy
 from itertools import combinations, product, chain
 
 from ordered_set import OrderedSet
 
 from .dsl_builder import DSLPredicate
 from .. import types, util
-from ..util import powerset_except_empty, get_permutations, all_permutations
+from ..util import powerset_except_empty, get_permutations, all_permutations, get_combinations
 
 
 def symmetric_op(op: str):
@@ -30,6 +31,7 @@ class ConditionGenerator():
         self.summarise_conditions = []
         self.filter_conditions = []
         self.inner_join_conditions = []
+        self.cross_join_conditions = []
 
     def generate_summarise(self):
         frozen_columns = self.specification.filter_columns(self.specification.columns_by_type)
@@ -49,6 +51,10 @@ class ConditionGenerator():
 
             if aggr == 'n':
                 add_condition('n = n()', 'n', [types.INT])
+
+            if aggr == 'n_distinct':
+                for columns in get_combinations(chain(*frozen_columns.values()), util.get_config().max_column_combinations):
+                    add_condition(f'n_distinct = n_distinct({columns})', 'n_distinct', [types.INT])
 
             if aggr == 'concat':
                 for column in frozen_columns[types.STRING]:
@@ -93,8 +99,9 @@ class ConditionGenerator():
                                                                                        self.specification.generated_columns[column]]))
 
             if aggr in ['coalesce']:
-                for cols in all_permutations(set(chain.from_iterable(frozen_columns.values())), len(set(chain.from_iterable(frozen_columns.values())))):
-                    add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', types.Type)
+                for cols in all_permutations(set(chain.from_iterable(frozen_columns.values())),
+                                             len(set(chain.from_iterable(frozen_columns.values())))):
+                    add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', [t for t in types.Type if t != types.NONE])
                     for column in cols:
                         if column in self.specification.generated_columns.keys():
                             self.predicates.append(DSLPredicate('happens_before', [f'{aggr} = {aggr}({",".join(cols)})',
@@ -263,3 +270,47 @@ class ConditionGenerator():
                 if col in self.specification.generated_columns.keys():
                     self.predicates.append(
                         DSLPredicate('happens_before', [f'"{self.inner_join_conditions[-1]}"', self.specification.generated_columns[col]]))
+
+    def generate_cross_join(self):
+        if util.get_config().full_cross_join:
+            all_columns = self.specification.filter_columns(self.specification.columns_by_type)
+
+            for type in all_columns:
+                all_columns[type] |= [col + '.other' for col in all_columns[type]]
+
+            column_pairs = []
+            for type, cols in all_columns.items():
+                for col_pair in product(cols, repeat=2):
+                    column_pairs.append((type, col_pair))
+
+            on_conditions = list(combinations(column_pairs, 2)) + list(combinations(column_pairs, 1))
+            on_conditions = list(filter(lambda t: all(map(lambda cond: cond[1][0] != cond[1][1], t)) and
+                                                  any(map(lambda cond: '.other' in cond[1][0] or '.other' in cond[1][1], t)), on_conditions))
+
+            for on_condition in on_conditions:
+                if len(on_condition) == 1:
+                    for op1 in types.operators_by_type[on_condition[0][0]]:
+                        self.cross_join_conditions.append(f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]}')
+
+                if len(on_condition) == 2:
+                    for op1 in types.operators_by_type[on_condition[0][0]]:
+                        for op2 in types.operators_by_type[on_condition[1][0]]:
+                            for op3 in ['&', '|']:
+                                self.cross_join_conditions.append(
+                                    f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]} {op3} {on_condition[1][1][0]} {op2} {on_condition[1][1][1]}')
+
+            # for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
+            #     for col in col_pairs:
+            #         if col in self.specification.generated_columns.keys():
+            #             self.predicates.append(DSLPredicate('happens_before', [f'"{self.inner_join_conditions[-1]}"',
+            #                                                                    self.specification.generated_columns[col]]))
+
+        self.cross_join_conditions.append('')
+
+        # for subset in powerset_except_empty(self.specification.columns, util.get_config().max_join_combinations):
+        #     self.inner_join_conditions.append(','.join(map(util.single_quote_str, subset)))
+        #
+        #     for col in subset:
+        #         if col in self.specification.generated_columns.keys():
+        #             self.predicates.append(
+        #                 DSLPredicate('happens_before', [f'"{self.inner_join_conditions[-1]}"', self.specification.generated_columns[col]]))

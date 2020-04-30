@@ -1,0 +1,84 @@
+[     1.566][MainProcess][INFO] Parsing specification...
+[     1.568][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.569][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.569][MainProcess][DEBUG] Reading input files...
+[     1.578][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     1.584][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     1.609][MainProcess][DEBUG] Generating DSL...
+[     1.766][MainProcess][INFO] Creating 8 processes
+[     1.797][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.926][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.932][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.940][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.941][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.951][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.954][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.956][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.983][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     4.581][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.616][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.958][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.971][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     7.176][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     7.199][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     7.202][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     7.219][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     7.225][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     7.241][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     7.243][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     7.248][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     7.264][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     7.273][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     7.280][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     7.313][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     7.354][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     7.382][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[     8.755][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     8.764][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     9.058][cube-solver-5][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[     9.071][cube-solver-5][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[     9.084][cube-solver-5][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[     9.417][cube-solver-5][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[     9.610][cube-solver-3][DEBUG] Found solution with cube (l0 = summarise(), l1 = inner_join())
+[     9.612][MainProcess][INFO] Statistics:
+[     9.612][MainProcess][INFO] 	Generated cubes: 24
+[     9.612][MainProcess][INFO] 	Attempted programs: 117
+[     9.613][MainProcess][INFO] 		Rejected: 45
+[     9.613][MainProcess][INFO] 		Failed: 71
+[     9.613][MainProcess][INFO] 	Blacklist clauses: 0
+[     9.613][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     9.614][MainProcess][DEBUG] 	0: Counter({'mutate': 48, 'summarise': 36})
+[     9.614][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     9.615][MainProcess][DEBUG] 	0: Counter({'summarise': 1292, 'left_join': 64})
+[     9.616][MainProcess][DEBUG] 	1: Counter({'left_join': 301, 'cross_join': 293, 'union': 288, 'anti_join': 181, 'semi_join': 144, 'inner_join': 61, 'mutate': 52, 'summarise': 36})
+[     9.617][MainProcess][INFO] Solution found: inner_join(@param0, summarise(@param0, maxTime = max(Time), Train), 'Train' = 'Train','Time' = 'maxTime')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i034.csv", col_types = cols(Train = col_integer(),Dest = col_character(),Time = col_time()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o034.csv", col_types = cols(Train = col_integer(),Dest = col_character(),Time = col_time()))
+
+df2 <- input1 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
+df3 <- inner_join(input1, df2, by=c('Train' = 'Train','Time' = 'maxTime'), suffix = c('', '.other'))
+out <- df3 %>% select(Train, Dest, Time) %>% arrange(Train)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Train,
+       Dest,
+       TIME
+FROM
+  (SELECT LHS.Train AS Train,
+          LHS.Dest AS Dest,
+          LHS.Time AS TIME
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT Train,
+             MAX(TIME) AS maxTime
+      FROM input1
+      GROUP BY Train) AS RHS ON (LHS.Train = RHS.Train
+                                 AND LHS.Time = RHS.maxTime))
+ORDER BY Train

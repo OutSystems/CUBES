@@ -1,0 +1,85 @@
+[     3.389][MainProcess][INFO] Parsing specification...
+[     3.396][MainProcess][DEBUG] Reading input files...
+[     3.408][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/040.csv: ['int64', 'int64', 'string', 'string', 'string']
+[     3.416][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/040_o.csv: ['int64', 'int64', 'string', 'string', 'string']
+[     3.455][MainProcess][DEBUG] Generating DSL...
+[     3.507][MainProcess][INFO] Creating 2 processes
+[     3.577][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.580][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.189][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     4.189][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     4.191][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     4.193][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     4.873][MainProcess][DEBUG] Increasing generator loc to 3
+[     4.875][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     6.110][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     6.118][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[     6.121][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[     6.124][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[     6.127][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[     6.129][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise())
+[     6.131][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = mutate())
+[     6.134][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate(), l2 = filter())
+[     6.136][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise(), l2 = filter())
+[     6.139][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise())
+[     6.141][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[     6.143][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[     6.145][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join(), l2 = filter())
+[    49.949][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[    50.943][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3(), l2 = filter())
+[    50.947][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4(), l2 = filter())
+[    50.949][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[    50.952][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[   373.202][cube-solver-1][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[   373.205][MainProcess][INFO] Statistics:
+[   373.206][MainProcess][INFO] 	Generated cubes: 21
+[   373.206][MainProcess][INFO] 	Attempted programs: 166
+[   373.207][MainProcess][INFO] 		Rejected: 142
+[   373.207][MainProcess][INFO] 		Failed: 23
+[   373.207][MainProcess][INFO] 	Blacklist clauses: 0
+[   373.207][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[   373.216][MainProcess][DEBUG] 	0: Counter({'mutate': 7200})
+[   373.219][MainProcess][DEBUG] 	1: Counter({'filter': 7200})
+[   373.219][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[   373.258][MainProcess][DEBUG] 	0: Counter({'summarise': 108840})
+[   373.286][MainProcess][DEBUG] 	1: Counter({'natural_join': 57860, 'filter': 50983})
+[   373.314][MainProcess][DEBUG] 	2: Counter({'filter': 57862, 'natural_join': 50983})
+[   373.314][MainProcess][INFO] Solution found: natural_join(filter(summarise(@param0, n_distinct = n_distinct(action), first_name), n_distinct == 2), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/040.csv", col_types = cols(id = col_integer(),timestamp = col_integer(),first_name = col_character(),last_name = col_character(),action = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/040_o.csv", col_types = cols(id = col_integer(),timestamp = col_integer(),first_name = col_character(),last_name = col_character(),action = col_character()))
+
+df2 <- input1 %>% group_by(first_name) %>% summarise(n_distinct = n_distinct(action)) %>% ungroup()
+df3 <- df2 %>% filter(n_distinct == 2)
+df4 <- inner_join(df3, input1)
+out <- df4 %>% select(id, timestamp, first_name, last_name, action) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       TIMESTAMP,
+       first_name,
+       last_name,
+       action
+FROM
+  (SELECT LHS.first_name AS first_name,
+          LHS.n_distinct AS n_distinct,
+          RHS.id AS id,
+          RHS.timestamp AS TIMESTAMP,
+          RHS.last_name AS last_name,
+          RHS.action AS action
+   FROM
+     (SELECT *
+      FROM
+        (SELECT first_name,
+                COUNT(DISTINCT action) AS n_distinct
+         FROM input1
+         GROUP BY first_name)
+      WHERE (n_distinct = 2.0)) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.first_name = RHS.first_name))
+ORDER BY id

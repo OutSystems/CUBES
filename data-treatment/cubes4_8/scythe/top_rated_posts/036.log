@@ -1,0 +1,90 @@
+[     3.680][MainProcess][INFO] Parsing specification...
+[     3.685][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.685][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.686][MainProcess][DEBUG] Reading input files...
+[     3.696][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i036.csv: ['string', 'datetime64[ns]', 'float64']
+[     3.703][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o036.csv: ['string', 'datetime64[ns]', 'float64']
+[     3.741][MainProcess][DEBUG] Generating DSL...
+[     3.903][MainProcess][INFO] Creating 8 processes
+[     3.930][MainProcess][DEBUG] Increasing generator loc to 2
+[     4.099][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.099][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     4.106][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     4.108][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     4.109][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     4.112][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     4.113][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     4.117][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     6.801][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.820][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     7.143][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     7.245][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     9.405][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     9.431][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     9.445][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     9.459][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     9.493][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     9.519][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     9.530][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     9.557][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     9.641][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     9.649][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     9.650][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     9.684][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     9.695][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     9.695][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[    10.740][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[    11.096][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[    11.124][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[    11.347][cube-solver-6][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[    11.361][cube-solver-6][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[    11.374][cube-solver-6][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[    11.389][cube-solver-6][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[    11.404][cube-solver-6][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[    11.751][cube-solver-6][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[    12.105][cube-solver-6][DEBUG] Solving cube (l0 = union(), l1 = summarise())
+[    12.251][cube-solver-7][DEBUG] Found solution with cube (l0 = summarise(), l1 = inner_join())
+[    12.252][MainProcess][INFO] Statistics:
+[    12.253][MainProcess][INFO] 	Generated cubes: 28
+[    12.253][MainProcess][INFO] 	Attempted programs: 139
+[    12.253][MainProcess][INFO] 		Rejected: 63
+[    12.253][MainProcess][INFO] 		Failed: 75
+[    12.254][MainProcess][INFO] 	Blacklist clauses: 0
+[    12.254][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    12.254][MainProcess][DEBUG] 	0: Counter({'mutate': 48, 'summarise': 36})
+[    12.255][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    12.256][MainProcess][DEBUG] 	0: Counter({'summarise': 1547, 'left_join': 84, 'union': 16})
+[    12.257][MainProcess][DEBUG] 	1: Counter({'left_join': 358, 'union': 331, 'anti_join': 252, 'cross_join': 195, 'semi_join': 144, 'inner_join': 123, 'filter': 120, 'mutate': 72, 'summarise': 52})
+[    12.258][MainProcess][INFO] Solution found: inner_join(summarise(@param0, maxdate = max(date), username), @param0, 'maxdate' = 'date')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i036.csv", col_types = cols(username = col_character(),date = col_character(),value = col_double()))
+input1$date <- ymd(input1$date)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o036.csv", col_types = cols(username = col_character(),date = col_character(),value = col_double()))
+expected_output$date <- ymd(expected_output$date)
+
+df2 <- input1 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
+df3 <- inner_join(df2, input1, by=c('maxdate' = 'date'), suffix = c('', '.other'))
+out <- df3 %>% select(username, date = maxdate, value) %>% arrange(username)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT username,
+       maxdate AS date,
+       value
+FROM
+  (SELECT LHS.username AS username,
+          LHS.maxdate AS maxdate,
+          RHS.username AS username.other,
+          RHS.value AS value
+   FROM
+     (SELECT username,
+             MAX(date) AS maxdate
+      FROM input1
+      GROUP BY username) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.maxdate = RHS.date))
+ORDER BY username

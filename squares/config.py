@@ -26,7 +26,8 @@ class Config:
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
     max_join_combinations: int = 2
-    max_columns: int = 6
+
+    full_cross_join: bool = True
 
     filters_function_enabled: bool = False
 

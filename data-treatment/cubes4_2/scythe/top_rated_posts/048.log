@@ -1,0 +1,65 @@
+[     1.584][MainProcess][INFO] Parsing specification...
+[     1.587][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.587][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.588][MainProcess][DEBUG] Reading input files...
+[     1.595][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i048.csv: ['string', 'int64', 'string']
+[     1.600][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o048.csv: ['string', 'int64', 'string']
+[     1.626][MainProcess][DEBUG] Generating DSL...
+[     1.793][MainProcess][INFO] Creating 2 processes
+[     1.945][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.960][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.408][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.437][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.825][MainProcess][DEBUG] Increasing generator loc to 2
+[     4.831][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     4.901][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     9.700][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     9.725][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([3]))
+[     9.739][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     9.751][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     9.764][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     9.776][cube-solver-0][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[     9.792][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     9.801][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[     9.803][MainProcess][INFO] Statistics:
+[     9.803][MainProcess][INFO] 	Generated cubes: 9
+[     9.803][MainProcess][INFO] 	Attempted programs: 15
+[     9.803][MainProcess][INFO] 		Rejected: 11
+[     9.803][MainProcess][INFO] 		Failed: 3
+[     9.804][MainProcess][INFO] 	Blacklist clauses: 3
+[     9.804][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     9.804][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     9.805][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     9.805][MainProcess][DEBUG] 	0: Counter({'summarise': 1})
+[     9.805][MainProcess][DEBUG] 	1: Counter({'natural_join': 1})
+[     9.805][MainProcess][INFO] Solution found: natural_join(summarise(@param0, AddressID = min(AddressID), CName), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i048.csv", col_types = cols(CName = col_character(),AddressID = col_integer(),AddressLine = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o048.csv", col_types = cols(CName = col_character(),minAddressID = col_integer(),AddressLine = col_character()))
+
+df2 <- input1 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CName,
+       AddressID AS minAddressID,
+       AddressLine
+FROM
+  (SELECT LHS.CName AS CName,
+          LHS.AddressID AS AddressID,
+          RHS.AddressLine AS AddressLine
+   FROM
+     (SELECT CName,
+             MIN(AddressID) AS AddressID
+      FROM input1
+      GROUP BY CName) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.CName = RHS.CName
+                                AND LHS.AddressID = RHS.AddressID))
+ORDER BY CName

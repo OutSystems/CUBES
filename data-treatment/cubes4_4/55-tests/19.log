@@ -1,0 +1,90 @@
+[     3.652][MainProcess][INFO] Parsing specification...
+[     3.657][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.657][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     3.658][MainProcess][DEBUG] Reading input files...
+[     3.668][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-1.txt: ['string', 'string']
+[     3.674][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-2.txt: ['string', 'string']
+[     3.680][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-3.txt: ['string', 'string']
+[     3.688][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19.out: ['string', 'string', 'string', 'string']
+[     3.726][MainProcess][DEBUG] Generating DSL...
+[     3.749][MainProcess][INFO] Creating 4 processes
+[     3.768][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.800][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.803][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.809][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.811][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.937][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     3.938][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     3.939][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     4.063][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter())
+[     4.065][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     4.068][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter())
+[     4.133][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter([3]))
+[     4.138][cube-solver-3][DEBUG] Solving cube (l0 = filter([3]), l1 = natural_join4())
+[     4.182][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = natural_join())
+[     4.185][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = filter([4]))
+[     4.189][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = anti_join())
+[     4.192][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = left_join())
+[     4.195][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = union())
+[     4.197][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = intersect())
+[     4.200][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = semi_join())
+[     4.203][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = cross_join())
+[     4.206][cube-solver-0][DEBUG] Solving cube (l0 = filter([4]), l1 = inner_join())
+[     4.206][cube-solver-3][DEBUG] Found solution with cube (l0 = filter([3]), l1 = natural_join4())
+[     4.207][MainProcess][INFO] Statistics:
+[     4.208][MainProcess][INFO] 	Generated cubes: 15
+[     4.208][MainProcess][INFO] 	Attempted programs: 2
+[     4.208][MainProcess][INFO] 		Rejected: 0
+[     4.208][MainProcess][INFO] 		Failed: 1
+[     4.208][MainProcess][INFO] 	Blacklist clauses: 4
+[     4.209][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     4.209][MainProcess][DEBUG] 	0: Counter({'filter': 13, 'natural_join3': 10})
+[     4.209][MainProcess][DEBUG] 	1: Counter({'natural_join3': 10, 'filter': 10, 'natural_join4': 3})
+[     4.210][MainProcess][INFO] Solution found: natural_join4(@param0, @param1, @param2, filter(@param1, color == 'red'))
+[     4.506][cube-solver-1][DEBUG] Found solution with cube (l0 = filter(), l1 = natural_join3())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/19-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/19-2.txt", col_types = cols(P_id = col_character(),color = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/19-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/19.out", col_types = cols(S_key = col_character(),P_id = col_character(),S_name = col_character(),color = col_character()))
+
+df4 <- input2 %>% filter(color == 'red')
+df5 <- inner_join(input1, input2) %>% inner_join(input3) %>% inner_join(df4)
+out <- df5 %>% select(S_key, P_id, S_name, color) %>% arrange(S_key)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_key`,
+       `P_id`,
+       `S_name`,
+       `color`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `LHS`.`P_id` AS `P_id`,
+          `LHS`.`color` AS `color`,
+          `LHS`.`S_name` AS `S_name`
+   FROM
+     (SELECT `LHS`.`S_key` AS `S_key`,
+             `LHS`.`P_id` AS `P_id`,
+             `LHS`.`color` AS `color`,
+             `RHS`.`S_name` AS `S_name`
+      FROM
+        (SELECT `LHS`.`S_key` AS `S_key`,
+                `LHS`.`P_id` AS `P_id`,
+                `RHS`.`color` AS `color`
+         FROM `input1` AS `LHS`
+         INNER JOIN `input2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+      INNER JOIN `input3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   INNER JOIN
+     (SELECT *
+      FROM `input2`
+      WHERE (`color` = 'red')) AS RHS ON (LHS.P_id = RHS.P_id
+                                          AND LHS.color = RHS.color))
+ORDER BY S_key

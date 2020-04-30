@@ -1,0 +1,86 @@
+[     1.659][MainProcess][INFO] Parsing specification...
+[     1.663][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.663][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.663][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.664][MainProcess][DEBUG] Reading input files...
+[     1.670][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.673][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/employees.txt: ['int64', 'string', 'int64']
+[     1.676][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/certified.txt: ['int64', 'int64']
+[     1.681][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/47.out: ['int64', 'string']
+[     1.711][MainProcess][DEBUG] Generating DSL...
+[     3.114][MainProcess][INFO] Creating 2 processes
+[     4.484][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.622][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[   192.010][cube-solver-1][WARNING] There is no solution for current loc (2).
+[   192.011][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[   192.113][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[   192.205][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[   192.206][MainProcess][DEBUG] Increasing generator loc to 3
+[   192.294][cube-solver-0][WARNING] There is no solution for current loc (2).
+[   192.295][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[   192.296][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[   192.457][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[   267.742][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[   268.073][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[   268.193][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[   268.328][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[   268.674][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[   268.947][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise())
+[   345.990][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[   345.995][MainProcess][INFO] Statistics:
+[   345.996][MainProcess][INFO] 	Generated cubes: 10
+[   345.996][MainProcess][INFO] 	Attempted programs: 1349
+[   345.996][MainProcess][INFO] 		Rejected: 295
+[   345.996][MainProcess][INFO] 		Failed: 1053
+[   345.997][MainProcess][INFO] 	Blacklist clauses: 0
+[   345.997][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[   346.004][MainProcess][DEBUG] 	0: Counter({'natural_join3': 8973})
+[   346.007][MainProcess][DEBUG] 	1: Counter({'filter': 5744, 'summarise': 3229})
+[   346.010][MainProcess][DEBUG] 	2: Counter({'summarise': 5744, 'filter': 3229})
+[   346.010][MainProcess][INFO] Solution found: filter(summarise(natural_join3(@param2, @param0, @param1), meansalary = mean(salary), aid, aname), meansalary <= 1000 | meansalary >= 250000)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/47.out", col_types = cols(aid = col_integer(),aname = col_character()))
+
+df4 <- inner_join(input3, input1) %>% inner_join(input2)
+df5 <- df4 %>% group_by(aid, aname) %>% summarise(meansalary = mean(salary)) %>% ungroup()
+df6 <- df5 %>% filter(meansalary <= 1000 | meansalary >= 250000)
+out <- df6 %>% select(aid, aname) %>% arrange(aid)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT aid,
+       aname
+FROM
+  (SELECT aid,
+          aname,
+          AVG(salary) AS meansalary
+   FROM
+     (SELECT LHS.eid AS eid,
+             LHS.aid AS aid,
+             LHS.aname AS aname,
+             LHS.crusingrange AS crusingrange,
+             RHS.ename AS ename,
+             RHS.salary AS salary
+      FROM
+        (SELECT LHS.eid AS eid,
+                LHS.aid AS aid,
+                RHS.aname AS aname,
+                RHS.crusingrange AS crusingrange
+         FROM input3 AS LHS
+         INNER JOIN input1 AS RHS ON (LHS.aid = RHS.aid)) AS LHS
+      INNER JOIN input2 AS RHS ON (LHS.eid = RHS.eid))
+   GROUP BY aid,
+            aname)
+WHERE (meansalary <= 1000.0
+       OR meansalary >= 250000.0)
+ORDER BY aid

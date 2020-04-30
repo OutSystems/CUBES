@@ -13,7 +13,7 @@ import logging
 from . import util
 from .config import Config
 from .decider import InstrumentedDecider
-from .dsl.dc import CubeGenerator, map_node
+from .dsl.dc import StatisticCubeGenerator, map_node
 from .dsl.interpreter import SquaresInterpreter
 from .dsl.specification import Specification
 from .exceptions import REvaluationError
@@ -40,6 +40,8 @@ def synthesize(enumerator, decider, blacklist_queue):
     prog = enumerator.next()
     while prog is not None:
         attempts += 1
+        if 'ID == ID.other & Company_group == Name.other' in str(prog):
+            print(prog)
         try:
             res = decider.analyze(prog, enumerator.current_roots)
             if res.is_ok():
@@ -165,7 +167,7 @@ class ParallelSynthesizer:
         solution = None
 
         loc = self.specification.min_loc
-        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
+        generator = StatisticCubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
         alternate_generator = None
         alternated = False
         left_to_assign = None
@@ -235,16 +237,18 @@ class ParallelSynthesizer:
                             cube = None
                             while cube is None:
                                 try:
+                                    logger.debug('%d programs saved so far', ResultsHolder().program_counter)
                                     cube = next(alternate_generator)
                                     ResultsHolder().increment_cubes()
                                 except (StopIteration, TypeError):
                                     logger.debug('Increasing alternate_generator loc to %d', loc + 1)
-                                    alternate_generator = CubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
+                                    alternate_generator = StatisticCubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
                                                                         blacklist)
                         else:
                             cube = None
                             while cube is None:
                                 try:
+                                    logger.debug('%d programs saved so far', ResultsHolder().program_counter)
                                     cube = next(generator)
                                     ResultsHolder().increment_cubes()
                                 except StopIteration:
@@ -253,10 +257,10 @@ class ParallelSynthesizer:
                                     loc += 1
                                     logger.debug('Increasing generator loc to %d', loc)
                                     if not alternated:
-                                        generator = CubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
+                                        generator = StatisticCubeGenerator(self.specification, self.tyrell_specification, loc, loc, blacklist)
                                     else:
                                         generator = alternate_generator
-                                        alternate_generator = CubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
+                                        alternate_generator = StatisticCubeGenerator(self.specification, self.tyrell_specification, loc + 1, loc + 1,
                                                                             blacklist)
 
                         this_loc = loc if fd not in alternates else loc + 1
@@ -265,6 +269,7 @@ class ParallelSynthesizer:
                             locs[fd] = this_loc
                             pipe.send((Message.INIT, this_loc))
                             poll.modify(fd, select.EPOLLIN)
+                            assert fd not in queue
                             queue[fd] = cube  # save this cube for later
                         else:
                             pipe.send((Message.SOLVE, cube))

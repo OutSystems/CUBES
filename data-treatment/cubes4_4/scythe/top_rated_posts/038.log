@@ -1,0 +1,88 @@
+[     1.646][MainProcess][INFO] Parsing specification...
+[     1.648][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.649][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.649][MainProcess][DEBUG] Reading input files...
+[     1.657][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i038.csv: ['int64', 'string', 'string']
+[     1.662][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o038.csv: ['int64', 'string', 'string']
+[     1.688][MainProcess][DEBUG] Generating DSL...
+[     1.708][MainProcess][INFO] Creating 4 processes
+[     1.750][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.753][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.756][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.760][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.008][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     2.012][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     2.012][MainProcess][DEBUG] Increasing generator loc to 3
+[     2.013][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     2.013][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     2.019][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     2.021][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     2.457][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[     2.459][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[     2.461][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[     2.463][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[     2.464][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise())
+[     2.466][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = mutate())
+[     2.467][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate(), l2 = filter())
+[     2.470][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise(), l2 = filter())
+[     2.471][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise())
+[     2.472][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[     2.474][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[     2.475][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join(), l2 = filter())
+[     2.510][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     2.513][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3(), l2 = filter())
+[     2.515][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4(), l2 = filter())
+[     2.518][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[     2.520][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[     3.201][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = natural_join())
+[     3.203][MainProcess][INFO] Statistics:
+[     3.203][MainProcess][INFO] 	Generated cubes: 21
+[     3.203][MainProcess][INFO] 	Attempted programs: 22
+[     3.203][MainProcess][INFO] 		Rejected: 4
+[     3.203][MainProcess][INFO] 		Failed: 17
+[     3.203][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.204][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     3.204][MainProcess][DEBUG] 	0: Counter({'mutate': 173, 'summarise': 147})
+[     3.204][MainProcess][DEBUG] 	1: Counter({'filter': 320})
+[     3.205][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[     3.205][MainProcess][DEBUG] 	0: Counter({'summarise': 168})
+[     3.205][MainProcess][DEBUG] 	1: Counter({'natural_join': 107, 'filter': 61})
+[     3.205][MainProcess][DEBUG] 	2: Counter({'filter': 107, 'natural_join': 61})
+[     3.205][MainProcess][INFO] Solution found: natural_join(@param0, filter(summarise(@param0, n = n(), city, name), n > 1))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i038.csv", col_types = cols(id = col_integer(),name = col_character(),city = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o038.csv", col_types = cols(id = col_integer(),name = col_character(),city = col_character()))
+
+df2 <- input1 %>% group_by(city, name) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 1)
+df4 <- inner_join(input1, df3)
+out <- df4 %>% select(id, name, city) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       name,
+       city
+FROM
+  (SELECT LHS.id AS id,
+          LHS.name AS name,
+          LHS.city AS city,
+          RHS.n AS n
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT *
+      FROM
+        (SELECT city,
+                name,
+                COUNT() AS n
+         FROM input1
+         GROUP BY city,
+                  name)
+      WHERE (n > 1.0)) AS RHS ON (LHS.name = RHS.name
+                                  AND LHS.city = RHS.city))
+ORDER BY id

@@ -1,0 +1,78 @@
+[     1.569][MainProcess][INFO] Parsing specification...
+[     1.572][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.572][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.573][MainProcess][DEBUG] Reading input files...
+[     1.581][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/18-1.txt: ['string', 'string', 'int64']
+[     1.585][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/18-3.txt: ['string', 'string']
+[     1.590][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/18.out: ['string', 'string']
+[     1.617][MainProcess][DEBUG] Generating DSL...
+[     1.779][MainProcess][INFO] Creating 2 processes
+[     1.933][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.940][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     4.447][cube-solver-1][WARNING] There is no solution for current loc (1).
+[     4.448][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.449][MainProcess][DEBUG] Increasing generator loc to 2
+[     4.455][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.473][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     4.474][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.492][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     9.508][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     9.582][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[    10.485][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[    10.503][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    10.517][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[    10.532][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[    10.545][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[    11.513][cube-solver-1][DEBUG] Solving cube (l0 = summarise([22]), l1 = natural_join3())
+[    12.404][cube-solver-0][DEBUG] Solving cube (l0 = summarise([31]), l1 = natural_join4())
+[    12.428][cube-solver-0][DEBUG] Solving cube (l0 = summarise([31]), l1 = summarise([31]))
+[    12.460][cube-solver-0][DEBUG] Solving cube (l0 = summarise([31]), l1 = filter())
+[    12.490][cube-solver-0][DEBUG] Solving cube (l0 = summarise([31]), l1 = anti_join())
+[    13.682][cube-solver-1][DEBUG] Found solution with cube (l0 = summarise([22]), l1 = natural_join3())
+[    13.683][MainProcess][INFO] Statistics:
+[    13.683][MainProcess][INFO] 	Generated cubes: 14
+[    13.683][MainProcess][INFO] 	Attempted programs: 152
+[    13.683][MainProcess][INFO] 		Rejected: 56
+[    13.683][MainProcess][INFO] 		Failed: 95
+[    13.684][MainProcess][INFO] 	Blacklist clauses: 31
+[    13.684][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    13.685][MainProcess][DEBUG] 	0: Counter({'summarise': 603, 'natural_join': 400})
+[    13.686][MainProcess][DEBUG] 	1: Counter({'natural_join3': 347, 'summarise': 272, 'natural_join': 192, 'mutate': 128, 'anti_join': 64})
+[    13.686][MainProcess][INFO] Solution found: natural_join3(@param0, summarise(@param0, cost = max(cost), P_id), @param1)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/18-1.txt", col_types = cols(S_key = col_character(),P_id = col_character(),cost = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/18-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/18.out", col_types = cols(P_id = col_character(),S_name = col_character()))
+
+df3 <- input1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
+df4 <- inner_join(input1, df3) %>% inner_join(input2)
+out <- df4 %>% select(P_id, S_name) %>% arrange(P_id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT P_id,
+       S_name
+FROM
+  (SELECT LHS.S_key AS S_key,
+          LHS.P_id AS P_id,
+          LHS.cost AS cost,
+          RHS.S_name AS S_name
+   FROM
+     (SELECT LHS.S_key AS S_key,
+             LHS.P_id AS P_id,
+             LHS.cost AS cost
+      FROM input1 AS LHS
+      INNER JOIN
+        (SELECT P_id,
+                MAX(cost) AS cost
+         FROM input1
+         GROUP BY P_id) AS RHS ON (LHS.P_id = RHS.P_id
+                                   AND LHS.cost = RHS.cost)) AS LHS
+   INNER JOIN input2 AS RHS ON (LHS.S_key = RHS.S_key))
+ORDER BY P_id

@@ -1,0 +1,38 @@
+[     1.602][MainProcess][INFO] Parsing specification...
+[     1.605][MainProcess][DEBUG] Reading input files...
+[     1.612][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i022.csv: ['int64', 'int64']
+[     1.615][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o022.csv: ['int64']
+[     1.641][MainProcess][DEBUG] Generating DSL...
+[     1.801][MainProcess][INFO] Creating 2 processes
+[     1.948][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.951][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.405][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.444][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.458][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     4.459][MainProcess][INFO] Statistics:
+[     4.460][MainProcess][INFO] 	Generated cubes: 2
+[     4.460][MainProcess][INFO] 	Attempted programs: 1
+[     4.460][MainProcess][INFO] 		Rejected: 0
+[     4.460][MainProcess][INFO] 		Failed: 0
+[     4.460][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.461][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.461][MainProcess][DEBUG] 	0: Counter({'mutate': 6})
+[     4.461][MainProcess][INFO] Solution found: mutate(@param0, medianval = median(val))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i022.csv", col_types = cols(id = col_integer(),val = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o022.csv", col_types = cols(median = col_integer()))
+
+df2 <- input1 %>% mutate(medianval = median(val))
+out <- df2 %>% select(median = medianval) %>% distinct() %>% arrange(median)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT PERCENTILE_CONT(0.5) WITHIN GROUP (
+                                                   ORDER BY val) OVER () AS median
+FROM input1
+ORDER BY median

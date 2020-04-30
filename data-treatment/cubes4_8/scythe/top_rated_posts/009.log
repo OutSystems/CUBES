@@ -1,0 +1,78 @@
+[     3.443][MainProcess][INFO] Parsing specification...
+[     3.448][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.448][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.449][MainProcess][DEBUG] Reading input files...
+[     3.458][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i009.csv: ['string', 'string', 'int64']
+[     3.464][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o009.csv: ['string', 'string', 'int64']
+[     3.493][MainProcess][DEBUG] Generating DSL...
+[     3.666][MainProcess][INFO] Creating 8 processes
+[     3.698][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.863][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.867][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.868][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.869][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.876][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.882][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.886][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.889][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     6.606][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.608][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     7.076][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     7.106][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     9.372][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     9.375][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     9.400][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([3]))
+[     9.403][cube-solver-6][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[     9.419][cube-solver-6][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter())
+[     9.421][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[     9.420][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     9.433][cube-solver-4][DEBUG] Solving cube (l0 = summarise([3]), l1 = anti_join())
+[     9.437][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     9.440][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     9.443][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = left_join())
+[     9.465][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = union())
+[     9.467][cube-solver-7][DEBUG] Solving cube (l0 = summarise([3]), l1 = intersect())
+[     9.486][cube-solver-5][DEBUG] Solving cube (l0 = summarise([3]), l1 = semi_join())
+[     9.935][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = left_join())
+[     9.936][MainProcess][INFO] Statistics:
+[     9.937][MainProcess][INFO] 	Generated cubes: 18
+[     9.937][MainProcess][INFO] 	Attempted programs: 18
+[     9.937][MainProcess][INFO] 		Rejected: 14
+[     9.937][MainProcess][INFO] 		Failed: 3
+[     9.937][MainProcess][INFO] 	Blacklist clauses: 3
+[     9.937][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     9.938][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     9.938][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     9.938][MainProcess][DEBUG] 	0: Counter({'summarise': 222})
+[     9.938][MainProcess][DEBUG] 	1: Counter({'union': 52, 'left_join': 51, 'filter': 41, 'semi_join': 40, 'anti_join': 38})
+[     9.938][MainProcess][INFO] Solution found: left_join(summarise(@param0, time_stamp = max(time_stamp), username), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+
+df2 <- input1 %>% group_by(username) %>% summarise(time_stamp = max(time_stamp)) %>% ungroup()
+df3 <- left_join(df2, input1)
+out <- df3 %>% select(username, ip, time_stamp) %>% arrange(username)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT username,
+       ip,
+       time_stamp
+FROM
+  (SELECT LHS.username AS username,
+          LHS.time_stamp AS time_stamp,
+          RHS.ip AS ip
+   FROM
+     (SELECT username,
+             MAX(time_stamp) AS time_stamp
+      FROM input1
+      GROUP BY username) AS LHS
+   LEFT JOIN input1 AS RHS ON (LHS.username = RHS.username
+                               AND LHS.time_stamp = RHS.time_stamp))
+ORDER BY username

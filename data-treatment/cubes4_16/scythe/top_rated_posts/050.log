@@ -1,0 +1,57 @@
+[     1.592][MainProcess][INFO] Parsing specification...
+[     1.606][MainProcess][DEBUG] Reading input files...
+[     1.631][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i050.csv: ['int64', 'int64', 'int64', 'int64']
+[     1.652][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o050.csv: ['int64', 'int64', 'int64', 'int64', 'int64']
+[     1.680][MainProcess][DEBUG] Generating DSL...
+[     4.638][MainProcess][INFO] Creating 16 processes
+[     4.731][MainProcess][DEBUG] Increasing generator loc to 2
+[     8.207][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     8.222][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     8.231][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     8.269][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     8.269][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     8.278][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     8.283][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     8.285][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     8.311][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     8.318][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     8.319][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     8.320][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     8.322][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     8.342][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     8.368][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     8.410][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[   293.187][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[   295.466][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[   302.870][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[   309.865][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[   309.867][MainProcess][INFO] Statistics:
+[   309.868][MainProcess][INFO] 	Generated cubes: 17
+[   309.868][MainProcess][INFO] 	Attempted programs: 76
+[   309.868][MainProcess][INFO] 		Rejected: 75
+[   309.868][MainProcess][INFO] 		Failed: 0
+[   309.868][MainProcess][INFO] 	Blacklist clauses: 0
+[   309.868][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[   309.869][MainProcess][DEBUG] 	0: Counter({'mutate': 1201})
+[   309.870][MainProcess][INFO] Solution found: mutate(@param0, pmin = pmin(Col1,Col2,Col3))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i050.csv", col_types = cols(ID = col_integer(),Col1 = col_integer(),Col2 = col_integer(),Col3 = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o050.csv", col_types = cols(ID = col_integer(),Col1 = col_integer(),Col2 = col_integer(),Col3 = col_integer(),TheMin = col_integer()))
+
+df2 <- input1 %>% mutate(pmin = pmin(Col1,Col2,Col3))
+out <- df2 %>% select(ID, Col1, Col2, Col3, TheMin = pmin) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       Col1,
+       Col2,
+       Col3,
+       MIN(Col1, Col2, Col3) AS TheMin
+FROM input1
+ORDER BY ID

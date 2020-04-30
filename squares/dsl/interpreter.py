@@ -148,7 +148,10 @@ class SquaresInterpreter(PostOrderInterpreter):
     @cached
     def eval_cross_join(self, node, args):
         name = self.fresh_table()
-        _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col" %>% select(-tmp.col))'
+        if args[2] == '':
+            _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col))'
+        else:
+            _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter({args[2]})'
         return self.save_and_try_execute(_script, name, node)
 
     @cached
@@ -199,7 +202,7 @@ class SquaresInterpreter(PostOrderInterpreter):
         if logger.isEnabledFor(logging.DEBUG):
             a_dim = tuple(robjects.r(f'dim({actual})'))
             e_dim = tuple(robjects.r(f'dim({expect})'))
-            if a_dim[0] == e_dim[0] or a_dim[1] == e_dim[1]:
+            if a_dim[0] == e_dim[0] and a_dim[1] == e_dim[1]:
                 if util.get_program_queue():
                     util.get_program_queue().put(tuple(r.production.name for r in args[0]))
 

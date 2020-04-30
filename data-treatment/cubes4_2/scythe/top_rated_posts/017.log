@@ -1,0 +1,60 @@
+[     1.678][MainProcess][INFO] Parsing specification...
+[     1.682][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.682][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.682][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.683][MainProcess][DEBUG] Reading input files...
+[     1.695][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i017.csv: ['int64', 'string', 'string']
+[     1.701][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o017.csv: ['int64', 'string', 'string']
+[     1.728][MainProcess][DEBUG] Generating DSL...
+[     1.917][MainProcess][INFO] Creating 2 processes
+[     2.093][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     2.113][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     7.756][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     7.757][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     8.339][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     8.748][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     9.536][MainProcess][DEBUG] Increasing generator loc to 3
+[     9.551][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[    12.046][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[    18.776][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]), l2 = filter())
+[    18.818][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[    18.837][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[    18.855][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([3]), l2 = filter())
+[    18.875][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise([3]))
+[    18.896][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = mutate())
+[    18.915][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate(), l2 = filter())
+[    18.933][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]), l2 = filter())
+[    18.953][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise([3]))
+[    18.974][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[    18.993][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[    19.011][cube-solver-0][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join(), l2 = filter())
+[    20.605][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join(), l2 = filter())
+[    20.606][MainProcess][INFO] Statistics:
+[    20.606][MainProcess][INFO] 	Generated cubes: 17
+[    20.607][MainProcess][INFO] 	Attempted programs: 104
+[    20.607][MainProcess][INFO] 		Rejected: 43
+[    20.607][MainProcess][INFO] 		Failed: 60
+[    20.607][MainProcess][INFO] 	Blacklist clauses: 3
+[    20.607][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    20.608][MainProcess][DEBUG] 	0: Counter({'mutate': 540, 'summarise': 156, 'filter': 108})
+[    20.609][MainProcess][DEBUG] 	1: Counter({'filter': 696, 'mutate': 60, 'summarise': 48})
+[    20.609][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[    20.610][MainProcess][DEBUG] 	0: Counter({'summarise': 261})
+[    20.610][MainProcess][DEBUG] 	1: Counter({'natural_join': 261})
+[    20.610][MainProcess][DEBUG] 	2: Counter({'filter': 261})
+[    20.610][MainProcess][INFO] Solution found: filter(natural_join(summarise(@param0, minID = min(ID), PRODUCT), @param0), str_detect(SKU, 'FOO-') & minID == ID)
+[    20.974][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i017.csv", col_types = cols(ID = col_integer(),SKU = col_character(),PRODUCT = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o017.csv", col_types = cols(ID = col_integer(),SKU = col_character(),PRODUCT = col_character()))
+
+df2 <- input1 %>% group_by(PRODUCT) %>% summarise(minID = min(ID)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+df4 <- df3 %>% filter(str_detect(SKU, 'FOO-') & minID == ID)
+out <- df4 %>% select(ID = minID, SKU, PRODUCT) %>% arrange(ID)
+
+Failed to generate SQL query

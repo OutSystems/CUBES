@@ -1,0 +1,100 @@
+[     3.262][MainProcess][INFO] Parsing specification...
+[     3.267][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.267][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.267][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     3.268][MainProcess][DEBUG] Reading input files...
+[     3.276][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-1.txt: ['string', 'string']
+[     3.281][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-2.txt: ['string', 'string']
+[     3.285][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-3.txt: ['string', 'string']
+[     3.291][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-4.txt: ['string', 'string', 'int64']
+[     3.294][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2.out: ['int64']
+[     3.329][MainProcess][DEBUG] Generating DSL...
+[     3.614][MainProcess][INFO] Creating 8 processes
+[     3.647][MainProcess][DEBUG] Increasing generator loc to 3
+[     3.954][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.958][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     3.965][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     3.980][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.986][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.988][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.996][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     3.998][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[    18.087][cube-solver-2][WARNING] There is no solution for current loc (2).
+[    18.088][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[    18.134][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[    18.322][cube-solver-3][WARNING] There is no solution for current loc (2).
+[    18.323][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[    18.348][cube-solver-3][DEBUG] Initialising process for 3 lines of code.
+[    18.455][cube-solver-0][WARNING] There is no solution for current loc (2).
+[    18.456][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[    18.466][cube-solver-1][WARNING] There is no solution for current loc (2).
+[    18.467][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[    18.492][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[    18.495][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[    23.646][cube-solver-4][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[    23.708][cube-solver-6][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[    23.762][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise(), l2 = filter())
+[    23.836][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise())
+[    23.875][cube-solver-7][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[    23.962][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4([4]), l1 = filter(), l2 = mutate())
+[    24.136][cube-solver-5][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[    24.222][cube-solver-5][DEBUG] Solving cube (l0 = natural_join4([10]), l1 = mutate(), l2 = filter())
+[    24.527][cube-solver-7][DEBUG] Found solution with cube (l0 = natural_join4([4]), l1 = filter(), l2 = mutate())
+[    24.528][MainProcess][INFO] Statistics:
+[    24.529][MainProcess][INFO] 	Generated cubes: 16
+[    24.529][MainProcess][INFO] 	Attempted programs: 10
+[    24.529][MainProcess][INFO] 		Rejected: 3
+[    24.529][MainProcess][INFO] 		Failed: 6
+[    24.529][MainProcess][INFO] 	Blacklist clauses: 10
+[    24.530][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[    24.530][MainProcess][DEBUG] 	0: Counter({'natural_join4': 82})
+[    24.530][MainProcess][DEBUG] 	1: Counter({'filter': 56, 'mutate': 26})
+[    24.531][MainProcess][DEBUG] 	2: Counter({'mutate': 46, 'filter': 26, 'summarise': 10})
+[    24.531][MainProcess][INFO] Solution found: mutate(filter(natural_join4(@param1, @param0, @param3, @param2), F_name == 'faculty1' & major != 'History'), age = max(age))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/2-1.txt", col_types = cols(C_name = col_character(),F_key = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/2-2.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/textbook/tables/2-3.txt", col_types = cols(F_key = col_character(),F_name = col_character()))
+input3 <- copy_to(con, input3)
+input4 <- read_csv("tests-examples/textbook/tables/2-4.txt", col_types = cols(S_key = col_character(),major = col_character(),age = col_integer()))
+input4 <- copy_to(con, input4)
+expected_output <- read_csv("tests-examples/textbook/tables/2.out", col_types = cols(maxage = col_integer()))
+
+df5 <- inner_join(input2, input1) %>% inner_join(input4) %>% inner_join(input3)
+df6 <- df5 %>% filter(F_name == 'faculty1' & major != 'History')
+df7 <- df6 %>% mutate(age = max(age))
+out <- df7 %>% select(maxage = age) %>% distinct() %>% arrange(maxage)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT MAX(`age`) OVER () AS `maxage`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `LHS`.`C_name` AS `C_name`,
+          `LHS`.`F_key` AS `F_key`,
+          `LHS`.`major` AS `major`,
+          `LHS`.`age` AS `age`,
+          `RHS`.`F_name` AS `F_name`
+   FROM
+     (SELECT `LHS`.`S_key` AS `S_key`,
+             `LHS`.`C_name` AS `C_name`,
+             `LHS`.`F_key` AS `F_key`,
+             `RHS`.`major` AS `major`,
+             `RHS`.`age` AS `age`
+      FROM
+        (SELECT `LHS`.`S_key` AS `S_key`,
+                `LHS`.`C_name` AS `C_name`,
+                `RHS`.`F_key` AS `F_key`
+         FROM `input2` AS `LHS`
+         INNER JOIN `input1` AS `RHS` ON (`LHS`.`C_name` = `RHS`.`C_name`)) AS `LHS`
+      INNER JOIN `input4` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   INNER JOIN `input3` AS `RHS` ON (`LHS`.`F_key` = `RHS`.`F_key`))
+WHERE (`F_name` = 'faculty1'
+       AND `major` != 'History')
+ORDER BY maxage

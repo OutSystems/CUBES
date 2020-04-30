@@ -1,0 +1,90 @@
+[     3.449][MainProcess][INFO] Parsing specification...
+[     3.454][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.454][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.454][MainProcess][DEBUG] Reading input files...
+[     3.465][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i051.csv: ['int64', 'string', 'datetime64[ns]']
+[     3.471][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o051.csv: ['int64', 'string', 'datetime64[ns]']
+[     3.509][MainProcess][DEBUG] Generating DSL...
+[     3.674][MainProcess][INFO] Creating 8 processes
+[     3.706][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.850][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.857][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.871][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.873][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.874][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.878][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.886][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.894][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     6.533][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.586][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.926][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     6.962][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     9.245][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     9.255][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     9.320][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     9.330][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     9.340][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     9.349][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     9.352][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     9.352][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     9.354][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     9.357][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     9.375][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     9.375][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     9.382][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     9.385][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[    10.680][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[    10.687][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[    10.793][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[    10.940][cube-solver-5][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[    10.954][cube-solver-5][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[    10.967][cube-solver-5][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[    10.982][cube-solver-5][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[    10.996][cube-solver-5][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[    11.338][cube-solver-5][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[    11.683][cube-solver-5][DEBUG] Solving cube (l0 = union(), l1 = summarise())
+[    11.742][cube-solver-3][DEBUG] Found solution with cube (l0 = summarise(), l1 = inner_join())
+[    11.744][MainProcess][INFO] Statistics:
+[    11.744][MainProcess][INFO] 	Generated cubes: 28
+[    11.744][MainProcess][INFO] 	Attempted programs: 137
+[    11.744][MainProcess][INFO] 		Rejected: 64
+[    11.744][MainProcess][INFO] 		Failed: 72
+[    11.745][MainProcess][INFO] 	Blacklist clauses: 0
+[    11.745][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    11.746][MainProcess][DEBUG] 	0: Counter({'mutate': 48, 'summarise': 36})
+[    11.746][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    11.747][MainProcess][DEBUG] 	0: Counter({'summarise': 1380, 'left_join': 84, 'union': 7})
+[    11.748][MainProcess][DEBUG] 	1: Counter({'union': 332, 'left_join': 316, 'anti_join': 192, 'semi_join': 144, 'cross_join': 144, 'filter': 120, 'inner_join': 108, 'mutate': 72, 'summarise': 43})
+[    11.749][MainProcess][INFO] Solution found: inner_join(summarise(@param0, maxdate = max(date), category), @param0, 'maxdate' = 'date')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i051.csv", col_types = cols(id = col_integer(),category = col_character(),date = col_character()))
+input1$date <- ymd(input1$date)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o051.csv", col_types = cols(id = col_integer(),category = col_character(),date = col_character()))
+expected_output$date <- ymd(expected_output$date)
+
+df2 <- input1 %>% group_by(category) %>% summarise(maxdate = max(date)) %>% ungroup()
+df3 <- inner_join(df2, input1, by=c('maxdate' = 'date'), suffix = c('', '.other'))
+out <- df3 %>% select(id, category = category.other, date = maxdate) %>% distinct() %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT id,
+                category.other AS category,
+                maxdate AS date
+FROM
+  (SELECT LHS.category AS category,
+          LHS.maxdate AS maxdate,
+          RHS.id AS id,
+          RHS.category AS category.other
+   FROM
+     (SELECT category,
+             MAX(date) AS maxdate
+      FROM input1
+      GROUP BY category) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.maxdate = RHS.date))
+ORDER BY id

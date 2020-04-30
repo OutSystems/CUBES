@@ -1,0 +1,41 @@
+[     3.653][MainProcess][INFO] Parsing specification...
+[     3.659][MainProcess][DEBUG] Reading input files...
+[     3.668][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i044.csv: ['int64', 'int64']
+[     3.674][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o044.csv: ['int64', 'int64', 'int64']
+[     3.713][MainProcess][DEBUG] Generating DSL...
+[     3.943][MainProcess][INFO] Creating 4 processes
+[     3.964][MainProcess][DEBUG] Increasing generator loc to 2
+[     4.133][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.139][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     4.141][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     4.154][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     6.651][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.676][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     6.678][MainProcess][INFO] Statistics:
+[     6.678][MainProcess][INFO] 	Generated cubes: 4
+[     6.678][MainProcess][INFO] 	Attempted programs: 1
+[     6.678][MainProcess][INFO] 		Rejected: 0
+[     6.678][MainProcess][INFO] 		Failed: 0
+[     6.678][MainProcess][INFO] 	Blacklist clauses: 0
+[     6.678][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     6.679][MainProcess][DEBUG] 	0: Counter({'mutate': 1})
+[     6.679][MainProcess][INFO] Solution found: mutate(@param0, cumsumcount = cumsum(count))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i044.csv", col_types = cols(id = col_integer(),count = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o044.csv", col_types = cols(id = col_integer(),count = col_integer(),sumcount = col_integer()))
+
+df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
+out <- df2 %>% select(id, count, sumcount = cumsumcount) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       COUNT,
+       SUM(COUNT) OVER (ROWS UNBOUNDED PRECEDING) AS sumcount
+FROM input1
+ORDER BY id

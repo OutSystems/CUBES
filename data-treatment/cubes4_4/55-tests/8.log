@@ -1,0 +1,56 @@
+[     1.651][MainProcess][INFO] Parsing specification...
+[     1.654][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.654][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.654][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.655][MainProcess][DEBUG] Reading input files...
+[     1.663][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/8-1.txt: ['string', 'string', 'int64']
+[     1.667][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/8.out: ['string', 'int64']
+[     1.693][MainProcess][DEBUG] Generating DSL...
+[     1.729][MainProcess][INFO] Creating 4 processes
+[     1.786][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.792][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.797][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.799][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.832][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     2.839][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     2.854][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     2.854][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     3.224][MainProcess][DEBUG] Increasing generator loc to 3
+[     3.225][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     3.550][cube-solver-1][DEBUG] Found solution with cube (l0 = filter(), l1 = summarise())
+[     3.551][MainProcess][INFO] Statistics:
+[     3.552][MainProcess][INFO] 	Generated cubes: 5
+[     3.552][MainProcess][INFO] 	Attempted programs: 14
+[     3.552][MainProcess][INFO] 		Rejected: 13
+[     3.552][MainProcess][INFO] 		Failed: 0
+[     3.552][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.553][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     3.553][MainProcess][DEBUG] 	0: Counter({'filter': 141, 'mutate': 101, 'summarise': 24})
+[     3.554][MainProcess][DEBUG] 	1: Counter({'filter': 125, 'summarise': 93, 'mutate': 48})
+[     3.554][MainProcess][INFO] Solution found: summarise(filter(@param0, level != 'JR'), meanage = mean(age), level)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/8-1.txt", col_types = cols(S_key = col_character(),level = col_character(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/8.out", col_types = cols(level = col_character(),meanage = col_integer()))
+
+df2 <- input1 %>% filter(level != 'JR')
+df3 <- df2 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+out <- df3 %>% select(level, meanage) %>% arrange(level)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `level`,
+       `meanage`
+FROM
+  (SELECT `level`,
+          AVG(`age`) AS `meanage`
+   FROM
+     (SELECT *
+      FROM `input1`
+      WHERE (`level` != 'JR'))
+   GROUP BY LEVEL)
+ORDER BY LEVEL

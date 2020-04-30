@@ -159,6 +159,7 @@ class Specification:
         condition_generator.generate_summarise()
         condition_generator.generate_filter()
         condition_generator.generate_inner_join()
+        condition_generator.generate_cross_join()
 
         dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'Table')
 
@@ -174,6 +175,9 @@ class Specification:
 
         if 'inner_join' not in util.get_config().disabled and condition_generator.inner_join_conditions:
             dsl.add_enum(DSLEnum('JoinCondition', condition_generator.inner_join_conditions))
+
+        if 'cross_join' not in util.get_config().disabled and condition_generator.cross_join_conditions:
+            dsl.add_enum(DSLEnum('CrossJoinCondition', condition_generator.cross_join_conditions))
 
         if condition_generator.filter_conditions:
             dsl.add_enum(DSLEnum('FilterCondition', condition_generator.filter_conditions))

@@ -1,0 +1,68 @@
+[     3.568][MainProcess][INFO] Parsing specification...
+[     3.573][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.574][MainProcess][DEBUG] Reading input files...
+[     3.581][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i019.csv: ['int64', 'int64']
+[     3.586][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o019.csv: ['int64', 'int64', 'int64']
+[     3.616][MainProcess][DEBUG] Generating DSL...
+[     3.643][MainProcess][INFO] Creating 4 processes
+[     3.659][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.691][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.694][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.695][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.699][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.834][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.859][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.939][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.988][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     3.990][cube-solver-3][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     3.991][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     3.992][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     3.993][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     3.998][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     4.003][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[     4.008][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     4.011][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     4.014][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     4.015][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     4.220][cube-solver-3][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     4.222][MainProcess][INFO] Statistics:
+[     4.222][MainProcess][INFO] 	Generated cubes: 14
+[     4.223][MainProcess][INFO] 	Attempted programs: 7
+[     4.223][MainProcess][INFO] 		Rejected: 6
+[     4.223][MainProcess][INFO] 		Failed: 0
+[     4.223][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.223][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.224][MainProcess][DEBUG] 	0: Counter({'mutate': 12, 'summarise': 12})
+[     4.224][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     4.224][MainProcess][DEBUG] 	0: Counter({'summarise': 29})
+[     4.224][MainProcess][DEBUG] 	1: Counter({'natural_join': 25, 'anti_join': 4})
+[     4.225][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, n = n(), age))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i019.csv", col_types = cols(id = col_integer(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o019.csv", col_types = cols(id = col_integer(),age = col_integer(),n = col_integer()))
+
+df2 <- input1 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(id, age, n) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       age,
+       n
+FROM
+  (SELECT LHS.id AS id,
+          LHS.age AS age,
+          RHS.n AS n
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT age,
+             COUNT() AS n
+      FROM input1
+      GROUP BY age) AS RHS ON (LHS.age = RHS.age))
+ORDER BY id

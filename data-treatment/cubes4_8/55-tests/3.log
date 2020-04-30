@@ -1,0 +1,85 @@
+[     2.953][MainProcess][INFO] Parsing specification...
+[     2.956][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.957][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.957][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     2.958][MainProcess][DEBUG] Reading input files...
+[     2.965][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/3-1.txt: ['string', 'string']
+[     2.970][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/3-2.txt: ['string', 'string']
+[     2.974][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/3.out: ['string']
+[     3.004][MainProcess][DEBUG] Generating DSL...
+[     3.034][MainProcess][INFO] Creating 8 processes
+[     3.065][MainProcess][DEBUG] Increasing generator loc to 3
+[     3.087][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.092][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.095][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.103][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     3.104][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.104][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     3.107][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     3.115][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     3.621][cube-solver-0][WARNING] There is no solution for current loc (2).
+[     3.622][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     3.624][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     3.639][cube-solver-2][WARNING] There is no solution for current loc (2).
+[     3.639][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     3.643][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     3.644][cube-solver-1][WARNING] There is no solution for current loc (2).
+[     3.645][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     3.646][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     3.704][cube-solver-3][WARNING] There is no solution for current loc (2).
+[     3.705][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     3.709][cube-solver-3][DEBUG] Initialising process for 3 lines of code.
+[     4.003][cube-solver-6][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[     4.008][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise(), l2 = filter())
+[     4.012][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise())
+[     4.015][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[     4.018][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[     4.020][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join(), l2 = filter())
+[     4.021][cube-solver-4][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     4.047][cube-solver-5][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[     4.054][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3(), l2 = filter())
+[     4.079][cube-solver-7][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[     4.460][cube-solver-6][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join(), l2 = filter())
+[     4.461][MainProcess][INFO] Statistics:
+[     4.461][MainProcess][INFO] 	Generated cubes: 18
+[     4.462][MainProcess][INFO] 	Attempted programs: 10
+[     4.462][MainProcess][INFO] 		Rejected: 6
+[     4.462][MainProcess][INFO] 		Failed: 3
+[     4.462][MainProcess][INFO] 	Blacklist clauses: 1
+[     4.462][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[     4.463][MainProcess][DEBUG] 	0: Counter({'summarise': 75, 'natural_join': 43})
+[     4.463][MainProcess][DEBUG] 	1: Counter({'mutate': 43, 'natural_join3': 38, 'natural_join': 37})
+[     4.464][MainProcess][DEBUG] 	2: Counter({'filter': 119})
+[     4.464][MainProcess][INFO] Solution found: filter(natural_join(summarise(@param1, n = n(), ID_key), @param0), Room == 'R128' | n > 4)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/3-1.txt", col_types = cols(ID_key = col_character(),Room = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/3-2.txt", col_types = cols(ID_key_student = col_character(),ID_key = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/3.out", col_types = cols(ID_key = col_character()))
+
+df3 <- input2 %>% group_by(ID_key) %>% summarise(n = n()) %>% ungroup()
+df4 <- inner_join(df3, input1)
+df5 <- df4 %>% filter(Room == 'R128' | n > 4)
+out <- df5 %>% select(ID_key) %>% arrange(ID_key)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `ID_key`
+FROM
+  (SELECT `LHS`.`ID_key` AS `ID_key`,
+          `LHS`.`n` AS `n`,
+          `RHS`.`Room` AS `Room`
+   FROM
+     (SELECT `ID_key`,
+             COUNT() AS `n`
+      FROM `input2`
+      GROUP BY `ID_key`) AS `LHS`
+   INNER JOIN `input1` AS `RHS` ON (`LHS`.`ID_key` = `RHS`.`ID_key`))
+WHERE (`Room` = 'R128'
+       OR n > 4.0)
+ORDER BY ID_key

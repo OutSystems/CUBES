@@ -1,0 +1,54 @@
+[     1.581][MainProcess][INFO] Parsing specification...
+[     1.583][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.584][MainProcess][DEBUG] Reading input files...
+[     1.593][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     1.598][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009_o.csv: ['int64', 'string', 'int64']
+[     1.629][MainProcess][DEBUG] Generating DSL...
+[     1.661][MainProcess][INFO] Creating 8 processes
+[     1.690][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.721][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.724][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.724][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.730][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.732][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.735][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.736][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.743][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.976][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.977][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     2.205][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.207][MainProcess][INFO] Statistics:
+[     2.207][MainProcess][INFO] 	Generated cubes: 8
+[     2.207][MainProcess][INFO] 	Attempted programs: 3
+[     2.207][MainProcess][INFO] 		Rejected: 2
+[     2.207][MainProcess][INFO] 		Failed: 0
+[     2.207][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.207][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     2.208][MainProcess][DEBUG] 	0: Counter({'mutate': 27, 'summarise': 25})
+[     2.208][MainProcess][INFO] Solution found: summarise(@param0, n = n(), c2, c4)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/009.csv", col_types = cols(c1 = col_integer(),c2 = col_integer(),c3 = col_character(),c4 = col_character(),c5 = col_integer()))
+input1$c3 <- dmy(input1$c3)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/009_o.csv", col_types = cols(c1 = col_integer(),c2 = col_character(),c3 = col_integer()))
+
+df2 <- input1 %>% group_by(c2, c4) %>% summarise(n = n()) %>% ungroup()
+out <- df2 %>% select(c1 = c2, c2 = c4, c3 = n) %>% arrange(c1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT c2 AS c1,
+       c4 AS c2,
+       n AS c3
+FROM
+  (SELECT c2,
+          c4,
+          COUNT() AS n
+   FROM input1
+   GROUP BY c2,
+            c4)
+ORDER BY c1

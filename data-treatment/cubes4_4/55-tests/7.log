@@ -1,0 +1,45 @@
+[     1.568][MainProcess][INFO] Parsing specification...
+[     1.571][MainProcess][DEBUG] Reading input files...
+[     1.578][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/7-1.txt: ['string', 'string', 'int64']
+[     1.583][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/7.out: ['string', 'int64']
+[     1.608][MainProcess][DEBUG] Generating DSL...
+[     1.636][MainProcess][INFO] Creating 4 processes
+[     1.651][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.682][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.686][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.687][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.700][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.955][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.960][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     2.092][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.093][MainProcess][INFO] Statistics:
+[     2.093][MainProcess][INFO] 	Generated cubes: 4
+[     2.093][MainProcess][INFO] 	Attempted programs: 3
+[     2.093][MainProcess][INFO] 		Rejected: 2
+[     2.093][MainProcess][INFO] 		Failed: 0
+[     2.093][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.094][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     2.094][MainProcess][DEBUG] 	0: Counter({'mutate': 18, 'summarise': 17})
+[     2.094][MainProcess][INFO] Solution found: summarise(@param0, meanage = mean(age), level)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/7-1.txt", col_types = cols(S_key = col_character(),level = col_character(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/7.out", col_types = cols(level = col_character(),meanage = col_integer()))
+
+df2 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+out <- df2 %>% select(level, meanage) %>% arrange(level)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT LEVEL,
+       meanage
+FROM
+  (SELECT LEVEL,
+          AVG(age) AS meanage
+   FROM input1
+   GROUP BY LEVEL)
+ORDER BY LEVEL

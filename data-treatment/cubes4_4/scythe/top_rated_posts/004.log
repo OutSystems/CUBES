@@ -1,0 +1,68 @@
+[     2.786][MainProcess][INFO] Parsing specification...
+[     2.790][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.790][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.791][MainProcess][DEBUG] Reading input files...
+[     2.798][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i004.csv: ['int64', 'int64', 'string']
+[     2.802][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o004.csv: ['int64', 'int64', 'string']
+[     2.830][MainProcess][DEBUG] Generating DSL...
+[     2.995][MainProcess][INFO] Creating 4 processes
+[     3.012][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.155][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.186][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.191][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.193][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     5.662][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     5.746][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.086][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     6.182][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     8.334][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     8.339][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     8.380][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     8.383][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     8.402][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[     8.402][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3())
+[     8.435][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[     8.456][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[     8.456][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[     8.457][MainProcess][INFO] Statistics:
+[     8.458][MainProcess][INFO] 	Generated cubes: 12
+[     8.458][MainProcess][INFO] 	Attempted programs: 15
+[     8.458][MainProcess][INFO] 		Rejected: 11
+[     8.458][MainProcess][INFO] 		Failed: 3
+[     8.458][MainProcess][INFO] 	Blacklist clauses: 3
+[     8.458][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     8.459][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     8.459][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     8.459][MainProcess][DEBUG] 	0: Counter({'summarise': 1})
+[     8.459][MainProcess][DEBUG] 	1: Counter({'natural_join': 1})
+[     8.459][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, rev = max(rev), id))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+
+df2 <- input1 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(id, rev, content) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       rev,
+       content
+FROM
+  (SELECT LHS.id AS id,
+          LHS.rev AS rev,
+          LHS.content AS content
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT id,
+             MAX(rev) AS rev
+      FROM input1
+      GROUP BY id) AS RHS ON (LHS.id = RHS.id
+                              AND LHS.rev = RHS.rev))
+ORDER BY id

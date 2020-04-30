@@ -1,0 +1,72 @@
+[     1.587][MainProcess][INFO] Parsing specification...
+[     1.591][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.591][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.591][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.592][MainProcess][DEBUG] Reading input files...
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i017.csv: ['int64', 'string', 'string']
+[     1.604][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o017.csv: ['int64', 'string', 'string']
+[     1.630][MainProcess][DEBUG] Generating DSL...
+[     1.798][MainProcess][INFO] Creating 8 processes
+[     1.825][MainProcess][DEBUG] Increasing generator loc to 3
+[     1.974][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.978][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     1.985][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     1.989][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.996][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.999][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.018][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     2.033][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     8.013][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     8.050][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     8.069][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     8.154][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     8.615][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     8.769][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[    10.195][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[    11.769][cube-solver-3][DEBUG] Initialising process for 3 lines of code.
+[    11.960][cube-solver-4][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]), l2 = filter())
+[    12.033][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]), l2 = filter())
+[    12.064][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise([3]))
+[    12.087][cube-solver-6][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[    12.095][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[    12.122][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[    12.150][cube-solver-4][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3(), l2 = filter())
+[    12.153][cube-solver-6][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join(), l2 = filter())
+[    12.186][cube-solver-5][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise([3]))
+[    12.187][cube-solver-4][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4(), l2 = filter())
+[    12.215][cube-solver-4][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]), l2 = filter())
+[    12.232][cube-solver-5][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter(), l2 = natural_join())
+[    12.265][cube-solver-4][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter(), l2 = natural_join3())
+[    12.298][cube-solver-7][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[    12.345][cube-solver-7][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter([1]), l2 = natural_join4())
+[    12.368][cube-solver-7][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter([2]), l2 = summarise([3]))
+[    14.040][cube-solver-6][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join(), l2 = filter())
+[    14.042][MainProcess][INFO] Statistics:
+[    14.042][MainProcess][INFO] 	Generated cubes: 24
+[    14.043][MainProcess][INFO] 	Attempted programs: 106
+[    14.043][MainProcess][INFO] 		Rejected: 45
+[    14.043][MainProcess][INFO] 		Failed: 60
+[    14.043][MainProcess][INFO] 	Blacklist clauses: 5
+[    14.043][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    14.044][MainProcess][DEBUG] 	0: Counter({'mutate': 540, 'summarise': 156, 'filter': 108})
+[    14.045][MainProcess][DEBUG] 	1: Counter({'filter': 696, 'mutate': 60, 'summarise': 48})
+[    14.045][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[    14.046][MainProcess][DEBUG] 	0: Counter({'summarise': 543})
+[    14.047][MainProcess][DEBUG] 	1: Counter({'filter': 308, 'natural_join': 235})
+[    14.047][MainProcess][DEBUG] 	2: Counter({'filter': 235, 'natural_join': 194, 'natural_join3': 114})
+[    14.047][MainProcess][INFO] Solution found: filter(natural_join(summarise(@param0, ID = min(ID), PRODUCT), @param0), str_detect(SKU, 'FOO-'))
+[    14.446][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i017.csv", col_types = cols(ID = col_integer(),SKU = col_character(),PRODUCT = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o017.csv", col_types = cols(ID = col_integer(),SKU = col_character(),PRODUCT = col_character()))
+
+df2 <- input1 %>% group_by(PRODUCT) %>% summarise(ID = min(ID)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+df4 <- df3 %>% filter(str_detect(SKU, 'FOO-'))
+out <- df4 %>% select(ID, SKU, PRODUCT) %>% arrange(ID)
+
+Failed to generate SQL query

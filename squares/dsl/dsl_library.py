@@ -95,7 +95,7 @@ semi_join_function = DSLFunction('semi_join',
 
 cross_join_function = DSLFunction('cross_join',
                                   'Table r',
-                                  ['Table a', 'Table b'],
+                                  ['Table a', 'Table b', 'CrossJoinCondition c'],
                                   [
                                       'col(r) <= col(a) + col(b)'
                                       ])

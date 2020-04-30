@@ -1,0 +1,59 @@
+[     3.224][MainProcess][INFO] Parsing specification...
+[     3.229][MainProcess][DEBUG] Reading input files...
+[     3.237][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/003_1.csv: ['int64', 'string']
+[     3.242][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/003_2.csv: ['string', 'string']
+[     3.246][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/003_o.csv: ['int64', 'string']
+[     3.277][MainProcess][DEBUG] Generating DSL...
+[     3.294][MainProcess][INFO] Creating 4 processes
+[     3.335][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.336][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.340][cube-solver-2][DEBUG] Initialising process for 1 lines of code.
+[     3.349][cube-solver-3][DEBUG] Initialising process for 1 lines of code.
+[     3.402][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(),)
+[     3.402][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(),)
+[     3.403][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(),)
+[     3.404][cube-solver-1][DEBUG] Solving cube (l0 = left_join(),)
+[     3.406][cube-solver-2][DEBUG] Solving cube (l0 = union(),)
+[     3.432][cube-solver-0][DEBUG] Solving cube (l0 = intersect(),)
+[     3.432][cube-solver-1][DEBUG] Solving cube (l0 = semi_join(),)
+[     3.446][cube-solver-3][DEBUG] Solving cube (l0 = anti_join(),)
+[     3.447][cube-solver-1][DEBUG] Solving cube (l0 = cross_join(),)
+[     3.457][cube-solver-1][DEBUG] Solving cube (l0 = inner_join(),)
+[     3.636][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.637][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.640][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.661][cube-solver-1][DEBUG] Found solution with cube (l0 = inner_join(),)
+[     3.662][MainProcess][INFO] Statistics:
+[     3.663][MainProcess][INFO] 	Generated cubes: 12
+[     3.663][MainProcess][INFO] 	Attempted programs: 44
+[     3.663][MainProcess][INFO] 		Rejected: 2
+[     3.663][MainProcess][INFO] 		Failed: 41
+[     3.663][MainProcess][INFO] 	Blacklist clauses: 41
+[     3.663][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     3.664][MainProcess][DEBUG] 	0: Counter({'union': 28, 'inner_join': 19})
+[     3.664][MainProcess][INFO] Solution found: inner_join(@param0, @param1, 'item' = 'f2')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/003_1.csv", col_types = cols(ID = col_integer(),item = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/003_2.csv", col_types = cols(f1 = col_character(),f2 = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/003_o.csv", col_types = cols(ID = col_integer(),item = col_character()))
+
+df3 <- inner_join(input1, input2, by=c('item' = 'f2'), suffix = c('', '.other'))
+out <- df3 %>% select(ID, item = f1) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       f1 AS item
+FROM
+  (SELECT LHS.ID AS ID,
+          LHS.item AS item,
+          RHS.f1 AS f1
+   FROM input1 AS LHS
+   INNER JOIN input2 AS RHS ON (LHS.item = RHS.f2))
+ORDER BY ID

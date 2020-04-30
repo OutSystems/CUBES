@@ -1,10 +1,13 @@
 from abc import ABC
-from collections import deque
+from collections import deque, namedtuple
+from random import shuffle, sample
 from typing import List, Tuple, Collection, Iterator, Iterable
 
+from ordered_set import OrderedSet
 from z3 import And, Or
 
 from squares import util
+from squares.results import ResultsHolder
 from squares.tyrell.dsl import ParamNode, AtomNode
 from squares.tyrell.enumerator.lines import LinesEnumerator
 from squares.tyrell.spec import TyrellSpec, FunctionProduction
@@ -155,7 +158,8 @@ class CubeGenerator(Iterable):
         productions = [p for p in self.tyrell_specification.get_productions_with_lhs('Table') if p.is_function()]
         lines = self.current()
 
-        if self.specification.solution and len(lines) + 1 in util.get_config().solution_use_lines:
+        if self.specification.solution and len(lines) + 1 in util.get_config().solution_use_lines and len(lines) < len(
+                self.specification.solution):
             productions = [p for p in productions if p.name == self.specification.solution[len(lines)]]
 
         if util.get_config().solution_use_last_line and self.specification.solution and len(lines) == self.n_lines - 1:
@@ -184,5 +188,83 @@ class CubeGenerator(Iterable):
             move(productions, 'natural_join', len(productions))
             move(productions, 'natural_join3', len(productions))
             move(productions, 'natural_join4', len(productions))
+
+        return deque(productions)
+
+
+class Node:
+
+    def __init__(self, head, children, parent):
+        self.head = head
+        self.children: List[Node] = children
+        self.parent: Node = parent
+
+    def __repr__(self) -> str:
+        return repr(self.head)
+
+
+class StatisticCubeGenerator(CubeGenerator):
+
+    def __init__(self, specification, tyrell_specification, loc, n_lines, blacklist) -> None:
+        super().__init__(specification, tyrell_specification, loc, n_lines, blacklist)
+        self.root = Node(None, None, None)
+
+    def __next__(self) -> Collection[CubeConstraint]:
+        node = self.root
+        depth = 0
+        cube = []
+        failed = False
+        while depth < self.n_lines:
+            if node.children is None:
+                node.children = [Node(p, None, node) for p in self.filter_productions(cube)]
+
+            try:
+                node = self.sort_productions(node.children, cube)[0]
+                depth += 1
+                cube.append(node)
+            except:
+                failed = True
+                break
+
+        node_ = node
+        while not node_.children:
+            tmp = node_.parent
+            if not tmp:
+                raise StopIteration
+            tmp.children.remove(node_)
+            node_ = tmp
+
+        if not failed:
+            return list(map(lambda x: LineConstraint(x[0], x[1].head.name, self.blacklist[x[1].head.name]), enumerate(cube)))
+        return None
+
+    def filter_productions(self, cube):
+        productions = [p for p in self.tyrell_specification.get_productions_with_lhs('Table') if p.is_function()]
+
+        if util.get_config().force_summarise and \
+                len(self.specification.aggrs) - count(l for l in cube if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(
+            cube):
+            productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
+
+        if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters) and \
+                count(l for l in cube if l.head.name == 'filter') == 0 and \
+                len(cube) == self.loc - 1:
+            productions = list(filter(lambda p: p.name == 'filter', productions))
+
+        return productions
+
+    def sort_productions(self, base_productions, cube):
+        productions = OrderedSet()
+
+        try:
+            for production in ResultsHolder().programs[len(cube) - self.loc]:
+                production = self.tyrell_specification.get_function_production_or_raise(production)
+                if production in base_productions:
+                    productions.append(production)
+        except:
+            pass
+
+        for p in sample(base_productions, len(base_productions)):
+            productions.append(p)
 
         return deque(productions)

@@ -1,0 +1,70 @@
+[     3.591][MainProcess][INFO] Parsing specification...
+[     3.596][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.597][MainProcess][DEBUG] Reading input files...
+[     3.606][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/10-1.txt: ['string', 'string']
+[     3.612][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/10-2.txt: ['string', 'string']
+[     3.617][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/10.out: ['string']
+[     3.658][MainProcess][DEBUG] Generating DSL...
+[     3.689][MainProcess][INFO] Creating 2 processes
+[     3.740][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.743][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.016][cube-solver-0][WARNING] There is no solution for current loc (2).
+[     4.017][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     4.018][cube-solver-0][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     4.019][cube-solver-0][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     4.020][MainProcess][DEBUG] Increasing generator loc to 3
+[     4.021][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     4.047][cube-solver-1][WARNING] There is no solution for current loc (2).
+[     4.047][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     4.051][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     4.474][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     4.512][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     4.513][MainProcess][INFO] Statistics:
+[     4.514][MainProcess][INFO] 	Generated cubes: 6
+[     4.514][MainProcess][INFO] 	Attempted programs: 1
+[     4.514][MainProcess][INFO] 		Rejected: 0
+[     4.514][MainProcess][INFO] 		Failed: 0
+[     4.514][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.514][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[     4.515][MainProcess][DEBUG] 	0: Counter({'natural_join': 1})
+[     4.515][MainProcess][DEBUG] 	1: Counter({'summarise': 1})
+[     4.516][MainProcess][DEBUG] 	2: Counter({'filter': 1})
+[     4.516][MainProcess][INFO] Solution found: filter(summarise(natural_join(@param1, @param0), n = n(), S_name), n == max(n))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/10-1.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/10-2.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/textbook/tables/10.out", col_types = cols(S_name = col_character()))
+
+df3 <- inner_join(input2, input1)
+df4 <- df3 %>% group_by(S_name) %>% summarise(n = n()) %>% ungroup()
+df5 <- df4 %>% filter(n == max(n))
+out <- df5 %>% select(S_name) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT S_name
+FROM
+  (SELECT S_name,
+          n
+   FROM
+     (SELECT S_name,
+             n,
+             MAX(n) OVER () AS zzz3
+      FROM
+        (SELECT S_name,
+                COUNT() AS n
+         FROM
+           (SELECT LHS.S_key AS S_key,
+                   LHS.S_name AS S_name,
+                   RHS.C_name AS C_name
+            FROM input2 AS LHS
+            INNER JOIN input1 AS RHS ON (LHS.S_key = RHS.S_key))
+         GROUP BY S_name))
+   WHERE (n = zzz3))
+ORDER BY S_name

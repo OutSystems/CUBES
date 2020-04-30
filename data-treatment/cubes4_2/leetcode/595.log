@@ -1,0 +1,43 @@
+[     1.657][MainProcess][INFO] Parsing specification...
+[     1.660][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.660][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.661][MainProcess][DEBUG] Reading input files...
+[     1.670][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/595.csv: ['string', 'string', 'int64', 'int64', 'int64']
+[     1.675][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/595_o.csv: ['string', 'int64', 'int64']
+[     1.700][MainProcess][DEBUG] Generating DSL...
+[     1.892][MainProcess][INFO] Creating 2 processes
+[     1.900][MainProcess][DEBUG] Increasing generator loc to 2
+[     2.066][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     2.076][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     5.003][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     5.880][cube-solver-0][DEBUG] Found solution with cube (l0 = filter(),)
+[     5.882][MainProcess][INFO] Statistics:
+[     5.882][MainProcess][INFO] 	Generated cubes: 2
+[     5.882][MainProcess][INFO] 	Attempted programs: 2
+[     5.882][MainProcess][INFO] 		Rejected: 1
+[     5.882][MainProcess][INFO] 		Failed: 0
+[     5.882][MainProcess][INFO] 	Blacklist clauses: 0
+[     5.882][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     5.883][MainProcess][DEBUG] 	0: Counter({'filter': 129})
+[     5.883][MainProcess][INFO] Solution found: filter(@param0, population >= 3000000 & population >= 25000000)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/595.csv", col_types = cols(name = col_character(),continent = col_character(),area = col_integer(),population = col_integer(),gdp = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/595_o.csv", col_types = cols(name = col_character(),area = col_integer(),population = col_integer()))
+
+df2 <- input1 %>% filter(population >= 3000000 & population >= 25000000)
+out <- df2 %>% select(name, area, population) %>% arrange(name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT name,
+       area,
+       population
+FROM input1
+WHERE (population >= 3000000.0
+       AND population >= 25000000.0)
+ORDER BY name

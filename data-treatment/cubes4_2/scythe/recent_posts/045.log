@@ -1,0 +1,72 @@
+[     3.211][MainProcess][INFO] Parsing specification...
+[     3.214][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.214][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.215][MainProcess][DEBUG] Reading input files...
+[     3.222][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_1.csv: ['int64', 'string']
+[     3.227][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_2.csv: ['int64', 'int64', 'int64']
+[     3.232][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_o.csv: ['string', 'float64']
+[     3.263][MainProcess][DEBUG] Generating DSL...
+[     3.448][MainProcess][INFO] Creating 2 processes
+[     3.655][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.684][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     6.242][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     6.244][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.246][MainProcess][DEBUG] Increasing generator loc to 2
+[     6.259][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     6.278][cube-solver-1][WARNING] There is no solution for current loc (1).
+[     6.279][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.284][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[    11.454][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[    11.455][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[    11.959][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[    11.976][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    11.989][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[    12.005][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[    12.019][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[    12.773][cube-solver-0][DEBUG] Solving cube (l0 = summarise([10]), l1 = natural_join3())
+[    13.145][cube-solver-1][DEBUG] Solving cube (l0 = summarise([14]), l1 = natural_join4())
+[    13.165][cube-solver-1][DEBUG] Solving cube (l0 = summarise([14]), l1 = summarise([14]))
+[    13.189][cube-solver-1][DEBUG] Solving cube (l0 = summarise([14]), l1 = filter())
+[    13.210][cube-solver-1][DEBUG] Solving cube (l0 = summarise([14]), l1 = anti_join())
+[    15.195][cube-solver-1][DEBUG] Solving cube (l0 = summarise([14]), l1 = left_join())
+[    15.259][cube-solver-1][DEBUG] Found solution with cube (l0 = summarise([14]), l1 = left_join())
+[    15.260][MainProcess][INFO] Statistics:
+[    15.260][MainProcess][INFO] 	Generated cubes: 15
+[    15.260][MainProcess][INFO] 	Attempted programs: 196
+[    15.260][MainProcess][INFO] 		Rejected: 40
+[    15.260][MainProcess][INFO] 		Failed: 155
+[    15.261][MainProcess][INFO] 	Blacklist clauses: 14
+[    15.261][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    15.262][MainProcess][DEBUG] 	0: Counter({'summarise': 650, 'natural_join': 256})
+[    15.263][MainProcess][DEBUG] 	1: Counter({'natural_join3': 443, 'summarise': 176, 'natural_join': 120, 'mutate': 80, 'anti_join': 80, 'left_join': 7})
+[    15.263][MainProcess][INFO] Solution found: left_join(@param0, summarise(@param1, sumQuantity = sum(Quantity), Menu_id))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/045_1.csv", col_types = cols(Menu_id = col_integer(),Name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/045_2.csv", col_types = cols(ID = col_integer(),Quantity = col_integer(),Menu_id = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/045_o.csv", col_types = cols(MenuName = col_character(),Quantity = col_double()))
+
+df3 <- input2 %>% group_by(Menu_id) %>% summarise(sumQuantity = sum(Quantity)) %>% ungroup()
+df4 <- left_join(input1, df3)
+out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity) %>% arrange(MenuName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Name AS MenuName,
+       sumQuantity AS Quantity
+FROM
+  (SELECT LHS.Menu_id AS Menu_id,
+          LHS.Name AS Name,
+          RHS.sumQuantity AS sumQuantity
+   FROM input1 AS LHS
+   LEFT JOIN
+     (SELECT Menu_id,
+             SUM(Quantity) AS sumQuantity
+      FROM input2
+      GROUP BY Menu_id) AS RHS ON (LHS.Menu_id = RHS.Menu_id))
+ORDER BY MenuName

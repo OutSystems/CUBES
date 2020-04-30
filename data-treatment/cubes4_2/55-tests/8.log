@@ -1,0 +1,50 @@
+[     1.585][MainProcess][INFO] Parsing specification...
+[     1.588][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.588][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.589][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.589][MainProcess][DEBUG] Reading input files...
+[     1.596][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/8-1.txt: ['string', 'string', 'int64']
+[     1.601][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/8.out: ['string', 'int64']
+[     1.626][MainProcess][DEBUG] Generating DSL...
+[     1.663][MainProcess][INFO] Creating 2 processes
+[     1.717][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.718][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.735][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     2.746][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     3.424][cube-solver-1][DEBUG] Found solution with cube (l0 = filter(), l1 = summarise())
+[     3.426][MainProcess][INFO] Statistics:
+[     3.427][MainProcess][INFO] 	Generated cubes: 2
+[     3.427][MainProcess][INFO] 	Attempted programs: 12
+[     3.427][MainProcess][INFO] 		Rejected: 11
+[     3.427][MainProcess][INFO] 		Failed: 0
+[     3.427][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.427][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     3.428][MainProcess][DEBUG] 	0: Counter({'filter': 93, 'summarise': 24})
+[     3.428][MainProcess][DEBUG] 	1: Counter({'summarise': 93, 'filter': 24})
+[     3.429][MainProcess][INFO] Solution found: summarise(filter(@param0, level != 'JR'), meanage = mean(age), level)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/8-1.txt", col_types = cols(S_key = col_character(),level = col_character(),age = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/8.out", col_types = cols(level = col_character(),meanage = col_integer()))
+
+df2 <- input1 %>% filter(level != 'JR')
+df3 <- df2 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+out <- df3 %>% select(level, meanage) %>% arrange(level)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `level`,
+       `meanage`
+FROM
+  (SELECT `level`,
+          AVG(`age`) AS `meanage`
+   FROM
+     (SELECT *
+      FROM `input1`
+      WHERE (`level` != 'JR'))
+   GROUP BY LEVEL)
+ORDER BY LEVEL

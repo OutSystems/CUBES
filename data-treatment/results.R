@@ -8,8 +8,9 @@ library(readr)
 
 setwd('./data-treatment')
 
-status_levels <- c(0, 3, 2, 4, 5, 143, NA, 1)
-status_meanings <- c('R & SQL', 'Non optimal', 'Just R', 'Just R non optimal', 'No solution', '???', 'Timeout', 'Fail')
+status_levels <- rev(c(0, 3, 2, 4, 5, 143, NA, 1))
+status_meanings <- rev(c('R & SQL', 'Non optimal', 'Just R', 'Just R non optimal', 'No solution', '???', 'Timeout', 'Fail'))
+status_colors <- rev(c("#689d6a", "#d65d0e", "#d79921", "#b16286", "#458588", "#3c3836", "#cc241d", "#3c3836"))
 
 timelimit <- 600
 
@@ -77,15 +78,15 @@ scatter_ram <- function(A, B) {
     expand_limits(x = min(min(t$ram_A), min(t$ram_B)) * 1000, y = min(min(t$ram_A), min(t$ram_B)) * 1000)
 }
 
-plot_hardness <- function(A) {
+plot_hardness <- function(A, limit) {
   eval(parse(text = A)) %>%
     filter(timeout == T | !is.na(hard_h)) %>%
-    mutate(hard_h = ifelse(is.na(hard_h), timelimit+200, hard_h)) %>%
-    ggplot(aes(x = hard_h, fill = factor(status, levels=status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_histogram() +
+    mutate(hard_h = ifelse(is.na(hard_h), limit * 1.5, hard_h)) %>%
+    ggplot(aes(x = hard_h, fill = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+    geom_histogram(bins = 40) +
     scale_x_continuous(trans = 'log10') +
     # scale_y_continuous(trans = 'log10') +
-    geom_vline(xintercept = timelimit, linetype = "dashed") +
+    geom_vline(xintercept = limit, linetype = "dashed") +
     scale_fill_brewer(palette = 'Dark2', '') +
     labs(y = 'instance count', x = 'time') +
     ggtitle('Distribution of hard heuristic activation')
@@ -99,7 +100,7 @@ bars <- function(...) {
     geom_bar(position = "stack") +
     scale_y_continuous(breaks = pretty_breaks()) +
     facet_wrap(~benchmark, scales = "free") +
-    scale_fill_brewer(palette = 'Dark2') +
+    scale_fill_manual(drop=F, values = status_colors) +
     labs(x = 'configuration', y = 'instances') +
     theme(axis.text.x = element_text(size = 12), axis.text.y = element_text(size = 12), legend.text = element_text(size = 12), text = element_text(size = 12))
 }
@@ -135,7 +136,16 @@ boxplot_ram <- function(...) {
     theme(axis.text.x = element_text(size = 12), legend.text = element_text(size = 12))
 }
 
-c4_16_h %>% count()
+solved_instances <- function(table) {
+  table %>%
+    group_by(benchmark) %>%
+    mutate(total = n()) %>%
+    ungroup() %>%
+    filter(timeout != T & status != 1) %>%
+    group_by(benchmark, total) %>%
+    summarise(n = n()) %>%
+    mutate(percentage = n /total)
+}
 
 test_filter <- c('scythe/demo_example', 'scythe/sqlsynthesizer', 'scythe/test_examples', 'scythe/newposts')
 
@@ -186,6 +196,8 @@ test_filter <- c('scythe/demo_example', 'scythe/sqlsynthesizer', 'scythe/test_ex
   c3_8 <- load_result_file('cubes3_8')
   c3_16 <- load_result_file('cubes3_16')
 
+  c4_2 <- load_result_file('cubes4_2')
+  c4_4 <- load_result_file('cubes4_4')
   c4_8 <- load_result_file('cubes4_8')
   c4_16 <- load_result_file('cubes4_16')
 
@@ -219,36 +231,40 @@ scatter('c2_8', 'c2_16')
 
 scatter('c2_8', 'c3_8')
 scatter('squares', 'c2_2')
-scatter('squares', 'qffd_r_no_prune')
+scatter('squares', 'c4_16_h')
 
 scatter('c3_16', 'c4_16')
 scatter('c4_16', 'c4_16_h')
 scatter('c4_16_h', 'c4_16_h_1h')
 
-plot_hardness('c4_16_h')
+plot_hardness('c4_16_h', limit = 600)
+plot_hardness('c4_16_h_cj', limit = 600)
+c4_16_h %>% filter(timeout != T & status != 1 & !is.na(hard_h)) %>% inner_join(c4_16, by='name') %>% select(name, timeout.x, real.x, timeout.y, real.y)
+plot_hardness('c4_16_h_1h', limit = 3600)
 
 ggplot(t6, aes(x = factor(process))) + geom_bar(fill = "turquoise")
 
-c4_16_h %>% mutate(a = replace_na(hard_h, 600))
+solved_instances(scythe)
+solved_instances(c4_16_h)
 
 a <- c4_16_h %>% filter(timeout == T | status == 1)
-
-c3_16 %>% filter(timeout == T | status_levels == 1) %>% count()   # 55
-c4_16 %>% filter(timeout == T | status_levels == 1) %>% count()   # 51    -    3 or 4 more instances solved by now
-c4_16_h %>% filter(timeout == T | status_levels == 1) %>% count() # 49
-
 b <- inner_join(scythe, c4_16_h, by = 'name') %>% filter((timeout.y == T | status.y == 1) & (timeout.x != T & status.x != 1))
 c <- inner_join(scythe, c4_16_h, by = 'name') %>% filter((timeout.x == T | status.x == 1) & (timeout.y != T & status.y != 1))
+
+inner_join(c4_16_h, c4_16_h_1h, by = 'name') %>% filter((timeout.x == T | status.x == 1) & (timeout.y != T & status.y != 1)) %>% select(name)
+inner_join(c4_16_h, c4_16_h_1h, by = 'name') %>% filter((timeout.y == T | status.y == 1) & (timeout.x != T & status.x != 1))
 
 # ggplot(c1_2, aes(x = real)) + geom_histogram()
 
 bars(scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o, c3_16 = c3_16)
 bars(scythe = scythe, squares = squares, c3_2 = c3_2, c3_4 = c3_4, c3_8 = c3_8, c3_16 = c3_16, c4_16 = c4_16, c4_16_h = c4_16_h, c4_16_h_1h = c4_16_h_1h)
+bars(scythe = scythe, squares = squares, qffd_r_no_prune = qffd_r_no_prune, c3_16 = c3_16, c4_2 = c4_2, c4_4 = c4_4, c4_8 = c4_8, c4_16 = c4_16, c4_16_h = c4_16_h)
 bars(scythe = scythe, squares = squares, c3_8 = c3_8, c3_16 = c3_16)
 bars(scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 
 boxplot(func = any, scythe = scythe, squares = squares, single = single, single_no_prune = single_no_prune, qffd = qffd_r, qffd_no_prune = qffd_r_no_prune, 't2 (3)' = t2, 't4 (5)' = t4, 't5 (4)' = t5, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c1_2 = c1_2, c1_4 = c1_4, c1_8 = c1_8, c1_16 = c1_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 boxplot(func = any, scythe = scythe, squares = squares, c3_2 = c3_2, c3_4 = c3_4, c3_8 = c3_8, c3_16 = c3_16, c4_16 = c4_16, c4_16_h = c4_16_h, c4_16_h_1h = c4_16_h_1h)
+boxplot(func = any, scythe = scythe, squares = squares, qffd_r_no_prune = qffd_r_no_prune, c3_16 = c3_16, c4_2 = c4_2, c4_4 = c4_4, c4_8 = c4_8, c4_16 = c4_16, c4_16_h = c4_16_h)
 boxplot(func = any, scythe = scythe, squares = squares, c3_8 = c3_8, c3_16 = c3_16)
 boxplot(func = any, scythe = scythe, squares = squares, qffd_no_prune = qffd_r_no_prune, 't6 (6)' = t6, c0_2 = c0_2, c0_4 = c0_4, c0_8 = c0_8, c0_16 = c0_16, c2_2 = c2_2, c2_4 = c2_4, c2_8 = c2_8, c2_16 = c2_16, c2_2_o = c2_2_o, c2_4_o = c2_4_o, c2_8_o = c2_8_o, c2_16_o = c2_16_o)
 

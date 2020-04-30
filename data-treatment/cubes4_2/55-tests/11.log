@@ -1,0 +1,49 @@
+[     3.318][MainProcess][INFO] Parsing specification...
+[     3.323][MainProcess][DEBUG] Reading input files...
+[     3.332][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11-1.txt: ['string', 'string']
+[     3.337][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11-2.txt: ['string', 'string']
+[     3.341][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11.out: ['string']
+[     3.373][MainProcess][DEBUG] Generating DSL...
+[     3.392][MainProcess][INFO] Creating 2 processes
+[     3.434][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.437][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.514][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(),)
+[     3.517][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(),)
+[     3.518][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(),)
+[     3.519][cube-solver-1][DEBUG] Solving cube (l0 = anti_join(),)
+[     3.620][cube-solver-0][DEBUG] Solving cube (l0 = left_join(),)
+[     3.625][cube-solver-1][DEBUG] Found solution with cube (l0 = anti_join(),)
+[     3.626][MainProcess][INFO] Statistics:
+[     3.627][MainProcess][INFO] 	Generated cubes: 5
+[     3.627][MainProcess][INFO] 	Attempted programs: 10
+[     3.627][MainProcess][INFO] 		Rejected: 2
+[     3.627][MainProcess][INFO] 		Failed: 7
+[     3.627][MainProcess][INFO] 	Blacklist clauses: 7
+[     3.627][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     3.628][MainProcess][DEBUG] 	0: Counter({'natural_join': 12, 'anti_join': 3})
+[     3.628][MainProcess][INFO] Solution found: anti_join(@param0, @param1, 'S_key')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/11-1.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/11-2.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/11.out", col_types = cols(S_name = col_character()))
+
+df3 <- anti_join(input1, input2, by=c('S_key'))
+out <- df3 %>% select(S_name) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT S_name
+FROM
+  (SELECT *
+   FROM input1 AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM input2 AS RHS
+        WHERE (LHS.S_key = RHS.S_key) ))
+ORDER BY S_name

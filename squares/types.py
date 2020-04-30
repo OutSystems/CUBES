@@ -27,6 +27,15 @@ BOOL = Type.BOOL
 NONE = Type.NONE
 TIME = Type.TIME
 
+operators_by_type = {
+    INT: ['==', '!=', '<=', '>=', '<', '>'],
+    FLOAT: ['==', '!=', '<=', '>=', '<', '>'],
+    DATETIME: ['==', '!=', '<=', '>=', '<', '>'],
+    TIME: ['==', '!=', '<=', '>=', '<', '>'],
+    BOOL: ['==', '!='],
+    STRING: ['==', '!=']
+    }
+
 
 def get_type(dtype: Union[ExtensionDtype, dtype]) -> Type:
     if pandas.api.types.is_integer_dtype(dtype):

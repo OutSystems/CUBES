@@ -1,0 +1,55 @@
+[     1.641][MainProcess][INFO] Parsing specification...
+[     1.645][MainProcess][DEBUG] Reading input files...
+[     1.651][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/176.csv: ['int64', 'int64']
+[     1.655][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/176_o.csv: ['int64']
+[     1.681][MainProcess][DEBUG] Generating DSL...
+[     1.859][MainProcess][INFO] Creating 8 processes
+[     1.893][MainProcess][DEBUG] Increasing generator loc to 3
+[     2.043][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     2.044][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     2.050][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     2.055][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     2.058][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.066][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.071][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     2.079][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     7.908][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     7.997][cube-solver-2][DEBUG] Found solution with cube (l0 = filter(), l1 = mutate())
+[     7.999][MainProcess][INFO] Statistics:
+[     7.999][MainProcess][INFO] 	Generated cubes: 8
+[     7.999][MainProcess][INFO] 	Attempted programs: 1
+[     7.999][MainProcess][INFO] 		Rejected: 0
+[     8.000][MainProcess][INFO] 		Failed: 0
+[     8.000][MainProcess][INFO] 	Blacklist clauses: 0
+[     8.000][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     8.000][MainProcess][DEBUG] 	0: Counter({'filter': 4})
+[     8.001][MainProcess][DEBUG] 	1: Counter({'mutate': 4})
+[     8.001][MainProcess][INFO] Solution found: mutate(filter(@param0, Id != max(Salary) & Salary != max(Salary)), Salary = max(Salary))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/176.csv", col_types = cols(Id = col_integer(),Salary = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/176_o.csv", col_types = cols(SecondHighestSalary = col_integer()))
+
+df2 <- input1 %>% filter(Id != max(Salary) & Salary != max(Salary))
+df3 <- df2 %>% mutate(Salary = max(Salary))
+out <- df3 %>% select(SecondHighestSalary = Salary) %>% distinct() %>% arrange(SecondHighestSalary)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT MAX(Salary) OVER () AS SecondHighestSalary
+FROM
+  (SELECT Id,
+          Salary
+   FROM
+     (SELECT Id,
+             Salary,
+             MAX(Salary) OVER () AS zzz2,
+                              MAX(Salary) OVER () AS zzz3
+      FROM input1)
+   WHERE (Id != zzz2
+          AND Salary != zzz3))
+ORDER BY SecondHighestSalary

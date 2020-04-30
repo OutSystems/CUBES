@@ -1,0 +1,57 @@
+[     1.581][MainProcess][INFO] Parsing specification...
+[     1.584][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.584][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.585][MainProcess][DEBUG] Reading input files...
+[     1.592][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i002.csv: ['int64', 'string', 'string']
+[     1.597][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o002.csv: ['string']
+[     1.622][MainProcess][DEBUG] Generating DSL...
+[     1.642][MainProcess][INFO] Creating 8 processes
+[     1.671][MainProcess][DEBUG] Increasing generator loc to 3
+[     1.682][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.687][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.689][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.692][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.696][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     1.700][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     1.701][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     1.707][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     1.961][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     1.963][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     1.967][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     1.967][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     1.968][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     1.983][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     2.113][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter())
+[     2.115][MainProcess][INFO] Statistics:
+[     2.115][MainProcess][INFO] 	Generated cubes: 10
+[     2.115][MainProcess][INFO] 	Attempted programs: 4
+[     2.116][MainProcess][INFO] 		Rejected: 3
+[     2.116][MainProcess][INFO] 		Failed: 0
+[     2.116][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.116][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.117][MainProcess][DEBUG] 	0: Counter({'summarise': 15, 'mutate': 15})
+[     2.117][MainProcess][DEBUG] 	1: Counter({'filter': 30})
+[     2.117][MainProcess][INFO] Solution found: filter(summarise(@param0, n = n(), NAME), n > 1)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i002.csv", col_types = cols(ID = col_integer(),NAME = col_character(),EMAIL = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o002.csv", col_types = cols(NAME = col_character()))
+
+df2 <- input1 %>% group_by(NAME) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 1)
+out <- df3 %>% select(NAME) %>% arrange(NAME)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT NAME
+FROM
+  (SELECT NAME,
+          COUNT() AS n
+   FROM input1
+   GROUP BY NAME)
+WHERE (n > 1.0)
+ORDER BY NAME

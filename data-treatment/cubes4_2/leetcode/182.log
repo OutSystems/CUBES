@@ -1,0 +1,46 @@
+[     3.056][MainProcess][INFO] Parsing specification...
+[     3.060][MainProcess][DEBUG] Reading input files...
+[     3.068][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/182.csv: ['int64', 'string']
+[     3.073][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/182_o.csv: ['string']
+[     3.102][MainProcess][DEBUG] Generating DSL...
+[     3.125][MainProcess][INFO] Creating 2 processes
+[     3.169][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.174][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.406][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     3.462][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     3.467][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     3.471][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     3.534][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter())
+[     3.536][MainProcess][INFO] Statistics:
+[     3.537][MainProcess][INFO] 	Generated cubes: 4
+[     3.537][MainProcess][INFO] 	Attempted programs: 4
+[     3.537][MainProcess][INFO] 		Rejected: 3
+[     3.537][MainProcess][INFO] 		Failed: 0
+[     3.537][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.537][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     3.539][MainProcess][DEBUG] 	0: Counter({'summarise': 15, 'mutate': 5})
+[     3.539][MainProcess][DEBUG] 	1: Counter({'filter': 20})
+[     3.539][MainProcess][INFO] Solution found: filter(summarise(@param0, n = n(), Email), n > 1)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/182.csv", col_types = cols(Id = col_integer(),Email = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/182_o.csv", col_types = cols(Email = col_character()))
+
+df2 <- input1 %>% group_by(Email) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 1)
+out <- df3 %>% select(Email) %>% arrange(Email)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Email
+FROM
+  (SELECT Email,
+          COUNT() AS n
+   FROM input1
+   GROUP BY Email)
+WHERE (n > 1.0)
+ORDER BY Email

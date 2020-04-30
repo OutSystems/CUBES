@@ -1,0 +1,81 @@
+[     3.445][MainProcess][INFO] Parsing specification...
+[     3.450][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.450][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.451][MainProcess][DEBUG] Reading input files...
+[     3.462][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/034.csv: ['string', 'datetime64[ns]', 'datetime64[ns]']
+[     3.469][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/034_o.csv: ['string', 'datetime64[ns]', 'datetime64[ns]']
+[     3.512][MainProcess][DEBUG] Generating DSL...
+[     3.693][MainProcess][INFO] Creating 2 processes
+[     3.895][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.933][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     6.415][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.460][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.774][MainProcess][DEBUG] Increasing generator loc to 2
+[     6.781][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     6.789][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[    11.714][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[    11.735][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[    11.740][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[    11.754][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    11.768][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[    11.781][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[    11.784][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[    11.803][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[    11.828][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[    11.848][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[    11.869][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[    12.903][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[    15.104][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[    15.889][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[    18.714][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[    19.433][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[    19.832][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = cross_join())
+[    20.456][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[    20.730][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[    27.187][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = inner_join())
+[    27.189][MainProcess][INFO] Statistics:
+[    27.189][MainProcess][INFO] 	Generated cubes: 21
+[    27.189][MainProcess][INFO] 	Attempted programs: 306
+[    27.189][MainProcess][INFO] 		Rejected: 163
+[    27.190][MainProcess][INFO] 		Failed: 142
+[    27.190][MainProcess][INFO] 	Blacklist clauses: 0
+[    27.190][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    27.191][MainProcess][DEBUG] 	0: Counter({'mutate': 48, 'summarise': 36})
+[    27.191][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    27.194][MainProcess][DEBUG] 	0: Counter({'summarise': 4896})
+[    27.198][MainProcess][DEBUG] 	1: Counter({'cross_join': 1359, 'inner_join': 1089, 'left_join': 612, 'union': 612, 'natural_join': 576, 'anti_join': 360, 'semi_join': 144, 'filter': 120, 'mutate': 24})
+[    27.198][MainProcess][INFO] Solution found: inner_join(summarise(@param0, maxDATE_UPDATE = max(DATE_UPDATE), MATERIAL), @param0, 'maxDATE_UPDATE' = 'DATE_UPDATE')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/034.csv", col_types = cols(MATERIAL = col_character(),DISCO_DATE = col_character(),DATE_UPDATE = col_character()))
+input1$DISCO_DATE <- ymd(input1$DISCO_DATE)
+input1$DATE_UPDATE <- ymd(input1$DATE_UPDATE)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/034_o.csv", col_types = cols(c1 = col_character(),c2 = col_character(),c3 = col_character()))
+expected_output$c2 <- ymd(expected_output$c2)
+expected_output$c3 <- ymd(expected_output$c3)
+
+df2 <- input1 %>% group_by(MATERIAL) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
+df3 <- inner_join(df2, input1, by=c('maxDATE_UPDATE' = 'DATE_UPDATE'), suffix = c('', '.other'))
+out <- df3 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = maxDATE_UPDATE) %>% arrange(c1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT MATERIAL AS c1,
+       DISCO_DATE AS c2,
+       maxDATE_UPDATE AS c3
+FROM
+  (SELECT LHS.MATERIAL AS MATERIAL,
+          LHS.maxDATE_UPDATE AS maxDATE_UPDATE,
+          RHS.MATERIAL AS MATERIAL.other,
+          RHS.DISCO_DATE AS DISCO_DATE
+   FROM
+     (SELECT MATERIAL,
+             MAX(DATE_UPDATE) AS maxDATE_UPDATE
+      FROM input1
+      GROUP BY MATERIAL) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.maxDATE_UPDATE = RHS.DATE_UPDATE))
+ORDER BY c1

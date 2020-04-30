@@ -1,0 +1,41 @@
+[     1.600][MainProcess][INFO] Parsing specification...
+[     1.604][MainProcess][DEBUG] Reading input files...
+[     1.610][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i022.csv: ['int64', 'int64']
+[     1.613][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o022.csv: ['int64']
+[     1.639][MainProcess][DEBUG] Generating DSL...
+[     1.803][MainProcess][INFO] Creating 4 processes
+[     1.819][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.958][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.963][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.971][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.973][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.504][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.513][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.570][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     4.571][MainProcess][INFO] Statistics:
+[     4.572][MainProcess][INFO] 	Generated cubes: 4
+[     4.572][MainProcess][INFO] 	Attempted programs: 1
+[     4.572][MainProcess][INFO] 		Rejected: 0
+[     4.572][MainProcess][INFO] 		Failed: 0
+[     4.572][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.572][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.573][MainProcess][DEBUG] 	0: Counter({'mutate': 6, 'summarise': 4})
+[     4.573][MainProcess][INFO] Solution found: mutate(@param0, medianval = median(val))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i022.csv", col_types = cols(id = col_integer(),val = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o022.csv", col_types = cols(median = col_integer()))
+
+df2 <- input1 %>% mutate(medianval = median(val))
+out <- df2 %>% select(median = medianval) %>% distinct() %>% arrange(median)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT PERCENTILE_CONT(0.5) WITHIN GROUP (
+                                                   ORDER BY val) OVER () AS median
+FROM input1
+ORDER BY median

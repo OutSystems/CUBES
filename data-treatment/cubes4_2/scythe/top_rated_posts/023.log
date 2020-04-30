@@ -1,0 +1,39 @@
+[     1.573][MainProcess][INFO] Parsing specification...
+[     1.576][MainProcess][DEBUG] Reading input files...
+[     1.582][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i023.csv: ['int64', 'int64']
+[     1.586][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o023.csv: ['int64', 'int64', 'int64']
+[     1.611][MainProcess][DEBUG] Generating DSL...
+[     1.633][MainProcess][INFO] Creating 2 processes
+[     1.675][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.681][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.799][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.827][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.884][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     1.886][MainProcess][INFO] Statistics:
+[     1.886][MainProcess][INFO] 	Generated cubes: 2
+[     1.886][MainProcess][INFO] 	Attempted programs: 1
+[     1.886][MainProcess][INFO] 		Rejected: 0
+[     1.886][MainProcess][INFO] 		Failed: 0
+[     1.887][MainProcess][INFO] 	Blacklist clauses: 0
+[     1.887][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     1.887][MainProcess][DEBUG] 	0: Counter({'mutate': 9, 'summarise': 4})
+[     1.888][MainProcess][INFO] Solution found: mutate(@param0, row_number = row_number())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i023.csv", col_types = cols(itemID = col_integer(),ordercount = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o023.csv", col_types = cols(rank = col_integer(),itemID = col_integer(),ordercount = col_integer()))
+
+df2 <- input1 %>% mutate(row_number = row_number())
+out <- df2 %>% select(rank = row_number, itemID, ordercount) %>% arrange(rank)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ROW_NUMBER() OVER () AS rank,
+                         itemID,
+                         ordercount
+FROM input1
+ORDER BY rank

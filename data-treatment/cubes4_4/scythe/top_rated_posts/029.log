@@ -1,0 +1,55 @@
+[     1.603][MainProcess][INFO] Parsing specification...
+[     1.605][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.605][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.606][MainProcess][DEBUG] Reading input files...
+[     1.613][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i029.csv: ['string', 'string']
+[     1.618][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o029.csv: ['string', 'string']
+[     1.645][MainProcess][DEBUG] Generating DSL...
+[     1.680][MainProcess][INFO] Creating 4 processes
+[     1.695][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.736][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.738][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.739][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.745][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.079][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     2.086][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     2.447][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.452][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     2.462][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     2.465][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     2.468][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     2.471][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     2.497][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.499][MainProcess][INFO] Statistics:
+[     2.499][MainProcess][INFO] 	Generated cubes: 9
+[     2.499][MainProcess][INFO] 	Attempted programs: 10
+[     2.499][MainProcess][INFO] 		Rejected: 9
+[     2.500][MainProcess][INFO] 		Failed: 0
+[     2.500][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.500][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     2.501][MainProcess][DEBUG] 	0: Counter({'summarise': 53, 'mutate': 48})
+[     2.501][MainProcess][INFO] Solution found: summarise(@param0, concatPerson = string_agg(Person, ' '), TicketID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i029.csv", col_types = cols(TicketID = col_character(),Person = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o029.csv", col_types = cols(TicketID = col_character(),concatPerson = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
+out <- df2 %>% select(TicketID, concatPerson) %>% arrange(TicketID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `TicketID`,
+       `concatPerson`
+FROM
+  (SELECT `TicketID`,
+          string_agg(`Person`, ' ') AS concatPerson
+   FROM input1
+   GROUP BY TicketID)
+ORDER BY TicketID

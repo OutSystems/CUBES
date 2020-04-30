@@ -1,0 +1,75 @@
+[     1.629][MainProcess][INFO] Parsing specification...
+[     1.632][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.632][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.633][MainProcess][DEBUG] Reading input files...
+[     1.640][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i057.csv: ['int64', 'string', 'string', 'int64']
+[     1.646][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o057.csv: ['string', 'string', 'int64']
+[     1.672][MainProcess][DEBUG] Generating DSL...
+[     1.845][MainProcess][INFO] Creating 4 processes
+[     1.866][MainProcess][DEBUG] Increasing generator loc to 2
+[     2.014][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     2.018][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     2.050][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     2.062][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     4.627][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.627][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     5.477][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     5.689][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     7.232][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([4]))
+[     7.257][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     7.277][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([4]))
+[     7.299][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     7.300][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join())
+[     7.320][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join3())
+[     7.349][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join4())
+[     7.370][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = summarise([4]))
+[     7.393][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = filter())
+[     9.138][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = anti_join())
+[    10.695][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([4]))
+[    10.724][cube-solver-0][DEBUG] Solving cube (l0 = summarise([4]), l1 = left_join())
+[    10.917][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    10.943][cube-solver-1][DEBUG] Solving cube (l0 = summarise([4]), l1 = union())
+[    11.996][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise([4]), l1 = natural_join())
+[    11.997][MainProcess][INFO] Statistics:
+[    11.998][MainProcess][INFO] 	Generated cubes: 16
+[    11.998][MainProcess][INFO] 	Attempted programs: 79
+[    11.998][MainProcess][INFO] 		Rejected: 44
+[    11.998][MainProcess][INFO] 		Failed: 34
+[    11.998][MainProcess][INFO] 	Blacklist clauses: 4
+[    11.999][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    11.999][MainProcess][DEBUG] 	0: Counter({'mutate': 168, 'summarise': 108})
+[    11.999][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    12.001][MainProcess][DEBUG] 	0: Counter({'summarise': 1663})
+[    12.002][MainProcess][DEBUG] 	1: Counter({'natural_join': 739, 'anti_join': 360, 'left_join': 211, 'filter': 180, 'union': 173})
+[    12.002][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, Birthyear = min(Birthyear), City))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i057.csv", col_types = cols(ID = col_integer(),Name = col_character(),City = col_character(),Birthyear = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o057.csv", col_types = cols(Name = col_character(),City = col_character(),minBirthyear = col_integer()))
+
+df2 <- input1 %>% group_by(City) %>% summarise(Birthyear = min(Birthyear)) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(Name, City, minBirthyear = Birthyear) %>% arrange(Name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Name,
+       City,
+       Birthyear AS minBirthyear
+FROM
+  (SELECT LHS.ID AS ID,
+          LHS.Name AS Name,
+          LHS.City AS City,
+          LHS.Birthyear AS Birthyear
+   FROM input1 AS LHS
+   INNER JOIN
+     (SELECT City,
+             MIN(Birthyear) AS Birthyear
+      FROM input1
+      GROUP BY City) AS RHS ON (LHS.City = RHS.City
+                                AND LHS.Birthyear = RHS.Birthyear))
+ORDER BY Name

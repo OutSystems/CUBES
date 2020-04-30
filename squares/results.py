@@ -33,7 +33,8 @@ class ResultsHolder(metaclass=Singleton):
     def __init__(self) -> None:
         self.specification = None
         self.solution = None
-        self.programs = defaultdict(list)
+        self.programs = defaultdict(Counter)
+        self.program_counter = 0
         self.blacklist = None
         self.n_cubes = 0
         self.n_attempts = 0
@@ -52,11 +53,11 @@ class ResultsHolder(metaclass=Singleton):
         if self.blacklist:
             logger.info('\tBlacklist clauses: %d', sum(map(len, self.blacklist.values())))
 
-        for l in self.programs.keys():
-            logger.debug('Priting statistics for good programs of size %d', l)
-            for i in range(l):
-                distribution = Counter(map(lambda prog: prog[i], self.programs[l]))
-                logger.debug('\t%d: %s', i, str(distribution))
+        # for l in self.programs.keys():
+        #     logger.debug('Printing statistics for good programs of size %d', l)
+        #     for i in range(l):
+        #         distribution = Counter(map(lambda prog: prog[i], self.programs[l]))
+        #         logger.debug('\t%d: %s', i, str(distribution))
 
         if self.solution is not None:
             logger.info(f'Solution found: {self.solution}')
@@ -101,7 +102,9 @@ class ResultsHolder(metaclass=Singleton):
         self.n_cubes += 1
 
     def store_program(self, program: Sequence):
-        self.programs[len(program)].append(program)
+        for i, production in enumerate(program):
+            self.programs[i - len(program)][production] += 1
+        self.program_counter += 1
 
     def store_solution(self, solution, optimal: bool = False):
         self.solution = solution
