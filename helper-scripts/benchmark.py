@@ -25,9 +25,9 @@ def test_file(filename: str):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './squares.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '49152', '-d', '20', '-o', out_file, './squares.py', '-vv', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '-o', out_file, './cubes.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '49152', '-d', '20', '-o', out_file, './cubes.py', '-vv', filename]
 
     command += other_args
 
@@ -35,14 +35,15 @@ def test_file(filename: str):
     p = subprocess.run(command, capture_output=True, encoding='utf8')
 
     timeout = re.search('Maximum wall clock time exceeded: sending SIGTERM then SIGKILL', p.stdout) is not None
+    memout = re.search('Maximum memory exceeded: sending SIGTERM then SIGKILL', p.stdout) is not None
 
     try:
         status = re.search('Child status: (.*)', p.stdout)[1]
     except:
-        status = None if timeout else 0
+        status = None if timeout or memout else 0
 
     process = None
-    if not timeout and not args.cubes:
+    if not timeout and not memout and not args.cubes:
         with open(out_file) as f:
             log = f.read()
             process = int(re.search('Solution found using process (.*)', log)[1])
@@ -54,7 +55,7 @@ def test_file(filename: str):
     with open('data-treatment/' + args.name + '.csv',
               'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
-        writer.writerow((test_name, timeout, real, cpu, ram, process, status))
+        writer.writerow((test_name, timeout, real, cpu, ram, process, status, memout))
         f.flush()
 
 

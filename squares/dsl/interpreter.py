@@ -1,15 +1,17 @@
+import math
 import re
+import time
 from itertools import permutations
 from logging import getLogger
 
-import logging
 from rpy2 import robjects as robjects
 from z3 import BitVecVal
 
-from squares import util
-from squares.exceptions import REvaluationError
-from squares.tyrell.interpreter import PostOrderInterpreter, InterpreterError
-from squares.util import get_fresh_name, get_permutations
+from .. import util
+from ..exceptions import REvaluationError
+from .. import results
+from ..tyrell.interpreter import PostOrderInterpreter, InterpreterError
+from ..util import get_fresh_name, get_permutations
 
 logger = getLogger('squares.interpreter')
 
@@ -174,9 +176,18 @@ class SquaresInterpreter(PostOrderInterpreter):
         return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)
 
     def equals(self, actual: str, expect: str, *args) -> bool:
+        start = time.time()
+        score = tuple(robjects.r(f'ue <- {expect} %>% unlist %>% unique;length(intersect({actual} %>% unlist %>% unique, ue)) / length(ue)'))[0]
+        if math.isnan(score):
+            score = 0
+        if score > 0 and util.get_program_queue():
+            util.get_program_queue().put((tuple(r.production.name for r in args[0]), score * 10))
+
+        if score < 1:
+            return False
+
         a_cols = list(robjects.r(f'colnames({actual})'))
         e_cols = list(robjects.r(f'colnames({expect})'))
-
         for combination in permutations(a_cols, len(e_cols)):
             for d in ['', ' %>% distinct()']:
                 _script = f'out <- {actual} %>% select({", ".join(map(lambda pair: f"{pair[0]} = {pair[1]}" if pair[0] != pair[1] else pair[0], zip(e_cols, combination)))}){d}'
@@ -193,19 +204,14 @@ class SquaresInterpreter(PostOrderInterpreter):
                                     break
 
                             self.final_program += _script + '\n'
+                        results.ResultsHolder().equality_time += time.time() - start
                         return True
                 except:
                     continue
+        results.ResultsHolder().equality_time += time.time() - start
         return False
 
     def test_equality(self, actual: str, expect: str, keep_order: bool = False, *args) -> bool:
-        if logger.isEnabledFor(logging.DEBUG):
-            a_dim = tuple(robjects.r(f'dim({actual})'))
-            e_dim = tuple(robjects.r(f'dim({expect})'))
-            if a_dim[0] == e_dim[0] and a_dim[1] == e_dim[1]:
-                if util.get_program_queue():
-                    util.get_program_queue().put(tuple(r.production.name for r in args[0]))
-
         if not keep_order:
             _script = f'all_equal({actual}, {expect}, convert=T)'
         else:

@@ -8,6 +8,7 @@ from z3 import And, Or
 
 from squares import util
 from squares.results import ResultsHolder
+from squares.statistics import Statistics
 from squares.tyrell.dsl import ParamNode, AtomNode
 from squares.tyrell.enumerator.lines import LinesEnumerator
 from squares.tyrell.spec import TyrellSpec, FunctionProduction
@@ -28,7 +29,7 @@ class LineConstraint(CubeConstraint):
 
     def realize_constraint(self, spec, enumerator):
         return And(
-            enumerator.roots[self.line].var == spec.get_function_production(self.production).id,
+            enumerator.roots[self.line].var == spec.get_function_production_or_raise(self.production).id,
             *(Or(*(enumerator.roots[self.line].children[i].var != arg.get_id(spec) for i, arg in enumerate(args))) for args in
               self.arguments)
             )
@@ -105,7 +106,7 @@ def move(production_list, name, position):
         pass
 
 
-class CubeGenerator(Iterable):
+class CubeGenerator:
 
     def __init__(self, specification, tyrell_specification, loc, n_lines, blacklist) -> None:
         self.line_stack = list()
@@ -121,10 +122,7 @@ class CubeGenerator(Iterable):
         while len(self.line_stack) < self.n_lines:
             self.line_stack.append(self.filtered_productions())
 
-    def __iter__(self) -> Iterator[Collection[CubeConstraint]]:
-        return self
-
-    def __next__(self) -> Collection[CubeConstraint]:
+    def next(self, dummy: bool) -> Collection[CubeConstraint]:
         if self.n_lines == 0 and self.exahusted == False:
             self.exahusted = True
             return tuple()
@@ -203,13 +201,24 @@ class Node:
         return repr(self.head)
 
 
+# production_limit = {
+#     'anti_join': 1,
+#     'semi_join': 1,
+#     'left_join': 1,
+#     'cross_join': 1,
+#     'union': 2,
+#     'intersect': 1,
+#     }
+
+
 class StatisticCubeGenerator(CubeGenerator):
 
-    def __init__(self, specification, tyrell_specification, loc, n_lines, blacklist) -> None:
+    def __init__(self, statistics: Statistics, specification, tyrell_specification, loc, n_lines, blacklist) -> None:
         super().__init__(specification, tyrell_specification, loc, n_lines, blacklist)
         self.root = Node(None, None, None)
+        self.statistics = statistics
 
-    def __next__(self) -> Collection[CubeConstraint]:
+    def next(self, probe: bool) -> Collection[CubeConstraint]:
         node = self.root
         depth = 0
         cube = []
@@ -219,7 +228,8 @@ class StatisticCubeGenerator(CubeGenerator):
                 node.children = [Node(p, None, node) for p in self.filter_productions(cube)]
 
             try:
-                node = self.sort_productions(node.children, cube)[0]
+                name = self.statistics.choose_production([c.head.name for c in node.children], [c.head.name for c in cube], probe, self.loc)
+                node = next(filter(lambda x: x.head.name == name, node.children))
                 depth += 1
                 cube.append(node)
             except:
@@ -229,10 +239,13 @@ class StatisticCubeGenerator(CubeGenerator):
         node_ = node
         while not node_.children:
             tmp = node_.parent
-            if not tmp:
+            if not tmp and failed:
                 raise StopIteration
-            tmp.children.remove(node_)
-            node_ = tmp
+            elif not tmp:
+                break
+            else:
+                tmp.children.remove(node_)
+                node_ = tmp
 
         if not failed:
             return list(map(lambda x: LineConstraint(x[0], x[1].head.name, self.blacklist[x[1].head.name]), enumerate(cube)))
@@ -241,30 +254,16 @@ class StatisticCubeGenerator(CubeGenerator):
     def filter_productions(self, cube):
         productions = [p for p in self.tyrell_specification.get_productions_with_lhs('Table') if p.is_function()]
 
-        if util.get_config().force_summarise and \
-                len(self.specification.aggrs) - count(l for l in cube if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(
-            cube):
+        # for production, max_count in production_limit.items():
+        #     if count(l for l in cube if l.head.name == production) >= max_count:
+        #         productions = list(filter(lambda p: p.name != production, productions))
+
+        if util.get_config().force_summarise and len(self.specification.aggrs) - count(
+                l for l in cube if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(cube):
             productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
 
-        if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters) and \
-                count(l for l in cube if l.head.name == 'filter') == 0 and \
-                len(cube) == self.loc - 1:
+        if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters) and count(
+                l for l in cube if l.head.name == 'filter') == 0 and len(cube) == self.loc - 1:
             productions = list(filter(lambda p: p.name == 'filter', productions))
 
         return productions
-
-    def sort_productions(self, base_productions, cube):
-        productions = OrderedSet()
-
-        try:
-            for production in ResultsHolder().programs[len(cube) - self.loc]:
-                production = self.tyrell_specification.get_function_production_or_raise(production)
-                if production in base_productions:
-                    productions.append(production)
-        except:
-            pass
-
-        for p in sample(base_productions, len(base_productions)):
-            productions.append(p)
-
-        return deque(productions)

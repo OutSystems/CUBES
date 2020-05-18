@@ -32,6 +32,7 @@ logger = getLogger('tyrell.synthesizer.constraint')
 ImplyMap = Mapping[Tuple[Production, Expr], List[Production]]
 MutableImplyMap = MutableMapping[Tuple[Production, Expr], List[Production]]
 
+COUNTER = 0
 
 class Z3Encoder(GenericVisitor):
     _interp: Interpreter
@@ -60,8 +61,10 @@ class Z3Encoder(GenericVisitor):
             raise RuntimeError('Unrecognized ExprType: {}'.format(ptype))
 
     def _get_constraint_var(self, node: Node, index: int):
+        global COUNTER
         node_id = self._indexer.get_id(node)
-        var_name = '@n{}_c{}'.format(node_id, index)
+        var_name = '@n{}_c{}_{}'.format(node_id, index, COUNTER)
+        COUNTER += 1
         return var_name
 
     def encode_param_alignment(self, node: Node, ty: ValueType, index: int):
@@ -99,6 +102,7 @@ class Z3Encoder(GenericVisitor):
             return self.get_z3_var(node, pname, pty)
 
         constraint_visitor = ConstraintEncoder(encode_property)
+        print(apply_node)
         for index, constraint in enumerate(apply_node.production.constraints):
             cname = self._get_constraint_var(apply_node, index)
             z3_clause = constraint_visitor.visit(constraint)

@@ -1,153 +1,129 @@
-from squares.dsl.dsl_builder import *
+from typing import Any
 
-table_value = DSLValue('Table',
-                       [
-                           ('col', 'int'),
-                           ('row', 'int'),
-                           # ('columns', 'bv')
-                           ])
+from squares import util
+from squares.tyrell.spec import ValueType, EnumType, ProgramSpec
+from squares.tyrell.spec.expr import *
 
-table_select_value = DSLValue('TableSelect',
-                              [
-                                  ('col', 'int'),
-                                  ('row', 'int'),
-                                  # ('columns', 'bv')
-                                  ])
 
-natural_join_function = DSLFunction('natural_join',
-                                    'Table r',
-                                    ['Table a', 'Table b'],
-                                    [
-                                        "col(r) <= col(a) + col(b)",
-                                        # "columns(r) == columns(a) | columns(b)",
-                                        # f"columns(a) & columns(b) != *0"
-                                        ])
+class Helper:
+    def __getattr__(self, name: str) -> Any:
+        if name in ['col', 'row']:
+            return lambda i: PropertyExpr(name, ExprType.INT, ParamExpr(i))
 
-natural_join3_function = DSLFunction('natural_join3',
-                                     'Table r',
-                                     ['Table a', 'Table b', 'Table c'],
-                                     [
-                                         "col(r) < col(a) + col(b) + col(c)",
-                                         # "columns(r) == columns(a) | columns(b) | columns(c)",
-                                         # f"columns(a) & columns(b) != *0",
-                                         # f"(columns(a) | columns(b)) & columns(c) != *0"
-                                         ])
+        elif name in BinaryOperator.__members__:
+            return lambda x, y: BinaryExpr(BinaryOperator[name], x, y)
 
-natural_join4_function = DSLFunction('natural_join4',
-                                     'Table r',
-                                     ['Table a', 'Table b', 'Table c', 'Table d'],
-                                     [
-                                         "col(r) < col(a) + col(b) + col(c) + col(d)",
-                                         # "columns(r) == columns(a) | columns(b) | columns(c) | columns(d)",
-                                         # f"columns(a) & columns(b) != *0",
-                                         # f"(columns(a) | columns(b)) & columns(c) != *0",
-                                         # f"(columns(a) | columns(b) | columns(c)) & columns(d) != *0"
-                                         ])
+        elif name in UnaryOperator.__members__:
+            return lambda x: UnaryExpr(UnaryOperator[name], x)
 
-inner_join_function = DSLFunction('inner_join',
-                                  'Table r',
-                                  ['Table a', 'Table b', 'JoinCondition c'],
-                                  [
-                                      "col(r) <= col(a) + col(b)"
-                                      ])
+        raise AttributeError
 
-anti_join_function = DSLFunction('anti_join',
-                                 'Table r',
-                                 ['Table a', 'Table b', 'JoinCols c'],
-                                 [
-                                     "col(r) == 1",
-                                     'row(r) <= row(a)'
-                                     ])
 
-left_join_function = DSLFunction('left_join',
-                                 'Table r',
-                                 ['Table a', 'Table b'],
-                                 [
-                                     'col(r) <= col(a) + col(b)',
-                                     'row(r) == row(a)',
-                                     # "columns(r) == columns(a) | columns(b)"
-                                     ])
+h = Helper()
 
-union_function = DSLFunction('union',
-                             'Table r',
-                             ['Table a', 'Table b'],
-                             [
-                                 'col(r) <= col(a) + col(b)',
-                                 'row(r) == row(a) + row(b)',
-                                 # "columns(r) == columns(a) | columns(b)"
-                                 ])
+Table = ValueType('Table',
+                  [('col', ExprType.INT),
+                   ('row', ExprType.INT)
+                   ])
 
-intersect_function = DSLFunction('intersect',
-                                 'Table r',
-                                 ['Table a', 'Table b', 'Col c'],
-                                 [
-                                     'col(r) == 1',
-                                     'row(r) <= row(a)'
-                                     ])
+JoinCondition = EnumType('JoinCondition')
+JoinCols = EnumType('JoinCols')
+Col = EnumType('Col')
+Cols = EnumType('Cols')
+CrossJoinCondition = EnumType('CrossJoinCondition')
+FilterCondition = EnumType('FilterCondition')
+Op = EnumType('Op')
+SummariseCondition = EnumType('SummariseCondition')
 
-semi_join_function = DSLFunction('semi_join',
-                                 'Table r',
-                                 ['Table a', 'Table b'],
-                                 [
-                                     'col(r) == col(a)',
-                                     'row(r) <= row(a)'
-                                     ])
+squares = ProgramSpec('Squares', [], Table)
 
-cross_join_function = DSLFunction('cross_join',
-                                  'Table r',
-                                  ['Table a', 'Table b', 'CrossJoinCondition c'],
-                                  [
-                                      'col(r) <= col(a) + col(b)'
-                                      ])
+natural_join = ('natural_join',
+                Table,
+                [Table, Table],
+                [h.LE(h.col(0), h.ADD(h.col(1), h.col(2))),
+                 h.LE(h.row(0), h.MUL(h.row(1), h.row(2)))])
 
-select_function = DSLFunction('select',
-                              'TableSelect r',
-                              ['Table a', 'SelectCols c', 'Distinct d'],
-                              [
-                                  'row(r) <= row(a)',
-                                  'col(r) <= col(a)',
-                                  # f"columns(r) & columns(a) != *0",
-                                  # f"columns(r) & ~columns(a) == *0",
-                                  ])
+natural_join3 = ('natural_join3',
+                 Table,
+                 [Table, Table, Table],
+                 [h.LE(h.col(0), h.ADD(h.ADD(h.col(1), h.col(2)), h.col(3))),
+                  h.LE(h.row(0), h.MUL(h.MUL(h.row(1), h.row(2)), h.row(3)))])
 
-unite_function = DSLFunction('unite',
-                             'Table r',
-                             ['Table a', 'Col c', 'Col d'],
-                             [
-                                 'row(r) <= row(a)',
-                                 'col(r) <= col(a)'
-                                 ])
+natural_join4 = ('natural_join4',
+                 Table,
+                 [Table, Table, Table, Table],
+                 [h.LE(h.col(0), h.ADD(h.ADD(h.ADD(h.col(1), h.col(2)), h.col(3)), h.col(4))),
+                  h.LE(h.row(0), h.MUL(h.MUL(h.MUL(h.row(1), h.row(2)), h.row(3)), h.row(4)))])
 
-filter_function = DSLFunction('filter',
-                              'Table r',
-                              ['Table a', 'FilterCondition f'],
-                              [
-                                  'row(r) <= row(a)',
-                                  'col(r) == col(a)',
-                                  # 'columns(r) == columns(a)'
-                                  ])
+inner_join = ('inner_join',
+              Table,
+              [Table, Table, JoinCondition],
+              [h.LE(h.col(0), h.ADD(h.col(1), h.col(2))),
+               h.LE(h.row(0), h.MUL(h.row(1), h.row(2)))])
 
-filters_function = DSLFunction('filters',
-                               'Table r',
-                               ['Table a', 'FilterCondition f', 'FilterCondition g', 'Op o'],
-                               [
-                                   'row(r) <= row(a)',
-                                   'col(r) == col(a)'
-                                   # 'columns(r) == columns(a)'
-                                   ])
+anti_join = ('anti_join',
+             Table,
+             [Table, Table, JoinCols],
+             [h.EQ(h.col(0), ConstExpr(1)),
+              h.LE(h.row(0), h.row(1))])
 
-summarise_function = DSLFunction('summarise',
-                                 'Table r',
-                                 ['Table a', 'SummariseCondition s', 'Cols b'],
-                                 [
-                                     'row(r) <= row(a)',
-                                     'col(r) <= 3'
-                                     ])
+left_join = ('left_join',
+             Table,
+             [Table, Table],
+             [h.LE(h.col(0), h.ADD(h.col(1), h.col(2))),
+              h.EQ(h.row(0), h.row(1))])
 
-mutate_function = DSLFunction('mutate',
-                              'Table r',
-                              ['Table a', 'MutateCondition s'],
-                              [
-                                  'row(r) <= row(a)',
-                                  'col(r) <= 3'
-                                  ])
+union = ('union',
+         Table,
+         [Table, Table],
+         [h.LE(h.col(0), h.ADD(h.col(1), h.col(2))),
+          h.EQ(h.row(0), h.ADD(h.row(1), h.row(2)))])
+
+intersect = ('intersect',
+             Table,
+             [Table, Table, Col],
+             [h.EQ(h.col(0), ConstExpr(1)),
+              h.LE(h.row(0), h.row(1)),
+              h.LE(h.row(0), h.row(2))])
+
+semi_join = ('semi_join',
+             Table,
+             [Table, Table],
+             [h.EQ(h.col(0), h.col(1)),
+              h.LE(h.row(0), h.row(1))])
+
+cross_join = ('cross_join',
+              Table,
+              [Table, Table, CrossJoinCondition],
+              [h.LE(h.col(0), h.ADD(h.col(1), h.col(2))),
+               h.LE(h.row(0), h.MUL(h.row(1), h.row(2)))])
+
+unite = ('unite',
+         Table,
+         [Table, Col, Col],
+         [h.LE(h.col(0), h.col(1)),
+          h.LE(h.row(0), h.row(1))])
+
+filter = ('filter',
+          Table,
+          [Table, FilterCondition],
+          [h.EQ(h.col(0), h.col(1)),
+           h.LE(h.row(0), h.row(1))])
+
+filters = ('filters',
+           Table,
+           [Table, FilterCondition, FilterCondition, Op],
+           [h.EQ(h.col(0), h.col(1)),
+            h.LE(h.row(0), h.row(1))])
+
+summarise = ('summarise',
+             Table,
+             [Table, SummariseCondition, Cols],
+             [h.LE(h.col(0), ConstExpr(3)),  # TODO should depend on max_cols
+              h.LE(h.row(0), h.row(1))])
+
+mutate = ('mutate',
+          Table,
+          [Table, SummariseCondition],
+          [h.GE(h.col(0), h.col(1)),
+           h.EQ(h.row(0), h.row(1))])

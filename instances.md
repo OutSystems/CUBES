@@ -8,7 +8,9 @@
 - 55-tests/46
 - scythe/recent_posts/006
 - scythe/recent_posts/012
+- scythe/recent_posts/013
 - scythe/recent_posts/019
+- scythe/recent_posts/021
 - scythe/recent_posts/036
 - scythe/recent_posts/046
 - leetcode/184
@@ -17,28 +19,22 @@
 
 ## Unsure if supported?
 - scythe/recent_posts/001
-- scythe/recent_posts/039
-- leetcode/185
-- textbook/26
-- textbook/29
-- textbook/32
-- textbook/34
-
-## Supported with cross join
-- scythe/recent_posts/013
-
-## Unsure if supported with cross_join?
-- scythe/recent_posts/021
 - scythe/recent_posts/023 (chained left join)
 - scythe/recent_posts/028
+- scythe/recent_posts/039
 - scythe/recent_posts/043 (self join)
 - scythe/recent_posts/048 (self join)
 - scythe/recent_posts/050
 - scythe/top_rated_posts/018
 - scythe/top_rated_posts/030
 - leetcode/181
+- leetcode/185
 - leetcode/197
+- textbook/26
 - textbook/27
+- textbook/29
+- textbook/32
+- textbook/34
 
 ## Not supported
 

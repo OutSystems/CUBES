@@ -17,12 +17,9 @@ from squares.dsl.specification import Specification
 from .tyrell import spec as S
 from .tyrell.decider import Example, ExampleConstraintDecider
 from .tyrell.enumerator import LinesEnumerator, SmtEnumerator
-from .tyrell.logger import get_logger
 from .tyrell.synthesizer import Synthesizer
 
-# warnings.filterwarnings("ignore", category=RRuntimeWarning)
-
-logger = get_logger('squares')
+logger = logging.getLogger('squares')
 
 robjects.r('''
 zz <- file("r_output.log", open = "wt")
@@ -37,14 +34,16 @@ library(lubridate)
 options(warn=-1)''')
 
 
-def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
+def main(args, spec, id: int, conf: Config, queue: Queue):
     util.seed(conf.seed)
     util.store_config(conf)
 
-    if args.debug:
+    if args.verbose >= 1:
+        logger.setLevel('INFO')
+    if args.verbose >= 2:
         logger.setLevel('DEBUG')
-
-    logger.handlers[0].set_identifier(f'prc{id}')
+    if args.verbose >= 3:
+        logging.getLogger('tyrell').setLevel('DEBUG')
 
     logger.info('Creating specification instance...')
     specification = Specification(spec)
@@ -64,8 +63,8 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
                                        )
 
     logger.info('Building synthesizer...')
-    loc = max(specification.min_loc, conf.starting_loc)
-    while loc <= limit:
+    loc = max(specification.min_loc, conf.minimum_loc)
+    while loc <= util.get_config().maximum_loc:
         logger.info("Lines of Code: " + str(loc))
         if args.tree:
             enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
@@ -83,7 +82,7 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
         prog = synthesizer.synthesize()
         if prog:
             logger.info(f'Solution found: {prog}')
-            ResultsHolder().store_solution(prog, True)
+            ResultsHolder().store_solution(prog, loc, True)
             ResultsHolder().print()
             queue.put(ResultsHolder().exit_code)
             return
@@ -93,4 +92,4 @@ def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
             logger.info('Increasing the number of lines of code.')
             loc = loc + 1
 
-    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, limit)
+    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, util.get_config().maximum_loc)

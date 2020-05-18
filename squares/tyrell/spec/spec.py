@@ -49,7 +49,7 @@ class TypeSpec:
         '''Return the total number of defined types'''
         return len(self._types)
 
-    def __repr(self) -> str:
+    def __repr__(self) -> str:
         return 'TypeSpec({})'.format([str(x) for x in self._types.values()])
 
 
@@ -231,8 +231,7 @@ class ProgramSpec:
     def check_value_type(ty):
         if not isinstance(ty, ValueType):
             raise ValueError(
-                'Non-value type cannot be used as program input/output: {}'.format(
-                    ty))
+                'Non-value type cannot be used as program input/output: {}'.format(ty))
 
     def __init__(self, name: str, in_types: List[Type], out_type: Type):
         for ty in in_types:
@@ -282,6 +281,9 @@ class PredicateSpec:
     def num_predicates(self) -> int:
         '''Return the number of predicates'''
         return len(self._preds)
+
+    def __repr__(self):
+        return 'PredicateSpec({})'.format([str(x) for x in self._preds])
 
 
 class TyrellSpec:
@@ -398,3 +400,13 @@ class TyrellSpec:
     def num_predicates(self) -> int:
         '''Return the number of predicates'''
         return self._pred_spec.num_predicates()
+
+    def __repr__(self) -> str:
+        result = ''
+        result += repr(self._type_spec) + '\n'
+        result += repr(self._prog_spec) + '\n'
+        result += repr(self._prod_spec) + '\n'
+        result += repr(self._pred_spec) + '\n'
+        return result
+
+

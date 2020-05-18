@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple, Optional, Any
 
+from ordered_set import OrderedSet
+
 from .expr import ExprType
 
 
@@ -41,16 +43,16 @@ class Type(ABC):
 class EnumType(Type):
     '''A special kind of type whose domain is finite and specified up-front'''
 
-    _domain: List[Any]
+    _domain: OrderedSet
 
     def __init__(self, name: str, domain=None):
         super().__init__(name)
         if domain is None:
             domain = []
-        self._domain = domain
+        self._domain = OrderedSet(domain)
 
     @property
-    def domain(self) -> List[Any]:
+    def domain(self) -> OrderedSet:
         return self._domain
 
     def is_enum(self) -> bool:

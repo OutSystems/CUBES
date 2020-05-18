@@ -1,17 +1,26 @@
 import re
-from collections import defaultdict, Counter
+import sys
 from enum import IntEnum
 from logging import getLogger
-from typing import Sequence
 
+import os
 import sqlparse
 from rpy2 import robjects
 
 from . import util
-from squares.dsl.interpreter import SquaresInterpreter
+from .dsl import interpreter
 from .util import Singleton
 
 logger = getLogger('squares')
+
+
+def handler_subprocess(signal, stackframe):
+    logger.debug('Time spent in equality testing: %f', ResultsHolder().equality_time)
+    logger.debug('Time spent in analysis: %f', ResultsHolder().analysis_time)
+    logger.debug('Time spent in enumerator: %f', ResultsHolder().enum_time)
+    logger.debug('Time spent in enumerator init: %f', ResultsHolder().init_time)
+    logger.debug('Enumerarted %f programs/second', ResultsHolder().n_attempts / ResultsHolder().enum_time)
+    os._exit(os.EX_OK)
 
 
 class ExitCode(IntEnum):
@@ -33,8 +42,7 @@ class ResultsHolder(metaclass=Singleton):
     def __init__(self) -> None:
         self.specification = None
         self.solution = None
-        self.programs = defaultdict(Counter)
-        self.program_counter = 0
+        self.solution_size = None
         self.blacklist = None
         self.n_cubes = 0
         self.n_attempts = 0
@@ -42,6 +50,10 @@ class ResultsHolder(metaclass=Singleton):
         self.n_fails = 0
         self.exit_code = ExitCode.ERROR
         self.exceeded_max_loc = False
+        self.equality_time = 0
+        self.analysis_time = 0
+        self.enum_time = 0
+        self.init_time = 0
 
     def print(self):
         logger.info('Statistics:')
@@ -53,21 +65,16 @@ class ResultsHolder(metaclass=Singleton):
         if self.blacklist:
             logger.info('\tBlacklist clauses: %d', sum(map(len, self.blacklist.values())))
 
-        # for l in self.programs.keys():
-        #     logger.debug('Printing statistics for good programs of size %d', l)
-        #     for i in range(l):
-        #         distribution = Counter(map(lambda prog: prog[i], self.programs[l]))
-        #         logger.debug('\t%d: %s', i, str(distribution))
-
         if self.solution is not None:
             logger.info(f'Solution found: {self.solution}')
+            logger.info(f'Solution size: {self.solution_size}')
             util.get_config().cache_ops = True
-            interpreter = SquaresInterpreter(self.specification, True)
-            evaluation = interpreter.eval(self.solution, self.specification.tables)
-            assert interpreter.equals(evaluation, 'expected_output')  # this call makes it so that the select() appears in the output
+            interp = interpreter.SquaresInterpreter(self.specification, True)
+            evaluation = interp.eval(self.solution, self.specification.tables)
+            assert interp.equals(evaluation, 'expected_output')  # this call makes it so that the select() appears in the output
 
             try:
-                program = self.specification.r_init + interpreter.final_program
+                program = self.specification.r_init + interp.final_program
                 robjects.r(program)
                 sql_query = robjects.r(f'sink(); sql_render(out, bare_identifier_ok=T)')
             except:
@@ -79,7 +86,7 @@ class ResultsHolder(metaclass=Singleton):
             if util.get_config().print_r:
                 pass
                 print("------------------------------------- R Solution ---------------------------------------\n")
-                print(self.specification.r_init + '\n' + interpreter.final_program)
+                print(self.specification.r_init + '\n' + interp.final_program)
 
             if sql_query is not None:
                 print()
@@ -101,11 +108,7 @@ class ResultsHolder(metaclass=Singleton):
     def increment_cubes(self):
         self.n_cubes += 1
 
-    def store_program(self, program: Sequence):
-        for i, production in enumerate(program):
-            self.programs[i - len(program)][production] += 1
-        self.program_counter += 1
-
-    def store_solution(self, solution, optimal: bool = False):
+    def store_solution(self, solution, size: int, optimal: bool):
         self.solution = solution
+        self.solution_size = size
         self.exit_code = ExitCode.OK if optimal else ExitCode.NON_OPTIMAL

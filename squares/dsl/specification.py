@@ -7,9 +7,10 @@ from rpy2 import robjects
 
 from . import dsl_library
 from .conditions import ConditionGenerator
-from .dsl_builder import DSLPredicate, DSLEnum, DSLBuilder
 from .. import util, types
 from ..exceptions import SquaresException
+from ..tyrell.spec import TyrellSpec, TypeSpec, ProductionSpec, ProgramSpec, ValueType
+from ..tyrell.spec.spec import PredicateSpec
 from ..util import next_counter, get_combinations
 
 logger = getLogger('squares')
@@ -53,9 +54,9 @@ def read_table(path):
     return df
 
 
-def add_is_not_parent_if_enabled(dsl, a, b):
+def add_is_not_parent_if_enabled(pred_spec, a, b):
     if a not in util.get_config().disabled and b not in util.get_config().disabled:
-        dsl.add_predicate(DSLPredicate('is_not_parent', [a, b, '100']))
+        pred_spec.add_predicate('is_not_parent', [a, b])
 
 
 class Specification:
@@ -121,10 +122,15 @@ class Specification:
                     self.types_by_const[const].append(type)
                     self.consts_by_type[type].append(const)
 
-        self.generate_r_init()
+        self.condition_generator = ConditionGenerator(self)
+        self.condition_generator.generate_summarise()
+        self.condition_generator.generate_filter()
+        self.condition_generator.generate_inner_join()
+        self.condition_generator.generate_cross_join()
 
-        logger.debug("Generating DSL...")
-        self.generate_dsl()
+        self.n_columns = len(self.all_columns)
+
+        self.generate_r_init()
 
     def generate_r_init(self):  # TODO dirty: initializes R for the inputs
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
@@ -155,130 +161,140 @@ class Specification:
                 '\nmode <- function(x) {ux <- unique(x); ux[which.max(tabulate(match(x, ux)))]}\n')
 
     def generate_dsl(self):
-        condition_generator = ConditionGenerator(self)
-        condition_generator.generate_summarise()
-        condition_generator.generate_filter()
-        condition_generator.generate_inner_join()
-        condition_generator.generate_cross_join()
+        dsl_library.squares._input = [dsl_library.Table] * len(self.inputs)
 
-        dsl = DSLBuilder('Squares', ['Table'] * len(self.inputs), 'Table')
+        type_spec = TypeSpec()
 
-        if condition_generator.summarise_conditions:
-            dsl.add_enum(DSLEnum('Cols', get_combinations(self.columns, util.get_config().max_column_combinations)))
+        Empty = ValueType('Empty')
+        type_spec.define_type(Empty)
+
+        type_spec.define_type(dsl_library.Table)
+
+        if self.condition_generator.summarise_conditions:
+            dsl_library.Cols._domain = get_combinations(self.columns, util.get_config().max_column_combinations)
+            type_spec.define_type(dsl_library.Cols)
 
         if 'intersect' not in util.get_config().disabled:
-            dsl.add_enum(DSLEnum('Col', list(self.columns)))
+            dsl_library.Col._domain = list(self.columns)
+            type_spec.define_type(dsl_library.Col)
 
         if 'anti_join' not in util.get_config().disabled:
-            dsl.add_enum(DSLEnum('JoinCols',
-                                 [''] + get_combinations([f"'{col}'" for col in self.columns], util.get_config().max_column_combinations)))
+            dsl_library.JoinCols._domain = [''] + get_combinations([f"'{col}'" for col in self.columns],
+                                                                   util.get_config().max_column_combinations)
+            type_spec.define_type(dsl_library.JoinCols)
 
-        if 'inner_join' not in util.get_config().disabled and condition_generator.inner_join_conditions:
-            dsl.add_enum(DSLEnum('JoinCondition', condition_generator.inner_join_conditions))
+        if 'inner_join' not in util.get_config().disabled and self.condition_generator.inner_join_conditions:
+            dsl_library.JoinCondition._domain = self.condition_generator.inner_join_conditions
+            type_spec.define_type(dsl_library.JoinCondition)
 
-        if 'cross_join' not in util.get_config().disabled and condition_generator.cross_join_conditions:
-            dsl.add_enum(DSLEnum('CrossJoinCondition', condition_generator.cross_join_conditions))
+        if 'cross_join' not in util.get_config().disabled and self.condition_generator.cross_join_conditions:
+            dsl_library.CrossJoinCondition._domain = OrderedSet(self.condition_generator.cross_join_conditions)
+            type_spec.define_type(dsl_library.CrossJoinCondition)
 
-        if condition_generator.filter_conditions:
-            dsl.add_enum(DSLEnum('FilterCondition', condition_generator.filter_conditions))
+        if self.condition_generator.filter_conditions:
+            dsl_library.FilterCondition._domain = self.condition_generator.filter_conditions
+            type_spec.define_type(dsl_library.FilterCondition)
 
-        if condition_generator.summarise_conditions:
-            dsl.add_enum(DSLEnum('SummariseCondition', condition_generator.summarise_conditions))
+        if self.condition_generator.summarise_conditions:
+            dsl_library.SummariseCondition._domain = self.condition_generator.summarise_conditions
+            type_spec.define_type(dsl_library.SummariseCondition)
 
-        if condition_generator.summarise_conditions:
-            dsl.add_enum(DSLEnum('MutateCondition', condition_generator.summarise_conditions))
+        if util.get_config().filters_function_enabled and len(self.condition_generator.filter_conditions) > 1:
+            dsl_library.Op._domain = ['|', '&']
+            type_spec.define_type(dsl_library.Op)
 
-        if util.get_config().filters_function_enabled and len(condition_generator.filter_conditions) > 1:
-            dsl.add_enum(DSLEnum('Op', ['|', '&']))
+        prod_spec = ProductionSpec()
 
-        dsl.add_value(dsl_library.table_value)
+        prod_spec.add_func_production('empty', Empty, [Empty])
 
         if 'natural_join' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.natural_join_function)
+            prod_spec.add_func_production(*dsl_library.natural_join)
 
         if 'natural_join3' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.natural_join3_function)
+            prod_spec.add_func_production(*dsl_library.natural_join3)
 
         if 'natural_join4' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.natural_join4_function)
+            prod_spec.add_func_production(*dsl_library.natural_join4)
 
-        if 'inner_join' not in util.get_config().disabled and condition_generator.inner_join_conditions:
-            dsl.add_function(dsl_library.inner_join_function)
+        if 'inner_join' not in util.get_config().disabled and self.condition_generator.inner_join_conditions:
+            prod_spec.add_func_production(*dsl_library.inner_join)
 
         if 'anti_join' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.anti_join_function)
+            prod_spec.add_func_production(*dsl_library.anti_join)
 
         if 'left_join' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.left_join_function)
+            prod_spec.add_func_production(*dsl_library.left_join)
 
         if 'union' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.union_function)
+            prod_spec.add_func_production(*dsl_library.union)
 
         if 'intersect' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.intersect_function)
+            prod_spec.add_func_production(*dsl_library.intersect)
 
         if 'semi_join' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.semi_join_function)
+            prod_spec.add_func_production(*dsl_library.semi_join)
 
         if 'cross_join' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.cross_join_function)
+            prod_spec.add_func_production(*dsl_library.cross_join)
 
         if 'concat' in self.aggrs:
-            dsl.add_function(dsl_library.unite_function)
+            prod_spec.add_func_production(*dsl_library.unite)
 
-        if condition_generator.filter_conditions:
-            dsl.add_function(dsl_library.filter_function)
+        if self.condition_generator.filter_conditions:
+            prod_spec.add_func_production(*dsl_library.filter)
 
-            if util.get_config().filters_function_enabled and len(condition_generator.filter_conditions) > 1:
-                dsl.add_function(dsl_library.filters_function)
+            if util.get_config().filters_function_enabled and len(self.condition_generator.filter_conditions) > 1:
+                prod_spec.add_func_production(*dsl_library.filters)
 
-        if condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
-            dsl.add_function(dsl_library.summarise_function)
+        if self.condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
+            prod_spec.add_func_production(*dsl_library.summarise)
 
-        if condition_generator.summarise_conditions:
-            dsl.add_function(dsl_library.mutate_function)
+        if self.condition_generator.summarise_conditions and 'mutate' not in util.get_config().disabled:
+            prod_spec.add_func_production(*dsl_library.mutate)
 
-        if condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
-            add_is_not_parent_if_enabled(dsl, 'natural_join4', 'summarise')
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['summarise', 'summarise', '100']))
+        pred_spec = PredicateSpec()
 
-        if len(condition_generator.filter_conditions) == 1:
-            add_is_not_parent_if_enabled(dsl, 'inner_join', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join3', 'filter')
-            add_is_not_parent_if_enabled(dsl, 'natural_join4', 'filter')
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
-            dsl.add_predicate(DSLPredicate('distinct_inputs', ['filter']))
-        elif len(condition_generator.filter_conditions) > 1 and util.get_config().filters_function_enabled:
-            dsl.add_predicate(DSLPredicate('distinct_filters', ['filters', '1', '2']))
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['filters', 'filter', '100']))
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filters', '100']))
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['filter', 'filter', '100']))
-            dsl.add_predicate(DSLPredicate('is_not_parent', ['filters', 'filters', '100']))
+        if self.condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
+            add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'summarise')
+            pred_spec.add_predicate('is_not_parent', ['summarise', 'summarise'])
 
-        for p in condition_generator.predicates:
-            dsl.add_predicate(p)
+        if len(self.condition_generator.filter_conditions) == 1:
+            add_is_not_parent_if_enabled(pred_spec, 'inner_join', 'filter')
+            add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'filter')
+            add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'filter')
+            add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'filter')
+            pred_spec.add_predicate('is_not_parent', ['filter', 'filter'])
+            pred_spec.add_predicate('distinct_inputs', ['filter'])
+        elif len(self.condition_generator.filter_conditions) > 1 and util.get_config().filters_function_enabled:
+            pred_spec.add_predicate('distinct_filters', ['filters', 1, 2])
+            pred_spec.add_predicate('is_not_parent', ['filters', 'filter'])
+            pred_spec.add_predicate('is_not_parent', ['filter', 'filters'])
+            pred_spec.add_predicate('is_not_parent', ['filter', 'filter'])
+            pred_spec.add_predicate('is_not_parent', ['filters', 'filters'])
 
-        add_is_not_parent_if_enabled(dsl, 'natural_join', 'natural_join3')
-        add_is_not_parent_if_enabled(dsl, 'natural_join', 'natural_join4')
-        # add_is_not_parent_if_enabled(dsl, self._config, 'natural_join', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join')
-        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join3')
-        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'natural_join4')
-        add_is_not_parent_if_enabled(dsl, 'natural_join3', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join')
-        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join3')
-        add_is_not_parent_if_enabled(dsl, 'natural_join4', 'natural_join4')
-        # add_is_not_parent_if_enabled(dsl, self._config, 'natural_join4', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'anti_join', 'anti_join')
-        add_is_not_parent_if_enabled(dsl, 'anti_join', 'natural_join')
-        add_is_not_parent_if_enabled(dsl, 'anti_join', 'natural_join4')
+        for p in self.condition_generator.predicates:
+            pred_spec.add_predicate(*p)
+
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'natural_join3')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'natural_join4')
+        # add_is_not_parent_if_enabled(pred_spec, self._config, 'natural_join', 'anti_join')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join3')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join4')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'anti_join')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join3')
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join4')
+        # add_is_not_parent_if_enabled(pred_spec, self._config, 'natural_join4', 'anti_join')
+        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'anti_join')
+        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join')
+        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join4')
 
         for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join']:
             if join not in util.get_config().disabled:
-                dsl.add_predicate(DSLPredicate('distinct_inputs', [join]))
+                pred_spec.add_predicate('distinct_inputs', [join])
 
-        self.dsl = dsl
+        return TyrellSpec(type_spec, dsl_library.squares, prod_spec, pred_spec)
 
     def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
         d = {}

@@ -5,18 +5,26 @@ from typing import List
 @dataclass
 class Config:
     seed: int
+    verbosity: int
 
     print_r: bool
     cache_ops: bool
 
-    minimum_loc: int = 1
-    maximum_loc: int = 256
+    static_search: bool
+    optimal: bool
+    advance_processes: bool
+    programs_per_cube_threshold: int
 
-    optimal: bool = False
-    advance_processes: bool = False
+    strictly_good_program_weight: float
+    good_program_weight: float
+    program_weigth_decay_rate: float
+    probing_threads: int
+
+    minimum_loc: int
+    maximum_loc: int
+
     advance_percentage = .4
-
-    programs_per_cube_threshold: int = 3500
+    smoothing_bias: float = 1
 
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True

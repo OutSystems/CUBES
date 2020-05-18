@@ -17,3 +17,8 @@ comment: |
   where od.product_id <> 22
   group by od.product_id
   order by count(od2.id_order) desc;
+
+  df2 <- input1 %>% filter(id_product == 22)
+  df3 <- full_join(input1 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(id_product.other != id_product & id_order.other == id_order)
+  df4 <- df3 %>% group_by(id_product) %>% summarise(n = n()) %>% ungroup()
+  out <- df4 %>% select(product_id = id_product, count_od2 = n) %>% arrange(product_id)
