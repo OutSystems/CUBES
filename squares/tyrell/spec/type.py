@@ -43,17 +43,32 @@ class Type(ABC):
 class EnumType(Type):
     '''A special kind of type whose domain is finite and specified up-front'''
 
-    _domain: OrderedSet
+    _domain: List
 
     def __init__(self, name: str, domain=None):
         super().__init__(name)
         if domain is None:
             domain = []
-        self._domain = OrderedSet(domain)
+        self._domain = domain
+        self._domain_ = [d[0] for d in self._domain]
+        self._values = [d[1] for d in self._domain]
+
+    def set_domain(self, domain):
+        self._domain = domain
+        self._domain_ = [d[0] for d in self._domain]
+        self._values = [d[1] for d in self._domain]
 
     @property
-    def domain(self) -> OrderedSet:
+    def domain_values(self) -> List:
         return self._domain
+
+    @property
+    def domain(self) -> List:
+        return self._domain_
+
+    @property
+    def values(self) -> List:
+        return self._values
 
     def is_enum(self) -> bool:
         return True

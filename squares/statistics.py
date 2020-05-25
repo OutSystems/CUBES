@@ -9,7 +9,7 @@ from ordered_set import OrderedSet
 
 from . import util
 from .tyrell.spec import TyrellSpec
-from .util import pairwise, ProgramInfo
+from .util import pairwise
 
 logger = getLogger('squares')
 
@@ -86,7 +86,7 @@ class BigramStatistics(Statistics):
     def base_probabilities(self, base_productions):
         scores = {production: score for (production, score) in self.base_scores.items() if production in base_productions}
         for prod in base_productions:
-            if prod not in scores:
+            if prod not in scores or scores[prod] <= 0:
                 scores[prod] = util.get_config().smoothing_bias
         return {production: score / sum(scores.values()) for (production, score) in scores.items()}
 

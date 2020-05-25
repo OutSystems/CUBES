@@ -39,7 +39,7 @@ operators_by_type = {
 
 def get_type(dtype: Union[ExtensionDtype, dtype]) -> Type:
     if pandas.api.types.is_integer_dtype(dtype):
-        return Type.FLOAT
+        return Type.INT
 
     elif pandas.api.types.is_float_dtype(dtype):
         return Type.FLOAT
@@ -148,7 +148,7 @@ def empty_type_map() -> Dict[Type, OrderedSet]:
 
 def _get_r_type(type):
     if type == Type.INT:
-        return 'col_double()'
+        return 'col_integer()'
     elif type == Type.FLOAT:
         return 'col_double()'
     elif type == Type.BOOL:

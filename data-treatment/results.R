@@ -9,9 +9,9 @@ library(tikzDevice)
 
 setwd('./data-treatment')
 
-status_levels <- rev(c(0, 3, 2, 4, 143, NA, 5, 1))
-status_meanings <- rev(c('R and SQL', 'Non optimal', 'Just R', 'Just R non optimal', '?', 'Timeout', 'No solution', 'Fail'))
-status_colors <- rev(c("#57853C", "#57853C", "#d79921", "#d79921", "#3c3836", "#cc241d", "#653e9c", "#3c3836"))
+status_levels <- rev(c(0, 3, 2, 4, -2, -1, 5, 1))
+status_meanings <- rev(c('R and SQL', 'Non optimal', 'Just R', 'Just R non optimal', 'Memout', 'Timeout', 'No solution', 'Fail'))
+status_colors <- rev(c("#57853C", "#57853C", "#d79921", "#d79921", "#CC6387", "#cc241d", "#653e9c", "#3c3836"))
 
 timelimit <- 600
 
@@ -27,29 +27,26 @@ load_result_squares <- function(file) {
     real = col_double(),
     cpu = col_double(),
     ram = col_double(),
-    status = col_factor(levels = status_levels)
+    status = col_character()
   )) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     filter(!(benchmark %in% test_filter))
-  t$status[t$timeout == T] <- NA
+  t$status[t$timeout == T] <- -1
+  t$status[t$status == 143] <- 1
+  t$status = parse_factor(t$status, levels = status_levels)
   t
 }
 
 load_result_file <- function(file) {
-  t <- read_csv(paste0(file, '.csv'), col_types = cols(
-    name = col_character(),
-    timeout = col_logical(),
-    real = col_double(),
-    cpu = col_double(),
-    ram = col_double(),
-    process = col_character(),
-    status = col_factor(levels = status_levels)
-  )) %>%
+  t <- read_csv(paste0(file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     mutate(log = paste0(file, '/', name, '.log')) %>%
     mutate(hard_h = ifelse(file.exists(log), sapply(log, function(x) { parse_number(first(na.omit(str_match(readLines(x), '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2]))) }), NA)) %>%
     filter(!(benchmark %in% test_filter))
-  t$status[t$timeout == T] <- NA
+  t$status[t$timeout == T] <- -1
+  if ('memout' %in% colnames(t)) {
+    t$status[t$memout == T] <- -2
+  }
   t
 }
 
@@ -135,17 +132,18 @@ plot_times <- function(run) {
 
 plot_cumsolved <- function(...) {
   tries <- list(...)
-  bind_rows(tries, .id = 'try') %>%
+  data <- bind_rows(tries, .id = 'try') %>%
     arrange(real) %>%
     group_by(try) %>%
-    mutate(val = cumsum(status != 1 & status != 5 & timeout == F)) %>%
-    ungroup() %>%
-    ggplot(aes(x = val, y = real, color = try)) +
+    mutate(val = cumsum(status != 1 & status != 5 & status != -1 & status != -2)) %>%
+    ungroup()
+  print(n_distinct(data$name))
+  ggplot(data, aes(x = val, y = real, color = try)) +
     geom_step(size = 1) +
     geom_point(shape = 4) +
     #scale_y_continuous(trans = 'log10', breaks = log_breaks(7)) +
     scale_y_continuous(breaks = pretty_breaks()) +
-    scale_x_continuous(breaks = pretty_breaks()) +
+    scale_x_continuous(breaks = pretty_breaks(), limits = c(0, n_distinct(data$name))) +
     scale_color_brewer(palette = 'Dark2') +
     #annotation_logticks(sides = 'l') +
     #geom_vline(xintercept = 600) +
@@ -209,7 +207,7 @@ solved_instances <- function(table) {
     group_by(benchmark) %>%
     mutate(total = n()) %>%
     ungroup() %>%
-    filter(timeout != T & status != 1) %>%
+    filter(status != -1 & status != -2 & status != 1) %>%
     group_by(benchmark, total) %>%
     summarise(n = n()) %>%
     mutate(percentage = n / total)
@@ -223,6 +221,7 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
 
   #single <- load_result_file('single')
   single_np <- load_result_file('single_np')
+  bitenum <- load_result_file('bitenum')
 
   #qffd_r <- load_result_file('qffd_r')
   #qffd_r_no_prune <- load_result_file('qffd_r_no_prune')
@@ -277,7 +276,7 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   c4_8_h <- load_result_file('cubes4_8_h')
   c4_16_h <- load_result_file('cubes4_16_h')
 
-  c5_16 <- load_result_file('cubes5_16')
+  #c5_16 <- load_result_file('cubes5_16')
 
   c6_16 <- load_result_file('cubes6_16')
   c6_16_h <- load_result_file('cubes6_16_h')
@@ -289,28 +288,41 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   c9_16_h <- load_result_file('cubes9_16_h')
   c10_16_h <- load_result_file('cubes10_16_h')
   c11_16_h <- load_result_file('cubes11_16_h')
+  c12_16_h <- load_result_file('cubes12_16_h')
+  c14_16_h <- load_result_file('cubes14_16_h')
+
+  c15_2 <- load_result_file('cubes15_2')
+  c15_16_h <- load_result_file('cubes15_16_h')
 
   c4_16_h_1h <- load_result_file('cubes4_16_h_1h')
 }
 
-scatter('c4_16', 'c7_16_h')
+scatter('single_np', 'bitenum')
+scatter('c3_16', 'c15_16_h')
+scatter('c4_16', 'c15_16_h')
+scatter('c12_16_h', 'c15_16_h')
+scatter('c15_2', 'c15_16_h')
 
-plot_hardness('c4_16_h', limit = 3600)
-plot_hardness('c6_16_h', limit = 3600)
-plot_hardness('c7_16_h', limit = 3600)
-plot_hardness('c7_16_h_1h', limit = 3600)
+scatter('bitenum', 'c15_2')
+scatter('bitenum', 'c15_16_h')
 
-plot_times('c7_16_h_1h')
-plot_cumsolved('c4_16')
-plot_cumsolved('c6_16_h')
-plot_cumsolved('c7_16_h')
-plot_cumsolved(squares = squares, single = single_np, '2P' = c4_2_h, '4P' = c4_4_h, '8P' = c4_8_h, '16P' = c4_16_h)
+plot_hardness('c15_16_h', limit = 600)
+
+plot_times('bitenum')
+plot_times('c15_16_h')
+
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum)
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 04 (16 threads)' = c4_16, 'Run 15 (16 threads, bitenum)' = c15_16_h)
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 15 (2 threads)' = c15_2, 'Run 15 (16 threads, bitenum)' = c15_16_h)
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 15' = c15_16_h)
 
 solved_instances(scythe)
 solved_instances(squares)
 solved_instances(single_np)
 solved_instances(c4_16)
 solved_instances(c11_16_h)
+solved_instances(c12_16_h)
+solved_instances(c15_16_h)
 
 plot_scores('cubes5_16', 'scythe/top_rated_posts', '007')
 
@@ -321,20 +333,24 @@ plot_scores2('../detailed_logs/recent_016.log.csv')
 plot_scores2('../detailed_logs/recent_013.log.csv')
 plot_scores2('../output.csv')
 
-all <- inner_join(c4_16_h, c11_16_h, by = 'name')
+all <- left_join(c4_16, c15_16_h, by = 'name') %>%
+  left_join(c15_2, by = 'name') %>%
+  select(-log, -log.x, -log.y, -benchmark, -benchmark.x, -benchmark.y)
 
-a_slower <- inner_join(c9_16_h, c6_16, by = 'name') %>% filter(10 < real.y - real.x)
-a_faster <- inner_join(c9_16_h, c6_16, by = 'name') %>% filter(10 < real.x - real.y)
+a_slower <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter(10 < real.y - real.x)
+a_faster <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter(10 < real.x - real.y)
 
-b <- inner_join(c4_16, c11_16_h, by = 'name') %>% filter((timeout.y == T | status.y == 1) & (timeout.x != T & status.x != 1))
-c <- inner_join(c4_16, c11_16_h, by = 'name') %>% filter((timeout.x == T | status.x == 1) & (timeout.y != T & status.y != 1))
+b <- inner_join(c4_16, c15_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
+c <- inner_join(c4_16, c15_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
 
-bars(scythe = scythe, squares = squares, single = single_np, c4_2 = c4_2, c4_2_h = c4_2_h, c4_4 = c4_4, c4_4_h = c4_4_h, c4_8 = c4_8, c4_8_h = c4_8_h, c4_16 = c4_16, c4_16_h = c4_16_h)
-bars(scythe = scythe, squares = squares, single = single_np, c4_16 = c4_16, c4_16_h = c4_16_h, c5_16 = c5_16, c6_16 = c6_16, c6_16_h = c6_16_h)
-bars(scythe = scythe, squares = squares, single = single_np, c4_16 = c4_16, c4_16_h = c4_16_h, c6_16 = c6_16, c6_16_h = c6_16_h, c7_16_h = c7_16_h, c8_16_h = c8_16_h, c9_16_h = c9_16_h, c11_16_h = c11_16_h)
-bars(scythe = scythe, squares = squares, single = single_np, c4_16_h = c4_16_h, c6_16_h = c6_16_h, c7_16_h = c7_16_h, c7_16_h_1h = c7_16_h_1h)
+b <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
+c <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
 
-boxplot(func = any, scythe = scythe, squares = squares, single = single_np, c4.2 = c4_2, c4.2.h = c4_2_h, c4.4 = c4_4, c4.4.h = c4_4_h, c4.8 = c4_8, c4.8.h = c4_8_h, c4.16 = c4_16, c4.16.h = c4_16_h)
-boxplot(func = any, scythe = scythe, squares = squares, single = single_np, c4_16 = c4_16, c4_16_h = c4_16_h, c6_16 = c6_16, c6_16_h = c6_16_h)
-boxplot(func = any, scythe = scythe, squares = squares, single = single_np, c4_16 = c4_16, c4_16_h = c4_16_h, c6_16 = c6_16, c6_16_h = c6_16_h, c7_16_h = c7_16_h, c8_16_h = c8_16_h, c9_16_h = c9_16_h, c11_16_h = c11_16_h)
-boxplot(func = any, scythe = scythe, squares = squares, single = single_np, c4_16_h = c4_16_h, c7_16_h = c7_16_h, c7_16_h_1h = c7_16_h_1h)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_16_h = c15_16_h)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_2 = c15_2, c15_16_h = c15_16_h)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c15_16_h = c15_16_h)
+bars(bitenum = bitenum, c15_2 = c15_2, c15_16_h = c15_16_h)
+
+boxplot(func = any, scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_2 = c15_2, c15_16_h = c15_16_h)
+boxplot(func = any, scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c15_16_h = c15_16_h)

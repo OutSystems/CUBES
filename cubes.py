@@ -19,12 +19,12 @@ robjects.r('''
 zz <- file("r_output.log", open = "wt")
 sink(zz)
 sink(zz, type = "message")
-library(dplyr)
-library(dbplyr)
 library(tidyr)
 library(stringr)
 library(readr)
 library(lubridate)
+library(dplyr)
+library(dbplyr)
 options(warn=-1)''')
 
 logger = getLogger('squares')
@@ -63,7 +63,7 @@ def main():
                     max_join_combinations=args.max_join_combo, good_program_weight=args.good_program_weight,
                     strictly_good_program_weight=args.strictly_good_program_weight, program_weigth_decay_rate=args.decay_rate,
                     probing_threads=args.probing_threads,
-                    z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
+                    z3_QF_FD=False, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 
     specification = Specification(spec)

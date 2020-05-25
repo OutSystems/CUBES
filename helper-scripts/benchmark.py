@@ -25,9 +25,9 @@ def test_file(filename: str):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '49152', '-d', '20', '-o', out_file, './squares.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '20', '-o', out_file, './squares.py', '-vv', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '49152', '-d', '20', '-o', out_file, './cubes.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '20', '-o', out_file, './cubes.py', '-vv', filename]
 
     command += other_args
 
@@ -63,7 +63,7 @@ if not args.append:
     os.mkdir(f'data-treatment/{args.name}')
     with open('data-treatment/' + args.name + '.csv', 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status'))
+        writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
         f.flush()
 
 if args.p == 1:

@@ -2,17 +2,14 @@
 import argparse
 import pickle
 import time
-from collections import namedtuple
 from itertools import permutations, combinations, tee
 from logging import getLogger
-from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from random import Random
 from typing import List, Any, Iterable
-import z3
 
-import re
 import yaml
+import z3
 
 from .config import Config
 from .tyrell.logger import setup_logger
@@ -30,8 +27,6 @@ solution = None
 program_queue = None
 
 BUFFER_SIZE = 8 * 4 * 1024
-
-ProgramInfo = namedtuple('ProgramInfo', ('strict_good'))
 
 
 def seed(s):
@@ -129,11 +124,11 @@ def create_argparser():
 
     g.add_argument('--split-search', action='store_true',
                    help='use an heuristic to determine if search should be split among multiple lines of code')
-    g.add_argument('--split-search-threshold', type=int, default=5000, help='instance hardness threshold')
+    g.add_argument('--split-search-threshold', type=int, default=1750, help='instance hardness threshold')
     g.add_argument('--good-program-weight', type=float, default=1.2, help='how much a good program influences the search for the solution')
     g.add_argument('--strictly-good-program-weight', type=float, default=20,
                    help='how much a strictly good program influences the search for the solution')
-    g.add_argument('--decay-rate', type=float, default=0.99999, help='rate at which old information is forgotten')
+    g.add_argument('--decay-rate', type=float, default=1, help='rate at which old information is forgotten')
     g.add_argument('--probing-threads', type=int, default=2,
                    help='number of threads that should be used to randomly explore the search space')
 
@@ -188,10 +183,6 @@ def parse_specification(filename):
     return spec
 
 
-def quote_str(string: str) -> str:
-    return f'"{string}"'
-
-
 def single_quote_str(string: str) -> str:
     return f"'{string}'"
 
@@ -201,13 +192,6 @@ def count(iter: Iterable) -> int:
         return len(iter)
     except TypeError:
         return sum(1 for _ in iter)
-
-
-def get_all(queue: Queue) -> List:
-    acum = []
-    while not queue.empty():
-        acum.append(queue.get())
-    return acum
 
 
 def pipe_write(pipe: Connection, ret: Any):
@@ -230,14 +214,6 @@ def pipe_read(pipe: Connection) -> Any:
         counter += pipe.recv_bytes_into(data, counter)
 
     return pickle.loads(data)
-
-
-def sub_while(pattern, repl, string, *args, **kwargs):
-    compiled = re.compile(pattern, *args, **kwargs)
-    n = 1
-    while n != 0:
-        string, n = compiled.subn(repl, string)
-    return string
 
 
 def pairwise(iterable):

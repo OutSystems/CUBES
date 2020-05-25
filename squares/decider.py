@@ -2,16 +2,16 @@ from .tyrell.decider import ExampleDecider, bad, ok, ExampleConstraintPruningDec
 from .tyrell.decider.example_constraint_pruning import BlameFinder
 
 
-class InstrumentedDecider(ExampleDecider):
-    def has_failed_examples(self, prog, roots=None):
+class LinesDecider(ExampleDecider):
+    def has_failed_examples(self, prog):
         return any(
             not self.interpreter.equals(
-                self.interpreter.eval(prog, x.input), x.output, roots)
+                self.interpreter.eval(prog, x.input), x.output, prog)
             for x in self.examples
             )
 
     def analyze(self, prog, roots=None):
-        if self.has_failed_examples(prog, roots):
+        if self.has_failed_examples(prog):
             return bad()
         else:
             return ok()

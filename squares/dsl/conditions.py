@@ -1,12 +1,11 @@
 import re
 from collections import defaultdict
-from copy import deepcopy
 from itertools import combinations, product, chain
 
 from ordered_set import OrderedSet
 
 from .. import types, util
-from ..util import powerset_except_empty, get_permutations, all_permutations, get_combinations
+from ..util import powerset_except_empty, all_permutations
 
 
 def symmetric_op(op: str):
@@ -22,7 +21,7 @@ def symmetric_op(op: str):
         return '=='
 
 
-class ConditionGenerator():
+class ConditionGenerator:
 
     def __init__(self, specification):
         self.specification = specification
@@ -38,52 +37,52 @@ class ConditionGenerator():
         for aggr in self.specification.aggrs:
             current_predicate = []
 
-            def add_condition(cond, new_col, new_col_types, save_generated=True):
-                self.summarise_conditions.append(cond)
-                current_predicate.append(cond)
+            def add_condition(cond, new_col, new_col_types, dependencies, save_generated=True):
                 if new_col:
                     self.specification.all_columns.add(new_col)
                     if save_generated:
                         self.specification.generated_columns[new_col] = cond
+                self.summarise_conditions.append((cond, (dependencies, self.specification.get_bitvecnum([new_col]))))
+                current_predicate.append(cond)
                 for type in new_col_types:
                     self.specification.columns_by_type[type].append(new_col)
 
             if aggr == 'n':
-                add_condition('n = n()', 'n', [types.INT])
+                add_condition('n = n()', 'n', [types.INT], 0)
 
             if aggr == 'n_distinct':
-                for columns in get_combinations(chain(*frozen_columns.values()), util.get_config().max_column_combinations):
-                    add_condition(f'n_distinct = n_distinct({columns})', 'n_distinct', [types.INT])
+                for columns in powerset_except_empty(chain(*frozen_columns.values()), util.get_config().max_column_combinations):
+                    add_condition(f'n_distinct = n_distinct({",".join(columns)})', 'n_distinct', [types.INT], self.specification.get_bitvecnum(columns))
 
             if aggr == 'concat':
                 for column in frozen_columns[types.STRING]:
                     for separator in ['', ' ', ',', ', ']:  # TODO generated columns (both ways). as it is it overrides
-                        add_condition(f"{aggr}{column} = string_agg({column}, '{separator}')", f'{aggr}{column}', [types.STRING])
+                        add_condition(f"{aggr}{column} = string_agg({column}, '{separator}')", f'{aggr}{column}', [types.STRING], self.specification.get_bitvecnum([column]))
 
             if aggr == 'str_count':
                 self.specification.aggrs_use_const = True
                 for column in frozen_columns[types.STRING]:
                     for constant in self.specification.consts_by_type[types.STRING]:
-                        add_condition(f"{aggr}{column} = str_count({column}, '{constant}')", f'{aggr}{column}', [types.INT])
+                        add_condition(f"{aggr}{column} = str_count({column}, '{constant}')", f'{aggr}{column}', [types.INT], self.specification.get_bitvecnum([column]))
 
             if aggr == 'mean':
                 for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [types.FLOAT])
+                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [types.FLOAT], self.specification.get_bitvecnum([column]))
                     if column in self.specification.generated_columns.keys():
                         self.predicates.append(('happens_before', [f'{aggr}{column} = {aggr}({column})',
                                                                    self.specification.generated_columns[column]]))
 
             if aggr in ['sum', 'cumsum']:
                 for type, column in [(t, col) for t in [types.INT, types.FLOAT] for col in frozen_columns[t]]:
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type])
+                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type], self.specification.get_bitvecnum([column]))
                     if column in self.specification.generated_columns.keys():
                         self.predicates.append(('happens_before', [f'{aggr}{column} = {aggr}({column})',
                                                                    self.specification.generated_columns[column]]))
 
             if aggr in ['min', 'max']:
                 for type, column in [(t, col) for t in [types.INT, types.FLOAT] for col in frozen_columns[t]]:
-                    add_condition(f'{column} = {aggr}({column})', column, [type], save_generated=False)
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type])
+                    add_condition(f'{column} = {aggr}({column})', column, [type], self.specification.get_bitvecnum([column]), save_generated=False)
+                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type], self.specification.get_bitvecnum([column]))
                     if column in self.specification.generated_columns.keys():
                         self.predicates.append(('happens_before', [f'{column} = {aggr}({column})',
                                                                    self.specification.generated_columns[column]]))
@@ -91,7 +90,7 @@ class ConditionGenerator():
             if aggr in ['pmin', 'pmax']:
                 for t in [types.INT, types.FLOAT]:
                     for cols in powerset_except_empty(frozen_columns[t]):
-                        add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', [t])
+                        add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', [t], self.specification.get_bitvecnum(cols))
                         for column in cols:
                             if column in self.specification.generated_columns.keys():
                                 self.predicates.append(('happens_before', [f'{aggr} = {aggr}({",".join(cols)})',
@@ -100,7 +99,7 @@ class ConditionGenerator():
             if aggr in ['coalesce']:
                 for cols in all_permutations(set(chain.from_iterable(frozen_columns.values())),
                                              len(set(chain.from_iterable(frozen_columns.values())))):
-                    add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', [t for t in types.Type if t != types.NONE])
+                    add_condition(f'{aggr} = {aggr}({",".join(cols)})', f'{aggr}', [t for t in types.Type if t != types.NONE], self.specification.get_bitvecnum(cols))
                     for column in cols:
                         if column in self.specification.generated_columns.keys():
                             self.predicates.append(('happens_before', [f'{aggr} = {aggr}({",".join(cols)})',
@@ -108,15 +107,15 @@ class ConditionGenerator():
 
             if aggr in ['mode', 'lead', 'lag', 'median']:
                 for type, column in [(t, col) for t in types.Type for col in frozen_columns[t]]:
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type])
+                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type], self.specification.get_bitvecnum([column]))
                     if column in self.specification.generated_columns.keys():
                         self.predicates.append(('happens_before', [f'{aggr}{column} = {aggr}({column})',
                                                                    self.specification.generated_columns[column]]))
 
             if aggr == 'rank':
                 for type, column in [(t, col) for t in types.Type for col in frozen_columns[t]]:
-                    add_condition(f'{aggr}{column} = dense_rank({column})', f'{aggr}{column}', [types.INT])
-                    add_condition(f'{aggr}d{column} = dense_rank(desc({column}))', f'{aggr}d{column}', [types.INT])
+                    add_condition(f'{aggr}{column} = dense_rank({column})', f'{aggr}{column}', [types.INT], self.specification.get_bitvecnum([column]))
+                    add_condition(f'{aggr}d{column} = dense_rank(desc({column}))', f'{aggr}d{column}', [types.INT], self.specification.get_bitvecnum([column]))
                     if column in self.specification.generated_columns.keys():
                         self.predicates.append(('happens_before', [f'{aggr}{column} = dense_rank({column})',
                                                                    self.specification.generated_columns[column]]))
@@ -124,14 +123,14 @@ class ConditionGenerator():
                                                                    self.specification.generated_columns[column]]))
 
             if aggr == 'row_number':
-                add_condition(f'{aggr} = {aggr}()', f'{aggr}', [types.INT])
+                add_condition(f'{aggr} = {aggr}()', f'{aggr}', [types.INT], 0)
 
             if aggr in ['min', 'max']:
                 for type, column in [(t, col) for t in [types.DATETIME, types.TIME] for col in frozen_columns[t]]:
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type])
+                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type], self.specification.get_bitvecnum([column]))
 
             if aggr == 'first':
-                add_condition('all$first', None, [])
+                add_condition('all$first', None, [], 0)
 
             if util.get_config().force_summarise and current_predicate:
                 self.predicates.append(('constant_occurs', current_predicate))
@@ -141,31 +140,38 @@ class ConditionGenerator():
         str_ops = ['==', '!=']
 
         filter_parts = defaultdict(OrderedSet)
+        parts_2_cols = defaultdict(OrderedSet)
         frozen_columns = self.specification.filter_columns(self.specification.columns_by_type)
 
         for constant in self.specification.consts_by_type[types.NONE]:
             for column in frozen_columns[types.STRING] | frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 filter_parts[frozenset((column, constant))].add(f"is.na({column})")
+                parts_2_cols[f"is.na({column})"].add(column)
                 filter_parts[frozenset((column, constant))].add(f"!is.na({column})")
+                parts_2_cols[f"!is.na({column})"].add(column)
 
         for constant in self.specification.consts_by_type[types.STRING]:
             for column in frozen_columns[types.STRING]:
                 if 'str_detect' in self.specification.filters or 'like' in self.specification.filters:
                     filter_parts[frozenset((column, constant))].add(f"str_detect({column}, {types.to_r_repr(constant)})")
+                    parts_2_cols[f"str_detect({column}, {types.to_r_repr(constant)})"].add(column)
 
                 if self.specification.constant_occurs(column, constant):
                     for op in str_ops:
                         filter_parts[frozenset((column, constant))].add(f"{column} {op} {types.to_r_repr(constant)}")
+                        parts_2_cols[f"{column} {op} {types.to_r_repr(constant)}"].add(column)
 
         for constant in self.specification.consts_by_type[types.INT] | self.specification.consts_by_type[types.FLOAT]:
             for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 for op in int_ops:
                     filter_parts[frozenset((column, constant))].add(f'{column} {op} {constant}')
+                    parts_2_cols[f'{column} {op} {constant}'].add(column)
 
         for constant in self.specification.consts_by_type[types.DATETIME]:
             for column in frozen_columns[types.DATETIME]:
                 for op in int_ops:
                     filter_parts[frozenset((column, constant))].add(f"{column} {op} {self.specification.dateorder}('{constant}')")
+                    parts_2_cols[f"{column} {op} {self.specification.dateorder}('{constant}')"].add(column)
 
         bc = set()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
@@ -177,6 +183,8 @@ class ConditionGenerator():
                         continue
                     bc.add((attr2, op, attr1))
                     filter_parts[frozenset((attr2, attr1))].add(f'{attr2} {op} {attr1}')
+                    parts_2_cols[f'{attr2} {op} {attr1}'].add(attr2)
+                    parts_2_cols[f'{attr2} {op} {attr1}'].add(attr1)
 
         bc = set()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.DATETIME]:
@@ -188,6 +196,8 @@ class ConditionGenerator():
                         continue
                     bc.add((attr2, op, attr1))
                     filter_parts[frozenset((attr2, attr1))].add(f'{attr2} {op} {attr1}')
+                    parts_2_cols[f'{attr2} {op} {attr1}'].add(attr2)
+                    parts_2_cols[f'{attr2} {op} {attr1}'].add(attr1)
 
         for filter in self.specification.filters:
             match = re.match(r'[a-zA-Z_][a-zA-Z_]*\(([a-zA-Z_][a-zA-Z_]*)\)', filter)
@@ -201,6 +211,10 @@ class ConditionGenerator():
                     for other_col in self.specification.columns_by_type[type]:
                         filter_parts[frozenset((col, other_col, filter))].add(f'{other_col} == {filter}')
                         filter_parts[frozenset((col, other_col, filter))].add(f'{other_col} != {filter}')
+                        parts_2_cols[f'{other_col} == {filter}'].add(col)
+                        parts_2_cols[f'{other_col} == {filter}'].add(other_col)
+                        parts_2_cols[f'{other_col} != {filter}'].add(col)
+                        parts_2_cols[f'{other_col} != {filter}'].add(other_col)
 
         conditions = []
         condition_map = defaultdict(OrderedSet)
@@ -214,25 +228,14 @@ class ConditionGenerator():
                     cols = frozenset([col for cols in k for col in cols])
 
                     if len(part_combo) == 1:
-                        conditions.append(part_combo[0])
-                        condition_map[cols].add(conditions[-1])
-                        for col in cols:
-                            if col in self.specification.generated_columns.keys():
-                                self.predicates.append(
-                                    ('happens_before', [f'{conditions[-1]}', self.specification.generated_columns[col]]))
+                        conditions.append((part_combo[0], self.specification.get_bitvecnum(parts_2_cols[part_combo[0]])))
+                        condition_map[cols].add(conditions[-1][0])
 
                     else:
-                        conditions.append(' & '.join(part_combo))
-                        conditions.append(' | '.join(part_combo))
-                        condition_map[cols].add(conditions[-1])
-                        condition_map[cols].add(conditions[-2])
-
-                        for col in cols:
-                            if col in self.specification.generated_columns.keys():
-                                self.predicates.append(
-                                    ('happens_before', [f'{conditions[-1]}', self.specification.generated_columns[col]]))
-                                self.predicates.append(
-                                    ('happens_before', [f'{conditions[-2]}', self.specification.generated_columns[col]]))
+                        conditions.append((' & '.join(part_combo), self.specification.get_bitvecnum(list(chain.from_iterable(map(lambda x: parts_2_cols[x], part_combo))))))
+                        conditions.append((' | '.join(part_combo), self.specification.get_bitvecnum(list(chain.from_iterable(map(lambda x: parts_2_cols[x], part_combo))))))
+                        condition_map[cols].add(conditions[-1][0])
+                        condition_map[cols].add(conditions[-2][0])
 
         for spec_part in [self.specification.consts, self.specification.filters]:
             for constant in spec_part:
@@ -254,21 +257,24 @@ class ConditionGenerator():
         on_conditions = list(filter(lambda t: any(map(lambda cond: cond[0] != cond[1], t)), on_conditions))
 
         for on_condition in on_conditions:
-            self.inner_join_conditions.append(','.join(map(lambda x: f"'{x[0]}' = '{x[1]}'", on_condition)))
+            self.inner_join_conditions.append((','.join(map(lambda x: f"'{x[0]}' = '{x[1]}'", on_condition)), (
+                self.specification.get_bitvecnum([pair[0] for pair in on_condition]),
+                self.specification.get_bitvecnum([pair[1] for pair in on_condition])
+                )))
 
-            for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
-                for col in col_pairs:
-                    if col in self.specification.generated_columns.keys():
-                        self.predicates.append(('happens_before', [f'{self.inner_join_conditions[-1]}',
-                                                                   self.specification.generated_columns[col]]))
+            # for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
+            #     for col in col_pairs:
+            #         if col in self.specification.generated_columns.keys():
+            #             self.predicates.append(('happens_before', [f'{self.inner_join_conditions[-1]}',
+            #                                                        self.specification.generated_columns[col]]))
 
         for subset in powerset_except_empty(self.specification.columns, util.get_config().max_join_combinations):
-            self.inner_join_conditions.append(','.join(map(util.single_quote_str, subset)))
+            self.inner_join_conditions.append((','.join(map(util.single_quote_str, subset)), (self.specification.get_bitvecnum(subset), self.specification.get_bitvecnum(subset))))
 
-            for col in subset:
-                if col in self.specification.generated_columns.keys():
-                    self.predicates.append(
-                        ('happens_before', [f'{self.inner_join_conditions[-1]}', self.specification.generated_columns[col]]))
+            # for col in subset:
+            #     if col in self.specification.generated_columns.keys():
+            #         self.predicates.append(
+            #             ('happens_before', [f'{self.inner_join_conditions[-1]}', self.specification.generated_columns[col]]))
 
     def generate_cross_join(self):
         if util.get_config().full_cross_join:
@@ -290,14 +296,22 @@ class ConditionGenerator():
             for on_condition in on_conditions:
                 if len(on_condition) == 1:
                     for op1 in types.operators_by_type[on_condition[0][0]]:
-                        self.cross_join_conditions.append(f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]}')
+                        cols = [on_condition[0][1][0], on_condition[0][1][1]]
+                        main_cols = [col for col in cols if '.other' not in col]
+                        second_cols = [col.replace('.other', '') for col in cols if '.other' in col]
+                        self.cross_join_conditions.append((f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]}',
+                                                           (self.specification.get_bitvecnum(main_cols),
+                                                            self.specification.get_bitvecnum(second_cols))))
 
                 if len(on_condition) == 2:
                     for op1 in types.operators_by_type[on_condition[0][0]]:
                         for op2 in types.operators_by_type[on_condition[1][0]]:
                             for op3 in ['&', '|']:
-                                self.cross_join_conditions.append(
-                                    f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]} {op3} {on_condition[1][1][0]} {op2} {on_condition[1][1][1]}')
+                                cols = [on_condition[0][1][0], on_condition[1][1][0], on_condition[0][1][1], on_condition[1][1][1]]
+                                main_cols = [col for col in cols if '.other' not in col]
+                                second_cols = [col.replace('.other', '') for col in cols if '.other' in col]
+                                self.cross_join_conditions.append((f'{on_condition[0][1][0]} {op1} {on_condition[0][1][1]} {op3} {on_condition[1][1][0]} {op2} {on_condition[1][1][1]}',
+                                                                   (self.specification.get_bitvecnum(main_cols), self.specification.get_bitvecnum(second_cols))))
 
             # for col_pairs in on_condition:  # we can only inner join after columns have been generated (by summarise)
             #     for col in col_pairs:
@@ -305,7 +319,7 @@ class ConditionGenerator():
             #             self.predicates.append(('happens_before', [f'"{self.inner_join_conditions[-1]}"',
             #                                                                    self.specification.generated_columns[col]]))
 
-        self.cross_join_conditions.append('')
+        # self.cross_join_conditions.append(('', 0))
 
         # for subset in powerset_except_empty(self.specification.columns, util.get_config().max_join_combinations):
         #     self.inner_join_conditions.append(','.join(map(util.single_quote_str, subset)))

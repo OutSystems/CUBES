@@ -3,15 +3,17 @@ from typing import Dict
 
 import pandas
 from ordered_set import OrderedSet
+from pandas.core.frame import DataFrame
 from rpy2 import robjects
+from z3 import BitVecVal
 
-from . import dsl_library
+from . import dsl
 from .conditions import ConditionGenerator
 from .. import util, types
 from ..exceptions import SquaresException
 from ..tyrell.spec import TyrellSpec, TypeSpec, ProductionSpec, ProgramSpec, ValueType
 from ..tyrell.spec.spec import PredicateSpec
-from ..util import next_counter, get_combinations
+from ..util import next_counter, powerset_except_empty
 
 logger = getLogger('squares')
 
@@ -50,7 +52,6 @@ def read_table(path):
                 pass
 
     logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
-
     return df
 
 
@@ -155,102 +156,101 @@ class Specification:
 
         if 'concat' in self.aggrs:
             self.r_init += exec_and_return(
-                '\nstring_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}\n')
+                '\nstring_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}\n')
         if 'mode' in self.aggrs:
             self.r_init += exec_and_return(
                 '\nmode <- function(x) {ux <- unique(x); ux[which.max(tabulate(match(x, ux)))]}\n')
 
     def generate_dsl(self):
-        dsl_library.squares._input = [dsl_library.Table] * len(self.inputs)
-
         type_spec = TypeSpec()
 
         Empty = ValueType('Empty')
         type_spec.define_type(Empty)
 
-        type_spec.define_type(dsl_library.Table)
+        type_spec.define_type(dsl.Table)
 
         if self.condition_generator.summarise_conditions:
-            dsl_library.Cols._domain = get_combinations(self.columns, util.get_config().max_column_combinations)
-            type_spec.define_type(dsl_library.Cols)
+            dsl.Cols.set_domain([(','.join(cols), self.get_bitvecnum(cols)) for cols in
+                                 powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
+            type_spec.define_type(dsl.Cols)
 
         if 'intersect' not in util.get_config().disabled:
-            dsl_library.Col._domain = list(self.columns)
-            type_spec.define_type(dsl_library.Col)
+            dsl.Col.set_domain([(column, self.get_bitvecnum([column])) for column in self.columns])
+            type_spec.define_type(dsl.Col)
 
         if 'anti_join' not in util.get_config().disabled:
-            dsl_library.JoinCols._domain = [''] + get_combinations([f"'{col}'" for col in self.columns],
-                                                                   util.get_config().max_column_combinations)
-            type_spec.define_type(dsl_library.JoinCols)
+            dsl.JoinCols.set_domain([('', 0)] + [(','.join(map(util.single_quote_str, cols)), self.get_bitvecnum(cols)) for cols in
+                                                 powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
+            type_spec.define_type(dsl.JoinCols)
 
         if 'inner_join' not in util.get_config().disabled and self.condition_generator.inner_join_conditions:
-            dsl_library.JoinCondition._domain = self.condition_generator.inner_join_conditions
-            type_spec.define_type(dsl_library.JoinCondition)
+            dsl.JoinCondition.set_domain(self.condition_generator.inner_join_conditions)
+            type_spec.define_type(dsl.JoinCondition)
 
         if 'cross_join' not in util.get_config().disabled and self.condition_generator.cross_join_conditions:
-            dsl_library.CrossJoinCondition._domain = OrderedSet(self.condition_generator.cross_join_conditions)
-            type_spec.define_type(dsl_library.CrossJoinCondition)
+            dsl.CrossJoinCondition.set_domain(self.condition_generator.cross_join_conditions)
+            type_spec.define_type(dsl.CrossJoinCondition)
 
         if self.condition_generator.filter_conditions:
-            dsl_library.FilterCondition._domain = self.condition_generator.filter_conditions
-            type_spec.define_type(dsl_library.FilterCondition)
+            dsl.FilterCondition.set_domain(self.condition_generator.filter_conditions)
+            type_spec.define_type(dsl.FilterCondition)
 
         if self.condition_generator.summarise_conditions:
-            dsl_library.SummariseCondition._domain = self.condition_generator.summarise_conditions
-            type_spec.define_type(dsl_library.SummariseCondition)
+            dsl.SummariseCondition.set_domain(self.condition_generator.summarise_conditions)
+            type_spec.define_type(dsl.SummariseCondition)
 
         if util.get_config().filters_function_enabled and len(self.condition_generator.filter_conditions) > 1:
-            dsl_library.Op._domain = ['|', '&']
-            type_spec.define_type(dsl_library.Op)
+            dsl.Op.set_domain(['|', '&'])
+            type_spec.define_type(dsl.Op)
 
         prod_spec = ProductionSpec()
 
         prod_spec.add_func_production('empty', Empty, [Empty])
 
         if 'natural_join' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.natural_join)
+            prod_spec.add_func_production(*dsl.natural_join)
 
         if 'natural_join3' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.natural_join3)
+            prod_spec.add_func_production(*dsl.natural_join3)
 
         if 'natural_join4' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.natural_join4)
+            prod_spec.add_func_production(*dsl.natural_join4)
 
         if 'inner_join' not in util.get_config().disabled and self.condition_generator.inner_join_conditions:
-            prod_spec.add_func_production(*dsl_library.inner_join)
+            prod_spec.add_func_production(*dsl.inner_join)
 
         if 'anti_join' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.anti_join)
+            prod_spec.add_func_production(*dsl.anti_join)
 
         if 'left_join' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.left_join)
+            prod_spec.add_func_production(*dsl.left_join)
 
         if 'union' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.union)
+            prod_spec.add_func_production(*dsl.union)
 
         if 'intersect' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.intersect)
+            prod_spec.add_func_production(*dsl.intersect)
 
         if 'semi_join' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.semi_join)
+            prod_spec.add_func_production(*dsl.semi_join)
 
         if 'cross_join' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.cross_join)
+            prod_spec.add_func_production(*dsl.cross_join)
 
         if 'concat' in self.aggrs:
-            prod_spec.add_func_production(*dsl_library.unite)
+            prod_spec.add_func_production(*dsl.unite)
 
         if self.condition_generator.filter_conditions:
-            prod_spec.add_func_production(*dsl_library.filter)
+            prod_spec.add_func_production(*dsl.filter)
 
             if util.get_config().filters_function_enabled and len(self.condition_generator.filter_conditions) > 1:
-                prod_spec.add_func_production(*dsl_library.filters)
+                prod_spec.add_func_production(*dsl.filters)
 
         if self.condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.summarise)
+            prod_spec.add_func_production(*dsl.summarise)
 
         if self.condition_generator.summarise_conditions and 'mutate' not in util.get_config().disabled:
-            prod_spec.add_func_production(*dsl_library.mutate)
+            prod_spec.add_func_production(*dsl.mutate)
 
         pred_spec = PredicateSpec()
 
@@ -294,7 +294,13 @@ class Specification:
             if join not in util.get_config().disabled:
                 pred_spec.add_predicate('distinct_inputs', [join])
 
-        return TyrellSpec(type_spec, dsl_library.squares, prod_spec, pred_spec)
+        program_spec = ProgramSpec('squares', [(dsl.Table, self.get_bitvecnum(self.data_frames[input])) for input in self.tables],
+                                   (dsl.Table, self.get_bitvecnum(self.data_frames["expected_output"])))
+
+        return TyrellSpec(type_spec, program_spec, prod_spec, pred_spec)
+
+    def get_bitvecnum(self, columns):
+        return util.boolvec2int([column in columns for column in self.all_columns])
 
     def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
         d = {}

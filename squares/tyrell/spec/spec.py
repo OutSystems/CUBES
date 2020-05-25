@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Iterable, List, Dict, DefaultDict, Optional, Union, Any
+from functools import cached_property
+from typing import Iterable, List, Dict, DefaultDict, Optional, Union, Any, Tuple
 
 from .expr import Expr
 from .predicate import Predicate
@@ -182,7 +183,7 @@ class ProductionSpec:
         self._add_production(prod)
         return prod
 
-    def add_param_production(self, lhs: ValueType, index: int) -> ParamProduction:
+    def add_param_production(self, lhs: ValueType, index: int, value: Any = None) -> ParamProduction:
         '''
         Create new param production. Return the created production.
         Raise `ValueError` if a production with the same `index` has already been created.
@@ -190,7 +191,7 @@ class ProductionSpec:
         if index in self._param_map:
             raise ValueError(
                 'Parameter Production with index {} has already been created'.format(index))
-        prod = ParamProduction(self._get_next_id(), lhs, index)
+        prod = ParamProduction(self._get_next_id(), lhs, index, value)
         self._param_map[index] = prod
         self._add_production(prod)
         return prod
@@ -224,38 +225,38 @@ class ProductionSpec:
 
 class ProgramSpec:
     _name: str
-    _input: List[Type]
-    _output: Type
+    _inputs: List[Tuple[Type, Any]]
+    _output: Tuple[Type, Any]
 
-    @staticmethod
-    def check_value_type(ty):
-        if not isinstance(ty, ValueType):
-            raise ValueError(
-                'Non-value type cannot be used as program input/output: {}'.format(ty))
-
-    def __init__(self, name: str, in_types: List[Type], out_type: Type):
-        for ty in in_types:
-            self.check_value_type(ty)
-        self.check_value_type(out_type)
-
+    def __init__(self, name: str, inputs: List[Tuple[Type, Any]], output: Tuple[Type, Any]):
         self._name = name
-        self._input = in_types
-        self._output = out_type
+        self._inputs = inputs
+        self._input_types = [type for type, _ in inputs]
+        self._output = output
+        self._output_type = output[0]
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
-    def input(self) -> List[Type]:
-        return self._input
-
-    def num_input(self) -> int:
-        return len(self._input)
+    def inputs(self) -> List[Tuple[Type, Any]]:
+        return self._inputs
 
     @property
-    def output(self) -> Type:
+    def input_types(self) -> List[Type]:
+        return self._input_types
+
+    def num_input(self) -> int:
+        return len(self._inputs)
+
+    @property
+    def output(self) -> Tuple[Type, Any]:
         return self._output
+
+    @property
+    def output_type(self) -> Type:
+        return self._output_type
 
 
 class PredicateSpec:
@@ -303,7 +304,7 @@ class TyrellSpec:
             filter(lambda ty: isinstance(ty, EnumType),
                    type_spec.types()))
         # Generate all param productions
-        self._add_param_productions(prod_spec, prog_spec.input)
+        self._add_param_productions(prod_spec, prog_spec.inputs)
 
         self._type_spec = type_spec
         self._prog_spec = prog_spec
@@ -319,7 +320,15 @@ class TyrellSpec:
     @staticmethod
     def _add_param_productions(prod_spec, input_tys):
         for i, ty in enumerate(input_tys):
-            prod_spec.add_param_production(ty, i)
+            prod_spec.add_param_production(ty[0], i, ty[1])
+
+    @cached_property
+    def max_rhs(self):
+        max_rhs = 0
+        for production in self.productions():
+            if production.is_function() and len(production.rhs) > max_rhs:
+                max_rhs = len(production.rhs)
+        return max_rhs
 
     # Delegate methods for TypeSpec
     def get_type(self, name: str) -> Optional[Type]:
@@ -381,14 +390,14 @@ class TyrellSpec:
 
     @property
     def input(self) -> List[Type]:
-        return self._prog_spec.input
+        return self._prog_spec.input_types
 
     def num_input(self) -> int:
         return self._prog_spec.num_input()
 
     @property
     def output(self) -> Type:
-        return self._prog_spec.output
+        return self._prog_spec.output_type
 
     # Delegate methods for PredicateSpec
     def get_predicates_with_name(self, name: str) -> List[Predicate]:
@@ -408,5 +417,3 @@ class TyrellSpec:
         result += repr(self._prod_spec) + '\n'
         result += repr(self._pred_spec) + '\n'
         return result
-
-

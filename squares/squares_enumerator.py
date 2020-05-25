@@ -15,8 +15,9 @@ from squares.dsl.interpreter import SquaresInterpreter
 from .results import ResultsHolder
 from squares.dsl.specification import Specification
 from .tyrell import spec as S
-from .tyrell.decider import Example, ExampleConstraintDecider
+from .tyrell.decider import Example, ExampleConstraintDecider, ExampleDecider
 from .tyrell.enumerator import LinesEnumerator, SmtEnumerator
+from .tyrell.enumerator.bitenum import BitEnumerator
 from .tyrell.synthesizer import Synthesizer
 
 logger = logging.getLogger('squares')
@@ -25,12 +26,12 @@ robjects.r('''
 zz <- file("r_output.log", open = "wt")
 sink(zz)
 sink(zz, type = "message")
-library(dplyr)
-library(dbplyr)
 library(tidyr)
 library(stringr)
 library(readr)
 library(lubridate)
+library(dplyr)
+library(dbplyr)
 options(warn=-1)''')
 
 
@@ -50,31 +51,31 @@ def main(args, spec, id: int, conf: Config, queue: Queue):
 
     ResultsHolder().specification = specification
 
-    if logger.isEnabledFor(logging.DEBUG):
-        with open(f'dsl{id}.tyrell', 'w') as f:
-            f.write(repr(specification.dsl))
+    # if logger.isEnabledFor(logging.DEBUG):
+    #     with open(f'dsl{id}.tyrell', 'w') as f:
+    #         f.write(repr(specification.dsl))
 
-    spec = S.parse(repr(specification.dsl))
+    spec = specification.generate_dsl()
     logger.info('Parsing succeeded')
 
-    decider = ExampleConstraintDecider(spec=spec,
-                                       interpreter=SquaresInterpreter(specification, False),
-                                       examples=[Example(input=specification.tables, output='expected_output')],
-                                       )
+    decider = ExampleDecider(interpreter=SquaresInterpreter(specification, False),
+                             examples=[Example(input=specification.tables, output='expected_output')],
+                             )
 
     logger.info('Building synthesizer...')
     loc = max(specification.min_loc, conf.minimum_loc)
     while loc <= util.get_config().maximum_loc:
         logger.info("Lines of Code: " + str(loc))
-        if args.tree:
-            enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
-        else:
-            if args.symm_off:
-                enumerator = LinesEnumerator(spec, loc=loc)
-            elif args.symm_on:
-                enumerator = LinesEnumerator(spec, loc=loc, break_sym_online=True)
-            else:
-                enumerator = LinesEnumerator(spec, loc=loc, sym_breaker=False)
+        # if args.tree:
+        #     enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
+        # else:
+        #     if args.symm_off:
+        #         enumerator = LinesEnumerator(spec, loc=loc)
+        #     elif args.symm_on:
+        #         enumerator = LinesEnumerator(spec, loc=loc, break_sym_online=True)
+        #     else:
+        #         enumerator = LinesEnumerator(spec, loc=loc, sym_breaker=False)
+        enumerator = BitEnumerator(spec, specification, loc=loc)
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 

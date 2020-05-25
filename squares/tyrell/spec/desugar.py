@@ -85,8 +85,8 @@ class ProgramCollector(Visitor_Recursive):
 
     def collect(self) -> ProgramSpec:
         return ProgramSpec(name=self._name,
-                           in_types=self._input_tys,
-                           out_type=self._output_ty)
+                           inputs=self._input_tys,
+                           output=self._output_ty)
 
 
 class ProductionCollecotr(Visitor_Recursive):

@@ -19,7 +19,8 @@ def handler_subprocess(signal, stackframe):
     logger.debug('Time spent in analysis: %f', ResultsHolder().analysis_time)
     logger.debug('Time spent in enumerator: %f', ResultsHolder().enum_time)
     logger.debug('Time spent in enumerator init: %f', ResultsHolder().init_time)
-    logger.debug('Enumerarted %f programs/second', ResultsHolder().n_attempts / ResultsHolder().enum_time)
+    if ResultsHolder().enum_time != 0:
+        logger.debug('Enumerated %f programs/second', ResultsHolder().n_attempts / ResultsHolder().enum_time)
     os._exit(os.EX_OK)
 
 
@@ -45,6 +46,7 @@ class ResultsHolder(metaclass=Singleton):
         self.solution_size = None
         self.blacklist = None
         self.n_cubes = 0
+        self.blocked_cubes = 0
         self.n_attempts = 0
         self.n_rejects = 0
         self.n_fails = 0
@@ -59,6 +61,7 @@ class ResultsHolder(metaclass=Singleton):
         logger.info('Statistics:')
         if self.n_cubes:
             logger.info('\tGenerated cubes: %d', self.n_cubes)
+        logger.info('\tBlocked cubes: %d', self.blocked_cubes)
         logger.info('\tAttempted programs: %d', self.n_attempts)
         logger.info('\t\tRejected: %d', self.n_rejects)
         logger.info('\t\tFailed: %d', self.n_fails)
@@ -74,7 +77,7 @@ class ResultsHolder(metaclass=Singleton):
             assert interp.equals(evaluation, 'expected_output')  # this call makes it so that the select() appears in the output
 
             try:
-                program = self.specification.r_init + interp.final_program
+                program = self.specification.r_init + interp.program
                 robjects.r(program)
                 sql_query = robjects.r(f'sink(); sql_render(out, bare_identifier_ok=T)')
             except:
@@ -86,7 +89,7 @@ class ResultsHolder(metaclass=Singleton):
             if util.get_config().print_r:
                 pass
                 print("------------------------------------- R Solution ---------------------------------------\n")
-                print(self.specification.r_init + '\n' + interp.final_program)
+                print(self.specification.r_init + '\n' + interp.program)
 
             if sql_query is not None:
                 print()

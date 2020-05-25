@@ -61,8 +61,12 @@ class EnumProduction(Production):
         return lhs_ty.domain[self._choice]
 
     @property
-    def rhs(self) -> List[Any]:
-        return [self._get_rhs()]
+    def rhs(self) -> Any:
+        return self._get_rhs()
+
+    @property
+    def value(self) -> Any:
+        return self._lhs.values[self._choice]
 
     def is_function(self) -> bool:
         return False
@@ -85,15 +89,20 @@ class EnumProduction(Production):
 class ParamProduction(Production):
     _param_id: int
 
-    def __init__(self, id: int, lhs: ValueType, param_id: int):
+    def __init__(self, id: int, lhs: ValueType, param_id: int, value: Any = None):
         super().__init__(id, lhs)
         if not isinstance(lhs, ValueType):
             raise ValueError('LHS of ParamProduction must be a value type')
         self._param_id = param_id
+        self._value = value
 
     @property
-    def rhs(self) -> List[int]:
-        return [self._param_id]
+    def rhs(self) -> int:
+        return self._param_id
+
+    @property
+    def value(self) -> Any:
+        return self._value
 
     def is_function(self) -> bool:
         return False
@@ -162,3 +171,10 @@ class FunctionProduction(Production):
         return 'Production {}: {} -> {}({})'.format(
             self._id, self._lhs, self._name,
             ', '.join([str(x) for x in self._rhs]))
+
+
+class LineProduction:
+    def __init__(self, id, type, line: int):
+        self.id = id
+        self.lhs = type
+        self.line = line

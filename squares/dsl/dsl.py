@@ -1,7 +1,6 @@
 from typing import Any
 
-from squares import util
-from squares.tyrell.spec import ValueType, EnumType, ProgramSpec
+from squares.tyrell.spec import ValueType, EnumType
 from squares.tyrell.spec.expr import *
 
 
@@ -34,8 +33,6 @@ CrossJoinCondition = EnumType('CrossJoinCondition')
 FilterCondition = EnumType('FilterCondition')
 Op = EnumType('Op')
 SummariseCondition = EnumType('SummariseCondition')
-
-squares = ProgramSpec('Squares', [], Table)
 
 natural_join = ('natural_join',
                 Table,

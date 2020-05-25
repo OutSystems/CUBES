@@ -26,7 +26,7 @@ class TestDSL(unittest.TestCase):
         )
 
         prog_spec = S.ProgramSpec(
-            name='test', in_types=[self._vty0], out_type=self._vty1)
+            name='test', inputs=[self._vty0], output=self._vty1)
 
         self._spec = S.TyrellSpec(type_spec, prog_spec, prod_spec)
         self._prod1 = self._spec.get_param_production_or_raise(0)
