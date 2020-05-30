@@ -3,6 +3,10 @@
 
 # Unsolved instances
 
+## Doesn't finish init
+- scythe/recent_posts/004 (supported by scythe)
+- scythe/recent_posts/007 (supported by scythe)
+
 ## Supported
 - 55-tests/22
 - 55-tests/46

@@ -5,6 +5,7 @@ from logging import getLogger
 from ..decider import Decider
 from ..enumerator import Enumerator
 from ..interpreter import InterpreterError
+from ... import results
 
 logger = getLogger('tyrell.synthesizer')
 
@@ -32,15 +33,20 @@ class Synthesizer(ABC):
         num_attempts = 0
         num_rejected = 0
         num_failed = 0
+        start = time.time()
         prog = self._enumerator.next()
+        results.enum_time += time.time() - start
         while prog is not None:
+            results.n_attempts += 1
             num_attempts += 1
             if num_attempts % 500 == 0:
                 self._enumerator.close_lattices()
                 logger.info('Attempts: %d. Rejected: %d. Failed: %d.', num_attempts, num_rejected, num_failed)
             # logger.debug('Attempt %s: %s', str(num_attempts), str(prog))
             try:
+                start = time.time()
                 res = self._decider.analyze(prog)
+                results.analysis_time += time.time() - start
                 if res.is_ok():
                     self._enumerator.close_lattices()
                     logger.info('Program accepted after %d attempts (%d rejected, %d failed)', num_attempts,
@@ -50,17 +56,23 @@ class Synthesizer(ABC):
 
                 else:
                     num_rejected += 1
+                    results.n_rejects += 1
                     info = res.why()
                     # logger.debug('Attempt {}: Program rejected. Reason: {}'.format(num_attempts, info))
                     self._enumerator.update(info)
+                    start = time.time()
                     prog = self._enumerator.next()
+                    results.enum_time += time.time() - start
 
             except InterpreterError as e:
                 num_failed += 1
+                results.n_fails += 1
                 info = self._decider.analyze_interpreter_error(e)
                 # logger.debug('Attempt {}: Interpreter failed. Reason: {}'.format(num_attempts, e))
                 self._enumerator.update(info)
+                start = time.time()
                 prog = self._enumerator.next()
+                results.enum_time += time.time() - start
 
         logger.debug('Enumerator is exhausted after %d attempts', num_attempts)
         logger.debug('Total Time: %f', time.time() - start_time)

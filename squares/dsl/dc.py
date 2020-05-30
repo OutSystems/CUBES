@@ -5,10 +5,8 @@ from typing import List, Tuple, Collection
 
 from z3 import And
 
-from squares import util
-from squares.results import ResultsHolder
+from squares import util, results
 from squares.statistics import Statistics
-from squares.tyrell.dsl import ParamNode, AtomNode
 from squares.tyrell.enumerator.lines import LinesEnumerator
 from squares.tyrell.spec import TyrellSpec, FunctionProduction
 from squares.util import count
@@ -28,62 +26,10 @@ class LineConstraint(CubeConstraint):
         self.production = production
 
     def realize_constraint(self, spec, enumerator):
-        return And(enumerator.roots[self.line].var == spec.get_function_production_or_raise(self.production).id)
+        return enumerator.roots[self.line].var == spec.get_function_production_or_raise(self.production).id
 
     def __repr__(self) -> str:
         return f'l{self.line} = {self.production}'
-
-
-class Param:
-
-    def __init__(self, n) -> None:
-        self.n = n
-
-    def __eq__(self, o: object) -> bool:
-        if isinstance(o, Param):
-            return self.n == o.n
-        else:
-            return False
-
-    def __hash__(self) -> int:
-        return hash(self.n)
-
-    def get_id(self, spec: TyrellSpec):
-        return spec.get_param_production(self.n).id
-
-    def __repr__(self) -> str:
-        return f'@{self.n}'
-
-
-class Atom:
-
-    def __init__(self, lhs, rhs) -> None:
-        self.lhs = lhs
-        self.rhs = rhs
-
-    def __eq__(self, o: object) -> bool:
-        if isinstance(o, Atom):
-            return self.lhs == o.lhs and self.rhs == o.rhs
-        else:
-            return False
-
-    def __hash__(self) -> int:
-        return hash((self.lhs, self.rhs))
-
-    def get_id(self, spec: TyrellSpec):
-        return spec.get_enum_production(self.lhs, self.rhs).id
-
-    def __repr__(self) -> str:
-        return f'{self.rhs}'
-
-
-def map_node(node):
-    if isinstance(node, ParamNode):
-        return Param(node.index)
-    elif isinstance(node, AtomNode):
-        return Atom(node.type, node.data)
-    else:
-        raise NotImplementedError()
 
 
 def find_production(production_list, name):
@@ -116,6 +62,9 @@ class CubeGenerator:
     def fill_stack(self):
         while len(self.line_stack) < self.n_lines:
             self.line_stack.append(self.filtered_productions())
+
+    def block(self, core):
+        logger.warning('Block is noop for CubeGenerator.')
 
     def next(self, dummy: bool) -> Collection[CubeConstraint]:
         if self.n_lines == 0 and self.exahusted == False:
@@ -193,17 +142,7 @@ class Node:
         self.parent: Node = parent
 
     def __repr__(self) -> str:
-        return f'Node({self.head.name if self.head else None})'
-
-
-# production_limit = {
-#     'anti_join': 1,
-#     'semi_join': 1,
-#     'left_join': 1,
-#     'cross_join': 1,
-#     'union': 2,
-#     'intersect': 1,
-#     }
+        return f'Node({self.head.name if self.head else None}, children={str(self.children)})'
 
 
 class StatisticCubeGenerator(CubeGenerator):
@@ -212,7 +151,7 @@ class StatisticCubeGenerator(CubeGenerator):
         super().__init__(specification, tyrell_specification, loc, n_lines)
         self.root = Node(None, None, None)
         self.statistics = statistics
-        self.first_line_done = False
+        self.force_stop = False
 
     def block(self, core, node=None, path=None):
         if node is None:
@@ -226,14 +165,16 @@ class StatisticCubeGenerator(CubeGenerator):
         if len(core) == 1:
             if core[0] is None:
                 for child in node.children:
-                    logger.debug('Blocking %s', str(path + [child]))
-                    ResultsHolder().blocked_cubes += 1
+                    # logger.debug('Blocking %s', str(list(map(lambda x: x.head.name, path + [child]))))
+                    results.blocked_cubes += 1
                 node.children = []
+                self.clean_branch(node)
             else:
                 try:
-                    logger.debug('Blocking %s', str(path + [next(filter(lambda x: x.head.name == core[0], node.children))]))
+                    # logger.debug('Blocking %s', str(list(map(lambda x: x.head.name,path + [next(filter(lambda x: x.head.name == core[0], node.children))]))))
                     node.children = [child for child in node.children if child.head.name != core[0]]
-                    ResultsHolder().blocked_cubes += 1
+                    self.clean_branch(node)
+                    results.blocked_cubes += 1
                 except StopIteration:
                     pass  # trying to block already blocked cube
             return
@@ -248,45 +189,50 @@ class StatisticCubeGenerator(CubeGenerator):
             except StopIteration:
                 pass  # trying to block already blocked cube
 
-    def next(self, probe: bool) -> Collection[CubeConstraint]:
-        node = self.root
-        depth = 0
-        cube = []
-        failed = False
-        while depth < self.n_lines:
-            if node.children is None:
-                node.children = [Node(p, None, node) for p in self.filter_productions(cube)]
+    def next(self, probe: bool, node=None, cube=None):
+        if node is None:
+            node = self.root
+        if cube is None:
+            cube = []
 
-            try:
-                name = self.statistics.choose_production([c.head.name for c in node.children], [c.head.name for c in cube], probe, self.loc)
-                node = next(filter(lambda x: x.head.name == name, node.children))
-                depth += 1
-                cube.append(node)
-            except:
-                failed = True
-                break
+        if self.force_stop:
+            raise StopIteration
 
+        if len(cube) >= self.n_lines and not self.force_stop:
+            parent = node.parent
+            if parent:
+                parent.children.remove(node)
+                self.clean_branch(parent)
+            if self.n_lines < 1:
+                self.force_stop = True
+            return tuple(map(lambda x: LineConstraint(x[0], x[1].head.name), enumerate(cube)))
+
+        if node.children is None:
+            node.children = [Node(p, None, node) for p in self.filter_productions(cube)]
+
+        for child in self.statistics.sort_productions([c.head.name for c in node.children], [c.head.name for c in cube], probe, self.loc):
+            child_node = next(filter(lambda x: x.head.name == child, node.children))
+            result = self.next(probe, child_node, cube + [child_node])
+            if result:
+                return result
+
+        if not cube:
+            raise StopIteration
+        else:
+            return None
+
+    def clean_branch(self, node):
         node_ = node
         while not node_.children:
             tmp = node_.parent
-            if not tmp and failed:
-                raise StopIteration
-            elif not tmp:
+            if not tmp:
                 break
             else:
                 tmp.children.remove(node_)
                 node_ = tmp
 
-        if not failed:
-            return tuple(map(lambda x: LineConstraint(x[0], x[1].head.name), enumerate(cube)))
-        return None
-
     def filter_productions(self, cube):
         productions = [p for p in self.tyrell_specification.get_productions_with_lhs('Table') if p.is_function()]
-
-        # for production, max_count in production_limit.items():
-        #     if count(l for l in cube if l.head.name == production) >= max_count:
-        #         productions = list(filter(lambda p: p.name != production, productions))
 
         if util.get_config().force_summarise and len(self.specification.aggrs) - count(
                 l for l in cube if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(cube):
@@ -297,3 +243,8 @@ class StatisticCubeGenerator(CubeGenerator):
             productions = list(filter(lambda p: p.name == 'filter', productions))
 
         return productions
+
+    def __str__(self) -> str:
+        return f'CubeGenerator(loc={self.loc}, n_lines={self.n_lines})'
+
+

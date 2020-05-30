@@ -15,15 +15,14 @@ class Config:
     advance_processes: bool
     programs_per_cube_threshold: int
 
-    strictly_good_program_weight: float
-    good_program_weight: float
     program_weigth_decay_rate: float
     probing_threads: int
+    cube_freedom: int
 
     minimum_loc: int
     maximum_loc: int
 
-    advance_percentage = .4
+    advance_percentage = .6
     smoothing_bias: float = 1
 
     lines_force_all_inputs: bool = True

@@ -6,6 +6,8 @@ from logging import getLogger
 from multiprocessing import Process, SimpleQueue
 from time import sleep
 
+import signal
+
 from squares import squares_enumerator
 from squares.config import Config
 from squares.util import create_argparser, parse_specification
@@ -38,7 +40,7 @@ def main():
                max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
                max_join_combinations=args.max_join_combo, good_program_weight=args.good_program_weight,
                strictly_good_program_weight=args.strictly_good_program_weight, program_weigth_decay_rate=args.decay_rate,
-               probing_threads=args.probing_threads,
+               probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
                z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
         ]
 
@@ -58,6 +60,13 @@ def main():
                           daemon=True)
         process.start()
         processes.append(process)
+
+    def handle_sigint(signal, stackframe):
+        for process in processes:
+            process.join()
+
+    signal.signal(signal.SIGINT, handle_sigint)
+    signal.signal(signal.SIGTERM, handle_sigint)
 
     done = False
     while not done and processes:

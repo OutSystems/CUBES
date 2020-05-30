@@ -9,7 +9,6 @@ from z3 import BitVecVal
 
 from .. import util, results
 from ..program import LineInterpreter
-from ..util import get_fresh_name, get_permutations
 
 logger = getLogger('squares.interpreter')
 
@@ -112,7 +111,7 @@ class SquaresInterpreter(LineInterpreter):
             util.get_program_queue().put((tuple(line.production.name for line in args[0]), score * 10))
 
         if score < 1:
-            results.ResultsHolder().equality_time += time.time() - start
+            results.equality_time += time.time() - start
             return False
 
         a_cols = list(robjects.r(f'colnames({actual})'))
@@ -124,8 +123,8 @@ class SquaresInterpreter(LineInterpreter):
                     robjects.r(_script)
                     if self.test_equality('out', expect, False):
                         if self.sort_columns:
-                            for perm in get_permutations(e_cols, len(e_cols)):
-                                name = get_fresh_name()
+                            for perm in util.get_permutations(e_cols, len(e_cols)):
+                                name = util.get_fresh_name()
                                 new_script = f'{name} <- out %>% arrange({perm})'
                                 robjects.r(new_script)
                                 if self.test_equality(name, expect, True):
@@ -133,11 +132,11 @@ class SquaresInterpreter(LineInterpreter):
                                     break
 
                             self.program += _script + '\n'
-                        results.ResultsHolder().equality_time += time.time() - start
+                        results.equality_time += time.time() - start
                         return True
                 except:
                     continue
-        results.ResultsHolder().equality_time += time.time() - start
+        results.equality_time += time.time() - start
         return False
 
     def test_equality(self, actual: str, expect: str, keep_order: bool = False) -> bool:

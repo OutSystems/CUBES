@@ -25,9 +25,9 @@ def test_file(filename: str):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '20', '-o', out_file, './squares.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './squares.py', '-vv', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '20', '-o', out_file, './cubes.py', '-vv', filename]
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './cubes.py', '-vv', filename]
 
     command += other_args
 
@@ -43,10 +43,10 @@ def test_file(filename: str):
         status = None if timeout or memout else 0
 
     process = None
-    if not timeout and not memout and not args.cubes:
-        with open(out_file) as f:
-            log = f.read()
-            process = int(re.search('Solution found using process (.*)', log)[1])
+    # if not timeout and not memout and not args.cubes:
+    #     with open(out_file) as f:
+    #         log = f.read()
+    #         process = int(re.search('Solution found using process (.*)', log)[1])
 
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])

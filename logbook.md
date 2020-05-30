@@ -260,3 +260,13 @@ Stats after 300s (16 threads):
 - union distinct
 
 ## Week 12
+
+## Week something??
+Nikolaj on StackOverflow:
+>Yes, there are essentially two incremental modes.
+>
+>Stack based: using push(), pop() you create a local context, that follows a stack discipline. Assertions added under a push() are removed after a matching pop(). Furthermore, any lemmas that are derived under a push are removed. Use push()/pop() to emulate freezing a state and adding additional constraints over the frozen state, then resume to the frozen state. It has the advantage that any additional memory overhead (such as learned lemmas) built up within the scope of a push() is released. The working assumption is that learned lemmas under a push would not be useful any longer.
+>
+>Assumption based: using additional assumption literals passed to check()/check_sat() you can (1) extract unsatisfiable cores over the assumption literals, (2) gain local incrementality without garbage collecting lemmas that get derived independently of the assumptions. In other words, if Z3 learns a lemma that does not contain any of the assumption literals it expects to not garbage collect them. To use assumption literals effectively, you would have to add them to formulas too. So the tradeoff is that clauses used with assumptions contain some amount of bloat. For example if you want to locally assume some formula (<= x y), then you add a clause (=> p (<= x y)), and assume p when calling check_sat(). Note that the original assumption was a unit. Z3 propagates units efficiently. With the formulation that uses assumption literals it is no longer a unit at the base level of search. This incurs some extra overhead. Units become binary clauses, binary clauses become ternary clauses, etc.
+>
+>The differentiation between push/pop functionality holds for Z3's default SMT engine. This is the engine most formulas will be using. Z3 contains some portfolio of engines. For example, for pure bit-vector problems, Z3 may end up using the sat based engine. Incrementality in the sat based engine is implemented differently from the default engine. Here incrementality is implemented using assumption literals. Any assertion you add within the scope of a push is asserted as an implication (=> scope_literals formula). check_sat() within such a scope will have to deal with assumption literals. On the flip-side, any consequence (lemma) that does not depend on the current scope is not garbage collected on pop().

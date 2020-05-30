@@ -20,7 +20,7 @@ class Statistics(ABC):
     def update(self, arg, *args):
         raise NotImplementedError
 
-    def choose_production(self, allowed_productions, cube, is_probe, loc):
+    def sort_productions(self, allowed_productions, cube, is_probe, loc):
         raise NotImplementedError
 
 
@@ -48,7 +48,7 @@ class BottomAlignedLinesStatistics(Statistics):
             else:
                 self.programs[i - len(program)][production] += util.get_config().good_program_weight
 
-    def choose_production(self, allowed_productions, cube, is_probe, loc):
+    def sort_productions(self, allowed_productions, cube, is_probe, loc):
         productions = OrderedSet()
 
         if not is_probe:
@@ -97,7 +97,7 @@ class BigramStatistics(Statistics):
             if prod0 not in scores:
                 scores[prod0] = {}
             for prod1 in base_productions:
-                if prod1 not in scores[prod0]:
+                if prod1 not in scores[prod0] or scores[prod0][prod1] <= 0:
                     scores[prod0][prod1] = util.get_config().smoothing_bias
         return {prod0: {prod1: score / sum(scores[prod0].values()) for (prod1, score) in submap.items()} for (prod0, submap) in
                 scores.items()}
@@ -118,23 +118,19 @@ class BigramStatistics(Statistics):
     def _(self, program: tuple, score):
         for bigram in pairwise(program):
             self.bigram_scores[bigram[0]][bigram[1]] += score
-        self.base_scores[program[0]] += score
+        if program:
+            self.base_scores[program[0]] += score
         # for i, prod in enumerate(program):
         #     self.base_scores[prod] += score / ((i + 1) ** 2)
 
-    def choose_production(self, allowed_productions, cube, is_probe, loc):
+    def sort_productions(self, allowed_productions, cube, is_probe, loc):
         if is_probe:
-            return random.choice(allowed_productions)
+            productions = allowed_productions.copy()
+            random.shuffle(productions)
+            return productions
         if len(cube) == 0:
             probabilities = self.base_probabilities(allowed_productions)
-            choice = choices(list(probabilities.keys()), list(probabilities.values()))[0]
-            if util.get_config().verbosity >= 3:
-                logger.debug('First line %s: %s', str(sorted(self.base_probabilities(self.productions).items(), key=lambda x: x[1], reverse=True)), choice)
-            return choice
+            return sorted(list(probabilities.keys()), key=lambda key: probabilities[key])
         else:
             probabilities = self.bigram_probabilities(allowed_productions, [cube[-1]])
-            choice = choices(list(probabilities[cube[-1]].keys()), list(probabilities[cube[-1]].values()))[0]
-            if util.get_config().verbosity >= 3:
-                logger.debug('2-gram for %s: %s: %s', cube[-1],
-                             str(sorted(self.bigram_probabilities(self.productions, [cube[-1]])[cube[-1]].items(), key=lambda x: x[1], reverse=True)), choice)
-            return choice
+            return sorted(list(probabilities[cube[-1]].keys()), key=lambda key: probabilities[cube[-1]][key])

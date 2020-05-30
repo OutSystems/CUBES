@@ -1,4 +1,3 @@
-# NOTE: this file should be the only one allowed to use 'global'
 import argparse
 import pickle
 import time
@@ -111,38 +110,31 @@ def create_argparser():
 
     parser.add_argument('--no-r', action='store_true', help="don't output R program")
 
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
-    g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
-    parser.set_defaults(tree=False)
-
     parser.add_argument('--optimal', action='store_true', help='make sure that returned solutions are as short as possible')
     parser.add_argument('--cache-operations', action='store_true', help='increased memory usage, but possibly faster results')
     parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
+    parser.add_argument('--cube-freedom', type=int, default=2, help='number of free lines when generating cubes')
 
     g = parser.add_argument_group('heuristics')
 
     g.add_argument('--split-search', action='store_true',
                    help='use an heuristic to determine if search should be split among multiple lines of code')
-    g.add_argument('--split-search-threshold', type=int, default=1750, help='instance hardness threshold')
-    g.add_argument('--good-program-weight', type=float, default=1.2, help='how much a good program influences the search for the solution')
-    g.add_argument('--strictly-good-program-weight', type=float, default=20,
-                   help='how much a strictly good program influences the search for the solution')
+    g.add_argument('--split-search-threshold', type=int, default=2000, help='instance hardness threshold')
     g.add_argument('--decay-rate', type=float, default=1, help='rate at which old information is forgotten')
     g.add_argument('--probing-threads', type=int, default=2,
                    help='number of threads that should be used to randomly explore the search space')
 
     parser.add_argument('--disable', nargs='+', default=[])
 
-    parser.add_argument('--max-filter-combo', type=int, default=2)
-    parser.add_argument('--max-cols-combo', type=int, default=2)
-    parser.add_argument('--max-join-combo', type=int, default=2)
+    parser.add_argument('--max-filter-combo', type=int, default=2, help='maximum size of filter conditions')
+    parser.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
+    parser.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
 
     parser.add_argument('--use-solution-line', dest='use_lines', type=int, action='append', default=[])
     parser.add_argument('--use-solution-last-line', dest='use_last', action='store_true')
 
     parser.add_argument('-j', '--jobs', type=int, default=-2, help='number of processes to use')
-    parser.add_argument('--max-lines', type=int, default=8, help='maximum program size')
+    parser.add_argument('--max-lines', type=int, default=7, help='maximum program size')
     parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
     parser.add_argument('--seed', default='squares')
     return parser
@@ -221,12 +213,3 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
-
-
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]

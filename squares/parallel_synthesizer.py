@@ -17,7 +17,6 @@ from .decider import LinesDecider
 from .dsl.dc import CubeGenerator, StatisticCubeGenerator, CubeConstraint
 from .dsl.interpreter import SquaresInterpreter
 from .dsl.specification import Specification
-from .results import ResultsHolder
 from .statistics import BigramStatistics
 from .tyrell.decider import Example
 from .tyrell.enumerator.bitenum import BitEnumerator
@@ -40,14 +39,11 @@ def synthesize(enumerator, decider, current_cube):
     failed = 0
     start = time.time()
     prog = enumerator.next()
-    ResultsHolder().enum_time += time.time() - start
+    results.enum_time += time.time() - start
     while prog is not None:
-        ResultsHolder().n_attempts += 1
+        results.n_attempts += 1
         attempts += 1
         current_attempts += 1
-        # logger.debug("Evaluating program %s", str(prog))
-        # print(list(reversed(enumerator.specification.all_columns)))
-        # enumerator.print_bitvec_prog()
         if current_attempts == 100:
             util.get_program_queue().put((current_attempts, None))
             current_attempts = 0
@@ -55,7 +51,7 @@ def synthesize(enumerator, decider, current_cube):
         try:
             start = time.time()
             res = decider.analyze(prog, current_cube)
-            ResultsHolder().analysis_time += time.time() - start
+            results.analysis_time += time.time() - start
             if res.is_ok():
                 util.get_program_queue().put((current_attempts, None))
                 return prog, attempts, rejected, failed
@@ -73,7 +69,7 @@ def synthesize(enumerator, decider, current_cube):
         enumerator.update(info)
         start = time.time()
         prog = enumerator.next()
-        ResultsHolder().enum_time += time.time() - start
+        results.enum_time += time.time() - start
 
     util.get_program_queue().put((current_attempts, None))
     return None, attempts, rejected, failed
@@ -100,7 +96,7 @@ def run_process(pipe: Pipe, config: Config, specification: Specification, progra
             logger.debug('Initialising process for %d lines of code.', data)
             start = time.time()
             enumerator = BitEnumerator(tyrell_specification, specification, data)
-            ResultsHolder().init_time += time.time() - start
+            results.init_time += time.time() - start
             # enumerator = cProfile.runctx('enumerator = BitEnumerator(tyrell_specification, specification, 3, sym_breaker=False)', globals(), locals(), f'output_3.cProfile')
             pipe_write(pipe, (None, 0, 0, 0, None))
             gc.collect()
@@ -196,10 +192,33 @@ class ProcessSet:
     def __repr__(self) -> str:
         return f'ProcessSet(loc={self.cube_generator.loc}, params={self.generator_params}, n={len(self)})'
 
+    def kill_above(self, loc_limit) -> List[Connection]:
+        result = []
+        for pipe, process in self.processes.items():
+            loc = self.locs[pipe]
+            if loc >= loc_limit:
+                try:
+                    process.terminate()
+                    process.terminate()
+
+                    def _kill(process):
+                        time.sleep(0.25)
+                        if process.is_alive():
+                            logger.debug('Process %s did not terminate. Killing', process.name)
+                            process.kill()
+
+                    t = Thread(target=_kill, args=(process,))
+                    t.start()
+                except ProcessLookupError:
+                    pass
+                result.append(pipe)
+        return result
+
 
 class ProcessSetManager:
 
     def __init__(self, poll, generator_constructor, alternate_j):
+        self.probing_process_set = None
         self.process_sets: Dict[Connection, ProcessSet] = {}
         self.waiting_list = {}  # cubes that have been generated but are waiting for a INIT to finish
         self.poll = poll
@@ -208,6 +227,8 @@ class ProcessSetManager:
         self.alternated = False
         self.left_to_switch = 0
         self.alternate_j = alternate_j
+        self.current_cube = {}
+        self.current_cube_generator = {}
 
     def register_process(self, process_set: ProcessSet, process: Process, pipe: Connection):
         self.process_sets[pipe] = process_set
@@ -215,16 +236,21 @@ class ProcessSetManager:
 
     def receive(self, pipe: Connection, program, att, rjc, fld, core):
         if core and any(map(lambda x: x is None, core)):
-            self.process_sets[pipe].cube_generator.block(core)
+            old = results.blocked_cubes
+            self.current_cube_generator[pipe].block(core)
+            if results.blocked_cubes - old > 0:
+                logger.info('Blocked %d cubes in %s due to %s', results.blocked_cubes - old, self.current_cube_generator[pipe], self.current_cube[pipe])
 
         if util.get_config().advance_processes and att >= util.get_config().programs_per_cube_threshold:
             if not self.alternated:
                 logger.info('Hard problem!')
                 self.alternated = True
                 self.left_to_switch = self.alternate_j
-                self.process_set_stack.append(self.generator_constructor(self.process_set_stack[-1].cube_generator.loc + 1))
+                self.process_set_stack.append(
+                    ProcessSet(self.process_set_stack[-1].generator_params,
+                               self.generator_constructor(self.process_set_stack[-1].cube_generator.loc + 1)))
 
-        ResultsHolder().increment_attempts(att, rjc, fld)
+        results.increment_attempts(att, rjc, fld)
 
         process_loc = self.get_loc(pipe)
         return program, process_loc
@@ -234,22 +260,25 @@ class ProcessSetManager:
             cube = self.waiting_list[pipe]
             self.waiting_list.pop(pipe)
 
+            self.current_cube[pipe] = cube
             pipe.send((Message.SOLVE, cube))
             self.poll.modify(pipe.fileno(), select.EPOLLIN)
         else:
-            if self.alternated and self.left_to_switch > 0:
-                if self.process_sets[pipe] in self.process_set_stack:
-                    process = self.process_sets[pipe].unregister_process(pipe)
-                    self.process_set_stack[-1].register_process(process, pipe)
-                    self.left_to_switch -= 1
+            if self.alternated and self.left_to_switch > 0 and \
+                    self.process_sets[pipe] in self.process_set_stack and self.process_sets[pipe] != self.process_set_stack[-1]:
+                process = self.process_sets[pipe].unregister_process(pipe)
+                self.register_process(self.process_set_stack[-1], process, pipe)
+                self.left_to_switch -= 1
+                logger.info('Generator configuration has changed: %s', str(set(self.process_sets.values())))
 
             cube = None
             while cube is None:
                 try:
                     cube = self.process_sets[pipe].generate_cube(pipe)
-                    ResultsHolder().increment_cubes()
+                    results.increment_cubes()
                 except StopIteration:
                     loc = self.process_sets[pipe].cube_generator.loc
+                    old_generator = self.process_sets[pipe].cube_generator
                     logger.warning('Generator for loc %d is exhausted!', loc)
                     if self.process_sets[pipe] in self.process_set_stack:
                         idx = self.process_set_stack.index(self.process_sets[pipe])
@@ -260,17 +289,19 @@ class ProcessSetManager:
                     if self.process_sets[pipe] not in self.process_set_stack:
                         self.process_sets[pipe].cube_generator = self.process_set_stack[0].cube_generator
                     self.process_set_stack[-1].set_generator(self.generator_constructor(loc + 1))
+                    for process_set in set(self.process_sets.values()):
+                        if process_set.cube_generator == old_generator:
+                            process_set.cube_generator = self.process_set_stack[0].cube_generator
                     logger.info('New generator configuration: %s', str(set(self.process_sets.values())))
 
-            if cube is None:
-                logger.error('Generated cube is None. This should not happen!')
-
+            self.current_cube_generator[pipe] = self.process_sets[pipe].cube_generator
             if self.should_reinit(pipe):
                 self.init(pipe)
                 self.poll.modify(pipe.fileno(), select.EPOLLIN)
                 assert pipe not in self.waiting_list
                 self.waiting_list[pipe] = cube
             else:
+                self.current_cube[pipe] = cube
                 pipe.send((Message.SOLVE, cube))
                 self.poll.modify(pipe.fileno(), select.EPOLLIN)
 
@@ -289,6 +320,14 @@ class ProcessSetManager:
     def set_loc(self, pipe: Connection, loc: int):
         self.process_sets[pipe].set_loc(pipe, loc)
 
+    def kill_above(self, loc):
+        for process_set in self.process_sets.values():
+            for pipe in process_set.kill_above(loc):
+                try:
+                    self.poll.unregister(pipe.fileno())
+                except FileNotFoundError:
+                    pass
+
 
 class ParallelSynthesizer:
 
@@ -296,7 +335,8 @@ class ParallelSynthesizer:
         self.tyrell_specification = tyrell_specification
         self.specification = specification
         self.j = j
-        self.alternate_j = round(self.j * util.get_config().advance_percentage)
+        # dont alternate so many processes such that there are no longer any processes searching the previous loc
+        self.alternate_j = min(round(self.j * util.get_config().advance_percentage), j - 1 - util.get_config().probing_threads)
 
     def synthesize(self):
         pipes = {}
@@ -316,10 +356,11 @@ class ParallelSynthesizer:
         t.start()
 
         process_manager = ProcessSetManager(poll,
-                                            (lambda loc: CubeGenerator(self.specification, self.tyrell_specification, loc, loc))
+                                            (lambda loc: CubeGenerator(self.specification, self.tyrell_specification, loc,
+                                                                       loc - util.get_config().cube_freedom))
                                             if util.get_config().static_search else
                                             (lambda loc: StatisticCubeGenerator(statistics, self.specification, self.tyrell_specification,
-                                                                               loc, loc)),
+                                                                                loc, loc - util.get_config().cube_freedom)),
                                             self.alternate_j)
 
         generator = process_manager.generator_constructor(self.specification.min_loc)
@@ -327,6 +368,7 @@ class ParallelSynthesizer:
         probers = ProcessSet((True,), generator)
         main_set = ProcessSet((False,), generator)
         process_manager.process_set_stack.append(main_set)
+        process_manager.probing_process_set = probers
 
         logger.info('Creating %d processes', self.j)
         for i in range(self.j):
@@ -350,7 +392,8 @@ class ParallelSynthesizer:
 
         while True and stopped < self.j:
             if solution_loc and solution_loc <= process_manager.min_loc():
-                ResultsHolder().store_solution(solution, solution_loc, optimal=True)
+                results.store_solution(solution, solution_loc, optimal=True)
+                process_manager.kill_above(0)
                 return solution
 
             events = poll.poll()
@@ -369,19 +412,17 @@ class ParallelSynthesizer:
 
                     if program:
                         if loc <= process_manager.min_loc() or not util.get_config().optimal:
-                            ResultsHolder().store_solution(program, loc, optimal=True)
+                            results.store_solution(program, loc, optimal=True)
+                            process_manager.kill_above(0)
                             return program
 
                         logger.info('Waiting for loc %d to finish before returning solution of loc %d', process_manager.min_loc(), loc)
                         if solution_loc is None or loc < solution_loc:
                             solution = program
-                            ResultsHolder().store_solution(solution, loc, optimal=False)
+                            results.store_solution(solution, loc, optimal=False)
                             solution_loc = loc
 
-                            # for fd in processes.keys():  # TODO not tested
-                            #     if locs[fd] >= solution_loc:
-                            #         processes[fd].terminate()
-                            #         poll.unregister(fd)
+                            process_manager.kill_above(solution_loc)
 
                 if event & select.EPOLLOUT:
                     if solution is not None:
@@ -391,4 +432,4 @@ class ParallelSynthesizer:
 
                     process_manager.send(pipe)
 
-        ResultsHolder().exceeded_max_loc = True
+        results.exceeded_max_loc = True

@@ -52,7 +52,7 @@ load_result_file <- function(file) {
 
 scatter <- function(A, B) {
   merge(eval(parse(text = A)), eval(parse(text = B)), by = 'name', suffixes = c("_A", "_B")) %>%
-    filter((timeout_A == F | timeout_B == F) & (status_A != 1 | status_B != 1)) %>%
+    filter((status_A != 1 & status_B != 1) & (status_A != -1 | status_B != -1) & (status_A != -2 & status_B != -2) & (status_A != 5 & status_B != 5)) %>%
     mutate(real_A = ifelse(status_A == 1, timelimit, real_A)) %>%
     mutate(real_B = ifelse(status_B == 1, timelimit, real_B)) %>%
     ggplot(aes(x = real_A, y = real_B)) +
@@ -222,6 +222,8 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   #single <- load_result_file('single')
   single_np <- load_result_file('single_np')
   bitenum <- load_result_file('bitenum')
+  bitenum2 <- load_result_file('bitenum2')
+  bitenum3 <- load_result_file('bitenum3')
 
   #qffd_r <- load_result_file('qffd_r')
   #qffd_r_no_prune <- load_result_file('qffd_r_no_prune')
@@ -294,6 +296,9 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   c15_2 <- load_result_file('cubes15_2')
   c15_16_h <- load_result_file('cubes15_16_h')
 
+  c16_16_h <- load_result_file('cubes16_16_h')
+  c17_16_h <- load_result_file('cubes17_16_h')
+
   c4_16_h_1h <- load_result_file('cubes4_16_h_1h')
 }
 
@@ -303,22 +308,29 @@ scatter('c4_16', 'c15_16_h')
 scatter('c12_16_h', 'c15_16_h')
 scatter('c15_2', 'c15_16_h')
 
-scatter('bitenum', 'c15_2')
-scatter('bitenum', 'c15_16_h')
+scatter('bitenum', 'bitenum2')
+scatter('bitenum', 'bitenum3')
+scatter('bitenum2', 'bitenum3')
+scatter('squares', 'c15_16_h')
+scatter('scythe', 'c15_16_h')
+scatter('c15_16_h', 'c16_16_h')
+scatter('c15_16_h', 'c17_16_h')
+
 
 plot_hardness('c15_16_h', limit = 600)
 
 plot_times('bitenum')
 plot_times('c15_16_h')
 
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum)
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, bit2 = bitenum2, bitenum3 = bitenum3)
 plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 04 (16 threads)' = c4_16, 'Run 15 (16 threads, bitenum)' = c15_16_h)
 plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 15 (2 threads)' = c15_2, 'Run 15 (16 threads, bitenum)' = c15_16_h)
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 15' = c15_16_h)
+plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum2, 'Run 15' = c15_16_h, 'Run 16' = c16_16_h)
 
 solved_instances(scythe)
 solved_instances(squares)
 solved_instances(single_np)
+solved_instances(bitenum)
 solved_instances(c4_16)
 solved_instances(c11_16_h)
 solved_instances(c12_16_h)
@@ -333,22 +345,22 @@ plot_scores2('../detailed_logs/recent_016.log.csv')
 plot_scores2('../detailed_logs/recent_013.log.csv')
 plot_scores2('../output.csv')
 
-all <- left_join(c4_16, c15_16_h, by = 'name') %>%
-  left_join(c15_2, by = 'name') %>%
-  select(-log, -log.x, -log.y, -benchmark, -benchmark.x, -benchmark.y)
+all <- left_join(c4_16, c15_16_h, by = 'name') %>% left_join(c17_16_h, by = 'name') %>% select(-log, -log.x, -log.y, -benchmark, -benchmark.x, -benchmark.y)
+all <- left_join(bitenum, bitenum2, by = 'name') %>% left_join(bitenum3, by = 'name') %>% select(-log, -log.x, -log.y, -benchmark, -benchmark.x, -benchmark.y)
 
 a_slower <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter(10 < real.y - real.x)
 a_faster <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter(10 < real.x - real.y)
 
-b <- inner_join(c4_16, c15_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
-c <- inner_join(c4_16, c15_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
+b <- inner_join(c15_16_h, c17_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
+c <- inner_join(c15_16_h, c17_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
 
-b <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
-c <- inner_join(c12_16_h, c15_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
+b <- inner_join(scythe, c15_16_h, by = 'name') %>% filter((status.y == -2 | status.y == -1 | status.y == 1) & (status.x != -2 & status.x != -1 & status.x != 1))
+c <- inner_join(scythe, c15_16_h, by = 'name') %>% filter((status.x == -2 | status.x == -1 | status.x == 1) & (status.y != -2 & status.y != -1 & status.y != 1))
 
-bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, bitenum2 = bitenum2)
 bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_16_h = c15_16_h)
-bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_2 = c15_2, c15_16_h = c15_16_h)
+bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c4_16_h = c4_16_h, c15_2 = c15_2, c15_16_h = c15_16_h, c16_16_h = c16_16_h, c17_16_h = c17_16_h)
+bars(bitenum = bitenum, c15_2 = c15_2, c15_16_h = c15_16_h)
 bars(scythe = scythe, squares = squares, single = single_np, bitenum = bitenum, c4_16 = c4_16, c15_16_h = c15_16_h)
 bars(bitenum = bitenum, c15_2 = c15_2, c15_16_h = c15_16_h)
 

@@ -8,11 +8,10 @@ from time import time
 import logging
 from rpy2 import robjects
 
-from squares import util
+from squares import util, results
 from squares.config import Config
 from squares.dsl.specification import Specification
 from squares.parallel_synthesizer import ParallelSynthesizer
-from squares.results import ResultsHolder
 from squares.util import create_argparser, parse_specification
 
 robjects.r('''
@@ -32,8 +31,8 @@ logger = getLogger('squares')
 
 def handle_sigint(signal, stackframe):
     print()
-    ResultsHolder().print()
-    exit(ResultsHolder().exit_code)
+    results.print_results()
+    exit(results.exit_code)
 
 
 def main():
@@ -60,10 +59,9 @@ def main():
                     solution_use_lines=args.use_lines, solution_use_last_line=args.use_last, advance_processes=args.split_search,
                     static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold, minimum_loc=args.min_lines,
                     maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
-                    max_join_combinations=args.max_join_combo, good_program_weight=args.good_program_weight,
-                    strictly_good_program_weight=args.strictly_good_program_weight, program_weigth_decay_rate=args.decay_rate,
-                    probing_threads=args.probing_threads,
-                    z3_QF_FD=False, z3_sat_phase='random', disabled=args.disable)
+                    max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
+                    probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
+                    z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 
     specification = Specification(spec)
@@ -75,7 +73,7 @@ def main():
         with open('dsl.tyrell', 'w') as f:
             f.write(repr(tyrell_spec))
 
-    ResultsHolder().specification = specification
+    results.specification = specification
 
     if args.jobs > 0:
         processes = args.jobs
@@ -88,8 +86,8 @@ def main():
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
     program = synthesizer.synthesize()  # program is stored in the results holder
 
-    ResultsHolder().print()
-    exit(ResultsHolder().exit_code)
+    results.print_results()
+    exit(results.exit_code)
 
 
 if __name__ == '__main__':

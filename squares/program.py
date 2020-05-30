@@ -2,10 +2,8 @@ from logging import getLogger
 from typing import List, Any
 
 from rpy2 import robjects
-from rpy2.rinterface_lib.embedded import RRuntimeError
 
 from . import util
-from .exceptions import REvaluationError
 from .tyrell.interpreter import Interpreter, InterpreterError
 from .tyrell.spec import Production, EnumProduction, ParamProduction, FunctionProduction, LineProduction
 
@@ -64,7 +62,7 @@ class LineInterpreter(Interpreter):
         for line in prog:
             new_var = util.get_fresh_name()
             method_name = self._eval_method_name(line.production.name)
-            method = getattr(self, method_name, self._method_not_found)
+            method = getattr(self, method_name)
             method(new_var, tuple(self.transform_arg(arg, inputs, vars) for arg in line.arguments))
             vars.append(new_var)
         try:
@@ -82,10 +80,6 @@ class LineInterpreter(Interpreter):
             return vars[arg.index]
         else:
             return arg
-
-    def _method_not_found(self, line: Line):
-        msg = 'Cannot find required eval method: "{}"'.format(self._eval_method_name(line.production.name))
-        raise NotImplementedError(msg)
 
     @staticmethod
     def _eval_method_name(name):
