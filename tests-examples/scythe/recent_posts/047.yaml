@@ -1,11 +1,15 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/047.csv
 output: tests-examples/scythe/recent_posts/tables/047_o.csv
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - Time
 dateorder: ymd
+loc: 2
+solution:
+  - summarise
+  - inner_join
 comment: |
   select id, payment_type, time
   from (select id, payment_type, time, count(*) as cnt,
@@ -16,6 +20,5 @@ comment: |
   where seqnum = 1;
 
   df2 <- input1 %>% group_by(ID) %>% summarise(maxTime = max(Time)) %>% ungroup()
-  df3 <- inner_join(input1, df2)
-  df4 <- df3 %>% filter(maxTime == Time)
-  out <- df4 %>% select(ID, Payment_type) %>% distinct()
+  df3 <- inner_join(df2, input1, by=c('ID' = 'ID','maxTime' = 'Time'), suffix = c('', '.other')) %>% mutate(Time = maxTime)
+  out <- df3 %>% select(ID, Payment_type) %>% distinct() %>% arrange(ID)

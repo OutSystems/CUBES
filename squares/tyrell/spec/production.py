@@ -82,8 +82,7 @@ class EnumProduction(Production):
             self._id, self._lhs, self._choice)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> {}'.format(
-            self._id, self._lhs, self._get_rhs())
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> {self._get_rhs()}'
 
 
 class ParamProduction(Production):
@@ -118,8 +117,7 @@ class ParamProduction(Production):
             self._id, self._lhs, self._param_id)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> <param {}>'.format(
-            self._id, self._lhs, self._param_id)
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> <param {self._param_id}>'
 
 
 class FunctionProduction(Production):
@@ -168,9 +166,7 @@ class FunctionProduction(Production):
             self._id, self._lhs, self._name, self._rhs)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> {}({})'.format(
-            self._id, self._lhs, self._name,
-            ', '.join([str(x) for x in self._rhs]))
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> {self._name}({", ".join([str(x) for x in self._rhs])})'
 
 
 class LineProduction:
@@ -178,3 +174,12 @@ class LineProduction:
         self.id = id
         self.lhs = type
         self.line = line
+
+    def is_enum(self) -> bool:
+        return False
+
+    def is_param(self) -> bool:
+        return False
+
+    def is_function(self) -> bool:
+        return False

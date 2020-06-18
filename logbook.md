@@ -262,6 +262,71 @@ Stats after 300s (16 threads):
 ## Week 12
 
 ## Week something??
+https://github.com/Z3Prover/z3/issues/1044
+>We don't expose ways to print internal state. You could perhaps interrupt the solver, then clone it using the "translate" methods and access the translated solver state using internal print utilities. You would have to change the code a bit to get to this state.
+ The print features on solvers don't access the internal state of any of the solvers, instead they look at the asserted formulas and print them.
+ I don't translate learned lemmas. For example, the code in smt_context.cpp line 176 is disabled because it didn't help with any performance enhancements. Similarly, the copy code in sat_solver does not copy learned clauses even though it retains unit literals and binary clauses that are learned.
+
+Open issue: https://github.com/Z3Prover/z3/issues/2095
+>I take there are two parts to your post:
+>
+>1. Expose hooks to make saving state usable.
+>2. The format and fidelity of the state that is saved.
+>
+>Regarding 1, I wonder if adding a configuration option to
+ save state to a file if a solver is interrupted will be a way
+ to go.
+>
+>Regarding 2, much of what is below is also discussed in the earlier
+>post, #1044. A few things changed since
+>
+>So far z3 can persist state by serializing solver state to smtlib or dimacs.
+>Text files in this format are much easier to work with for debugging.
+>This isn't wrapped in a way that is as usable as you suggest (with commands).
+>You are also bound to lose lemmas.
+>
+>For the SAT solver I include lemmas of low glue level
+>and have configuration flags to control this. The SAT
+>solver serializes to either dimacs or SMT-LIB. Using SMT-LIB
+>has the advantage that the format includes model transformations
+>so that a solution to the saved formula can be translated to
+>a solution to the original formula.
+>
+>I use this serialization for distributed parallelization and
+>I think the text file-based approach is preferrable for debuggability
+>and portability.
+>
+>Saving state that is produced from SMT core is much cruder
+>(= limited to asserted formulas after pre-processing, excluding lemmas)
+>and other kernels (nlsat) simply non-existent. It possibly could be
+>improved if there is a clear use case, such as yours.
+>This would be for text-based state snapshots.
+>Since the text based formats dont' expose a notion of redundant
+>clauses they would be limited to learned clauses with low glue level,
+>which is not much of a restriction (because it amounts to running
+>agressive GC).
+>
+>A caveat with the text-based format is that it doesn't handle
+>internal identifiers created during pre-processing correctly:
+>you have to rename them (e.g., rename k!10 to k!_10) before
+>using them again so to avoid that a new internal identifier k!10
+>gets created.
+>
+>A binary format would be tougher to get right, have to address all
+>questions as the textual formats, but potentially be more flexible
+>and could address the internal identifier issue systematically.
+>Some of this was engineered around 2010 for MPI, by @cwintersteiger,
+>but subsequently bit-rot.
+>Features that would have to be serializable:
+>
+>model and proof transformers
+>smt-context state
+>sat solver state
+>maybe nlsat, qsat, other solver states
+>ast-manager state
+>An OS-based approach, with native snapshots would be nicer to
+>administrate. This would be outside of Z3.
+
 Nikolaj on StackOverflow:
 >Yes, there are essentially two incremental modes.
 >
@@ -270,3 +335,53 @@ Nikolaj on StackOverflow:
 >Assumption based: using additional assumption literals passed to check()/check_sat() you can (1) extract unsatisfiable cores over the assumption literals, (2) gain local incrementality without garbage collecting lemmas that get derived independently of the assumptions. In other words, if Z3 learns a lemma that does not contain any of the assumption literals it expects to not garbage collect them. To use assumption literals effectively, you would have to add them to formulas too. So the tradeoff is that clauses used with assumptions contain some amount of bloat. For example if you want to locally assume some formula (<= x y), then you add a clause (=> p (<= x y)), and assume p when calling check_sat(). Note that the original assumption was a unit. Z3 propagates units efficiently. With the formulation that uses assumption literals it is no longer a unit at the base level of search. This incurs some extra overhead. Units become binary clauses, binary clauses become ternary clauses, etc.
 >
 >The differentiation between push/pop functionality holds for Z3's default SMT engine. This is the engine most formulas will be using. Z3 contains some portfolio of engines. For example, for pure bit-vector problems, Z3 may end up using the sat based engine. Incrementality in the sat based engine is implemented differently from the default engine. Here incrementality is implemented using assumption literals. Any assertion you add within the scope of a push is asserted as an implication (=> scope_literals formula). check_sat() within such a scope will have to deal with assumption literals. On the flip-side, any consequence (lemma) that does not depend on the current scope is not garbage collected on pop().
+
+## Week of 10/6
+
+#### c27
+- Added blocking of programs based on condition subsumption of Cols, FilterConditions and CrossJoinConditions
+
+#### c28
+- Multiply scores by number of programs solved
+- Re-enabled h-splitting
+- Optimized cube blocking
+
+#### c29
+- split threshold changed from 200 to 500
+- now uses substitute_vars in model blocking
+
+#### c30
+- made it so that max, min and mean do not create new columns
+
+#### c31
+- fixed a bug in condition subsumption and added transitivity
+
+#### c32
+- reversed "made it so that max, min and mean do not create new columns"
+
+#### c33
+- added operation transitivity   ---   UNSOUND
+
+#### c34
+- reverted "added operation transitivity"
+
+#### c35
+- disabled condition subsumption
+
+#### c36
+- enabled condition subsumption
+- split inner and cross join   ---    FLAWED IMPLEMENTATION
+
+#### t11
+    'subsume_conditions': [True, False],
+    'static_search': [True, False],
+    'z3_QF_FD': [True, False]
+- cache enabled
+
+#### c37
+- fixed a few instances (csv format errors / type detection mistakes)
+- fixed a bug where the dsl for the block case wasn't actually being blocked
+- small optimizations
+
+#### c38
+- disabled condition subsumption

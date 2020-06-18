@@ -1,24 +1,42 @@
-from .tyrell.decider import ExampleDecider, bad, ok, ExampleConstraintPruningDecider
-from .tyrell.decider.example_constraint_pruning import BlameFinder
+from enum import Enum
+from typing import NamedTuple
+
+from rpy2 import robjects
+
+from .tyrell.decider import ExampleDecider, ok, bad
+
+
+class RowNumberInfo(Enum):
+    MORE_ROWS = 1
+    LESS_ROWS = 2
+
+
+class RejectionInfo(NamedTuple):
+    row_info: RowNumberInfo
+    score: float
 
 
 class LinesDecider(ExampleDecider):
-    def has_failed_examples(self, prog):
-        return any(
-            not self.interpreter.equals(
-                self.interpreter.eval(prog, x.input), x.output, prog)
-            for x in self.examples
-            )
 
-    def analyze(self, prog, roots=None):
-        if self.has_failed_examples(prog):
-            return bad()
-        else:
+    def get_failed_examples(self, prog):
+        fails = []
+        for example in self._examples:
+            output = self.interpreter.eval(prog, example.input)
+            result = self._interpreter.equals(output, example.output, prog)
+            if not result[0]:
+                fails.append((example, output, result[1]))
+        return fails
+
+    def analyze(self, prog):
+        failed_examples = self.get_failed_examples(prog)
+        if len(failed_examples) == 0:
             return ok()
-
-
-class InstrumentedPruningDecider(ExampleConstraintPruningDecider):
-
-    def analyze(self, prog, roots=None):
-        blame_finder = BlameFinder(self.interpreter, prog)
-        return blame_finder.process_examples(self.examples, lambda x, y: self.interpreter.equals(x, y, roots))
+        else:
+            for example, output, score in failed_examples:
+                actual_n = int(robjects.r(f'nrow({output})')[0])
+                expected_n = int(robjects.r(f'nrow({example.output})')[0])
+                if actual_n > expected_n:
+                    return bad(RejectionInfo(RowNumberInfo.LESS_ROWS, score))
+                if actual_n < expected_n:
+                    return bad(RejectionInfo(RowNumberInfo.MORE_ROWS, score))
+            return bad()

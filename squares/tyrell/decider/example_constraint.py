@@ -8,10 +8,8 @@ from typing import (
     FrozenSet,
     Mapping,
     MutableMapping,
-    Any,
-    Callable,
     Iterator
-)
+    )
 
 import z3
 

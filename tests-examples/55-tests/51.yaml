@@ -3,20 +3,17 @@ inputs:
   - tests-examples/55-tests/tables/21-2.txt
   - tests-examples/55-tests/tables/21-3.txt
 output: tests-examples/55-tests/tables/51.out
-aggrs:
+functions:
   - n
-loc: 4
+loc: 3
+solution:
+  - summarise
+  - natural_join3
+  - left_join
 comment: |
   5.2.9 optimal solution
 
-  catalog <- read.table("tests-examples/55-tests/tables/21-1.txt", sep =",", header=T)
-  catalog
-  parts <- read.table("tests-examples/55-tests/tables/21-2.txt", sep =",", header=T)
-  parts
-  suppliers <- read.table("tests-examples/55-tests/tables/21-3.txt", sep =",", header=T)
-  suppliers
-
-    out <- inner_join(
-  inner_join(parts,catalog) %>% inner_join(suppliers),
-  inner_join(parts,catalog) %>% inner_join(suppliers) %>%
-  group_by(P_id) %>% summarise(n = n())) %>% select(S_name, n) %>% distinct()
+  df4 <- input1 %>% group_by(P_id) %>% summarise(n = n()) %>% ungroup()
+  df5 <- inner_join(df4, input2) %>% inner_join(input1)
+  df6 <- left_join(df5, input3)
+  out <- df6 %>% select(S_name, n) %>% distinct() %>% arrange(S_name)

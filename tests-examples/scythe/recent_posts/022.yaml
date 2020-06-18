@@ -9,6 +9,11 @@ columns:
   - c1
 constants:
   - 3
+loc: 3
+solution:
+  - summarise
+  - filter
+  - mutate
 comment: |
   SELECT [t0].[TrackId], [t0].[UserId], (
       SELECT [t3].[FolloweeId]
@@ -25,8 +30,7 @@ comment: |
   FROM [Tracks] AS [t0]
   WHERE [t0].[TrackId] = @p0
 
-  df2 <- input1 %>% group_by(c2) %>% summarise(c1 = max(c1)) %>% ungroup()
-  df3 <- inner_join(input1, df2)
-  df4 <- df3 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
-  df5 <- df4 %>% filter(n == 3 | n >= c1)
-  out <- df5 %>% select(c3 = c1)
+  df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == 3 | n > c1)
+  df4 <- df3 %>% mutate(c1 = max(c1))
+  out <- df4 %>% select(c3 = c1) %>% distinct() %>% arrange(c3)

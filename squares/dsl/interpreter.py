@@ -1,14 +1,15 @@
 import math
 import re
-import time
 from itertools import permutations
 from logging import getLogger
+from typing import Tuple
 
-from rpy2 import robjects as robjects
+from rpy2 import robjects
 from z3 import BitVecVal
 
 from .. import util, results
 from ..program import LineInterpreter
+from ..tyrell.interpreter import InterpreterError
 
 logger = getLogger('squares.interpreter')
 
@@ -19,29 +20,61 @@ def get_type(df, index):
     return ret_val[0]
 
 
+def eval_decorator(func):
+    def wrapper(self, args, key):
+        if key and not self.final_interpretation and util.get_config().cache_ops:
+            if not key in self.cache:
+                name = util.get_fresh_name()
+                self.try_execute(func(self, name, args))
+                self.cache[key] = name
+            return self.cache[key]
+        name = util.get_fresh_name()
+        script = func(self, name, args)
+        if self.final_interpretation:
+            self.program += script
+        self.try_execute(script)
+        return name
+
+    return wrapper
+
+
 class SquaresInterpreter(LineInterpreter):
 
-    def __init__(self, problem, sort_columns = False):
+    def __init__(self, problem, final_interpretation=False):
         self.problem = problem
         self.program = ''
-        self.sort_columns = sort_columns
+        self.final_interpretation = final_interpretation
+        self.cache = {}
 
+    def try_execute(self, script):
+        try:
+            robjects.r(script)
+        except Exception as e:
+            logger.error("Error while evaluating program")
+            logger.error("%s", str(e))
+            raise InterpreterError(e)
+
+    @eval_decorator
     def eval_filter(self, name, args):
-        self.program += f'{name} <- {args[0]} %>% filter({args[1]})\n'
+        return f'{name} <- {args[0]} %>% filter({args[1]})\n'
 
+    @eval_decorator
     def eval_filters(self, name, args):
-        self.program += f'{name} <- {args[0]} %>% filter({args[1]} {args[3]} {args[2]})\n'
+        return f'{name} <- {args[0]} %>% filter({args[1]} {args[3]} {args[2]})\n'
 
+    @eval_decorator
     def eval_summarise(self, name, args):
         re_object = re.fullmatch(r'([A-Za-z_]+)\$([A-Za-z_]+)', args[1])
         if re_object:
-            self.program += f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()\n'
+            return f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()\n'
         else:
-            self.program += f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise({args[1]}) %>% ungroup()\n'
+            return f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise({args[1]}) %>% ungroup()\n'
 
+    @eval_decorator
     def eval_mutate(self, name, args):
-        self.program += f'{name} <- {args[0]} %>% mutate({args[1]})\n'
+        return f'{name} <- {args[0]} %>% mutate({args[1]})\n'
 
+    @eval_decorator
     def eval_inner_join(self, name, args):
         _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}), suffix = c('', '.other'))"
         for pair in args[2].split(','):
@@ -51,41 +84,51 @@ class SquaresInterpreter(LineInterpreter):
                 B = B.strip()[1:-1]
                 if A.strip() != B.strip():
                     _script += f' %>% mutate({B} = {A})'
-        self.program += _script + '\n'
+        return _script + '\n'
 
+    @eval_decorator
     def eval_natural_join(self, name, args):
-        self.program += f'{name} <- inner_join({args[0]}, {args[1]})\n'
+        return f'{name} <- inner_join({args[0]}, {args[1]})\n'
 
+    @eval_decorator
     def eval_natural_join3(self, name, args):
-        self.program += f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]})\n'
+        return f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]})\n'
 
+    @eval_decorator
     def eval_natural_join4(self, name, args):
-        self.program += f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]}) %>% inner_join({args[3]})\n'
+        return f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]}) %>% inner_join({args[3]})\n'
 
+    @eval_decorator
     def eval_anti_join(self, name, args):
-        self.program += f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args[2]}))\n'
+        return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args[2]}))\n'
 
+    @eval_decorator
     def eval_left_join(self, name, args):
-        self.program += f'{name} <- left_join({args[0]}, {args[1]})\n'
+        return f'{name} <- left_join({args[0]}, {args[1]})\n'
 
+    @eval_decorator
     def eval_union(self, name, args):
-        self.program += f'{name} <- bind_rows({args[0]}, {args[1]})\n'
+        return f'{name} <- bind_rows({args[0]}, {args[1]})\n'
 
+    @eval_decorator
     def eval_intersect(self, name, args):
-        self.program += f'{name} <- intersect(select({args[0]},{args[2]}), select({args[1]}, {args[2]}))\n'
+        return f'{name} <- intersect(select({args[0]},{args[2]}), select({args[1]}, {args[2]}))\n'
 
+    @eval_decorator
     def eval_semi_join(self, name, args):
-        self.program += f'{name} <- semi_join({args[0]}, {args[1]})\n'
+        return f'{name} <- semi_join({args[0]}, {args[1]})\n'
 
+    @eval_decorator
     def eval_cross_join(self, name, args):
-        if args[2] == '':
-            _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col))'
-        else:
-            _script = f'{name} <- full_join({args[0]} %>% mutate(tmp.col=1), {args[1]} %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter({args[2]})'
-        self.program += _script + '\n'
+        _script = f'{name} <- full_join({args[0]}, {args[1]}, by=character(), suffix = c("", ".other"))'
 
+        if args[2] != '':
+            _script += f' %>% filter({args[2]})'
+        return _script + '\n'
+
+    @eval_decorator
     def eval_unite(self, name, args):
-        self.program += f'{name} <- unite({args[0]}, {args[1]}, {args[1]}, {args[2]}, sep=":")\n'
+        return f'{name} <- unite({args[0]}, {args[1]}, {args[1]}, {args[2]}, sep=":", remove=F)\n'
 
     def apply_row(self, val):
         df = robjects.r(val)
@@ -100,19 +143,19 @@ class SquaresInterpreter(LineInterpreter):
         bools = list(map(lambda c: c in a, self.problem.all_columns))
         return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)
 
-    def equals(self, actual: str, expect: str, *args) -> bool:
-        start = time.time()
-        score = \
-        tuple(robjects.r(f'ue <- {expect} %>% unlist %>% unique;length(intersect({actual} %>% unlist %>% unique, ue)) / length(ue)'))[0]
+    def equals(self, actual: str, expect: str, *args) -> Tuple[bool, float]:
+        if robjects.r(f'nrow({actual})')[0] == 0:
+            results.empty_output += 1
+
+        # with rpy2.robjects.conversion.localconverter(robjects.default_converter + pandas2ri.converter):
+        #     print(robjects.conversion.rpy2py(robjects.r(actual)))
+
+        score = robjects.r(f'ue <- {expect} %>% unlist %>% unique;length(intersect({actual} %>% unlist %>% unique, ue)) / length(ue)')[0]
         if math.isnan(score):
             score = 0
-        # score -= .5
-        if score > 0 and util.get_program_queue():
-            util.get_program_queue().put((tuple(line.production.name for line in args[0]), score * 10))
 
         if score < 1:
-            results.equality_time += time.time() - start
-            return False
+            return False, score
 
         a_cols = list(robjects.r(f'colnames({actual})'))
         e_cols = list(robjects.r(f'colnames({expect})'))
@@ -122,7 +165,7 @@ class SquaresInterpreter(LineInterpreter):
                 try:
                     robjects.r(_script)
                     if self.test_equality('out', expect, False):
-                        if self.sort_columns:
+                        if self.final_interpretation:
                             for perm in util.get_permutations(e_cols, len(e_cols)):
                                 name = util.get_fresh_name()
                                 new_script = f'{name} <- out %>% arrange({perm})'
@@ -132,12 +175,10 @@ class SquaresInterpreter(LineInterpreter):
                                     break
 
                             self.program += _script + '\n'
-                        results.equality_time += time.time() - start
-                        return True
+                        return True, score
                 except:
                     continue
-        results.equality_time += time.time() - start
-        return False
+        return False, score
 
     def test_equality(self, actual: str, expect: str, keep_order: bool = False) -> bool:
         if not keep_order:

@@ -2,19 +2,17 @@ inputs:
   - tests-examples/55-tests/tables/18-1.txt
   - tests-examples/55-tests/tables/18-3.txt
 output: tests-examples/55-tests/tables/43.out
-aggrs:
+functions:
   - max
   - n
-attrs:
+columns:
   - cost
 bools:
   - ==
-loc: 5
+loc: 3
 solution:
-  - natural_join
   - summarise
   - natural_join3
-  - filter
   - summarise
 comment: |
   5.2.6 optimal solution modified
@@ -31,3 +29,8 @@ comment: |
   df3 <- df2 %>% filter(maxcost == cost)
   df4 <- df3 %>% group_by(S_key, S_name) %>% summarise(n = n()) %>% ungroup()
   out <- df4 %>% select(S_name, n) %>% distinct()
+
+  df3 <- input1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
+  df4 <- inner_join(input1, df3) %>% inner_join(input2)
+  df5 <- df4 %>% group_by(S_name) %>% summarise(n = n()) %>% ungroup()
+  out <- df5 %>% select(S_name, n) %>% arrange(S_name)

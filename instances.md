@@ -1,30 +1,34 @@
 # Underspecified instances
+- scythe/recent_posts/017
 - leetcode/180
 
 # Unsolved instances
 
 ## Doesn't finish init
-- scythe/recent_posts/004 (supported by scythe)
 - scythe/recent_posts/007 (supported by scythe)
 
 ## Supported
-- 55-tests/22
-- 55-tests/46
+- scythe/recent_posts/004
 - scythe/recent_posts/006
 - scythe/recent_posts/012
 - scythe/recent_posts/013
+- scythe/recent_posts/017
 - scythe/recent_posts/019
 - scythe/recent_posts/021
+- scythe/recent_posts/028
 - scythe/recent_posts/036
 - scythe/recent_posts/046
+- scythe/recent_posts/049
 - leetcode/184
 - textbook/20
 - textbook/22
+- textbook/26
+- textbook/29
+- textbook/34
 
 ## Unsure if supported?
 - scythe/recent_posts/001
 - scythe/recent_posts/023 (chained left join)
-- scythe/recent_posts/028
 - scythe/recent_posts/039
 - scythe/recent_posts/043 (self join)
 - scythe/recent_posts/048 (self join)
@@ -34,11 +38,8 @@
 - leetcode/181
 - leetcode/185
 - leetcode/197
-- textbook/26
 - textbook/27
-- textbook/29
 - textbook/32
-- textbook/34
 
 ## Not supported
 
@@ -66,9 +67,6 @@
 
 ### Complex Constant
 - scythe/recent_posts/033 (ymd('2016-10-13') - weeks(1))
-
-### Distinct
-- scythe/recent_posts/017 (distinct with .keep=T) (would still be 6 lines + select) (scythe supports because instance is underspecified)
 
 ### Union select
 - scythe/recent_posts/002

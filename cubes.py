@@ -15,24 +15,16 @@ from squares.parallel_synthesizer import ParallelSynthesizer
 from squares.util import create_argparser, parse_specification
 
 robjects.r('''
-zz <- file("r_output.log", open = "wt")
-sink(zz)
-sink(zz, type = "message")
-library(tidyr)
-library(stringr)
-library(readr)
-library(lubridate)
-library(dplyr)
-library(dbplyr)
-options(warn=-1)''')
+sink("/dev/null")
+options(warn=-1)
+suppressMessages(library(tidyr))
+suppressMessages(library(stringr))
+suppressMessages(library(readr))
+suppressMessages(library(lubridate))
+suppressMessages(library(dplyr))
+suppressMessages(library(dbplyr))''')
 
 logger = getLogger('squares')
-
-
-def handle_sigint(signal, stackframe):
-    print()
-    results.print_results()
-    exit(results.exit_code)
 
 
 def main():
@@ -60,8 +52,9 @@ def main():
                     static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold, minimum_loc=args.min_lines,
                     maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
                     max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
+                    block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
                     probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
-                    z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
+                    z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 
     specification = Specification(spec)
@@ -69,9 +62,9 @@ def main():
     logger.debug("Generating DSL...")
     tyrell_spec = specification.generate_dsl()
 
-    if logger.isEnabledFor(logging.DEBUG):
-        with open('dsl.tyrell', 'w') as f:
-            f.write(repr(tyrell_spec))
+    if util.get_config().verbosity >= 3:
+        with open('dump.dsl', 'w') as f:
+            f.write(str(specification))
 
     results.specification = specification
 
@@ -80,8 +73,8 @@ def main():
     else:
         processes = os.cpu_count() + args.jobs
 
-    signal.signal(signal.SIGINT, handle_sigint)
-    signal.signal(signal.SIGTERM, handle_sigint)
+    signal.signal(signal.SIGINT, results.handle_sigint)
+    signal.signal(signal.SIGTERM, results.handle_sigint)
 
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
     program = synthesizer.synthesize()  # program is stored in the results holder

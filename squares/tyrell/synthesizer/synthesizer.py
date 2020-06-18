@@ -1,3 +1,4 @@
+import cProfile
 import time
 from abc import ABC
 from logging import getLogger
@@ -5,12 +6,20 @@ from logging import getLogger
 from ..decider import Decider
 from ..enumerator import Enumerator
 from ..interpreter import InterpreterError
-from ... import results
+from ... import results, util
 
-logger = getLogger('tyrell.synthesizer')
+logger = getLogger('squares.synthesizer')
+
+# counter = 0
 
 
-class Synthesizer(ABC):
+class AbstractSynthesizer(ABC):
+
+    def synthesize(self):
+        raise NotImplementedError
+
+
+class Synthesizer(AbstractSynthesizer):
 
     def __init__(self, enumerator: Enumerator, decider: Decider):
         self._enumerator = enumerator
@@ -29,52 +38,73 @@ class Synthesizer(ABC):
         A convenient method to enumerate ASTs until the result passes the analysis.
         Returns the synthesized program, or `None` if the synthesis failed.
         '''
-        start_time = time.time()
-        num_attempts = 0
-        num_rejected = 0
-        num_failed = 0
+        global counter
+        total_attempts = 0
+        attempts = 0
+        rejected = 0
+        failed = 0
+        blocked = 0
+        enum_time = 0
+        analysis_time = 0
+        block_time = 0
         start = time.time()
-        prog = self._enumerator.next()
-        results.enum_time += time.time() - start
+        prog = self.enumerator.next()
+        enum_time += time.time() - start
+        # pr = cProfile.Profile()
         while prog is not None:
-            results.n_attempts += 1
-            num_attempts += 1
-            if num_attempts % 500 == 0:
-                self._enumerator.close_lattices()
-                logger.info('Attempts: %d. Rejected: %d. Failed: %d.', num_attempts, num_rejected, num_failed)
-            # logger.debug('Attempt %s: %s', str(num_attempts), str(prog))
+            # logger.debug('Testing program %s', prog)
+            total_attempts += 1
+            attempts += 1
+            if attempts == 50:
+                util.get_program_queue().put(
+                    (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
+                     block_time))
+                attempts = 0
+                rejected = 0
+                failed = 0
+                blocked = 0
+                results.empty_output = 0
+                enum_time = 0
+                analysis_time = 0
+                block_time = 0
+
             try:
                 start = time.time()
-                res = self._decider.analyze(prog)
-                results.analysis_time += time.time() - start
+                res = self.decider.analyze(prog)
+                analysis_time += time.time() - start
                 if res.is_ok():
-                    self._enumerator.close_lattices()
-                    logger.info('Program accepted after %d attempts (%d rejected, %d failed)', num_attempts,
-                                num_rejected, num_failed)
-                    logger.debug('Total Time: %f', time.time() - start_time)
-                    return prog
+                    util.get_program_queue().put(
+                        (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
+                         block_time))
+                    results.empty_output = 0
+                    # pr.dump_stats(f'profiles/{counter}.cProfile')
+                    # counter += 1
+                    return prog, attempts
 
                 else:
-                    num_rejected += 1
-                    results.n_rejects += 1
+                    rejected += 1
                     info = res.why()
-                    # logger.debug('Attempt {}: Program rejected. Reason: {}'.format(num_attempts, info))
-                    self._enumerator.update(info)
-                    start = time.time()
-                    prog = self._enumerator.next()
-                    results.enum_time += time.time() - start
 
             except InterpreterError as e:
-                num_failed += 1
-                results.n_fails += 1
-                info = self._decider.analyze_interpreter_error(e)
-                # logger.debug('Attempt {}: Interpreter failed. Reason: {}'.format(num_attempts, e))
-                self._enumerator.update(info)
-                start = time.time()
-                prog = self._enumerator.next()
-                results.enum_time += time.time() - start
+                logger.error('Failed program %s', str(prog))
+                logger.error('%s', str(e))
+                failed += 1
+                info = self.decider.analyze_interpreter_error(e)
 
-        logger.debug('Enumerator is exhausted after %d attempts', num_attempts)
-        logger.debug('Total Time: %f', time.time() - start_time)
-        self._enumerator.close_lattices()
-        return None
+            start = time.time()
+            # pr.enable()
+            blocked_ = self.enumerator.update(info)
+            # pr.disable()
+            blocked += blocked_
+            total_attempts += blocked_
+            block_time += time.time() - start
+            start = time.time()
+            prog = self.enumerator.next()
+            enum_time += time.time() - start
+
+        util.get_program_queue().put(
+            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time))
+        results.empty_output = 0
+        # pr.dump_stats(f'profiles/{counter}.cProfile')
+        # counter += 1
+        return None, total_attempts

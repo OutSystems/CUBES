@@ -1,66 +1,108 @@
-import time
 from collections import defaultdict
+from functools import cached_property
+from itertools import permutations, islice
 from logging import getLogger
+from typing import Optional, List, Callable, TypeVar, Tuple, Type, Any, Dict
 
-from chromalog.mark.helpers import simple
+import z3
 from ordered_set import OrderedSet
-from z3 import *
-from z3 import Or
 
 from .enumerator import Enumerator
-from ..spec import TyrellSpec
+from ..spec import TyrellSpec, Predicate
 from ..spec.production import LineProduction
 from ... import util, program
+from ...decider import RejectionInfo, RowNumberInfo
 from ...dsl.specification import Specification
+from ...util import flatten
 
 logger = getLogger('squares.enumerator')
 
+ExprType = TypeVar('ExprType')
 
-class Node(object):
-    def __init__(self, nb=None):
-        self.nb = nb
-        self.var = None
-        self.children = None
-        self.h = None
-        self.bitvec = None
-        self.bitvec2 = None
 
-    def __repr__(self) -> str:
-        return f'Node({self.nb})'
+class Node:
+    def __init__(self) -> None:
+        self.var: Optional[z3.ExprRef] = None
+        self.bitvec: Optional[z3.ExprRef] = None
 
 
 class Root(Node):
-    def __init__(self, id=None, nb=None, depth=None, children=None, type=None):
-        super().__init__(nb)
+    def __init__(self, enumerator: 'BitEnumerator', id: int) -> None:
+        super().__init__()
         self.id = id
-        self.depth = depth  # num of children
-        self.children = children
-        self.type = type
+        self.children = []
+        self.type = self._create_type_variable(enumerator)
+        self.var = self._create_root_variable(enumerator)
+        self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
+
+    def _create_root_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
+        var = enumerator.create_variable(f'root_{self.id}', z3.Int)
+        enumerator.variables.append(var)
+        ctr = []
+        for p in enumerator.spec.productions():
+            if p.is_function() and p.lhs.name != 'Empty':
+                ctr.append(var == p.id)
+        enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
+        return var
+
+    def _create_type_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
+        var = enumerator.create_variable(f'type_{self.id}', z3.Int)
+        # variable range constraints
+        enumerator.assert_expr(z3.And(var >= 0, var < len(enumerator.types)), f'type_{self.id}_domain')
+        return var
 
     def __repr__(self) -> str:
-        return 'Root({}, children={})'.format(self.id, len(self.children))
+        return f'Root({self.id}, children={len(self.children)})'
 
 
 class Leaf(Node):
-    def __init__(self, nb=None, parent=None, lines=None):
-        super().__init__(nb)
-        self.parent = parent  # parent id
-        self.lines = lines
+    def __init__(self, enumerator: 'BitEnumerator', parent: Root, child_id: int):
+        super().__init__()
+        self.parent = parent
+        self.child_id = child_id
+        self.var = self._create_leaf_variable(enumerator)
+        self.lines = self._create_lines_variables(enumerator)
+        self.bitvec = enumerator.create_variable(f'bv_{parent.id}_{child_id}_a', z3.BitVec, enumerator.specification.n_columns)
+        self.bitvec2 = enumerator.create_variable(f'bv_{parent.id}_{child_id}_b', z3.BitVec, enumerator.specification.n_columns)
+
+    def _create_leaf_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
+        var = enumerator.create_variable(f'leaf_{self.parent.id}_{self.child_id}', z3.Const, enumerator.leaf_enum)
+        enumerator.variables.append(var)
+
+        ctr = []
+        for a in range(self.parent.id, enumerator.loc - 1):
+            for p in enumerator.line_productions[a]:
+                ctr.append(var != enumerator.leaf_enum_values[p.id])
+
+        enumerator.assert_expr(z3.And(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
+        return var
+
+    def _create_lines_variables(self, enumerator: 'BitEnumerator') -> List[z3.ExprRef]:
+        lines = []
+        for x in range(1, self.parent.id):
+            var = enumerator.create_variable(f'leaf_{self.parent.id}_{self.child_id}_is_line_{x}', z3.Bool)
+            enumerator.line_vars_by_line[x].append(var)
+            lines.append(var)
+        return lines
 
     def __repr__(self) -> str:
-        return 'Leaf({}, parent={})'.format(self.nb, self.parent)
+        return f'Leaf(parent={self.parent}, child_id={self.child_id})'
+
+
+formula_counter = 0
 
 
 class BitEnumerator(Enumerator):
 
-    def __init__(self, tyrell_spec: TyrellSpec, spec: Specification, loc=None, debug=True):
+    def __init__(self, tyrell_spec: TyrellSpec, spec: Specification, loc: int = None, debug: bool = True):
+        super().__init__()
 
         if util.get_config().z3_QF_FD:
             # self.z3_solver = Then('lia2card', 'card2bv', 'dt2bv', 'simplify', 'bit-blast', 'sat').solver()
-            self.z3_solver = SolverFor('QF_FD')
+            self.z3_solver = z3.SolverFor('QF_FD')
 
         else:
-            self.z3_solver = Solver()
+            self.z3_solver = z3.Solver()
             self.z3_solver.set('phase_selection', util.get_config().z3_smt_phase)
             self.z3_solver.set('case_split', util.get_config().z3_smt_case_split)
 
@@ -96,10 +138,7 @@ class BitEnumerator(Enumerator):
         self.clean_model = {}
         self.num_prods = self.spec.num_productions()
         self.max_children = self.spec.max_rhs
-        self.find_types()
         self.create_leaf_enum()
-        self.linesVars = []
-        self.typeVars = []
         self.line_vars_by_line = defaultdict(list)
         self.roots, self.leaves = self.build_trees()
         self.model = None
@@ -113,39 +152,53 @@ class BitEnumerator(Enumerator):
         self._production_id_cache = defaultdict(OrderedSet)
         for p in self.spec.productions():
             if p.is_enum():
-                self._production_id_cache[p._get_rhs()].append(p.id)
-        self._production_id_cache.default_factory = lambda: None
+                self._production_id_cache[p.rhs].append(p.id)
+        self._production_id_cache.default_factory = lambda: None  # from now on throw errors id invalid keys are accessed
         self.resolve_predicates()
         self.constraint_functions()
 
-        with open(f'formula_{loc}.smt', 'w') as f:
-            f.write(self.z3_solver.sexpr())
+        logger.debug('Compiling condition tables...')
 
-        self.assertions_str = self.z3_solver.sexpr()
+        self.more_restrictive = self.specification.condition_generator.more_restrictive.compile(tyrell_spec)
+        self.less_restrictive = self.specification.condition_generator.less_restrictive.compile(tyrell_spec)
+
+        self.natural_join = self.spec.get_function_production('natural_join')
+        self.natural_join3 = self.spec.get_function_production('natural_join3')
+        self.natural_join4 = self.spec.get_function_production('natural_join4')
+
+        logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
+                     self.num_constraints)
 
         res = self.z3_solver.check()
-        if res != sat:
+        if res != z3.sat:
             logger.warning(f"There is no solution for current loc ({self.loc}).")
         else:
             self.model = self.z3_solver.model()
 
-    def assert_expr(self, expr, name, no_track=False):
-        if self.debug and not no_track:
+    @cached_property
+    def types(self) -> List[str]:
+        types = []
+        for t in self.spec.types():
+            if t.name == 'Empty':
+                continue
+            for p in self.spec.get_productions_with_lhs(t):  # type must be the lhs of some production
+                if p.is_function():
+                    types.append(t.name)
+                    break
+        return types
+
+    def create_variable(self, name: str, type: 'Callable[[str, ...], ExprType]', *args) -> ExprType:
+        self.num_variables += 1
+        return type(name, *args)
+
+    def assert_expr(self, expr: z3.ExprRef, name: str = None, track: bool = False) -> None:
+        self.num_constraints += 1
+        if self.debug and track and name is not None:
             self.z3_solver.assert_and_track(expr, name)
         else:
             self.z3_solver.add(expr)
 
-    def find_types(self):
-        types = []
-        for t in self.spec.types():
-            for p in self.spec.productions():
-                if p.is_function() and p.lhs.name != 'Empty' and p.lhs == t:
-                    types.append(t.name)
-                    break
-        self.types = types
-        self.num_types = len(self.types)
-
-    def create_leaf_enum(self):
+    def create_leaf_enum(self) -> None:
         productions = []
 
         true_leaves_number = 0
@@ -164,120 +217,60 @@ class BitEnumerator(Enumerator):
                 line_productions.append(line_production)
             self.line_productions.append(line_productions)
 
-        sort, values = EnumSort('Leaf', productions)
+        sort, values = z3.EnumSort('Leaf', productions)
         self.leaf_enum = sort
         self.leaf_enum_values = {int(value.decl().name()): value for value in values}
         self.leaf_enum_refs = {value: int(value.decl().name()) for value in values}
 
-    def build_trees(self):
+    def build_trees(self) -> Tuple[List[Root], List[Leaf]]:
         """Builds a loc trees, each tree will be a line of the program"""
         nodes = []
-        nb = 1
         leaves = []
         for i in range(1, self.loc + 1):
-            n = Root(i, nb, self.max_children)
-            n.var = self.create_root_variables(nb)
-            children = []
+            n = Root(self, i)
             for x in range(self.max_children):
-                nb += 1
-                child = Leaf(nb, n)
-                child.lines = self.create_lines_variables(nb, n.id)
-                child.var = self.create_leaf_variables(nb, n.id)
-                child.bitvec = BitVec(f'bv_{nb}_{n.id}', self.specification.n_columns)
-                child.bitvec2 = BitVec(f'bv_{nb}_{n.id}_', self.specification.n_columns)
-                children.append(child)
+                child = Leaf(self, n, x)
+                n.children.append(child)
                 leaves.append(child)
-            n.children = children
-            n.type = self.create_type_variables(n.id)
-            n.bitvec = BitVec(f'bv_{nb}', self.specification.n_columns)
             nodes.append(n)
-            nb += 1
         return nodes, leaves
 
-    def create_lines_variables(self, nb, parent):
-        lines = []
-        for x in range(1, parent):
-            name = f'line_{nb}_{x}'
-            var = Bool(name)
-            self.linesVars.append(var)
-            self.line_vars_by_line[x].append(var)
-            lines.append(var)
-            self.num_constraints += 1
-        return lines
-
-    def create_type_variables(self, nb):
-        var = Int(f'type_{nb}')
-        # variable range constraints
-        self.typeVars.append(var)
-        self.assert_expr(And(var >= 0, var < self.num_types), f'type_{nb}_domain', no_track=True)
-        self.num_constraints += 1
-        return var
-
-    def create_root_variables(self, nb):
-        v = Int(f'root_{nb}')
-        self.variables.append(v)
-        ctr = []
-        for p in self.spec.productions():
-            if p.is_function() and p.name != 'empty':
-                ctr.append(v == p.id)
-        self.assert_expr(Or(ctr), f'root_{nb}_domain', no_track=True)
-        self.num_constraints += 1
-        return v
-
-    def create_leaf_variables(self, nb, parent):
-        var = Const(f'leaf_{nb}', self.leaf_enum)
-        self.variables.append(var)
-
-        ctr = []
-        for a in range(parent, self.loc - 1):
-            for p in self.line_productions[a]:
-                ctr.append(var != self.leaf_enum_values[p.id])
-
-        self.assert_expr(And(ctr), f'leaf_{nb}_domain', no_track=True)
-        self.num_constraints += 1
-        return var
-
-    def create_output_constraints(self):
+    def create_output_constraints(self) -> None:
         """The output production matches the output type"""
         ctr = []
         var = self.roots[-1].var  # last line corresponds to the output line
         for p in self.spec.get_productions_with_lhs(self.spec.output):
             ctr.append(var == p.id)
-        self.assert_expr(Or(ctr), 'output_has_correct_type', no_track=True)
-        # self.assert_expr(AtLeast(*(Extract(i, i, self.roots[-1].bitvec) == BitVecVal(1, 1) for i in range(self.specification.n_columns)),
+        self.assert_expr(z3.Or(ctr), 'output_has_correct_type')
+        # self.assert_expr(z3.AtLeast(*(z3.Extract(i, i, self.roots[-1].bitvec) == z3.BitVecVal(1, 1) for i in range(self.specification.n_columns)),
         #                          len(self.specification.output_cols)),
         #                  'output_has_at_least_k_columns')
-        self.z3_solver.add()
-        self.num_constraints += 1
 
-    def create_lines_constraints(self):
+    def create_lines_constraints(self) -> None:
         """Each line is used at least once in the program"""
         for r in range(1, len(self.roots)):
-            self.z3_solver.add(Or(self.line_vars_by_line[r]))
-            self.num_constraints += 1
+            self.assert_expr(z3.Or(self.line_vars_by_line[r]), f'line_{r}_is_used')
 
-    def create_input_constraints(self):
+    def create_input_constraints(self) -> None:
         """Each input will appear at least once in the program"""
         input_productions = self.spec.get_param_productions()
-        for prod in input_productions:
+        for i, prod in enumerate(input_productions):
             ctr = []
             for y in self.leaves:
                 ctr.append(y.var == self.leaf_enum_values[prod.id])
-            self.z3_solver.add(Or(ctr))
-            self.num_constraints += 1
+            self.assert_expr(z3.Or(ctr), f'input_{i}_is_used')
 
-    def create_type_constraints(self):
+    def create_type_constraints(self) -> None:
         """If a production is used in a node, then the nodes' type is equal to the production's type"""
         for r in self.roots:
-            for t in range(len(self.types)):  # todo one of the fors can be removed
+            for t in range(len(self.types)):
                 if self.types[t] == 'Empty':
                     continue
-                for p in self.spec.productions():
-                    if p.is_function() and p.lhs.name == self.types[t]:
-                        self.z3_solver.add(Implies(r.var == p.id, r.type == t))
-                        self.num_constraints += 1
+                for p in self.spec.get_productions_with_lhs(self.types[t]):
+                    if p.is_function():
+                        self.assert_expr(z3.Implies(r.var == p.id, r.type == t))
 
-    def create_children_constraints(self):
+    def create_children_constraints(self) -> None:
         for r in self.roots:
             for p in self.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':
@@ -286,36 +279,32 @@ class BitEnumerator(Enumerator):
                 for c in range(len(r.children)):
                     ctr = []
                     if c >= len(p.rhs):
-                        self.num_constraints += 1
-                        self.z3_solver.add(Implies(aux, And(r.children[c].var == self.leaf_enum_values[0],
-                                                            r.children[c].bitvec == self.mk_bitvec(0),
-                                                            r.children[c].bitvec2 == self.mk_bitvec(0))))
+                        self.assert_expr(z3.Implies(aux, z3.And(r.children[c].var == self.leaf_enum_values[0],
+                                                                r.children[c].bitvec == self.mk_bitvec(0),
+                                                                r.children[c].bitvec2 == self.mk_bitvec(0))))
                         continue
 
                     for leaf_p in self.spec.get_productions_with_lhs(p.rhs[c]):
                         if not leaf_p.is_function():
                             bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else (leaf_p.value, 0)
-                            ctr.append(And(r.children[c].var == self.leaf_enum_values[leaf_p.id],
-                                           r.children[c].bitvec == self.mk_bitvec(bv1),
-                                           r.children[c].bitvec2 == self.mk_bitvec(bv2)))
+                            ctr.append(z3.And(r.children[c].var == self.leaf_enum_values[leaf_p.id],
+                                              r.children[c].bitvec == self.mk_bitvec(bv1),
+                                              r.children[c].bitvec2 == self.mk_bitvec(bv2)))
 
                     for l in range(r.id - 1):
                         for line_production in self.line_productions[l]:
                             if line_production.lhs.name == p.rhs[c].name:
-                                ctr.append(And(r.children[c].var == self.leaf_enum_values[line_production.id],
-                                               r.children[c].bitvec == self.roots[l].bitvec,
-                                               r.children[c].bitvec2 == self.mk_bitvec(0)))
+                                ctr.append(z3.And(r.children[c].var == self.leaf_enum_values[line_production.id],
+                                                  r.children[c].bitvec == self.roots[l].bitvec,
+                                                  r.children[c].bitvec2 == self.mk_bitvec(0)))
                                 # if a previous line is used, then its flag must be true
                                 line_var = r.children[c].lines[l]
-                                self.z3_solver.add(Implies(line_var, r.children[c].var == self.leaf_enum_values[line_production.id]))
-                                self.z3_solver.add(Implies(r.children[c].var == self.leaf_enum_values[line_production.id], line_var))
-                                self.num_constraints += 2
+                                self.assert_expr(line_var == (r.children[c].var == self.leaf_enum_values[line_production.id]))
 
-                    self.num_constraints += 1
-                    self.z3_solver.add(Implies(aux, Or(ctr)))
+                    self.assert_expr(z3.Implies(aux, z3.Or(ctr)))
 
     @staticmethod
-    def _check_arg_types(pred, python_tys):
+    def _check_arg_types(pred: Predicate, python_tys: List[Type]):
         if pred.num_args() < len(python_tys):
             msg = 'Predicate "{}" must have at least {} arugments. Only {} is found.'.format(pred.name, len(python_tys), pred.num_args())
             raise ValueError(msg)
@@ -324,7 +313,7 @@ class BitEnumerator(Enumerator):
                 msg = 'Argument {} of predicate {} has unexpected type.'.format(index, pred.name)
                 raise ValueError(msg)
 
-    def _resolve_is_not_parent_predicate(self, pred):
+    def _resolve_is_not_parent_predicate(self, pred: Predicate):
         if not util.get_config().is_not_parent_enabled:
             return
 
@@ -336,41 +325,46 @@ class BitEnumerator(Enumerator):
             for s in range(len(r.children[0].lines)):
                 children = []
                 for c in r.children:
-                    children.append(c.lines[s] == True)
-                self.z3_solver.add(Implies(And(Or(children), self.roots[s].var == prod1.id), r.var != prod0.id))
+                    children.append(c.lines[s])
+                self.assert_expr(z3.Implies(z3.And(z3.Or(children), self.roots[s].var == prod1.id), r.var != prod0.id),
+                                 f'{prod0.id}_is_not_parent_of_{prod1.id}_r{r.id}_l{s}')
 
-    def _resolve_distinct_inputs_predicate(self, pred):
+    def _resolve_distinct_inputs_predicate(self, pred: Predicate):
         self._check_arg_types(pred, [str])
         production = self.spec.get_function_production_or_raise(pred.args[0])
         for r in self.roots:
+            ctr = []
             for c1 in range(len(r.children)):
                 child1 = r.children[c1]
                 for c2 in range(c1 + 1, len(r.children)):
                     child2 = r.children[c2]
                     # this works because even a inner_join between two filters, the children will have different values for the variables because of the lines produtions
-                    self.z3_solver.add(Implies(r.var == production.id, Or(child1.var != child2.var,
-                                                                          And(child1.var == self.leaf_enum_values[0],
-                                                                              child2.var == self.leaf_enum_values[0]))))
+                    ctr.append(z3.Or(child1.var != child2.var,
+                                     z3.And(child1.var == self.leaf_enum_values[0], child2.var == self.leaf_enum_values[0])))
 
-    def _resolve_distinct_filters_predicate(self, pred):
+            self.assert_expr(z3.Implies(r.var == production.id, z3.And(ctr)), f'{production.id}_has_distinct_inputs_r{r.id}')
+
+    def _resolve_distinct_filters_predicate(self, pred: Predicate):
         self._check_arg_types(pred, [str])
         prod0 = self.spec.get_function_production_or_raise(pred.args[0])
         for r in self.roots:
-            self.z3_solver.add(Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
+            self.z3_solver.add(z3.Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
 
-    def _resolve_constant_occurs_predicate(self, pred):
+    def _resolve_constant_occurs_predicate(self, pred: Predicate):
         conditions = pred.args
         lst = []
+        ids = ''
         for c in conditions:
             for id in self._production_id_cache[c]:
+                ids += f'{id}_'
                 for l in self.leaves:
                     lst.append(l.var == self.leaf_enum_values[id])
-        self.z3_solver.add(Or(lst))
+        self.assert_expr(z3.Or(lst), f'constant_occurs_{ids[:-1]}')
 
-    def _resolve_happens_before_predicate(self, pred):
+    def _resolve_happens_before_predicate(self, pred: Predicate):
         return
 
-    def resolve_predicates(self):
+    def resolve_predicates(self) -> None:
         try:
             for pred in self.spec.predicates():
                 if pred.name == 'is_not_parent':
@@ -389,15 +383,96 @@ class BitEnumerator(Enumerator):
             msg = 'Failed to resolve predicates. {}'.format(e)
             raise RuntimeError(msg) from None
 
-    def update(self, info=None, id=None):
-        if info is not None and not isinstance(info, str):
-            for core in info:
-                ctr = []
-                for constraint in core:
-                    ctr.append(self.program2tree[constraint[0]] != constraint[1].id)
-                self.z3_solver.add(Or(ctr))
-        else:
-            self.z3_solver.add(Or(*(x != self.model[x] for x in self.variables)))
+    @cached_property
+    def blocking_template(self) -> z3.ExprRef:
+        ctr = []
+        counter = 0
+        for root in self.roots:
+            ctr.append(root.var != z3.Var(counter, z3.IntSort()))
+            counter += 1
+            for child in root.children:
+                ctr.append(child.var != z3.Var(counter, self.leaf_enum))
+                counter += 1
+        return z3.Or(ctr)
+
+    def block_model(self, model: Dict[z3.ExprRef, Any]) -> None:
+        values = []
+        for root in self.roots:
+            values.append(model[root.var])
+            for child in root.children:
+                values.append(model[child.var])
+        self.z3_solver.add(z3.substitute_vars(self.blocking_template, *values))
+
+    def line_uses_line(self, x, y):
+        vars = list(flatten([set(child.lines) & set(self.line_vars_by_line[y + 1]) for child in self.roots[x].children]))
+        return any(map(lambda var: self.model[var], vars))
+
+    def lines_used_by(self, x):
+        return [i for i, v in enumerate([self.line_uses_line(j, x) for j in range(len(self.roots))]) if v]
+
+    def update(self, info: RejectionInfo = None):
+        models = [{x: self.model[x] for x in self.variables}]
+
+        # monot = [self.spec.get_function_production(pn).id for pn in ['natural_join', 'natural_join3', 'natural_join4', 'mutate', 'filter', 'summarise', 'inner_join', 'left_join', 'union'] if self.spec.get_function_production(pn)]
+
+        if info and util.get_config().subsume_conditions:
+            restriction_table = None
+            if info.row_info == RowNumberInfo.MORE_ROWS:
+                restriction_table = self.more_restrictive
+            elif info.row_info == RowNumberInfo.LESS_ROWS:
+                restriction_table = self.less_restrictive
+
+            for model in islice(models, len(models)):
+                # for i, root in enumerate(self.roots):
+                #     if not all(map(lambda line: models[0][self.roots[line].var].as_long() in monot, self.lines_used_by(i))):
+                #         continue
+                for child in self.roots[-1].children:
+                    for replacement in restriction_table[self.leaf_enum_refs[model[child.var]]]:
+                        new_model = model.copy()
+                        new_model[child.var] = self.leaf_enum_values[replacement]
+                        models.append(new_model)
+
+        if util.get_config().block_commutative_ops:
+            for root in self.roots:
+                for model in islice(models, len(models)):
+                    if self.natural_join and model[root.var].as_long() == self.natural_join.id:
+                        for c0, c1 in permutations(root.children[0:2]):
+                            if c0 != root.children[0] or c1 != root.children[1]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                models.append(new_model)
+                    if self.natural_join3 and model[root.var].as_long() == self.natural_join3.id:
+                        for c0, c1, c2 in permutations(root.children[0:3]):
+                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                new_model[root.children[2].var] = model[c2.var]
+                                models.append(new_model)
+                    if self.natural_join4 and model[root.var].as_long() == self.natural_join4.id:
+                        for c0, c1, c2, c3 in permutations(root.children[0:4]):
+                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2] or c3 != root.children[3]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                new_model[root.children[2].var] = model[c2.var]
+                                new_model[root.children[3].var] = model[c3.var]
+                                models.append(new_model)
+
+        # if len(models) > 1:
+        #     logger.warning('Blocked %d programs!', len(models) - 1)
+        #     logger.warning('Due to %s:', self.construct_program(models[0]))
+        for model in models:
+            # if len(models) > 1:
+            #     logger.warning('Blocking %s', self.construct_program(model))
+            self.block_model(model)
+
+        if info and info.score != 0:
+            util.get_program_queue().put((util.Message.EVAL_INFO,
+                                          tuple(line.production.name for line in self.current_program),
+                                          info.score * len(models)))
+        return len(models) - 1
 
     def get_production(self, prod_id):
         if prod_id in self.line_productions_by_id:
@@ -405,13 +480,12 @@ class BitEnumerator(Enumerator):
         else:
             return self.spec.get_production(prod_id)
 
-    def construct_program(self) -> program.Program:
-        lines = []
-        for r in self.roots:
-            lines.append(
-                program.Line(self.get_production(self.model[r.var].as_long()),
-                             tuple(self.get_production(self.leaf_enum_refs[self.model[child.var]]) for child in r.children)))
-        return lines
+    def construct_program(self, model) -> program.Program:
+        prog = [program.Line(self.get_production(model[root.var].as_long()),
+                             tuple(self.get_production(self.leaf_enum_refs[model[child.var]]) for child in root.children)) for root in
+                self.roots]
+        self.current_program = prog
+        return prog
 
     def print_bitvec_prog(self):
         for i, r in enumerate(self.roots):
@@ -423,140 +497,138 @@ class BitEnumerator(Enumerator):
                 print(')')
 
     def next(self):
+        global formula_counter
         res = self.z3_solver.check()
 
-        if res == unsat:
+        if res == z3.unsat:
             self.unsat_core = self.z3_solver.unsat_core()
-            logger.debug('UNSAT core: %s', simple.warning(str(self.unsat_core)))
-            # print(self.z3_solver.sexpr().replace(self.assertions_str, ''))
+            # with open(f'subformula_{formula_counter}', 'w') as f:
+            #     f.write(self.z3_solver.to_smt2())
+            #     formula_counter += 1
+            # logger.debug('UNSAT core: %s', simple.warning(str(self.unsat_core)))
             return None
-        elif res == unknown:
+        elif res == z3.unknown:
             logger.error('Z3 failed to produce an answer: %s', self.z3_solver.reason_unknown())
             raise RuntimeError()
 
         self.model = self.z3_solver.model()
 
         if self.model is not None:
-            return self.construct_program()
+            return self.construct_program(self.model)
         else:
             return None
 
     def constraint_functions(self):
-        bv0 = BitVecVal(0, self.specification.n_columns)
+        bv0 = z3.BitVecVal(0, self.specification.n_columns)
 
         for i, root in enumerate(self.roots):
             natural_join = self.spec.get_function_production('natural_join')
             if natural_join:
-                self.assert_expr(Implies(root.var == natural_join.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
-                                             (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
+                self.assert_expr(z3.Implies(root.var == natural_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
+                                                   (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
                                  f'natural_join_bv_{i}')
 
             natural_join3 = self.spec.get_function_production('natural_join3')
             if natural_join3:
-                self.assert_expr(Implies(root.var == natural_join3.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
-                                             ((root.children[0].bitvec | root.children[1].bitvec) & root.children[2].bitvec) != bv0,
-                                             (root.children[0].bitvec | root.children[1].bitvec | root.children[2].bitvec) == root.bitvec)),
-                                 f'natural_join3_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == natural_join3.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
+                                                   ((root.children[0].bitvec | root.children[1].bitvec) & root.children[2].bitvec) != bv0,
+                                                   (root.children[0].bitvec | root.children[1].bitvec | root.children[
+                                                       2].bitvec) == root.bitvec)), f'natural_join3_bv_{i}')
 
             natural_join4 = self.spec.get_function_production('natural_join4')
             if natural_join4:
-                self.assert_expr(Implies(root.var == natural_join4.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
-                                             ((root.children[0].bitvec | root.children[1].bitvec) & root.children[2].bitvec) != bv0,
-                                             ((root.children[0].bitvec | root.children[1].bitvec | root.children[2].bitvec) & root.children[
-                                                 3].bitvec) != bv0,
-                                             (root.children[0].bitvec | root.children[1].bitvec | root.children[2].bitvec | root.children[
-                                                 3].bitvec) == root.bitvec)),
-                                 f'natural_join4_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == natural_join4.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
+                                                   ((root.children[0].bitvec | root.children[1].bitvec) & root.children[2].bitvec) != bv0,
+                                                   ((root.children[0].bitvec | root.children[1].bitvec | root.children[2].bitvec) &
+                                                    root.children[
+                                                        3].bitvec) != bv0,
+                                                   (root.children[0].bitvec | root.children[1].bitvec | root.children[2].bitvec |
+                                                    root.children[
+                                                        3].bitvec) == root.bitvec)), f'natural_join4_bv_{i}')
 
             inner_join = self.spec.get_function_production('inner_join')
             if inner_join:
-                self.assert_expr(Implies(root.var == inner_join.id,
-                                         And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             (root.children[1].bitvec & root.children[2].bitvec2) == root.children[2].bitvec2,
-                                             (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
+                self.assert_expr(z3.Implies(root.var == inner_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   (root.children[1].bitvec & root.children[2].bitvec2) == root.children[2].bitvec2,
+                                                   (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
                                  f'inner_join_bv_{i}')
 
             anti_join = self.spec.get_function_production('anti_join')
             if anti_join:
-                self.assert_expr(Implies(root.var == anti_join.id,
-                                         And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             (root.children[1].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             Implies(root.children[2].bitvec == bv0,
-                                                     (root.children[0].bitvec & root.children[1].bitvec) != bv0),
-                                             root.children[0].bitvec == root.bitvec)),
-                                 f'anti_join_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == anti_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   (root.children[1].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   z3.Implies(root.children[2].bitvec == bv0,
+                                                              (root.children[0].bitvec & root.children[1].bitvec) != bv0),
+                                                   root.children[0].bitvec == root.bitvec)), f'anti_join_bv_{i}')
 
             left_join = self.spec.get_function_production('left_join')
             if left_join:
-                self.assert_expr(Implies(root.var == left_join.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
-                                             (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
+                self.assert_expr(z3.Implies(root.var == left_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
+                                                   (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
                                  f'left_join_bv_{i}')
 
             union = self.spec.get_function_production('union')
             if union:
-                self.assert_expr(Implies(root.var == union.id, (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec),
+                self.assert_expr(z3.Implies(root.var == union.id, (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec),
                                  f'union_bv_{i}')
 
             intersect = self.spec.get_function_production('intersect')
             if intersect:
-                self.assert_expr(Implies(root.var == intersect.id,
-                                         And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             (root.children[1].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             root.children[2].bitvec == root.bitvec)),
-                                 f'intersect_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == intersect.id,
+                                            z3.And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   (root.children[1].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   root.children[2].bitvec == root.bitvec)), f'intersect_bv_{i}')
 
             semi_join = self.spec.get_function_production('semi_join')
             if semi_join:
-                self.assert_expr(Implies(root.var == semi_join.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
-                                             root.children[0].bitvec == root.bitvec)),
-                                 f'semi_join_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == semi_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) != bv0,
+                                                   root.children[0].bitvec == root.bitvec)), f'semi_join_bv_{i}')
 
             cross_join = self.spec.get_function_production('cross_join')
             if cross_join:
-                self.assert_expr(Implies(root.var == cross_join.id,
-                                         And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             ((root.children[0].bitvec & root.children[1].bitvec) & root.children[2].bitvec2) ==
-                                             root.children[2].bitvec2,
-                                             (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
+                self.assert_expr(z3.Implies(root.var == cross_join.id,
+                                            z3.And((root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   ((root.children[0].bitvec & root.children[1].bitvec) & root.children[2].bitvec2) ==
+                                                   root.children[2].bitvec2,
+                                                   (root.children[0].bitvec | root.children[1].bitvec) == root.bitvec)),
                                  f'cross_join_bv_{i}')
 
             filter = self.spec.get_function_production('filter')
             if filter:
-                self.assert_expr(Implies(root.var == filter.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
-                                             root.children[0].bitvec == root.bitvec)),
-                                 f'filter_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == filter.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
+                                                   root.children[0].bitvec == root.bitvec)), f'filter_bv_{i}')
 
             summarise = self.spec.get_function_production('summarise')
             if summarise:
-                self.assert_expr(Implies(root.var == summarise.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
-                                             (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             (root.children[1].bitvec2 & root.children[2].bitvec) == bv0,
-                                             (root.children[1].bitvec2 | root.children[2].bitvec) == root.bitvec)),
+                self.assert_expr(z3.Implies(root.var == summarise.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
+                                                   (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   (root.children[1].bitvec2 & root.children[2].bitvec) == bv0,
+                                                   (root.children[1].bitvec2 | root.children[2].bitvec) == root.bitvec)),
                                  f'summarise_bv_{i}')
 
             mutate = self.spec.get_function_production('mutate')
             if mutate:
-                self.assert_expr(Implies(root.var == mutate.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
-                                             (root.children[0].bitvec | root.children[1].bitvec2) == root.bitvec)),
-                                 f'mutate_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == mutate.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
+                                                   (root.children[0].bitvec | root.children[1].bitvec2) == root.bitvec)), f'mutate_bv_{i}')
 
             unite = self.spec.get_function_production('unite')
             if unite:
-                self.assert_expr(Implies(root.var == unite.id,
-                                         And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
-                                             (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
-                                             root.children[0].bitvec == root.bitvec)),
-                                 f'unite_bv_{i}')
+                self.assert_expr(z3.Implies(root.var == unite.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
+                                                   (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
+                                                   root.children[0].bitvec == root.bitvec)), f'unite_bv_{i}')
 
     def mk_bitvec(self, bitvec_val):
         if bitvec_val not in self.bitvec_cache:
-            self.bitvec_cache[bitvec_val] = BitVecVal(bitvec_val, self.specification.n_columns)
+            self.bitvec_cache[bitvec_val] = z3.BitVecVal(bitvec_val, self.specification.n_columns)
         return self.bitvec_cache[bitvec_val]

@@ -1,11 +1,15 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/034.csv
 output: tests-examples/scythe/recent_posts/tables/034_o.csv
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - DATE_UPDATE
 dateorder: ymd
+loc: 2
+solution:
+  - mutate
+  - filter
 comment: |
   select * from ( SELECT
     t1.[MFG_PART_NUMBER]
@@ -22,7 +26,6 @@ comment: |
    t1.[MFG_PART_NUMBER]
    ,t2.[DISCO_DATE]
 
-  df2 <- input1 %>% group_by(MATERIAL) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
-  df3 <- input1 %>% group_by(DATE_UPDATE) %>% summarise(maxDATE_UPDATE = max(DATE_UPDATE)) %>% ungroup()
-  df4 <- inner_join(input1, df2) %>% inner_join(df3)
-  out <- df4 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE)
+  df2 <- input1 %>% mutate(maxDATE_UPDATE = max(DATE_UPDATE))
+  df3 <- df2 %>% filter(maxDATE_UPDATE <= DATE_UPDATE)
+  out <- df3 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE) %>% arrange(c1)

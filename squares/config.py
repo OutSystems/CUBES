@@ -22,6 +22,9 @@ class Config:
     minimum_loc: int
     maximum_loc: int
 
+    block_commutative_ops: bool
+    subsume_conditions: bool
+
     advance_percentage = .6
     smoothing_bias: float = 1
 

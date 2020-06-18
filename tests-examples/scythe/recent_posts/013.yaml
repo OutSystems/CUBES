@@ -6,6 +6,10 @@ columns:
   - Name
   - Company_group
   - ID
+loc: 2
+solution:
+  - natural_join
+  - cross_join
 comment: |
   select t1.ID,
          t1.Name,
@@ -19,5 +23,5 @@ comment: |
   where t1.ID <> t1_b.ID
 
   df3 <- inner_join(input2, input1)
-  df4 <- full_join(df3 %>% mutate(tmp.col=1), df3 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(ID != ID.other & Name.other == Company_group)
+  df4 <- full_join(df3, df3, by=character(), suffix = c("", ".other")) %>% filter(Name != Company_group.other & Company_group == Name.other)
   out <- df4 %>% select(ID, Name, RootName = Company_group, RootId = ID.other) %>% arrange(ID)

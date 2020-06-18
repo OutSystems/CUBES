@@ -1,10 +1,11 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i034.csv
 output: tests-examples/scythe/top_rated_posts/tables/o034.csv
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - Time
+loc: 2
 comment: |
   SELECT t.Train, t.Dest, r.MaxTime
   FROM (
@@ -16,6 +17,5 @@ comment: |
   ON t.Train = r.Train AND t.Time = r.MaxTime
 
   df2 <- input1 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
-  df3 <- input1 %>% group_by(Dest, Time) %>% summarise(maxTime = max(Time)) %>% ungroup()
-  df4 <- inner_join(df2, df3)
-  out <- df4 %>% select(Train, Dest, Time)
+  df3 <- inner_join(df2, input1, by=c('maxTime' = 'Time'), suffix = c('', '.other')) %>% mutate(Time = maxTime)
+  out <- df3 %>% select(Train, Dest, Time = maxTime) %>% arrange(Train)

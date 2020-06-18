@@ -1,11 +1,12 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i039.csv
 output: tests-examples/scythe/top_rated_posts/tables/o039.csv
-aggrs:
+functions:
   - n
   - max
-attrs:
+columns:
   - n
+loc: 2
 comment: |
   SELECT   `value`,
             COUNT(`value`) AS `value_occurrence`
@@ -35,3 +36,7 @@ comment: |
   df4 <- df3 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
   df5 <- inner_join(df3, df4) %>% inner_join(df2)
   out <- df5 %>% select(c) %>% distinct()
+
+  df2 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df3 <- full_join(df2 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(n > n.other & n.other != n)
+  out <- df3 %>% select(c) %>% distinct() %>% arrange(c)

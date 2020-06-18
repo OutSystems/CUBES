@@ -31,16 +31,16 @@ enrolled <- read_csv("tests-examples/textbook2/tables/enrolled.csv", col_types =
 class <- read_csv('tests-examples/textbook2/tables/class.csv')
 faculty <- read_csv('tests-examples/textbook2/tables/faculty.csv')
 
-input1 <- read_csv("tests-examples/leetcode/tables/181.csv", col_types = cols('i', 'c', 'i', 'd'))
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/006.csv")
 # input1$date = dmy(input1$date)
 input2 <- read_csv("tests-examples/55-tests/tables/9-2.txt")
 input3 <- read_csv("tests-examples/textbook/tables/23-3.txt")
-expected_output <- read_csv("tests-examples/textbook/tables/23.out")
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/006_o.csv")
+expected_output
 
-df38 <- inner_join(input1, input1, by=c('Salary' = 'Id'), suffix = c('', '.other')) %>% mutate( Id = Salary )
-df38 %>% sapply(class)
+unite(input1, variants, which(colnames(input1)=="variants"), variants_value, which(colnames(input1)=="variants_value"), sep=":")
 
-df1 <- input1 %>% inner_join(input2) %>% inner_join(input3)
+df1 <- unite(input1, variants, variants, variants_value, sep=":")
 df1
 df2 <- df1 %>% filter(color == 'green') %>% select(S_name)
 df2

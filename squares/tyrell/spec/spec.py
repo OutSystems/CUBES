@@ -51,7 +51,8 @@ class TypeSpec:
         return len(self._types)
 
     def __repr__(self) -> str:
-        return 'TypeSpec({})'.format([str(x) for x in self._types.values()])
+        new_line = '\n'
+        return f'TypeSpec(\n{new_line.join(map(str, self._types.values()))}\n)'
 
 
 class ProductionSpec:
@@ -65,6 +66,7 @@ class ProductionSpec:
         self._lhs_map = defaultdict(list)
         self._param_map = dict()
         self._func_map = dict()
+        self._enum_map = dict()
 
     def get_production(self, id: int) -> Optional[Production]:
         '''
@@ -145,27 +147,14 @@ class ProductionSpec:
         Return the enum production whose type is `type` and value is `value`.
         If no production is found, return `None`
         '''
-        if not isinstance(ty, EnumType):
-            return None
-        prods = self.get_productions_with_lhs(ty)
-        for prod in prods:
-            if prod.rhs[0] == value:
-                return prod
-        return None
+        return self._enum_map.get((ty, value))
 
     def get_enum_production_or_raise(self, ty: EnumType, value: str) -> Optional[Production]:
         '''
         Return the enum production whose type is `type` and value is `value`.
         If no production is found, raise `KeyError`
         '''
-        if not isinstance(ty, EnumType):
-            raise KeyError(
-                'The given type is not a enum type: {}'.format(ty))
-        for prod in self.get_productions_with_lhs(ty):
-            if prod.rhs[0] == value:
-                return prod
-        raise KeyError(
-            'Value "{}" is not in the domain of type {}'.format(value, ty))
+        return self._enum_map[(ty, value)]
 
     def _get_next_id(self) -> int:
         return len(self._productions)
@@ -181,6 +170,7 @@ class ProductionSpec:
         '''
         prod = EnumProduction(self._get_next_id(), lhs, choice)
         self._add_production(prod)
+        self._enum_map[(lhs, prod.rhs)] = prod
         return prod
 
     def add_param_production(self, lhs: ValueType, index: int, value: Any = None) -> ParamProduction:
@@ -220,7 +210,8 @@ class ProductionSpec:
         return len(self._productions)
 
     def __repr__(self):
-        return 'ProductionSpec({})'.format([str(x) for x in self._productions])
+        new_line = '\n'
+        return f'ProductionSpec(\n{new_line.join(map(str, self._productions))}\n)'
 
 
 class ProgramSpec:
@@ -284,7 +275,8 @@ class PredicateSpec:
         return len(self._preds)
 
     def __repr__(self):
-        return 'PredicateSpec({})'.format([str(x) for x in self._preds])
+        new_line = '\n'
+        return f'PredicateSpec(\n{new_line.join(map(str, self._preds))}\n)'
 
 
 class TyrellSpec:
@@ -413,7 +405,6 @@ class TyrellSpec:
     def __repr__(self) -> str:
         result = ''
         result += repr(self._type_spec) + '\n'
-        result += repr(self._prog_spec) + '\n'
         result += repr(self._prod_spec) + '\n'
         result += repr(self._pred_spec) + '\n'
         return result

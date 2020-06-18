@@ -1,7 +1,8 @@
 import argparse
 import pickle
 import time
-from itertools import permutations, combinations, tee
+from enum import Enum
+from itertools import permutations, combinations, tee, chain
 from logging import getLogger
 from multiprocessing.connection import Connection
 from random import Random
@@ -98,10 +99,11 @@ def boolvec2int(bools: List[bool]) -> int:
     return result
 
 
-def create_argparser():
+def create_argparser(all_inputs=False):
     parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
+    if not all_inputs:
+        parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='using this flag multiple times further increases verbosity')
 
     g = parser.add_mutually_exclusive_group()
@@ -111,16 +113,19 @@ def create_argparser():
     parser.add_argument('--no-r', action='store_true', help="don't output R program")
 
     parser.add_argument('--optimal', action='store_true', help='make sure that returned solutions are as short as possible')
-    parser.add_argument('--cache-operations', action='store_true', help='increased memory usage, but possibly faster results')
+    parser.add_argument('--cache', dest='cache_operations', action='store_true', help='increased memory usage, but possibly faster results')
     parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
-    parser.add_argument('--cube-freedom', type=int, default=2, help='number of free lines when generating cubes')
+    parser.add_argument('--cube-freedom', type=int, default=0, help='number of free lines when generating cubes')
+    parser.add_argument('--no-block-commutative-ops', dest='block_commutative_ops', action='store_false',
+                        help='block commutative operations')
+    parser.add_argument('--no-subsume-conditions', dest='subsume_conditions', action='store_false', help='subsume conditions')
 
     g = parser.add_argument_group('heuristics')
 
     g.add_argument('--split-search', action='store_true',
                    help='use an heuristic to determine if search should be split among multiple lines of code')
-    g.add_argument('--split-search-threshold', type=int, default=2000, help='instance hardness threshold')
-    g.add_argument('--decay-rate', type=float, default=1, help='rate at which old information is forgotten')
+    g.add_argument('--split-search-threshold', type=int, default=500, help='instance hardness threshold')
+    g.add_argument('--decay-rate', type=float, default=0.99999, help='rate at which old information is forgotten')
     g.add_argument('--probing-threads', type=int, default=2,
                    help='number of threads that should be used to randomly explore the search space')
 
@@ -136,6 +141,7 @@ def create_argparser():
     parser.add_argument('-j', '--jobs', type=int, default=-2, help='number of processes to use')
     parser.add_argument('--max-lines', type=int, default=7, help='maximum program size')
     parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
+    parser.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
     parser.add_argument('--seed', default='squares')
     return parser
 
@@ -213,3 +219,24 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
+
+def has_duplicates(iterable):
+    seen = set()
+    for x in iterable:
+        if x in seen:
+            return True
+        seen.add(x)
+    return False
+
+
+def flatten(list_of_lists):
+    return chain.from_iterable(list_of_lists)
+
+
+class Message(Enum):
+    INIT = 1
+    SOLVE = 2
+    DEBUG_STATS = 3
+    EVAL_INFO = 4
+    SOLUTION = 5

@@ -1,14 +1,19 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/019.csv
 output: tests-examples/scythe/recent_posts/tables/019_o.csv
-aggrs:
+functions:
   - max
-const:
+constants:
   - 0
-attrs:
+columns:
   - Balance
   - Date
 dateorder: mdy
+loc: 3
+solution:
+  - mutate
+  - cross_join
+  - filter
 comment: |
   select *
   from tablename t1
@@ -16,8 +21,11 @@ comment: |
                     where t2.Balance > 0
                       and t2.date > t1.date)
 
-  df2 <- input1 %>% filter(Balance >= 0)
-  df3 <- df2 %>% group_by(CustomerID) %>% summarise(maxDate = max(Date)) %>% ungroup()
-  df4 <- inner_join(df3, input1)
-  df5 <- df4 %>% filter(maxDate < Date)
-  out <- df5 %>% select(CustomerID, Balance, Date)
+  mutate(input0, 'maxBalance = max(Balance)')
+  cross_join(line0, input0, 'maxBalance == Balance.other & Date.other < Date')
+  filter(line1, 'Balance > 0 | maxBalance >= 0')
+
+  df2 <- input1 %>% mutate(maxBalance = max(Balance))
+  df3 <- full_join(df2 %>% mutate(tmp.col=1), input1 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(maxBalance == Balance.other & Date.other < Date)
+  df4 <- df3 %>% filter(Balance > 0 | maxBalance >= 0)
+  out <- df4 %>% select(CustomerID, Balance, Date) %>% arrange(CustomerID)

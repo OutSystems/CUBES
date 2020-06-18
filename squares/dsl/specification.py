@@ -1,11 +1,13 @@
+import io
+import os
+import re
 from logging import getLogger
-from typing import Dict
+from typing import Dict, Sequence, Any
 
 import pandas
 from ordered_set import OrderedSet
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 from rpy2 import robjects
-from z3 import BitVecVal
 
 from . import dsl
 from .conditions import ConditionGenerator
@@ -13,19 +15,31 @@ from .. import util, types
 from ..exceptions import SquaresException
 from ..tyrell.spec import TyrellSpec, TypeSpec, ProductionSpec, ProgramSpec, ValueType
 from ..tyrell.spec.spec import PredicateSpec
-from ..util import next_counter, powerset_except_empty
+from ..util import powerset_except_empty
 
 logger = getLogger('squares')
 
 
-def exec_and_return(r_script):
+def exec_and_return(r_script: str) -> str:
     robjects.r(r_script)
     return r_script
 
 
-def read_table(path):
+def read_table(path: str) -> DataFrame:
     df = pandas.read_csv(path)
     df = df.convert_dtypes(convert_integer=False)
+
+    replacements = {}
+
+    for col in df.columns:
+        new_col, n = re.subn('[^a-zA-Z0-9._]', '_', col)
+        new_col, n2 = re.subn('^([0-9])', r'col_\1', new_col)
+        if n + n2:
+            logger.warning('Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!')
+            logger.warning('Replacing column "%s" in table %s with %s', col, path, new_col)
+            replacements[col] = new_col
+
+    df = df.rename(columns=replacements)
 
     for col in df:  # try to coerce columns to datetime
         if types.get_type(df[col].dtype) == types.INT:
@@ -34,10 +48,6 @@ def read_table(path):
                     logger.warning('Using integers larger than 32 bits! Converting column %s to string.', col)
                     df[col] = df[col].astype(str)
                     break
-
-        if '-' in col:
-            logger.error('Column names should be valid identifiers.')
-            raise ValueError(f'Columns names should be valid identifiers. Column {col} in table {path}.')
 
         if all(types.is_time(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_time(elem) for elem in df[col]):
             try:
@@ -55,14 +65,14 @@ def read_table(path):
     return df
 
 
-def add_is_not_parent_if_enabled(pred_spec, a, b):
+def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> None:
     if a not in util.get_config().disabled and b not in util.get_config().disabled:
         pred_spec.add_predicate('is_not_parent', [a, b])
 
 
 class Specification:
 
-    def __init__(self, spec):
+    def __init__(self, spec) -> None:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants']
@@ -97,8 +107,8 @@ class Specification:
 
         logger.debug("Reading input files...")
         for input in self.inputs:
-            id = next_counter()
-            table_name = f'input{id}'
+            table_name = 'df_' + os.path.splitext(os.path.basename(input))[0]
+            table_name = re.sub('[^a-zA-Z0-9._]', '_', table_name)
             self.tables.append(table_name)
             df = read_table(input)
 
@@ -124,22 +134,20 @@ class Specification:
                     self.consts_by_type[type].append(const)
 
         self.condition_generator = ConditionGenerator(self)
-        self.condition_generator.generate_summarise()
-        self.condition_generator.generate_filter()
-        self.condition_generator.generate_inner_join()
-        self.condition_generator.generate_cross_join()
+        self.condition_generator.generate()
 
         self.n_columns = len(self.all_columns)
 
         self.generate_r_init()
 
-    def generate_r_init(self):  # TODO dirty: initializes R for the inputs
+        self.tyrell_spec = None
+
+    def generate_r_init(self) -> None:  # TODO dirty: initializes R for the inputs
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
 
         for table, file in zip(self.tables, self.inputs):
             df = self.data_frames[table]
-            self.r_init += exec_and_return(
-                f'{table} <- read_csv("{file}", col_types = cols({types.get_r_types(df.dtypes)}))\n')
+            self.r_init += exec_and_return(f'{table} <- read_csv("{file}", col_types = cols({types.get_r_types(df.dtypes)}))\n')
 
             for col, dtype in zip(df.columns, df.dtypes):  # parse dates
                 if types.get_type(dtype) == types.DATETIME:
@@ -155,13 +163,14 @@ class Specification:
                 self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
 
         if 'concat' in self.aggrs:
-            self.r_init += exec_and_return(
-                '\nstring_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}\n')
+            self.r_init += exec_and_return('\nstring_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}\n')
         if 'mode' in self.aggrs:
-            self.r_init += exec_and_return(
-                '\nmode <- function(x) {ux <- unique(x); ux[which.max(tabulate(match(x, ux)))]}\n')
+            self.r_init += exec_and_return('\nmode <- function(x) {ux <- unique(x); ux[which.max(tabulate(match(x, ux)))]}\n')
 
-    def generate_dsl(self):
+    def generate_dsl(self, discard: bool = False) -> TyrellSpec:
+        if self.tyrell_spec and not discard:
+            return self.tyrell_spec
+
         type_spec = TypeSpec()
 
         Empty = ValueType('Empty')
@@ -170,8 +179,7 @@ class Specification:
         type_spec.define_type(dsl.Table)
 
         if self.condition_generator.summarise_conditions:
-            dsl.Cols.set_domain([(','.join(cols), self.get_bitvecnum(cols)) for cols in
-                                 powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
+            dsl.Cols.set_domain(self.condition_generator.cols)
             type_spec.define_type(dsl.Cols)
 
         if 'intersect' not in util.get_config().disabled:
@@ -290,19 +298,20 @@ class Specification:
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join')
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join4')
 
-        for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join']:
+        for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join', 'semi_join', 'left_join']:
             if join not in util.get_config().disabled:
                 pred_spec.add_predicate('distinct_inputs', [join])
 
         program_spec = ProgramSpec('squares', [(dsl.Table, self.get_bitvecnum(self.data_frames[input])) for input in self.tables],
                                    (dsl.Table, self.get_bitvecnum(self.data_frames["expected_output"])))
 
-        return TyrellSpec(type_spec, program_spec, prod_spec, pred_spec)
+        self.tyrell_spec = TyrellSpec(type_spec, program_spec, prod_spec, pred_spec)
+        return self.tyrell_spec
 
-    def get_bitvecnum(self, columns):
+    def get_bitvecnum(self, columns: Sequence[str]) -> int:
         return util.boolvec2int([column in columns for column in self.all_columns])
 
-    def filter_columns(self, columns_map: Dict[types.Type, OrderedSet]) -> Dict[types.Type, OrderedSet]:
+    def filter_columns(self, columns_map: Dict[types.Type, OrderedSet[str]]) -> Dict[types.Type, OrderedSet[str]]:
         d = {}
         for type in columns_map.keys():
             d[type] = OrderedSet()
@@ -311,7 +320,7 @@ class Specification:
                     d[type].add(column)
         return d
 
-    def constant_occurs(self, column, constant):
+    def constant_occurs(self, column: str, constant: str) -> bool:
         for data_frame in self.data_frames.values():
             if column in data_frame.columns:
                 if constant is None:
@@ -322,3 +331,20 @@ class Specification:
                         return True
 
         return False
+
+    def __str__(self) -> str:
+        buffer = io.StringIO()
+        buffer.write(repr(self.generate_dsl()))
+        buffer.write('\nMore restrictive:\n')
+        for type in self.condition_generator.more_restrictive.graphs.keys():
+            max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
+            buffer.write(f'\t{type}:\n')
+            for key in list(self.condition_generator.more_restrictive.graphs[type]):
+                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
+        buffer.write('Less restrictive:\n')
+        for type in self.condition_generator.less_restrictive.graphs.keys():
+            max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
+            buffer.write(f'\t{type}:\n')
+            for key in list(self.condition_generator.less_restrictive.graphs[type]):
+                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
+        return buffer.getvalue()
