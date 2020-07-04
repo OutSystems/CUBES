@@ -3,17 +3,22 @@ inputs:
   - tests-examples/55-tests/tables/21-2.txt
   - tests-examples/55-tests/tables/21-3.txt
 output: tests-examples/55-tests/tables/33.out
-const:
+constants:
   - green
-aggrs:
+functions:
   - n
 filters:
   - max(n)
-attrs:
+columns:
   - color
 bools:
   - ==
-loc: 6
+loc: 4
+solution:
+  - natural_join
+  - summarise
+  - filter
+  - natural_join4
 comment: |
   5.2.9 optimal solution
 
@@ -32,3 +37,9 @@ comment: |
   inner_join(parts,catalog) %>% inner_join(suppliers) %>%
   group_by(P_id) %>% summarise(n = n()) %>%
   filter(n == max(n))) %>% select(S_name) %>% distinct()'
+
+  df4 <- inner_join(input1, input2)
+  df5 <- df4 %>% group_by(P_id, color) %>% summarise(n = n()) %>% ungroup()
+  df6 <- df5 %>% filter(color == 'green' & n == max(n))
+  df7 <- inner_join(input2, input1) %>% inner_join(df6) %>% inner_join(input3)
+  out <- df7 %>% select(S_name) %>% arrange(S_name)

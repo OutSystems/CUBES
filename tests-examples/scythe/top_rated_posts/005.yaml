@@ -1,12 +1,13 @@
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i005.csv
 output: tests-examples/scythe/top_rated_posts/tables/o005.csv
-aggrs:
+functions:
   - max
   - min
-attrs:
+columns:
   - id
   - total
+loc: 3
 comment: |
   SELECT *
   FROM (SELECT p.customer, p.total, MIN(p.id) AS min_id
@@ -16,3 +17,8 @@ comment: |
   			 FROM PURCHASES p
   			 GROUP BY p.customer) y
   ON y.customer = x.customer AND y.max_total = x.total
+
+  df2 <- input1 %>% group_by(customer) %>% summarise(total = max(total)) %>% ungroup()
+  df3 <- input1 %>% group_by(total) %>% summarise(id = min(id)) %>% ungroup()
+  df4 <- left_join(df2, df3)
+  out <- df4 %>% select(minid = id, customer, maxtotal = total) %>% arrange(minid)

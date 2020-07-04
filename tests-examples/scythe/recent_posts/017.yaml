@@ -1,14 +1,20 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/017.csv
 output: tests-examples/scythe/recent_posts/tables/017_o.csv
-const:
+constants:
   - HMCPR
-aggrs:
+functions:
   - min
-attrs:
+columns:
   - emp_grp
   - emp_sal
 dateorder: mdy
+loc: 4
+solution:
+  - mutate
+  - filter
+  - summarise
+  - left_join
 comment: |
   https://stackoverflow.com/questions/40118180/retrieve-table-data-based-on-specific-condition-in-teradata
 
@@ -21,9 +27,8 @@ comment: |
   ) t
   where rn = 1;
 
-  df1 <- input1 %>% filter(emp_grp == 'HMCPR')
-  df2 <- df1 %>% group_by(emp_id) %>% summarise(emp_sal = min(emp_sal)) %>% ungroup()
-  df3 <- input1 %>% group_by(emp_id) %>% summarise(emp_sal = min(emp_sal)) %>% ungroup()
-  df4 <- bind_rows(df2, df3) %>% distinct(emp_id, .keep_all = TRUE)
-  df5 <- input1 %>% inner_join(df4, by=c('emp_id', 'emp_sal'), suffix = c('', '.other'))
-  out <- df5 %>% select(emp_id, emp_sal, emp_grp)
+  df2 <- input1 %>% mutate(minemp_sal = min(emp_sal))
+  df3 <- df2 %>% filter(emp_grp == 'HMCPR' | minemp_sal < emp_sal)
+  df4 <- df3 %>% group_by(emp_id) %>% summarise(emp_sal = min(emp_sal)) %>% ungroup()
+  df5 <- left_join(df4, input1)
+  out <- df5 %>% select(emp_id, emp_sal, emp_grp) %>% arrange(emp_id)

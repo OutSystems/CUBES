@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0170.csv
+constants: []
+functions:
+- count
+- max
+columns:
+- state_name
+- population
+- river_name
+foreign-keys: []
+comment: |-
+  SELECT COUNT(RIVERalias0.RIVER_NAME)
+  FROM RIVER AS RIVERalias0,
+       STATE AS STATEalias0
+  WHERE STATEalias0.STATE_NAME =
+      (SELECT STATEalias1.STATE_NAME
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.POPULATION =
+           (SELECT MAX(STATEalias2.POPULATION)
+            FROM STATE AS STATEalias2) )
+    AND STATEalias0.STATE_NAME = RIVERalias0.TRAVERSE ;

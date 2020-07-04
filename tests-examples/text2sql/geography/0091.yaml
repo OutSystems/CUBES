@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0091.csv
+functions:
+- min
+constants: []
+columns:
+- density
+foreign-keys: []
+comment: |
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.STATE_NAME IN
+      (SELECT STATEalias0.STATE_NAME
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.DENSITY =
+           (SELECT MIN(STATEalias1.DENSITY)
+            FROM STATE AS STATEalias1) ) ;
+
+  df1 <- df_state %>% group_by(country_name) %>% summarise(density = min(density)) %>% ungroup()
+  df2 <- inner_join(df_state, df_highlow) %>% inner_join(df1)
+  out <- df2 %>% select(HIGHEST_POINT = highest_point) %>% arrange(HIGHEST_POINT)

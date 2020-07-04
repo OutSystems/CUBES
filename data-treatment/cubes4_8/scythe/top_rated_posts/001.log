@@ -1,0 +1,53 @@
+[     3.605][MainProcess][INFO] Parsing specification...
+[     3.610][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.611][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.611][MainProcess][DEBUG] Reading input files...
+[     3.619][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i001.csv: ['int64', 'string']
+[     3.625][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o001.csv: ['int64', 'string']
+[     3.662][MainProcess][DEBUG] Generating DSL...
+[     3.698][MainProcess][INFO] Creating 8 processes
+[     3.727][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.763][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.765][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.767][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.771][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.772][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.778][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.780][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.784][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     4.121][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.122][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.239][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     4.242][MainProcess][INFO] Statistics:
+[     4.242][MainProcess][INFO] 	Generated cubes: 8
+[     4.242][MainProcess][INFO] 	Attempted programs: 3
+[     4.242][MainProcess][INFO] 		Rejected: 2
+[     4.242][MainProcess][INFO] 		Failed: 0
+[     4.242][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.243][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.243][MainProcess][DEBUG] 	0: Counter({'mutate': 12, 'summarise': 9})
+[     4.244][MainProcess][INFO] Solution found: summarise(@param0, concatStudentName = string_agg(StudentName, ', '), SubjectID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i001.csv", col_types = cols(SubjectID = col_integer(),StudentName = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o001.csv", col_types = cols(SubjectID = col_integer(),concatStudentName = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(SubjectID) %>% summarise(concatStudentName = string_agg(StudentName, ', ')) %>% ungroup()
+out <- df2 %>% select(SubjectID, concatStudentName) %>% arrange(SubjectID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `SubjectID`,
+       `concatStudentName`
+FROM
+  (SELECT `SubjectID`,
+          string_agg(`StudentName`, ', ') AS concatStudentName
+   FROM input1
+   GROUP BY SubjectID)
+ORDER BY SubjectID

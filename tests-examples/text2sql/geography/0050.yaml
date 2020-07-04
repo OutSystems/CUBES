@@ -1,0 +1,18 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0050.csv
+functions:
+- max
+constants: []
+columns:
+- population
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.POPULATION
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION =
+      (SELECT MAX(CITYalias1.POPULATION)
+       FROM CITY AS CITYalias1) ;
+
+  df1 <- df_city %>% group_by(country_name) %>% summarise(population = max(population)) %>% ungroup()
+  out <- df1 %>% select(POPULATION = population) %>% arrange(POPULATION)

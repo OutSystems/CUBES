@@ -1,0 +1,68 @@
+[     1.566][MainProcess][INFO] Parsing specification...
+[     1.569][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.570][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.570][MainProcess][DEBUG] Reading input files...
+[     1.576][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'float64']
+[     1.580][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.582][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     1.586][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/28.out: ['string']
+[     1.615][MainProcess][DEBUG] Generating DSL...
+[     1.634][MainProcess][INFO] Creating 2 processes
+[     1.642][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.674][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.677][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.786][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     1.787][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     1.790][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.900][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter())
+[     1.902][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter())
+[     1.903][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join())
+[     1.904][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     1.905][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join4())
+[     1.906][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = filter())
+[     1.907][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = anti_join())
+[     1.908][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = left_join())
+[     1.910][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = union())
+[     1.911][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = intersect())
+[     1.912][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = semi_join())
+[     1.913][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = cross_join())
+[     1.914][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = inner_join())
+[     1.915][cube-solver-1][DEBUG] Solving cube (l0 = anti_join(), l1 = filter())
+[     1.916][cube-solver-1][DEBUG] Solving cube (l0 = left_join(), l1 = filter())
+[     1.917][cube-solver-1][DEBUG] Solving cube (l0 = union(), l1 = filter())
+[     1.918][cube-solver-1][DEBUG] Solving cube (l0 = intersect(), l1 = filter())
+[     1.920][cube-solver-1][DEBUG] Solving cube (l0 = semi_join(), l1 = filter())
+[     1.921][cube-solver-1][DEBUG] Solving cube (l0 = cross_join(), l1 = filter())
+[     1.922][cube-solver-1][DEBUG] Solving cube (l0 = inner_join(), l1 = filter())
+[     1.923][MainProcess][DEBUG] Increasing generator loc to 3
+[     1.923][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     2.043][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter())
+[     2.122][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = filter())
+[     2.123][MainProcess][INFO] Statistics:
+[     2.124][MainProcess][INFO] 	Generated cubes: 23
+[     2.124][MainProcess][INFO] 	Attempted programs: 1
+[     2.124][MainProcess][INFO] 		Rejected: 0
+[     2.124][MainProcess][INFO] 		Failed: 0
+[     2.124][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.124][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.125][MainProcess][DEBUG] 	0: Counter({'natural_join3': 10})
+[     2.125][MainProcess][DEBUG] 	1: Counter({'filter': 10})
+[     2.125][MainProcess][INFO] Solution found: filter(natural_join3(@param1, @param2, @param0), str_detect(aname, 'Boeing'))
+[     2.428][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_double()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/textbook/tables/28.out", col_types = cols(ename = col_character()))
+
+df4 <- inner_join(input2, input3) %>% inner_join(input1)
+df5 <- df4 %>% filter(str_detect(aname, 'Boeing'))
+out <- df5 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+Failed to generate SQL query

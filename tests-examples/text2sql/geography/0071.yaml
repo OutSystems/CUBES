@@ -1,0 +1,28 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0071.csv
+functions: []
+constants:
+- mississippi
+- 750
+- 150000
+columns:
+- population
+- river_name
+- length
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION > 150000
+    AND CITYalias0.STATE_NAME IN
+      (SELECT RIVERalias0.TRAVERSE
+       FROM RIVER AS RIVERalias0
+       WHERE RIVERalias0.LENGTH > 750
+         AND RIVERalias0.RIVER_NAME = "mississippi" ) ;
+
+  df1 <- inner_join(df_city, df_river, by=c('country_name' = 'country_name','state_name' = 'traverse'), suffix = c('', '.other')) %>% mutate(traverse = state_name)
+  df2 <- df1 %>% filter(length <= 750 | population > 150000)
+  df3 <- df2 %>% filter(river_name == 'mississippi' | length == 750)
+  out <- df3 %>% select(CITY_NAME = city_name) %>% distinct() %>% arrange(CITY_NAME)

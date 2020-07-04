@@ -1,0 +1,28 @@
+inputs:
+- tests-examples/text2sql/advising/tables/area.csv
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0005.csv
+constants:
+- EECS
+- software
+- '281'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER,
+                  PROGRAM_COURSEalias0.WORKLOAD
+  FROM COURSE AS COURSEalias0
+  INNER JOIN AREA AS AREAalias0 ON COURSEalias0.COURSE_ID = AREAalias0.COURSE_ID
+  INNER JOIN PROGRAM_COURSE AS PROGRAM_COURSEalias0 ON PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+  WHERE AREAalias0.AREA LIKE "%software%"
+    AND PROGRAM_COURSEalias0.WORKLOAD <
+      (SELECT MIN(PROGRAM_COURSEalias1.WORKLOAD)
+       FROM COURSE AS COURSEalias1
+       INNER JOIN PROGRAM_COURSE AS PROGRAM_COURSEalias1 ON PROGRAM_COURSEalias1.COURSE_ID = COURSEalias1.COURSE_ID
+       WHERE COURSEalias1.DEPARTMENT = "EECS"
+         AND COURSEalias1.NUMBER = 281 )
+  ORDER BY PROGRAM_COURSEalias0.WORKLOAD ;

@@ -1,0 +1,39 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+- tests-examples/text2sql/advising/tables/student_record.csv
+output: tests-examples/text2sql/advising/tables/0200.csv
+constants:
+- EECS
+- '400'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER,
+                  SEMESTERalias0.SEMESTER
+  FROM
+    (SELECT STUDENT_RECORDalias0.COURSE_ID
+     FROM STUDENT_RECORD AS STUDENT_RECORDalias0
+     WHERE STUDENT_RECORDalias0.EARN_CREDIT = "Y"
+       AND STUDENT_RECORDalias0.STUDENT_ID = 1 ) AS DERIVED_TABLEalias0,
+       COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE ((SEMESTERalias0.SEMESTER = "FA"
+          AND SEMESTERalias0.YEAR = 2016)
+         OR (SEMESTERalias0.SEMESTER = "WN"
+             AND SEMESTERalias0.YEAR = 2017))
+    AND COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.COURSE_ID NOT IN (DERIVED_TABLEalias0.COURSE_ID)
+    AND COURSEalias0.COURSE_ID NOT IN
+      (SELECT DISTINCT COURSE_PREREQUISITEalias0.COURSE_ID
+       FROM COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0
+       WHERE COURSE_PREREQUISITEalias0.PRE_COURSE_ID NOT IN (DERIVED_TABLEalias0.COURSE_ID) )
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER BETWEEN 400 AND 400 + 100
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER ;

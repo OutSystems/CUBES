@@ -34,7 +34,7 @@ class ExampleDecider(Decider):
         '''
         return list(filter(
             lambda x: not self._interpreter.equals(
-                self.interpreter.eval(prog, x.input), x.output),
+                self.interpreter.eval(prog, x.input), x.output, prog),
             self._examples
         ))
 
@@ -44,7 +44,7 @@ class ExampleDecider(Decider):
         '''
         return any(
             not self._interpreter.equals(
-                self.interpreter.eval(prog, x.input), x.output)
+                self.interpreter.eval(prog, x.input), x.output, prog)
             for x in self._examples
         )
 

@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0216.csv
+constants: []
+functions:
+- count
+columns:
+- state_name
+- river_name
+foreign-keys: []
+comment: |-
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE (HIGHLOWalias0.STATE_NAME =
+           (SELECT RIVERalias0.TRAVERSE
+            FROM RIVER AS RIVERalias0,
+                 STATE AS STATEalias0
+            WHERE STATEalias0.STATE_NAME = RIVERalias0.TRAVERSE
+            GROUP BY STATEalias0.STATE_NAME
+            ORDER BY COUNT(RIVERalias0.RIVER_NAME) DESC
+            LIMIT 1)) ;

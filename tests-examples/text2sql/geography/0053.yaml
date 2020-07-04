@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0053.csv
+functions:
+- max
+constants:
+- new york
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.POPULATION
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION =
+      (SELECT MAX(CITYalias1.POPULATION)
+       FROM CITY AS CITYalias1
+       WHERE CITYalias1.STATE_NAME = "new york" )
+    AND CITYalias0.STATE_NAME = "new york" ;
+
+  df1 <- df_city %>% filter(state_name == 'new york')
+  df2 <- df1 %>% mutate(population = max(population))
+  out <- df2 %>% select(POPULATION = population) %>% distinct() %>% arrange(POPULATION)

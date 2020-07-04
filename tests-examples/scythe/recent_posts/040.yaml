@@ -1,12 +1,17 @@
 inputs:
   - tests-examples/scythe/recent_posts/tables/040.csv
 output: tests-examples/scythe/recent_posts/tables/040_o.csv
-const:
+constants:
   - 2
-aggrs:
-  - n
-attrs:
+functions:
+  - n_distinct
+columns:
   - action
+loc: 3
+solution:
+  - summarise
+  - filter
+  - natural_join3
 comment: |
   select p.*
   from person_log p
@@ -15,3 +20,8 @@ comment: |
         group by first_name,last_name
         having count(*) >=2 and count(distinct action) >= 2) p1
   on p1.first_name=p.first_name and p1.last_name=p.last_name
+
+  df2 <- input1 %>% group_by(first_name, last_name) %>% summarise(n_distinct = n_distinct(action)) %>% ungroup()
+  df3 <- df2 %>% filter(n_distinct == 2)
+  df4 <- inner_join(df2, input1) %>% inner_join(df3)
+  out <- df4 %>% select(id, timestamp, first_name, last_name, action) %>% arrange(id)

@@ -1,0 +1,69 @@
+[     3.340][MainProcess][INFO] Parsing specification...
+[     3.345][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.345][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.346][MainProcess][DEBUG] Reading input files...
+[     3.356][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i009.csv: ['string', 'string', 'int64']
+[     3.362][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o009.csv: ['string', 'string', 'int64']
+[     3.390][MainProcess][DEBUG] Generating DSL...
+[     3.565][MainProcess][INFO] Creating 4 processes
+[     3.582][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.728][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.756][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.759][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.792][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     6.297][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.311][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.751][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     6.782][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     8.788][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     8.827][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     8.849][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     8.860][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     8.869][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[     8.886][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3())
+[     8.907][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[     8.921][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[     8.935][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter())
+[     9.677][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[     9.679][MainProcess][INFO] Statistics:
+[     9.679][MainProcess][INFO] 	Generated cubes: 13
+[     9.679][MainProcess][INFO] 	Attempted programs: 18
+[     9.679][MainProcess][INFO] 		Rejected: 14
+[     9.680][MainProcess][INFO] 		Failed: 3
+[     9.680][MainProcess][INFO] 	Blacklist clauses: 3
+[     9.680][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     9.680][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     9.681][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     9.681][MainProcess][DEBUG] 	0: Counter({'summarise': 195})
+[     9.681][MainProcess][DEBUG] 	1: Counter({'natural_join': 111, 'filter': 84})
+[     9.682][MainProcess][INFO] Solution found: natural_join(summarise(@param0, time_stamp = max(time_stamp), username), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o009.csv", col_types = cols(username = col_character(),ip = col_character(),time_stamp = col_integer()))
+
+df2 <- input1 %>% group_by(username) %>% summarise(time_stamp = max(time_stamp)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(username, ip, time_stamp) %>% arrange(username)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT username,
+       ip,
+       time_stamp
+FROM
+  (SELECT LHS.username AS username,
+          LHS.time_stamp AS time_stamp,
+          RHS.ip AS ip
+   FROM
+     (SELECT username,
+             MAX(time_stamp) AS time_stamp
+      FROM input1
+      GROUP BY username) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.username = RHS.username
+                                AND LHS.time_stamp = RHS.time_stamp))
+ORDER BY username

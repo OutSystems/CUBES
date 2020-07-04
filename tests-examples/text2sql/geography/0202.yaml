@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0202.csv
+constants: []
+functions:
+- min
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |-
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0,
+       STATE AS STATEalias0
+  WHERE STATEalias0.STATE_NAME = HIGHLOWalias0.STATE_NAME
+    AND STATEalias0.STATE_NAME IN
+      (SELECT STATEalias1.STATE_NAME
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.POPULATION =
+           (SELECT MIN(STATEalias2.POPULATION)
+            FROM STATE AS STATEalias2) ) ;

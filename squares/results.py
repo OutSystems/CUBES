@@ -1,15 +1,13 @@
 import re
-from collections import defaultdict, Counter
+import time
 from enum import IntEnum
 from logging import getLogger
-from typing import Sequence
 
 import sqlparse
 from rpy2 import robjects
 
 from . import util
-from squares.dsl.interpreter import SquaresInterpreter
-from .util import Singleton
+from .dsl import interpreter
 
 logger = getLogger('squares')
 
@@ -23,86 +21,114 @@ class ExitCode(IntEnum):
     END_SEARCH_SPACE = 5
 
 
+start_time = time.time()
+specification = None
+solution = None
+solution_size = None
+n_cubes = 0
+blocked_cubes = 0
+n_attempts = 0
+n_rejects = 0
+n_fails = 0
+n_blocks = 0
+exit_code = ExitCode.ERROR
+exceeded_max_loc = False
+analysis_time = 0
+enum_time = 0
+init_time = 0
+block_time = 0
+empty_output = 0
+redundant_lines = 0
+
+
+def handle_sigint(signal, stackframe):
+    print()
+    print_results()
+    exit(exit_code)
+
+
 def beautifier(sql):
     sql = re.sub(r"""`(?=([^"'\\]*(\\.|"([^"'\\]*\\.)*[^"'\\]*"))*[^"']*$)""", '', sql)  # remove backticks if not inside strings
     return sqlparse.format(sql, reindent=True, keyword_case='upper')
 
 
-class ResultsHolder(metaclass=Singleton):
+def print_results():
+    global exit_code
+    logger.info('Statistics:')
+    if n_cubes:
+        logger.info('\tGenerated cubes: %d', n_cubes)
+        logger.info('\tBlocked cubes: %d (%f / generated avg.)', blocked_cubes, blocked_cubes / n_cubes if n_cubes else 0)
+    logger.info('\tAttempted programs: %d (approx)', n_attempts)
+    logger.info('\t\tRejected: %d (approx)', n_rejects)
+    logger.info('\t\tFailed: %d (approx)', n_fails)
+    logger.info('\t\tEmpty outputs: %d (%.1f%%) (approx)', empty_output, empty_output / n_attempts * 100 if n_attempts else 0)
+    logger.info('\t\tRedundant lines: %d (approx)', redundant_lines)
+    logger.info('\tBlocked programs: %d (%f / attempted avg.) (approx)', n_blocks, n_blocks / n_attempts if n_attempts else 0)
+    logger.info('\tTotal time spent in enumerator init: %f (approx)', init_time)
+    logger.info('\tTotal time spent in enumerator: %f (approx)', enum_time)
+    if enum_time != 0:
+        logger.info('\t\tEnumerated %f programs/s avg. (just enumeration time)', n_attempts / enum_time)
+    logger.info('\t\tEnumerated %f programs/s avg. (overall)', n_attempts / (time.time() - start_time))
+    logger.info('\tTotal time spent in evaluation & testing: %f (approx)', analysis_time)
+    logger.info('\tTotal time spent blocking cubes/programs: %f (approx)', block_time)
 
-    def __init__(self) -> None:
-        self.specification = None
-        self.solution = None
-        self.programs = defaultdict(list)
-        self.blacklist = None
-        self.n_cubes = 0
-        self.n_attempts = 0
-        self.n_rejects = 0
-        self.n_fails = 0
-        self.exit_code = ExitCode.ERROR
-        self.exceeded_max_loc = False
+    if solution is not None:
+        logger.info(f'Solution found: {solution}')
+        logger.info(f'Solution size: {solution_size}')
+        util.get_config().cache_ops = True
+        interp = interpreter.SquaresInterpreter(specification, True)
+        evaluation = interp.eval(solution, specification.tables)
+        assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
 
-    def print(self):
-        logger.info('Statistics:')
-        if self.n_cubes:
-            logger.info('\tGenerated cubes: %d', self.n_cubes)
-        logger.info('\tAttempted programs: %d', self.n_attempts)
-        logger.info('\t\tRejected: %d', self.n_rejects)
-        logger.info('\t\tFailed: %d', self.n_fails)
-        if self.blacklist:
-            logger.info('\tBlacklist clauses: %d', sum(map(len, self.blacklist.values())))
+        try:
+            program = specification.r_init + interp.program
+            robjects.r(program)
+            sql_query = robjects.r(f'sink(); sql_render(out, bare_identifier_ok=T)')
+        except:
+            logger.error('Error while trying to convert R code to SQL.')
+            sql_query = None
+            exit_code = ExitCode.SQL_FAILED if exit_code != ExitCode.NON_OPTIMAL else ExitCode.SQL_FAILED_NON_OPTIMAL
 
-        for l in self.programs.keys():
-            logger.debug('Priting statistics for good programs of size %d', l)
-            for i in range(l):
-                distribution = Counter(map(lambda prog: prog[i], self.programs[l]))
-                logger.debug('\t%d: %s', i, str(distribution))
+        print()
+        if util.get_config().print_r:
+            pass
+            print("------------------------------------- R Solution ---------------------------------------\n")
+            print(specification.r_init + '\n' + interp.program)
 
-        if self.solution is not None:
-            logger.info(f'Solution found: {self.solution}')
-            util.get_config().cache_ops = True
-            interpreter = SquaresInterpreter(self.specification, True)
-            evaluation = interpreter.eval(self.solution, self.specification.tables)
-            assert interpreter.equals(evaluation, 'expected_output')  # this call makes it so that the select() appears in the output
-
-            try:
-                program = self.specification.r_init + interpreter.final_program
-                robjects.r(program)
-                sql_query = robjects.r(f'sink(); sql_render(out, bare_identifier_ok=T)')
-            except:
-                logger.error('Error while trying to convert R code to SQL.')
-                sql_query = None
-                self.exit_code = ExitCode.SQL_FAILED if self.exit_code != ExitCode.NON_OPTIMAL else ExitCode.SQL_FAILED_NON_OPTIMAL
-
+        if sql_query is not None:
             print()
-            if util.get_config().print_r:
-                pass
-                print("------------------------------------- R Solution ---------------------------------------\n")
-                print(self.specification.r_init + '\n' + interpreter.final_program)
-
-            if sql_query is not None:
-                print()
-                print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
-                print(beautifier(str(sql_query)[6:]))
-            else:
-                print('Failed to generate SQL query')
+            print("+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++\n")
+            print(beautifier(str(sql_query)[6:]))
         else:
-            if self.exceeded_max_loc:
-                self.exit_code = ExitCode.END_SEARCH_SPACE
+            print('Failed to generate SQL query')
+    else:
+        if exceeded_max_loc:
+            exit_code = ExitCode.END_SEARCH_SPACE
 
-            print("No solution found")
+        print("No solution found")
 
-    def increment_attempts(self, attempts, rejects, fails):
-        self.n_attempts += attempts
-        self.n_rejects += rejects
-        self.n_fails += fails
 
-    def increment_cubes(self):
-        self.n_cubes += 1
+def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t, redundant):
+    global n_attempts, n_rejects, n_fails, n_blocks, empty_output, enum_time, analysis_time, init_time, block_time, redundant_lines
+    n_attempts += attempts
+    n_rejects += rejects
+    n_fails += fails
+    n_blocks += blocks
+    empty_output += emptys
+    enum_time += enum_t
+    analysis_time += analysis_t
+    init_time += init_t
+    block_time += block_t
+    redundant_lines += redundant
 
-    def store_program(self, program: Sequence):
-        self.programs[len(program)].append(program)
 
-    def store_solution(self, solution, optimal: bool = False):
-        self.solution = solution
-        self.exit_code = ExitCode.OK if optimal else ExitCode.NON_OPTIMAL
+def increment_cubes():
+    global n_cubes
+    n_cubes += 1
+
+
+def store_solution(sol, size: int, optimal: bool):
+    global solution, solution_size, exit_code
+    solution = sol
+    solution_size = size
+    exit_code = ExitCode.OK if optimal else ExitCode.NON_OPTIMAL

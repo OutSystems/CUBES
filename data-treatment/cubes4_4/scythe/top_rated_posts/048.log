@@ -1,0 +1,70 @@
+[     1.644][MainProcess][INFO] Parsing specification...
+[     1.647][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.647][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.648][MainProcess][DEBUG] Reading input files...
+[     1.655][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i048.csv: ['string', 'int64', 'string']
+[     1.661][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o048.csv: ['string', 'int64', 'string']
+[     1.686][MainProcess][DEBUG] Generating DSL...
+[     1.855][MainProcess][INFO] Creating 4 processes
+[     1.870][MainProcess][DEBUG] Increasing generator loc to 2
+[     2.015][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     2.015][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     2.020][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.023][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     4.561][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.598][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.972][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     5.083][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     7.041][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     7.065][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     7.080][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     7.093][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[     7.114][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     7.153][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3())
+[     7.178][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[     7.198][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[     7.219][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter())
+[     8.367][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = anti_join())
+[     8.699][cube-solver-3][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[     8.700][MainProcess][INFO] Statistics:
+[     8.701][MainProcess][INFO] 	Generated cubes: 14
+[     8.701][MainProcess][INFO] 	Attempted programs: 51
+[     8.701][MainProcess][INFO] 		Rejected: 32
+[     8.701][MainProcess][INFO] 		Failed: 18
+[     8.702][MainProcess][INFO] 	Blacklist clauses: 3
+[     8.702][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     8.702][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     8.703][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     8.703][MainProcess][DEBUG] 	0: Counter({'summarise': 401})
+[     8.704][MainProcess][DEBUG] 	1: Counter({'natural_join': 253, 'filter': 120, 'anti_join': 28})
+[     8.704][MainProcess][INFO] Solution found: natural_join(summarise(@param0, AddressID = min(AddressID), CName), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i048.csv", col_types = cols(CName = col_character(),AddressID = col_integer(),AddressLine = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o048.csv", col_types = cols(CName = col_character(),minAddressID = col_integer(),AddressLine = col_character()))
+
+df2 <- input1 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CName,
+       AddressID AS minAddressID,
+       AddressLine
+FROM
+  (SELECT LHS.CName AS CName,
+          LHS.AddressID AS AddressID,
+          RHS.AddressLine AS AddressLine
+   FROM
+     (SELECT CName,
+             MIN(AddressID) AS AddressID
+      FROM input1
+      GROUP BY CName) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.CName = RHS.CName
+                                AND LHS.AddressID = RHS.AddressID))
+ORDER BY CName

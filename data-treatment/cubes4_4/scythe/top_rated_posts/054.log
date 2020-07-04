@@ -1,0 +1,43 @@
+[     1.592][MainProcess][INFO] Parsing specification...
+[     1.595][MainProcess][DEBUG] Reading input files...
+[     1.603][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i054.csv: ['datetime64[ns]', 'int64']
+[     1.608][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o054.csv: ['datetime64[ns]', 'int64']
+[     1.643][MainProcess][DEBUG] Generating DSL...
+[     1.806][MainProcess][INFO] Creating 4 processes
+[     1.820][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.963][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.965][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.972][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.977][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     4.438][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     4.488][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.558][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     4.560][MainProcess][INFO] Statistics:
+[     4.560][MainProcess][INFO] 	Generated cubes: 4
+[     4.560][MainProcess][INFO] 	Attempted programs: 1
+[     4.560][MainProcess][INFO] 		Rejected: 0
+[     4.560][MainProcess][INFO] 		Failed: 0
+[     4.560][MainProcess][INFO] 	Blacklist clauses: 1
+[     4.561][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.561][MainProcess][DEBUG] 	0: Counter({'summarise': 13, 'mutate': 3})
+[     4.561][MainProcess][INFO] Solution found: mutate(@param0, cumsumcount = cumsum(count))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i054.csv", col_types = cols(created_at = col_character(),count = col_integer()))
+input1$created_at <- mdy(input1$created_at)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o054.csv", col_types = cols(created_at = col_character(),count = col_integer()))
+expected_output$created_at <- mdy(expected_output$created_at)
+
+df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
+out <- df2 %>% select(created_at, count = cumsumcount) %>% arrange(created_at)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT created_at,
+       SUM(COUNT) OVER (ROWS UNBOUNDED PRECEDING) AS COUNT
+FROM input1
+ORDER BY created_at

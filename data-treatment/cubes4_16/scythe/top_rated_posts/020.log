@@ -1,0 +1,68 @@
+[     1.559][MainProcess][INFO] Parsing specification...
+[     1.572][MainProcess][DEBUG] Reading input files...
+[     1.589][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i020.csv: ['string', 'string']
+[     1.604][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o020.csv: ['string', 'string', 'int64']
+[     1.633][MainProcess][DEBUG] Generating DSL...
+[     1.655][MainProcess][INFO] Creating 16 processes
+[     1.712][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.712][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.712][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.712][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.713][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.714][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.716][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.723][cube-solver-8][DEBUG] Initialising process for 2 lines of code.
+[     1.725][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     1.727][cube-solver-9][DEBUG] Initialising process for 2 lines of code.
+[     1.731][cube-solver-10][DEBUG] Initialising process for 2 lines of code.
+[     1.735][cube-solver-11][DEBUG] Initialising process for 2 lines of code.
+[     1.739][cube-solver-12][DEBUG] Initialising process for 2 lines of code.
+[     1.751][cube-solver-13][DEBUG] Initialising process for 2 lines of code.
+[     1.757][cube-solver-14][DEBUG] Initialising process for 2 lines of code.
+[     1.758][cube-solver-15][DEBUG] Initialising process for 2 lines of code.
+[     2.060][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     2.062][cube-solver-5][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     2.065][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = mutate())
+[     2.070][cube-solver-8][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     2.071][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     2.072][cube-solver-4][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     2.074][cube-solver-9][DEBUG] Solving cube (l0 = summarise(), l1 = inner_join())
+[     2.075][cube-solver-8][DEBUG] Solving cube (l0 = anti_join(), l1 = summarise())
+[     2.076][cube-solver-4][DEBUG] Solving cube (l0 = anti_join(), l1 = mutate())
+[     2.077][cube-solver-8][DEBUG] Solving cube (l0 = left_join(), l1 = summarise())
+[     2.078][cube-solver-4][DEBUG] Solving cube (l0 = left_join(), l1 = mutate())
+[     2.084][cube-solver-12][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     2.089][cube-solver-11][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     2.095][cube-solver-3][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     2.097][cube-solver-3][DEBUG] Solving cube (l0 = union(), l1 = summarise())
+[     2.099][cube-solver-10][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     2.123][cube-solver-6][DEBUG] Found solution with cube (l0 = summarise(), l1 = natural_join())
+[     2.125][MainProcess][INFO] Statistics:
+[     2.125][MainProcess][INFO] 	Generated cubes: 23
+[     2.125][MainProcess][INFO] 	Attempted programs: 1
+[     2.125][MainProcess][INFO] 		Rejected: 0
+[     2.125][MainProcess][INFO] 		Failed: 0
+[     2.125][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.126][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.126][MainProcess][DEBUG] 	0: Counter({'summarise': 3})
+[     2.126][MainProcess][DEBUG] 	1: Counter({'mutate': 1, 'inner_join': 1, 'natural_join': 1})
+[     2.126][MainProcess][INFO] Solution found: natural_join(@param0, summarise(@param0, str_countDESCRIPTION = str_count(DESCRIPTION, 'value'), TITLE))
+[     2.134][cube-solver-4][DEBUG] Found solution with cube (l0 = left_join(), l1 = mutate())
+[     2.169][cube-solver-9][DEBUG] Found solution with cube (l0 = summarise(), l1 = inner_join())
+[     2.173][cube-solver-5][DEBUG] Found solution with cube (l0 = summarise(), l1 = mutate())
+[     2.214][cube-solver-8][DEBUG] Found solution with cube (l0 = left_join(), l1 = summarise())
+[     2.216][cube-solver-11][DEBUG] Found solution with cube (l0 = summarise(), l1 = left_join())
+[     2.393][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i020.csv", col_types = cols(TITLE = col_character(),DESCRIPTION = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o020.csv", col_types = cols(TITLE = col_character(),DESCRIPTION = col_character(),COUNT = col_integer()))
+
+df2 <- input1 %>% group_by(TITLE) %>% summarise(str_countDESCRIPTION = str_count(DESCRIPTION, 'value')) %>% ungroup()
+df3 <- inner_join(input1, df2)
+out <- df3 %>% select(TITLE, DESCRIPTION, COUNT = str_countDESCRIPTION) %>% arrange(TITLE)
+
+Failed to generate SQL query

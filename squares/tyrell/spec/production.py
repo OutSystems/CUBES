@@ -61,8 +61,12 @@ class EnumProduction(Production):
         return lhs_ty.domain[self._choice]
 
     @property
-    def rhs(self) -> List[Any]:
-        return [self._get_rhs()]
+    def rhs(self) -> Any:
+        return self._get_rhs()
+
+    @property
+    def value(self) -> Any:
+        return self._lhs.values[self._choice]
 
     def is_function(self) -> bool:
         return False
@@ -78,22 +82,26 @@ class EnumProduction(Production):
             self._id, self._lhs, self._choice)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> {}'.format(
-            self._id, self._lhs, self._get_rhs())
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> {self._get_rhs()}'
 
 
 class ParamProduction(Production):
     _param_id: int
 
-    def __init__(self, id: int, lhs: ValueType, param_id: int):
+    def __init__(self, id: int, lhs: ValueType, param_id: int, value: Any = None):
         super().__init__(id, lhs)
         if not isinstance(lhs, ValueType):
             raise ValueError('LHS of ParamProduction must be a value type')
         self._param_id = param_id
+        self._value = value
 
     @property
-    def rhs(self) -> List[int]:
-        return [self._param_id]
+    def rhs(self) -> int:
+        return self._param_id
+
+    @property
+    def value(self) -> Any:
+        return self._value
 
     def is_function(self) -> bool:
         return False
@@ -109,8 +117,7 @@ class ParamProduction(Production):
             self._id, self._lhs, self._param_id)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> <param {}>'.format(
-            self._id, self._lhs, self._param_id)
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> <param {self._param_id}>'
 
 
 class FunctionProduction(Production):
@@ -159,6 +166,24 @@ class FunctionProduction(Production):
             self._id, self._lhs, self._name, self._rhs)
 
     def __str__(self) -> str:
-        return 'Production {}: {} -> {}({})'.format(
-            self._id, self._lhs, self._name,
-            ', '.join([str(x) for x in self._rhs]))
+        return f'[{str(self._id).rjust(4)}] {self._lhs} -> {self._name}({", ".join([str(x) for x in self._rhs])})'
+
+
+class LineProduction(Production):
+
+    def __init__(self, id, type, line: int):
+        super().__init__(id, type)
+        self.line = line
+
+    @property
+    def rhs(self) -> List[Any]:
+        raise NotImplementedError
+
+    def is_enum(self) -> bool:
+        return False
+
+    def is_param(self) -> bool:
+        return False
+
+    def is_function(self) -> bool:
+        return False

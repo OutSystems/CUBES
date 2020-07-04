@@ -1,0 +1,48 @@
+[    11.431][MainProcess][INFO] Parsing specification...
+[    11.435][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[    11.436][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[    11.436][MainProcess][DEBUG] Reading input files...
+[    11.444][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011.csv: ['int64', 'string', 'string']
+[    11.449][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011_o.csv: ['int64', 'string']
+[    11.541][MainProcess][DEBUG] Generating DSL...
+[    11.654][MainProcess][INFO] Creating 2 processes
+[    11.746][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[    11.750][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[    12.107][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[    12.149][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[    12.693][MainProcess][DEBUG] Increasing generator loc to 2
+[    12.694][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[    12.961][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[    12.964][MainProcess][INFO] Statistics:
+[    12.964][MainProcess][INFO] 	Generated cubes: 3
+[    12.964][MainProcess][INFO] 	Attempted programs: 18
+[    12.964][MainProcess][INFO] 		Rejected: 17
+[    12.964][MainProcess][INFO] 		Failed: 0
+[    12.964][MainProcess][INFO] 	Blacklist clauses: 0
+[    12.965][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    12.965][MainProcess][DEBUG] 	0: Counter({'summarise': 101, 'mutate': 96})
+[    12.965][MainProcess][INFO] Solution found: summarise(@param0, concatValue = string_agg(Value, ', '), ID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/011.csv", col_types = cols(ID = col_integer(),Name = col_character(),Value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/011_o.csv", col_types = cols(ID = col_integer(),Value = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(ID) %>% summarise(concatValue = string_agg(Value, ', ')) %>% ungroup()
+out <- df2 %>% select(ID, Value = concatValue) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `ID`,
+       `concatValue` AS `Value`
+FROM
+  (SELECT `ID`,
+          string_agg(`Value`, ', ') AS concatValue
+   FROM input1
+   GROUP BY ID)
+ORDER BY ID

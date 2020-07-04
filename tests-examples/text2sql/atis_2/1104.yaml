@@ -1,0 +1,51 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/1104.csv
+constants:
+- '400'
+- SAN FRANCISCO
+- DALLAS
+- '0'
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM FLIGHT AS FLIGHTalias0
+  WHERE (((FLIGHTalias0.DEPARTURE_TIME > 400
+           AND FLIGHTalias0.TO_AIRPORT IN
+             (SELECT AIRPORT_SERVICEalias1.AIRPORT_CODE
+              FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias1
+              WHERE AIRPORT_SERVICEalias1.CITY_CODE IN
+                  (SELECT CITYalias1.CITY_CODE
+                   FROM CITY AS CITYalias1
+                   WHERE CITYalias1.CITY_NAME = 'SAN FRANCISCO' ) ))
+          AND FLIGHTalias0.FROM_AIRPORT IN
+            (SELECT AIRPORT_SERVICEalias0.AIRPORT_CODE
+             FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0
+             WHERE AIRPORT_SERVICEalias0.CITY_CODE IN
+                 (SELECT CITYalias0.CITY_CODE
+                  FROM CITY AS CITYalias0
+                  WHERE CITYalias0.CITY_NAME = 'DALLAS' ) ))
+         AND FLIGHTalias0.CONNECTIONS > 0) ;

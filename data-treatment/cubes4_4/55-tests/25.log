@@ -1,0 +1,96 @@
+[     1.578][MainProcess][INFO] Parsing specification...
+[     1.582][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.582][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.582][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.582][MainProcess][DEBUG] Reading input files...
+[     1.588][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.591][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/certified.txt: ['int64', 'int64']
+[     1.595][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/25.out: ['int64']
+[     1.622][MainProcess][DEBUG] Generating DSL...
+[     2.687][MainProcess][INFO] Creating 4 processes
+[     3.825][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     3.825][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     3.834][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     3.893][cube-solver-3][DEBUG] Initialising process for 3 lines of code.
+[   126.889][cube-solver-2][WARNING] There is no solution for current loc (3).
+[   126.890][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = mutate())
+[   127.042][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = summarise(), l2 = summarise())
+[   127.140][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = summarise(), l2 = mutate())
+[   127.239][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate(), l2 = summarise())
+[   127.336][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate(), l2 = mutate())
+[   127.434][cube-solver-2][DEBUG] Solving cube (l0 = mutate(), l1 = summarise(), l2 = filter())
+[   127.532][cube-solver-2][DEBUG] Solving cube (l0 = mutate(), l1 = filter(), l2 = summarise())
+[   127.629][cube-solver-2][DEBUG] Solving cube (l0 = mutate(), l1 = filter(), l2 = mutate())
+[   127.726][cube-solver-2][DEBUG] Solving cube (l0 = mutate(), l1 = mutate(), l2 = filter())
+[   127.728][MainProcess][DEBUG] Increasing generator loc to 4
+[   127.826][cube-solver-2][DEBUG] Initialising process for 4 lines of code.
+[   127.872][cube-solver-3][WARNING] There is no solution for current loc (3).
+[   127.873][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = mutate(), l2 = filter())
+[   128.050][cube-solver-3][DEBUG] Initialising process for 4 lines of code.
+[   128.383][cube-solver-1][WARNING] There is no solution for current loc (3).
+[   128.384][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = summarise())
+[   128.504][cube-solver-1][DEBUG] Initialising process for 4 lines of code.
+[   128.744][cube-solver-0][WARNING] There is no solution for current loc (3).
+[   128.745][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[   128.865][cube-solver-0][DEBUG] Initialising process for 4 lines of code.
+[   236.124][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = summarise(), l3 = filter())
+[   236.556][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise(), l3 = summarise())
+[   236.697][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise(), l3 = mutate())
+[   249.648][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter(), l3 = summarise())
+[   251.120][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter(), l3 = mutate())
+[   252.141][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = mutate(), l3 = filter())
+[   270.875][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate(), l3 = summarise())
+[   304.774][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate(), l3 = mutate())
+[   309.709][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = summarise(), l3 = filter())
+[   341.505][cube-solver-2][DEBUG] Found solution with cube (l0 = natural_join(), l1 = mutate(), l2 = summarise(), l3 = filter())
+[   341.509][MainProcess][INFO] Statistics:
+[   341.510][MainProcess][INFO] 	Generated cubes: 21
+[   341.510][MainProcess][INFO] 	Attempted programs: 1338
+[   341.510][MainProcess][INFO] 		Rejected: 718
+[   341.510][MainProcess][INFO] 		Failed: 619
+[   341.510][MainProcess][INFO] 	Blacklist clauses: 0
+[   341.511][MainProcess][DEBUG] Printing statistics for good programs of size 4
+[   341.520][MainProcess][DEBUG] 	0: Counter({'natural_join': 11861})
+[   341.523][MainProcess][DEBUG] 	1: Counter({'summarise': 7478, 'filter': 3960, 'mutate': 423})
+[   341.527][MainProcess][DEBUG] 	2: Counter({'mutate': 5772, 'filter': 4006, 'summarise': 2083})
+[   341.530][MainProcess][DEBUG] 	3: Counter({'mutate': 5474, 'filter': 3895, 'summarise': 2492})
+[   341.530][MainProcess][INFO] Solution found: filter(summarise(mutate(natural_join(@param0, @param1), maxcrusingrange = max(crusingrange)), n = n(), eid), n > 3)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/25.out", col_types = cols(eid = col_integer()))
+
+df3 <- inner_join(input1, input2)
+df4 <- df3 %>% mutate(maxcrusingrange = max(crusingrange))
+df5 <- df4 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+df6 <- df5 %>% filter(n > 3)
+out <- df6 %>% select(eid) %>% arrange(eid)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT eid
+FROM
+  (SELECT eid,
+          COUNT() AS n
+   FROM
+     (SELECT aid,
+             aname,
+             crusingrange,
+             eid,
+             MAX(crusingrange) OVER () AS maxcrusingrange
+      FROM
+        (SELECT LHS.aid AS aid,
+                LHS.aname AS aname,
+                LHS.crusingrange AS crusingrange,
+                RHS.eid AS eid
+         FROM input1 AS LHS
+         INNER JOIN input2 AS RHS ON (LHS.aid = RHS.aid)))
+   GROUP BY eid)
+WHERE (n > 3.0)
+ORDER BY eid

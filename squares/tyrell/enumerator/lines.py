@@ -9,6 +9,7 @@ from z3 import *
 from .enumerator import Enumerator
 from .gen_lattices import SymmetryFinder
 from .. import dsl as D
+from ..spec import EnumType
 from ... import util
 
 logger = getLogger('tyrell.enumerator.smt')
@@ -148,6 +149,7 @@ class LinesEnumerator(Enumerator):
         for p in self.spec.productions():
             if p.is_enum():
                 self._production_id_cache[p._get_rhs()].append(p.id)
+        self._production_id_cache.default_factory = lambda: None
         self.resolve_predicates()
         logger.info('Number of Nodes: {} '.format(len(self.roots + self.leafs)))
         logger.info('Number of Variables: {}'.format(len(self.variables + self.typeVars + self.linesVars)))
@@ -258,7 +260,7 @@ class LinesEnumerator(Enumerator):
             for p in self.line_productions[a]:
                 ctr.append(var == p.id)
 
-        self.z3_solver.add(Or(ctr))
+        self.z3_solver.add(Or(*ctr))
         self.num_constraints += 1
         self.parentId[nb] = parent
         return var
@@ -358,7 +360,7 @@ class LinesEnumerator(Enumerator):
         if not util.get_config().is_not_parent_enabled:
             return
 
-        self._check_arg_types(pred, [str, str, (int, float)])
+        self._check_arg_types(pred, [str, str])
         prod0 = self.spec.get_function_production_or_raise(pred.args[0])
         prod1 = self.spec.get_function_production_or_raise(pred.args[1])
 
@@ -402,11 +404,17 @@ class LinesEnumerator(Enumerator):
             for r_i in range(len(self.roots)):
                 previous_roots = []
                 for r_ia in range(r_i):
-                    for c in self.roots[r_ia].children:
-                        for pre in pres:
-                            previous_roots.append(c.var == pre)
+                    for child_i, child in enumerate(self.roots[r_ia].children):
+                        for production in self.spec.get_function_productions():
+                            rhs = production.rhs
+                            if len(rhs) > child_i:
+                                if isinstance(rhs[child_i], EnumType):
+                                    if pred.args[1] in rhs[child_i].domain:
+                                        for pre in pres:
+                                            previous_roots.append(child.var == pre)
+                                        break
 
-                self.z3_solver.add(Implies(Or(*(c.var == pos for c in self.roots[r_i].children)), Or(previous_roots)))
+                self.z3_solver.add(Implies(Or(*(c.var == pos for c in self.roots[r_i].children)), Or(*previous_roots)))
 
     def resolve_predicates(self):
         try:

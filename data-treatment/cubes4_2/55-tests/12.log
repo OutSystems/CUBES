@@ -1,0 +1,61 @@
+[     1.578][MainProcess][INFO] Parsing specification...
+[     1.581][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.582][MainProcess][DEBUG] Reading input files...
+[     1.589][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/12-1.txt: ['string', 'int64', 'string']
+[     1.593][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/12.out: ['int64', 'string']
+[     1.618][MainProcess][DEBUG] Generating DSL...
+[     1.639][MainProcess][INFO] Creating 2 processes
+[     1.679][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.682][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.955][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     1.957][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     1.959][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     1.960][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     2.884][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter())
+[     2.886][MainProcess][INFO] Statistics:
+[     2.887][MainProcess][INFO] 	Generated cubes: 4
+[     2.887][MainProcess][INFO] 	Attempted programs: 16
+[     2.887][MainProcess][INFO] 		Rejected: 12
+[     2.887][MainProcess][INFO] 		Failed: 3
+[     2.887][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.887][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.888][MainProcess][DEBUG] 	0: Counter({'mutate': 153, 'summarise': 129})
+[     2.889][MainProcess][DEBUG] 	1: Counter({'filter': 282})
+[     2.889][MainProcess][INFO] Solution found: filter(summarise(@param0, n = n(), age, level), age == max(n) | n == max(n))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/12-1.txt", col_types = cols(S_key = col_character(),age = col_integer(),level = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/55-tests/tables/12.out", col_types = cols(age = col_integer(),level = col_character()))
+
+df2 <- input1 %>% group_by(age, level) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(age == max(n) | n == max(n))
+out <- df3 %>% select(age, level) %>% arrange(age)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT age,
+       LEVEL
+FROM
+  (SELECT age,
+          LEVEL,
+          n
+   FROM
+     (SELECT age,
+             LEVEL,
+             n,
+             MAX(n) OVER () AS zzz2,
+                         MAX(n) OVER () AS zzz3
+      FROM
+        (SELECT age,
+                LEVEL,
+                COUNT() AS n
+         FROM input1
+         GROUP BY age,
+                  LEVEL))
+   WHERE (age = zzz2
+          OR n = zzz3))
+ORDER BY age

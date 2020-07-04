@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0056.csv
+functions:
+  - n
+filters:
+  - max(n)
+constants: []
+columns:
+  - river_name
+foreign-keys: []
+comment: |
+  SELECT COUNT(RIVERalias0.RIVER_NAME)
+  FROM RIVER AS RIVERalias0
+  GROUP BY RIVERalias0.TRAVERSE
+  ORDER BY COUNT(RIVERalias0.RIVER_NAME) DESC
+  LIMIT 1 ;
+
+  df1 <- df_river %>% group_by(river_name) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n == max(n))
+  out <- df2 %>% select(COUNT..RIVERalias0.RIVER_NAME.. = n) %>% arrange(COUNT..RIVERalias0.RIVER_NAME..)

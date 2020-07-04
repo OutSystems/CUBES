@@ -1,0 +1,70 @@
+[     1.608][MainProcess][INFO] Parsing specification...
+[     1.610][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.611][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.611][MainProcess][DEBUG] Reading input files...
+[     1.618][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-1.txt: ['string', 'string']
+[     1.623][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-2.txt: ['string', 'string']
+[     1.628][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/19-3.txt: ['string', 'string']
+[     1.634][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/20.out: ['string', 'string', 'string', 'string']
+[     1.664][MainProcess][DEBUG] Generating DSL...
+[     1.682][MainProcess][INFO] Creating 2 processes
+[     1.690][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.722][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.725][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.831][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     1.832][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     1.833][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.957][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter())
+[     1.959][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter())
+[     1.961][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join())
+[     1.963][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     2.073][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter([4]))
+[     2.113][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = filter([4]))
+[     2.114][MainProcess][INFO] Statistics:
+[     2.115][MainProcess][INFO] 	Generated cubes: 6
+[     2.115][MainProcess][INFO] 	Attempted programs: 1
+[     2.115][MainProcess][INFO] 		Rejected: 0
+[     2.115][MainProcess][INFO] 		Failed: 0
+[     2.115][MainProcess][INFO] 	Blacklist clauses: 4
+[     2.115][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.116][MainProcess][DEBUG] 	0: Counter({'natural_join3': 1})
+[     2.116][MainProcess][DEBUG] 	1: Counter({'filter': 1})
+[     2.116][MainProcess][INFO] Solution found: filter(natural_join3(@param0, @param2, @param1), color == 'red')
+[     2.338][cube-solver-1][DEBUG] Found solution with cube (l0 = filter(), l1 = natural_join3())
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/19-1.txt", col_types = cols(S_key = col_character(),P_id = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/19-2.txt", col_types = cols(P_id = col_character(),color = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/19-3.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/20.out", col_types = cols(S_key = col_character(),P_id = col_character(),S_name = col_character(),color = col_character()))
+
+df4 <- inner_join(input1, input3) %>% inner_join(input2)
+df5 <- df4 %>% filter(color == 'red')
+out <- df5 %>% select(S_key, P_id, S_name, color) %>% arrange(S_key)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_key`,
+       `P_id`,
+       `S_name`,
+       `color`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `LHS`.`P_id` AS `P_id`,
+          `LHS`.`S_name` AS `S_name`,
+          `RHS`.`color` AS `color`
+   FROM
+     (SELECT `LHS`.`S_key` AS `S_key`,
+             `LHS`.`P_id` AS `P_id`,
+             `RHS`.`S_name` AS `S_name`
+      FROM `input1` AS `LHS`
+      INNER JOIN `input3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   INNER JOIN `input2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`))
+WHERE (`color` = 'red')
+ORDER BY S_key

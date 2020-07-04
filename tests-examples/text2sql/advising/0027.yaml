@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0027.csv
+constants:
+- deorio
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER
+  FROM COURSE AS COURSEalias0
+  INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  INNER JOIN OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.OFFERING_ID = COURSE_OFFERINGalias0.OFFERING_ID
+  INNER JOIN INSTRUCTOR AS INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID = INSTRUCTORalias0.INSTRUCTOR_ID
+  INNER JOIN PROGRAM_COURSE AS PROGRAM_COURSEalias0 ON PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+  WHERE INSTRUCTORalias0.NAME LIKE "%deorio%"
+    AND PROGRAM_COURSEalias0.CATEGORY LIKE "ULCS" ;

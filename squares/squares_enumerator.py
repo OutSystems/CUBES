@@ -5,92 +5,75 @@
 # Usage:	python3 squares_enumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
 import logging
+import signal
+import time
 from multiprocessing import Queue
 
 import rpy2.robjects as robjects
 
-from . import util
-from .config import Config
 from squares.dsl.interpreter import SquaresInterpreter
-from .results import ResultsHolder
 from squares.dsl.specification import Specification
-from .tyrell import spec as S
-from .tyrell.decider import Example, ExampleConstraintDecider
-from .tyrell.enumerator import LinesEnumerator, SmtEnumerator
-from .tyrell.logger import get_logger
+from . import util, results
+from .config import Config
+from .decider import LinesDecider
+from .tyrell.decider import Example, ExampleDecider
+from .tyrell.enumerator.bitenum import BitEnumerator
 from .tyrell.synthesizer import Synthesizer
 
-# warnings.filterwarnings("ignore", category=RRuntimeWarning)
-
-logger = get_logger('squares')
+logger = logging.getLogger('squares')
 
 robjects.r('''
-zz <- file("r_output.log", open = "wt")
-sink(zz)
-sink(zz, type = "message")
-library(dplyr)
-library(dbplyr)
-library(tidyr)
-library(stringr)
-library(readr)
-library(lubridate)
-options(warn=-1)''')
+sink("/dev/null")
+options(warn=-1)
+suppressMessages(library(tidyr))
+suppressMessages(library(stringr))
+suppressMessages(library(readr))
+suppressMessages(library(lubridate))
+suppressMessages(library(dplyr))
+suppressMessages(library(dbplyr))''')
 
 
-def main(args, spec, id: int, conf: Config, queue: Queue, limit: int):
+def main(args, specification, id: int, conf: Config, queue: Queue):
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
     util.seed(conf.seed)
     util.store_config(conf)
+    util.set_program_queue(queue)
 
-    if args.debug:
+    if args.verbose >= 1:
+        logger.setLevel('INFO')
+    if args.verbose >= 2:
         logger.setLevel('DEBUG')
+    if args.verbose >= 3:
+        logging.getLogger('tyrell').setLevel('DEBUG')
 
-    logger.handlers[0].set_identifier(f'prc{id}')
+    results.specification = specification
 
-    logger.info('Creating specification instance...')
-    specification = Specification(spec)
+    spec = specification.generate_dsl()
 
-    ResultsHolder().specification = specification
-
-    if logger.isEnabledFor(logging.DEBUG):
-        with open(f'dsl{id}.tyrell', 'w') as f:
-            f.write(repr(specification.dsl))
-
-    spec = S.parse(repr(specification.dsl))
-    logger.info('Parsing succeeded')
-
-    decider = ExampleConstraintDecider(spec=spec,
-                                       interpreter=SquaresInterpreter(specification, False),
-                                       examples=[Example(input=specification.tables, output='expected_output')],
-                                       )
+    decider = LinesDecider(interpreter=SquaresInterpreter(specification),
+                           examples=[Example(input=specification.tables, output='expected_output')],
+                           )
 
     logger.info('Building synthesizer...')
-    loc = max(specification.min_loc, conf.starting_loc)
-    while loc <= limit:
-        logger.info("Lines of Code: " + str(loc))
-        if args.tree:
-            enumerator = SmtEnumerator(spec, depth=loc + 1, loc=loc)
-        else:
-            if args.symm_off:
-                enumerator = LinesEnumerator(spec, loc=loc)
-            elif args.symm_on:
-                enumerator = LinesEnumerator(spec, loc=loc, break_sym_online=True)
-            else:
-                enumerator = LinesEnumerator(spec, loc=loc, sym_breaker=False)
+    loc = max(specification.min_loc, conf.minimum_loc)
+    while loc <= util.get_config().maximum_loc:
+        start = time.time()
+        enumerator = BitEnumerator(spec, specification, loc=loc)
+        results.init_time += time.time() - start
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
-        logger.info('Synthesizing programs...')
-        prog = synthesizer.synthesize()
+        prog, attempts = synthesizer.synthesize()
         if prog:
             logger.info(f'Solution found: {prog}')
-            ResultsHolder().store_solution(prog, True)
-            ResultsHolder().print()
-            queue.put(ResultsHolder().exit_code)
+            queue.put((util.Message.SOLUTION, id, prog, loc, True))
             return
 
         else:
-            logger.info('No more queries to be tested. Solution not found!')
-            logger.info('Increasing the number of lines of code.')
+            logger.info('Increasing the number of lines of code to %d.', loc + 1)
             loc = loc + 1
 
-    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, limit)
+    results.exceeded_max_loc = True
+    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, util.get_config().maximum_loc)

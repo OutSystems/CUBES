@@ -1,0 +1,33 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0131.csv
+constants:
+- EECS
+- '280'
+- SU
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSE_OFFERINGalias0.END_TIME,
+                  COURSE_OFFERINGalias0.FRIDAY,
+                  COURSE_OFFERINGalias0.MONDAY,
+                  COURSE_OFFERINGalias0.SATURDAY,
+                  COURSE_OFFERINGalias0.START_TIME,
+                  COURSE_OFFERINGalias0.SUNDAY,
+                  COURSE_OFFERINGalias0.THURSDAY,
+                  COURSE_OFFERINGalias0.TUESDAY,
+                  COURSE_OFFERINGalias0.WEDNESDAY
+  FROM COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 280
+    AND SEMESTERalias0.SEMESTER IN ("SP",
+                                    "SU",
+                                    "SS")
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+    AND SEMESTERalias0.YEAR = 2016 ;

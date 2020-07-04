@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0002.csv
+constants: []
+functions:
+- max
+columns:
+- population
+foreign-keys: []
+comment: |-
+  SELECT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.TRAVERSE IN
+      (SELECT CITYalias0.STATE_NAME
+       FROM CITY AS CITYalias0
+       WHERE CITYalias0.POPULATION =
+           (SELECT MAX(CITYalias1.POPULATION)
+            FROM CITY AS CITYalias1) ) ;
+
+  df1 <- df_city %>% group_by(country_name) %>% summarise(population = max(population)) %>% ungroup()
+  df2 <- semi_join(df_city, df1)
+  df3 <- inner_join(df2, df_river, by=c('city_name' = 'traverse','country_name' = 'country_name'), suffix = c('', '.other')) %>% mutate(traverse = city_name)
+  out <- df3 %>% select(RIVER_NAME = river_name) %>% arrange(RIVER_NAME)

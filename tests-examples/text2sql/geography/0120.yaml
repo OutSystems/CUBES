@@ -1,0 +1,25 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0120.csv
+constants: []
+functions:
+- max
+columns: []
+foreign-keys: []
+comment: |-
+  SELECT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.TRAVERSE IN
+      (SELECT DERIVED_TABLEalias0.STATE_NAME
+       FROM
+         (SELECT CITYalias0.STATE_NAME,
+                 COUNT(1) AS DERIVED_FIELDalias0
+          FROM CITY AS CITYalias0
+          GROUP BY CITYalias0.STATE_NAME) AS DERIVED_TABLEalias0
+       WHERE DERIVED_TABLEalias0.DERIVED_FIELDalias0 =
+           (SELECT MAX(DERIVED_TABLEalias1.DERIVED_FIELDalias1)
+            FROM
+              (SELECT COUNT(1) AS DERIVED_FIELDalias1
+               FROM CITY AS CITYalias1
+               GROUP BY CITYalias1.STATE_NAME) AS DERIVED_TABLEalias1) ) ;

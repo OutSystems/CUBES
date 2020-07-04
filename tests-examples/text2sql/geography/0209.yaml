@@ -1,0 +1,25 @@
+inputs:
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0209.csv
+constants:
+- texas
+functions:
+- max
+columns:
+- length
+- traverse
+foreign-keys: []
+comment: |-
+  SELECT DISTINCT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.LENGTH =
+      (SELECT MAX(RIVERalias1.LENGTH)
+       FROM RIVER AS RIVERalias1
+       WHERE RIVERalias1.RIVER_NAME NOT IN
+           (SELECT RIVERalias2.RIVER_NAME
+            FROM RIVER AS RIVERalias2
+            WHERE RIVERalias2.TRAVERSE = "texas" ) )
+    AND RIVERalias0.RIVER_NAME NOT IN
+      (SELECT RIVERalias3.RIVER_NAME
+       FROM RIVER AS RIVERalias3
+       WHERE RIVERalias3.TRAVERSE = "texas" ) ;

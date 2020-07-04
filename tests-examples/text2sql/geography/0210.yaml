@@ -1,0 +1,36 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0210.csv
+constants: []
+functions:
+- max
+- max
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |-
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION IN
+      (SELECT DERIVED_TABLEalias1.DERIVED_FIELDalias0
+       FROM
+         (SELECT MAX(CITYalias1.POPULATION) AS DERIVED_FIELDalias0,
+                 STATEalias0.STATE_NAME
+          FROM CITY AS CITYalias1,
+               STATE AS STATEalias0
+          WHERE STATEalias0.STATE_NAME = CITYalias1.STATE_NAME
+            AND STATEalias0.STATE_NAME IN
+              (SELECT BORDER_INFOalias0.BORDER
+               FROM BORDER_INFO AS BORDER_INFOalias0
+               GROUP BY BORDER_INFOalias0.BORDER
+               HAVING COUNT(1) =
+                 (SELECT MAX(DERIVED_TABLEalias0.DERIVED_FIELDalias1)
+                  FROM
+                    (SELECT BORDER_INFOalias1.BORDER,
+                            COUNT(1) AS DERIVED_FIELDalias1
+                     FROM BORDER_INFO AS BORDER_INFOalias1
+                     GROUP BY BORDER_INFOalias1.BORDER) AS DERIVED_TABLEalias0))
+          GROUP BY STATEalias0.STATE_NAME) AS DERIVED_TABLEalias1) ;

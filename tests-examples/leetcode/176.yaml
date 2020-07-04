@@ -1,16 +1,13 @@
 inputs:
   - tests-examples/leetcode/tables/176.csv
 output: tests-examples/leetcode/tables/176_o.csv
-aggrs:
+functions:
   - max
 filters:
   - max(Salary)
-attrs:
+columns:
   - Salary
 comment:
-  df2 <- input1 %>% group_by(Id, Salary) %>% summarise(maxSalary = max(Salary)) %>% ungroup()
-  df3 <- df2 %>% filter(maxSalary >= Salary & Salary != max(Salary))
-  df4 <- df3 %>% filter(maxSalary >= Salary & maxSalary == max(Salary))
-  out <- df4 %>% select(SecondHighestSalary = Salary)
-
-  Weird solution?
+  df2 <- input1 %>% filter(Id == max(Salary) | Salary != max(Salary))
+  df3 <- df2 %>% mutate(Salary = max(Salary))
+  out <- df3 %>% select(SecondHighestSalary = Salary) %>% distinct() %>% arrange(SecondHighestSalary)

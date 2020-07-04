@@ -1,0 +1,88 @@
+[     1.575][MainProcess][INFO] Parsing specification...
+[     1.578][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.578][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.579][MainProcess][DEBUG] Reading input files...
+[     1.585][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/6-1.txt: ['string', 'string']
+[     1.590][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/6-2.txt: ['string', 'string']
+[     1.595][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/6-3.txt: ['string', 'string']
+[     1.599][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/6.out: ['string']
+[     1.628][MainProcess][DEBUG] Generating DSL...
+[     1.652][MainProcess][INFO] Creating 2 processes
+[     1.698][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     1.701][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     2.120][cube-solver-1][WARNING] There is no solution for current loc (2).
+[     2.121][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     2.122][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     2.123][cube-solver-1][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     2.124][MainProcess][DEBUG] Increasing generator loc to 3
+[     2.125][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     2.127][cube-solver-0][WARNING] There is no solution for current loc (2).
+[     2.128][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     2.132][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     2.847][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise(), l2 = filter())
+[     2.853][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = summarise())
+[     2.856][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate(), l2 = filter())
+[     2.858][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[     2.858][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter(), l2 = mutate())
+[     2.862][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = summarise())
+[     2.865][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter(), l2 = mutate())
+[     2.867][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate(), l2 = filter())
+[     4.302][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise(), l2 = filter())
+[     4.308][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = summarise())
+[     4.312][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter(), l2 = mutate())
+[     4.315][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate(), l2 = filter())
+[     4.318][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join(), l2 = filter())
+[     4.320][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3([2]), l2 = filter())
+[     9.581][cube-solver-0][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = summarise(), l2 = filter())
+[     9.582][MainProcess][INFO] Statistics:
+[     9.582][MainProcess][INFO] 	Generated cubes: 18
+[     9.582][MainProcess][INFO] 	Attempted programs: 270
+[     9.582][MainProcess][INFO] 		Rejected: 177
+[     9.582][MainProcess][INFO] 		Failed: 92
+[     9.583][MainProcess][INFO] 	Blacklist clauses: 2
+[     9.583][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[     9.584][MainProcess][DEBUG] 	0: Counter({'natural_join3': 1033, 'summarise': 362})
+[     9.585][MainProcess][DEBUG] 	1: Counter({'summarise': 833, 'natural_join3': 362, 'mutate': 200})
+[     9.585][MainProcess][DEBUG] 	2: Counter({'filter': 1395})
+[     9.586][MainProcess][INFO] Solution found: filter(summarise(natural_join3(@param1, @param0, @param2), n = n(), F_key, F_name), n <= 5)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/6-1.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/6-2.txt", col_types = cols(C_name = col_character(),F_key = col_character()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/6-3.txt", col_types = cols(F_key = col_character(),F_name = col_character()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/6.out", col_types = cols(F_name = col_character()))
+
+df4 <- inner_join(input2, input1) %>% inner_join(input3)
+df5 <- df4 %>% group_by(F_key, F_name) %>% summarise(n = n()) %>% ungroup()
+df6 <- df5 %>% filter(n <= 5)
+out <- df6 %>% select(F_name) %>% arrange(F_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT F_name
+FROM
+  (SELECT F_key,
+          F_name,
+          COUNT() AS n
+   FROM
+     (SELECT LHS.C_name AS C_name,
+             LHS.F_key AS F_key,
+             LHS.S_key AS S_key,
+             RHS.F_name AS F_name
+      FROM
+        (SELECT LHS.C_name AS C_name,
+                LHS.F_key AS F_key,
+                RHS.S_key AS S_key
+         FROM input2 AS LHS
+         INNER JOIN input1 AS RHS ON (LHS.C_name = RHS.C_name)) AS LHS
+      INNER JOIN input3 AS RHS ON (LHS.F_key = RHS.F_key))
+   GROUP BY F_key,
+            F_name)
+WHERE (n <= 5.0)
+ORDER BY F_name

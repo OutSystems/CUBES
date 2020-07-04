@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0059.csv
+functions:
+- count
+constants:
+- iowa
+columns:
+- state_name
+- border
+foreign-keys: []
+comment: |
+  SELECT COUNT(BORDER_INFOalias0.BORDER)
+  FROM BORDER_INFO AS BORDER_INFOalias0
+  WHERE BORDER_INFOalias0.STATE_NAME = "iowa" ;
+
+  df1 <- df_border_info %>% filter(state_name == 'iowa')
+  df2 <- df1 %>% mutate(n_distinct = n_distinct(border))
+  out <- df2 %>% select(COUNT..BORDER_INFOalias0.BORDER.. = n_distinct) %>% distinct() %>% arrange(COUNT..BORDER_INFOalias0.BORDER..)

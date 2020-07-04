@@ -1,0 +1,55 @@
+[     3.126][MainProcess][INFO] Parsing specification...
+[     3.130][MainProcess][DEBUG] Reading input files...
+[     3.137][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/182.csv: ['int64', 'string']
+[     3.141][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/182_o.csv: ['string']
+[     3.169][MainProcess][DEBUG] Generating DSL...
+[     3.193][MainProcess][INFO] Creating 8 processes
+[     3.228][MainProcess][DEBUG] Increasing generator loc to 3
+[     3.239][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     3.244][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     3.247][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.249][cube-solver-4][DEBUG] Initialising process for 3 lines of code.
+[     3.251][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.252][cube-solver-5][DEBUG] Initialising process for 3 lines of code.
+[     3.257][cube-solver-6][DEBUG] Initialising process for 3 lines of code.
+[     3.262][cube-solver-7][DEBUG] Initialising process for 3 lines of code.
+[     3.496][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     3.505][cube-solver-2][DEBUG] Solving cube (l0 = filter(), l1 = mutate())
+[     3.509][cube-solver-1][DEBUG] Solving cube (l0 = filter(), l1 = summarise())
+[     3.510][cube-solver-2][DEBUG] Initialising process for 3 lines of code.
+[     3.514][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[     3.519][cube-solver-3][DEBUG] Solving cube (l0 = mutate(), l1 = filter())
+[     3.646][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter())
+[     3.647][MainProcess][INFO] Statistics:
+[     3.648][MainProcess][INFO] 	Generated cubes: 10
+[     3.648][MainProcess][INFO] 	Attempted programs: 4
+[     3.648][MainProcess][INFO] 		Rejected: 3
+[     3.648][MainProcess][INFO] 		Failed: 0
+[     3.648][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.648][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     3.649][MainProcess][DEBUG] 	0: Counter({'summarise': 15, 'mutate': 14})
+[     3.650][MainProcess][DEBUG] 	1: Counter({'filter': 29})
+[     3.650][MainProcess][INFO] Solution found: filter(summarise(@param0, n = n(), Email), n > 1)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/182.csv", col_types = cols(Id = col_integer(),Email = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/182_o.csv", col_types = cols(Email = col_character()))
+
+df2 <- input1 %>% group_by(Email) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n > 1)
+out <- df3 %>% select(Email) %>% arrange(Email)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Email
+FROM
+  (SELECT Email,
+          COUNT() AS n
+   FROM input1
+   GROUP BY Email)
+WHERE (n > 1.0)
+ORDER BY Email

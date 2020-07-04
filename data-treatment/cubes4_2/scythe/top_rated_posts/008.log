@@ -1,0 +1,52 @@
+[     1.599][MainProcess][INFO] Parsing specification...
+[     1.602][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.602][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.603][MainProcess][DEBUG] Reading input files...
+[     1.610][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_1.csv: ['int64', 'string', 'string']
+[     1.616][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_2.csv: ['string', 'int64', 'int64', 'string']
+[     1.621][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o008.csv: ['string', 'int64', 'string']
+[     1.649][MainProcess][DEBUG] Generating DSL...
+[     1.670][MainProcess][INFO] Creating 2 processes
+[     1.713][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.715][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.876][cube-solver-1][WARNING] There is no solution for current loc (1).
+[     1.876][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     1.877][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.878][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.885][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     1.886][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     1.889][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     2.216][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     2.220][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     2.247][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     2.249][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     2.250][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     2.252][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     2.253][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     2.291][cube-solver-1][DEBUG] Found solution with cube (l0 = natural_join(), l1 = summarise())
+[     2.292][MainProcess][INFO] Statistics:
+[     2.293][MainProcess][INFO] 	Generated cubes: 9
+[     2.293][MainProcess][INFO] 	Attempted programs: 3
+[     2.293][MainProcess][INFO] 		Rejected: 0
+[     2.293][MainProcess][INFO] 		Failed: 2
+[     2.293][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.293][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.294][MainProcess][DEBUG] 	0: Counter({'natural_join': 5, 'summarise': 3})
+[     2.294][MainProcess][DEBUG] 	1: Counter({'summarise': 5, 'natural_join': 3})
+[     2.294][MainProcess][INFO] Solution found: summarise(natural_join(@param1, @param0), all$first, OrderNumber, Quantity)
+[     2.617][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_1.csv", col_types = cols(OrderID = col_integer(),OrderGUID = col_character(),OrderNumber = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_2.csv", col_types = cols(LineItemGUID = col_character(),OrderID = col_integer(),Quantity = col_integer(),Description = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o008.csv", col_types = cols(OrderNumber = col_character(),Quantity = col_integer(),Description = col_character()))
+
+df3 <- inner_join(input2, input1)
+df4 <- df3 %>% group_by(OrderNumber, Quantity) %>% summarise_all(first) %>% ungroup()
+out <- df4 %>% select(OrderNumber, Quantity, Description) %>% arrange(OrderNumber)
+
+Failed to generate SQL query

@@ -1,0 +1,64 @@
+[     3.118][MainProcess][INFO] Parsing specification...
+[     3.121][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.121][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.122][MainProcess][DEBUG] Reading input files...
+[     3.130][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011.csv: ['int64', 'string', 'string']
+[     3.135][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/011_o.csv: ['int64', 'string']
+[     3.165][MainProcess][DEBUG] Generating DSL...
+[     3.207][MainProcess][INFO] Creating 4 processes
+[     3.224][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.276][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.280][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.284][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.285][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.641][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.680][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.047][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     4.053][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     4.057][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     4.060][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     4.063][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     4.065][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     4.074][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     4.078][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[     4.081][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     4.083][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     4.085][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     4.340][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     4.378][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     4.379][MainProcess][INFO] Statistics:
+[     4.380][MainProcess][INFO] 	Generated cubes: 14
+[     4.380][MainProcess][INFO] 	Attempted programs: 18
+[     4.380][MainProcess][INFO] 		Rejected: 17
+[     4.380][MainProcess][INFO] 		Failed: 0
+[     4.380][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.380][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.381][MainProcess][DEBUG] 	0: Counter({'summarise': 101, 'mutate': 96})
+[     4.381][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     4.381][MainProcess][DEBUG] 	0: Counter({'summarise': 63})
+[     4.381][MainProcess][DEBUG] 	1: Counter({'natural_join': 35, 'anti_join': 28})
+[     4.382][MainProcess][INFO] Solution found: summarise(@param0, concatValue = string_agg(Value, ', '), ID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/011.csv", col_types = cols(ID = col_integer(),Name = col_character(),Value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/011_o.csv", col_types = cols(ID = col_integer(),Value = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(ID) %>% summarise(concatValue = string_agg(Value, ', ')) %>% ungroup()
+out <- df2 %>% select(ID, Value = concatValue) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `ID`,
+       `concatValue` AS `Value`
+FROM
+  (SELECT `ID`,
+          string_agg(`Value`, ', ') AS concatValue
+   FROM input1
+   GROUP BY ID)
+ORDER BY ID

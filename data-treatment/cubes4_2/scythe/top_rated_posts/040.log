@@ -1,0 +1,46 @@
+[     3.131][MainProcess][INFO] Parsing specification...
+[     3.135][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.136][MainProcess][DEBUG] Reading input files...
+[     3.144][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i040.csv: ['string', 'string']
+[     3.150][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o040.csv: ['string', 'string', 'int64']
+[     3.179][MainProcess][DEBUG] Generating DSL...
+[     3.200][MainProcess][INFO] Creating 2 processes
+[     3.237][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.246][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.319][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     3.357][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     3.366][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     3.367][MainProcess][INFO] Statistics:
+[     3.368][MainProcess][INFO] 	Generated cubes: 2
+[     3.368][MainProcess][INFO] 	Attempted programs: 3
+[     3.368][MainProcess][INFO] 		Rejected: 2
+[     3.368][MainProcess][INFO] 		Failed: 0
+[     3.368][MainProcess][INFO] 	Blacklist clauses: 0
+[     3.368][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     3.369][MainProcess][DEBUG] 	0: Counter({'summarise': 1})
+[     3.369][MainProcess][INFO] Solution found: summarise(@param0, n = n(), group, subGroup)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i040.csv", col_types = cols(group = col_character(),subGroup = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o040.csv", col_types = cols(group = col_character(),subGroup = col_character(),n = col_integer()))
+
+df2 <- input1 %>% group_by(group, subGroup) %>% summarise(n = n()) %>% ungroup()
+out <- df2 %>% select(group, subGroup, n) %>% arrange(group)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT GROUP,
+       subGroup,
+       n
+FROM
+  (SELECT GROUP,
+          subGroup,
+          COUNT() AS n
+   FROM input1
+   GROUP BY GROUP,
+            subGroup)
+ORDER BY GROUP

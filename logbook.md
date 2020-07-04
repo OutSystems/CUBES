@@ -254,106 +254,149 @@ Stats after 300s (16 threads):
 ### Hard but possibly solvable
 - scythe/recent_posts/046
 
-## Weeks 11, 12
+## Week 11
 
 ### Possible extension
 - union distinct
 
-### Underspecified instances
-- leetcode/180
+## Week 12
 
-### Unsolved instances
+## Week something??
+https://github.com/Z3Prover/z3/issues/1044
+>We don't expose ways to print internal state. You could perhaps interrupt the solver, then clone it using the "translate" methods and access the translated solver state using internal print utilities. You would have to change the code a bit to get to this state.
+ The print features on solvers don't access the internal state of any of the solvers, instead they look at the asserted formulas and print them.
+ I don't translate learned lemmas. For example, the code in smt_context.cpp line 176 is disabled because it didn't help with any performance enhancements. Similarly, the copy code in sat_solver does not copy learned clauses even though it retains unit literals and binary clauses that are learned.
 
-#### Supported
-- 55-tests/22
-- 55-tests/46
-- scythe/recent_posts/006
-- scythe/recent_posts/012
-- scythe/recent_posts/019
-- scythe/recent_posts/036
-- scythe/recent_posts/046
-- scythe/recent_posts/046
-- textbook/20
-- textbook/22
+Open issue: https://github.com/Z3Prover/z3/issues/2095
+>I take there are two parts to your post:
+>
+>1. Expose hooks to make saving state usable.
+>2. The format and fidelity of the state that is saved.
+>
+>Regarding 1, I wonder if adding a configuration option to
+ save state to a file if a solver is interrupted will be a way
+ to go.
+>
+>Regarding 2, much of what is below is also discussed in the earlier
+>post, #1044. A few things changed since
+>
+>So far z3 can persist state by serializing solver state to smtlib or dimacs.
+>Text files in this format are much easier to work with for debugging.
+>This isn't wrapped in a way that is as usable as you suggest (with commands).
+>You are also bound to lose lemmas.
+>
+>For the SAT solver I include lemmas of low glue level
+>and have configuration flags to control this. The SAT
+>solver serializes to either dimacs or SMT-LIB. Using SMT-LIB
+>has the advantage that the format includes model transformations
+>so that a solution to the saved formula can be translated to
+>a solution to the original formula.
+>
+>I use this serialization for distributed parallelization and
+>I think the text file-based approach is preferrable for debuggability
+>and portability.
+>
+>Saving state that is produced from SMT core is much cruder
+>(= limited to asserted formulas after pre-processing, excluding lemmas)
+>and other kernels (nlsat) simply non-existent. It possibly could be
+>improved if there is a clear use case, such as yours.
+>This would be for text-based state snapshots.
+>Since the text based formats dont' expose a notion of redundant
+>clauses they would be limited to learned clauses with low glue level,
+>which is not much of a restriction (because it amounts to running
+>agressive GC).
+>
+>A caveat with the text-based format is that it doesn't handle
+>internal identifiers created during pre-processing correctly:
+>you have to rename them (e.g., rename k!10 to k!_10) before
+>using them again so to avoid that a new internal identifier k!10
+>gets created.
+>
+>A binary format would be tougher to get right, have to address all
+>questions as the textual formats, but potentially be more flexible
+>and could address the internal identifier issue systematically.
+>Some of this was engineered around 2010 for MPI, by @cwintersteiger,
+>but subsequently bit-rot.
+>Features that would have to be serializable:
+>
+>model and proof transformers
+>smt-context state
+>sat solver state
+>maybe nlsat, qsat, other solver states
+>ast-manager state
+>An OS-based approach, with native snapshots would be nicer to
+>administrate. This would be outside of Z3.
 
-#### Unsure if supported?
-- scythe/recent_posts/001
-- scythe/recent_posts/039
-- leetcode/185
-- textbook/23
-- textbook/26
-- textbook/29
-- textbook/32
-- textbook/34
+Nikolaj on StackOverflow:
+>Yes, there are essentially two incremental modes.
+>
+>Stack based: using push(), pop() you create a local context, that follows a stack discipline. Assertions added under a push() are removed after a matching pop(). Furthermore, any lemmas that are derived under a push are removed. Use push()/pop() to emulate freezing a state and adding additional constraints over the frozen state, then resume to the frozen state. It has the advantage that any additional memory overhead (such as learned lemmas) built up within the scope of a push() is released. The working assumption is that learned lemmas under a push would not be useful any longer.
+>
+>Assumption based: using additional assumption literals passed to check()/check_sat() you can (1) extract unsatisfiable cores over the assumption literals, (2) gain local incrementality without garbage collecting lemmas that get derived independently of the assumptions. In other words, if Z3 learns a lemma that does not contain any of the assumption literals it expects to not garbage collect them. To use assumption literals effectively, you would have to add them to formulas too. So the tradeoff is that clauses used with assumptions contain some amount of bloat. For example if you want to locally assume some formula (<= x y), then you add a clause (=> p (<= x y)), and assume p when calling check_sat(). Note that the original assumption was a unit. Z3 propagates units efficiently. With the formulation that uses assumption literals it is no longer a unit at the base level of search. This incurs some extra overhead. Units become binary clauses, binary clauses become ternary clauses, etc.
+>
+>The differentiation between push/pop functionality holds for Z3's default SMT engine. This is the engine most formulas will be using. Z3 contains some portfolio of engines. For example, for pure bit-vector problems, Z3 may end up using the sat based engine. Incrementality in the sat based engine is implemented differently from the default engine. Here incrementality is implemented using assumption literals. Any assertion you add within the scope of a push is asserted as an implication (=> scope_literals formula). check_sat() within such a scope will have to deal with assumption literals. On the flip-side, any consequence (lemma) that does not depend on the current scope is not garbage collected on pop().
 
-#### Not supported
+## Week of 10/6
 
-##### Mutate
-- scythe/recent_posts/020 (concat, array_agg)
-- scythe/recent_posts/024 (arithmetic)
-- scythe/recent_posts/026 (predicates to bool cols)
-- scythe/recent_posts/027 (date arithmetic: hour(ts)*2 + minute(ts) %/% 30)
-- scythe/recent_posts/033 (arithmetic)
-- scythe/top_rated_posts/024 (year(date), month(date, label=T))
-- scythe/top_rated_posts/052 (arithmetic)
-- scythe/top_rated_posts/053 (case when)
-- leetcode/197 (arithmetic)
-- leetcode/262 (replace_na(n.y, 0) / n.x)
-- textbook/33 (arithmetic)
+#### c27
+- Added blocking of programs based on condition subsumption of Cols, FilterConditions and CrossJoinConditions
 
-##### Grouped mutate
-- scythe/recent_posts/024
-- scythe/recent_posts/035 (n / sum(n) * 100)
+#### c28
+- Multiply scores by number of programs solved
+- Re-enabled h-splitting
+- Optimized cube blocking
 
-##### Grouped filter
-- textbook/36 (all)
-- textbook/37 (all, any)
+#### c29
+- split threshold changed from 200 to 500
+- now uses substitute_vars in model blocking
 
-##### Complex Join
-- scythe/recent_posts/013
-- scythe/recent_posts/021
-- scythe/recent_posts/023 (chained left join)
-- scythe/recent_posts/028
-- scythe/recent_posts/043 (self join)
-- scythe/recent_posts/048 (self join)
-- scythe/recent_posts/050
-- scythe/top_rated_posts/018
-- scythe/top_rated_posts/030
-- scythe/top_rated_posts/054
-- leetcode/181
-- leetcode/197
-- textbook/27
+#### c30
+- made it so that max, min and mean do not create new columns
 
-##### Complex Constant
-- scythe/recent_posts/033 (ymd('2016-10-13') - weeks(1))
+#### c31
+- fixed a bug in condition subsumption and added transitivity
 
-##### Distinct
-- scythe/recent_posts/017 (distinct with .keep=T) (would still be 6 lines + select) (scythe supports because instance is underspecified)
+#### c32
+- reversed "made it so that max, min and mean do not create new columns"
 
-##### Union select
-- scythe/recent_posts/002
+#### c33
+- added operation transitivity   ---   UNSOUND
 
-##### Float comparison
-- scythe/recent_posts/024
-- scythe/recent_posts/035
-- leetcode/262
+#### c34
+- reverted "added operation transitivity"
 
-##### Gather / Spread
-- scythe/recent_posts/008
-- scythe/recent_posts/015
-- scythe/top_rated_posts/015
-- scythe/top_rated_posts/026
-- scythe/top_rated_posts/033
-- scythe/top_rated_posts/035
-- scythe/top_rated_posts/042 (transpose)
+#### c35
+- disabled condition subsumption
 
-##### Others
-- scythe/recent_posts/010 (???)
-- scythe/recent_posts/029 (full outer join?)
-- scythe/top_rated_posts/041 (recursive query)
-- scythe/top_rated_posts/046 (custom order, multiple filters)
-- scythe/top_rated_posts/056 (rotate table 45 degrees?????????????????????????)
+#### c36
+- enabled condition subsumption
+- split inner and cross join   ---    FLAWED IMPLEMENTATION
 
-##### Too complex to ever support?
-- scythe/recent_posts/030 (IN sets)
-- scythe/recent_posts/037 (SQL windows??)
+#### t11
+    'subsume_conditions': [True, False],
+    'static_search': [True, False],
+    'z3_QF_FD': [True, False]
+- cache enabled
+
+#### c37
+- fixed a few instances (csv format errors / type detection mistakes)
+- fixed a bug where the dsl for the block case wasn't actually being blocked
+- small optimizations
+
+#### c38
+- disabled condition subsumption
+
+#### c39
+- misc. optimizations and determinization
+
+## Week of 21/6
+
+#### c40
+- add exception raising when line will be redundant
+
+#### c41
+- removed exception raising when line will be redundant
+- added op transitivity
+
+#### c42
+- no transitivity

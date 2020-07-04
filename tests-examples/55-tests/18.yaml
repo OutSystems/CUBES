@@ -1,20 +1,21 @@
 inputs:
   - tests-examples/55-tests/tables/18-1.txt
+  #  - tests-examples/55-tests/tables/18-2.txt
   - tests-examples/55-tests/tables/18-3.txt
 output: tests-examples/55-tests/tables/18.out
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - cost
 bools:
   - ==
-loc: 4
+loc: 2
+solution:
+  - summarise
+  - natural_join3
 comment: |
   5.2.6 optimal solution
 
-  df1 <- input1 %>% group_by(P_id) %>% summarise(maxcost = max(cost)) %>% ungroup()
-  df2 <- inner_join(inner_join(df1, input1), input2)
-  df3 <- df2 %>% filter(maxcost == cost)
-  out <- df3 %>% select(P_id,S_name) %>% distinct()
-
-  NOT USED tests-examples/55-tests/tables/18-2.txt
+  df3 <- input1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
+  df4 <- inner_join(input2, input1) %>% inner_join(df3)
+  out <- df4 %>% select(P_id, S_name) %>% arrange(P_id)

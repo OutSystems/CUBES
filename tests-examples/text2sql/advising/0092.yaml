@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+output: tests-examples/text2sql/advising/tables/0092.csv
+constants:
+- EECS
+- '281'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias1.DEPARTMENT,
+                  COURSEalias1.NAME,
+                  COURSEalias1.NUMBER
+  FROM COURSE AS COURSEalias0
+  INNER JOIN COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0 ON COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.COURSE_ID
+  INNER JOIN COURSE AS COURSEalias1 ON COURSEalias1.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+  WHERE COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 281 ;

@@ -1,0 +1,71 @@
+[     1.586][MainProcess][INFO] Parsing specification...
+[     1.589][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.589][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.590][MainProcess][DEBUG] Reading input files...
+[     1.597][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i016.csv: ['int64', 'int64', 'string']
+[     1.601][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o016.csv: ['int64', 'string']
+[     1.628][MainProcess][DEBUG] Generating DSL...
+[     1.661][MainProcess][INFO] Creating 8 processes
+[     1.697][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.720][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.723][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.723][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.731][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.732][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.738][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.740][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.751][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     2.096][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     2.140][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     2.443][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     2.448][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise())
+[     2.450][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join())
+[     2.459][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join3())
+[     2.465][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     2.468][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     2.470][cube-solver-6][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     2.480][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise())
+[     2.485][cube-solver-2][DEBUG] Solving cube (l0 = summarise(), l1 = left_join())
+[     2.524][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     2.533][cube-solver-3][DEBUG] Solving cube (l0 = summarise(), l1 = union())
+[     2.536][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     2.541][cube-solver-5][DEBUG] Solving cube (l0 = summarise(), l1 = intersect())
+[     2.551][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     2.555][cube-solver-7][DEBUG] Solving cube (l0 = summarise(), l1 = semi_join())
+[     2.791][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     2.793][MainProcess][INFO] Statistics:
+[     2.793][MainProcess][INFO] 	Generated cubes: 17
+[     2.793][MainProcess][INFO] 	Attempted programs: 10
+[     2.793][MainProcess][INFO] 		Rejected: 9
+[     2.793][MainProcess][INFO] 		Failed: 0
+[     2.793][MainProcess][INFO] 	Blacklist clauses: 0
+[     2.793][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     2.794][MainProcess][DEBUG] 	0: Counter({'mutate': 94, 'summarise': 77})
+[     2.794][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.794][MainProcess][DEBUG] 	0: Counter({'summarise': 140})
+[     2.794][MainProcess][DEBUG] 	1: Counter({'natural_join': 35, 'left_join': 31, 'anti_join': 30, 'union': 24, 'semi_join': 20})
+[     2.794][MainProcess][INFO] Solution found: summarise(@param0, concatEMPLOYEE = string_agg(EMPLOYEE, ', '), COMPANY_ID)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i016.csv", col_types = cols(ID = col_integer(),COMPANY_ID = col_integer(),EMPLOYEE = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o016.csv", col_types = cols(COMPANY_ID = col_integer(),concatEMPLOYEE = col_character()))
+
+string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+df2 <- input1 %>% group_by(COMPANY_ID) %>% summarise(concatEMPLOYEE = string_agg(EMPLOYEE, ', ')) %>% ungroup()
+out <- df2 %>% select(COMPANY_ID, concatEMPLOYEE) %>% arrange(COMPANY_ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `COMPANY_ID`,
+       `concatEMPLOYEE`
+FROM
+  (SELECT `COMPANY_ID`,
+          string_agg(`EMPLOYEE`, ', ') AS concatEMPLOYEE
+   FROM input1
+   GROUP BY COMPANY_ID)
+ORDER BY COMPANY_ID

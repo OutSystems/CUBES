@@ -1,0 +1,22 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/highlow.csv
+  - tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0235.csv
+constants:
+  - mississippi
+functions:
+  - min
+columns:
+  - lowest_elevation
+  - river_name
+  - traverse
+foreign-keys: []
+comment: |-
+  SELECT HIGHLOWalias0.STATE_NAME
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.LOWEST_ELEVATION =
+      (SELECT MIN(HIGHLOWalias1.LOWEST_ELEVATION)
+       FROM HIGHLOW AS HIGHLOWalias1,
+            RIVER AS RIVERalias0
+       WHERE (RIVERalias0.RIVER_NAME = "mississippi")
+         AND (RIVERalias0.TRAVERSE = HIGHLOWalias1.STATE_NAME) ) ;

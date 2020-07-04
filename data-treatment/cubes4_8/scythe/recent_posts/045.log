@@ -1,0 +1,80 @@
+[     2.650][MainProcess][INFO] Parsing specification...
+[     2.653][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.653][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.654][MainProcess][DEBUG] Reading input files...
+[     2.662][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_1.csv: ['int64', 'string']
+[     2.666][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_2.csv: ['int64', 'int64', 'int64']
+[     2.671][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_o.csv: ['string', 'float64']
+[     2.701][MainProcess][DEBUG] Generating DSL...
+[     2.886][MainProcess][INFO] Creating 8 processes
+[     2.917][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.072][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.087][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.091][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.097][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.112][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     3.118][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     3.119][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     3.121][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     5.908][cube-solver-1][WARNING] There is no solution for current loc (1).
+[     5.909][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     5.915][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     5.965][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     5.966][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     5.972][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     8.862][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     8.918][cube-solver-4][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise())
+[     8.951][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = natural_join4())
+[     8.964][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = summarise())
+[     8.977][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = filter())
+[     8.997][cube-solver-4][DEBUG] Solving cube (l0 = summarise(), l1 = anti_join())
+[     9.021][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([1]))
+[     9.070][cube-solver-5][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[     9.073][cube-solver-7][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     9.079][cube-solver-6][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([2]))
+[     9.121][cube-solver-7][DEBUG] Solving cube (l0 = summarise([2]), l1 = left_join())
+[     9.123][cube-solver-5][DEBUG] Solving cube (l0 = summarise([2]), l1 = union())
+[     9.176][cube-solver-6][DEBUG] Solving cube (l0 = summarise([2]), l1 = intersect())
+[     9.485][cube-solver-3][DEBUG] Solving cube (l0 = summarise([8]), l1 = semi_join())
+[    10.101][cube-solver-3][DEBUG] Solving cube (l0 = summarise([14]), l1 = cross_join())
+[    10.212][cube-solver-7][DEBUG] Found solution with cube (l0 = summarise([2]), l1 = left_join())
+[    10.213][MainProcess][INFO] Statistics:
+[    10.213][MainProcess][INFO] 	Generated cubes: 19
+[    10.213][MainProcess][INFO] 	Attempted programs: 47
+[    10.214][MainProcess][INFO] 		Rejected: 13
+[    10.214][MainProcess][INFO] 		Failed: 33
+[    10.214][MainProcess][INFO] 	Blacklist clauses: 14
+[    10.214][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    10.214][MainProcess][DEBUG] 	0: Counter({'summarise': 305, 'natural_join': 216})
+[    10.215][MainProcess][DEBUG] 	1: Counter({'summarise': 136, 'union': 122, 'left_join': 115, 'mutate': 80, 'semi_join': 40, 'anti_join': 28})
+[    10.215][MainProcess][INFO] Solution found: left_join(@param0, summarise(@param1, sumQuantity = sum(Quantity), Menu_id))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/045_1.csv", col_types = cols(Menu_id = col_integer(),Name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/scythe/recent_posts/tables/045_2.csv", col_types = cols(ID = col_integer(),Quantity = col_integer(),Menu_id = col_integer()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/045_o.csv", col_types = cols(MenuName = col_character(),Quantity = col_double()))
+
+df3 <- input2 %>% group_by(Menu_id) %>% summarise(sumQuantity = sum(Quantity)) %>% ungroup()
+df4 <- left_join(input1, df3)
+out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity) %>% arrange(MenuName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Name AS MenuName,
+       sumQuantity AS Quantity
+FROM
+  (SELECT LHS.Menu_id AS Menu_id,
+          LHS.Name AS Name,
+          RHS.sumQuantity AS sumQuantity
+   FROM input1 AS LHS
+   LEFT JOIN
+     (SELECT Menu_id,
+             SUM(Quantity) AS sumQuantity
+      FROM input2
+      GROUP BY Menu_id) AS RHS ON (LHS.Menu_id = RHS.Menu_id))
+ORDER BY MenuName

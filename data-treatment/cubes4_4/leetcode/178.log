@@ -1,0 +1,42 @@
+[     3.083][MainProcess][INFO] Parsing specification...
+[     3.088][MainProcess][DEBUG] Reading input files...
+[     3.096][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/178.csv: ['int64', 'float64']
+[     3.101][MainProcess][INFO] Inferred data types for table tests-examples/leetcode/tables/178_o.csv: ['float64', 'int64']
+[     3.130][MainProcess][DEBUG] Generating DSL...
+[     3.387][MainProcess][INFO] Creating 4 processes
+[     3.405][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.667][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.670][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.707][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.709][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     7.418][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     7.429][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     7.653][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     7.654][MainProcess][INFO] Statistics:
+[     7.655][MainProcess][INFO] 	Generated cubes: 4
+[     7.655][MainProcess][INFO] 	Attempted programs: 2
+[     7.655][MainProcess][INFO] 		Rejected: 1
+[     7.655][MainProcess][INFO] 		Failed: 0
+[     7.655][MainProcess][INFO] 	Blacklist clauses: 0
+[     7.656][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     7.656][MainProcess][DEBUG] 	0: Counter({'summarise': 29, 'mutate': 19})
+[     7.656][MainProcess][INFO] Solution found: mutate(@param0, rankdScore = dense_rank(desc(Score)))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/leetcode/tables/178.csv", col_types = cols(Id = col_integer(),Score = col_double()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/leetcode/tables/178_o.csv", col_types = cols(Score = col_double(),Rank = col_integer()))
+
+df2 <- input1 %>% mutate(rankdScore = dense_rank(desc(Score)))
+out <- df2 %>% select(Score, Rank = rankdScore) %>% arrange(Score)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Score,
+       DENSE_RANK() OVER (
+                          ORDER BY Score DESC) AS Rank
+FROM input1
+ORDER BY Score

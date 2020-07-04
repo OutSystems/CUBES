@@ -1,0 +1,52 @@
+[     1.648][MainProcess][INFO] Parsing specification...
+[     1.651][MainProcess][DEBUG] Reading input files...
+[     1.658][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042.csv: ['int64', 'string', 'string']
+[     1.662][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042_o.csv: ['int64', 'string']
+[     1.688][MainProcess][DEBUG] Generating DSL...
+[     1.700][MainProcess][INFO] Creating 4 processes
+[     1.734][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.737][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.740][cube-solver-2][DEBUG] Initialising process for 1 lines of code.
+[     1.749][cube-solver-3][DEBUG] Initialising process for 1 lines of code.
+[     1.777][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(),)
+[     1.778][cube-solver-0][DEBUG] Solving cube (l0 = left_join(),)
+[     1.780][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(),)
+[     1.781][cube-solver-1][DEBUG] Solving cube (l0 = union(),)
+[     1.781][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(),)
+[     1.785][cube-solver-2][DEBUG] Solving cube (l0 = intersect(),)
+[     1.805][cube-solver-0][DEBUG] Found solution with cube (l0 = left_join(),)
+[     1.806][MainProcess][INFO] Statistics:
+[     1.807][MainProcess][INFO] 	Generated cubes: 7
+[     1.807][MainProcess][INFO] 	Attempted programs: 1
+[     1.807][MainProcess][INFO] 		Rejected: 0
+[     1.807][MainProcess][INFO] 		Failed: 0
+[     1.807][MainProcess][INFO] 	Blacklist clauses: 0
+[     1.807][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     1.808][MainProcess][DEBUG] 	0: Counter({'union': 1, 'left_join': 1})
+[     1.808][MainProcess][INFO] Solution found: left_join(@param0, @param0)
+[     1.813][cube-solver-1][DEBUG] Found solution with cube (l0 = union(),)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/042.csv", col_types = cols(id = col_integer(),name = col_character(),school = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/042_o.csv", col_types = cols(id = col_integer(),name = col_character()))
+
+df2 <- left_join(input1, input1)
+out <- df2 %>% select(id, name) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       name
+FROM
+  (SELECT LHS.id AS id,
+          LHS.name AS name,
+          LHS.school AS school
+   FROM input1 AS LHS
+   LEFT JOIN input1 AS RHS ON (LHS.id = RHS.id
+                               AND LHS.name = RHS.name
+                               AND LHS.school = RHS.school))
+ORDER BY id

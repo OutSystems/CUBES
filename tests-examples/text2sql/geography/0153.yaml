@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0153.csv
+constants:
+- idaho
+functions:
+- min
+columns:
+- state_name
+- lowest_elevation
+foreign-keys: []
+comment: |-
+  SELECT HIGHLOWalias0.STATE_NAME
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.LOWEST_ELEVATION =
+      (SELECT MIN(HIGHLOWalias1.LOWEST_ELEVATION)
+       FROM HIGHLOW AS HIGHLOWalias1
+       WHERE HIGHLOWalias1.STATE_NAME IN
+           (SELECT BORDER_INFOalias0.BORDER
+            FROM BORDER_INFO AS BORDER_INFOalias0
+            WHERE BORDER_INFOalias0.STATE_NAME = "idaho" ) )
+    AND HIGHLOWalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias1.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias1
+       WHERE BORDER_INFOalias1.STATE_NAME = "idaho" ) ;

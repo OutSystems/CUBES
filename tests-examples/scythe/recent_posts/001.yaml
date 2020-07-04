@@ -6,6 +6,11 @@ constants:
 columns:
   - partner_company
   - concurrent_company
+loc: 3
+solution:
+  - inner_join
+  - union
+  - filter
 comment: |
   select partner_company , id_demand
   From invitation
@@ -21,5 +26,10 @@ comment: |
   df4 <- df3 %>% select(company = concurrent_company, id_demand)
   df5 <- bind_rows(df2, df4)
   out <- df5 %>% select(company, id_demand)
+
+  df2 <- inner_join(input1, input1, by=c('partner_company' = 'partner_company','concurrent_company' = 'partner_company'), suffix = c('', '.other')) %>% mutate(partner_company = concurrent_company)
+  df3 <- bind_rows(df2, input1)
+  df4 <- df3 %>% filter(!is.na(partner_company))
+  out <- df4 %>% select(Company = partner_company, id_demand) %>% distinct() %>% arrange(Company)
 
 

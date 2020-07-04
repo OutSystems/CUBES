@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/border_info.csv
+  - tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0034.csv
+constants:
+  - mississippi
+filters:
+  - max
+columns:
+  - state_name
+  - highest_elevation
+foreign-keys: []
+comment: |-
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias0.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias0
+       WHERE BORDER_INFOalias0.STATE_NAME = "mississippi" )
+  ORDER BY HIGHLOWalias0.HIGHEST_ELEVATION DESC
+  LIMIT 1 ;

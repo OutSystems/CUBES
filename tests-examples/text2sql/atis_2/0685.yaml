@@ -1,0 +1,42 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0685.csv
+constants:
+- US
+comment: |-
+  SELECT DISTINCT CLASS_OF_SERVICEalias0.BOOKING_CLASS,
+                  FAREalias0.FARE_ID
+  FROM CLASS_OF_SERVICE AS CLASS_OF_SERVICEalias0,
+       FARE AS FAREalias0,
+       FARE_BASIS AS FARE_BASISalias0,
+       FLIGHT AS FLIGHTalias0,
+       FLIGHT_FARE AS FLIGHT_FAREalias0
+  WHERE FARE_BASISalias0.BOOKING_CLASS = CLASS_OF_SERVICEalias0.BOOKING_CLASS
+    AND FAREalias0.FARE_BASIS_CODE = FARE_BASISalias0.FARE_BASIS_CODE
+    AND FLIGHT_FAREalias0.FARE_ID = FAREalias0.FARE_ID
+    AND FLIGHTalias0.AIRLINE_CODE = 'US'
+    AND FLIGHTalias0.FLIGHT_ID = FLIGHT_FAREalias0.FLIGHT_ID ;

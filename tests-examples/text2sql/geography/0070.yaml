@@ -1,0 +1,20 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0070.csv
+functions: []
+constants:
+- alabama
+- 150000
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION > 150000
+    AND CITYalias0.STATE_NAME = "alabama" ;
+
+  df1 <- df_city %>% filter(state_name == 'alabama' & population >= 150000)
+  df2 <- inner_join(df_city, df1, by=c('country_name','population'), suffix = c('', '.other'))
+  out <- df2 %>% select(CITY_NAME = city_name) %>% arrange(CITY_NAME)

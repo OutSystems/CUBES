@@ -1,0 +1,63 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0338.csv
+constants:
+- THURSDAY
+- FRIDAY
+- WEDNESDAY
+- TUESDAY
+- MONDAY
+- ATLANTA
+- PITTSBURGH
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias1,
+       CITY AS CITYalias0,
+       CITY AS CITYalias1,
+       DAYS AS DAYSalias0,
+       DAYS AS DAYSalias1,
+       DAYS AS DAYSalias2,
+       DAYS AS DAYSalias3,
+       DAYS AS DAYSalias4,
+       FLIGHT AS FLIGHTalias0
+  WHERE (((((DAYSalias3.DAY_NAME = 'THURSDAY'
+             AND DAYSalias4.DAY_NAME = 'FRIDAY'
+             AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias3.DAYS_CODE
+             AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias4.DAYS_CODE)
+            AND DAYSalias2.DAY_NAME = 'WEDNESDAY'
+            AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias2.DAYS_CODE)
+           AND DAYSalias1.DAY_NAME = 'TUESDAY'
+           AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias1.DAYS_CODE)
+          AND DAYSalias0.DAY_NAME = 'MONDAY'
+          AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias0.DAYS_CODE)
+         AND CITYalias1.CITY_CODE = AIRPORT_SERVICEalias1.CITY_CODE
+         AND CITYalias1.CITY_NAME = 'ATLANTA'
+         AND FLIGHTalias0.TO_AIRPORT = AIRPORT_SERVICEalias1.AIRPORT_CODE)
+    AND CITYalias0.CITY_CODE = AIRPORT_SERVICEalias0.CITY_CODE
+    AND CITYalias0.CITY_NAME = 'PITTSBURGH'
+    AND FLIGHTalias0.FROM_AIRPORT = AIRPORT_SERVICEalias0.AIRPORT_CODE ;

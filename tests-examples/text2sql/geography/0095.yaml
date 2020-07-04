@@ -1,0 +1,25 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0095.csv
+filters:
+- max(area)
+constants:
+- arkansas
+columns:
+- state_name
+- area
+foreign-keys: []
+comment: |
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias0.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias0
+       WHERE BORDER_INFOalias0.STATE_NAME = "arkansas" )
+  ORDER BY STATEalias0.AREA DESC
+  LIMIT 1 ;
+
+  df1 <- inner_join(df_state, df_border_info, by=c('state_name'), suffix = c('', '.other'))
+  df2 <- df1 %>% filter(state_name != 'arkansas' & area == max(area))
+  out <- df2 %>% select(STATE_NAME = state_name) %>% distinct() %>% arrange(STATE_NAME)

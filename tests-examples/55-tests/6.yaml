@@ -3,17 +3,21 @@ inputs:
   - tests-examples/55-tests/tables/6-2.txt
   - tests-examples/55-tests/tables/6-3.txt
 output: tests-examples/55-tests/tables/6.out
-const:
+constants:
   - 5
-aggrs:
+functions:
   - n
 bools:
   - <=
 loc: 3
+solution:
+  - natural_join3
+  - summarise
+  - filter
 comment: |
   5.1.6 optimal solution
 
-  df1 <- inner_join(inner_join(input2, input1), input3)
-  df2 <- df1 %>% group_by(F_name) %>% summarise(n = n()) %>% ungroup()
-  df3 <- df2 %>% filter(n <= 5)
-  out <- df3 %>% select(F_name)
+  df4 <- inner_join(input2, input1) %>% inner_join(input3)
+  df5 <- df4 %>% group_by(F_key, F_name) %>% summarise(n = n()) %>% ungroup()
+  df6 <- df5 %>% filter(n <= 5)
+  out <- df6 %>% select(F_name) %>% arrange(F_name)

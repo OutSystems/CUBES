@@ -1,0 +1,143 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/1080.csv
+constants:
+- THURSDAY
+- 'NO'
+- FRIDAY
+- WEDNESDAY
+- TUESDAY
+- MONDAY
+- ORLANDO
+- MILWAUKEE
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM FLIGHT AS FLIGHTalias0
+  WHERE (((((((FLIGHTalias0.FLIGHT_DAYS IN
+                 (SELECT DAYSalias6.DAYS_CODE
+                  FROM DAYS AS DAYSalias6
+                  WHERE DAYSalias6.DAY_NAME = 'THURSDAY' )
+               AND FLIGHTalias0.FLIGHT_ID IN
+                 (SELECT FLIGHT_FAREalias3.FLIGHT_ID
+                  FROM FLIGHT_FARE AS FLIGHT_FAREalias3
+                  WHERE FLIGHT_FAREalias3.FARE_ID IN
+                      (SELECT FAREalias3.FARE_ID
+                       FROM FARE AS FAREalias3
+                       WHERE (FAREalias3.FARE_BASIS_CODE IN
+                                (SELECT FARE_BASISalias3.FARE_BASIS_CODE
+                                 FROM FARE_BASIS AS FARE_BASISalias3
+                                 WHERE FARE_BASISalias3.BASIS_DAYS IN
+                                     (SELECT DAYSalias7.DAYS_CODE
+                                      FROM DAYS AS DAYSalias7
+                                      WHERE DAYSalias7.DAY_NAME = 'THURSDAY' ) )
+                              AND FAREalias3.ROUND_TRIP_REQUIRED = 'NO') ) ))
+              OR (FLIGHTalias0.FLIGHT_DAYS IN
+                    (SELECT DAYSalias8.DAYS_CODE
+                     FROM DAYS AS DAYSalias8
+                     WHERE DAYSalias8.DAY_NAME = 'FRIDAY' )
+                  AND FLIGHTalias0.FLIGHT_ID IN
+                    (SELECT FLIGHT_FAREalias4.FLIGHT_ID
+                     FROM FLIGHT_FARE AS FLIGHT_FAREalias4
+                     WHERE FLIGHT_FAREalias4.FARE_ID IN
+                         (SELECT FAREalias4.FARE_ID
+                          FROM FARE AS FAREalias4
+                          WHERE (FAREalias4.FARE_BASIS_CODE IN
+                                   (SELECT FARE_BASISalias4.FARE_BASIS_CODE
+                                    FROM FARE_BASIS AS FARE_BASISalias4
+                                    WHERE FARE_BASISalias4.BASIS_DAYS IN
+                                        (SELECT DAYSalias9.DAYS_CODE
+                                         FROM DAYS AS DAYSalias9
+                                         WHERE DAYSalias9.DAY_NAME = 'FRIDAY' ) )
+                                 AND FAREalias4.ROUND_TRIP_REQUIRED = 'NO') ) )))
+             OR (FLIGHTalias0.FLIGHT_DAYS IN
+                   (SELECT DAYSalias4.DAYS_CODE
+                    FROM DAYS AS DAYSalias4
+                    WHERE DAYSalias4.DAY_NAME = 'WEDNESDAY' )
+                 AND FLIGHTalias0.FLIGHT_ID IN
+                   (SELECT FLIGHT_FAREalias2.FLIGHT_ID
+                    FROM FLIGHT_FARE AS FLIGHT_FAREalias2
+                    WHERE FLIGHT_FAREalias2.FARE_ID IN
+                        (SELECT FAREalias2.FARE_ID
+                         FROM FARE AS FAREalias2
+                         WHERE (FAREalias2.FARE_BASIS_CODE IN
+                                  (SELECT FARE_BASISalias2.FARE_BASIS_CODE
+                                   FROM FARE_BASIS AS FARE_BASISalias2
+                                   WHERE FARE_BASISalias2.BASIS_DAYS IN
+                                       (SELECT DAYSalias5.DAYS_CODE
+                                        FROM DAYS AS DAYSalias5
+                                        WHERE DAYSalias5.DAY_NAME = 'WEDNESDAY' ) )
+                                AND FAREalias2.ROUND_TRIP_REQUIRED = 'NO') ) )))
+            OR (FLIGHTalias0.FLIGHT_DAYS IN
+                  (SELECT DAYSalias2.DAYS_CODE
+                   FROM DAYS AS DAYSalias2
+                   WHERE DAYSalias2.DAY_NAME = 'TUESDAY' )
+                AND FLIGHTalias0.FLIGHT_ID IN
+                  (SELECT FLIGHT_FAREalias1.FLIGHT_ID
+                   FROM FLIGHT_FARE AS FLIGHT_FAREalias1
+                   WHERE FLIGHT_FAREalias1.FARE_ID IN
+                       (SELECT FAREalias1.FARE_ID
+                        FROM FARE AS FAREalias1
+                        WHERE (FAREalias1.FARE_BASIS_CODE IN
+                                 (SELECT FARE_BASISalias1.FARE_BASIS_CODE
+                                  FROM FARE_BASIS AS FARE_BASISalias1
+                                  WHERE FARE_BASISalias1.BASIS_DAYS IN
+                                      (SELECT DAYSalias3.DAYS_CODE
+                                       FROM DAYS AS DAYSalias3
+                                       WHERE DAYSalias3.DAY_NAME = 'TUESDAY' ) )
+                               AND FAREalias1.ROUND_TRIP_REQUIRED = 'NO') ) )))
+           OR (FLIGHTalias0.FLIGHT_DAYS IN
+                 (SELECT DAYSalias0.DAYS_CODE
+                  FROM DAYS AS DAYSalias0
+                  WHERE DAYSalias0.DAY_NAME = 'MONDAY' )
+               AND FLIGHTalias0.FLIGHT_ID IN
+                 (SELECT FLIGHT_FAREalias0.FLIGHT_ID
+                  FROM FLIGHT_FARE AS FLIGHT_FAREalias0
+                  WHERE FLIGHT_FAREalias0.FARE_ID IN
+                      (SELECT FAREalias0.FARE_ID
+                       FROM FARE AS FAREalias0
+                       WHERE (FAREalias0.FARE_BASIS_CODE IN
+                                (SELECT FARE_BASISalias0.FARE_BASIS_CODE
+                                 FROM FARE_BASIS AS FARE_BASISalias0
+                                 WHERE FARE_BASISalias0.BASIS_DAYS IN
+                                     (SELECT DAYSalias1.DAYS_CODE
+                                      FROM DAYS AS DAYSalias1
+                                      WHERE DAYSalias1.DAY_NAME = 'MONDAY' ) )
+                              AND FAREalias0.ROUND_TRIP_REQUIRED = 'NO') ) )))
+          AND FLIGHTalias0.TO_AIRPORT IN
+            (SELECT AIRPORT_SERVICEalias1.AIRPORT_CODE
+             FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias1
+             WHERE AIRPORT_SERVICEalias1.CITY_CODE IN
+                 (SELECT CITYalias1.CITY_CODE
+                  FROM CITY AS CITYalias1
+                  WHERE CITYalias1.CITY_NAME = 'ORLANDO' ) ))
+         AND FLIGHTalias0.FROM_AIRPORT IN
+           (SELECT AIRPORT_SERVICEalias0.AIRPORT_CODE
+            FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0
+            WHERE AIRPORT_SERVICEalias0.CITY_CODE IN
+                (SELECT CITYalias0.CITY_CODE
+                 FROM CITY AS CITYalias0
+                 WHERE CITYalias0.CITY_NAME = 'MILWAUKEE' ) )) ;

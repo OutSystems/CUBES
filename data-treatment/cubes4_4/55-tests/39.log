@@ -1,0 +1,90 @@
+[     1.644][MainProcess][INFO] Parsing specification...
+[     1.648][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.648][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.649][MainProcess][DEBUG] Reading input files...
+[     1.656][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.659][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/employees.txt: ['int64', 'string', 'int64']
+[     1.662][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/certified.txt: ['int64', 'int64']
+[     1.666][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/39.out: ['string']
+[     1.695][MainProcess][DEBUG] Generating DSL...
+[     1.723][MainProcess][INFO] Creating 4 processes
+[     1.740][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.773][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.776][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     1.779][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.783][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.023][cube-solver-0][WARNING] There is no solution for current loc (1).
+[     2.024][cube-solver-0][DEBUG] Solving cube (l0 = filter(),)
+[     2.025][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     2.456][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = filter())
+[     2.459][cube-solver-3][DEBUG] Solving cube (l0 = filter(), l1 = natural_join3())
+[     2.501][cube-solver-2][DEBUG] Solving cube (l0 = natural_join3(), l1 = filter([1]))
+[     2.505][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = filter([1]))
+[     2.512][cube-solver-1][DEBUG] Solving cube (l0 = filter([1]), l1 = natural_join4())
+[     2.528][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = natural_join())
+[     2.533][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = filter([1]))
+[     2.536][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = anti_join())
+[     2.538][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = left_join())
+[     2.540][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = union())
+[     2.543][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = intersect())
+[     2.545][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = semi_join())
+[     2.547][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = cross_join())
+[     2.550][cube-solver-0][DEBUG] Solving cube (l0 = filter([1]), l1 = inner_join())
+[     2.552][cube-solver-0][DEBUG] Solving cube (l0 = anti_join(), l1 = filter([1]))
+[     2.555][cube-solver-0][DEBUG] Solving cube (l0 = left_join(), l1 = filter([1]))
+[     2.558][cube-solver-0][DEBUG] Solving cube (l0 = union(), l1 = filter([1]))
+[     2.560][cube-solver-0][DEBUG] Solving cube (l0 = intersect(), l1 = filter([1]))
+[     2.562][cube-solver-0][DEBUG] Solving cube (l0 = semi_join(), l1 = filter([1]))
+[     2.565][cube-solver-0][DEBUG] Solving cube (l0 = cross_join(), l1 = filter([1]))
+[     2.567][cube-solver-0][DEBUG] Solving cube (l0 = inner_join(), l1 = filter([1]))
+[     2.570][MainProcess][DEBUG] Increasing generator loc to 3
+[     2.570][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     2.580][cube-solver-2][DEBUG] Found solution with cube (l0 = natural_join3(), l1 = filter([1]))
+[     2.581][MainProcess][INFO] Statistics:
+[     2.581][MainProcess][INFO] 	Generated cubes: 23
+[     2.581][MainProcess][INFO] 	Attempted programs: 2
+[     2.581][MainProcess][INFO] 		Rejected: 0
+[     2.581][MainProcess][INFO] 		Failed: 1
+[     2.581][MainProcess][INFO] 	Blacklist clauses: 3
+[     2.582][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     2.582][MainProcess][DEBUG] 	0: Counter({'filter': 18, 'natural_join3': 4})
+[     2.582][MainProcess][DEBUG] 	1: Counter({'natural_join3': 12, 'natural_join4': 6, 'filter': 4})
+[     2.582][MainProcess][INFO] Solution found: filter(natural_join3(@param0, @param2, @param1), salary < 80000 | salary >= 120000)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/aircraft.txt", col_types = cols(aid = col_integer(),aname = col_character(),crusingrange = col_integer()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/employees.txt", col_types = cols(eid = col_integer(),ename = col_character(),salary = col_integer()))
+input2 <- copy_to(con, input2)
+input3 <- read_csv("tests-examples/55-tests/tables/certified.txt", col_types = cols(eid = col_integer(),aid = col_integer()))
+input3 <- copy_to(con, input3)
+expected_output <- read_csv("tests-examples/55-tests/tables/39.out", col_types = cols(aname = col_character()))
+
+df4 <- inner_join(input1, input3) %>% inner_join(input2)
+df5 <- df4 %>% filter(salary < 80000 | salary >= 120000)
+out <- df5 %>% select(aname) %>% distinct() %>% arrange(aname)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT aname
+FROM
+  (SELECT LHS.aid AS aid,
+          LHS.aname AS aname,
+          LHS.crusingrange AS crusingrange,
+          LHS.eid AS eid,
+          RHS.ename AS ename,
+          RHS.salary AS salary
+   FROM
+     (SELECT LHS.aid AS aid,
+             LHS.aname AS aname,
+             LHS.crusingrange AS crusingrange,
+             RHS.eid AS eid
+      FROM input1 AS LHS
+      INNER JOIN input3 AS RHS ON (LHS.aid = RHS.aid)) AS LHS
+   INNER JOIN input2 AS RHS ON (LHS.eid = RHS.eid))
+WHERE (salary < 80000.0
+       OR salary >= 120000.0)
+ORDER BY aname

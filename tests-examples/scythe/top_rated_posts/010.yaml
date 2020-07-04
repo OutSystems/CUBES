@@ -2,6 +2,7 @@ inputs:
   - tests-examples/scythe/top_rated_posts/tables/i010_1.csv
   - tests-examples/scythe/top_rated_posts/tables/i010_2.csv
 output: tests-examples/scythe/top_rated_posts/tables/o010.csv
+loc: 1
 comment: |
   SELECT *
   FROM   Call
@@ -16,6 +17,5 @@ comment: |
      FROM   Phone_book
      WHERE  Phone_book.phone_number = Call.phone_number)
 
-  df1 <- anti_join(select(input2,phone_number), select(input1, phone_number))
-  df2 <- semi_join(input2, df1)
-  out <- df2 %>% ungroup() %>% select(id,date,phone_number)
+  df3 <- anti_join(input2, input1, by=c('phone_number'))
+  out <- df3 %>% select(id, date, phone_number) %>% arrange(id)

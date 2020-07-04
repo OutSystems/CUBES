@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0026.csv
+constants:
+- '485'
+- EECS
+- '484'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.NUMBER
+  FROM COURSE AS COURSEalias0
+  INNER JOIN PROGRAM_COURSE AS PROGRAM_COURSEalias0 ON PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+  WHERE (COURSEalias0.NUMBER = 484
+         OR COURSEalias0.NUMBER = 485)
+    AND PROGRAM_COURSEalias0.WORKLOAD =
+      (SELECT MIN(PROGRAM_COURSEalias1.WORKLOAD)
+       FROM PROGRAM_COURSE AS PROGRAM_COURSEalias1
+       INNER JOIN COURSE AS COURSEalias1 ON PROGRAM_COURSEalias1.COURSE_ID = COURSEalias1.COURSE_ID
+       WHERE (COURSEalias1.NUMBER = 484
+              OR COURSEalias1.NUMBER = 485)
+         AND COURSEalias1.DEPARTMENT = "EECS" ) ;

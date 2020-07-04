@@ -1,0 +1,56 @@
+[     1.610][MainProcess][INFO] Parsing specification...
+[     1.613][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.613][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.613][MainProcess][DEBUG] Reading input files...
+[     1.622][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i021.csv: ['int64', 'int64', 'string', 'datetime64[ns]']
+[     1.629][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o021.csv: ['int64', 'string', 'datetime64[ns]']
+[     1.664][MainProcess][DEBUG] Generating DSL...
+[     1.839][MainProcess][INFO] Creating 8 processes
+[     1.866][MainProcess][DEBUG] Increasing generator loc to 2
+[     2.023][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     2.030][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     2.035][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     2.037][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     2.043][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     2.047][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     2.050][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     2.054][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     4.853][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.857][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     5.418][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(),)
+[     5.419][MainProcess][INFO] Statistics:
+[     5.419][MainProcess][INFO] 	Generated cubes: 8
+[     5.419][MainProcess][INFO] 	Attempted programs: 8
+[     5.419][MainProcess][INFO] 		Rejected: 7
+[     5.419][MainProcess][INFO] 		Failed: 0
+[     5.420][MainProcess][INFO] 	Blacklist clauses: 0
+[     5.420][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     5.420][MainProcess][DEBUG] 	0: Counter({'mutate': 80, 'summarise': 61})
+[     5.420][MainProcess][INFO] Solution found: summarise(@param0, maxSERVICEMONTH = max(SERVICEMONTH), CHARGEID, CHARGETYPE)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i021.csv", col_types = cols(ID = col_integer(),CHARGEID = col_integer(),CHARGETYPE = col_character(),SERVICEMONTH = col_character()))
+input1$SERVICEMONTH <- mdy(input1$SERVICEMONTH)
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o021.csv", col_types = cols(CHARGEID = col_integer(),CHARGETYPE = col_character(),maxSERVICEMONTH = col_character()))
+expected_output$maxSERVICEMONTH <- mdy(expected_output$maxSERVICEMONTH)
+
+df2 <- input1 %>% group_by(CHARGEID, CHARGETYPE) %>% summarise(maxSERVICEMONTH = max(SERVICEMONTH)) %>% ungroup()
+out <- df2 %>% select(CHARGEID, CHARGETYPE, maxSERVICEMONTH) %>% arrange(CHARGEID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CHARGEID,
+       CHARGETYPE,
+       maxSERVICEMONTH
+FROM
+  (SELECT CHARGEID,
+          CHARGETYPE,
+          MAX(SERVICEMONTH) AS maxSERVICEMONTH
+   FROM input1
+   GROUP BY CHARGEID,
+            CHARGETYPE)
+ORDER BY CHARGEID

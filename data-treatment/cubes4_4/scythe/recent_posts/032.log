@@ -1,0 +1,78 @@
+[     3.059][MainProcess][INFO] Parsing specification...
+[     3.063][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.064][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.064][MainProcess][DEBUG] Reading input files...
+[     3.073][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/032.csv: ['int64', 'int64', 'int64', 'string']
+[     3.078][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/032_o.csv: ['int64', 'int64', 'string']
+[     3.107][MainProcess][DEBUG] Generating DSL...
+[     3.286][MainProcess][INFO] Creating 4 processes
+[     3.305][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.449][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.473][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.490][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     3.504][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     6.110][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.151][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     7.012][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     7.233][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     8.833][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([4]))
+[     8.842][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     8.868][cube-solver-3][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     8.873][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([4]))
+[     8.882][cube-solver-3][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join())
+[     8.896][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join3())
+[     8.927][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = natural_join4())
+[     8.949][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = summarise([4]))
+[     8.970][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = filter())
+[    10.640][cube-solver-2][DEBUG] Solving cube (l0 = summarise([4]), l1 = anti_join())
+[    12.433][cube-solver-0][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([4]))
+[    12.478][cube-solver-0][DEBUG] Solving cube (l0 = summarise([4]), l1 = left_join())
+[    12.635][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    12.663][cube-solver-1][DEBUG] Solving cube (l0 = summarise([4]), l1 = union())
+[    24.059][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise([4]), l1 = left_join())
+[    24.061][MainProcess][INFO] Statistics:
+[    24.061][MainProcess][INFO] 	Generated cubes: 16
+[    24.061][MainProcess][INFO] 	Attempted programs: 101
+[    24.061][MainProcess][INFO] 		Rejected: 66
+[    24.061][MainProcess][INFO] 		Failed: 34
+[    24.062][MainProcess][INFO] 	Blacklist clauses: 4
+[    24.062][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    24.062][MainProcess][DEBUG] 	0: Counter({'mutate': 168, 'summarise': 108})
+[    24.063][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    24.069][MainProcess][DEBUG] 	0: Counter({'summarise': 8266})
+[    24.071][MainProcess][DEBUG] 	1: Counter({'natural_join': 2527, 'left_join': 1923, 'anti_join': 1859, 'union': 1779, 'filter': 180})
+[    24.072][MainProcess][INFO] Solution found: left_join(summarise(@param0, Id = max(Id), crit1, crit2), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/032.csv", col_types = cols(Id = col_integer(),crit1 = col_integer(),crit2 = col_integer(),value = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/032_o.csv", col_types = cols(crit1 = col_integer(),crit2 = col_integer(),value = col_character()))
+
+df2 <- input1 %>% group_by(crit1, crit2) %>% summarise(Id = max(Id)) %>% ungroup()
+df3 <- left_join(df2, input1)
+out <- df3 %>% select(crit1, crit2, value) %>% arrange(crit1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT crit1,
+       crit2,
+       value
+FROM
+  (SELECT LHS.crit1 AS crit1,
+          LHS.crit2 AS crit2,
+          LHS.Id AS Id,
+          RHS.value AS value
+   FROM
+     (SELECT crit1,
+             crit2,
+             MAX(Id) AS Id
+      FROM input1
+      GROUP BY crit1,
+               crit2) AS LHS
+   LEFT JOIN input1 AS RHS ON (LHS.crit1 = RHS.crit1
+                               AND LHS.crit2 = RHS.crit2
+                               AND LHS.Id = RHS.Id))
+ORDER BY crit1

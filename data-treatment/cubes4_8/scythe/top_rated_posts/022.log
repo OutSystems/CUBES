@@ -1,0 +1,44 @@
+[     1.562][MainProcess][INFO] Parsing specification...
+[     1.565][MainProcess][DEBUG] Reading input files...
+[     1.571][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i022.csv: ['int64', 'int64']
+[     1.574][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o022.csv: ['int64']
+[     1.599][MainProcess][DEBUG] Generating DSL...
+[     1.760][MainProcess][INFO] Creating 8 processes
+[     1.795][MainProcess][DEBUG] Increasing generator loc to 2
+[     1.935][cube-solver-4][DEBUG] Initialising process for 2 lines of code.
+[     1.941][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     1.942][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     1.950][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     1.954][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     1.956][cube-solver-5][DEBUG] Initialising process for 2 lines of code.
+[     1.967][cube-solver-6][DEBUG] Initialising process for 2 lines of code.
+[     1.967][cube-solver-7][DEBUG] Initialising process for 2 lines of code.
+[     4.675][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     4.731][cube-solver-1][DEBUG] Found solution with cube (l0 = mutate(),)
+[     4.732][MainProcess][INFO] Statistics:
+[     4.733][MainProcess][INFO] 	Generated cubes: 8
+[     4.733][MainProcess][INFO] 	Attempted programs: 1
+[     4.733][MainProcess][INFO] 		Rejected: 0
+[     4.733][MainProcess][INFO] 		Failed: 0
+[     4.733][MainProcess][INFO] 	Blacklist clauses: 0
+[     4.733][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     4.734][MainProcess][DEBUG] 	0: Counter({'mutate': 6})
+[     4.734][MainProcess][INFO] Solution found: mutate(@param0, medianval = median(val))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i022.csv", col_types = cols(id = col_integer(),val = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o022.csv", col_types = cols(median = col_integer()))
+
+df2 <- input1 %>% mutate(medianval = median(val))
+out <- df2 %>% select(median = medianval) %>% distinct() %>% arrange(median)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT PERCENTILE_CONT(0.5) WITHIN GROUP (
+                                                   ORDER BY val) OVER () AS median
+FROM input1
+ORDER BY median

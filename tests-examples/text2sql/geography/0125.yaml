@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0125.csv
+constants:
+- nevada
+functions:
+- max
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |-
+  SELECT DISTINCT STATEalias0.STATE_NAME
+  FROM BORDER_INFO AS BORDER_INFOalias0,
+       STATE AS STATEalias0
+  WHERE BORDER_INFOalias0.STATE_NAME = "nevada"
+    AND STATEalias0.POPULATION =
+      (SELECT MAX(STATEalias1.POPULATION)
+       FROM BORDER_INFO AS BORDER_INFOalias1,
+            STATE AS STATEalias1
+       WHERE BORDER_INFOalias1.STATE_NAME = "nevada"
+         AND STATEalias1.STATE_NAME = BORDER_INFOalias1.BORDER )
+    AND STATEalias0.STATE_NAME = BORDER_INFOalias0.BORDER ;

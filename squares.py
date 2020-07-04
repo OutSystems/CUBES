@@ -1,24 +1,32 @@
 #!/usr/bin/env python
-
+import copy
 import os
 import random
+from itertools import product
+from logging import getLogger
 from multiprocessing import Process, SimpleQueue
 from time import sleep
 
-from squares import squares_enumerator
+import signal
+
+from squares import squares_enumerator, results, util
 from squares.config import Config
-from squares.tyrell.logger import get_logger
+from squares.dsl.specification import Specification
 from squares.util import create_argparser, parse_specification
 
-logger = get_logger('squares')
+logger = getLogger('squares')
 
 
 def main():
     parser = create_argparser()
     args = parser.parse_args()
 
-    if args.debug:
+    if args.verbose >= 1:
+        logger.setLevel('INFO')
+    if args.verbose >= 2:
         logger.setLevel('DEBUG')
+    if args.verbose >= 3:
+        getLogger('tyrell').setLevel('DEBUG')
 
     logger.info('Parsing specification...')
     spec = parse_specification(args.input)
@@ -26,9 +34,33 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    configs = [
-        Config(seed=seed, print_r=args.r, cache_ops=args.cache_ops, z3_QF_FD=True, z3_sat_phase='random', disabled=['inner_join', 'semi_join'])
-    ]
+    base_config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations, optimal=args.optimal,
+                         solution_use_lines=args.use_lines, solution_use_last_line=args.use_last, advance_processes=args.split_search,
+                         static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold,
+                         minimum_loc=args.min_lines,
+                         maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo,
+                         max_column_combinations=args.max_cols_combo,
+                         max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
+                         block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
+                         probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
+                         z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
+    util.store_config(base_config)
+
+    specification = Specification(spec)
+    results.specification = specification
+
+    config_map = {
+        'subsume_conditions': [True, False],
+        'static_search': [True, False],
+        'z3_QF_FD': [True, False]
+        }
+
+    configs = []
+    for config in map(lambda vals: {key: val for key, val in zip(config_map.keys(), vals)}, product(*config_map.values())):
+        new_config = copy.copy(base_config)
+        for key, val in config.items():
+            new_config.__setattr__(key, val)
+        configs.append(new_config)
 
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')
@@ -41,29 +73,34 @@ def main():
 
     processes = []
     for i in range(len(configs)):
-        process = Process(target=squares_enumerator.main, name=str(configs[i]),
-                          args=(args, spec, i, configs[i], queue, args.limit),
+        process = Process(target=squares_enumerator.main, name=f'process{i}',
+                          args=(args, specification, i, configs[i], queue),
                           daemon=True)
         process.start()
         processes.append(process)
 
-    done = False
-    while not done and processes:
-        sleep(.5)
-        for p in processes:
-            if not p.is_alive():
-                if not queue.empty():
-                    done = True
-                    break
-                processes.remove(p)
+    signal.signal(signal.SIGINT, results.handle_sigint)
+    signal.signal(signal.SIGTERM, results.handle_sigint)
+
+    while True:
+        packet = queue.get()
+        if packet[0] == util.Message.DEBUG_STATS:
+            results.update_stats(*packet[1:])
+        elif packet[0] == util.Message.SOLUTION:
+            logger.debug('Solution found using process %d', packet[1])
+            results.store_solution(*packet[2:])
+            break
+        elif packet[0] == util.Message.EVAL_INFO:
+            pass
+        else:
+            logger.error('Unexpected message %s', packet[0])
+            raise NotImplementedError
 
     for p in processes:
-        p.terminate()
+        p.kill()
 
-    if not queue.empty():
-        exit(queue.get())
-
-    exit(1)
+    results.print_results()
+    exit(results.exit_code)
 
 
 if __name__ == '__main__':

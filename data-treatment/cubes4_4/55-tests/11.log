@@ -1,0 +1,56 @@
+[     3.119][MainProcess][INFO] Parsing specification...
+[     3.123][MainProcess][DEBUG] Reading input files...
+[     3.130][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11-1.txt: ['string', 'string']
+[     3.135][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11-2.txt: ['string', 'string']
+[     3.139][MainProcess][INFO] Inferred data types for table tests-examples/55-tests/tables/11.out: ['string']
+[     3.169][MainProcess][DEBUG] Generating DSL...
+[     3.188][MainProcess][INFO] Creating 4 processes
+[     3.228][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.231][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.235][cube-solver-2][DEBUG] Initialising process for 1 lines of code.
+[     3.244][cube-solver-3][DEBUG] Initialising process for 1 lines of code.
+[     3.289][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(),)
+[     3.292][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(),)
+[     3.293][cube-solver-1][DEBUG] Solving cube (l0 = left_join(),)
+[     3.293][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(),)
+[     3.297][cube-solver-2][DEBUG] Solving cube (l0 = union(),)
+[     3.325][cube-solver-3][DEBUG] Solving cube (l0 = anti_join(),)
+[     3.395][cube-solver-0][DEBUG] Solving cube (l0 = intersect(),)
+[     3.396][cube-solver-1][DEBUG] Solving cube (l0 = semi_join(),)
+[     3.422][cube-solver-2][DEBUG] Solving cube (l0 = cross_join(),)
+[     3.434][cube-solver-3][DEBUG] Found solution with cube (l0 = anti_join(),)
+[     3.435][cube-solver-2][DEBUG] Solving cube (l0 = inner_join(),)
+[     3.435][MainProcess][INFO] Statistics:
+[     3.436][MainProcess][INFO] 	Generated cubes: 10
+[     3.436][MainProcess][INFO] 	Attempted programs: 15
+[     3.436][MainProcess][INFO] 		Rejected: 6
+[     3.436][MainProcess][INFO] 		Failed: 8
+[     3.437][MainProcess][INFO] 	Blacklist clauses: 8
+[     3.437][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     3.437][MainProcess][DEBUG] 	0: Counter({'natural_join': 12, 'left_join': 12, 'union': 12, 'semi_join': 4, 'anti_join': 3})
+[     3.438][MainProcess][INFO] Solution found: anti_join(@param0, @param1, 'S_key')
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/55-tests/tables/11-1.txt", col_types = cols(S_key = col_character(),S_name = col_character()))
+input1 <- copy_to(con, input1)
+input2 <- read_csv("tests-examples/55-tests/tables/11-2.txt", col_types = cols(S_key = col_character(),C_name = col_character()))
+input2 <- copy_to(con, input2)
+expected_output <- read_csv("tests-examples/55-tests/tables/11.out", col_types = cols(S_name = col_character()))
+
+df3 <- anti_join(input1, input2, by=c('S_key'))
+out <- df3 %>% select(S_name) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT S_name
+FROM
+  (SELECT *
+   FROM input1 AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM input2 AS RHS
+        WHERE (LHS.S_key = RHS.S_key) ))
+ORDER BY S_name

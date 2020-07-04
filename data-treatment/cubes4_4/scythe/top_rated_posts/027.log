@@ -1,0 +1,70 @@
+[     2.905][MainProcess][INFO] Parsing specification...
+[     2.909][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.909][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.910][MainProcess][DEBUG] Reading input files...
+[     2.918][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i027.csv: ['string', 'string', 'float64']
+[     2.923][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o027.csv: ['string', 'string', 'float64']
+[     2.951][MainProcess][DEBUG] Generating DSL...
+[     3.113][MainProcess][INFO] Creating 4 processes
+[     3.131][MainProcess][DEBUG] Increasing generator loc to 2
+[     3.266][cube-solver-2][DEBUG] Initialising process for 2 lines of code.
+[     3.298][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.300][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     3.310][cube-solver-3][DEBUG] Initialising process for 2 lines of code.
+[     5.806][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     5.814][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.233][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[     6.283][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     8.297][cube-solver-2][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[     8.336][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[     8.358][cube-solver-2][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[     8.378][cube-solver-2][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[     8.383][cube-solver-3][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[     8.408][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3())
+[     8.427][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[     8.441][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[     8.455][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter())
+[     9.555][cube-solver-3][DEBUG] Solving cube (l0 = summarise([3]), l1 = anti_join())
+[     9.772][cube-solver-2][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[     9.773][MainProcess][INFO] Statistics:
+[     9.774][MainProcess][INFO] 	Generated cubes: 14
+[     9.774][MainProcess][INFO] 	Attempted programs: 51
+[     9.774][MainProcess][INFO] 		Rejected: 32
+[     9.774][MainProcess][INFO] 		Failed: 18
+[     9.774][MainProcess][INFO] 	Blacklist clauses: 3
+[     9.774][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[     9.775][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[     9.775][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[     9.776][MainProcess][DEBUG] 	0: Counter({'summarise': 363})
+[     9.776][MainProcess][DEBUG] 	1: Counter({'natural_join': 219, 'filter': 120, 'anti_join': 24})
+[     9.776][MainProcess][INFO] Solution found: natural_join(summarise(@param0, avg = max(avg), cname), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i027.csv", col_types = cols(cname = col_character(),wmname = col_character(),avg = col_double()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o027.csv", col_types = cols(cname = col_character(),wmname = col_character(),maxavg = col_double()))
+
+df2 <- input1 %>% group_by(cname) %>% summarise(avg = max(avg)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(cname, wmname, maxavg = avg) %>% arrange(cname)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT cname,
+       wmname,
+       AVG AS maxavg
+FROM
+  (SELECT LHS.cname AS cname,
+          LHS.avg AS AVG,
+          RHS.wmname AS wmname
+   FROM
+     (SELECT cname,
+             MAX(AVG) AS AVG
+      FROM input1
+      GROUP BY cname) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.cname = RHS.cname
+                                AND LHS.avg = RHS.avg))
+ORDER BY cname

@@ -27,6 +27,15 @@ BOOL = Type.BOOL
 NONE = Type.NONE
 TIME = Type.TIME
 
+operators_by_type = {
+    INT: OrderedSet(['==', '!=', '<=', '>=', '<', '>']),
+    FLOAT: OrderedSet(['==', '!=', '<=', '>=', '<', '>']),
+    DATETIME: OrderedSet(['==', '!=', '<=', '>=', '<', '>']),
+    TIME: OrderedSet(['==', '!=', '<=', '>=', '<', '>']),
+    BOOL: OrderedSet(['==', '!=']),
+    STRING: OrderedSet(['==', '!='])
+    }
+
 
 def get_type(dtype: Union[ExtensionDtype, dtype]) -> Type:
     if pandas.api.types.is_integer_dtype(dtype):
@@ -36,7 +45,7 @@ def get_type(dtype: Union[ExtensionDtype, dtype]) -> Type:
         return Type.FLOAT
 
     elif pandas.api.types.is_bool_dtype(dtype):
-        return Type.Bool
+        return Type.BOOL
 
     elif pandas.api.types.is_datetime64_any_dtype(dtype):
         return Type.DATETIME
@@ -53,7 +62,7 @@ dflt_2 = datetime.datetime(2, 2, 2)
 
 
 def is_time(o):
-    if not isinstance(o, str) or o.startswith('T') or not any(i.isdigit() for i in o):
+    if not isinstance(o, str) or o.startswith('T') or not any(i.isdigit() for i in o) or '-' in o or 'a' in o:
         return False
 
     try:
@@ -89,6 +98,8 @@ def is_integer(o):
 
 
 def is_float(o):
+    if o == 'N/A':
+        return False
     try:
         float(o)
         return True
@@ -169,6 +180,6 @@ def to_r_repr(o):
     elif is_type(o, Type.STRING):
         return f"'{o}'"
     elif is_type(o, Type.INT) or is_type(o, Type.FLOAT):
-        return str(o)
+        return str(o)  # TODO should use R integers for ints but it needs to be tested first
     else:
-        raise NotImplementedError
+        raise NotImplementedError  # TODO what about times and booleans??

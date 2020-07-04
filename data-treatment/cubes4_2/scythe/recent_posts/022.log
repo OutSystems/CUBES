@@ -1,0 +1,48 @@
+[     1.577][MainProcess][INFO] Parsing specification...
+[     1.581][MainProcess][DEBUG] Reading input files...
+[     1.587][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/022_2.csv: ['int64', 'int64']
+[     1.590][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/022_o.csv: ['int64']
+[     1.615][MainProcess][DEBUG] Generating DSL...
+[     2.566][MainProcess][INFO] Creating 2 processes
+[     3.564][cube-solver-0][DEBUG] Initialising process for 3 lines of code.
+[     3.580][cube-solver-1][DEBUG] Initialising process for 3 lines of code.
+[    98.291][cube-solver-1][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = summarise())
+[    98.306][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = summarise(), l2 = filter())
+[    98.692][cube-solver-0][DEBUG] Solving cube (l0 = summarise(), l1 = filter(), l2 = mutate())
+[   100.483][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise(), l1 = filter(), l2 = mutate())
+[   100.486][MainProcess][INFO] Statistics:
+[   100.487][MainProcess][INFO] 	Generated cubes: 3
+[   100.487][MainProcess][INFO] 	Attempted programs: 23
+[   100.487][MainProcess][INFO] 		Rejected: 20
+[   100.487][MainProcess][INFO] 		Failed: 2
+[   100.487][MainProcess][INFO] 	Blacklist clauses: 0
+[   100.488][MainProcess][DEBUG] Printing statistics for good programs of size 3
+[   100.488][MainProcess][DEBUG] 	0: Counter({'summarise': 196})
+[   100.489][MainProcess][DEBUG] 	1: Counter({'filter': 196})
+[   100.489][MainProcess][DEBUG] 	2: Counter({'mutate': 114, 'summarise': 82})
+[   100.489][MainProcess][INFO] Solution found: mutate(filter(summarise(@param0, n = n(), c1), n >= 3 | n == c1), c1 = max(c1))
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/recent_posts/tables/022_2.csv", col_types = cols(c1 = col_integer(),c2 = col_integer()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/022_o.csv", col_types = cols(c3 = col_integer()))
+
+df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
+df3 <- df2 %>% filter(n >= 3 | n == c1)
+df4 <- df3 %>% mutate(c1 = max(c1))
+out <- df4 %>% select(c3 = c1) %>% distinct() %>% arrange(c3)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT MAX(c1) OVER () AS c3
+FROM
+  (SELECT c1,
+          COUNT() AS n
+   FROM input1
+   GROUP BY c1)
+WHERE (n >= 3.0
+       OR n = c1)
+ORDER BY c3

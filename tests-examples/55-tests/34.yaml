@@ -3,16 +3,21 @@ inputs:
   - tests-examples/55-tests/tables/21-2.txt
   - tests-examples/55-tests/tables/21-3.txt
 output: tests-examples/55-tests/tables/34.out
-const:
+constants:
   - red
   - 3
-aggrs:
+functions:
   - n
-attrs:
+columns:
   - color
 bools:
   - ==
-loc: 6
+loc: 4
+solution:
+  - summarise
+  - natural_join3
+  - filter
+  - natural_join4
 comment: |
   5.2.9 optimal solution
 
@@ -30,4 +35,10 @@ comment: |
   filter(color == "red"),
   inner_join(parts,catalog) %>% inner_join(suppliers) %>%
   group_by(P_id) %>% summarise(n = n()) %>%
-  filter(n == 3)) %>% select(S_name) %>% distinct()'
+  filter(n == 3)) %>% select(S_name) %>% distinct()
+
+  df4 <- input1 %>% group_by(P_id) %>% summarise(n = n()) %>% ungroup()
+  df5 <- inner_join(input2, df4) %>% inner_join(input1)
+  df6 <- df5 %>% filter(color == 'red' & n == 3)
+  df7 <- inner_join(input2, input1) %>% inner_join(input3) %>% inner_join(df6)
+  out <- df7 %>% select(S_name) %>% arrange(S_name)

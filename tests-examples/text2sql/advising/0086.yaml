@@ -1,0 +1,20 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0086.csv
+constants:
+- EECS
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER
+  FROM COURSE AS COURSEalias0,
+       PROGRAM AS PROGRAMalias0,
+       PROGRAM_COURSE AS PROGRAM_COURSEalias0
+  WHERE COURSEalias0.DEPARTMENT <> "EECS"
+    AND PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+    AND PROGRAMalias0.PROGRAM_ID = PROGRAM_COURSEalias0.PROGRAM_ID ;

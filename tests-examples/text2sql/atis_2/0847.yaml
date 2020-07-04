@@ -1,0 +1,76 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0847.csv
+constants:
+- '41'
+- '60'
+- '27'
+- '8'
+- '1991'
+- '1600'
+- LAS VEGAS
+- NEVADA
+- MIAMI
+- FLORIDA
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias1,
+       CITY AS CITYalias0,
+       CITY AS CITYalias1,
+       DATE_DAY AS DATE_DAYalias0,
+       DAYS AS DAYSalias0,
+       FLIGHT AS FLIGHTalias0,
+       STATE AS STATEalias0,
+       STATE AS STATEalias1
+  WHERE ((((((FLIGHTalias0.ARRIVAL_TIME < 41
+              OR FLIGHTalias0.TIME_ELAPSED >= 60)
+             AND FLIGHTalias0.DEPARTURE_TIME > FLIGHTalias0.ARRIVAL_TIME)
+            AND DATE_DAYalias0.DAY_NUMBER = 27
+            AND DATE_DAYalias0.MONTH_NUMBER = 8
+            AND DATE_DAYalias0.YEAR = 1991
+            AND DAYSalias0.DAY_NAME = DATE_DAYalias0.DAY_NAME
+            AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias0.DAYS_CODE)
+           OR (DATE_DAYalias0.DAY_NUMBER = 27
+               AND DATE_DAYalias0.MONTH_NUMBER = 8
+               AND DATE_DAYalias0.YEAR = 1991
+               AND DAYSalias0.DAY_NAME = DATE_DAYalias0.DAY_NAME
+               AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias0.DAYS_CODE
+               AND NOT ((FLIGHTalias0.ARRIVAL_TIME < 41
+                         OR FLIGHTalias0.TIME_ELAPSED >= 60)
+                        AND FLIGHTalias0.DEPARTURE_TIME > FLIGHTalias0.ARRIVAL_TIME)))
+          AND FLIGHTalias0.ARRIVAL_TIME < 1600)
+         AND CITYalias1.CITY_CODE = AIRPORT_SERVICEalias1.CITY_CODE
+         AND CITYalias1.CITY_NAME = 'LAS VEGAS'
+         AND FLIGHTalias0.TO_AIRPORT = AIRPORT_SERVICEalias1.AIRPORT_CODE
+         AND STATEalias1.STATE_CODE = CITYalias1.STATE_CODE
+         AND STATEalias1.STATE_NAME = 'NEVADA')
+    AND CITYalias0.CITY_CODE = AIRPORT_SERVICEalias0.CITY_CODE
+    AND CITYalias0.CITY_NAME = 'MIAMI'
+    AND FLIGHTalias0.FROM_AIRPORT = AIRPORT_SERVICEalias0.AIRPORT_CODE
+    AND STATEalias0.STATE_CODE = CITYalias0.STATE_CODE
+    AND STATEalias0.STATE_NAME = 'FLORIDA' ;

@@ -6,35 +6,28 @@ from logging import getLogger
 from time import time
 
 import logging
+
+import yaml
 from rpy2 import robjects
 
-from squares import util
+from squares import util, results
 from squares.config import Config
+from squares.dsl import interpreter
 from squares.dsl.specification import Specification
 from squares.parallel_synthesizer import ParallelSynthesizer
-from squares.results import ResultsHolder
-from squares.tyrell import spec as S
-from squares.util import create_argparser, parse_specification
+from squares.util import create_argparser, parse_specification, write_specification
 
 robjects.r('''
-zz <- file("r_output.log", open = "wt")
-sink(zz)
-sink(zz, type = "message")
-library(dplyr)
-library(dbplyr)
-library(tidyr)
-library(stringr)
-library(readr)
-library(lubridate)
-options(warn=-1)''')
+sink("/dev/null")
+options(warn=-1)
+suppressMessages(library(tidyr))
+suppressMessages(library(stringr))
+suppressMessages(library(readr))
+suppressMessages(library(lubridate))
+suppressMessages(library(dplyr))
+suppressMessages(library(dbplyr))''')
 
 logger = getLogger('squares')
-
-
-def handle_sigint(signal, stackframe):
-    print()
-    ResultsHolder().print()
-    exit(ResultsHolder().exit_code)
 
 
 def main():
@@ -48,7 +41,7 @@ def main():
         logger.setLevel('INFO')
     if args.verbose >= 2:
         logger.setLevel('DEBUG')
-    if args.verbose >= 3:
+    if args.verbose >= 4:
         getLogger('tyrell').setLevel('DEBUG')
 
     logger.info('Parsing specification...')
@@ -57,38 +50,52 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    config = Config(seed=seed, print_r=args.r, cache_ops=args.cache_ops, optimal=args.optimal, solution_use_lines=args.use_lines,
-                    solution_use_last_line=args.use_last, advance_processes=args.split_search,
-                    programs_per_cube_threshold=args.split_search_h, minimum_loc=args.min_lines, maximum_loc=args.max_lines,
-                    max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
-                    max_join_combinations=args.max_join_combo,
-                    z3_QF_FD=True, z3_sat_phase='random', disabled=args.disable)
+    config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations, optimal=args.optimal,
+                    solution_use_lines=args.use_lines, solution_use_last_line=args.use_last, advance_processes=args.split_search,
+                    static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold, minimum_loc=args.min_lines,
+                    maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
+                    max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
+                    block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
+                    transitive_blocking=args.transitive_blocking,
+                    probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
+                    z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 
     specification = Specification(spec)
 
-    if logger.isEnabledFor(logging.DEBUG):
-        with open('dsl.tyrell', 'w') as f:
-            f.write(repr(specification.dsl))
+    logger.debug("Generating DSL...")
+    tyrell_spec = specification.generate_dsl()
 
-    tyrell_spec = S.parse(repr(specification.dsl))
+    if util.get_config().verbosity >= 3:
+        with open('dump.dsl', 'w') as f:
+            f.write(str(specification))
 
-    ResultsHolder().specification = specification
+    results.specification = specification
 
-    if args.j > 0:
-        processes = args.j
+    if args.jobs > 0:
+        processes = args.jobs
     else:
-        processes = os.cpu_count() + args.j
+        processes = os.cpu_count() + args.jobs
 
-    signal.signal(signal.SIGINT, handle_sigint)
-    signal.signal(signal.SIGTERM, handle_sigint)
+    signal.signal(signal.SIGINT, results.handle_sigint)
+    signal.signal(signal.SIGTERM, results.handle_sigint)
 
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
-    program = synthesizer.synthesize()
+    program = synthesizer.synthesize()  # program is stored in the results holder
 
-    ResultsHolder().store_solution(program, True)
-    ResultsHolder().print()
-    exit(ResultsHolder().exit_code)
+    if args.append:
+        spec = parse_specification(args.input)
+        if 'comment' not in spec:
+            spec['comment'] = ''
+        interp = interpreter.SquaresInterpreter(specification, True)
+        evaluation = interp.eval(program, specification.tables)
+        assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
+        spec['comment'] += '\n\n' + interp.program
+        with open(args.input, 'w') as f:
+            write_specification(spec, f)
+
+    results.print_results()
+    exit(results.exit_code)
 
 
 if __name__ == '__main__':

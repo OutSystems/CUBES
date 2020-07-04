@@ -3,15 +3,20 @@ inputs:
   - tests-examples/55-tests/tables/16-2.txt
   - tests-examples/55-tests/tables/16-3.txt
 output: tests-examples/55-tests/tables/16.out
-const:
+constants:
   - AWS
-aggrs:
+functions:
   - n
-attrs:
+columns:
   - S_name
 bools:
   - ==
-loc: '6'
+loc: 4
+solution:
+  - natural_join
+  - summarise
+  - filter
+  - anti_join
 comment: |
   5.2.4 optimal solution
 
@@ -34,7 +39,8 @@ comment: |
 
   ALTERNATIVE SOLUTION?
 
-  RET_DF205 <- inner_join(inner_join(input1, input2), input3)
-  RET_DF206 <- RET_DF205 %>% ungroup() %>% filter(S_name != "AWS")
-  RET_DF207 <- anti_join(select(input2,P_name), select(RET_DF206, P_name))
-  RET_DF208 <- RET_DF207 %>% ungroup() %>% select(P_name) %>% distinct()
+  df4 <- inner_join(input1, input3)
+  df5 <- df4 %>% group_by(P_id, S_name) %>% summarise(n = n()) %>% ungroup()
+  df6 <- df5 %>% filter(S_name != 'AWS')
+  df7 <- anti_join(input2, df6, by=c('P_id'))
+  out <- df7 %>% select(P_name) %>% arrange(P_name)

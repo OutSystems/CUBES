@@ -20,3 +20,8 @@ comment: |
                     WHERE E1.eid IN
                           (SELECT DISTINCT C1.eid
                            FROM Certified C1))
+
+  df3 <- input2 %>% mutate(meansalary = mean(salary))
+  df4 <- anti_join(input2, input1, by=c())
+  df5 <- full_join(df3 %>% mutate(tmp.col=1), df4 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(salary >= salary.other & meansalary <= salary.other)
+  out <- df5 %>% select(ename = ename.other, salary = salary.other) %>% distinct() %>% arrange(ename)

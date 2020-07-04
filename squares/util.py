@@ -1,15 +1,16 @@
-# NOTE: this file should be the only one allowed to use 'global'
 import argparse
 import pickle
 import time
-from itertools import permutations, combinations
+from collections import OrderedDict
+from enum import Enum
+from itertools import permutations, combinations, tee, chain
 from logging import getLogger
-from multiprocessing import Queue
 from multiprocessing.connection import Connection
 from random import Random
 from typing import List, Any, Iterable
 
 import yaml
+import z3
 
 from .config import Config
 from .tyrell.logger import setup_logger
@@ -18,6 +19,8 @@ setup_logger('squares')
 setup_logger('tyrell')
 logger = getLogger('squares')
 
+z3.Z3_DEBUG = False
+
 counter = 0
 random = None
 config = None
@@ -25,6 +28,17 @@ solution = None
 program_queue = None
 
 BUFFER_SIZE = 8 * 4 * 1024
+
+
+class literal(str):
+    pass
+
+
+def literal_presenter(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+
+yaml.add_representer(literal, literal_presenter)
 
 
 def seed(s):
@@ -97,42 +111,53 @@ def boolvec2int(bools: List[bool]) -> int:
     return result
 
 
-def create_argparser():
-    parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering')
-    parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
+def create_argparser(all_inputs=False):
+    parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    if not all_inputs:
+        parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
     parser.add_argument('-v', '--verbose', action='count', default=0, help='using this flag multiple times further increases verbosity')
 
     g = parser.add_mutually_exclusive_group()
     g.add_argument('--symm-on', dest='symm_on', action='store_true', help="enable online symmetry breaking")
     g.add_argument('--symm-off', dest='symm_off', action='store_true', help="enable offline symmetry breaking")
 
-    parser.add_argument('--no-r', dest='r', action='store_false', help="don't output R program")
+    parser.add_argument('--no-r', action='store_true', help="don't output R program")
 
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--tree', dest='tree', action='store_true', help="use tree encoding")
-    g.add_argument('--lines', dest='tree', action='store_false', help="use line encoding")
-    parser.set_defaults(tree=False)
-
-    parser.add_argument('--optimal', action='store_true')
-    parser.add_argument('--cache-operations', dest='cache_ops', action='store_true',
+    parser.add_argument('--optimal', action='store_true', help='make sure that returned solutions are as short as possible')
+    parser.add_argument('--no-cache', dest='cache_operations', action='store_false',
                         help='increased memory usage, but possibly faster results')
-    parser.add_argument('--h-split-search', dest='split_search', action='store_true',
-                        help='use an heuristic to determine if search should be split among multiple lines of code')
-    parser.add_argument('--h-split-search-threshold', dest='split_search_h', type=int, default=4000)
+    parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
+    parser.add_argument('--cube-freedom', type=int, default=0, help='number of free lines when generating cubes')
+    parser.add_argument('--no-block-commutative-ops', dest='block_commutative_ops', action='store_false',
+                        help='block commutative operations')
+    parser.add_argument('--no-subsume-conditions', dest='subsume_conditions', action='store_false', help='subsume conditions')
+    parser.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false', help='subsume conditions transitively')
+
+    g = parser.add_argument_group('heuristics')
+
+    g.add_argument('--split-search', action='store_true',
+                   help='use an heuristic to determine if search should be split among multiple lines of code')
+    g.add_argument('--split-search-threshold', type=int, default=500, help='instance hardness threshold')
+    g.add_argument('--decay-rate', type=float, default=0.99999, help='rate at which old information is forgotten')
+    g.add_argument('--probing-threads', type=int, default=2,
+                   help='number of threads that should be used to randomly explore the search space')
 
     parser.add_argument('--disable', nargs='+', default=[])
 
-    parser.add_argument('--max-filter-combo', dest='max_filter_combo', type=int, default=2)
-    parser.add_argument('--max-cols-combo', dest='max_cols_combo', type=int, default=2)
-    parser.add_argument('--max-join-combo', dest='max_join_combo', type=int, default=2)
+    parser.add_argument('--max-filter-combo', type=int, default=2, help='maximum size of filter conditions')
+    parser.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
+    parser.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
 
     parser.add_argument('--use-solution-line', dest='use_lines', type=int, action='append', default=[])
     parser.add_argument('--use-solution-last-line', dest='use_last', action='store_true')
 
-    parser.add_argument('-j', type=int, default=-2, help='number of processes to use')
-    parser.add_argument('--max-lines', dest='max_lines', type=int, default=8, help='maximum program size')
-    parser.add_argument('--min-lines', dest='min_lines', type=int, default=1, help='minimum program size')
+    parser.add_argument('-j', '--jobs', type=int, default=-2, help='number of processes to use')
+    parser.add_argument('--max-lines', type=int, default=7, help='maximum program size')
+    parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
+    parser.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
     parser.add_argument('--seed', default='squares')
+    parser.add_argument('--append', action='store_true')
     return parser
 
 
@@ -163,16 +188,42 @@ def parse_specification(filename):
 
     for field in ['constants', 'functions', 'columns', 'filters']:
         if field not in spec:
-            spec[field] = []
+            spec[field] = None
 
     if 'dateorder' not in spec:
-        spec['dateorder'] = 'dmy'
+        spec['dateorder'] = None
 
     return spec
 
 
-def quote_str(string: str) -> str:
-    return f'"{string}"'
+def write_specification(spec, file):
+    spec = OrderedDict(spec)
+
+    for key in list(spec.keys()):
+        if spec[key] is None:
+            spec.pop(key)
+
+    if 'comment' in spec:
+        spec['comment'] = literal(spec['comment'])
+
+    spec.move_to_end('inputs')
+    spec.move_to_end('output')
+    if 'functions' in spec:
+        spec.move_to_end('functions')
+    if 'filters' in spec:
+        spec.move_to_end('filters')
+    if 'constants' in spec:
+        spec.move_to_end('constants')
+    if 'columns' in spec:
+        spec.move_to_end('columns')
+    if 'foreign-keys' in spec:
+        spec.move_to_end('foreign-keys')
+    if 'dateorder' in spec:
+        spec.move_to_end('dateorder')
+    if 'comment' in spec:
+        spec.move_to_end('comment')
+
+    yaml.dump(dict(spec), file, default_flow_style=False, sort_keys=False)
 
 
 def single_quote_str(string: str) -> str:
@@ -184,13 +235,6 @@ def count(iter: Iterable) -> int:
         return len(iter)
     except TypeError:
         return sum(1 for _ in iter)
-
-
-def get_all(queue: Queue) -> List:
-    acum = []
-    while not queue.empty():
-        acum.append(queue.get())
-    return acum
 
 
 def pipe_write(pipe: Connection, ret: Any):
@@ -215,10 +259,29 @@ def pipe_read(pipe: Connection) -> Any:
     return pickle.loads(data)
 
 
-class Singleton(type):
-    _instances = {}
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+
+def has_duplicates(iterable):
+    seen = set()
+    for x in iterable:
+        if x in seen:
+            return True
+        seen.add(x)
+    return False
+
+
+def flatten(list_of_lists):
+    return chain.from_iterable(list_of_lists)
+
+
+class Message(Enum):
+    INIT = 1
+    SOLVE = 2
+    DEBUG_STATS = 3
+    EVAL_INFO = 4
+    SOLUTION = 5

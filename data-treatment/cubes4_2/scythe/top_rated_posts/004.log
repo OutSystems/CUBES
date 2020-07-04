@@ -1,0 +1,70 @@
+[     3.492][MainProcess][INFO] Parsing specification...
+[     3.498][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.498][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.499][MainProcess][DEBUG] Reading input files...
+[     3.509][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i004.csv: ['int64', 'int64', 'string']
+[     3.515][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o004.csv: ['int64', 'int64', 'string']
+[     3.553][MainProcess][DEBUG] Generating DSL...
+[     3.725][MainProcess][INFO] Creating 2 processes
+[     3.914][cube-solver-1][DEBUG] Initialising process for 1 lines of code.
+[     3.933][cube-solver-0][DEBUG] Initialising process for 1 lines of code.
+[     6.438][cube-solver-1][DEBUG] Solving cube (l0 = mutate(),)
+[     6.484][cube-solver-0][DEBUG] Solving cube (l0 = summarise(),)
+[     6.906][MainProcess][DEBUG] Increasing generator loc to 2
+[     6.911][cube-solver-1][DEBUG] Initialising process for 2 lines of code.
+[     6.912][cube-solver-0][DEBUG] Initialising process for 2 lines of code.
+[    11.887][cube-solver-1][DEBUG] Solving cube (l0 = natural_join(), l1 = mutate())
+[    11.926][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = summarise([3]))
+[    11.937][cube-solver-0][DEBUG] Solving cube (l0 = natural_join(), l1 = summarise([3]))
+[    11.949][cube-solver-1][DEBUG] Solving cube (l0 = natural_join3(), l1 = mutate())
+[    11.966][cube-solver-0][DEBUG] Solving cube (l0 = natural_join4(), l1 = summarise([3]))
+[    11.970][cube-solver-1][DEBUG] Solving cube (l0 = natural_join4(), l1 = mutate())
+[    11.982][cube-solver-0][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join())
+[    11.990][cube-solver-1][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join3())
+[    12.018][cube-solver-1][DEBUG] Solving cube (l0 = summarise([3]), l1 = natural_join4())
+[    12.037][cube-solver-1][DEBUG] Solving cube (l0 = summarise([3]), l1 = summarise([3]))
+[    12.058][cube-solver-1][DEBUG] Solving cube (l0 = summarise([3]), l1 = filter())
+[    13.146][cube-solver-1][DEBUG] Solving cube (l0 = summarise([3]), l1 = anti_join())
+[    13.420][cube-solver-0][DEBUG] Found solution with cube (l0 = summarise([3]), l1 = natural_join())
+[    13.421][MainProcess][INFO] Statistics:
+[    13.421][MainProcess][INFO] 	Generated cubes: 14
+[    13.421][MainProcess][INFO] 	Attempted programs: 52
+[    13.421][MainProcess][INFO] 		Rejected: 33
+[    13.422][MainProcess][INFO] 		Failed: 18
+[    13.422][MainProcess][INFO] 	Blacklist clauses: 3
+[    13.422][MainProcess][DEBUG] Printing statistics for good programs of size 1
+[    13.422][MainProcess][DEBUG] 	0: Counter({'mutate': 60, 'summarise': 48})
+[    13.423][MainProcess][DEBUG] Printing statistics for good programs of size 2
+[    13.423][MainProcess][DEBUG] 	0: Counter({'summarise': 373})
+[    13.424][MainProcess][DEBUG] 	1: Counter({'natural_join': 229, 'filter': 120, 'anti_join': 24})
+[    13.424][MainProcess][INFO] Solution found: natural_join(summarise(@param0, rev = max(rev), id), @param0)
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+input1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+input1 <- copy_to(con, input1)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o004.csv", col_types = cols(id = col_integer(),rev = col_integer(),content = col_character()))
+
+df2 <- input1 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
+df3 <- inner_join(df2, input1)
+out <- df3 %>% select(id, rev, content) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       rev,
+       content
+FROM
+  (SELECT LHS.id AS id,
+          LHS.rev AS rev,
+          RHS.content AS content
+   FROM
+     (SELECT id,
+             MAX(rev) AS rev
+      FROM input1
+      GROUP BY id) AS LHS
+   INNER JOIN input1 AS RHS ON (LHS.id = RHS.id
+                                AND LHS.rev = RHS.rev))
+ORDER BY id

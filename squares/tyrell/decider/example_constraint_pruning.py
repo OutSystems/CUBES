@@ -19,6 +19,8 @@ from ... import util
 
 logger = getLogger('tyrell.decider.example_constraint_pruning')
 
+COUNTER = 0
+
 
 class Z3Encoder(GenericVisitor):
     _interp: Interpreter
@@ -49,8 +51,10 @@ class Z3Encoder(GenericVisitor):
             raise RuntimeError('Unrecognized ExprType: {}'.format(ptype))
 
     def _get_constraint_var(self, node: Node, index: int):
+        global COUNTER
         node_id = self._indexer.get_id(node)
-        var_name = '@n{}_c{}'.format(node_id, index)
+        var_name = '@n{}_c{}_{}'.format(node_id, index, COUNTER)
+        COUNTER += 1
         return var_name
 
     def encode_param_alignment(self, node: Node, ty: ValueType, index: int):
@@ -298,4 +302,4 @@ class ExampleConstraintPruningDecider(ExampleDecider):
 
     def analyze(self, prog):
         blame_finder = BlameFinder(self.interpreter, prog)
-        return blame_finder.process_examples(self.examples, self.equal_output)
+        return blame_finder.process_examples(self.examples, lambda x, y: self.interpreter.equals(x, y))

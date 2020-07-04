@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0060.csv
+functions:
+- count
+- max
+constants: []
+columns:
+- population
+- border
+foreign-keys: []
+comment: |
+  SELECT COUNT(BORDER_INFOalias0.BORDER)
+  FROM BORDER_INFO AS BORDER_INFOalias0
+  WHERE BORDER_INFOalias0.STATE_NAME IN
+      (SELECT STATEalias0.STATE_NAME
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.POPULATION =
+           (SELECT MAX(STATEalias1.POPULATION)
+            FROM STATE AS STATEalias1) ) ;
+
+  df1 <- df_state %>% mutate(population = max(population))
+  df2 <- df_border_info %>% group_by(state_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- inner_join(df_state, df1) %>% inner_join(df2)
+  out <- df3 %>% select(COUNT..BORDER_INFOalias0.BORDER.. = n) %>% arrange(COUNT..BORDER_INFOalias0.BORDER..)

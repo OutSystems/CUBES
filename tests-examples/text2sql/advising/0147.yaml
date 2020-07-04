@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0147.csv
+constants:
+- EECS
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias1.NAME,
+                  COURSEalias1.NUMBER
+  FROM
+    (SELECT MAX(PROGRAM_COURSEalias0.WORKLOAD) AS DERIVED_FIELDalias0
+     FROM COURSE AS COURSEalias0,
+          PROGRAM_COURSE AS PROGRAM_COURSEalias0
+     WHERE COURSEalias0.DEPARTMENT = "EECS"
+       AND PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID ) AS DERIVED_TABLEalias0,
+       COURSE AS COURSEalias1,
+       PROGRAM_COURSE AS PROGRAM_COURSEalias1
+  WHERE PROGRAM_COURSEalias1.COURSE_ID = COURSEalias1.COURSE_ID
+    AND PROGRAM_COURSEalias1.WORKLOAD = DERIVED_TABLEalias0.DERIVED_FIELDalias0 ;

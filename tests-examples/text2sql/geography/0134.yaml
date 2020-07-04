@@ -1,0 +1,20 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0134.csv
+constants: []
+functions:
+- max
+columns:
+- state_name
+- population
+foreign-keys: []
+comment: |-
+  SELECT BORDER_INFOalias0.BORDER
+  FROM BORDER_INFO AS BORDER_INFOalias0
+  WHERE BORDER_INFOalias0.STATE_NAME =
+      (SELECT STATEalias0.STATE_NAME
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.POPULATION =
+           (SELECT MAX(STATEalias1.POPULATION)
+            FROM STATE AS STATEalias1) ) ;
