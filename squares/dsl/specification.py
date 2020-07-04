@@ -25,46 +25,6 @@ def exec_and_return(r_script: str) -> str:
     return r_script
 
 
-def read_table(path: str) -> DataFrame:
-    df = pandas.read_csv(path)
-    df = df.convert_dtypes(convert_integer=False)
-
-    replacements = {}
-
-    for col in df.columns:
-        new_col, n = re.subn('[^a-zA-Z0-9._]', '_', col)
-        new_col, n2 = re.subn('^([0-9])', r'col_\1', new_col)
-        if n + n2:
-            logger.warning('Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!')
-            logger.warning('Replacing column "%s" in table %s with %s', col, path, new_col)
-            replacements[col] = new_col
-
-    df = df.rename(columns=replacements)
-
-    for col in df:  # try to coerce columns to datetime
-        if types.get_type(df[col].dtype) == types.INT:
-            for elem in df[col]:
-                if elem >= 2 ** 32 - 1:
-                    logger.warning('Using integers larger than 32 bits! Converting column %s to string.', col)
-                    df[col] = df[col].astype(str)
-                    break
-
-        if all(types.is_time(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_time(elem) for elem in df[col]):
-            try:
-                df[col] = pandas.to_timedelta(df[col], errors='coerce')
-            except Exception:
-                pass
-
-        elif all(types.is_date(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_date(elem) for elem in df[col]):
-            try:
-                df[col] = pandas.to_datetime(df[col], errors='coerce')
-            except Exception:
-                pass
-
-    logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
-    return df
-
-
 def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> None:
     if a not in util.get_config().disabled and b not in util.get_config().disabled:
         pred_spec.add_predicate('is_not_parent', [a, b])
@@ -75,14 +35,14 @@ class Specification:
     def __init__(self, spec) -> None:
         self.inputs = spec['inputs']
         self.output = spec['output']
-        self.consts = spec['constants']
+        self.consts = spec['constants'] or []
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
-            self.aggrs = spec['functions']
-        self.attrs = spec['columns']
-        self.dateorder = spec['dateorder']
-        self.filters = spec['filters']
+            self.aggrs = spec['functions'] or []
+        self.attrs = spec['columns'] or []
+        self.dateorder = spec['dateorder'] or 'dmy'
+        self.filters = spec['filters'] or []
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
@@ -97,6 +57,7 @@ class Specification:
         self.data_frames = {}
 
         self.columns = OrderedSet()
+        self.column_replacements = {}
         self.generated_columns = {}
         self.columns_by_type = types.empty_type_map()
         self.types_by_const = {}
@@ -110,7 +71,7 @@ class Specification:
             table_name = 'df_' + os.path.splitext(os.path.basename(input))[0]
             table_name = re.sub('[^a-zA-Z0-9._]', '_', table_name)
             self.tables.append(table_name)
-            df = read_table(input)
+            df = self.read_table(input, table_name)
 
             for column, type in df.dtypes.items():
                 type = types.get_type(type)
@@ -122,7 +83,7 @@ class Specification:
         self.columns = OrderedSet(sorted(self.columns))
         self.all_columns = self.columns.copy()
 
-        self.data_frames['expected_output'] = read_table(self.output)
+        self.data_frames['expected_output'] = self.read_table(self.output, 'expected_output')
         self.output_cols = self.data_frames['expected_output'].columns
 
         for const in self.consts:
@@ -142,6 +103,48 @@ class Specification:
 
         self.tyrell_spec = None
 
+    def read_table(self, path: str, table_name:str = None) -> DataFrame:
+        df = pandas.read_csv(path, na_filter=False)
+        df = df.convert_dtypes(convert_integer=False)
+
+        replacements = {}
+
+        for col in df.columns:
+            new_col, n = re.subn('[^a-zA-Z0-9._]', '.', col)
+            new_col, n2 = re.subn('^([0-9])', r'col_\1', new_col)
+            if n + n2:
+                logger.warning('Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!')
+                logger.warning('Replacing column "%s" in table %s with %s', col, path, new_col)
+                replacements[col] = new_col
+
+        if replacements and table_name:
+            self.column_replacements[table_name] = replacements.copy()
+
+        df = df.rename(columns=replacements)
+
+        for col in df:  # try to coerce columns to datetime
+            if types.get_type(df[col].dtype) == types.INT:
+                for elem in df[col]:
+                    if elem >= 2 ** 32 - 1:
+                        logger.warning('Using integers larger than 32 bits! Converting column %s to string.', col)
+                        df[col] = df[col].astype(str)
+                        break
+
+            if all(types.is_time(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_time(elem) for elem in df[col]):
+                try:
+                    df[col] = pandas.to_timedelta(df[col], errors='coerce')
+                except Exception:
+                    pass
+
+            elif all(types.is_date(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_date(elem) for elem in df[col]):
+                try:
+                    df[col] = pandas.to_datetime(df[col], errors='coerce')
+                except Exception:
+                    pass
+
+        logger.info('Inferred data types for table %s: %s', path, str(list(map(str, df.dtypes.values))))
+        return df
+
     def generate_r_init(self) -> None:  # TODO dirty: initializes R for the inputs
         self.r_init = 'con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")\n'
 
@@ -153,6 +156,10 @@ class Specification:
                 if types.get_type(dtype) == types.DATETIME:
                     self.r_init += exec_and_return(f'{table}${col} <- {self.dateorder}({table}${col})\n')
 
+            if table in self.column_replacements:
+                for old, new in self.column_replacements[table].items():
+                    self.r_init += exec_and_return(f'{table} <- rename({table}, {new} = "{old}")\n')
+
             self.r_init += f'{table} <- copy_to(con, {table})\n'
 
         output_df = self.data_frames['expected_output']
@@ -161,6 +168,9 @@ class Specification:
         for col, dtype in zip(output_df.columns, output_df.dtypes):  # parse dates
             if types.get_type(dtype) == types.DATETIME:
                 self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
+        if 'expected_output' in self.column_replacements:
+            for old, new in self.column_replacements['expected_output'].items():
+                self.r_init += exec_and_return(f'expected_output <- rename(expected_output, {new} = "{old}")\n')
 
         if 'concat' in self.aggrs:
             self.r_init += exec_and_return('\nstring_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}\n')
@@ -329,7 +339,6 @@ class Specification:
                 else:
                     if constant in data_frame[column].values:
                         return True
-
         return False
 
     def __str__(self) -> str:

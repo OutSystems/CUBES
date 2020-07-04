@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0097.csv
+constants: []
+functions:
+- max
+columns:
+- river_name
+foreign-keys: []
+comment: |-
+  SELECT DISTINCT RIVERalias0.LENGTH
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.RIVER_NAME =
+      (SELECT RIVER_NAME
+       FROM
+         (SELECT COUNT(1) AS DERIVED_FIELDalias0,
+                 RIVERalias1.RIVER_NAME
+          FROM RIVER AS RIVERalias1
+          GROUP BY RIVERalias1.RIVER_NAME) AS DERIVED_TABLEalias0
+       WHERE DERIVED_TABLEalias0.DERIVED_FIELDalias0 =
+           (SELECT MAX(DERIVED_TABLEalias1.DERIVED_FIELDalias1)
+            FROM
+              (SELECT COUNT(1) AS DERIVED_FIELDalias1,
+                      RIVERalias2.RIVER_NAME
+               FROM RIVER AS RIVERalias2
+               GROUP BY RIVERalias2.RIVER_NAME) AS DERIVED_TABLEalias1) ) ;

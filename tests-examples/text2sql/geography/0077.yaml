@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0077.csv
+functions:
+- max
+constants: []
+columns:
+- population
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION =
+      (SELECT MAX(CITYalias1.POPULATION)
+       FROM CITY AS CITYalias1) ;
+
+  df1 <- df_city %>% mutate(maxpopulation = max(population))
+  df2 <- inner_join(df_city, df1, by=c('population' = 'maxpopulation','state_name' = 'city_name'), suffix = c('', '.other')) %>% mutate(maxpopulation = population) %>% mutate(city_name = state_name)
+  out <- df2 %>% select(CITY_NAME = city_name) %>% arrange(CITY_NAME)

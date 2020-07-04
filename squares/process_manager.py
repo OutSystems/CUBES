@@ -149,7 +149,7 @@ class ProcessSetManager:
                         self.poll.unregister(pipe.fileno())
                         raise MaximumLinesOfCodeReached
                     if self.process_sets[pipe].cube_generator.next_generator is None:
-                        logger.warning('Generator for loc %d is exhausted!', loc)
+                        logger.info('Generator for loc %d is exhausted!', loc)
                     self.process_sets[pipe].cube_generator = self.process_sets[pipe].cube_generator.get_next_generator()
                     logger.info('New generator configuration: %s', str(set(self.process_sets.values())))
 

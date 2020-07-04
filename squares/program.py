@@ -1,10 +1,7 @@
 from logging import getLogger
 from typing import List, Any
 
-from rpy2 import robjects
-
-from . import util
-from .tyrell.interpreter import Interpreter, InterpreterError
+from .tyrell.interpreter import Interpreter
 from .tyrell.spec import Production, EnumProduction, ParamProduction, FunctionProduction, LineProduction
 
 logger = getLogger('squares')

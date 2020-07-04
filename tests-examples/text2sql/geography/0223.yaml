@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0223.csv
+constants: []
+functions:
+- max
+columns:
+- length
+foreign-keys: []
+comment: |-
+  SELECT BORDER_INFOalias0.BORDER
+  FROM BORDER_INFO AS BORDER_INFOalias0
+  WHERE BORDER_INFOalias0.STATE_NAME IN
+      (SELECT RIVERalias0.TRAVERSE
+       FROM RIVER AS RIVERalias0
+       WHERE RIVERalias0.LENGTH =
+           (SELECT MAX(RIVERalias1.LENGTH)
+            FROM RIVER AS RIVERalias1) ) ;

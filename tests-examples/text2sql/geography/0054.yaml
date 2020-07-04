@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0054.csv
+functions: []
+constants:
+- texas
+columns:
+- state_name
+- city_name
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.POPULATION
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.CITY_NAME =
+      (SELECT STATEalias0.CAPITAL
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.STATE_NAME = "texas" ) ;
+
+  df1 <- df_state %>% filter(state_name == 'texas')
+  df2 <- inner_join(df1, df_city, by=c('state_name' = 'state_name','capital' = 'city_name'), suffix = c('', '.other')) %>% mutate(city_name = capital)
+  out <- df2 %>% select(POPULATION = population.other) %>% arrange(POPULATION)

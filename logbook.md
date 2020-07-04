@@ -385,3 +385,18 @@ Nikolaj on StackOverflow:
 
 #### c38
 - disabled condition subsumption
+
+#### c39
+- misc. optimizations and determinization
+
+## Week of 21/6
+
+#### c40
+- add exception raising when line will be redundant
+
+#### c41
+- removed exception raising when line will be redundant
+- added op transitivity
+
+#### c42
+- no transitivity

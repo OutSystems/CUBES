@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import NamedTuple
+from typing import NamedTuple, List, Any
 
 from rpy2 import robjects
 
@@ -18,11 +18,11 @@ class RejectionInfo(NamedTuple):
 
 class LinesDecider(ExampleDecider):
 
-    def get_failed_examples(self, prog):
+    def get_failed_examples(self, prog) -> List[Any]:
         fails = []
         for example in self._examples:
             output = self.interpreter.eval(prog, example.input)
-            result = self._interpreter.equals(output, example.output, prog)
+            result = self.interpreter.equals(output, example.output, prog)
             if not result[0]:
                 fails.append((example, output, result[1]))
         return fails

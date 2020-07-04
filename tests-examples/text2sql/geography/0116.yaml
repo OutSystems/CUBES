@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0116.csv
+constants:
+- mississippi
+functions:
+- min
+columns:
+- area
+- river_name
+foreign-keys: []
+comment: |-
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.AREA =
+      (SELECT MIN(STATEalias1.AREA)
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.STATE_NAME IN
+           (SELECT RIVERalias0.TRAVERSE
+            FROM RIVER AS RIVERalias0
+            WHERE RIVERalias0.RIVER_NAME = "mississippi" ) )
+    AND STATEalias0.STATE_NAME IN
+      (SELECT RIVERalias1.TRAVERSE
+       FROM RIVER AS RIVERalias1
+       WHERE RIVERalias1.RIVER_NAME = "mississippi" ) ;

@@ -1,0 +1,100 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0162.csv
+constants:
+- BALTIMORE
+- '3'
+- '8'
+- '1991'
+- DALLAS
+comment: |-
+  SELECT DISTINCT AIRLINEalias0.AIRLINE_CODE
+  FROM AIRLINE AS AIRLINEalias0,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias0,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias1,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias2,
+       AIRPORT_SERVICE AS AIRPORT_SERVICEalias3,
+       CITY AS CITYalias0,
+       CITY AS CITYalias1,
+       CITY AS CITYalias2,
+       CITY AS CITYalias3,
+       DATE_DAY AS DATE_DAYalias0,
+       DATE_DAY AS DATE_DAYalias1,
+       DAYS AS DAYSalias0,
+       DAYS AS DAYSalias1,
+       FARE AS FAREalias0,
+       FARE_BASIS AS FARE_BASISalias0,
+       FLIGHT AS FLIGHTalias0,
+       FLIGHT_FARE AS FLIGHT_FAREalias0
+  WHERE ((((CITYalias2.CITY_CODE = AIRPORT_SERVICEalias2.CITY_CODE
+            AND CITYalias2.CITY_NAME = 'BALTIMORE'
+            AND CITYalias3.CITY_CODE = AIRPORT_SERVICEalias3.CITY_CODE
+            AND CITYalias3.CITY_NAME = 'DALLAS'
+            AND FAREalias0.FROM_AIRPORT = AIRPORT_SERVICEalias2.AIRPORT_CODE
+            AND FAREalias0.TO_AIRPORT = AIRPORT_SERVICEalias3.AIRPORT_CODE)
+           AND DATE_DAYalias1.DAY_NUMBER = 3
+           AND DATE_DAYalias1.MONTH_NUMBER = 8
+           AND DATE_DAYalias1.YEAR = 1991
+           AND DAYSalias1.DAY_NAME = DATE_DAYalias1.DAY_NAME
+           AND FARE_BASISalias0.BASIS_DAYS = DAYSalias1.DAYS_CODE
+           AND FAREalias0.FARE_BASIS_CODE = FARE_BASISalias0.FARE_BASIS_CODE)
+          AND DATE_DAYalias0.DAY_NUMBER = 3
+          AND DATE_DAYalias0.MONTH_NUMBER = 8
+          AND DATE_DAYalias0.YEAR = 1991
+          AND DAYSalias0.DAY_NAME = DATE_DAYalias0.DAY_NAME
+          AND FAREalias0.ONE_DIRECTION_COST =
+            (SELECT MIN(FAREalias1.ONE_DIRECTION_COST)
+             FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias4,
+                  AIRPORT_SERVICE AS AIRPORT_SERVICEalias5,
+                  CITY AS CITYalias4,
+                  CITY AS CITYalias5,
+                  DATE_DAY AS DATE_DAYalias2,
+                  DAYS AS DAYSalias2,
+                  FARE AS FAREalias1,
+                  FARE_BASIS AS FARE_BASISalias1
+             WHERE (CITYalias4.CITY_CODE = AIRPORT_SERVICEalias4.CITY_CODE
+                    AND CITYalias4.CITY_NAME = 'BALTIMORE'
+                    AND CITYalias5.CITY_CODE = AIRPORT_SERVICEalias5.CITY_CODE
+                    AND CITYalias5.CITY_NAME = 'DALLAS'
+                    AND FAREalias1.FROM_AIRPORT = AIRPORT_SERVICEalias4.AIRPORT_CODE
+                    AND FAREalias1.TO_AIRPORT = AIRPORT_SERVICEalias5.AIRPORT_CODE)
+               AND DATE_DAYalias2.DAY_NUMBER = 3
+               AND DATE_DAYalias2.MONTH_NUMBER = 8
+               AND DATE_DAYalias2.YEAR = 1991
+               AND DAYSalias2.DAY_NAME = DATE_DAYalias2.DAY_NAME
+               AND FARE_BASISalias1.BASIS_DAYS = DAYSalias2.DAYS_CODE
+               AND FAREalias1.FARE_BASIS_CODE = FARE_BASISalias1.FARE_BASIS_CODE )
+          AND FLIGHT_FAREalias0.FARE_ID = FAREalias0.FARE_ID
+          AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias0.DAYS_CODE
+          AND FLIGHTalias0.FLIGHT_ID = FLIGHT_FAREalias0.FLIGHT_ID)
+         AND CITYalias1.CITY_CODE = AIRPORT_SERVICEalias1.CITY_CODE
+         AND CITYalias1.CITY_NAME = 'DALLAS'
+         AND FLIGHTalias0.TO_AIRPORT = AIRPORT_SERVICEalias1.AIRPORT_CODE)
+    AND CITYalias0.CITY_CODE = AIRPORT_SERVICEalias0.CITY_CODE
+    AND CITYalias0.CITY_NAME = 'BALTIMORE'
+    AND FLIGHTalias0.AIRLINE_CODE = AIRLINEalias0.AIRLINE_CODE
+    AND FLIGHTalias0.FROM_AIRPORT = AIRPORT_SERVICEalias0.AIRPORT_CODE ;

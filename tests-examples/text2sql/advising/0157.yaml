@@ -1,0 +1,29 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0157.csv
+constants:
+- '2016'
+- EECS
+- '280'
+- WN
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) > 0
+  FROM COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE COURSE_OFFERINGalias0.FRIDAY = "N"
+    AND COURSE_OFFERINGalias0.MONDAY = "Y"
+    AND COURSE_OFFERINGalias0.THURSDAY = "N"
+    AND COURSE_OFFERINGalias0.TUESDAY = "N"
+    AND COURSE_OFFERINGalias0.WEDNESDAY = "Y"
+    AND COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 280
+    AND SEMESTERalias0.SEMESTER = "WN"
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+    AND SEMESTERalias0.YEAR = 2016 ;

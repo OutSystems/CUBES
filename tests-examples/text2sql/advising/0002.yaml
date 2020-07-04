@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0002.csv
+constants:
+- MDE
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER,
+                  PROGRAM_COURSEalias0.WORKLOAD,
+                  PROGRAM_COURSEalias0.WORKLOAD
+  FROM COURSE AS COURSEalias0,
+       PROGRAM_COURSE AS PROGRAM_COURSEalias0
+  WHERE PROGRAM_COURSEalias0.CATEGORY LIKE "%MDE%"
+    AND PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+    AND PROGRAM_COURSEalias0.WORKLOAD =
+      (SELECT MIN(PROGRAM_COURSEalias1.WORKLOAD)
+       FROM PROGRAM_COURSE AS PROGRAM_COURSEalias1
+       WHERE PROGRAM_COURSEalias1.CATEGORY LIKE "%MDE%" ) ;

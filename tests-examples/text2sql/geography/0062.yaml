@@ -1,0 +1,30 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/state.csv
+  - tests-examples/text2sql/geography/tables/city.csv
+  - tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0062.csv
+constants: []
+functions:
+  - n
+  - max
+columns:
+  - state_name
+  - population
+  - capital
+  - highest_elevation
+foreign-keys: []
+comment: |-
+  SELECT COUNT(HIGHLOWalias0.STATE_NAME)
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.HIGHEST_ELEVATION >
+      (SELECT HIGHLOWalias1.HIGHEST_ELEVATION
+       FROM HIGHLOW AS HIGHLOWalias1
+       WHERE HIGHLOWalias1.STATE_NAME =
+           (SELECT STATEalias0.STATE_NAME
+            FROM STATE AS STATEalias0
+            WHERE STATEalias0.CAPITAL =
+                (SELECT CITYalias0.CITY_NAME
+                 FROM CITY AS CITYalias0
+                 WHERE CITYalias0.POPULATION =
+                     (SELECT MAX(CITYalias1.POPULATION)
+                      FROM CITY AS CITYalias1) ) ) ) ;

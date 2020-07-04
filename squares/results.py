@@ -38,6 +38,7 @@ enum_time = 0
 init_time = 0
 block_time = 0
 empty_output = 0
+redundant_lines = 0
 
 
 def handle_sigint(signal, stackframe):
@@ -61,6 +62,7 @@ def print_results():
     logger.info('\t\tRejected: %d (approx)', n_rejects)
     logger.info('\t\tFailed: %d (approx)', n_fails)
     logger.info('\t\tEmpty outputs: %d (%.1f%%) (approx)', empty_output, empty_output / n_attempts * 100 if n_attempts else 0)
+    logger.info('\t\tRedundant lines: %d (approx)', redundant_lines)
     logger.info('\tBlocked programs: %d (%f / attempted avg.) (approx)', n_blocks, n_blocks / n_attempts if n_attempts else 0)
     logger.info('\tTotal time spent in enumerator init: %f (approx)', init_time)
     logger.info('\tTotal time spent in enumerator: %f (approx)', enum_time)
@@ -106,8 +108,8 @@ def print_results():
         print("No solution found")
 
 
-def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t):
-    global n_attempts, n_rejects, n_fails, n_blocks, empty_output, enum_time, analysis_time, init_time, block_time
+def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t, redundant):
+    global n_attempts, n_rejects, n_fails, n_blocks, empty_output, enum_time, analysis_time, init_time, block_time, redundant_lines
     n_attempts += attempts
     n_rejects += rejects
     n_fails += fails
@@ -117,6 +119,7 @@ def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, i
     analysis_time += analysis_t
     init_time += init_t
     block_time += block_t
+    redundant_lines += redundant
 
 
 def increment_cubes():

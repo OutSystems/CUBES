@@ -1,0 +1,45 @@
+inputs:
+#  - tests-examples/text2sql/atis/tables/aircraft.csv
+#  - tests-examples/text2sql/atis/tables/airline.csv
+  - tests-examples/text2sql/atis/tables/airport.csv
+#  - tests-examples/text2sql/atis/tables/airport_service.csv
+#  - tests-examples/text2sql/atis/tables/city.csv
+#  - tests-examples/text2sql/atis/tables/class_of_service.csv
+#  - tests-examples/text2sql/atis/tables/code_description.csv
+#  - tests-examples/text2sql/atis/tables/compartment_class.csv
+#  - tests-examples/text2sql/atis/tables/date_day.csv
+#  - tests-examples/text2sql/atis/tables/days.csv
+#  - tests-examples/text2sql/atis/tables/dual_carrier.csv
+#  - tests-examples/text2sql/atis/tables/equipment_sequence.csv
+#  - tests-examples/text2sql/atis/tables/fare.csv
+#  - tests-examples/text2sql/atis/tables/fare_basis.csv
+  - tests-examples/text2sql/atis/tables/flight.csv
+#  - tests-examples/text2sql/atis/tables/flight_fare.csv
+#  - tests-examples/text2sql/atis/tables/flight_leg.csv
+#  - tests-examples/text2sql/atis/tables/flight_stop.csv
+#  - tests-examples/text2sql/atis/tables/food_service.csv
+#  - tests-examples/text2sql/atis/tables/ground_service.csv
+#  - tests-examples/text2sql/atis/tables/month.csv
+#  - tests-examples/text2sql/atis/tables/restriction.csv
+#  - tests-examples/text2sql/atis/tables/state.csv
+#  - tests-examples/text2sql/atis/tables/time_interval.csv
+#  - tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0003.csv
+constants:
+  - MKE
+columns:
+  - airport_code
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM AIRPORT AS AIRPORTalias0,
+       AIRPORT AS AIRPORTalias1,
+       FLIGHT AS FLIGHTalias0
+  WHERE AIRPORTalias1.AIRPORT_CODE = 'MKE'
+    AND FLIGHTalias0.FROM_AIRPORT = AIRPORTalias0.AIRPORT_CODE
+    AND FLIGHTalias0.TO_AIRPORT = AIRPORTalias1.AIRPORT_CODE;
+
+  df3 <- inner_join(input1, input2, by=c('airport_code' = 'to_airport'), suffix = c('', '.other')) %>% mutate(to_airport = airport_code)
+  df4 <- df3 %>% filter(airport_code == 'MKE')
+  out <- df4 %>% select(flight_id) %>% arrange(flight_id)
+
+

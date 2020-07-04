@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0149.csv
+constants:
+- EECS
+- '281'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) > 0
+  FROM SEMESTER AS SEMESTERalias0
+  WHERE SEMESTERalias0.SEMESTER NOT IN
+      (SELECT DISTINCT SEMESTERalias1.SEMESTER
+       FROM COURSE AS COURSEalias0,
+            COURSE_OFFERING AS COURSE_OFFERINGalias0,
+            SEMESTER AS SEMESTERalias1
+       WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+         AND COURSEalias0.DEPARTMENT = "EECS"
+         AND COURSEalias0.NUMBER = 281
+         AND SEMESTERalias1.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER ) ;

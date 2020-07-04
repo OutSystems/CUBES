@@ -1,0 +1,20 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0066.csv
+functions: []
+constants:
+- missouri
+columns:
+- state_name
+foreign-keys: []
+comment: |
+  SELECT STATEalias0.CAPITAL
+  FROM BORDER_INFO AS BORDER_INFOalias0,
+       STATE AS STATEalias0
+  WHERE BORDER_INFOalias0.STATE_NAME = "missouri"
+    AND STATEalias0.STATE_NAME = BORDER_INFOalias0.BORDER ;
+
+  df1 <- df_border_info %>% filter(state_name == 'missouri')
+  df2 <- inner_join(df_state, df1, by=c('state_name' = 'border'), suffix = c('', '.other')) %>% mutate(border = state_name)
+  out <- df2 %>% select(CAPITAL = capital) %>% arrange(CAPITAL)

@@ -43,6 +43,11 @@
 
 ## Not supported
 
+### COUNT(column)
+- geography/0017
+- geography/0042
+- geography/0049
+
 ### Mutate
 - scythe/recent_posts/020 (concat, array_agg)
 - scythe/recent_posts/024 (arithmetic)

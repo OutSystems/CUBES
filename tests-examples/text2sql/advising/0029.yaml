@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0029.csv
+constants:
+- operating systems
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT SEMESTERalias0.SEMESTER,
+                  SEMESTERalias0.YEAR
+  FROM SEMESTER AS SEMESTERalias0
+  INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+  INNER JOIN COURSE AS COURSEalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  WHERE COURSEalias0.NAME LIKE "%operating systems%"
+    AND SEMESTERalias0.SEMESTER_ID >
+      (SELECT SEMESTERalias1.SEMESTER_ID
+       FROM SEMESTER AS SEMESTERalias1
+       WHERE SEMESTERalias1.SEMESTER = "WN"
+         AND SEMESTERalias1.YEAR = 2016 ) ;

@@ -1,0 +1,39 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/border_info.csv
+  - tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0036.csv
+functions:
+  - max
+constants: []
+columns:
+  - length
+foreign-keys: []
+comment: |
+  SELECT DISTINCT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.LENGTH IN
+      (SELECT MAX(DERIVED_TABLEalias1.DERIVED_FIELDalias0)
+       FROM
+         (SELECT MAX(RIVERalias1.LENGTH) AS DERIVED_FIELDalias0,
+                 RIVERalias1.TRAVERSE
+          FROM RIVER AS RIVERalias1
+          WHERE RIVERalias1.TRAVERSE IN
+              (SELECT BORDER_INFOalias0.STATE_NAME
+               FROM BORDER_INFO AS BORDER_INFOalias0
+               WHERE BORDER_INFOalias0.BORDER IN
+                   (SELECT BORDER_INFOalias1.BORDER
+                    FROM BORDER_INFO AS BORDER_INFOalias1
+                    GROUP BY BORDER_INFOalias1.BORDER
+                    HAVING COUNT(1) =
+                      (SELECT MAX(DERIVED_TABLEalias0.DERIVED_FIELDalias1)
+                       FROM
+                         (SELECT BORDER_INFOalias2.BORDER,
+                                 COUNT(1) AS DERIVED_FIELDalias1
+                          FROM BORDER_INFO AS BORDER_INFOalias2
+                          GROUP BY BORDER_INFOalias2.BORDER) AS DERIVED_TABLEalias0)) )
+          GROUP BY RIVERalias1.TRAVERSE) AS DERIVED_TABLEalias1) ;
+
+  df1 <- bind_rows(df_river, df_border_info)
+  df2 <- df1 %>% group_by(state_name) %>% summarise(length = max(length)) %>% ungroup()
+  df3 <- inner_join(df_river, df2, by=c('length'), suffix = c('', '.other'))
+  out <- df3 %>% select(RIVER_NAME = river_name) %>% distinct() %>% arrange(RIVER_NAME)

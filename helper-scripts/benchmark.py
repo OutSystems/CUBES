@@ -11,6 +11,7 @@ from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
+parser.add_argument('-n', default=1, type=int, help='number of times to run each instance')
 parser.add_argument('-p', default=1, type=int, help='#processes')
 parser.add_argument('--append', action='store_true', help='append to file')
 parser.add_argument('--cubes', action='store_true', help='use cubes')
@@ -19,9 +20,9 @@ parser.add_argument('name', metavar='NAME', help="name of the result file")
 args, other_args = parser.parse_known_args()
 
 
-def test_file(filename: str):
+def test_file(filename: str, run: str = ''):
     test_name = filename.replace('tests/', '', 1).replace('.yaml', '')
-    out_file = f'data-treatment/{args.name}/{test_name}.log'
+    out_file = f'data-treatment/{args.name}/{test_name}{run}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
@@ -67,8 +68,10 @@ if not args.append:
         f.flush()
 
 if args.p == 1:
-    for file in glob.glob('tests/**/*.yaml', recursive=True):
-        test_file(file)
+    for i in range(args.n):
+        for file in glob.glob('tests/**/*.yaml', recursive=True):
+            test_file(file, f'_{i}')
 else:
     with Pool(processes=args.p) as pool:
-        pool.map(test_file, glob.glob('tests/**/*.yaml', recursive=True), chunksize=1)
+        for i in range(args.n):
+            pool.map(test_file, glob.glob('tests/**/*.yaml', recursive=True), chunksize=1)

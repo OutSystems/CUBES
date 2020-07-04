@@ -169,11 +169,15 @@ class FunctionProduction(Production):
         return f'[{str(self._id).rjust(4)}] {self._lhs} -> {self._name}({", ".join([str(x) for x in self._rhs])})'
 
 
-class LineProduction:
+class LineProduction(Production):
+
     def __init__(self, id, type, line: int):
-        self.id = id
-        self.lhs = type
+        super().__init__(id, type)
         self.line = line
+
+    @property
+    def rhs(self) -> List[Any]:
+        raise NotImplementedError
 
     def is_enum(self) -> bool:
         return False

@@ -1,0 +1,48 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0199.csv
+constants:
+- alaska
+- hawaii
+functions:
+- count
+- min
+- count
+columns:
+- state_name
+- population
+- area
+- country_name
+- capital
+- density
+- border
+- city_name
+- highest_elevation
+- lowest_point
+- highest_point
+- lowest_elevation
+- river_name
+- length
+- traverse
+- mountain_name
+- mountain_altitude
+- lake_name
+foreign-keys: []
+comment: |-
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  LEFT OUTER JOIN BORDER_INFO AS BORDER_INFOalias0 ON STATEalias0.STATE_NAME = BORDER_INFOalias0.STATE_NAME
+  WHERE STATEalias0.STATE_NAME <> "alaska"
+    AND STATEalias0.STATE_NAME <> "hawaii"
+  GROUP BY STATEalias0.STATE_NAME
+  HAVING COUNT(BORDER_INFOalias0.BORDER) =
+    (SELECT MIN(DERIVED_TABLEalias0.DERIVED_FIELDalias0)
+     FROM
+       (SELECT COUNT(BORDER_INFOalias1.BORDER) AS DERIVED_FIELDalias0,
+               STATEalias1.STATE_NAME
+        FROM STATE AS STATEalias1
+        LEFT OUTER JOIN BORDER_INFO AS BORDER_INFOalias1 ON STATEalias1.STATE_NAME = BORDER_INFOalias1.STATE_NAME
+        WHERE STATEalias1.STATE_NAME <> "alaska"
+          AND STATEalias1.STATE_NAME <> "hawaii"
+        GROUP BY STATEalias1.STATE_NAME) AS DERIVED_TABLEalias0) ;

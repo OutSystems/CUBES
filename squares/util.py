@@ -1,6 +1,7 @@
 import argparse
 import pickle
 import time
+from collections import OrderedDict
 from enum import Enum
 from itertools import permutations, combinations, tee, chain
 from logging import getLogger
@@ -27,6 +28,17 @@ solution = None
 program_queue = None
 
 BUFFER_SIZE = 8 * 4 * 1024
+
+
+class literal(str):
+    pass
+
+
+def literal_presenter(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+
+yaml.add_representer(literal, literal_presenter)
 
 
 def seed(s):
@@ -113,12 +125,14 @@ def create_argparser(all_inputs=False):
     parser.add_argument('--no-r', action='store_true', help="don't output R program")
 
     parser.add_argument('--optimal', action='store_true', help='make sure that returned solutions are as short as possible')
-    parser.add_argument('--cache', dest='cache_operations', action='store_true', help='increased memory usage, but possibly faster results')
+    parser.add_argument('--no-cache', dest='cache_operations', action='store_false',
+                        help='increased memory usage, but possibly faster results')
     parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
     parser.add_argument('--cube-freedom', type=int, default=0, help='number of free lines when generating cubes')
     parser.add_argument('--no-block-commutative-ops', dest='block_commutative_ops', action='store_false',
                         help='block commutative operations')
     parser.add_argument('--no-subsume-conditions', dest='subsume_conditions', action='store_false', help='subsume conditions')
+    parser.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false', help='subsume conditions transitively')
 
     g = parser.add_argument_group('heuristics')
 
@@ -143,6 +157,7 @@ def create_argparser(all_inputs=False):
     parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
     parser.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
     parser.add_argument('--seed', default='squares')
+    parser.add_argument('--append', action='store_true')
     return parser
 
 
@@ -173,12 +188,42 @@ def parse_specification(filename):
 
     for field in ['constants', 'functions', 'columns', 'filters']:
         if field not in spec:
-            spec[field] = []
+            spec[field] = None
 
     if 'dateorder' not in spec:
-        spec['dateorder'] = 'dmy'
+        spec['dateorder'] = None
 
     return spec
+
+
+def write_specification(spec, file):
+    spec = OrderedDict(spec)
+
+    for key in list(spec.keys()):
+        if spec[key] is None:
+            spec.pop(key)
+
+    if 'comment' in spec:
+        spec['comment'] = literal(spec['comment'])
+
+    spec.move_to_end('inputs')
+    spec.move_to_end('output')
+    if 'functions' in spec:
+        spec.move_to_end('functions')
+    if 'filters' in spec:
+        spec.move_to_end('filters')
+    if 'constants' in spec:
+        spec.move_to_end('constants')
+    if 'columns' in spec:
+        spec.move_to_end('columns')
+    if 'foreign-keys' in spec:
+        spec.move_to_end('foreign-keys')
+    if 'dateorder' in spec:
+        spec.move_to_end('dateorder')
+    if 'comment' in spec:
+        spec.move_to_end('comment')
+
+    yaml.dump(dict(spec), file, default_flow_style=False, sort_keys=False)
 
 
 def single_quote_str(string: str) -> str:

@@ -1,0 +1,31 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0004.csv
+constants:
+- '370'
+- EECS
+- '281'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) > 0
+  FROM COURSE AS COURSEalias0,
+       COURSE AS COURSEalias1,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias1,
+       COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0
+  WHERE COURSE_OFFERINGalias1.SEMESTER = COURSE_OFFERINGalias0.SEMESTER
+    AND COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 281
+    AND COURSEalias1.COURSE_ID = COURSE_OFFERINGalias1.COURSE_ID
+    AND COURSEalias1.DEPARTMENT = "EECS"
+    AND COURSEalias1.NUMBER = 370
+    AND (NOT ((COURSEalias1.COURSE_ID = COURSE_PREREQUISITEalias0.COURSE_ID
+               AND COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID)
+              OR (COURSEalias1.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+                  AND COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.COURSE_ID))) ;

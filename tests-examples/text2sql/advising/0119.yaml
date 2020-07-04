@@ -1,0 +1,30 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0119.csv
+constants:
+- '2016'
+- EECS
+- '370'
+- FA
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(DISTINCT INSTRUCTORalias0.INSTRUCTOR_ID)
+  FROM COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       INSTRUCTOR AS INSTRUCTORalias0,
+       OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 370
+    AND OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID = INSTRUCTORalias0.INSTRUCTOR_ID
+    AND OFFERING_INSTRUCTORalias0.OFFERING_ID = COURSE_OFFERINGalias0.OFFERING_ID
+    AND SEMESTERalias0.SEMESTER = "FA"
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+    AND SEMESTERalias0.YEAR = 2016 ;

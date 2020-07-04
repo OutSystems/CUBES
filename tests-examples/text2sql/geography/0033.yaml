@@ -1,0 +1,21 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0033.csv
+functions: []
+constants:
+- mississippi
+columns:
+- state_name
+foreign-keys: []
+comment: |
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias0.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias0
+       WHERE BORDER_INFOalias0.STATE_NAME = "mississippi" ) ;
+
+  df1 <- df_border_info %>% filter(state_name == 'mississippi')
+  df2 <- inner_join(df_highlow, df1, by=c('state_name' = 'border'), suffix = c('', '.other')) %>% mutate(border = state_name)
+  out <- df2 %>% select(HIGHEST_POINT = highest_point) %>% arrange(HIGHEST_POINT)

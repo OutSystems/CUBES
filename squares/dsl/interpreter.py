@@ -20,12 +20,21 @@ def get_type(df, index):
     return ret_val[0]
 
 
+class RedudantError(InterpreterError):
+
+    def __init__(self, *args):
+        pass
+
+
 def eval_decorator(func):
     def wrapper(self, args, key):
         if key and not self.final_interpretation and util.get_config().cache_ops:
             if not key in self.cache:
                 name = util.get_fresh_name()
                 self.try_execute(func(self, name, args))
+                # if robjects.r(f'all_equal({name}, {args[0]}, convert=T, ignore_row_order=T)')[0] is True:
+                #     results.redundant_lines += 1
+                #     raise RedudantError()
                 self.cache[key] = name
             return self.cache[key]
         name = util.get_fresh_name()

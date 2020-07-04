@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+output: tests-examples/text2sql/advising/tables/0162.csv
+constants:
+- EECS
+- '280'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT INSTRUCTORalias0.NAME
+  FROM INSTRUCTOR AS INSTRUCTORalias0
+  WHERE INSTRUCTORalias0.NAME NOT IN
+      (SELECT INSTRUCTORalias1.NAME
+       FROM COURSE AS COURSEalias0
+       INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+       INNER JOIN OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.OFFERING_ID = COURSE_OFFERINGalias0.OFFERING_ID
+       INNER JOIN INSTRUCTOR AS INSTRUCTORalias1 ON OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID = INSTRUCTORalias1.INSTRUCTOR_ID
+       WHERE COURSEalias0.DEPARTMENT = "EECS"
+         AND COURSEalias0.NUMBER = 280 ) ;

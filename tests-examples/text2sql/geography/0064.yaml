@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0064.csv
+functions:
+- max
+constants:
+- texas
+columns:
+- length
+- traverse
+foreign-keys: []
+comment: |
+  SELECT RIVERalias0.TRAVERSE
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.LENGTH =
+      (SELECT MAX(RIVERalias1.LENGTH)
+       FROM RIVER AS RIVERalias1
+       WHERE RIVERalias1.TRAVERSE = "texas" ) ;
+
+  df1 <- df_river %>% filter(traverse == 'texas')
+  df2 <- df1 %>% group_by(country_name) %>% summarise(length = max(length)) %>% ungroup()
+  df3 <- left_join(df2, df_river)
+  out <- df3 %>% select(TRAVERSE = traverse) %>% arrange(TRAVERSE)

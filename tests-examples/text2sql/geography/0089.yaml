@@ -1,0 +1,21 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0089.csv
+functions: []
+constants:
+- austin
+columns:
+- capital
+foreign-keys: []
+comment: |
+  SELECT HIGHLOWalias0.HIGHEST_POINT
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.STATE_NAME IN
+      (SELECT STATEalias0.STATE_NAME
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.CAPITAL = "austin" ) ;
+
+  df1 <- df_state %>% filter(capital == 'austin')
+  df2 <- semi_join(df_highlow, df1)
+  out <- df2 %>% select(HIGHEST_POINT = highest_point) %>% arrange(HIGHEST_POINT)

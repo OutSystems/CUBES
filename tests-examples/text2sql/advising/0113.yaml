@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+- tests-examples/text2sql/advising/tables/student_record.csv
+output: tests-examples/text2sql/advising/tables/0113.csv
+constants:
+- EECS
+- '492'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(DISTINCT COURSEalias1.DEPARTMENT, COURSEalias0.NUMBER)
+  FROM COURSE AS COURSEalias0,
+       COURSE AS COURSEalias1,
+       COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0,
+       STUDENT_RECORD AS STUDENT_RECORDalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+    AND COURSEalias1.COURSE_ID = COURSE_PREREQUISITEalias0.COURSE_ID
+    AND COURSEalias1.DEPARTMENT = "EECS"
+    AND COURSEalias1.NUMBER = 492
+    AND STUDENT_RECORDalias0.COURSE_ID = COURSEalias0.COURSE_ID
+    AND STUDENT_RECORDalias0.STUDENT_ID = 1 ;

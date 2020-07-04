@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0171.csv
+constants: []
+functions:
+- min
+columns:
+- state_name
+- lowest_elevation
+foreign-keys: []
+comment: |-
+  SELECT BORDER_INFOalias0.STATE_NAME
+  FROM BORDER_INFO AS BORDER_INFOalias0,
+       HIGHLOW AS HIGHLOWalias0,
+       STATE AS STATEalias0
+  WHERE (HIGHLOWalias0.STATE_NAME = BORDER_INFOalias0.BORDER)
+    AND (STATEalias0.STATE_NAME = BORDER_INFOalias0.BORDER)
+    AND HIGHLOWalias0.LOWEST_ELEVATION =
+      (SELECT MIN(HIGHLOWalias1.LOWEST_ELEVATION)
+       FROM HIGHLOW AS HIGHLOWalias1)
+  ORDER BY STATEalias0.AREA DESC
+  LIMIT 1 ;

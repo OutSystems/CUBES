@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0161.csv
+constants:
+- '2016'
+- EECS
+- '280'
+- WN
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT INSTRUCTORalias0.NAME
+  FROM COURSE AS COURSEalias0
+  INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  INNER JOIN OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.OFFERING_ID = COURSE_OFFERINGalias0.OFFERING_ID
+  INNER JOIN INSTRUCTOR AS INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID = INSTRUCTORalias0.INSTRUCTOR_ID
+  INNER JOIN SEMESTER AS SEMESTERalias0 ON SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+  WHERE COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 280
+    AND NOT (SEMESTERalias0.SEMESTER = "WN"
+             AND SEMESTERalias0.YEAR = 2016) ;

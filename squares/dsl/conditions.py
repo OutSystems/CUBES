@@ -91,10 +91,10 @@ class ConditionGenerator:
                 for type in new_col_types:
                     self.specification.columns_by_type[type].append(new_col)
 
-            if aggr == 'n':
+            if aggr == 'n' or aggr == 'count':
                 add_condition('n = n()', 'n', [types.INT], 0)
 
-            if aggr == 'n_distinct':
+            if aggr == 'n_distinct' or aggr == 'count':
                 for columns in powerset_except_empty(chain(*frozen_columns.values()), util.get_config().max_column_combinations):
                     add_condition(f'n_distinct = n_distinct({",".join(columns)})', 'n_distinct', [types.INT],
                                   self.specification.get_bitvecnum(columns))

@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+output: tests-examples/text2sql/geography/tables/0041.csv
+functions:
+- min
+constants: []
+columns:
+- density
+foreign-keys: []
+comment: |
+  SELECT STATEalias0.AREA
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.DENSITY =
+      (SELECT MIN(STATEalias1.DENSITY)
+       FROM STATE AS STATEalias1) ;
+
+  df1 <- df_state %>% mutate(mindensity = min(density))
+  df2 <- inner_join(df_state, df1, by=c('density' = 'mindensity'), suffix = c('', '.other')) %>% mutate(mindensity = density)
+  out <- df2 %>% select(AREA = area) %>% distinct() %>% arrange(AREA)

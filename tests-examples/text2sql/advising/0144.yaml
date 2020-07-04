@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+output: tests-examples/text2sql/advising/tables/0144.csv
+constants:
+- '381'
+- EECS
+- '494'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) > 0
+  FROM COURSE AS COURSEalias0,
+       COURSE AS COURSEalias1,
+       PROGRAM_COURSE AS PROGRAM_COURSEalias0,
+       PROGRAM_COURSE AS PROGRAM_COURSEalias1
+  WHERE COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 494
+    AND COURSEalias1.DEPARTMENT = "EECS"
+    AND COURSEalias1.NUMBER = 381
+    AND PROGRAM_COURSEalias0.COURSE_ID = COURSEalias0.COURSE_ID
+    AND PROGRAM_COURSEalias0.WORKLOAD < PROGRAM_COURSEalias1.WORKLOAD
+    AND PROGRAM_COURSEalias1.COURSE_ID = COURSEalias1.COURSE_ID ;

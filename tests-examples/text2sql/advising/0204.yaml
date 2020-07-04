@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/program_course.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0204.csv
+constants:
+- MDE
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT COURSEalias0.DEPARTMENT,
+                  COURSEalias0.NAME,
+                  COURSEalias0.NUMBER,
+                  SEMESTERalias0.SEMESTER
+  FROM COURSE AS COURSEalias0
+  INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  INNER JOIN SEMESTER AS SEMESTERalias0 ON SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+  INNER JOIN PROGRAM_COURSE AS PROGRAM_COURSEalias0 ON PROGRAM_COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  WHERE PROGRAM_COURSEalias0.CATEGORY LIKE "%MDE%"
+    AND SEMESTERalias0.SEMESTER IN ("FA",
+                                    "WN")
+    AND SEMESTERalias0.YEAR = 2016 ;

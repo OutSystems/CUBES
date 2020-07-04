@@ -1,0 +1,28 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0213.csv
+constants:
+- EECS
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(DISTINCT COURSE_PREREQUISITEalias0.COURSE_ID),
+         COURSEalias0.DEPARTMENT,
+         COURSEalias0.NAME,
+         COURSEalias0.NUMBER
+  FROM COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND SEMESTERalias0.SEMESTER = "WN"
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+    AND SEMESTERalias0.YEAR = 2016
+  GROUP BY COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+  ORDER BY COUNT(COURSE_PREREQUISITEalias0.COURSE_ID) DESC ;

@@ -1,0 +1,29 @@
+inputs:
+- tests-examples/text2sql/advising/tables/area.csv
+- tests-examples/text2sql/advising/tables/student_record.csv
+output: tests-examples/text2sql/advising/tables/0193.csv
+constants:
+- A
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT DERIVED_TABLEalias0.DERIVED_FIELDalias1
+  FROM
+    (SELECT AREAalias0.AREA AS DERIVED_FIELDalias0,
+            COUNT(*) AS DERIVED_FIELDalias1
+     FROM AREA AS AREAalias0
+     INNER JOIN STUDENT_RECORD AS STUDENT_RECORDalias0 ON STUDENT_RECORDalias0.COURSE_ID = AREAalias0.COURSE_ID
+     WHERE STUDENT_RECORDalias0.GRADE LIKE "A"
+       AND STUDENT_RECORDalias0.STUDENT_ID = 1
+     GROUP BY AREAalias0.AREA) AS DERIVED_TABLEalias0
+  WHERE DERIVED_TABLEalias0.DERIVED_FIELDalias1 =
+      (SELECT COUNT(*) AS DERIVED_FIELDalias2
+       FROM AREA AS AREAalias1,
+            STUDENT_RECORD AS STUDENT_RECORDalias1
+       WHERE STUDENT_RECORDalias1.COURSE_ID = AREAalias1.COURSE_ID
+         AND STUDENT_RECORDalias1.GRADE LIKE "A"
+         AND STUDENT_RECORDalias1.STUDENT_ID = 1
+       GROUP BY AREAalias1.AREA
+       ORDER BY DERIVED_FIELDalias2 DESC
+       LIMIT 1) ;

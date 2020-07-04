@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/highlow.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0203.csv
+constants: []
+functions:
+- min
+columns:
+- lowest_elevation
+foreign-keys: []
+comment: |-
+  SELECT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.TRAVERSE IN
+      (SELECT HIGHLOWalias0.STATE_NAME
+       FROM HIGHLOW AS HIGHLOWalias0
+       WHERE HIGHLOWalias0.LOWEST_ELEVATION =
+           (SELECT MIN(HIGHLOWalias1.LOWEST_ELEVATION)
+            FROM HIGHLOW AS HIGHLOWalias1) ) ;

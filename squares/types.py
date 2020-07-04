@@ -98,6 +98,8 @@ def is_integer(o):
 
 
 def is_float(o):
+    if o == 'N/A':
+        return False
     try:
         float(o)
         return True

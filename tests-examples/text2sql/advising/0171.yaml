@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+output: tests-examples/text2sql/advising/tables/0171.csv
+constants:
+- EECS
+- '280'
+- smith
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) = 0
+  FROM COURSE AS COURSEalias0
+  INNER JOIN COURSE_OFFERING AS COURSE_OFFERINGalias0 ON COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+  INNER JOIN OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.OFFERING_ID = COURSE_OFFERINGalias0.OFFERING_ID
+  INNER JOIN INSTRUCTOR AS INSTRUCTORalias0 ON OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID = INSTRUCTORalias0.INSTRUCTOR_ID
+  WHERE COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.HAS_LAB = "N"
+    AND COURSEalias0.NUMBER = 280
+    AND INSTRUCTORalias0.NAME LIKE "%smith%" ;

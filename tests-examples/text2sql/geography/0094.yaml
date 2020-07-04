@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0094.csv
+constants:
+- arkansas
+functions:
+- max
+columns:
+- state_name
+- area
+foreign-keys: []
+comment: |-
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.AREA =
+      (SELECT MAX(STATEalias1.AREA)
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.STATE_NAME IN
+           (SELECT BORDER_INFOalias0.BORDER
+            FROM BORDER_INFO AS BORDER_INFOalias0
+            WHERE BORDER_INFOalias0.STATE_NAME = "arkansas" ) )
+    AND STATEalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias1.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias1
+       WHERE BORDER_INFOalias1.STATE_NAME = "arkansas" ) ;

@@ -9,8 +9,9 @@ from ordered_set import OrderedSet
 
 from .enumerator import Enumerator
 from ..spec import TyrellSpec, Predicate
-from ..spec.production import LineProduction
+from ..spec.production import LineProduction, Production
 from ... import util, program
+from ...program import Program
 from ...decider import RejectionInfo, RowNumberInfo
 from ...dsl.specification import Specification
 from ...util import flatten
@@ -89,9 +90,6 @@ class Leaf(Node):
         return f'Leaf(parent={self.parent}, child_id={self.child_id})'
 
 
-formula_counter = 0
-
-
 class BitEnumerator(Enumerator):
 
     def __init__(self, tyrell_spec: TyrellSpec, spec: Specification, loc: int = None, debug: bool = True):
@@ -142,6 +140,8 @@ class BitEnumerator(Enumerator):
         self.line_vars_by_line = defaultdict(list)
         self.roots, self.leaves = self.build_trees()
         self.model = None
+        self.current_program = None
+        self.unsat_core = None
 
         if util.get_config().lines_force_all_inputs:
             self.create_input_constraints()
@@ -155,7 +155,7 @@ class BitEnumerator(Enumerator):
                 self._production_id_cache[p.rhs].append(p.id)
         self._production_id_cache.default_factory = lambda: None  # from now on throw errors id invalid keys are accessed
         self.resolve_predicates()
-        self.constraint_functions()
+        self.create_bitvector_constraints()
 
         logger.debug('Compiling condition tables...')
 
@@ -171,7 +171,7 @@ class BitEnumerator(Enumerator):
 
         res = self.z3_solver.check()
         if res != z3.sat:
-            logger.warning(f"There is no solution for current loc ({self.loc}).")
+            logger.debug(f"There is no solution for current loc ({self.loc}).")
         else:
             self.model = self.z3_solver.model()
 
@@ -197,6 +197,12 @@ class BitEnumerator(Enumerator):
             self.z3_solver.assert_and_track(expr, name)
         else:
             self.z3_solver.add(expr)
+
+    def get_production(self, prod_id: int) -> Production:
+        if prod_id in self.line_productions_by_id:
+            return self.line_productions_by_id[prod_id]
+        else:
+            return self.spec.get_production(prod_id)
 
     def create_leaf_enum(self) -> None:
         productions = []
@@ -303,222 +309,7 @@ class BitEnumerator(Enumerator):
 
                     self.assert_expr(z3.Implies(aux, z3.Or(ctr)))
 
-    @staticmethod
-    def _check_arg_types(pred: Predicate, python_tys: List[Type]):
-        if pred.num_args() < len(python_tys):
-            msg = 'Predicate "{}" must have at least {} arugments. Only {} is found.'.format(pred.name, len(python_tys), pred.num_args())
-            raise ValueError(msg)
-        for index, (arg, python_ty) in enumerate(zip(pred.args, python_tys)):
-            if not isinstance(arg, python_ty):
-                msg = 'Argument {} of predicate {} has unexpected type.'.format(index, pred.name)
-                raise ValueError(msg)
-
-    def _resolve_is_not_parent_predicate(self, pred: Predicate):
-        if not util.get_config().is_not_parent_enabled:
-            return
-
-        self._check_arg_types(pred, [str, str])
-        prod0 = self.spec.get_function_production_or_raise(pred.args[0])
-        prod1 = self.spec.get_function_production_or_raise(pred.args[1])
-
-        for r in self.roots:
-            for s in range(len(r.children[0].lines)):
-                children = []
-                for c in r.children:
-                    children.append(c.lines[s])
-                self.assert_expr(z3.Implies(z3.And(z3.Or(children), self.roots[s].var == prod1.id), r.var != prod0.id),
-                                 f'{prod0.id}_is_not_parent_of_{prod1.id}_r{r.id}_l{s}')
-
-    def _resolve_distinct_inputs_predicate(self, pred: Predicate):
-        self._check_arg_types(pred, [str])
-        production = self.spec.get_function_production_or_raise(pred.args[0])
-        for r in self.roots:
-            ctr = []
-            for c1 in range(len(r.children)):
-                child1 = r.children[c1]
-                for c2 in range(c1 + 1, len(r.children)):
-                    child2 = r.children[c2]
-                    # this works because even a inner_join between two filters, the children will have different values for the variables because of the lines produtions
-                    ctr.append(z3.Or(child1.var != child2.var,
-                                     z3.And(child1.var == self.leaf_enum_values[0], child2.var == self.leaf_enum_values[0])))
-
-            self.assert_expr(z3.Implies(r.var == production.id, z3.And(ctr)), f'{production.id}_has_distinct_inputs_r{r.id}')
-
-    def _resolve_distinct_filters_predicate(self, pred: Predicate):
-        self._check_arg_types(pred, [str])
-        prod0 = self.spec.get_function_production_or_raise(pred.args[0])
-        for r in self.roots:
-            self.z3_solver.add(z3.Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
-
-    def _resolve_constant_occurs_predicate(self, pred: Predicate):
-        conditions = pred.args
-        lst = []
-        ids = ''
-        for c in conditions:
-            for id in self._production_id_cache[c]:
-                ids += f'{id}_'
-                for l in self.leaves:
-                    lst.append(l.var == self.leaf_enum_values[id])
-        self.assert_expr(z3.Or(lst), f'constant_occurs_{ids[:-1]}')
-
-    def _resolve_happens_before_predicate(self, pred: Predicate):
-        return
-
-    def resolve_predicates(self) -> None:
-        try:
-            for pred in self.spec.predicates():
-                if pred.name == 'is_not_parent':
-                    self._resolve_is_not_parent_predicate(pred)
-                elif pred.name == 'distinct_inputs':
-                    self._resolve_distinct_inputs_predicate(pred)
-                elif pred.name == 'constant_occurs':
-                    self._resolve_constant_occurs_predicate(pred)
-                elif pred.name == 'happens_before':
-                    self._resolve_happens_before_predicate(pred)
-                elif pred.name == 'distinct_filters':
-                    self._resolve_distinct_filters_predicate(pred)
-                else:
-                    logger.warning('Predicate not handled: {}'.format(pred))
-        except (KeyError, ValueError) as e:
-            msg = 'Failed to resolve predicates. {}'.format(e)
-            raise RuntimeError(msg) from None
-
-    @cached_property
-    def blocking_template(self) -> z3.ExprRef:
-        ctr = []
-        counter = 0
-        for root in self.roots:
-            ctr.append(root.var != z3.Var(counter, z3.IntSort()))
-            counter += 1
-            for child in root.children:
-                ctr.append(child.var != z3.Var(counter, self.leaf_enum))
-                counter += 1
-        return z3.Or(ctr)
-
-    def block_model(self, model: Dict[z3.ExprRef, Any]) -> None:
-        values = []
-        for root in self.roots:
-            values.append(model[root.var])
-            for child in root.children:
-                values.append(model[child.var])
-        self.z3_solver.add(z3.substitute_vars(self.blocking_template, *values))
-
-    def line_uses_line(self, x, y):
-        vars = list(flatten([set(child.lines) & set(self.line_vars_by_line[y + 1]) for child in self.roots[x].children]))
-        return any(map(lambda var: self.model[var], vars))
-
-    def lines_used_by(self, x):
-        return [i for i, v in enumerate([self.line_uses_line(j, x) for j in range(len(self.roots))]) if v]
-
-    def update(self, info: RejectionInfo = None):
-        models = [{x: self.model[x] for x in self.variables}]
-
-        # monot = [self.spec.get_function_production(pn).id for pn in ['natural_join', 'natural_join3', 'natural_join4', 'mutate', 'filter', 'summarise', 'inner_join', 'left_join', 'union'] if self.spec.get_function_production(pn)]
-
-        if info and util.get_config().subsume_conditions:
-            restriction_table = None
-            if info.row_info == RowNumberInfo.MORE_ROWS:
-                restriction_table = self.more_restrictive
-            elif info.row_info == RowNumberInfo.LESS_ROWS:
-                restriction_table = self.less_restrictive
-
-            for model in islice(models, len(models)):
-                # for i, root in enumerate(self.roots):
-                #     if not all(map(lambda line: models[0][self.roots[line].var].as_long() in monot, self.lines_used_by(i))):
-                #         continue
-                for child in self.roots[-1].children:
-                    for replacement in restriction_table[self.leaf_enum_refs[model[child.var]]]:
-                        new_model = model.copy()
-                        new_model[child.var] = self.leaf_enum_values[replacement]
-                        models.append(new_model)
-
-        if util.get_config().block_commutative_ops:
-            for root in self.roots:
-                for model in islice(models, len(models)):
-                    if self.natural_join and model[root.var].as_long() == self.natural_join.id:
-                        for c0, c1 in permutations(root.children[0:2]):
-                            if c0 != root.children[0] or c1 != root.children[1]:
-                                new_model = model.copy()
-                                new_model[root.children[0].var] = model[c0.var]
-                                new_model[root.children[1].var] = model[c1.var]
-                                models.append(new_model)
-                    if self.natural_join3 and model[root.var].as_long() == self.natural_join3.id:
-                        for c0, c1, c2 in permutations(root.children[0:3]):
-                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2]:
-                                new_model = model.copy()
-                                new_model[root.children[0].var] = model[c0.var]
-                                new_model[root.children[1].var] = model[c1.var]
-                                new_model[root.children[2].var] = model[c2.var]
-                                models.append(new_model)
-                    if self.natural_join4 and model[root.var].as_long() == self.natural_join4.id:
-                        for c0, c1, c2, c3 in permutations(root.children[0:4]):
-                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2] or c3 != root.children[3]:
-                                new_model = model.copy()
-                                new_model[root.children[0].var] = model[c0.var]
-                                new_model[root.children[1].var] = model[c1.var]
-                                new_model[root.children[2].var] = model[c2.var]
-                                new_model[root.children[3].var] = model[c3.var]
-                                models.append(new_model)
-
-        # if len(models) > 1:
-        #     logger.warning('Blocked %d programs!', len(models) - 1)
-        #     logger.warning('Due to %s:', self.construct_program(models[0]))
-        for model in models:
-            # if len(models) > 1:
-            #     logger.warning('Blocking %s', self.construct_program(model))
-            self.block_model(model)
-
-        if info and info.score != 0:
-            util.get_program_queue().put((util.Message.EVAL_INFO,
-                                          tuple(line.production.name for line in self.current_program),
-                                          info.score * len(models)))
-        return len(models) - 1
-
-    def get_production(self, prod_id):
-        if prod_id in self.line_productions_by_id:
-            return self.line_productions_by_id[prod_id]
-        else:
-            return self.spec.get_production(prod_id)
-
-    def construct_program(self, model) -> program.Program:
-        prog = [program.Line(self.get_production(model[root.var].as_long()),
-                             tuple(self.get_production(self.leaf_enum_refs[model[child.var]]) for child in root.children)) for root in
-                self.roots]
-        self.current_program = prog
-        return prog
-
-    def print_bitvec_prog(self):
-        for i, r in enumerate(self.roots):
-            if self.model[r.bitvec] is not None:
-                print(i, format(self.model[r.bitvec].as_long(), f'0{self.specification.n_columns}b'), '= ', end='(')
-                for child in r.children:
-                    print('(', format(self.model[child.bitvec].as_long(), f'0{self.specification.n_columns}b'), ', ',
-                          format(self.model[child.bitvec2].as_long(), f'0{self.specification.n_columns}b'), ')', sep='', end=',  ')
-                print(')')
-
-    def next(self):
-        global formula_counter
-        res = self.z3_solver.check()
-
-        if res == z3.unsat:
-            self.unsat_core = self.z3_solver.unsat_core()
-            # with open(f'subformula_{formula_counter}', 'w') as f:
-            #     f.write(self.z3_solver.to_smt2())
-            #     formula_counter += 1
-            # logger.debug('UNSAT core: %s', simple.warning(str(self.unsat_core)))
-            return None
-        elif res == z3.unknown:
-            logger.error('Z3 failed to produce an answer: %s', self.z3_solver.reason_unknown())
-            raise RuntimeError()
-
-        self.model = self.z3_solver.model()
-
-        if self.model is not None:
-            return self.construct_program(self.model)
-        else:
-            return None
-
-    def constraint_functions(self):
+    def create_bitvector_constraints(self) -> None:
         bv0 = z3.BitVecVal(0, self.specification.n_columns)
 
         for i, root in enumerate(self.roots):
@@ -628,7 +419,217 @@ class BitEnumerator(Enumerator):
                                                    (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
                                                    root.children[0].bitvec == root.bitvec)), f'unite_bv_{i}')
 
-    def mk_bitvec(self, bitvec_val):
+    @staticmethod
+    def _check_arg_types(pred: Predicate, python_tys: List[Type]):
+        if pred.num_args() < len(python_tys):
+            msg = 'Predicate "{}" must have at least {} arugments. Only {} is found.'.format(pred.name, len(python_tys), pred.num_args())
+            raise ValueError(msg)
+        for index, (arg, python_ty) in enumerate(zip(pred.args, python_tys)):
+            if not isinstance(arg, python_ty):
+                msg = 'Argument {} of predicate {} has unexpected type.'.format(index, pred.name)
+                raise ValueError(msg)
+
+    def _resolve_is_not_parent_predicate(self, pred: Predicate):
+        if not util.get_config().is_not_parent_enabled:
+            return
+
+        self._check_arg_types(pred, [str, str])
+        prod0 = self.spec.get_function_production_or_raise(pred.args[0])
+        prod1 = self.spec.get_function_production_or_raise(pred.args[1])
+
+        for r in self.roots:
+            for s in range(len(r.children[0].lines)):
+                children = []
+                for c in r.children:
+                    children.append(c.lines[s])
+                self.assert_expr(z3.Implies(z3.And(z3.Or(children), self.roots[s].var == prod1.id), r.var != prod0.id),
+                                 f'{prod0.id}_is_not_parent_of_{prod1.id}_r{r.id}_l{s}')
+
+    def _resolve_distinct_inputs_predicate(self, pred: Predicate):
+        self._check_arg_types(pred, [str])
+        production = self.spec.get_function_production_or_raise(pred.args[0])
+        for r in self.roots:
+            ctr = []
+            for c1 in range(len(r.children)):
+                child1 = r.children[c1]
+                for c2 in range(c1 + 1, len(r.children)):
+                    child2 = r.children[c2]
+                    # this works because even a inner_join between two filters, the children will have different values for the variables because of the lines produtions
+                    ctr.append(z3.Or(child1.var != child2.var,
+                                     z3.And(child1.var == self.leaf_enum_values[0], child2.var == self.leaf_enum_values[0])))
+
+            self.assert_expr(z3.Implies(r.var == production.id, z3.And(ctr)), f'{production.id}_has_distinct_inputs_r{r.id}')
+
+    def _resolve_distinct_filters_predicate(self, pred: Predicate):
+        self._check_arg_types(pred, [str])
+        prod0 = self.spec.get_function_production_or_raise(pred.args[0])
+        for r in self.roots:
+            self.z3_solver.add(z3.Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
+
+    def _resolve_constant_occurs_predicate(self, pred: Predicate):
+        conditions = pred.args
+        lst = []
+        ids = ''
+        for c in conditions:
+            for id in self._production_id_cache[c]:
+                ids += f'{id}_'
+                for l in self.leaves:
+                    lst.append(l.var == self.leaf_enum_values[id])
+        self.assert_expr(z3.Or(lst), f'constant_occurs_{ids[:-1]}')
+
+    def _resolve_happens_before_predicate(self, pred: Predicate):
+        return
+
+    def resolve_predicates(self) -> None:
+        try:
+            for pred in self.spec.predicates():
+                if pred.name == 'is_not_parent':
+                    self._resolve_is_not_parent_predicate(pred)
+                elif pred.name == 'distinct_inputs':
+                    self._resolve_distinct_inputs_predicate(pred)
+                elif pred.name == 'constant_occurs':
+                    self._resolve_constant_occurs_predicate(pred)
+                elif pred.name == 'happens_before':
+                    self._resolve_happens_before_predicate(pred)
+                elif pred.name == 'distinct_filters':
+                    self._resolve_distinct_filters_predicate(pred)
+                else:
+                    logger.warning('Predicate not handled: {}'.format(pred))
+        except (KeyError, ValueError) as e:
+            msg = 'Failed to resolve predicates. {}'.format(e)
+            raise RuntimeError(msg) from None
+
+    @cached_property
+    def blocking_template(self) -> z3.ExprRef:
+        ctr = []
+        counter = 0
+        for root in self.roots:
+            ctr.append(root.var != z3.Var(counter, z3.IntSort()))
+            counter += 1
+            for child in root.children:
+                ctr.append(child.var != z3.Var(counter, self.leaf_enum))
+                counter += 1
+        return z3.Or(ctr)
+
+    def block_model(self, model: Dict[z3.ExprRef, Any]) -> None:
+        values = []
+        for root in self.roots:
+            values.append(model[root.var])
+            for child in root.children:
+                values.append(model[child.var])
+        self.z3_solver.add(z3.substitute_vars(self.blocking_template, *values))
+
+    def line_uses_line(self, x, y):
+        vars = list(flatten([set(child.lines) & set(self.line_vars_by_line[y + 1]) for child in self.roots[x].children]))
+        return any(map(lambda var: self.model[var], vars))
+
+    def lines_used_by(self, x):
+        return [i for i, v in enumerate([self.line_uses_line(j, x) for j in range(len(self.roots))]) if v]
+
+    @cached_property
+    def monotonic_ids(self):
+        return [self.spec.get_function_production(pn).id for pn in
+                ['natural_join', 'natural_join3', 'natural_join4', 'mutate', 'filter', 'summarise', 'inner_join', 'left_join', 'union'] if
+                self.spec.get_function_production(pn)]
+
+    def all_recursive(self, model, i):
+        tmp = list(map(lambda line: (line, model[self.roots[line].var].as_long() in self.monotonic_ids), self.lines_used_by(i)))
+        if not all(map(lambda x: x[1], tmp)):
+            return False
+        for j, elem in tmp:
+            if not self.all_recursive(model, j):
+                return False
+        return True
+
+    def update(self, info: RejectionInfo = None):
+        models = [{x: self.model[x] for x in self.variables}]
+
+        if info and util.get_config().subsume_conditions:
+            restriction_table = None
+            if info.row_info == RowNumberInfo.MORE_ROWS:
+                restriction_table = self.more_restrictive
+            elif info.row_info == RowNumberInfo.LESS_ROWS:
+                restriction_table = self.less_restrictive
+
+            for model in islice(models, len(models)):
+                for i, root in enumerate(self.roots):
+                    if util.get_config().transitive_blocking and not self.all_recursive(models[0], i):
+                        continue
+                    elif not util.get_config().transitive_blocking and i > 0:
+                        continue
+                    for child in root.children:
+                        for replacement in restriction_table[self.leaf_enum_refs[model[child.var]]]:
+                            new_model = model.copy()
+                            new_model[child.var] = self.leaf_enum_values[replacement]
+                            models.append(new_model)
+
+        if util.get_config().block_commutative_ops:
+            for root in self.roots:
+                for model in islice(models, len(models)):
+                    if self.natural_join and model[root.var].as_long() == self.natural_join.id:
+                        for c0, c1 in permutations(root.children[0:2]):
+                            if c0 != root.children[0] or c1 != root.children[1]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                models.append(new_model)
+                    if self.natural_join3 and model[root.var].as_long() == self.natural_join3.id:
+                        for c0, c1, c2 in permutations(root.children[0:3]):
+                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                new_model[root.children[2].var] = model[c2.var]
+                                models.append(new_model)
+                    if self.natural_join4 and model[root.var].as_long() == self.natural_join4.id:
+                        for c0, c1, c2, c3 in permutations(root.children[0:4]):
+                            if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2] or c3 != root.children[3]:
+                                new_model = model.copy()
+                                new_model[root.children[0].var] = model[c0.var]
+                                new_model[root.children[1].var] = model[c1.var]
+                                new_model[root.children[2].var] = model[c2.var]
+                                new_model[root.children[3].var] = model[c3.var]
+                                models.append(new_model)
+
+        # if len(models) > 1:
+        #     logger.warning('Blocked %d programs!', len(models) - 1)
+        #     logger.warning('Due to %s:', self.construct_program(models[0]))
+        for model in models:
+            # if len(models) > 1:
+            #     logger.warning('Blocking %s', self.construct_program(model))
+            self.block_model(model)
+
+        if info and info.score != 0:
+            util.get_program_queue().put((util.Message.EVAL_INFO,
+                                          tuple(line.production.name for line in self.current_program),
+                                          info.score * len(models)))
+        return len(models) - 1
+
+    def construct_program(self, model) -> Program:
+        prog = [program.Line(self.get_production(model[root.var].as_long()),
+                             tuple(self.get_production(self.leaf_enum_refs[model[child.var]]) for child in root.children)) for root in
+                self.roots]
+        self.current_program = prog
+        return prog
+
+    def next(self) -> Optional[Program]:
+        res = self.z3_solver.check()
+
+        if res == z3.unsat:
+            self.unsat_core = self.z3_solver.unsat_core()
+            return None
+        elif res == z3.unknown:
+            logger.error('Z3 failed to produce an answer: %s', self.z3_solver.reason_unknown())
+            raise RuntimeError()
+
+        self.model = self.z3_solver.model()
+
+        if self.model is not None:
+            return self.construct_program(self.model)
+        else:
+            return None
+
+    def mk_bitvec(self, bitvec_val: int) -> z3.BitVecNumRef:
         if bitvec_val not in self.bitvec_cache:
             self.bitvec_cache[bitvec_val] = z3.BitVecVal(bitvec_val, self.specification.n_columns)
         return self.bitvec_cache[bitvec_val]

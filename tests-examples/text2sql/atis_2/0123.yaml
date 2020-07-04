@@ -1,0 +1,79 @@
+inputs:
+- tests-examples/text2sql/atis/tables/aircraft.csv
+- tests-examples/text2sql/atis/tables/airline.csv
+- tests-examples/text2sql/atis/tables/airport.csv
+- tests-examples/text2sql/atis/tables/airport_service.csv
+- tests-examples/text2sql/atis/tables/city.csv
+- tests-examples/text2sql/atis/tables/class_of_service.csv
+- tests-examples/text2sql/atis/tables/code_description.csv
+- tests-examples/text2sql/atis/tables/compartment_class.csv
+- tests-examples/text2sql/atis/tables/date_day.csv
+- tests-examples/text2sql/atis/tables/days.csv
+- tests-examples/text2sql/atis/tables/dual_carrier.csv
+- tests-examples/text2sql/atis/tables/equipment_sequence.csv
+- tests-examples/text2sql/atis/tables/fare.csv
+- tests-examples/text2sql/atis/tables/fare_basis.csv
+- tests-examples/text2sql/atis/tables/flight.csv
+- tests-examples/text2sql/atis/tables/flight_fare.csv
+- tests-examples/text2sql/atis/tables/flight_leg.csv
+- tests-examples/text2sql/atis/tables/flight_stop.csv
+- tests-examples/text2sql/atis/tables/food_service.csv
+- tests-examples/text2sql/atis/tables/ground_service.csv
+- tests-examples/text2sql/atis/tables/month.csv
+- tests-examples/text2sql/atis/tables/restriction.csv
+- tests-examples/text2sql/atis/tables/state.csv
+- tests-examples/text2sql/atis/tables/time_interval.csv
+- tests-examples/text2sql/atis/tables/time_zone.csv
+output: tests-examples/text2sql/atis/tables/0123.csv
+constants:
+- BOSTON
+- OAKLAND
+- 'NO'
+comment: |-
+  SELECT DISTINCT FLIGHTalias0.FLIGHT_ID
+  FROM FLIGHT AS FLIGHTalias0
+  WHERE ((FLIGHTalias0.FROM_AIRPORT IN
+            (SELECT AIRPORT_SERVICEalias2.AIRPORT_CODE
+             FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias2
+             WHERE AIRPORT_SERVICEalias2.CITY_CODE IN
+                 (SELECT CITYalias2.CITY_CODE
+                  FROM CITY AS CITYalias2
+                  WHERE CITYalias2.CITY_NAME = 'BOSTON' ) )
+          AND FLIGHTalias0.TO_AIRPORT IN
+            (SELECT AIRPORT_SERVICEalias3.AIRPORT_CODE
+             FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias3
+             WHERE AIRPORT_SERVICEalias3.CITY_CODE IN
+                 (SELECT CITYalias3.CITY_CODE
+                  FROM CITY AS CITYalias3
+                  WHERE CITYalias3.CITY_NAME = 'OAKLAND' ) ))
+         AND FLIGHTalias0.FLIGHT_ID IN
+           (SELECT FLIGHT_FAREalias0.FLIGHT_ID
+            FROM FLIGHT_FARE AS FLIGHT_FAREalias0
+            WHERE FLIGHT_FAREalias0.FARE_ID IN
+                (SELECT FAREalias0.FARE_ID
+                 FROM FARE AS FAREalias0
+                 WHERE FAREalias0.ROUND_TRIP_REQUIRED = 'NO'
+                   AND FAREalias0.ONE_DIRECTION_COST =
+                     (SELECT MIN(FAREalias1.ONE_DIRECTION_COST)
+                      FROM FARE AS FAREalias1
+                      WHERE FAREalias1.FARE_ID IN
+                          (SELECT FLIGHT_FAREalias1.FARE_ID
+                           FROM FLIGHT_FARE AS FLIGHT_FAREalias1
+                           WHERE FLIGHT_FAREalias1.FLIGHT_ID IN
+                               (SELECT FLIGHTalias1.FLIGHT_ID
+                                FROM FLIGHT AS FLIGHTalias1
+                                WHERE (FLIGHTalias1.FROM_AIRPORT IN
+                                         (SELECT AIRPORT_SERVICEalias0.AIRPORT_CODE
+                                          FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0
+                                          WHERE AIRPORT_SERVICEalias0.CITY_CODE IN
+                                              (SELECT CITYalias0.CITY_CODE
+                                               FROM CITY AS CITYalias0
+                                               WHERE CITYalias0.CITY_NAME = 'BOSTON' ) )
+                                       AND FLIGHTalias1.TO_AIRPORT IN
+                                         (SELECT AIRPORT_SERVICEalias1.AIRPORT_CODE
+                                          FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias1
+                                          WHERE AIRPORT_SERVICEalias1.CITY_CODE IN
+                                              (SELECT CITYalias1.CITY_CODE
+                                               FROM CITY AS CITYalias1
+                                               WHERE CITYalias1.CITY_NAME = 'OAKLAND' ) )) ) )
+                        AND FAREalias1.ROUND_TRIP_REQUIRED = 'NO' ) ) )) ;

@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/semester.csv
+output: tests-examples/text2sql/advising/tables/0208.csv
+constants:
+- EECS
+- '400'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(DISTINCT COURSEalias0.COURSE_ID, SEMESTERalias0.SEMESTER)
+  FROM COURSE AS COURSEalias0,
+       COURSE_OFFERING AS COURSE_OFFERINGalias0,
+       SEMESTER AS SEMESTERalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER BETWEEN 400 AND 400 + 100
+    AND SEMESTERalias0.SEMESTER IN ("SP",
+                                    "SS",
+                                    "SU")
+    AND SEMESTERalias0.SEMESTER_ID = COURSE_OFFERINGalias0.SEMESTER
+    AND SEMESTERalias0.YEAR = 2016 ;

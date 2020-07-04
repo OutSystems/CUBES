@@ -1,0 +1,17 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0038.csv
+functions: []
+constants: []
+columns: []
+foreign-keys: []
+comment: |
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.STATE_NAME NOT IN
+      (SELECT BORDER_INFOalias0.STATE_NAME
+       FROM BORDER_INFO AS BORDER_INFOalias0) ;
+
+  df1 <- anti_join(df_state, df_border_info, by=c('state_name'))
+  out <- df1 %>% select(STATE_NAME = state_name) %>% arrange(STATE_NAME)

@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0136.csv
+constants: []
+functions:
+- max
+columns: []
+foreign-keys: []
+comment: |-
+  SELECT BORDER_INFOalias0.BORDER
+  FROM BORDER_INFO AS BORDER_INFOalias0
+  WHERE BORDER_INFOalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias1.BORDER
+       FROM BORDER_INFO AS BORDER_INFOalias1
+       GROUP BY BORDER_INFOalias1.BORDER
+       HAVING COUNT(1) =
+         (SELECT MAX(DERIVED_TABLEalias0.DERIVED_FIELDalias0)
+          FROM
+            (SELECT BORDER_INFOalias2.BORDER,
+                    COUNT(1) AS DERIVED_FIELDalias0
+             FROM BORDER_INFO AS BORDER_INFOalias2
+             GROUP BY BORDER_INFOalias2.BORDER) AS DERIVED_TABLEalias0)) ;

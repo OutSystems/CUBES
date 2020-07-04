@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/text2sql/geography/tables/mountain.csv
+output: tests-examples/text2sql/geography/tables/0088.csv
+functions:
+- max
+constants: []
+columns:
+- mountain_altitude
+foreign-keys: []
+comment: |
+  SELECT MOUNTAINalias0.MOUNTAIN_NAME
+  FROM MOUNTAIN AS MOUNTAINalias0
+  WHERE MOUNTAINalias0.MOUNTAIN_ALTITUDE =
+      (SELECT MAX(MOUNTAINalias1.MOUNTAIN_ALTITUDE)
+       FROM MOUNTAIN AS MOUNTAINalias1) ;
+
+  df1 <- df_mountain %>% mutate(mountain_altitude = max(mountain_altitude))
+  df2 <- inner_join(df1, df_mountain, by=c('country_name','mountain_altitude'), suffix = c('', '.other'))
+  out <- df2 %>% select(MOUNTAIN_NAME = mountain_name.other) %>% distinct() %>% arrange(MOUNTAIN_NAME)

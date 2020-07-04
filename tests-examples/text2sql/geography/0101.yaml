@@ -1,0 +1,24 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0101.csv
+constants: []
+functions:
+- count
+columns:
+- population
+- city_name
+- traverse
+foreign-keys: []
+comment: |-
+  SELECT RIVERalias0.RIVER_NAME
+  FROM RIVER AS RIVERalias0
+  WHERE RIVERalias0.TRAVERSE =
+      (SELECT CITYalias0.STATE_NAME
+       FROM CITY AS CITYalias0
+       WHERE CITYalias0.POPULATION > 150000
+       GROUP BY CITYalias0.STATE_NAME
+       ORDER BY COUNT(CITYalias0.CITY_NAME) DESC
+       LIMIT 1)
+  ORDER BY RIVERalias0.LENGTH DESC
+  LIMIT 1 ;

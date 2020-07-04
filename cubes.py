@@ -6,13 +6,16 @@ from logging import getLogger
 from time import time
 
 import logging
+
+import yaml
 from rpy2 import robjects
 
 from squares import util, results
 from squares.config import Config
+from squares.dsl import interpreter
 from squares.dsl.specification import Specification
 from squares.parallel_synthesizer import ParallelSynthesizer
-from squares.util import create_argparser, parse_specification
+from squares.util import create_argparser, parse_specification, write_specification
 
 robjects.r('''
 sink("/dev/null")
@@ -53,6 +56,7 @@ def main():
                     maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
                     max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
                     block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
+                    transitive_blocking=args.transitive_blocking,
                     probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
                     z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
@@ -78,6 +82,17 @@ def main():
 
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
     program = synthesizer.synthesize()  # program is stored in the results holder
+
+    if args.append:
+        spec = parse_specification(args.input)
+        if 'comment' not in spec:
+            spec['comment'] = ''
+        interp = interpreter.SquaresInterpreter(specification, True)
+        evaluation = interp.eval(program, specification.tables)
+        assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
+        spec['comment'] += '\n\n' + interp.program
+        with open(args.input, 'w') as f:
+            write_specification(spec, f)
 
     results.print_results()
     exit(results.exit_code)

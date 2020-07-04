@@ -1,6 +1,6 @@
 from collections import defaultdict
 from logging import getLogger
-from typing import Dict
+from typing import Dict, Mapping
 
 from ordered_set import OrderedSet
 
@@ -26,21 +26,32 @@ class ConditionTable:
                 self.dfs(t, neighbour, visited)
         return visited - OrderedSet([key])
 
-    def compile(self, spec: TyrellSpec) -> Dict[int, OrderedSet[int]]:
-        result = defaultdict(OrderedSet)
-        missing_values = False
-        for type, graph in self.graphs.items():
-            for key in list(graph.keys()):
-                prod0 = spec.get_enum_production(type, key)
-                if prod0 is None:
-                    missing_values = True
-                    continue
-                for condition in self.dfs(type, key):
-                    prod1 = spec.get_enum_production(type, condition)
-                    if prod1 is None:
-                        missing_values = True
-                        continue
-                    result[prod0.id].append(prod1.id)
-        if missing_values:
-            logger.warning('There were some missing values while compiling condition table.')
-        return result
+    def compile(self, spec: TyrellSpec) -> Mapping[int, OrderedSet[int]]:
+        return ConditionTableJIT(self, spec)
+
+
+class ConditionTableJIT:
+
+    def __init__(self, base_conditions: ConditionTable, spec: TyrellSpec) -> None:
+        self.base_conditions = base_conditions
+        self.spec: TyrellSpec = spec
+        self.compiled: Dict[int, OrderedSet[int]] = {}
+
+    def dfs(self, key: int) -> OrderedSet[str]:
+        if key not in self.compiled.keys():
+            self.compiled[key] = OrderedSet()
+            production = self.spec.get_production(key)
+            if production and production.is_enum():
+                for neighbour in self.base_conditions.graphs[production.lhs][production.rhs]:
+                    n_production = self.spec.get_enum_production(production.lhs, neighbour)
+                    if n_production:
+                        tmp = self.dfs(n_production.id)
+                        self.compiled[key].update(tmp)
+                    else:
+                        logger.warning('Unknown production "%s" in type %s', neighbour, production.lhs)
+        return self.compiled[key] | {key}
+
+    def __getitem__(self, item: int) -> OrderedSet[int]:
+        if item not in self.compiled:
+            self.dfs(item)
+        return self.compiled[item] - {item}

@@ -1,0 +1,29 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_offering.csv
+- tests-examples/text2sql/advising/tables/instructor.csv
+- tests-examples/text2sql/advising/tables/offering_instructor.csv
+output: tests-examples/text2sql/advising/tables/0024.csv
+constants:
+- EECS
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT DISTINCT INSTRUCTORalias0.NAME
+  FROM INSTRUCTOR AS INSTRUCTORalias0,
+       COURSE AS COURSEalias1,
+       COURSE_OFFERING AS COURSE_OFFERINGalias1,
+       OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias1
+  WHERE COURSEalias1.COURSE_ID = COURSE_OFFERINGalias1.COURSE_ID
+    AND COURSEalias1.DEPARTMENT = "EECS"
+    AND COURSE_OFFERINGalias1.OFFERING_ID = OFFERING_INSTRUCTORalias1.OFFERING_ID
+    AND INSTRUCTORalias0.INSTRUCTOR_ID = OFFERING_INSTRUCTORalias1.INSTRUCTOR_ID
+    AND INSTRUCTORalias0.INSTRUCTOR_ID NOT IN
+      (SELECT DISTINCT OFFERING_INSTRUCTORalias0.INSTRUCTOR_ID
+       FROM COURSE AS COURSEalias0,
+            COURSE_OFFERING AS COURSE_OFFERINGalias0,
+            OFFERING_INSTRUCTOR AS OFFERING_INSTRUCTORalias0
+       WHERE COURSEalias0.COURSE_ID = COURSE_OFFERINGalias0.COURSE_ID
+         AND COURSEalias0.HAS_LAB = "Y"
+         AND COURSE_OFFERINGalias0.OFFERING_ID = OFFERING_INSTRUCTORalias0.OFFERING_ID ) ;

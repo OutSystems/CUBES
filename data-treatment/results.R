@@ -20,20 +20,10 @@ my_theme <- theme_bw()
 renderer <- pdf
 extension <- 'pdf'
 
-instance_info <- read_csv('data.csv', col_types = cols(
+instance_info <- read_csv('instances.csv', col_types = cols(
   name = col_character(),
-  loc = col_integer(),
-  productions = col_double(),
-  columns = col_double(),
-  filters = col_double(),
-  summarises = col_double(),
-  innerjoins = col_double(),
-  crossjoins = col_double(),
-  maxcolstype = col_double(),
-  outputcols = col_double(),
-  inputs = col_double(),
-  gencols = col_double()
-)) %>% select(name, loc)
+  loc = col_integer()
+))
 
 load_result_squares <- function(file) {
   t <- read_csv(file, col_types = cols(
@@ -225,9 +215,13 @@ plot_processes <- function(run) {
     my_theme
 }
 
-plot_cumsolved <- function(...) {
+plot_cumsolved <- function(use_vbs = T, full_x = T, ...) {
   tries <- list(...)
-  data <- bind_rows(tries, .id = 'try') %>% bind_rows(vbs(...)) %>%
+  data <- bind_rows(tries, .id = 'try')
+  if (use_vbs) {
+    data <- data %>% bind_rows(vbs(...))
+  }
+  data <- data %>%
     arrange(real) %>%
     group_by(try) %>%
     mutate(val = cumsum(status != 1 &
@@ -235,13 +229,19 @@ plot_cumsolved <- function(...) {
                           status != -1 &
                           status != -2)) %>%
     ungroup()
-  ggplot(data, aes(x = val, y = real, color = try)) +
+  tmp <- ggplot(data, aes(x = val, y = real, color = try)) +
     geom_step(size = 1) +
     geom_point(shape = 4) +
     #scale_y_continuous(trans = 'log10', breaks = log_breaks(7)) +
-    scale_y_continuous(breaks = pretty_breaks()) +
-    scale_x_continuous(breaks = pretty_breaks(), limits = c(0, n_distinct(data$name))) +
-    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8)), breaks = c(names(tries), 'VBS')) +
+    scale_y_continuous(breaks = pretty_breaks())
+  if (full_x) {
+    tmp <- tmp + scale_x_continuous(breaks = pretty_breaks(), limits = c(0, n_distinct(data$name)))
+  } else {
+    tmp <- tmp + scale_x_continuous(breaks = pretty_breaks())
+  }
+    tmp +
+    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop=F) +
+    labs(x = 'Instances solved', y = 'Time', color = 'Legend') +
     #annotation_logticks(sides = 'l') +
     #geom_vline(xintercept = 600) +
     my_theme
@@ -320,7 +320,7 @@ solved_instances <- function(table) {
     group_by(benchmark) %>%
     mutate(total = n()) %>%
     ungroup() %>%
-    filter(status != -1 & status != -2 & status != 1) %>%
+    filter(status != -1 & status != -2 & status != 1 & status != 5) %>%
     group_by(benchmark, total) %>%
     summarise(n = n()) %>%
     mutate(percentage = n / total)
@@ -444,34 +444,73 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   c36_16_0f_c <- load_result_file('cubes36_16_0f_c')
   c37_16_0f_c <- load_result_file('cubes37_16_0f')
   c38_16_0f_c <- load_result_file('cubes38_16_0f')
+  c39_16_0f <- load_result_file('cubes39_16_0f')
+  c39_16_0f_c <- load_result_file('cubes39_16_0f_c')
+  c40_16_0f_c <- load_result_file('cubes40_16_0f')
+
+  c41_4_0f_c <- load_result_file('cubes41_4_0f')
+  c41_8_0f_c <- load_result_file('cubes41_8_0f')
+  c41_16_0f_c <- load_result_file('cubes41_16_0f')
+  c41_16_0f_c_2 <- load_result_file('cubes41_16_0f_2')
+  c41_16_0f_c_3 <- load_result_file('cubes41_16_0f_3')
+  c41_16_0f_c_4 <- load_result_file('cubes41_16_0f_4')
+  c41_30_0f_c <- load_result_file('cubes41_30_0f')
+
+  c42_16_0f_c <- load_result_file('cubes42_16_0f')
 }
 
 v <- vbs(bitenum, c4_16, c15_16_h, c20_16_h, c26_16_h_0f, c30_16_0f, c31_16_0f, c32_16_0f)
+v1 <- vbs(c41_16_0f_c, c41_16_0f_c_2, c41_16_0f_c_3)
 
-scatter('squares', 'c37_16_0f_c')
-scatter('c26_16_h_0f', 'c37_16_0f_c')
-scatter('c26_16_h_0f_o', 'c37_16_0f_c')
-scatter('c34_16_0f_c', 'c37_16_0f_c')
-scatter('c32_16_0f', 'c37_16_0f_c')
-scatter('c36_16_0f_c', 'c37_16_0f_c')
-scatter('c37_16_0f_c', 'c38_16_0f_c')
+# last week vs condition generalization
+scatter('c26_16_h_0f', 'c27_16_h_0f')
 
-plot_locs2(c30_16_0f)
+# optimization tries - little relevance
+scatter('c26_16_h_0f', 'c28_16_h_0f')
+scatter('c26_16_h_0f', 'c29_16_h_0f')
 
-plot_hardness('c26_16_h_0f', limit = 600)
+# restricted dsl
+scatter('c26_16_h_0f', 'c30_16_0f') # best vs .
+scatter('c29_16_h_0f', 'c30_16_0f') # last vs .
 
-plot_times('c26_16_h_0f')
-plot_times('c26_16_h_0f_oo')
+# bug fix and generalization transitivity addition
+scatter('c26_16_h_0f', 'c32_16_0f') # best vs .
+scatter('c30_16_0f', 'c32_16_0f') # last vs .
 
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum)
-plot_cumsolved('Run 26' = c26_16_h_0f, 'Run 26_o' = c26_16_h_0f_o)
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 26' = c26_16_h_0f, 'Run 26_o' = c26_16_h_0f_o)
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 26' = c26_16_h_0f, 'Run 37' = c37_16_0f_c)
-plot_cumsolved(squares = squares, single = single_np, bitenum = bitenum, 'Run 26' = c26_16_h_0f, 'Run 37' = c37_16_0f_c, 'Run 38' = c38_16_0f_c)
+# CHECKPOINT: no generalization vs generalization
+scatter('c35_16_0f_c', 'c32_16_0f')
 
-solved_instances(scythe)
-solved_instances(squares)
-solved_instances(c37_16_0f_c)
+# split cross and inner_join into seperate threads
+scatter('c26_16_h_0f', 'c37_16_0f_c') # best vs .
+scatter('c32_16_0f', 'c37_16_0f_c') # last vs .
+
+# CHECKPOINT: no generalization vs generalization
+scatter('c38_16_0f_c', 'c37_16_0f_c')
+
+scatter('c37_16_0f_c', 'c39_16_0f_c')
+scatter('c39_16_0f', 'c39_16_0f_c')
+
+scatter('c37_16_0f_c', 'c40_16_0f_c')
+scatter('c39_16_0f_c', 'c40_16_0f_c')
+
+scatter('c37_16_0f_c', 'c41_16_0f_c')
+scatter('c39_16_0f_c', 'c41_16_0f_c')
+scatter('c40_16_0f_c', 'c41_16_0f_c')
+scatter('c41_16_0f_c', 'c41_16_0f_c_2')
+scatter('c37_16_0f_c', 'c42_16_0f_c')
+scatter('c41_16_0f_c', 'c42_16_0f_c')
+
+plot_locs2(c37_16_0f_c)
+plot_locs(c37_16_0f_c)
+
+plot_cumsolved(use_vbs = F, full = F, 'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'Current Portoflio' = t11_c, 'Current Space Splitting' = c37_16_0f_c)
+plot_cumsolved(use_vbs = F, 'Original SQUARES' = squares)
+plot_cumsolved(use_vbs = F, 'Original SQUARES' = squares, 'Current Sequential' = bitenum)
+plot_cumsolved(use_vbs = F, 'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'Current Portoflio' = t11_c)
+plot_cumsolved(use_vbs = F, 'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'Current Portoflio' = t11_c, 'Current Space Splitting' = c38_16_0f_c)
+plot_cumsolved(use_vbs = F, 'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'Current Portoflio' = t11_c, 'Current Space Splitting' = c38_16_0f_c, '8T' = c41_8_0f_c, '16T' = c41_16_0f_c_3)
+plot_cumsolved(use_vbs = F, squares = squares, bitenum = bitenum, 'Last week' = c26_16_h_0f, 'Cond. generalization I' = c27_16_h_0f, 'Cond. generalization II' = c32_16_0f, 'Split operations' = c37_16_0f_c, 'Split & no cond. gen.' = c38_16_0f_c, 'A' = c39_16_0f, 'B' = c39_16_0f_c)
+plot_cumsolved(use_vbs = F,'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'C_8' = c41_8_0f_c, 'C_8' = c41_8_0f_c, 'C_16_1' = c41_16_0f_c, 'C_16_2' = c41_16_0f_c_2, 'C_16_3' = c41_16_0f_c_3)
 
 plot_scores2('../55-tests-9.log.csv')
 
@@ -486,7 +525,34 @@ c <- inner_join(squares, c37_16_0f_c, by = 'name') %>% filter((status.x == -2 | 
 
 a <- vbs(squares = squares, c15_16_h = c15_16_h, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c33_16_0f = c33_16_0f, c34_16_0f_c = c34_16_0f_c, c35_16_0f_c = c35_16_0f_c, c37_16_0f_c = c37_16_0f_c)
 
-bars(scythe = scythe, squares = squares, bitenum = bitenum, c15_16_h = c15_16_h, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c34_16_0f_c = c34_16_0f_c, c37_16_0f_c = c37_16_0f_c)
-bars(scythe = scythe, squares = squares, bitenum = bitenum, c26_16_h_0f = c26_16_h_0f, c37_16_0f_c = c37_16_0f_c, c38_16_0f_c = c38_16_0f_c)
+bars(scythe = scythe, squares = squares, bitenum = bitenum, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c37_16_0f_c = c37_16_0f_c)
+bars(scythe = scythe, squares = squares, bitenum = bitenum, c26 = c26_16_h_0f, c27 = c27_16_h_0f, c32 = c32_16_0f, c37 = c37_16_0f_c, c38 = c38_16_0f_c, c39_nc = c39_16_0f, c39 = c39_16_0f_c, c40 = c40_16_0f_c, c41 = c41_16_0f_c)
+bars(squares = squares, bitenum = bitenum, 'C_4' = c41_4_0f_c, 'C_8' = c41_8_0f_c, 'C_16_1' = c41_16_0f_c, 'C_16_2' = c41_16_0f_c_2, 'C_16_3' = c41_16_0f_c_3, 'C_30' = c41_30_0f_c, 'N' = c42_16_0f_c, 'N1' = c41_16_0f_c_4)
 
-boxplot(func = any, scythe = scythe, squares = squares, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c34_16_0f_c = c34_16_0f_c, c37_16_0f_c = c37_16_0f_c)
+boxplot(func = any, scythe = scythe, squares = squares, bitenum = bitenum, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c37_16_0f_c = c37_16_0f_c)
+boxplot(func = any, scythe = scythe, squares = squares, bitenum = bitenum, c26_16_h_0f = c26_16_h_0f, c27_16_h_0f = c27_16_h_0f, c32_16_0f = c32_16_0f, c37_16_0f_c = c37_16_0f_c, c38_16_0f_c = c38_16_0f_c)
+boxplot(func = any, squares = squares, bitenum = bitenum, 'C_4' = c41_4_0f_c, 'C_8' = c41_8_0f_c, 'C_16_1' = c41_16_0f_c, 'C_16_2' = c41_16_0f_c_2, 'C_16_3' = c41_16_0f_c_3, 'C_30' = c41_30_0f_c, 'N' = c42_16_0f_c, 'N1' = c41_16_0f_c_4)
+boxplot(func = any, 'Original SQUARES' = squares, 'Current Sequential' = bitenum, 'Current Portoflio' = t11_c, 'Current Space Splitting' = c38_16_0f_c)
+
+
+squares %>% count()
+
+squares %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% count()
+squares %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = median(real))
+squares %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = mean(real))
+squares %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% filter(real <= 10) %>% count()
+
+bitenum %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% count()
+bitenum %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = median(real))
+bitenum %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = mean(real))
+bitenum %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% filter(real <= 10) %>% count()
+
+t11_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% count()
+t11_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = median(real))
+t11_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = mean(real))
+t11_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% filter(real <= 10) %>% count()
+
+c37_16_0f_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% count()
+c37_16_0f_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = median(real))
+c37_16_0f_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% summarise(med = mean(real))
+c37_16_0f_c %>% filter(status != -1 & status != -2 & status != 1 & status != 5) %>% filter(real <= 10) %>% count()

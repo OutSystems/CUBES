@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0027.csv
+functions: []
+constants:
+  - colorado
+columns:
+  - state_name
+  - highest_elevation
+foreign-keys: []
+comment: |
+  SELECT HIGHLOWalias0.STATE_NAME
+  FROM HIGHLOW AS HIGHLOWalias0
+  WHERE HIGHLOWalias0.HIGHEST_ELEVATION >
+      (SELECT HIGHLOWalias1.HIGHEST_ELEVATION
+       FROM HIGHLOW AS HIGHLOWalias1
+       WHERE HIGHLOWalias1.STATE_NAME = "colorado" ) ;
+
+  df1 <- df_highlow %>% filter(state_name == 'colorado')
+  df2 <- full_join(df_highlow, df1, by=character(), suffix = c("", ".other")) %>% filter(highest_elevation > highest_elevation.other)
+  out <- df2 %>% select(STATE_NAME = state_name) %>% arrange(STATE_NAME)

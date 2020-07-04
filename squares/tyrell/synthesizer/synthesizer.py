@@ -7,6 +7,7 @@ from ..decider import Decider
 from ..enumerator import Enumerator
 from ..interpreter import InterpreterError
 from ... import results, util
+from ...dsl.interpreter import RedudantError
 
 logger = getLogger('squares.synthesizer')
 
@@ -58,7 +59,7 @@ class Synthesizer(AbstractSynthesizer):
             if attempts == 50:
                 util.get_program_queue().put(
                     (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                     block_time))
+                     block_time, results.redundant_lines))
                 attempts = 0
                 rejected = 0
                 failed = 0
@@ -67,6 +68,7 @@ class Synthesizer(AbstractSynthesizer):
                 enum_time = 0
                 analysis_time = 0
                 block_time = 0
+                results.redundant_lines = 0
 
             try:
                 start = time.time()
@@ -75,8 +77,9 @@ class Synthesizer(AbstractSynthesizer):
                 if res.is_ok():
                     util.get_program_queue().put(
                         (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                         block_time))
+                         block_time, results.redundant_lines))
                     results.empty_output = 0
+                    results.redundant_lines = 0
                     # pr.dump_stats(f'profiles/{counter}.cProfile')
                     # counter += 1
                     return prog, attempts
@@ -84,6 +87,9 @@ class Synthesizer(AbstractSynthesizer):
                 else:
                     rejected += 1
                     info = res.why()
+
+            except RedudantError as e:
+                info = None
 
             except InterpreterError as e:
                 logger.error('Failed program %s', str(prog))
@@ -103,8 +109,9 @@ class Synthesizer(AbstractSynthesizer):
             enum_time += time.time() - start
 
         util.get_program_queue().put(
-            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time))
+            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time, results.redundant_lines))
         results.empty_output = 0
+        results.redundant_lines = 0
         # pr.dump_stats(f'profiles/{counter}.cProfile')
         # counter += 1
         return None, total_attempts

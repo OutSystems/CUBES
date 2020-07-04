@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/text2sql/advising/tables/course.csv
+- tests-examples/text2sql/advising/tables/course_prerequisite.csv
+output: tests-examples/text2sql/advising/tables/0127.csv
+constants:
+- '370'
+- EECS
+- '270'
+foreign-keys:
+- [pre_course_id, COURSE_ID]
+- [course_offering_id, OFFERING_ID]
+comment: |-
+  SELECT COUNT(*) > 0
+  FROM COURSE AS COURSEalias0,
+       COURSE AS COURSEalias1,
+       COURSE_PREREQUISITE AS COURSE_PREREQUISITEalias0
+  WHERE COURSEalias0.COURSE_ID = COURSE_PREREQUISITEalias0.PRE_COURSE_ID
+    AND COURSEalias0.DEPARTMENT = "EECS"
+    AND COURSEalias0.NUMBER = 270
+    AND COURSEalias1.COURSE_ID = COURSE_PREREQUISITEalias0.COURSE_ID
+    AND COURSEalias1.DEPARTMENT = "EECS"
+    AND COURSEalias1.NUMBER = 370 ;

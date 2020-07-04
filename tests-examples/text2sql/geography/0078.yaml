@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0078.csv
+functions:
+- min
+constants: []
+columns:
+- state_name
+- lowest_elevation
+foreign-keys: []
+comment: |
+  SELECT STATEalias0.CAPITAL
+  FROM HIGHLOW AS HIGHLOWalias0,
+       STATE AS STATEalias0
+  WHERE HIGHLOWalias0.LOWEST_ELEVATION =
+      (SELECT MIN(HIGHLOWalias1.LOWEST_ELEVATION)
+       FROM HIGHLOW AS HIGHLOWalias1)
+    AND STATEalias0.STATE_NAME = HIGHLOWalias0.STATE_NAME ;
+
+  df1 <- df_highlow %>% mutate(minlowest_elevation = min(lowest_elevation))
+  df2 <- full_join(df1, df_state, by=character(), suffix = c("", ".other")) %>% filter(lowest_elevation == minlowest_elevation & state_name == state_name.other)
+  out <- df2 %>% select(CAPITAL = capital) %>% arrange(CAPITAL)

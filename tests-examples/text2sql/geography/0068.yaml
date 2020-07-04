@@ -1,0 +1,23 @@
+inputs:
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/highlow.csv
+output: tests-examples/text2sql/geography/tables/0068.csv
+functions:
+- max
+constants: []
+columns:
+- highest_elevation
+foreign-keys: []
+comment: |
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.STATE_NAME IN
+      (SELECT HIGHLOWalias0.STATE_NAME
+       FROM HIGHLOW AS HIGHLOWalias0
+       WHERE HIGHLOWalias0.HIGHEST_ELEVATION =
+           (SELECT MAX(HIGHLOWalias1.HIGHEST_ELEVATION)
+            FROM HIGHLOW AS HIGHLOWalias1) ) ;
+
+  df1 <- df_highlow %>% mutate(highest_elevation = max(highest_elevation))
+  df2 <- inner_join(df1, df_city) %>% inner_join(df_highlow)
+  out <- df2 %>% select(CITY_NAME = city_name) %>% arrange(CITY_NAME)

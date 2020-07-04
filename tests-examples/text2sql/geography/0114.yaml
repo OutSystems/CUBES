@@ -1,0 +1,31 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/border_info.csv
+output: tests-examples/text2sql/geography/tables/0114.csv
+constants: []
+functions:
+- min
+- max
+columns:
+- area
+foreign-keys: []
+comment: |-
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.AREA =
+      (SELECT MIN(STATEalias1.AREA)
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.STATE_NAME IN
+           (SELECT DERIVED_TABLEalias0.STATE_NAME
+            FROM
+              (SELECT BORDER_INFOalias0.STATE_NAME,
+                      COUNT(DISTINCT BORDER_INFOalias0.BORDER) AS DERIVED_FIELDalias0
+               FROM BORDER_INFO AS BORDER_INFOalias0
+               GROUP BY BORDER_INFOalias0.STATE_NAME) AS DERIVED_TABLEalias0
+            WHERE DERIVED_TABLEalias0.DERIVED_FIELDalias0 =
+                (SELECT MAX(DERIVED_TABLEalias1.DERIVED_FIELDalias1)
+                 FROM
+                   (SELECT BORDER_INFOalias1.STATE_NAME,
+                           COUNT(DISTINCT BORDER_INFOalias1.BORDER) AS DERIVED_FIELDalias1
+                    FROM BORDER_INFO AS BORDER_INFOalias1
+                    GROUP BY BORDER_INFOalias1.STATE_NAME) AS DERIVED_TABLEalias1) ) ) ;

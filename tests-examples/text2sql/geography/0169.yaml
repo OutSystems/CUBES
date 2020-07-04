@@ -1,0 +1,31 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0169.csv
+constants: []
+functions:
+- min
+- min
+- min
+columns:
+- population
+- area
+foreign-keys: []
+comment: |-
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION =
+      (SELECT MIN(CITYalias1.POPULATION)
+       FROM CITY AS CITYalias1
+       WHERE CITYalias1.STATE_NAME IN
+           (SELECT STATEalias0.STATE_NAME
+            FROM STATE AS STATEalias0
+            WHERE STATEalias0.AREA =
+                (SELECT MIN(STATEalias1.AREA)
+                 FROM STATE AS STATEalias1) ) )
+    AND CITYalias0.STATE_NAME IN
+      (SELECT STATEalias2.STATE_NAME
+       FROM STATE AS STATEalias2
+       WHERE STATEalias2.AREA =
+           (SELECT MIN(STATEalias3.AREA)
+            FROM STATE AS STATEalias3) ) ;

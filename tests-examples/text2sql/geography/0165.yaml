@@ -1,0 +1,27 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/city.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0165.csv
+constants:
+- mississippi
+functions:
+- max
+columns:
+- state_name
+- area
+- city_name
+- river_name
+foreign-keys: []
+comment: |-
+  SELECT CITYalias0.POPULATION
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.CITY_NAME =
+      (SELECT STATEalias0.CAPITAL
+       FROM STATE AS STATEalias0
+       WHERE STATEalias0.AREA =
+           (SELECT MAX(STATEalias1.AREA)
+            FROM RIVER AS RIVERalias0,
+                 STATE AS STATEalias1
+            WHERE RIVERalias0.RIVER_NAME = "mississippi"
+              AND STATEalias1.STATE_NAME = RIVERalias0.TRAVERSE ) ) ;

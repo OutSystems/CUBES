@@ -72,7 +72,7 @@ class ChildSynthesizer(Process, Synthesizer):
 
         start = time.time()
         self._enumerator = BitEnumerator(self.tyrell_specification, self.specification, loc)
-        util.get_program_queue().put((Message.DEBUG_STATS, 0, 0, 0, 0, 0, 0, 0, time.time() - start, 0))
+        util.get_program_queue().put((Message.DEBUG_STATS, 0, 0, 0, 0, 0, 0, 0, time.time() - start, 0, 0))
         pipe_write(self.pipe, (None, None, 0))
 
     def solve(self, cube):

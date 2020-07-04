@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/text2sql/geography/tables/border_info.csv
+- tests-examples/text2sql/geography/tables/city.csv
+output: tests-examples/text2sql/geography/tables/0160.csv
+constants:
+- texas
+functions:
+- max
+columns:
+- population
+- border
+foreign-keys: []
+comment: |-
+  SELECT CITYalias0.CITY_NAME
+  FROM CITY AS CITYalias0
+  WHERE CITYalias0.POPULATION =
+      (SELECT MAX(CITYalias1.POPULATION)
+       FROM CITY AS CITYalias1
+       WHERE CITYalias1.STATE_NAME IN
+           (SELECT BORDER_INFOalias0.STATE_NAME
+            FROM BORDER_INFO AS BORDER_INFOalias0
+            WHERE BORDER_INFOalias0.BORDER = "texas" ) )
+    AND CITYalias0.STATE_NAME IN
+      (SELECT BORDER_INFOalias1.STATE_NAME
+       FROM BORDER_INFO AS BORDER_INFOalias1
+       WHERE BORDER_INFOalias1.BORDER = "texas" ) ;

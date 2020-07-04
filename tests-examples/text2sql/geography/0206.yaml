@@ -1,0 +1,31 @@
+inputs:
+- tests-examples/text2sql/geography/tables/state.csv
+- tests-examples/text2sql/geography/tables/river.csv
+output: tests-examples/text2sql/geography/tables/0206.csv
+constants: []
+functions:
+- min
+- max
+- max
+columns:
+- area
+- length
+foreign-keys: []
+comment: |-
+  SELECT STATEalias0.STATE_NAME
+  FROM STATE AS STATEalias0
+  WHERE STATEalias0.AREA =
+      (SELECT MIN(STATEalias1.AREA)
+       FROM STATE AS STATEalias1
+       WHERE STATEalias1.STATE_NAME IN
+           (SELECT RIVERalias0.TRAVERSE
+            FROM RIVER AS RIVERalias0
+            WHERE RIVERalias0.LENGTH =
+                (SELECT MAX(RIVERalias1.LENGTH)
+                 FROM RIVER AS RIVERalias1) ) )
+    AND STATEalias0.STATE_NAME IN
+      (SELECT RIVERalias2.TRAVERSE
+       FROM RIVER AS RIVERalias2
+       WHERE RIVERalias2.LENGTH =
+           (SELECT MAX(RIVERalias3.LENGTH)
+            FROM RIVER AS RIVERalias3) ) ;
