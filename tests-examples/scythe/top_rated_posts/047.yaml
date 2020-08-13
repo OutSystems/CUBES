@@ -6,6 +6,9 @@ functions:
 columns:
   - time
 loc: 2
+solution:
+  - summarise
+  - natural_join
 comment: |
   SELECT t1.*
   FROM lms_attendance t1
@@ -21,6 +24,6 @@ comment: |
   WHERE t1.time = t2.maxTime
     AND t1.user = t2.user
 
-  df1 <- input1 %>% group_by(user) %>% summarise(maxtime = max(time)) %>% ungroup()
-  df2 <- inner_join(input1, df1, by=c('user' = 'user','time' = 'maxtime'), suffix = c("", ".other"))
-  out <- df2 %>% select(id, user, time, io) %>% distinct()
+  df1 <- df_i047 %>% group_by(user) %>% summarise(time = max(time)) %>% ungroup()
+  df2 <- inner_join(df_i047, df1)
+  out <- df2 %>% select(id, user, time, io) %>% arrange(id)

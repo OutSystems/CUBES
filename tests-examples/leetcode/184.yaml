@@ -2,13 +2,17 @@ inputs:
   - tests-examples/leetcode/tables/184_1.csv
   - tests-examples/leetcode/tables/184_2.csv
 output: tests-examples/leetcode/tables/184_o.csv
-aggrs:
+functions:
   - max
-attrs:
+columns:
   - Salary
+loc: 3
+solution:
+  - summarise
+  - natural_join
+  - inner_join
 comment:
   df3 <- inner_join(input2, input1, by=c('Id' = 'DepartmentId'), suffix = c('', '.other'))
   df4 <- input1 %>% group_by(DepartmentId) %>% summarise(Salary = max(Salary)) %>% ungroup()
   df5 <- inner_join(df3, df4)
   out <- df5 %>% select(Department = Name, Employee = Name.other, Salary)
-

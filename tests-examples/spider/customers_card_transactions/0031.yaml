@@ -1,0 +1,18 @@
+inputs:
+- tests-examples/spider/customers_card_transactions/tables/customers.csv
+- tests-examples/spider/customers_card_transactions/tables/customers_cards.csv
+output: tests-examples/spider/customers_card_transactions/tables/0031.csv
+constants:
+- Credit
+columns:
+- card_type_code
+comment: |-
+  SELECT customer_id,
+         customer_first_name
+  FROM Customers
+  EXCEPT
+  SELECT T1.customer_id,
+         T2.customer_first_name
+  FROM Customers_cards AS T1
+  JOIN Customers AS T2 ON T1.customer_id = T2.customer_id
+  WHERE card_type_code = "Credit"

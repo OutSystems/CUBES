@@ -8,13 +8,19 @@ attrs:
   - cost
 bools:
   - ==
-loc: 4
+loc: 2
+solution:
+  - summarise
+  - natural_join3
 comment: |
   5.2.6 optimal solution
 
-  df1 <- input1 %>% group_by(P_id) %>% summarise(maxcost = max(cost)) %>% ungroup()
-  df2 <- inner_join(inner_join(df1, input1), input2)
-  df3 <- df2 %>% filter(maxcost == cost)
-  out <- df3 %>% select(P_id, S_name) %>% distinct()
+  df1 <- df_18_1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
+  df2 <- inner_join(df_18_1, df1) %>% inner_join(df_18_3)
+  out <- df2 %>% select(P_id, S_name) %>% arrange(P_id)
 
   NOT USED tests-examples/textbook/tables/18-2.txt
+
+  summarise(input0, 'cost = max(cost)', 'P_id'), natural_join3(input0, line0, input1)
+  summarise(input0, 'cost = max(cost)', 'P_id'), natural_join3(input0, input1, line0)
+

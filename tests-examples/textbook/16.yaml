@@ -3,15 +3,20 @@ inputs:
   - tests-examples/textbook/tables/16-2.txt
   - tests-examples/textbook/tables/16-3.txt
 output: tests-examples/textbook/tables/16.out
-const:
+constants:
   - AWS
-aggrs:
+functions:
   - n
-attrs:
+columns:
   - S_name
 bools:
   - ==
-loc: 6
+loc: 4
+solution:
+  - filter
+  - natural_join4
+  - summarise
+  - anti_join
 comment: |
   5.2.4 optimal solution
 
@@ -27,3 +32,12 @@ comment: |
   df3 <- anti_join(input2, df2)
   df4 <- df3 %>% group_by(P_name) %>% summarise(n = n()) %>% ungroup()
   out <- df4 %>% select(P_name) %>% distinct()
+
+
+  filter(input2, "S_name != 'AWS'"), natural_join4(input1, input0, line0, input2), summarise(line1, 'n = n()', 'P_id,P_name'), anti_join(input1, line2, "'P_id','P_name'")
+
+  filter(input2, "S_name != 'AWS'"), natural_join4(input0, input1, line0, input2), summarise(line1, 'n = n()', 'P_id,S_key'), anti_join(input1, line2, '')
+
+  filter(input2, "S_name != 'AWS'"), natural_join4(input0, input1, line0, input2), summarise(line1, 'n = n()', 'P_id,S_name'), anti_join(input1, line2, '')
+
+  filter(input2, "S_name != 'AWS'"), natural_join4(input1, input0, line0, input2), summarise(line1, 'n = n()', 'P_id,P_name'), anti_join(input1, line2, "'P_name'")

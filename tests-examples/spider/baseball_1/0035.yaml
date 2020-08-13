@@ -1,0 +1,26 @@
+inputs:
+- tests-examples/spider/baseball_1/tables/player.csv
+- tests-examples/spider/baseball_1/tables/salary.csv
+- tests-examples/spider/baseball_1/tables/team.csv
+output: tests-examples/spider/baseball_1/tables/0035.csv
+constants:
+- '2005'
+- Washington Nationals
+- '2007'
+columns:
+- year
+- name
+comment: |-
+  SELECT T2.name_first,
+         T2.name_last
+  FROM salary AS T1
+  JOIN player AS T2 ON T1.player_id = T2.player_id
+  JOIN team AS T3 ON T3.team_id_br = T1.team_id
+  WHERE T1.year = 2005
+    AND T3.name = 'Washington Nationals' INTERSECT
+    SELECT T2.name_first,
+           T2.name_last
+    FROM salary AS T1
+    JOIN player AS T2 ON T1.player_id = T2.player_id
+    JOIN team AS T3 ON T3.team_id_br = T1.team_id WHERE T1.year = 2007
+    AND T3.name = 'Washington Nationals'

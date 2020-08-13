@@ -1,0 +1,17 @@
+inputs:
+- tests-examples/spider/college_2/tables/course.csv
+- tests-examples/spider/college_2/tables/prereq.csv
+output: tests-examples/spider/college_2/tables/0051.csv
+constants:
+- Differential Geometry
+columns:
+- course_id
+- title
+comment: |-
+  SELECT title
+  FROM course
+  WHERE course_id IN
+      (SELECT T1.course_id
+       FROM prereq AS T1
+       JOIN course AS T2 ON T1.prereq_id = T2.course_id
+       WHERE T2.title = 'Differential Geometry')

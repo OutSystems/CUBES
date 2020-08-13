@@ -5,6 +5,11 @@ functions:
   - n
 constants:
   - 1
+loc: 3
+solution:
+  - summarise
+  - cross_join
+  - filter
 comment: |
   SELECT
    user_id ,
@@ -41,3 +46,8 @@ comment: |
 
       date
   HAVING COUNT(*) > 1
+
+  df1 <- df_i045 %>% group_by(account_no,date) %>% summarise(n = n()) %>% ungroup()
+  df2 <- full_join(df1, df1, by=character(), suffix = c("", ".other")) %>% filter(n < n.other)
+  df3 <- df2 %>% filter(n == 1)
+  out <- df3 %>% select(user_id = n, n = n.other) %>% distinct() %>% arrange(user_id)

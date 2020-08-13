@@ -3,17 +3,20 @@ inputs:
   - tests-examples/textbook/tables/21-2.txt
   - tests-examples/textbook/tables/21-3.txt
 output: tests-examples/textbook/tables/21.out
-const:
+constants:
   - red
   - green
-attrs:
+columns:
   - color
 bools:
   - ==
 loc: 2
+solution:
+  - natural_join3
+  - filter
 comment: |
   5.2.9 optimal solution
 
-  df1 <- inner_join(inner_join(input2, input1), input3)
-  df2 <- df1 %>% filter(color == 'green' | color == 'red')
-  out <- df2 %>% select(S_name) %>% distinct()
+  df1 <- inner_join(df_21_1, df_21_3) %>% inner_join(df_21_2)
+  df2 <- df1 %>% filter(color == 'red' | color == 'green')
+  out <- df2 %>% select(S_name) %>% distinct() %>% arrange(S_name)

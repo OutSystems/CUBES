@@ -8,8 +8,20 @@ filters:
 bools:
   - ==
 loc: 2
+solution:
+  - summarise
+  - filter
+  - summarise
+  - natural_join
 comment: |
   5.1.12 optimal solution
 
   student %>% group_by(age,level) %>% summarise(n = n()) %>%
   filter(n==max(n)) %>% select(-n)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) | n != max(n)'), summarise(line1, 'n = n()', 'age'), semi_join(line0, line2)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) & n == max(n)'), anti_join(input0, line1, "'age'"), union(line1, line2)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) | n != max(n)'), summarise(line1, 'n = n()', 'age'), natural_join(line0, line2)
+

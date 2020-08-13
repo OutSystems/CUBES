@@ -6,6 +6,10 @@ functions:
 constants:
   - 1
 loc: 3
+solution:
+  - summarise
+  - inner_join
+  - filter
 comment: |
   SELECT EmailAddress, CustomerName
   FROM Customers
@@ -16,7 +20,7 @@ comment: |
    HAVING COUNT(*) > 1)
 
 
-  df1 <- input1 %>% group_by(EmailAddress) %>% summarise(n = n())
-  df2 <- df1 %>% ungroup() %>% filter(n < 1 | n > 1)
-  df3 <- inner_join(input1, df2)
-  out <- df3 %>% ungroup() %>% select(CustomerName,EmailAddress) %>% distinct()
+  df1 <- df_i043 %>% group_by(EmailAddress) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(df1, df_i043, by=c('EmailAddress'), suffix = c('', '.other'))
+  df3 <- df2 %>% filter(n > 1)
+  out <- df3 %>% select(CustomerName, EmailAddress) %>% arrange(CustomerName)

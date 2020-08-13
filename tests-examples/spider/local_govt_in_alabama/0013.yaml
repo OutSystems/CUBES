@@ -1,0 +1,17 @@
+inputs:
+- tests-examples/spider/local_govt_in_alabama/tables/services.csv
+- tests-examples/spider/local_govt_in_alabama/tables/events.csv
+output: tests-examples/spider/local_govt_in_alabama/tables/0013.csv
+constants:
+- Success
+- Fail
+columns:
+- event_details
+comment: |-
+  SELECT T1.service_type_code
+  FROM services AS T1
+  JOIN EVENTS AS T2 ON T1.service_id = T2.service_id
+  WHERE T2.event_details = 'Success' INTERSECT
+    SELECT T1.service_type_code
+    FROM services AS T1
+    JOIN EVENTS AS T2 ON T1.service_id = T2.service_id WHERE T2.event_details = 'Fail'

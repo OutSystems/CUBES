@@ -7,6 +7,9 @@ columns:
   - date
 dateorder: ymd
 loc: 2
+solution:
+  - summarise
+  - inner_join
 comment: |
   SELECT t.username, t.date, t.value
   FROM MyTable t
@@ -16,6 +19,6 @@ comment: |
       GROUP BY username
   ) tm ON t.username = tm.username AND t.date = tm.MaxDate
 
-  df1 <- input1 %>% group_by(username) %>% summarise(maxdate = max(date))
-  df2 <- inner_join(input1, df1, by=c('username' = 'username','date' = 'maxdate'), suffix = c("", ".other"))
-  out <- df2 %>% ungroup() %>% select(username,date,value) %>% distinct()
+  df1 <- df_i036 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
+  df2 <- inner_join(df_i036, df1, by=c('date' = 'maxdate'), suffix = c('', '.other')) %>% mutate(maxdate = date)
+  out <- df2 %>% select(username, date, value) %>% arrange(username)

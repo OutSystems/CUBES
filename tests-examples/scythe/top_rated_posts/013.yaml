@@ -6,6 +6,10 @@ constants:
 functions:
   - n
 loc: 3
+solution:
+  - summarise
+  - inner_join
+  - filter
 comment: |
   SELECT o.orgName, oc.dupeCount, o.id
   FROM organizations o
@@ -16,7 +20,7 @@ comment: |
       HAVING COUNT(*) > 1
   ) oc ON o.orgName = oc.orgName
 
-  df1 <- input1 %>% group_by(orgName) %>% summarise(n = n())
-  df2 <- inner_join(input1, df1)
-  df3 <- df2 %>% ungroup() %>% filter(n > 1)
-  out <- df3 %>% ungroup() %>% select(orgName,n,id)
+  df1 <- df_i013 %>% group_by(orgName) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(df1, df_i013, by=c('orgName'), suffix = c('', '.other'))
+  df3 <- df2 %>% filter(n > 1)
+  out <- df3 %>% select(orgName, n, id) %>% arrange(orgName)

@@ -1,0 +1,22 @@
+inputs:
+- tests-examples/spider/bike_1/tables/station.csv
+- tests-examples/spider/bike_1/tables/status.csv
+output: tests-examples/spider/bike_1/tables/0032.csv
+constants:
+- '10'
+- San Jose
+functions:
+- avg
+columns:
+- bikes_available
+- city
+comment: |-
+  SELECT T1.name
+  FROM station AS T1
+  JOIN status AS T2 ON T1.id = T2.station_id
+  GROUP BY T2.station_id
+  HAVING avg(bikes_available) > 10
+  EXCEPT
+  SELECT name
+  FROM station
+  WHERE city = "San Jose"

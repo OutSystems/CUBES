@@ -1,0 +1,20 @@
+inputs:
+- tests-examples/spider/mountain_photos/tables/mountain.csv
+- tests-examples/spider/mountain_photos/tables/camera_lens.csv
+- tests-examples/spider/mountain_photos/tables/photos.csv
+output: tests-examples/spider/mountain_photos/tables/0014.csv
+constants:
+- Toubkal Atlas
+- Lasta Massif
+columns:
+- range
+comment: |-
+  SELECT T3.brand
+  FROM mountain AS T1
+  JOIN photos AS T2 ON T1.id = T2.mountain_id
+  JOIN camera_lens AS T3 ON T2.camera_lens_id = T3.id
+  WHERE T1.range = 'Toubkal Atlas' INTERSECT
+    SELECT T3.brand
+    FROM mountain AS T1
+    JOIN photos AS T2 ON T1.id = T2.mountain_id
+    JOIN camera_lens AS T3 ON T2.camera_lens_id = T3.id WHERE T1.range = 'Lasta Massif'

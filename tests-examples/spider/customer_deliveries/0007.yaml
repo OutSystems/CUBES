@@ -1,0 +1,18 @@
+inputs:
+- tests-examples/spider/customer_deliveries/tables/addresses.csv
+- tests-examples/spider/customer_deliveries/tables/customers.csv
+- tests-examples/spider/customer_deliveries/tables/customer_addresses.csv
+output: tests-examples/spider/customer_deliveries/tables/0007.csv
+constants:
+- California
+columns:
+- state_province_county
+comment: |-
+  SELECT customer_name
+  FROM customers
+  EXCEPT
+  SELECT t1.customer_name
+  FROM customers AS t1
+  JOIN customer_addresses AS t2 ON t1.customer_id = t2.customer_id
+  JOIN addresses AS t3 ON t2.address_id = t3.address_id
+  WHERE t3.state_province_county = 'California'

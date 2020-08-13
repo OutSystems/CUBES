@@ -1,0 +1,19 @@
+inputs:
+- tests-examples/spider/allergy_1/tables/allergy_type.csv
+- tests-examples/spider/allergy_1/tables/has_allergy.csv
+- tests-examples/spider/allergy_1/tables/student.csv
+output: tests-examples/spider/allergy_1/tables/0045.csv
+constants:
+- food
+columns:
+- stuid
+- allergytype
+comment: |-
+  SELECT fname,
+         lname
+  FROM Student
+  WHERE StuID NOT IN
+      (SELECT T1.StuID
+       FROM Has_allergy AS T1
+       JOIN Allergy_Type AS T2 ON T1.Allergy = T2.Allergy
+       WHERE T2.allergytype = "food")

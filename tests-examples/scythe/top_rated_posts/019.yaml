@@ -4,6 +4,9 @@ output: tests-examples/scythe/top_rated_posts/tables/o019.csv
 functions:
   - n
 loc: 2
+solution:
+  - summarise
+  - natural_join
 comment: |
   SELECT S.id, S.age, C.cnt
     FROM Students  S
@@ -11,6 +14,6 @@ comment: |
                        FROM Students
                       GROUP BY age) C ON S.age = C.age
 
-  df1 <- input1 %>% group_by(age) %>% summarise(n = n())
-  df2 <- inner_join(df1, input1)
-  out <- df2 %>% ungroup() %>% select(id,age,n) %>% distinct()
+  df1 <- df_i019 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(df_i019, df1)
+  out <- df2 %>% select(id, age, n) %>% arrange(id)

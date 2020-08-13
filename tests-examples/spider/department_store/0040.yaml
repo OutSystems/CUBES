@@ -1,0 +1,18 @@
+inputs:
+- tests-examples/spider/department_store/tables/customers.csv
+- tests-examples/spider/department_store/tables/customer_orders.csv
+- tests-examples/spider/department_store/tables/order_items.csv
+output: tests-examples/spider/department_store/tables/0040.csv
+constants:
+- '3'
+functions:
+- count
+columns:
+- product_id
+comment: |-
+  SELECT DISTINCT T1.customer_name
+  FROM customers AS T1
+  JOIN customer_orders AS T2 ON T1.customer_id = T2.customer_id
+  JOIN order_items AS T3 ON T2.order_id = T3.order_id
+  GROUP BY T1.customer_id
+  HAVING COUNT (DISTINCT T3.product_id) >= 3

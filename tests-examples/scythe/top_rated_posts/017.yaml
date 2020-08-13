@@ -11,6 +11,10 @@ filters:
 constants:
   - "FOO-"
 loc: 3
+solution:
+  - summarise
+  - cross_join
+  - filter
 comment: |
   SELECT t.*
   FROM TestData t
@@ -20,7 +24,7 @@ comment: |
                   WHERE SKU LIKE 'FOO-%'
              ) dt ON t.ID=dt.MinID
 
-  df1 <- input1 %>% filter(str_detect(SKU, 'FOO-'))
-  df2 <- input1 %>% group_by(PRODUCT) %>% summarise(minID = min(ID)) %>% ungroup()
-  df3 <- inner_join(df1, df2, by=c('ID' = 'minID','minID' = 'minID'), suffix = c("", ".other"))
-  out <- df3 %>% select(ID, SKU, PRODUCT) %>% distinct()
+  df1 <- df_i017 %>% group_by(PRODUCT) %>% summarise(ID = min(ID)) %>% ungroup()
+  df2 <- full_join(df1, df_i017, by=character(), suffix = c("", ".other")) %>% filter(ID >= ID.other)
+  df3 <- df2 %>% filter(str_detect(SKU, 'FOO-'))
+  out <- df3 %>% select(ID = ID.other, SKU, PRODUCT = PRODUCT.other) %>% distinct() %>% arrange(ID)

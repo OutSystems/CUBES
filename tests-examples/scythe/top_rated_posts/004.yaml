@@ -6,6 +6,9 @@ functions:
 columns:
   - rev
 loc: 2
+solution:
+  - summarise
+  - natural_join
 comment: |
   SELECT a.id, a.rev, a.content
   FROM YourTable a
@@ -15,6 +18,6 @@ comment: |
       GROUP BY id
   ) b ON a.id = b.id AND a.rev = b.maxrev
 
-  df1 <- input1 %>% group_by(id) %>% summarise(maxrev = max(rev)) %>% ungroup()
-  df2 <- inner_join(input1, df1, by=c('id' = 'id','rev' = 'maxrev'), suffix = c("", ".other"))
-  out <- df2 %>% select(id, rev, content) %>% distinct()
+  df1 <- df_i004 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
+  df2 <- inner_join(df_i004, df1)
+  out <- df2 %>% select(id, rev, content) %>% arrange(id)

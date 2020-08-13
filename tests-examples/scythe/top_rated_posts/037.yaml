@@ -6,6 +6,9 @@ functions:
 columns:
   - c1
 loc: 2
+solution:
+  - summarise
+  - natural_join
 comment: |
   select t1.*
   (select c2, min(c1) minc1
@@ -14,6 +17,6 @@ comment: |
   join t2
   on t1.minc1 = t2.c1
 
-  df1 <- input1 %>% group_by(c2) %>% summarise(minc1 = min(c1))
-  df2 <- inner_join(input1, df1, by=c('c1' = 'minc1','minc1' = 'minc1'), suffix = c("", ".other"))
-  out <- df2 %>% ungroup() %>% select(c1,c2,c3)
+  df1 <- df_i037 %>% group_by(c2) %>% summarise(c1 = min(c1)) %>% ungroup()
+  df2 <- inner_join(df_i037, df1)
+  out <- df2 %>% select(c1, c2, c3) %>% arrange(c1)

@@ -6,6 +6,9 @@ functions:
 columns:
   - AddressID
 loc: 2
+solution:
+  - summarise
+  - natural_join
 comment: |
   SELECT
       M.CName, M.AddressLine,
@@ -20,6 +23,6 @@ comment: |
   JOIN MyTable M
   ON foo.CName = M.CName AND foo.First = M.Inserted
 
-  df1 <- input1 %>% group_by(CName) %>% summarise(minAddressID = min(AddressID)) %>% ungroup()
-  df2 <- inner_join(df1, input1, by=c('minAddressID' = 'AddressID','CName' = 'CName'), suffix = c("", ".other"))
-  out <- df2 %>% select(CName, minAddressID, AddressLine)
+  df1 <- df_i048 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
+  df2 <- inner_join(df_i048, df1)
+  out <- df2 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)

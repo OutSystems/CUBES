@@ -7,6 +7,10 @@ constants:
   - Beta
 columns:
   - name
+solution:
+  - union
+  - filter
+  - summarise
 comment: |
   SELECT t.id,
          (SELECT COUNT(*)
@@ -15,3 +19,8 @@ comment: |
          t.name
     FROM TABLE t
    WHERE t.name = 'Beta'
+
+  df1 <- bind_rows(df_i031, df_i031)
+  df2 <- df1 %>% filter(name == 'Beta')
+  df3 <- df2 %>% group_by(id,name) %>% summarise(n = n()) %>% ungroup()
+  out <- df3 %>% select(id, n, name) %>% arrange(id)

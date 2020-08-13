@@ -6,6 +6,10 @@ functions:
 constants:
   - 1
 loc: 3
+solution:
+  - summarise
+  - natural_join
+  - filter
 comment: |
   select s.id, t.*
   from [stuff] s
@@ -16,7 +20,7 @@ comment: |
       having count(*) > 1
   ) t on s.name = t.name and s.city = t.city
 
-  df1 <- input1 %>% group_by(name, city) %>% summarise(n = n())
-  df2 <- inner_join(input1, df1)
-  df3 <- df2 %>% ungroup() %>% filter(n > 1)
-  out <- df3 %>% ungroup() %>% select(id,name,city)
+  df1 <- df_i038 %>% group_by(name) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(df_i038, df1)
+  df3 <- df2 %>% filter(n > 1)
+  out <- df3 %>% select(id, name, city) %>% arrange(id)
