@@ -112,9 +112,9 @@ class ConditionGenerator:
                         add_condition(f"{aggr}{column} = str_count({column}, '{constant}')", f'{aggr}{column}', [types.INT],
                                       self.specification.get_bitvecnum([column]))
 
-            if aggr == 'mean':
+            if aggr == 'mean' or aggr == 'avg':
                 for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                    add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [types.FLOAT],
+                    add_condition(f'mean{column} = mean({column})', f'mean{column}', [types.FLOAT],
                                   self.specification.get_bitvecnum([column]))
 
             if aggr in ['sum', 'cumsum']:
@@ -184,6 +184,8 @@ class ConditionGenerator:
                 if 'str_detect' in self.specification.filters or 'like' in self.specification.filters:
                     filter_parts[frozenset((column, constant))].add(f"str_detect({column}, {types.to_r_repr(constant)})")
                     parts_2_cols[f"str_detect({column}, {types.to_r_repr(constant)})"].add(column)
+                    filter_parts[frozenset((column, constant))].add(f"str_detect({column}, {types.to_r_repr(constant)}, negate=TRUE)")
+                    parts_2_cols[f"str_detect({column}, {types.to_r_repr(constant)}, negate=TRUE)"].add(column)
 
                 if self.specification.constant_occurs(column, constant):
                     for op in types.operators_by_type[types.STRING]:
@@ -206,7 +208,7 @@ class ConditionGenerator:
                     filter_parts[frozenset((column, constant))].add(f"{column} {op} {self.specification.dateorder}('{constant}')")
                     parts_2_cols[f"{column} {op} {self.specification.dateorder}('{constant}')"].add(column)
 
-        bc = set()  # this set is used to ensure no redundant operations are created
+        bc = OrderedSet()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
             for attr2 in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
                 if attr1 == attr2:
@@ -223,7 +225,7 @@ class ConditionGenerator:
                     for op2 in less_restrictive_op(op):
                         self.less_restrictive.append(dsl.FilterCondition, f'{attr2} {op} {attr1}', f'{attr2} {op2} {attr1}')
 
-        bc = set()  # this set is used to ensure no redundant operations are created
+        bc = OrderedSet()  # this set is used to ensure no redundant operations are created
         for attr1 in frozen_columns[types.DATETIME]:
             for attr2 in frozen_columns[types.DATETIME]:
                 if attr1 == attr2:

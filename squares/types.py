@@ -73,7 +73,7 @@ def is_time(o):
             return True
 
         return False
-    except (ValueError, OverflowError):
+    except (ValueError, OverflowError, TypeError):
         return False
 
 
@@ -85,7 +85,7 @@ def is_date(o):
         dateutil.parser.parse(o)
         return True
 
-    except (ValueError, OverflowError):
+    except (ValueError, OverflowError, TypeError):
         return False
 
 
@@ -165,10 +165,13 @@ def _get_r_type(type):
         raise NotImplementedError
 
 
-def get_r_types(dtypes):
+def get_r_types(dtypes, replacements=None):
+    if replacements is None:
+        replacements = {}
+    replacements = {value: key for key, value in replacements.items()}
     result = []
     for col, type in zip(dtypes.index, map(get_type, dtypes)):
-        result.append(f'{col} = {_get_r_type(type)}')
+        result.append(f'"{col if col not in replacements else replacements[col]}" = {_get_r_type(type)}')
     return ','.join(result)
 
 

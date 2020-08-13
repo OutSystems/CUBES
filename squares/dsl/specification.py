@@ -1,13 +1,18 @@
 import io
+import math
 import os
 import re
+from collections import defaultdict
+from functools import reduce
 from logging import getLogger
 from typing import Dict, Sequence, Any
 
+import operator
 import pandas
 from ordered_set import OrderedSet
 from pandas import DataFrame
 from rpy2 import robjects
+from rpy2.rinterface_lib.embedded import RRuntimeError
 
 from . import dsl
 from .conditions import ConditionGenerator
@@ -21,6 +26,7 @@ logger = getLogger('squares')
 
 
 def exec_and_return(r_script: str) -> str:
+    # print(r_script)
     robjects.r(r_script)
     return r_script
 
@@ -41,12 +47,15 @@ class Specification:
         else:
             self.aggrs = spec['functions'] or []
         self.attrs = spec['columns'] or []
-        self.dateorder = spec['dateorder'] or 'dmy'
+        self.dateorder = spec['dateorder'] or 'parse_datetime'
         self.filters = spec['filters'] or []
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
             self.solution = None
+
+        if util.get_config().use_solution_dsl and self.solution:
+            util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
 
         self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
                            util.get_config().minimum_loc)  # TODO
@@ -57,7 +66,7 @@ class Specification:
         self.data_frames = {}
 
         self.columns = OrderedSet()
-        self.column_replacements = {}
+        self.column_replacements = defaultdict(dict)
         self.generated_columns = {}
         self.columns_by_type = types.empty_type_map()
         self.types_by_const = {}
@@ -104,7 +113,7 @@ class Specification:
         self.tyrell_spec = None
 
     def read_table(self, path: str, table_name:str = None) -> DataFrame:
-        df = pandas.read_csv(path, na_filter=False)
+        df = pandas.read_csv(path)
         df = df.convert_dtypes(convert_integer=False)
 
         replacements = {}
@@ -150,27 +159,27 @@ class Specification:
 
         for table, file in zip(self.tables, self.inputs):
             df = self.data_frames[table]
-            self.r_init += exec_and_return(f'{table} <- read_csv("{file}", col_types = cols({types.get_r_types(df.dtypes)}))\n')
-
-            for col, dtype in zip(df.columns, df.dtypes):  # parse dates
-                if types.get_type(dtype) == types.DATETIME:
-                    self.r_init += exec_and_return(f'{table}${col} <- {self.dateorder}({table}${col})\n')
+            self.r_init += exec_and_return(f'{table} <- read_csv("{file}", col_types = cols({types.get_r_types(df.dtypes, self.column_replacements[table])}))\n')
 
             if table in self.column_replacements:
                 for old, new in self.column_replacements[table].items():
                     self.r_init += exec_and_return(f'{table} <- rename({table}, {new} = "{old}")\n')
 
+            for col, dtype in zip(df.columns, df.dtypes):  # parse dates
+                if types.get_type(dtype) == types.DATETIME:
+                    self.r_init += exec_and_return(f'{table}${col} <- {self.dateorder}({table}${col})\n')
+
             self.r_init += f'{table} <- copy_to(con, {table})\n'
 
         output_df = self.data_frames['expected_output']
         self.r_init += exec_and_return(
-            f'expected_output <- read_csv("{self.output}", col_types = cols({types.get_r_types(output_df.dtypes)}))\n')
-        for col, dtype in zip(output_df.columns, output_df.dtypes):  # parse dates
-            if types.get_type(dtype) == types.DATETIME:
-                self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
+            f'expected_output <- read_csv("{self.output}", col_types = cols({types.get_r_types(output_df.dtypes, self.column_replacements["expected_output"])}))\n')
         if 'expected_output' in self.column_replacements:
             for old, new in self.column_replacements['expected_output'].items():
                 self.r_init += exec_and_return(f'expected_output <- rename(expected_output, {new} = "{old}")\n')
+        for col, dtype in zip(output_df.columns, output_df.dtypes):  # parse dates
+            if types.get_type(dtype) == types.DATETIME:
+                self.r_init += exec_and_return(f'expected_output${col} <- {self.dateorder}(expected_output${col})\n')
 
         if 'concat' in self.aggrs:
             self.r_init += exec_and_return('\nstring_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}\n')
@@ -272,40 +281,37 @@ class Specification:
 
         pred_spec = PredicateSpec()
 
-        if self.condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
-            add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'summarise')
-            pred_spec.add_predicate('is_not_parent', ['summarise', 'summarise'])
+        # if self.condition_generator.summarise_conditions and 'summarise' not in util.get_config().disabled:
+        #     pred_spec.add_predicate('is_not_parent', ['summarise', 'summarise'])
 
-        if len(self.condition_generator.filter_conditions) == 1:
-            add_is_not_parent_if_enabled(pred_spec, 'inner_join', 'filter')
-            add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'filter')
-            add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'filter')
-            add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'filter')
-            pred_spec.add_predicate('is_not_parent', ['filter', 'filter'])
-            pred_spec.add_predicate('distinct_inputs', ['filter'])
+        if len(self.condition_generator.filter_conditions) >= 1:
+            # add_is_not_parent_if_enabled(pred_spec, 'filter', 'inner_join')
+            # add_is_not_parent_if_enabled(pred_spec, 'filter', 'natural_join')
+            # add_is_not_parent_if_enabled(pred_spec, 'filter', 'natural_join3')
+            # add_is_not_parent_if_enabled(pred_spec, 'filter', 'natural_join4')
+            # add_is_not_parent_if_enabled(pred_spec, 'inner_join', 'filter')
+            # add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'filter')
+            # add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'filter')
+            # add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'filter')
+            pass
         elif len(self.condition_generator.filter_conditions) > 1 and util.get_config().filters_function_enabled:
             pred_spec.add_predicate('distinct_filters', ['filters', 1, 2])
             pred_spec.add_predicate('is_not_parent', ['filters', 'filter'])
-            pred_spec.add_predicate('is_not_parent', ['filter', 'filters'])
+            # pred_spec.add_predicate('is_not_parent', ['filter', 'filters'])
             pred_spec.add_predicate('is_not_parent', ['filter', 'filter'])
-            pred_spec.add_predicate('is_not_parent', ['filters', 'filters'])
+            # pred_spec.add_predicate('is_not_parent', ['filters', 'filters'])
 
         for p in self.condition_generator.predicates:
             pred_spec.add_predicate(*p)
 
+        add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'natural_join')
         add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'natural_join3')
         add_is_not_parent_if_enabled(pred_spec, 'natural_join', 'natural_join4')
-        # add_is_not_parent_if_enabled(pred_spec, self._config, 'natural_join', 'anti_join')
         add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join')
-        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join3')
         add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join4')
-        add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'anti_join')
-        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join')
-        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join3')
-        add_is_not_parent_if_enabled(pred_spec, 'natural_join4', 'natural_join4')
-        # add_is_not_parent_if_enabled(pred_spec, self._config, 'natural_join4', 'anti_join')
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'anti_join')
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join')
+        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join3')
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join4')
 
         for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join', 'semi_join', 'left_join']:
@@ -316,6 +322,11 @@ class Specification:
                                    (dsl.Table, self.get_bitvecnum(self.data_frames["expected_output"])))
 
         self.tyrell_spec = TyrellSpec(type_spec, program_spec, prod_spec, pred_spec)
+        function_difficulty = {prod.name: reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else len(self.inputs) for rhs in prod.rhs), 1) for prod
+                  in self.tyrell_spec.get_function_productions() if prod.name != 'empty'}
+        logger.warning(function_difficulty)
+        function_difficulty = {key: value / sum( function_difficulty.values()) for key, value in function_difficulty.items()}
+        logger.warning(function_difficulty)
         return self.tyrell_spec
 
     def get_bitvecnum(self, columns: Sequence[str]) -> int:
@@ -344,16 +355,16 @@ class Specification:
     def __str__(self) -> str:
         buffer = io.StringIO()
         buffer.write(repr(self.generate_dsl()))
-        buffer.write('\nMore restrictive:\n')
-        for type in self.condition_generator.more_restrictive.graphs.keys():
-            max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
-            buffer.write(f'\t{type}:\n')
-            for key in list(self.condition_generator.more_restrictive.graphs[type]):
-                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
-        buffer.write('Less restrictive:\n')
-        for type in self.condition_generator.less_restrictive.graphs.keys():
-            max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
-            buffer.write(f'\t{type}:\n')
-            for key in list(self.condition_generator.less_restrictive.graphs[type]):
-                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
+        # buffer.write('\nMore restrictive:\n')
+        # for type in self.condition_generator.more_restrictive.graphs.keys():
+        #     max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
+        #     buffer.write(f'\t{type}:\n')
+        #     for key in list(self.condition_generator.more_restrictive.graphs[type]):
+        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
+        # buffer.write('Less restrictive:\n')
+        # for type in self.condition_generator.less_restrictive.graphs.keys():
+        #     max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
+        #     buffer.write(f'\t{type}:\n')
+        #     for key in list(self.condition_generator.less_restrictive.graphs[type]):
+        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
         return buffer.getvalue()

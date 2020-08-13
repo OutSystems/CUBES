@@ -8,23 +8,16 @@
 - scythe/recent_posts/007 (supported by scythe)
 
 ## Supported
-- scythe/recent_posts/004
 - scythe/recent_posts/006
 - scythe/recent_posts/012
-- scythe/recent_posts/013
-- scythe/recent_posts/017
 - scythe/recent_posts/019
-- scythe/recent_posts/021
-- scythe/recent_posts/028
-- scythe/recent_posts/036
-- scythe/recent_posts/046
 - scythe/recent_posts/049
 - leetcode/184
 - textbook/20
-- textbook/22
-- textbook/26
 - textbook/29
-- textbook/34
+
+## Probably supported
+- spider/activity_1/0022
 
 ## Unsure if supported?
 - scythe/recent_posts/001
@@ -40,8 +33,12 @@
 - leetcode/197
 - textbook/27
 - textbook/32
+- spider/activity_1/0007
 
 ## Not supported
+
+### Type inference is wrong for output table (due to not having enough rows)
+- spider/activity_1/0008
 
 ### COUNT(column)
 - geography/0017
@@ -60,6 +57,8 @@
 - leetcode/197 (arithmetic)
 - leetcode/262 (replace_na(n.y, 0) / n.x)
 - textbook/33 (arithmetic)
+
+### Ungrouped summarise
 
 ### Grouped mutate
 - scythe/recent_posts/024

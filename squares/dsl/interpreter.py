@@ -57,6 +57,7 @@ class SquaresInterpreter(LineInterpreter):
 
     def try_execute(self, script):
         try:
+            # print(script)
             robjects.r(script)
         except Exception as e:
             logger.error("Error while evaluating program")
@@ -81,7 +82,11 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_mutate(self, name, args):
-        return f'{name} <- {args[0]} %>% mutate({args[1]})\n'
+        re_object = re.fullmatch(r'([A-Za-z_]+)\$([A-Za-z_]+)', args[1])
+        if re_object:
+            return f'{name} <- {args[0]} %>% mutate_{re_object.groups()[0]}({re_object.groups()[1]})\n'
+        else:
+            return f'{name} <- {args[0]} %>% mutate({args[1]})\n'
 
     @eval_decorator
     def eval_inner_join(self, name, args):
@@ -97,15 +102,40 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_natural_join(self, name, args):
-        return f'{name} <- inner_join({args[0]}, {args[1]})\n'
+        if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
+            return f'{name} <- inner_join({args[0]}, {args[1]})\n'
+        else:
+            return f'{name} <- full_join({args[0]}, {args[1]}, by=character())\n'
 
     @eval_decorator
     def eval_natural_join3(self, name, args):
-        return f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]})\n'
+        _script = f'{name} <-'
+        if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
+            _script += f'inner_join({args[0]}, {args[1]}) '
+        else:
+            _script += f'full_join({args[0]}, {args[1]}, by=character()) '
+        if robjects.r(f'length(intersect(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})))')[0] > 0:
+            _script += f'%>% inner_join({args[2]})\n'
+        else:
+            _script += f'%>% full_join({args[2]}, by=character())\n'
+        return _script
 
     @eval_decorator
     def eval_natural_join4(self, name, args):
-        return f'{name} <- inner_join({args[0]}, {args[1]}) %>% inner_join({args[2]}) %>% inner_join({args[3]})\n'
+        _script = f'{name} <-'
+        if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
+            _script += f'inner_join({args[0]}, {args[1]}) '
+        else:
+            _script += f'full_join({args[0]}, {args[1]}, by=character()) '
+        if robjects.r(f'length(intersect(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})))')[0] > 0:
+            _script += f'%>% inner_join({args[2]}) '
+        else:
+            _script += f'%>% full_join({args[2]}, by=character()) '
+        if robjects.r(f'length(intersect(union(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})), colnames({args[3]})))')[0] > 0:
+            _script += f'%>% inner_join({args[3]})\n'
+        else:
+            _script += f'%>% full_join({args[3]}, by=character())\n'
+        return _script
 
     @eval_decorator
     def eval_anti_join(self, name, args):

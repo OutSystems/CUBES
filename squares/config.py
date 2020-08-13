@@ -32,6 +32,9 @@ class Config:
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True
 
+    use_solution_dsl: bool = False
+    use_solution_cube: bool = False
+
     bitvector_size: int = 16  # TODO should not be a fixed number
 
     max_column_combinations: int = 2

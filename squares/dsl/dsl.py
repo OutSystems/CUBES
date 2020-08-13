@@ -1,5 +1,7 @@
 from typing import Any
 
+from ordered_set import OrderedSet
+
 from squares.tyrell.spec import ValueType, EnumType
 from squares.tyrell.spec.expr import *
 
@@ -33,6 +35,8 @@ CrossJoinCondition = EnumType('CrossJoinCondition')
 FilterCondition = EnumType('FilterCondition')
 Op = EnumType('Op')
 SummariseCondition = EnumType('SummariseCondition')
+
+functions = OrderedSet(['natural_join', 'natural_join3', 'natural_join4', 'inner_join', 'anti_join', 'left_join', 'union', 'intersect', 'semi_join', 'cross_join', 'unite', 'filter', 'filters', 'summarise', 'mutate'])
 
 natural_join = ('natural_join',
                 Table,

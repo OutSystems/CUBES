@@ -149,10 +149,11 @@ def create_argparser(all_inputs=False):
     parser.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
     parser.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
 
-    parser.add_argument('--use-solution-line', dest='use_lines', type=int, action='append', default=[])
-    parser.add_argument('--use-solution-last-line', dest='use_last', action='store_true')
+    parser.add_argument('--use-solution-dsl', dest='use_dsl', action='store_true')
+    parser.add_argument('--use-solution-cube', dest='use_cube', action='store_true')
+    parser.add_argument('--use-solution-loc', dest='use_loc', action='store_true')
 
-    parser.add_argument('-j', '--jobs', type=int, default=-2, help='number of processes to use')
+    parser.add_argument('-j', '--jobs', type=int, default=0, help='number of processes to use')
     parser.add_argument('--max-lines', type=int, default=7, help='maximum program size')
     parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
     parser.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')

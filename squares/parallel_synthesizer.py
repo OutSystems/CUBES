@@ -11,6 +11,8 @@ from threading import Thread
 
 import select
 
+import random
+
 from . import util, results
 from .config import Config
 from .decider import LinesDecider
@@ -43,6 +45,7 @@ class ChildSynthesizer(Process, Synthesizer):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
+        random.seed(self.config.seed)
         logger.setLevel(self.logger_level)
         util.store_config(copy.copy(self.config))
         util.set_program_queue(self.program_queue)

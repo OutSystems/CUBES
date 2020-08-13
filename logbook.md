@@ -400,3 +400,41 @@ Nikolaj on StackOverflow:
 
 #### c42
 - no transitivity
+
+## Week of 12/7
+
+### Sources of non-determinism
+- (possible) overlooked usage of sets (vs orderedset)
+- (possible) Z3 is not always deterministic, even when (doubly) seeded
+- ~~By default all logical cores except two are used. In systems with SMT this might be more than the amount of physical cores available~~
+- (possible) processes are dispatched using the order returned from the the python Poll object
+- Scores are updated asynchronously
+- Process-local cache for sub-programs (up to 2 lines by default)
+- Process-local cache for transitive closure of condition generalizations
+- Learned cubes (from UNSAT cores) are not synchronized
+- ~~Consider using a new Random object for choosing the next line of a cube (based on n-grams) since seeding of the random module is only done at program start~~
+
+### Runs
+
+#### c43
+Some non-determinism fixes (quite minimal)
+
+#### c44
+Default values for bigrams obtained from instance counting
+
+## Week of 21/7
+
+### Runs
+
+#### c45
+Reverted bigram value changes
+Added more pruning in natural_join, natural_join3 and natural_join4
+
+#### c46
+Fixed bug in condition generalization?
+
+#### c47
+Full natural_join blocking
+
+#### c48
+Misc changes

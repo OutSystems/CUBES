@@ -47,7 +47,10 @@ def test_file(filename: str, run: str = ''):
     if not timeout and not memout and not args.cubes:
         with open(out_file) as f:
             log = f.read()
-            process = int(re.search('Solution found using process (.*)', log)[1])
+            try:
+                process = int(re.search('Solution found using process (.*)', log)[1])
+            except:
+                process = None
 
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])

@@ -33,7 +33,7 @@ config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_
                 maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
                 max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
                 block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
-                probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
+                probing_threads=args.probing_threads, cube_freedom=args.cube_freedom, transitive_blocking=args.transitive_blocking,
                 z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
 util.store_config(config)
 
