@@ -57,7 +57,7 @@ class SquaresInterpreter(LineInterpreter):
 
     def try_execute(self, script):
         try:
-            # print(script)
+            # print(script, end='')
             robjects.r(script)
         except Exception as e:
             logger.error("Error while evaluating program")
@@ -74,11 +74,12 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_summarise(self, name, args):
+        args2 = args[2].replace("'", "")
         re_object = re.fullmatch(r'([A-Za-z_]+)\$([A-Za-z_]+)', args[1])
         if re_object:
-            return f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()\n'
+            return f'{name} <- {args[0]} %>% group_by({args2}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()\n'
         else:
-            return f'{name} <- {args[0]} %>% group_by({args[2]}) %>% summarise({args[1]}) %>% ungroup()\n'
+            return f'{name} <- {args[0]} %>% group_by({args2}) %>% summarise({args[1]}) %>% ungroup()\n'
 
     @eval_decorator
     def eval_mutate(self, name, args):

@@ -189,10 +189,11 @@ class TreeBasedCubeGenerator:
         productions = self.productions
 
         if util.get_config().force_summarise and len(set(self.specification.aggrs) - {'concat'}) - \
-                count(l for l in current_path if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(current_path):
+                count(l for l in current_path if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(current_path) and \
+            self.specification.condition_generator.summarise_conditions:
             productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
 
-        if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters) and \
+        if not self.specification.aggrs_use_const and self.specification.condition_generator.filter_conditions and \
                 count(l for l in current_path if l.head.name == 'filter') == 0 and len(current_path) == self.loc - 1:
             productions = list(filter(lambda p: p.name == 'filter', productions))
 

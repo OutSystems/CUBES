@@ -114,7 +114,7 @@ class Specification:
 
     def read_table(self, path: str, table_name:str = None) -> DataFrame:
         df = pandas.read_csv(path)
-        df = df.convert_dtypes(convert_integer=False)
+        df = df.convert_dtypes(convert_integer=False, convert_boolean=False)
 
         replacements = {}
 
@@ -197,18 +197,14 @@ class Specification:
 
         type_spec.define_type(dsl.Table)
 
-        if self.condition_generator.summarise_conditions:
-            dsl.Cols.set_domain(self.condition_generator.cols)
-            type_spec.define_type(dsl.Cols)
-
         if 'intersect' not in util.get_config().disabled:
             dsl.Col.set_domain([(column, self.get_bitvecnum([column])) for column in self.columns])
             type_spec.define_type(dsl.Col)
 
-        if 'anti_join' not in util.get_config().disabled:
-            dsl.JoinCols.set_domain([('', 0)] + [(','.join(map(util.single_quote_str, cols)), self.get_bitvecnum(cols)) for cols in
+        if 'anti_join' not in util.get_config().disabled or self.condition_generator.summarise_conditions:
+            dsl.Cols.set_domain([('', 0)] + [(','.join(map(util.single_quote_str, cols)), self.get_bitvecnum(cols)) for cols in
                                                  powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
-            type_spec.define_type(dsl.JoinCols)
+            type_spec.define_type(dsl.Cols)
 
         if 'inner_join' not in util.get_config().disabled and self.condition_generator.inner_join_conditions:
             dsl.JoinCondition.set_domain(self.condition_generator.inner_join_conditions)
@@ -348,7 +344,8 @@ class Specification:
                     if any(pandas.isna(data_frame[column])):
                         return True
                 else:
-                    if constant in data_frame[column].values:
+                    print(constant, column)
+                    if constant in data_frame[column].dropna().values:
                         return True
         return False
 

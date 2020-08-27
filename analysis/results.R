@@ -8,7 +8,7 @@ library(readr)
 library(tikzDevice)
 library(ggforce)
 
-setwd('./data-treatment')
+setwd('./analysis')
 
 status_levels <- rev(c(0, 3, 2, 4, -2, -1, 5, 1))
 status_meanings <- rev(c('R and SQL', 'Non optimal', 'Just R', 'Just R non optimal', 'Memout', 'Timeout', 'No solution', 'Fail'))
@@ -39,20 +39,20 @@ is_solved_status <- function(status) {
 }
 
 load_result_squares <- function(file) {
-  read_csv(paste0(file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
+  read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)),
            status = ifelse(status == 143, 1, as.character(status)),
            status = ifelse(timeout, -1, as.character(status)),
            solved = is_solved_status(status)) %>%
-    #mutate(benchmark = ifelse(grepl("spider", name, fixed=TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
+    mutate(benchmark = ifelse(grepl("spider", name, fixed=TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
     filter(!(benchmark %in% test_filter)) %>%
     left_join(instance_info)
 }
 
 load_result_file <- function(file) {
-  read_csv(paste0(file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
-    mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
-    #mutate(benchmark = ifelse(grepl("spider", name, fixed=TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
+  read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
+    #mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
+    mutate(benchmark = ifelse(grepl("spider", name, fixed=TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
     filter(!(benchmark %in% test_filter)) %>%
     group_by(name) %>%
     mutate(run_number = 0:(n() - 1)) %>%
@@ -62,7 +62,7 @@ load_result_file <- function(file) {
            status = ifelse(memout, -2, as.character(status)),  # *sighs* factors are weird
            solved = is_solved_status(status),
            log_suff = ifelse(several_runs, paste0('_', run_number), ''),
-           log = paste0(file, '/', name, log_suff, '.log'),
+           log = paste0('data/', file, '/', name, log_suff, '.log'),
            log_content = ifelse(file.exists(log), sapply(log, function(x) { read_file(x) }), NA),
            hard_h = parse_number(str_match(log_content, '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2]),
            loc_reached = parse_integer(str_match(log_content, 'Initialising process for (.*) lines of code')[, 2]),
@@ -215,7 +215,7 @@ scatter <- function(A, B) {
     mutate(real_A = ifelse(!solved_A, timelimit, real_A)) %>%
     mutate(real_B = ifelse(!solved_B, timelimit, real_B)) %>%
     ggplot(aes(x = real_A, y = real_B)) +
-    geom_point(color = 'red', alpha = 0.4, size = 2) +
+    geom_point(color = 'red', alpha = 0.2, size = 2) +
     scale_x_continuous(trans = log10_trans(), breaks = log_breaks()) +
     scale_y_continuous(trans = log10_trans(), breaks = log_breaks()) +
     geom_abline() +
@@ -299,7 +299,7 @@ plot_processes <- function(run) {
     my_theme
 }
 
-plot_cumsolved <- function(use_vbs = T, full_x = T, ...) {
+plot_cumsolved <- function(use_vbs = T, full_x = T, cutoff=NA, ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   if (use_vbs) {
@@ -312,9 +312,12 @@ plot_cumsolved <- function(use_vbs = T, full_x = T, ...) {
     ungroup()
   tmp <- ggplot(data, aes(x = val, y = real, color = try)) +
     geom_step(size = 1) +
-    geom_point(shape = 4) +
-    #scale_y_continuous(trans = 'log10', breaks = log_breaks(7))
-    scale_y_continuous(breaks = pretty_breaks())
+    geom_point(shape = 4)
+  if (!is.na(cutoff)) {
+    tmp <- tmp + scale_y_continuous(breaks = pretty_breaks(), limits = c(0, cutoff))
+  } else {
+    tmp <- tmp + scale_y_continuous(breaks = pretty_breaks())
+  }
   if (full_x) {
     tmp <- tmp + scale_x_continuous(breaks = pretty_breaks(), limits = c(0, n_distinct(data$name)))
   } else {
@@ -358,10 +361,15 @@ bars <- function(use_vbs = T, facet_size = 4, ...) {
   print(pages)
   plots <- vector("list", pages)
   for (i in 1:pages) {
-    plots[[i]] <- ggplot(solved, aes(x = factor(try, levels = c(names(tries), 'VBS')), fill = results)) +
+    tmp <- ggplot(solved, aes(x = factor(try, levels = c(names(tries), 'VBS')), fill = results)) +
       geom_bar(position = "stack") +
-      scale_y_continuous(breaks = pretty_breaks()) +
-      facet_wrap_paginate(~benchmark, scales = "free", nrow = facet_size, ncol = facet_size, page = i) +
+      scale_y_continuous(breaks = pretty_breaks())
+    if (pages != 1) {
+      tmp <- tmp + facet_wrap_paginate(~benchmark, scales = "free", nrow = facet_size, ncol = facet_size, page = i)
+    } else {
+      tmp <- tmp + facet_wrap(~benchmark, scales = "free")
+    }
+    plots[[i]] <- tmp +
       scale_fill_manual(drop = F, values = status_colors) +
       labs(x = 'configuration', y = 'instances', caption = paste0('page ', toString(i), '/', toString(pages))) +
       my_theme
@@ -555,34 +563,38 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   #c44_16_0f_c_5b <- load_result_file_best('cubes44_16_0f_5')
   #c44_16_0f_c_5w <- load_result_file_worst('cubes44_16_0f_5')
 
-  c45_16_0f_c_5 <- load_result_file_median('cubes45_16_0f_5')
-  c45_16_0f_c_5b <- load_result_file_best('cubes45_16_0f_5')
-  c45_16_0f_c_5w <- load_result_file_worst('cubes45_16_0f_5')
+  #c45_16_0f_c_5 <- load_result_file_median('cubes45_16_0f_5')
+  #c45_16_0f_c_5b <- load_result_file_best('cubes45_16_0f_5')
+  #c45_16_0f_c_5w <- load_result_file_worst('cubes45_16_0f_5')
 
-  c45_16_0f_c_dsl_5 <- load_result_file_median('cubes45_16_0f_5_dsl')
-  c45_16_0f_c_dsl_5b <- load_result_file_best('cubes45_16_0f_5_dsl')
-  c45_16_0f_c_dsl_5w <- load_result_file_worst('cubes45_16_0f_5_dsl')
+  #c45_16_0f_c_dsl_5 <- load_result_file_median('cubes45_16_0f_5_dsl')
+  #c45_16_0f_c_dsl_5b <- load_result_file_best('cubes45_16_0f_5_dsl')
+  #c45_16_0f_c_dsl_5w <- load_result_file_worst('cubes45_16_0f_5_dsl')
 
-  c46_16_0f_c_cube_5 <- load_result_file_median('cubes46_16_0f_5_cube')
-  c46_16_0f_c_cube_5b <- load_result_file_best('cubes46_16_0f_5_cube')
-  c46_16_0f_c_cube_5w <- load_result_file_worst('cubes46_16_0f_5_cube')
+  #c46_16_0f_c_cube_5 <- load_result_file_median('cubes46_16_0f_5_cube')
+  #c46_16_0f_c_cube_5b <- load_result_file_best('cubes46_16_0f_5_cube')
+  #c46_16_0f_c_cube_5w <- load_result_file_worst('cubes46_16_0f_5_cube')
 
-  c47_16_0f_c_5 <- load_result_file_median('cubes47_16_0f_5')
-  c47_16_0f_c_5b <- load_result_file_best('cubes47_16_0f_5')
-  c47_16_0f_c_5w <- load_result_file_worst('cubes47_16_0f_5')
+  #c47_16_0f_c_5 <- load_result_file_median('cubes47_16_0f_5')
+  #c47_16_0f_c_5b <- load_result_file_best('cubes47_16_0f_5')
+  #c47_16_0f_c_5w <- load_result_file_worst('cubes47_16_0f_5')
 
-  c47_16_0f_c_spider <- load_result_file_median('cubes47_16_0f_spider')
-  c48_16_0f_c_spider <- load_result_file_median('cubes48_16_0f_spider')
-  c49_16_0f_c_spider <- load_result_file_median('cubes49_16_0f_spider')
+  #c47_16_0f_c_spider <- load_result_file_median('cubes47_16_0f_spider')
+  #c48_16_0f_c_spider <- load_result_file_median('cubes48_16_0f_spider')
+  #c49_16_0f_c_spider <- load_result_file_median('cubes49_16_0f_spider')
+
+  c49_16_0f_c <- load_result_file_median('cubes49_16_0f_fake')
 }
 
-scatter('c47_16_0f_c_spider', 'c48_16_0f_c_spider')
-scatter('c47_16_0f_c_spider', 'c49_16_0f_c_spider')
-scatter('c48_16_0f_c_spider', 'c49_16_0f_c_spider')
-scatter('bitenum', 'c47_16_0f_c_5')
-scatter('bitenum_spider', 'c49_16_0f_c_spider')
+scatter('squares', 'c49_16_0f_c')
+scatter('scythe', 'c49_16_0f_c')
 
-plot_cumsolved(use_vbs = F, '47' = c47_16_0f_c_spider, '48' = c48_16_0f_c_spider, '49' = c49_16_0f_c_spider)
+plot_cumsolved(use_vbs = F, 'bitenum' = bitenum_spider, '47' = c47_16_0f_c_spider, '48' = c48_16_0f_c_spider, '49' = c49_16_0f_c_spider)
+
+plot_cumsolved(use_vbs = F, 'Sequential' = bitenum_spider, 'Parallel (16T)' = c49_16_0f_c_spider)
+plot_cumsolved(use_vbs = F, cutoff=10, 'Sequential' = bitenum_spider, 'Parallel (16T)' = c49_16_0f_c_spider)
+plot_cumsolved(use_vbs = F, cutoff=60, 'Sequential' = bitenum_spider, 'Parallel (16T)' = c49_16_0f_c_spider)
+
 
 plot_times(c47_16_0f_c_5, scale_x = scale_x_log10)
 plot_times(c47_16_0f_c_spider, scale_x = scale_x_log10)
@@ -591,19 +603,33 @@ plot_times(c48_16_0f_c_spider, scale_x = scale_x_log10)
 b <- inner_join(bitenum_spider, c49_16_0f_c_spider, by = 'name') %>% filter(solved.x & !solved.y)
 c <- inner_join(bitenum_spider, c49_16_0f_c_spider, by = 'name') %>% filter(!solved.x & solved.y)
 
-bars(use_vbs = F, facet_size = 5, '47' = c47_16_0f_c_spider, '48' = c48_16_0f_c_spider)
+squares %>% count()
+squares %>% filter(solved) %>% count() / squares %>% count()
+squares %>% filter(real <= 10) %>% filter(solved) %>% count() / squares %>% count()
 
-c47_16_0f_c_spider %>% filter(solved) %>% count() / c47_16_0f_c_spider %>% count()
-c48_16_0f_c_spider %>% count()
-c48_16_0f_c_spider %>% filter(solved) %>% count() / c48_16_0f_c_spider %>% count()
-c49_16_0f_c_spider %>% count()
-c49_16_0f_c_spider %>% filter(solved) %>% count() / c49_16_0f_c_spider %>% count()
+scythe %>% count()
+scythe %>% filter(solved) %>% count() / scythe %>% count()
+scythe %>% filter(real <= 10) %>% filter(solved) %>% count() / scythe %>% count()
+
+bitenum_spider %>% count()
+bitenum_spider %>% filter(solved) %>% count() / bitenum_spider %>% count()
+bitenum_spider %>% filter(real <= 10) %>% filter(solved) %>% count() / bitenum_spider %>% count()
+
+c49_16_0f_c %>% count()
+c49_16_0f_c %>% filter(solved) %>% count() / c49_16_0f_c %>% count()
+c49_16_0f_c %>% filter(real <= 10) %>% filter(solved) %>% count() / c49_16_0f_c %>% count()
+
+squares %>% filter(solved) %>% summarise(a = mean(real))
+scythe %>% filter(solved) %>% summarise(a = mean(real))
+c49_16_0f_c %>% filter(solved) %>% summarise(a = mean(real))
+
 solved_instances(c47_16_0f_c_spider) %>% arrange(percentage)
 solved_instances(c48_16_0f_c_spider) %>% arrange(percentage)
+solved_instances(c49_16_0f_c_spider) %>% arrange(percentage)
 
-boxplot(func = any, '43' = c43_16_0f_c_5, '45' = c45_16_0f_c_5)
-boxplot(func = any, scythe = scythe, bitenum = bitenum, '43' = c43_16_0f_c_5, '45' = c45_16_0f_c_5, '47' = c47_16_0f_c_5)
-boxplot(func = any, spider = c47_16_0f_c_spider)
+bars(use_vbs = F, squares = squares, scythe = scythe, '49' = c49_16_0f_c)
+
+boxplot(func = any, squares = squares, scythe = scythe, '49' = c49_16_0f_c)
 
 c43_16_0f_c_5 %>% ggplot(aes(x = solution_n)) +
   geom_bar() +

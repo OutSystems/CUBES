@@ -28,7 +28,6 @@ Table = ValueType('Table',
                    ])
 
 JoinCondition = EnumType('JoinCondition')
-JoinCols = EnumType('JoinCols')
 Col = EnumType('Col')
 Cols = EnumType('Cols')
 CrossJoinCondition = EnumType('CrossJoinCondition')
@@ -64,7 +63,7 @@ inner_join = ('inner_join',
 
 anti_join = ('anti_join',
              Table,
-             [Table, Table, JoinCols],
+             [Table, Table, Cols],
              [h.EQ(h.col(0), ConstExpr(1)),
               h.LE(h.row(0), h.row(1))])
 

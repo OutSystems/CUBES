@@ -21,7 +21,7 @@ robjects.r('library(vctrs)')
 
 vec_as_names = robjects.r('vec_as_names')
 
-allowed_keywords_as_identifiers = ['events', 'length', 'month', 'location', 'position', 'uid', 'source', 'year', 'section', 'connection', 'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics']
+allowed_keywords_as_identifiers = ['events', 'length', 'month', 'location', 'position', 'uid', 'source', 'year', 'section', 'connection', 'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics', 'result']
 
 
 def askbool(message):
@@ -136,7 +136,11 @@ class InstanceCollector:
             elif node.value.lower() == 'order by':
                 self.in_order = True
             elif node.value.lower() in allowed_keywords_as_identifiers:
-                self.identifiers.add(node.value.lower())
+                if not self.in_order:
+                    self.identifiers.add(node.value.lower())
+                else:
+                    self.order_col.add(node.value.lower())
+                    self.in_order = False
         elif node.ttype in Name.Builtin:
             self.identifiers.add(node.value.lower())
 

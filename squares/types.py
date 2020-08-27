@@ -45,7 +45,7 @@ def get_type(dtype: Union[ExtensionDtype, dtype]) -> Type:
         return Type.FLOAT
 
     elif pandas.api.types.is_bool_dtype(dtype):
-        return Type.BOOL
+        return Type.STRING
 
     elif pandas.api.types.is_datetime64_any_dtype(dtype):
         return Type.DATETIME
@@ -108,6 +108,7 @@ def is_float(o):
 
 
 def is_bool(o):
+    return False
     return isinstance(o, str) and o.lower() in ['t', 'f', 'true', 'false']
 
 

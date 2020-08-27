@@ -22,7 +22,7 @@ args, other_args = parser.parse_known_args()
 
 def test_file(filename: str, run: str = ''):
     test_name = filename.replace('tests/', '', 1).replace('.yaml', '')
-    out_file = f'data-treatment/{args.name}/{test_name}{run}.log'
+    out_file = f'analysis/data/{args.name}/{test_name}{run}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if not args.cubes:
@@ -56,7 +56,7 @@ def test_file(filename: str, run: str = ''):
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])
     ram = int(re.search('Max. memory \(cumulated for all children\) \(KiB\): (.*)', p.stdout)[1])
 
-    with open('data-treatment/' + args.name + '.csv',
+    with open('analysis/data/' + args.name + '.csv',
               'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
         writer.writerow((test_name, timeout, real, cpu, ram, process, status, memout))
@@ -64,8 +64,8 @@ def test_file(filename: str, run: str = ''):
 
 
 if not args.append:
-    os.mkdir(f'data-treatment/{args.name}')
-    with open('data-treatment/' + args.name + '.csv', 'w') as f:
+    os.mkdir(f'analysis/data/{args.name}')
+    with open('analysis/data/' + args.name + '.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
         f.flush()
