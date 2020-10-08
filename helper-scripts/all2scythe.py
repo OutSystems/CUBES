@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests-examples/**/*.yaml', recursive=True):
+    for file in glob.glob('tests-examples/outsystems/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
             for input_name in spec['inputs']:
                 result += '#input\n\n'
                 with open(input_name) as f:
-                    result += f.read()
+                    result += f.read().replace(',,', ',"",').replace(',\n', ',""\n')
                 result += '\n'
 
             result += '#output\n\n'

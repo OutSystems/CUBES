@@ -438,3 +438,14 @@ Full natural_join blocking
 
 #### c48
 Misc changes
+
+
+## Week ??
+
+#### Portfolio 1
+    {
+        'subsume_conditions': [True, False],
+        'bitenum_enabled': [True, False],
+        'static_search': [True, False],
+        'z3_QF_FD': [True, False]
+    }

@@ -15,6 +15,8 @@ parser.add_argument('-n', default=1, type=int, help='number of times to run each
 parser.add_argument('-p', default=1, type=int, help='#processes')
 parser.add_argument('--append', action='store_true', help='append to file')
 parser.add_argument('--cubes', action='store_true', help='use cubes')
+parser.add_argument('--portfolio', action='store_true', help='use portfolio')
+parser.add_argument('--resume', action='store_true', help='resume previous run')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args, other_args = parser.parse_known_args()
@@ -25,10 +27,13 @@ def test_file(filename: str, run: str = ''):
     out_file = f'analysis/data/{args.name}/{test_name}{run}.log'
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
-    if not args.cubes:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './squares.py', '-vv', filename]
-    else:
+    if args.cubes:
         command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './cubes.py', '-vv', filename]
+    elif args.portfolio:
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './portfolio.py', '-vv', filename]
+    else:
+        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './sequential.py', '-vv', filename]
+
 
     command += other_args
 
@@ -63,18 +68,30 @@ def test_file(filename: str, run: str = ''):
         f.flush()
 
 
-if not args.append:
+if not args.append and not args.resume:
     os.mkdir(f'analysis/data/{args.name}')
     with open('analysis/data/' + args.name + '.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
         f.flush()
 
+instances = glob.glob('tests/**/*.yaml', recursive=True)
+
+if args.resume:
+    with open('analysis/data/' + args.name + '.csv', 'r') as f:
+        reader = csv.reader(f)
+        existing_instances = []
+        for row in reader:
+            existing_instances.append('tests/' + row[0] + '.yaml')
+            print('Skipping', 'tests/' + row[0] + '.yaml')
+
+    instances = filter(lambda x: x not in existing_instances, instances)
+
 if args.p == 1:
     for i in range(args.n):
-        for file in glob.glob('tests/**/*.yaml', recursive=True):
+        for file in instances:
             test_file(file, f'_{i}')
 else:
     with Pool(processes=args.p) as pool:
         for i in range(args.n):
-            pool.map(test_file, glob.glob('tests/**/*.yaml', recursive=True), chunksize=1)
+            pool.map(test_file, instances, chunksize=1)

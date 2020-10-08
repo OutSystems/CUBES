@@ -92,8 +92,8 @@ class Synthesizer(AbstractSynthesizer):
                 info = None
 
             except InterpreterError as e:
-                logger.error('Failed program %s', str(prog))
-                logger.error('%s', str(e))
+                # logger.error('Failed program %s', str(prog))
+                # logger.error('%s', str(e))
                 failed += 1
                 info = self.decider.analyze_interpreter_error(e)
 

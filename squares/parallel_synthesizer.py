@@ -148,16 +148,21 @@ class ParallelSynthesizer(AbstractSynthesizer):
 
         process_manager = ProcessSetManager(self.tyrell_specification, poll, self.alternate_j)
 
-        if True:
-            generator_f = ForceStatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
-                                                      self.specification.min_loc - util.get_config().cube_freedom, statistics,
-                                                      ['cross_join', 'inner_join'])
-            generator_b = BlockStatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
-                                                      self.specification.min_loc - util.get_config().cube_freedom, statistics,
-                                                      ['cross_join', 'inner_join'])
+        if util.get_config().static_search:
+            generator_f = (generator_b := StaticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
+                                                                 self.specification.min_loc - util.get_config().cube_freedom))
+
         else:
-            generator_f = (generator_b := StatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
-                                                                 self.specification.min_loc - util.get_config().cube_freedom, statistics))
+            if util.get_config().split_complex_joins:
+                generator_f = ForceStatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
+                                                          self.specification.min_loc - util.get_config().cube_freedom, statistics,
+                                                          ['cross_join', 'inner_join'])
+                generator_b = BlockStatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
+                                                          self.specification.min_loc - util.get_config().cube_freedom, statistics,
+                                                          ['cross_join', 'inner_join'])
+            else:
+                generator_f = (generator_b := StatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
+                                                                     self.specification.min_loc - util.get_config().cube_freedom, statistics))
 
         probers_f = ProcessSet((True,), generator_f)
         probers_b = ProcessSet((True,), generator_b)

@@ -129,10 +129,13 @@ def create_argparser(all_inputs=False):
                         help='increased memory usage, but possibly faster results')
     parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
     parser.add_argument('--cube-freedom', type=int, default=0, help='number of free lines when generating cubes')
+    parser.add_argument('--no-bitenum', dest='bitenum', action='store_false', help='use bitvector restrictions')
     parser.add_argument('--no-block-commutative-ops', dest='block_commutative_ops', action='store_false',
                         help='block commutative operations')
     parser.add_argument('--no-subsume-conditions', dest='subsume_conditions', action='store_false', help='subsume conditions')
     parser.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false', help='subsume conditions transitively')
+    parser.add_argument('--no-split-complex-joins', dest='split_complex_joins', action='store_false',
+                        help='use separate threads to test programs containing complex joins')
 
     g = parser.add_argument_group('heuristics')
 

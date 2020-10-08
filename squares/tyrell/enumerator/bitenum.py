@@ -8,7 +8,7 @@ import z3
 from ordered_set import OrderedSet
 
 from .enumerator import Enumerator
-from ..spec import TyrellSpec, Predicate
+from ..spec import TyrellSpec, Predicate, EnumType
 from ..spec.production import LineProduction, Production
 from ... import util, program
 from ...program import Program
@@ -299,6 +299,9 @@ class BitEnumerator(Enumerator):
                     self.assert_expr(z3.Implies(aux, z3.Or(ctr)))
 
     def create_bitvector_constraints(self) -> None:
+        if not util.get_config().bitenum_enabled:
+            return
+
         bv0 = z3.BitVecVal(0, self.specification.n_columns)
 
         for i, root in enumerate(self.roots):
@@ -463,7 +466,26 @@ class BitEnumerator(Enumerator):
         self.assert_expr(z3.Or(lst), f'constant_occurs_{ids[:-1]}')
 
     def _resolve_happens_before_predicate(self, pred: Predicate):
-        return
+        if util.get_config().bitenum_enabled:
+            return
+
+        pres = self._production_id_cache[pred.args[1]]
+
+        for pos in self._production_id_cache[pred.args[0]]:
+            for r_i in range(len(self.roots)):
+                previous_roots = []
+                for r_ia in range(r_i):
+                    for child_i, child in enumerate(self.roots[r_ia].children):
+                        for production in self.spec.get_function_productions():
+                            rhs = production.rhs
+                            if len(rhs) > child_i:
+                                if isinstance(rhs[child_i], EnumType):
+                                    if pred.args[1] in rhs[child_i].domain:
+                                        for pre in pres:
+                                            previous_roots.append(child.var == pre)
+                                        break
+
+                self.z3_solver.add(z3.Implies(z3.Or(*(c.var == pos for c in self.roots[r_i].children)), z3.Or(*previous_roots)))
 
     def resolve_predicates(self) -> None:
         try:
@@ -547,35 +569,6 @@ class BitEnumerator(Enumerator):
                             new_model = model.copy()
                             new_model[child.var] = z3.IntVal(replacement)
                             models.append(new_model)
-
-        # if info and util.get_config().block_commutative_ops:
-        #     for root in self.roots:
-        #         model = models[0]
-        #         # for model in islice(models, len(models)):
-        #         if self.natural_join and model[root.var].as_long() == self.natural_join.id:
-        #             for c0, c1 in permutations(root.children[0:2]):
-        #                 if c0 != root.children[0] or c1 != root.children[1]:
-        #                     new_model = model.copy()
-        #                     new_model[root.children[0].var] = model[c0.var]
-        #                     new_model[root.children[1].var] = model[c1.var]
-        #                     models.append(new_model)
-        #         if self.natural_join3 and model[root.var].as_long() == self.natural_join3.id:
-        #             for c0, c1, c2 in permutations(root.children[0:3]):
-        #                 if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2]:
-        #                     new_model = model.copy()
-        #                     new_model[root.children[0].var] = model[c0.var]
-        #                     new_model[root.children[1].var] = model[c1.var]
-        #                     new_model[root.children[2].var] = model[c2.var]
-        #                     models.append(new_model)
-        #         if self.natural_join4 and model[root.var].as_long() == self.natural_join4.id:
-        #             for c0, c1, c2, c3 in permutations(root.children[0:4]):
-        #                 if c0 != root.children[0] or c1 != root.children[1] or c2 != root.children[2] or c3 != root.children[3]:
-        #                     new_model = model.copy()
-        #                     new_model[root.children[0].var] = model[c0.var]
-        #                     new_model[root.children[1].var] = model[c1.var]
-        #                     new_model[root.children[2].var] = model[c2.var]
-        #                     new_model[root.children[3].var] = model[c3.var]
-        #                     models.append(new_model)
 
         # if len(models) > 1:
         #     logger.warning('Blocked %d programs!', len(models) - 1)

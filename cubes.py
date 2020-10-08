@@ -58,7 +58,8 @@ def main():
                     max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
                     block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
                     transitive_blocking=args.transitive_blocking, use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube,
-                    probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
+                    probing_threads=args.probing_threads, cube_freedom=args.cube_freedom, split_complex_joins=args.split_complex_joins,
+                    bitenum_enabled=args.bitenum,
                     z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
     util.store_config(config)
 

@@ -25,12 +25,14 @@ class Config:
     block_commutative_ops: bool
     subsume_conditions: bool
     transitive_blocking: bool
+    split_complex_joins: bool
 
     advance_percentage = .6
     smoothing_bias: float = 1
 
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True
+    bitenum_enabled: bool = True
 
     use_solution_dsl: bool = False
     use_solution_cube: bool = False

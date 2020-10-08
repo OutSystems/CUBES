@@ -159,12 +159,11 @@ class TreeBasedCubeGenerator:
 
         sorted_productions = self.sort_productions([c.head.name for c in node.children], [c.head.name for c in cube], probe)
         while sorted_productions:
-            child = self.choose_production(sorted_productions)
+            sorted_productions, child = self.choose_production(sorted_productions)
             child_node = next(filter(lambda x: x.head.name == child, node.children))
             result = self.next(probe, child_node, cube + [child_node])
             if result:
                 return result
-            sorted_productions.pop(child)
 
         if not cube:
             raise StopIteration
@@ -190,7 +189,7 @@ class TreeBasedCubeGenerator:
 
         if util.get_config().force_summarise and len(set(self.specification.aggrs) - {'concat'}) - \
                 count(l for l in current_path if l.head.name == 'summarise' or l.head.name == 'mutate') >= self.loc - len(current_path) and \
-            self.specification.condition_generator.summarise_conditions:
+                self.specification.condition_generator.summarise_conditions:
             productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
 
         if not self.specification.aggrs_use_const and self.specification.condition_generator.filter_conditions and \
@@ -247,8 +246,8 @@ class StaticCubeGenerator(TreeBasedCubeGenerator):
                 productions.append('natural_join4')
         return productions
 
-    def choose_production(self, sorted_productions: List[str]) -> str:
-        return sorted_productions[0]
+    def choose_production(self, sorted_productions: List[str]) -> Tuple[List[str], str]:
+        return sorted_productions[1:], sorted_productions[0]
 
 
 class StatisticCubeGenerator(TreeBasedCubeGenerator):
@@ -265,8 +264,10 @@ class StatisticCubeGenerator(TreeBasedCubeGenerator):
     def sort_productions(self, allowed_productions: List[str], current_path: List[str], is_probe: bool) -> Dict[str, float]:
         return self.statistics.sort_productions(allowed_productions, current_path, is_probe)
 
-    def choose_production(self, sorted_productions: Dict[str, float]) -> str:
-        return self.random.choices(list(sorted_productions.keys()), list(sorted_productions.values()))[0]
+    def choose_production(self, sorted_productions: Dict[str, float]) -> Tuple[Dict[str, float], str]:
+        prod = self.random.choices(list(sorted_productions.keys()), list(sorted_productions.values()))[0]
+        new_prods = sorted_productions.pop(prod)
+        return new_prods, prod
 
 
 class BlockStatisticCubeGenerator(StatisticCubeGenerator):

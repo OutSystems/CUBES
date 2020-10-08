@@ -60,8 +60,8 @@ class SquaresInterpreter(LineInterpreter):
             # print(script, end='')
             robjects.r(script)
         except Exception as e:
-            logger.error("Error while evaluating program")
-            logger.error("%s", str(e))
+            # logger.error("Error while evaluating program")
+            # logger.error("%s", str(e))
             raise InterpreterError(e)
 
     @eval_decorator
@@ -181,7 +181,7 @@ class SquaresInterpreter(LineInterpreter):
     def apply_columns(self, val):
         a = list(robjects.r(f'colnames({val})'))
         bools = list(map(lambda c: c in a, self.problem.all_columns))
-        return BitVecVal(util.boolvec2int(bools), util.get_config().bitvector_size)
+        raise NotImplementedError()
 
     def equals(self, actual: str, expect: str, *args) -> Tuple[bool, float]:
         if robjects.r(f'nrow({actual})')[0] == 0:
