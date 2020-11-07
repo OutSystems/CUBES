@@ -4,19 +4,20 @@
 # Created on:	22-02-2019 15:13:15
 # Usage:	python3 squares_enumerator.py [flags|(-h for help)] specFile.in
 # Python version:	3.6.4
+import contextlib
 import logging
 import signal
 import time
 from multiprocessing import Queue
 
+import rpy2
 import rpy2.robjects as robjects
 
 from squares.dsl.interpreter import SquaresInterpreter
-from squares.dsl.specification import Specification
 from . import util, results
 from .config import Config
 from .decider import LinesDecider
-from .tyrell.decider import Example, ExampleDecider
+from .tyrell.decider import Example
 from .tyrell.enumerator.bitenum import BitEnumerator
 from .tyrell.synthesizer import Synthesizer
 
@@ -31,6 +32,13 @@ suppressMessages(library(readr))
 suppressMessages(library(lubridate))
 suppressMessages(library(dplyr))
 suppressMessages(library(dbplyr))''')
+
+def do_not_print(msg):
+    pass
+
+
+rpy2.rinterface_lib.callbacks.consolewrite_print = do_not_print
+rpy2.rinterface_lib.callbacks.consolewrite_warnerror = do_not_print
 
 
 def main(args, specification, id: int, conf: Config, queue: Queue):

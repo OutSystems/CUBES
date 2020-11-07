@@ -1,18 +1,12 @@
 import random
 from abc import ABC
-from functools import cached_property, reduce
-from itertools import accumulate
+from functools import cached_property
 from logging import getLogger
 from typing import List, Any, Sequence, Tuple, Union, Dict, Optional
-
-import operator
-
-from ordered_set import OrderedSet
 
 from squares import util, results
 from squares.dsl.specification import Specification
 from squares.statistics import Statistics
-from squares.tyrell.enumerator import Enumerator
 from squares.tyrell.enumerator.bitenum import BitEnumerator
 from squares.tyrell.spec import TyrellSpec, Production
 from squares.util import count
@@ -94,6 +88,9 @@ class TreeBasedCubeGenerator:
         node.children = [Node(p, None, node) for p in self.filter_productions(node.ancestors())]
 
     def block(self, core: Sequence[str], node: Node = None, path: Sequence[Node] = None) -> None:
+        if not util.get_config().deduce_cubes:
+            return
+
         if node is None:
             node = self.root
         if path is None:
@@ -256,7 +253,6 @@ class StatisticCubeGenerator(TreeBasedCubeGenerator):
         super().__init__(specification, tyrell_specification, loc, max_lines)
         self.statistics = statistics
         self.random = random.Random(util.get_config().seed)
-        # logger.warning('First line for %s generated %d possibilities', self, self.estimated_programs())
 
     def _next_generator(self) -> 'StatisticCubeGenerator':
         return StatisticCubeGenerator(self.specification, self.tyrell_specification, self.loc + 1, self.max_lines + 1, self.statistics)
@@ -266,8 +262,8 @@ class StatisticCubeGenerator(TreeBasedCubeGenerator):
 
     def choose_production(self, sorted_productions: Dict[str, float]) -> Tuple[Dict[str, float], str]:
         prod = self.random.choices(list(sorted_productions.keys()), list(sorted_productions.values()))[0]
-        new_prods = sorted_productions.pop(prod)
-        return new_prods, prod
+        sorted_productions.pop(prod)
+        return sorted_productions, prod
 
 
 class BlockStatisticCubeGenerator(StatisticCubeGenerator):
@@ -275,24 +271,6 @@ class BlockStatisticCubeGenerator(StatisticCubeGenerator):
     def __init__(self, specification, tyrell_specification, loc, max_lines, statistics: Statistics, disabled: list) -> None:
         self.disabled = disabled
         super().__init__(specification, tyrell_specification, loc, max_lines, statistics)
-
-    # def estimated_programs(self) -> int:
-    #     lines_left = self.loc
-    #     programs = 1
-    #     if util.get_config().force_summarise and len(set(self.specification.aggrs) - {'concat'}) != 0:
-    #         if lines_left >= len(set(self.specification.aggrs) - {'concat'}):
-    #             programs *= reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in self.tyrell_specification.get_function_production_or_raise('summarise').rhs), 1) ** len(set(self.specification.aggrs) - {'concat'})
-    #             lines_left -= len(set(self.specification.aggrs) - {'concat'})
-    #         else:
-    #             programs = 0
-    #     if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters):
-    #         if lines_left >= 1:
-    #             programs *= reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in self.tyrell_specification.get_function_production_or_raise('filter').rhs), 1)
-    #             lines_left -= 1
-    #         else:
-    #             programs = 0
-    #     programs *= sum(reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in prod.rhs), 1) for prod in self.productions) ** lines_left
-    #     return programs
 
     def _next_generator(self) -> 'BlockStatisticCubeGenerator':
         return BlockStatisticCubeGenerator(self.specification, self.tyrell_specification, self.loc + 1, self.max_lines + 1, self.statistics,
@@ -311,26 +289,6 @@ class ForceStatisticCubeGenerator(StatisticCubeGenerator):
     def __init__(self, specification, tyrell_specification, loc, max_lines, statistics: Statistics, forced: list) -> None:
         self.forced = forced
         super().__init__(specification, tyrell_specification, loc, max_lines, statistics)
-
-    # def estimated_programs(self) -> int:
-    #     lines_left = self.loc
-    #     programs = 1
-    #     programs *= sum(reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in self.tyrell_specification.get_function_production_or_raise(prod).rhs), 1) for prod in self.forced)
-    #     lines_left -= 1
-    #     if util.get_config().force_summarise and len(set(self.specification.aggrs) - {'concat'}) != 0:
-    #         if lines_left >= len(set(self.specification.aggrs) - {'concat'}):
-    #             programs *= reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in self.tyrell_specification.get_function_production_or_raise('summarise').rhs), 1) ** len(set(self.specification.aggrs) - {'concat'})
-    #             lines_left -= len(set(self.specification.aggrs) - {'concat'})
-    #         else:
-    #             programs = 0
-    #     if not self.specification.aggrs_use_const and (self.specification.consts or self.specification.filters):
-    #         if lines_left >= 1:
-    #             programs *= reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in self.tyrell_specification.get_function_production_or_raise('filter').rhs), 1)
-    #             lines_left -= 1
-    #         else:
-    #             programs = 0
-    #     programs *= sum(reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else 1 for rhs in prod.rhs), 1) for prod in self.productions) ** lines_left
-    #     return programs
 
     def _next_generator(self) -> 'ForceStatisticCubeGenerator':
         return ForceStatisticCubeGenerator(self.specification, self.tyrell_specification, self.loc + 1, self.max_lines + 1, self.statistics,

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import copy
+
 import os
+import copy
 import random
 from itertools import product
 from logging import getLogger
@@ -34,16 +35,12 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    base_config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations, optimal=args.optimal,
-                         advance_processes=args.split_search,
-                         static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold, minimum_loc=args.min_lines,
-                         maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
-                         max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
-                         block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
-                         transitive_blocking=args.transitive_blocking, use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube,
-                         probing_threads=args.probing_threads, cube_freedom=args.cube_freedom, split_complex_joins=args.split_complex_joins,
-                         bitenum_enabled=args.bitenum,
-                         z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
+    base_config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations,
+                         minimum_loc=args.min_lines, maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo,
+                         max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
+                         subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
+                         use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
+                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
     util.store_config(base_config)
 
     specification = Specification(spec)

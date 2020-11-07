@@ -151,7 +151,7 @@ class ProcessSetManager:
                     if self.process_sets[pipe].cube_generator.next_generator is None:
                         logger.info('Generator for loc %d is exhausted!', loc)
                     self.process_sets[pipe].cube_generator = self.process_sets[pipe].cube_generator.get_next_generator()
-                    logger.info('New generator configuration: %s', str(set(self.process_sets.values())))
+                    logger.debug('New generator configuration: %s', str(set(self.process_sets.values())))
 
             self.current_cube_generator[pipe] = self.process_sets[pipe].cube_generator
             if self.should_reinit(pipe):

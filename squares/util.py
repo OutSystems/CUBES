@@ -1,6 +1,8 @@
 import argparse
 import pickle
+import re
 import time
+from argparse import _StoreAction
 from collections import OrderedDict
 from enum import Enum
 from itertools import permutations, combinations, tee, chain
@@ -28,6 +30,8 @@ solution = None
 program_queue = None
 
 BUFFER_SIZE = 8 * 4 * 1024
+
+units = {"B": 1, "KB": 2 ** 10, "MB": 2 ** 20, "GB": 2 ** 30, "TB": 2 ** 40}
 
 
 class literal(str):
@@ -111,57 +115,69 @@ def boolvec2int(bools: List[bool]) -> int:
     return result
 
 
+def parse_size(size):
+    size = size.upper()
+    if not re.match(r' ', size):
+        size = re.sub(r'([KMGT]?B)', r' \1', size)
+    number, unit = [string.strip() for string in size.split()]
+    return int(float(number) * units[unit])
+
+
+class CubesHelpFormatter(argparse.HelpFormatter):
+    """Help message formatter which adds default values to argument help.
+
+    Only the name of this class is considered a public API. All the methods
+    provided by the class are considered an implementation detail.
+    """
+
+    def _get_help_string(self, action):
+        help = action.help
+        if '%(default)' not in action.help:
+            if action.default is not argparse.SUPPRESS:
+                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
+                if action.option_strings or action.nargs in defaulting_nargs:
+                    if isinstance(action, _StoreAction):
+                        help += ' (default: %(default)s)'
+        return help
+
+
 def create_argparser(all_inputs=False):
     parser = argparse.ArgumentParser(description='A SQL Synthesizer Using Query Reverse Engineering',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=CubesHelpFormatter)
     if not all_inputs:
         parser.add_argument('input', metavar='SPECIFICATION', type=str, help='specification file')
-    parser.add_argument('-v', '--verbose', action='count', default=0, help='using this flag multiple times further increases verbosity')
 
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument('--symm-on', dest='symm_on', action='store_true', help="enable online symmetry breaking")
-    g.add_argument('--symm-off', dest='symm_off', action='store_true', help="enable offline symmetry breaking")
+    g = parser.add_argument_group('Core arguments')
+    g.add_argument('-v', '--verbose', action='count', default=0, help='using this flag multiple times further increases verbosity')
+    g.add_argument('--seed', default='squares')
+    g.add_argument('-M', '--heap-limit', type=parse_size, help='sets a memory usage limit')
+    g.add_argument('--no-r', action='store_true', help="don't output R program")
+    g.add_argument('--append', action='store_true', help='store the solution in the specification file')
 
-    parser.add_argument('--no-r', action='store_true', help="don't output R program")
+    g = parser.add_argument_group('Program space arguments')
+    g.add_argument('--disable', nargs='+', default=[], help='disable DSL components')
 
-    parser.add_argument('--optimal', action='store_true', help='make sure that returned solutions are as short as possible')
-    parser.add_argument('--no-cache', dest='cache_operations', action='store_false',
-                        help='increased memory usage, but possibly faster results')
-    parser.add_argument('--static-search', action='store_true', help='search for solutions using a static ordering')
-    parser.add_argument('--cube-freedom', type=int, default=0, help='number of free lines when generating cubes')
-    parser.add_argument('--no-bitenum', dest='bitenum', action='store_false', help='use bitvector restrictions')
-    parser.add_argument('--no-block-commutative-ops', dest='block_commutative_ops', action='store_false',
-                        help='block commutative operations')
-    parser.add_argument('--no-subsume-conditions', dest='subsume_conditions', action='store_false', help='subsume conditions')
-    parser.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false', help='subsume conditions transitively')
-    parser.add_argument('--no-split-complex-joins', dest='split_complex_joins', action='store_false',
-                        help='use separate threads to test programs containing complex joins')
+    g.add_argument('--max-filter-combo', type=int, default=2, help='maximum size of filter conditions')
+    g.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
+    g.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
 
-    g = parser.add_argument_group('heuristics')
+    g.add_argument('--max-lines', type=int, default=7, help='maximum program size')
+    g.add_argument('--min-lines', type=int, default=1, help='minimum program size')
 
-    g.add_argument('--split-search', action='store_true',
-                   help='use an heuristic to determine if search should be split among multiple lines of code')
-    g.add_argument('--split-search-threshold', type=int, default=500, help='instance hardness threshold')
-    g.add_argument('--decay-rate', type=float, default=0.99999, help='rate at which old information is forgotten')
-    g.add_argument('--probing-threads', type=int, default=2,
-                   help='number of threads that should be used to randomly explore the search space')
+    g = parser.add_argument_group('Synthesizer arguments')
+    g.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
+    g.add_argument('--no-bitenum', dest='bitenum', action='store_false', help='use bitvector restrictions')
+    g.add_argument('--subsume-conditions', dest='subsume_conditions', action='store_true', help='subsume conditions')
+    g.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false',
+                        help='disable transitive condition blocking')
+    g.add_argument('--no-cache', dest='cache_operations', action='store_false',
+                   help='increased memory usage, but possibly faster results')
 
-    parser.add_argument('--disable', nargs='+', default=[])
+    g = parser.add_argument_group('Debug arguments')
+    g.add_argument('--use-solution-dsl', dest='use_dsl', action='store_true')
+    g.add_argument('--use-solution-cube', dest='use_cube', action='store_true')
+    g.add_argument('--use-solution-loc', dest='use_loc', action='store_true')
 
-    parser.add_argument('--max-filter-combo', type=int, default=2, help='maximum size of filter conditions')
-    parser.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
-    parser.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
-
-    parser.add_argument('--use-solution-dsl', dest='use_dsl', action='store_true')
-    parser.add_argument('--use-solution-cube', dest='use_cube', action='store_true')
-    parser.add_argument('--use-solution-loc', dest='use_loc', action='store_true')
-
-    parser.add_argument('-j', '--jobs', type=int, default=0, help='number of processes to use')
-    parser.add_argument('--max-lines', type=int, default=7, help='maximum program size')
-    parser.add_argument('--min-lines', type=int, default=1, help='minimum program size')
-    parser.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
-    parser.add_argument('--seed', default='squares')
-    parser.add_argument('--append', action='store_true')
     return parser
 
 

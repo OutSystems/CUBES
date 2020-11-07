@@ -2,12 +2,14 @@ import math
 import re
 from itertools import permutations
 from logging import getLogger
-from typing import Tuple
+from typing import Tuple, Union
 
 from rpy2 import robjects
+from rpy2.rinterface_lib.embedded import RRuntimeError
 from z3 import BitVecVal
 
 from .. import util, results
+from ..decider import RowNumberInfo
 from ..program import LineInterpreter
 from ..tyrell.interpreter import InterpreterError
 
@@ -59,7 +61,7 @@ class SquaresInterpreter(LineInterpreter):
         try:
             # print(script, end='')
             robjects.r(script)
-        except Exception as e:
+        except (Exception, RRuntimeError) as e:
             # logger.error("Error while evaluating program")
             # logger.error("%s", str(e))
             raise InterpreterError(e)
@@ -183,7 +185,7 @@ class SquaresInterpreter(LineInterpreter):
         bools = list(map(lambda c: c in a, self.problem.all_columns))
         raise NotImplementedError()
 
-    def equals(self, actual: str, expect: str, *args) -> Tuple[bool, float]:
+    def equals(self, actual: str, expect: str, *args) -> Tuple[bool, float, Union[RowNumberInfo, None]]:
         if robjects.r(f'nrow({actual})')[0] == 0:
             results.empty_output += 1
 
@@ -194,11 +196,13 @@ class SquaresInterpreter(LineInterpreter):
         if math.isnan(score):
             score = 0
 
-        if score < 1:
-            return False, score
+        if not util.get_config().subsume_conditions and score < 1:
+            return False, score, None
 
         a_cols = list(robjects.r(f'colnames({actual})'))
         e_cols = list(robjects.r(f'colnames({expect})'))
+        expected_n = int(robjects.r(f'nrow({expect})')[0])
+        result = None
         for combination in permutations(a_cols, len(e_cols)):
             for d in ['', ' %>% distinct()']:
                 _script = f'out <- {actual} %>% select({", ".join(map(lambda pair: f"{pair[0]} = {pair[1]}" if pair[0] != pair[1] else pair[0], zip(e_cols, combination)))}){d}'
@@ -215,10 +219,23 @@ class SquaresInterpreter(LineInterpreter):
                                     break
 
                             self.program += _script + '\n'
-                        return True, score
+                        return True, score, None
                 except:
                     continue
-        return False, score
+                finally:
+                    if util.get_config().subsume_conditions and result != RowNumberInfo.UNKNOWN:
+                        actual_n = int(robjects.r(f'nrow(out)')[0])
+                        if actual_n > expected_n:
+                            if result is None or result == RowNumberInfo.LESS_ROWS:
+                                result = RowNumberInfo.LESS_ROWS
+                            else:
+                                result = RowNumberInfo.UNKNOWN
+                        if actual_n < expected_n:
+                            if result is None or result == RowNumberInfo.MORE_ROWS:
+                                result = RowNumberInfo.MORE_ROWS
+                            else:
+                                result = RowNumberInfo.UNKNOWN
+        return False, score, result
 
     def test_equality(self, actual: str, expect: str, keep_order: bool = False) -> bool:
         if not keep_order:

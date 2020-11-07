@@ -16,7 +16,7 @@ pick <- function(condition){
   function(d) d %>% filter_(condition)
 }
 
-scatter <- function(exclude = NULL, timelimit = 600, text_size=NULL, ...) {
+scatter <- function(exclude = NULL, timelimit = 600, text_size=NULL, transparency=.2, ...) {
   args <- list(...)
   stopifnot(length(args) == 2)
   data <- inner_join(args[[1]], args[[2]], by = c('name', 'benchmark'), suffix = c("_A", "_B")) %>%
@@ -26,9 +26,15 @@ scatter <- function(exclude = NULL, timelimit = 600, text_size=NULL, ...) {
     mutate(real_B = ifelse(!solved_B, timelimit, real_B))
   tmp <- data %>%
     ggplot(aes(x = real_A, y = real_B)) +
-    geom_point(color = maincolor, alpha = 0.2, size = .75) +
-    scale_x_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B))) +
-    scale_y_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B))) +
+    geom_point(color = maincolor, alpha = transparency, size = 1)
+  if(any(data$real_A < 2) | any(data$real_B < 2)) {
+    tmp <- tmp + scale_x_continuous(trans = log10_trans(), breaks = c(.5, 2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B)), labels = c('0.5', '2', '10', '60', '600')) +
+      scale_y_continuous(trans = log10_trans(), breaks = c(.5, 2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B)), labels = c('0.5', '2', '10', '60', '600'))
+  } else {
+    tmp <- tmp + scale_x_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B))) +
+      scale_y_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$real_A, data$real_B), max(data$real_A, data$real_B)))
+  }
+  tmp <- tmp +
     geom_abline() +
     annotation_logticks() +
     geom_hline(yintercept = timelimit, linetype = "dashed") +
@@ -51,9 +57,9 @@ scatter_cpu <- function(exclude = NULL, ...) {
     mutate(real_B = ifelse(!solved_B, timelimit, real_B))
   data %>%
     ggplot(aes(x = cpu_A, y = cpu_B)) +
-    geom_point(color = maincolor, alpha = 0.2, size = 1.5) +
-    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
-    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
+    geom_point(color = maincolor, alpha = 0.2, size = 1) +
+    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
+    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
     geom_abline() +
     annotation_logticks() +
     geom_hline(yintercept = timelimit, linetype = "dashed") +
@@ -70,11 +76,27 @@ scatter_ram <- function(exclude = NULL, ...) {
     filter(solved_A & solved_B)
   data %>%
     ggplot(aes(x = ram_A * 1000, y = ram_B * 1000)) +
-    geom_point(color = maincolor, alpha = 0.2, size = 1.5) +
-    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
-    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
+    geom_point(color = maincolor, alpha = 0.2, size = 1) +
+    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(n=4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
+    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(n=4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
     geom_abline() +
     annotation_logticks() +
+    labs(y = names(args)[2], x = names(args)[1]) +
+    my_theme
+}
+
+scatter_enum<- function(exclude = NULL, ...) {
+  args <- list(...)
+  stopifnot(length(args) == 2)
+  data <- inner_join(args[[1]], args[[2]], by = c('name', 'benchmark'), suffix = c("_A", "_B")) %>%
+    filter(!(benchmark %in% exclude)) %>%
+    filter(solved_A & solved_B)
+  data %>%
+    ggplot(aes(x = attempts_A, y = attempts_B)) +
+    geom_point(color = maincolor, alpha = 0.2, size = 1) +
+    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$attempts_A, data$attempts_B), max(data$attempts_A, data$attempts_B))) +
+    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$attempts_A, data$attempts_B), max(data$attempts_A, data$attempts_B))) +
+    geom_abline() +
     labs(y = names(args)[2], x = names(args)[1]) +
     my_theme
 }
@@ -98,21 +120,33 @@ times <- function(run, exclude_timeouts = F) {
   run %>%
     filter(!exclude_timeouts | status != -1) %>%
     ggplot(aes(x = real, fill = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_histogram(bins = 100) +
+    geom_histogram(bins = 60) +
     scale_x_continuous(trans = 'log10', breaks = log_breaks()) +
     scale_fill_manual(drop = F, values = status_colors, '') +
     geom_vline(xintercept = 600) +
     my_theme
 }
 
-processes <- function(run) {
+processes <- function(run, n) {
   run %>%
-    ggplot(aes(x = process)) +
-    geom_bar() +
+    ggplot(aes(x = process+1)) +
+    geom_bar(fill=maincolor,aes(y=stat(count/sum(count)))) +
+    scale_y_continuous(labels=label_percent(accuracy = 1, suffix = '\\%')) +
+    scale_x_continuous(breaks=1:n) +
+    labs(x = 'Process', y = 'Instances Solved') +
     my_theme
 }
 
-cumsolved <- function(use_vbs = T, full_x = F, exclude = NULL, ...) {
+equiv_processes <- function(run, cutoff=5) {
+  run %>% filter(real > cutoff) %>%
+    ggplot(aes(x=equivalent_p)) +
+    geom_histogram(fill = maincolor, bins=20) +
+    scale_x_continuous(breaks = c(1, 4, 8, 12, 16)) +
+    labs(x = 'Equivalent Number of Processes', y = '\\# Instances') +
+    my_theme
+}
+
+cumsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other=50, step_size=.5, point_size=.75, facet=F, legend.position='bottom', ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   if (use_vbs) {
@@ -124,26 +158,38 @@ cumsolved <- function(use_vbs = T, full_x = F, exclude = NULL, ...) {
     group_by(try) %>%
     mutate(val = cumsum(solved)) %>%
     ungroup() %>%
-    filter(solved)
-  tmp <- ggplot(data, aes(x = val, y = real, color = try)) +
-    geom_step(size = 1) +
-    geom_point(shape = 4)
+    filter(solved) %>%
+    mutate(id = row_number())
+  tmp <- ggplot(data, aes(x = val, y = real, color = try, shape=try)) +
+    geom_step(size = step_size) +
+    geom_point(shape = point_size, data = pick(~id %% every_other == 0))
   if (full_x) {
     tmp <- tmp + scale_x_continuous(breaks = pretty_breaks(), limits = c(0, n_distinct(data$name)))
   } else {
     tmp <- tmp + scale_x_continuous(breaks = pretty_breaks())
   }
+  if (log) {
+    if(any(data$real < 2)) {
+      tmp <- tmp + scale_y_continuous(trans=log_trans(10), breaks = c(.5, 2, 5, 10, 60, 180, 600), labels = c('0.5', '2', '5', '10', '60', '180', '600')) +
+        annotation_logticks(sides='l')
+    } else {
+      tmp <- tmp + scale_y_continuous(trans=log_trans(10), breaks = c(2, 5, 10, 60, 180, 600)) +
+        annotation_logticks(sides='l')
+    }
+  } else {
+    tmp <- tmp + facet_zoom(xy = real <= 10, zoom.size = 2 / 3)
+  }
   tmp +
     scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop = F) +
     labs(x = 'Instances solved', y = 'Time') +
-    facet_zoom(xy = real <= 10, zoom.size = 2 / 3) +
+    scale_shape(breaks = c(names(tries), 'VBS'), drop = F) +
     #geom_vline(xintercept = n_distinct(data$name), linetype = "longdash") +
     #annotation_logticks(sides = 'l') +
     #geom_vline(xintercept = 600) +
     my_theme
 }
 
-invsolved <- function(use_vbs = T, full_x = F, exclude = NULL, log = F, every_other=50, legend.position='bottom', ...) {
+invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other=50, step_size=.5, point_size=.75, facet=F, legend.position='bottom', ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   if (use_vbs) {
@@ -158,8 +204,8 @@ invsolved <- function(use_vbs = T, full_x = F, exclude = NULL, log = F, every_ot
     mutate(id = row_number()) %>%
     ungroup()
   tmp <- ggplot(data, aes(y = val, x = real, color = try, group=try, shape=try)) +
-    geom_step(size = .5) +
-    geom_point(size=.75, data = pick(~id %% every_other == 0))
+    geom_step(size = step_size) +
+    geom_point(size=point_size, data = pick(~id %% every_other == 0))
   if (full_x) {
     tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels=label_percent(accuracy = 1, suffix = '\\%'))
   } else {
@@ -176,10 +222,13 @@ invsolved <- function(use_vbs = T, full_x = F, exclude = NULL, log = F, every_ot
   } else {
     tmp <- tmp + facet_zoom(xy = real <= 10, zoom.size = 2 / 3)
   }
+  if (facet) {
+    tmp <- tmp + facet_wrap(~benchmark)
+  }
   tmp +
     scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop = F) +
-    scale_shape_discrete(breaks = c(names(tries), 'VBS'), drop = F) +
-    labs(y = 'Instances solved', x = 'Time (s)') +
+    scale_shape(breaks = c(names(tries), 'VBS'), drop = F) +
+    labs(y = 'Instances Solved', x = 'Time (s)') +
     #geom_vline(xintercept = n_distinct(data$name), linetype = "longdash") +
     #annotation_logticks(sides = 'l') +
     #geom_vline(xintercept = 600) +
@@ -227,7 +276,7 @@ bars <- function(use_vbs = T, facet_size = 4, ...) {
       scale_fill_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
         keep(function(x) { any(x[1] == as.character(solved$status)) }) %>%
         map(function(x) { x[2] })) +
-      labs(x = element_blank(), y = 'Number of instances')
+      labs(x = element_blank(), y = 'Number of Instances')
     if (pages != 1) {
       tmp <- tmp + labs(caption = paste0('page ', toString(i), '/', toString(pages)))
     }
@@ -288,4 +337,39 @@ solved_instances <- function(table) {
     group_by(benchmark, total) %>%
     summarise(n = n()) %>%
     mutate(percentage = n / total)
+}
+
+time_dist <- function(filter = NULL, wrap=F, ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id='try')
+  if (!is.null(filter)) {
+    data <- right_join(data, filter %>% select(name))
+  }
+  tmp <- ggplot(data, aes(x = real, group=try, fill=try))
+  for (n in names(tries)) {
+    tmp <- tmp + geom_histogram(data=subset(data, try == n), aes(y=stat(count/sum(count))), alpha = 0.6, bins=20)
+  }
+  if (wrap) {
+    tmp <- tmp + facet_wrap(~try)
+  }
+  tmp  + labs(y='Frequency', x='Time')
+}
+
+time_part_dist <- function(filter = NULL, col=NULL, wrap=F, ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id='try')
+  if (!is.null(filter)) {
+    data <- right_join(data, filter %>% select(name))
+  }
+  tmp <- ggplot(data, aes(x = !!as.name(col)/real, group=try, fill=try))
+  for (n in names(tries)) {
+    tmp <- tmp + geom_histogram(data=subset(data, try == n), alpha = 0.4, bins=20)
+  }
+  if (wrap) {
+    tmp <- tmp + facet_wrap(~try)
+  }
+  tmp  +
+    scale_fill_brewer(palette = 'Dark2') +
+    labs(y='Number of Instances', x=paste0('Fraction of Time Spent in ', ifelse(col == 'eval', 'Evaluation', col)), legend='Configuration') +
+    my_theme
 }

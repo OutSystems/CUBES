@@ -7,16 +7,21 @@ import os
 import pathlib
 import re
 import subprocess
+import random
 from multiprocessing import Pool
 
 parser = argparse.ArgumentParser(description='Util for benchmarking the SQUARES program synthesizer.')
 parser.add_argument('-t', default=600, type=int, help='timeout')
+parser.add_argument('-m', default=57344, type=int, help='memout')
 parser.add_argument('-n', default=1, type=int, help='number of times to run each instance')
 parser.add_argument('-p', default=1, type=int, help='#processes')
 parser.add_argument('--append', action='store_true', help='append to file')
 parser.add_argument('--cubes', action='store_true', help='use cubes')
 parser.add_argument('--portfolio', action='store_true', help='use portfolio')
+parser.add_argument('--portfolio2', action='store_true', help='use portfolio 2')
+parser.add_argument('--sequential2', action='store_true', help='use sequential 2')
 parser.add_argument('--resume', action='store_true', help='resume previous run')
+parser.add_argument('--sample', type=float)
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args, other_args = parser.parse_known_args()
@@ -28,12 +33,15 @@ def test_file(filename: str, run: str = ''):
     pathlib.Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
     if args.cubes:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './cubes.py', '-vv', filename]
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './cubes.py', '-vv', filename]
     elif args.portfolio:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './portfolio.py', '-vv', filename]
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './portfolio.py', '-vv', filename]
+    elif args.portfolio2:
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './portfolio2.py', '-vv', filename]
+    elif args.sequential2:
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './sequential2.py', '-vv', filename]
     else:
-        command = ['runsolver', '-W', str(args.t), '--rss-swap-limit', '57344', '-d', '5', '-o', out_file, './sequential.py', '-vv', filename]
-
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './sequential.py', '-vv', filename]
 
     command += other_args
 
@@ -76,6 +84,9 @@ if not args.append and not args.resume:
         f.flush()
 
 instances = glob.glob('tests/**/*.yaml', recursive=True)
+
+if args.sample:
+    instances = random.sample(instances, int(len(instances) * args.sample))
 
 if args.resume:
     with open('analysis/data/' + args.name + '.csv', 'r') as f:

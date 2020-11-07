@@ -16,9 +16,46 @@ from squares.util import create_argparser, parse_specification
 
 logger = getLogger('squares')
 
+default_config_1 = [{'z3_sat_phase': 'caching', 'bitenum_enabled': True},
+                    {'z3_sat_phase': 'caching', 'bitenum_enabled': False},
+                    {'z3_sat_phase': 'random', 'bitenum_enabled': True},
+                    {'z3_sat_phase': 'random', 'bitenum_enabled': False}]
+
+
+default_config_2 = [{'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': True},
+                    {'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': False},
+                    {'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': True},
+                    {'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': False},
+                    {'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': True},
+                    {'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': False},
+                    {'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': True},
+                    {'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': False}]
+
+default_config_3 = [{'subsume_conditions': False, 'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': True},
+                    {'subsume_conditions': False, 'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': False},
+                    {'subsume_conditions': False, 'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': True},
+                    {'subsume_conditions': False, 'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': False},
+                    {'subsume_conditions': False, 'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': True},
+                    {'subsume_conditions': False, 'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': False},
+                    {'subsume_conditions': False, 'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': True},
+                    {'subsume_conditions': False, 'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': False},
+                    {'subsume_conditions': True, 'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': True},
+                    {'subsume_conditions': True, 'z3_QF_FD': True, 'z3_sat_phase': 'caching', 'bitenum_enabled': False},
+                    {'subsume_conditions': True, 'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': True},
+                    {'subsume_conditions': True, 'z3_QF_FD': True, 'z3_sat_phase': 'random', 'bitenum_enabled': False},
+                    {'subsume_conditions': True, 'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': True},
+                    {'subsume_conditions': True, 'z3_QF_FD': False, 'z3_smt_phase': 3, 'bitenum_enabled': False},
+                    {'subsume_conditions': True, 'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': True},
+                    {'subsume_conditions': True, 'z3_QF_FD': False, 'z3_smt_phase': 5, 'bitenum_enabled': False}]
+
+presets = [default_config_1, default_config_2, default_config_3]
 
 def main():
     parser = create_argparser()
+
+    g = parser.add_argument_group('Portfolio arguments')
+    g.add_argument('--preset', choices=map(str, range(len(presets))), default='0', help='one of the preset portfolio configurations')
+
     args = parser.parse_args()
 
     if args.verbose >= 1:
@@ -34,29 +71,19 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    base_config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations, optimal=args.optimal,
-                         advance_processes=args.split_search,
-                         static_search=args.static_search, programs_per_cube_threshold=args.split_search_threshold, minimum_loc=args.min_lines,
-                         maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo, max_column_combinations=args.max_cols_combo,
-                         max_join_combinations=args.max_join_combo, program_weigth_decay_rate=args.decay_rate,
-                         block_commutative_ops=args.block_commutative_ops, subsume_conditions=args.subsume_conditions,
-                         transitive_blocking=args.transitive_blocking, use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube,
-                         probing_threads=args.probing_threads, cube_freedom=args.cube_freedom, split_complex_joins=args.split_complex_joins,
-                         bitenum_enabled=args.bitenum,
-                         z3_QF_FD=args.qffd, z3_sat_phase='random', disabled=args.disable)
+    base_config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_ops=args.cache_operations,
+                         minimum_loc=args.min_lines, maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo,
+                         max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
+                         subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
+                         use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
+                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
     util.store_config(base_config)
 
     specification = Specification(spec)
     results.specification = specification
 
-    config_map = {
-        'subsume_conditions': [True, False],
-        'bitenum_enabled': [True, False],
-        'z3_sat_phase': ['caching', 'random']
-        }
-
     configs = []
-    for config in map(lambda vals: {key: val for key, val in zip(config_map.keys(), vals)}, product(*config_map.values())):
+    for config in presets[int(args.preset)]:
         new_config = copy.copy(base_config)
         for key, val in config.items():
             new_config.__setattr__(key, val)

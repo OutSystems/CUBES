@@ -111,6 +111,7 @@ class ChildSynthesizer(Process, Synthesizer):
             print(traceback.format_exc())
 
         finally:
+            self._enumerator.blocked_models = {}
             self._enumerator.z3_solver.pop()
 
 
@@ -182,7 +183,7 @@ class ParallelSynthesizer(AbstractSynthesizer):
                 process_manager.register_process(probers_f, process, pipe)
             elif len(probers_b) < floor(util.get_config().probing_threads / 2):
                 process_manager.register_process(probers_b, process, pipe)
-            elif len(main_set_f) < (self.j - util.get_config().probing_threads) / 3:
+            elif len(main_set_f) < (self.j - util.get_config().probing_threads) * util.get_config().split_complex_joins_ratio:
                 process_manager.register_process(main_set_f, process, pipe)
             else:
                 process_manager.register_process(main_set_b, process, pipe)

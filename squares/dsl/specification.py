@@ -12,7 +12,7 @@ import pandas
 from ordered_set import OrderedSet
 from pandas import DataFrame
 from rpy2 import robjects
-from rpy2.rinterface_lib.embedded import RRuntimeError
+# from rpy2.rinterface_lib.embedded import RRuntimeError
 
 from . import dsl
 from .conditions import ConditionGenerator
@@ -320,9 +320,9 @@ class Specification:
         self.tyrell_spec = TyrellSpec(type_spec, program_spec, prod_spec, pred_spec)
         function_difficulty = {prod.name: reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else len(self.inputs) for rhs in prod.rhs), 1) for prod
                   in self.tyrell_spec.get_function_productions() if prod.name != 'empty'}
-        logger.warning(function_difficulty)
+        logger.debug(function_difficulty)
         function_difficulty = {key: value / sum( function_difficulty.values()) for key, value in function_difficulty.items()}
-        logger.warning(function_difficulty)
+        logger.debug(function_difficulty)
         return self.tyrell_spec
 
     def get_bitvecnum(self, columns: Sequence[str]) -> int:
@@ -352,16 +352,16 @@ class Specification:
     def __str__(self) -> str:
         buffer = io.StringIO()
         buffer.write(repr(self.generate_dsl()))
-        # buffer.write('\nMore restrictive:\n')
-        # for type in self.condition_generator.more_restrictive.graphs.keys():
-        #     max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
-        #     buffer.write(f'\t{type}:\n')
-        #     for key in list(self.condition_generator.more_restrictive.graphs[type]):
-        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
-        # buffer.write('Less restrictive:\n')
-        # for type in self.condition_generator.less_restrictive.graphs.keys():
-        #     max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
-        #     buffer.write(f'\t{type}:\n')
-        #     for key in list(self.condition_generator.less_restrictive.graphs[type]):
-        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
+        buffer.write('\nMore restrictive:\n')
+        for type in self.condition_generator.more_restrictive.graphs.keys():
+            max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
+            buffer.write(f'\t{type}:\n')
+            for key in list(self.condition_generator.more_restrictive.graphs[type]):
+                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
+        buffer.write('Less restrictive:\n')
+        for type in self.condition_generator.less_restrictive.graphs.keys():
+            max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
+            buffer.write(f'\t{type}:\n')
+            for key in list(self.condition_generator.less_restrictive.graphs[type]):
+                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
         return buffer.getvalue()

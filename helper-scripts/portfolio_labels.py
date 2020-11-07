@@ -1,10 +1,12 @@
 from itertools import product
 
 config_map = {
-        'subsume_conditions': [True, False],
-        'bitenum_enabled': [True, False],
-        'z3_QF_FD': [True, False]
-        }
+    'z3_sat_phase': ['caching', 'random'],
+    'bitenum_enabled': [True, False]
+    }
 
-for i, config in enumerate(map(lambda vals: {key: val for key, val in zip(config_map.keys(), vals)}, product(*config_map.values()))):
-    print(i, config)
+configs = []
+for config in map(lambda vals: {key: val for key, val in zip(config_map.keys(), vals)}, product(*config_map.values())):
+    configs.append(config)
+
+print(configs)

@@ -6,6 +6,7 @@ from typing import Optional, List, Callable, TypeVar, Tuple, Type, Any, Dict
 
 import z3
 from ordered_set import OrderedSet
+from frozendict import frozendict
 
 from .enumerator import Enumerator
 from ..spec import TyrellSpec, Predicate, EnumType
@@ -169,6 +170,8 @@ class BitEnumerator(Enumerator):
         self.natural_join3 = self.spec.get_function_production('natural_join3')
         self.natural_join4 = self.spec.get_function_production('natural_join4')
 
+        self.blocked_models = set()
+
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
                      self.num_constraints)
 
@@ -263,7 +266,7 @@ class BitEnumerator(Enumerator):
                     continue
                 for p in self.spec.get_productions_with_lhs(self.types[t]):
                     if p.is_function():
-                        self.assert_expr(z3.Implies(r.var == p.id, r.type == t))
+                        self.assert_expr(z3.Implies(r.var == p.id, r.type == t), f'type_constraint_{r.id}_{t}_{p.id}')
 
     def create_children_constraints(self) -> None:
         for r in self.roots:
@@ -276,12 +279,12 @@ class BitEnumerator(Enumerator):
                     if c >= len(p.rhs):
                         self.assert_expr(z3.Implies(aux, z3.And(r.children[c].var == 0,
                                                                 r.children[c].bitvec == self.mk_bitvec(0),
-                                                                r.children[c].bitvec2 == self.mk_bitvec(0))))
+                                                                r.children[c].bitvec2 == self.mk_bitvec(0))), f'empty_arg_{r.id}_{p.id}_{c}')
                         continue
 
                     for leaf_p in self.spec.get_productions_with_lhs(p.rhs[c]):
                         if not leaf_p.is_function():
-                            bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else (leaf_p.value, 0)
+                            bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else ((leaf_p.value, 0) if leaf_p.value is not None else (0, 0))
                             ctr.append(z3.And(r.children[c].var == leaf_p.id,
                                               r.children[c].bitvec == self.mk_bitvec(bv1),
                                               r.children[c].bitvec2 == self.mk_bitvec(bv2)))
@@ -296,7 +299,7 @@ class BitEnumerator(Enumerator):
                                 line_var = r.children[c].lines[l]
                                 self.assert_expr(line_var == (r.children[c].var == line_production.id))
 
-                    self.assert_expr(z3.Implies(aux, z3.Or(ctr)))
+                    self.assert_expr(z3.Implies(aux, z3.Or(ctr)), f'arg_{r.id}_{p.id}_{c}')
 
     def create_bitvector_constraints(self) -> None:
         if not util.get_config().bitenum_enabled:
@@ -431,7 +434,8 @@ class BitEnumerator(Enumerator):
                 children = []
                 for c in r.children:
                     children.append(c.lines[s])
-                self.assert_expr(z3.Implies(z3.And(z3.Or(children), self.roots[s].var == prod1.id), r.var != prod0.id), f'{prod0.id}_is_not_parent_of_{prod1.id}_r{r.id}_l{s}')
+                self.assert_expr(z3.Implies(z3.And(z3.Or(children), self.roots[s].var == prod1.id), r.var != prod0.id),
+                                 f'{prod0.id}_is_not_parent_of_{prod1.id}_r{r.id}_l{s}')
 
     def _resolve_distinct_inputs_predicate(self, pred: Predicate):
         self._check_arg_types(pred, [str])
@@ -558,21 +562,25 @@ class BitEnumerator(Enumerator):
             elif info.row_info == RowNumberInfo.LESS_ROWS:
                 restriction_table = self.less_restrictive
 
-            for model in islice(models, len(models)):
-                for i, root in enumerate(self.roots):
-                    if util.get_config().transitive_blocking and not self.all_recursive(models[0], i):
-                        continue
-                    elif not util.get_config().transitive_blocking and i > 0:
-                        continue
-                    for child in root.children:
-                        for replacement in restriction_table[model[child.var].as_long()]:
-                            new_model = model.copy()
-                            new_model[child.var] = z3.IntVal(replacement)
-                            models.append(new_model)
+            if restriction_table:
+                for model in islice(models, len(models)):
+                    for i, root in enumerate(self.roots):
+                        if util.get_config().transitive_blocking and not self.all_recursive(models[0], i):
+                            continue
+                        elif not util.get_config().transitive_blocking and i > 0:
+                            continue
+                        for child in root.children:
+                            for replacement in restriction_table[model[child.var].as_long()]:
+                                new_model = model.copy()
+                                new_model[child.var] = z3.IntVal(replacement)
+                                if frozendict(new_model) not in self.blocked_models:
+                                    self.blocked_models.add(frozendict(new_model))
+                                    models.append(new_model)
 
         # if len(models) > 1:
         #     logger.warning('Blocked %d programs!', len(models) - 1)
-        #     logger.warning('Due to %s:', self.construct_program(models[0]))
+        #     logger.warning('Due to %s blocking %s conditions:', self.construct_program(models[0]),
+        #                    'more restrictive' if info.row_info == RowNumberInfo.MORE_ROWS else 'less restrictive')
         for model in models:
             # if len(models) > 1:
             #     logger.warning('Blocking %s', self.construct_program(model))

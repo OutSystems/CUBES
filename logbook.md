@@ -449,3 +449,13 @@ Misc changes
         'static_search': [True, False],
         'z3_QF_FD': [True, False]
     }
+
+#### Portfolio 2
+    {
+        'subsume_conditions': [True, False],
+        'bitenum_enabled': [True, False],
+        'z3_sat_phase': ['caching', 'random']
+        }
+
+#### c50
+Disable condition subsumption

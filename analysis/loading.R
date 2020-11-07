@@ -1,5 +1,5 @@
 status_levels <- rev(c(0, 3, 2, 4, -2, -1, 5, 1, 143))
-status_meanings <- rev(c('R and SQL', 'Non optimal', 'Just R', 'Just R non optimal', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
+status_meanings <- rev(c('R and SQL', 'Non-optimal', 'Just R', 'Just R Non-optimal', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
 status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#CC6387", "#cc241d", "#653e9c", "#3c3836", '#000000'))
 
 instance_info <- read_csv('instances.csv', col_types = cols(
@@ -21,6 +21,15 @@ getmode <- function(v) {
   uniqv[which.max(tabulate(match(v, uniqv)))]
 }
 
+max_non_inf <- function(...) {
+  tmp <- max(...)
+  if (is.finite(tmp)) {
+    tmp
+  } else {
+    NA
+  }
+}
+
 is_solved_status <- function(status) {
   status != -2 &
     status != -1 &
@@ -29,7 +38,7 @@ is_solved_status <- function(status) {
 }
 
 load_result_squares <- function(file) {
-  read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
+  result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)),
            status = ifelse(status == 143, 1, as.character(status)),
            status = ifelse(timeout, -1, as.character(status)),
@@ -37,10 +46,12 @@ load_result_squares <- function(file) {
     mutate(benchmark = ifelse(grepl("spider", name, fixed = TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
     filter(!(benchmark %in% test_filter)) %>%
     left_join(instance_info)
+  gc()
+  result
 }
 
 load_result_file <- function(file) {
-  read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
+  result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
     #mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     mutate(benchmark = ifelse(grepl("spider", name, fixed = TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
     filter(!(benchmark %in% test_filter)) %>%
@@ -48,29 +59,38 @@ load_result_file <- function(file) {
     mutate(run_number = 0:(n() - 1)) %>%
     ungroup() %>%
     mutate(several_runs = any(run_number > 0),
-           status = ifelse(timeout, -1, as.character(status)),  # *sighs* factors are weird
+           status = ifelse(is.na(status), 1, as.character(status)),  # *sighs* factors are weird
+           status = ifelse(timeout, ifelse(status == 3 | status == 4, as.character(status), -1), as.character(status)),  # *sighs* factors are weird
            status = ifelse(memout, -2, as.character(status)),  # *sighs* factors are weird
            solved = is_solved_status(status),
            log_suff = paste0('_', run_number),
            log = paste0('data/', file, '/', name, log_suff, '.log'),
            log_content = map(log, function(x) { ifelse(file.exists(x), read_file(x), NA) }),
-           hard_h = unlist(map(log_content, function(x) {str_match(x, '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2]})),
-           loc_reached = unlist(map(log_content, function(x) {str_match(x, 'Initialising process for (.*) lines of code')[, 2]})),
-           loc_found = unlist(map(log_content, function(x) {str_match(x, 'Solution size: (.*)')[, 2]})),
-           fails = parse_integer(unlist(map(log_content, function(x) {str_match(x, 'Failed: (.*) \\(approx\\)')[, 2]}))),
-           init = parse_number(unlist(map(log_content, function(x) {str_match(x, 'Total time spent in enumerator init: (.*) \\(approx\\)')[, 2]}))),
-           enum = parse_number(unlist(map(log_content, function(x) {str_match(x, 'Total time spent in enumerator: (.*) \\(approx\\)')[, 2]}))),
-           eval = parse_number(unlist(map(log_content, function(x) {str_match(x, 'Total time spent in evaluation & testing: (.*) \\(approx\\)')[, 2]}))),
-           block = parse_number(unlist(map(log_content, function(x) {str_match(x, 'Total time spent blocking cubes/programs: (.*) \\(approx\\)')[, 2]}))),
-           solution = map(log_content, function(x) {str_match(x, 'Solution found: \\[(.*)\\]')[, 2]}),
+           skewed = unlist(map(log_content, function(x) { str_detect(x, 'ypcall') })),
+           hard_h = unlist(map(log_content, function(x) { str_match(x, '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2] })),
+           loc_reached = unlist(map(log_content, function(x) { max_non_inf(parse_integer(str_match_all(x, 'Enumerator for loc (.*) constructed')[[1]][,2])) })),
+           loc_found = unlist(map(log_content, function(x) { str_match(x, 'Solution size: (.*)')[, 2] })),
+           fails = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Failed: (.*) \\(approx\\)')[, 2] }))),
+           init = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in enumerator init: (.*) \\(approx\\)')[, 2] }))),
+           enum = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in enumerator: (.*) \\(approx\\)')[, 2] }))),
+           eval = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in evaluation & testing: (.*) \\(approx\\)')[, 2] }))),
+           block = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent blocking cubes/programs: (.*) \\(approx\\)')[, 2] }))),
+           blocked = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Blocked programs: (.*) \\(.*\\) \\(approx\\)')[, 2] }))),
+           cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Generated cubes: (.*)')[, 2] }))),
+           blocked_cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Blocked cubes: (.*) \\(.*\\)')[, 2] }))),
+           attempts = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Attempted programs: (.*) \\(approx\\)')[, 2] }))),
+           solution = map(log_content, function(x) { str_match(x, 'Solution found: \\[(.*)\\]')[, 2] }),
            #status = ifelse(is.na(solution), as.character(status), ifelse(status == -2, 2, as.character(status))),  # *sighs* factors are weird
            #solved = ifelse(is.na(solution), solved, ifelse(status == -2, T, solved)),  # *sighs* factors are weird
            equivalent_p = cpu / real) %>%
-    select(-log, -log_content, -log_suff, -several_runs) %>%
+    filter(!skewed) %>%
+    select(-log, -log_content, -log_suff, -several_runs, -skewed) %>%
     left_join(instance_info)
+  gc()
+  result
 }
 
-load_result_file_median <- function(file, timelimit=600) {
+load_result_file_median <- function(file, timelimit = 600) {
   load_result_file(file) %>%
     group_by(name) %>%
     mutate(solve_count = sum(ifelse(solved, 1, 0)),
@@ -78,9 +98,13 @@ load_result_file_median <- function(file, timelimit=600) {
            status = as.numeric(as.character(status))) %>%
     ungroup() %>%
     group_by(name, benchmark) %>%
-    summarise(real = ifelse(med_solved, median(real), timelimit),
+    summarise(real_sd = sd(real),
+              real_min = min(real),
+              real_max = max(real),
+              real = ifelse(med_solved, median(real), timelimit),
               cpu = ifelse(med_solved, median(cpu), timelimit),
               ram = median(ram),
+              solveds = sum(ifelse(solved, 1L, 0L)),
               status = factor(ifelse(med_solved, status %>%
                 .[. != -1 & . != -2 & . != 1 & . != 5] %>%
                 getmode, status %>%
@@ -145,18 +169,24 @@ load_result_file_worst <- function(file) {
     distinct()
 }
 
-test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set')
-
+test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set', 'outsystems', 'leetcode')
 {
   squares <- load_result_squares('squares')
   scythe <- load_result_squares('scythe')
 
   #single <- load_result_file('single')
   #single_np <- load_result_file('single_np')
-  bitenum <- load_result_file('bitenum')
-  bitenum_nobit <- load_result_file('bitenum_nobit')
-  bitenum_nosub <- load_result_file('bitenum_nosub')
-  bitenum_nofd <- load_result_file('bitenum_nofd')
+  #bitenum <- load_result_file('bitenum')
+  #bitenum_nobit <- load_result_file('bitenum_nobit')
+  #bitenum_nosub <- load_result_file('bitenum_nosub')
+  #bitenum_nofd <- load_result_file('bitenum_nofd')
+
+  #sequential1 <- load_result_file('sequential')
+  sequential <- load_result_file('sequential_2')
+  sequential_subsume <- load_result_file('sequential_subsume')
+  sequential_no_qffd <- load_result_file('sequential_no_qffd')
+  sequential_simple_dsl <- load_result_file('sequential_simple_dsl')
+  sequential_no_bitvec <- load_result_file('sequential_no_bitvec')
 
   #qffd_r <- load_result_file('qffd_r')
   #qffd_r_no_prune <- load_result_file('qffd_r_no_prune')
@@ -174,7 +204,9 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   # t9 <- load_result_file('try9')
   #t10 <- load_result_file('try10')
   #t11_c <- load_result_file('try11_c')
-  portfolio1 <- load_result_file('portfolio_1')
+  #portfolio1 <- load_result_file('portfolio_1')
+  #portfolio2 <- load_result_file('portfolio_2')
+  #portfolio3 <- load_result_file('portfolio_3')
 
   #c0_2 <- load_result_file('cubes0_2')
   #c0_4 <- load_result_file('cubes0_4')
@@ -310,10 +342,30 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   #c48_16_0f_c_spider <- load_result_file_median('cubes48_16_0f_spider')
   #c49_16_0f_c_spider <- load_result_file_median('cubes49_16_0f_spider')
 
-  c49_4_0f_c <- load_result_file_median('cubes49_4_0f')
-  c49_8_0f_c <- load_result_file_median('cubes49_8_0f')
-  c49_16_0f_c <- load_result_file_median('cubes49_16_0f_1')
+  #c49_4_0f_c <- load_result_file_median('cubes49_4_0f')
+  #c49_8_0f_c <- load_result_file_median('cubes49_8_0f')
+  #c49_16_0f_c <- load_result_file_median('cubes49_16_0f_1')
 
   #c49_16_0f_c_static <- load_result_file_median('cubes49_16_0f_static')
-  c49_16_0f_c_no_split <- load_result_file_median('cubes49_16_0f_no_split')
+  #c49_16_0f_c_no_split <- load_result_file_median('cubes49_16_0f_no_split')
+  #c49_16_0f_c_optimal <- load_result_file_median('cubes49_16_0f_optimal')
+  #c49_16_0f_c_no_unsat <- load_result_file_median('cubes49_16_0f_no_unsat')
+
+  #portfolio1 <- load_result_file('portfolio_1')
+  portfolio5_4 <- load_result_file('portfolio_5_4')
+  portfolio5_8 <- load_result_file('portfolio_5_8')
+  portfolio5_16 <- load_result_file('portfolio_5_16')
+
+  c50_4 <- load_result_file('c50_4')
+  c50_8 <- load_result_file('c50_8')
+  #c50_16_1 <- load_result_file('c50_16')
+  c50_16 <- load_result_file('c50_16_2')
+  #c50_16_optimal <- load_result_file('c50_16_optimal')
+  c50_16_optimal <- load_result_file('c50_16_optimal_2')
+  c50_16_static <- load_result_file('c50_16_static')
+  c50_16_no_dedu <- load_result_file('c50_16_no_dedu')
+  c50_16_no_split <- load_result_file('c50_16_no_split')
+
+  determ <- load_result_file_median('determinism')
+  determ2 <- load_result_file_median('determinism_2')
 }
