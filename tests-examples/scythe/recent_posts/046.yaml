@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/046.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/046.csv
 output: tests-examples/scythe/recent_posts/tables/046_o.csv
@@ -12,19 +13,19 @@ solution:
   - filter
   - anti_join
   - union
-comment: |
+sql: |
   select *
   from table
-  where type = `Z01`
+  where type = 'Z01'
   union all
   select *
   from table
-  where type = `Z09`
+  where type = 'Z09'
   and not exists (
       select 1
       from table
       where id = t.id and type = 'Z01')
-
+comment: |
   df2 <- input1 %>% filter(Type == 'Z01')
   df3 <- input1 %>% filter(Type == 'Z01' | Type != 'Z09')
   df4 <- anti_join(input1, df3, by=c('ID'))

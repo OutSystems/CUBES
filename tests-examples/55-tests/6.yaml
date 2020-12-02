@@ -14,6 +14,26 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT F_name
+  FROM
+    (SELECT F_name,
+            COUNT() AS n
+     FROM
+       (SELECT LHS.S_key AS S_key,
+               LHS.C_name AS C_name,
+               LHS.F_key AS F_key,
+               RHS.F_name AS F_name
+        FROM
+          (SELECT LHS.S_key AS S_key,
+                  LHS.C_name AS C_name,
+                  RHS.F_key AS F_key
+           FROM df_6_1 AS LHS
+           INNER JOIN df_6_2 AS RHS ON (LHS.C_name = RHS.C_name)) AS LHS
+        INNER JOIN df_6_3 AS RHS ON (LHS.F_key = RHS.F_key))
+     GROUP BY F_name)
+  WHERE (n <= 5.0)
+  ORDER BY F_name
 comment: |
   5.1.6 optimal solution
 

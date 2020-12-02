@@ -1,3 +1,4 @@
+db: tests-examples/spider/film_rank/tables/db.sqlite
 inputs:
 - tests-examples/spider/film_rank/tables/film.csv
 - tests-examples/spider/film_rank/tables/market.csv
@@ -9,6 +10,16 @@ columns:
 - film_id
 - country
 comment: |-
+  SELECT title,
+         director
+  FROM film
+  WHERE film_id NOT IN
+      (SELECT film_id
+       FROM film_market_estimation AS T1
+       JOIN market AS T2 ON T1.market_id = T2.Market_ID
+       WHERE country = 'China')
+
+sql: |-
   SELECT title,
          director
   FROM film

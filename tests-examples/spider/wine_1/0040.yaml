@@ -1,3 +1,4 @@
+db: tests-examples/spider/wine_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/wine_1/tables/appellations.csv
 - tests-examples/spider/wine_1/tables/wine.csv
@@ -11,6 +12,15 @@ columns:
 - appelation
 - county
 comment: |-
+  SELECT avg(price)
+  FROM wine
+  WHERE Appelation NOT IN
+      (SELECT T1.Appelation
+       FROM APPELLATIONS AS T1
+       JOIN WINE AS T2 ON T1.Appelation = T2.Appelation
+       WHERE T1.County = 'Sonoma')
+
+sql: |-
   SELECT avg(price)
   FROM wine
   WHERE Appelation NOT IN

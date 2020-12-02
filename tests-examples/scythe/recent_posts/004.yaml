@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/004.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/004.csv
 output: tests-examples/scythe/recent_posts/tables/004_o.csv
@@ -13,19 +14,17 @@ solution:
   - filter
   - summarise
   - union
+sql: |
+  SELECT call_ref, job_num
+  FROM (SELECT max(call_ref) as call_ref, job_num
+        FROM `004`
+        WHERE job_num != 0
+        GROUP BY job_num
+        UNION
+        SELECT call_ref, job_num
+        FROM `004`
+        WHERE job_num = 0) AS T
 comment: |
-  SELECT *
-  FROM
-  (SELECT SQL_CALC_FOUND_ROWS *
-  FROM calls
-  WHERE parent_id = '$term'
-     AND job_num != 0
-  GROUP BY job_num
-  UNION SELECT SQL_CALC_FOUND_ROWS *
-  FROM calls
-  WHERE parent_id = '$term'
-     AND job_num = 0) AS T
-
   df1 <- input1 %>% filter(job_num == 0)
   df2 <- input1 %>% group_by(job_num) %>% summarise(call_ref = max(call_ref)) %>% ungroup()
   df3 <- bind_rows(df1, df2)

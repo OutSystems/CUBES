@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/002.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/002.csv
 output: tests-examples/scythe/recent_posts/tables/002_o.csv
@@ -5,16 +6,16 @@ constants:
   - ~ # YAML null canonical representation
 columns:
   - Start
-comment: |
+sql: |
   select start, lead(start) over (order by start)
-  from ((select t.start as start from likethis t
+  from ((select t.start as start from 002 t
         ) union all
-        (select t.end from likethis t
+        (select t.end from 002 t
         )
        ) t
   where start is not null
   order by start;
-
+comment: |
   df1 <- input1 %>% select(Start)
   df2 <- input1 %>% select(Start = End)
   df3 <- df1 %>% bind_rows(df2)

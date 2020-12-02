@@ -1,3 +1,4 @@
+db: tests-examples/spider/protein_institute/tables/db.sqlite
 inputs:
 - tests-examples/spider/protein_institute/tables/building.csv
 output: tests-examples/spider/protein_institute/tables/0005.csv
@@ -8,6 +9,16 @@ columns:
 - height_feet
 - floors
 comment: |-
+  SELECT count(*)
+  FROM building
+  WHERE height_feet >
+      (SELECT avg(height_feet)
+       FROM building)
+    OR floors >
+      (SELECT avg(floors)
+       FROM building)
+
+sql: |-
   SELECT count(*)
   FROM building
   WHERE height_feet >

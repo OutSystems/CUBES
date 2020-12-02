@@ -13,6 +13,21 @@ loc: 2
 solution:
   - summarise
   - natural_join3
+sql: |
+  SELECT P_id,
+         S_name
+  FROM
+    (SELECT *
+     FROM
+       (SELECT *
+        FROM df_18_1 AS LHS
+        INNER JOIN df_18_3 AS RHS ON (LHS.S_key = RHS.S_key)) AS LHS
+     INNER JOIN
+       (SELECT P_id,
+               MAX(cost) AS maxcost
+        FROM df_18_1
+        GROUP BY P_id) AS RHS ON (LHS.P_id = RHS.P_id))
+  WHERE (maxcost = cost)
 comment: |
   5.2.6 optimal solution
 

@@ -1,3 +1,4 @@
+db: tests-examples/spider/dorm_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/dorm_1/tables/student.csv
 - tests-examples/spider/dorm_1/tables/dorm.csv
@@ -11,6 +12,19 @@ functions:
 columns:
 - dormid
 comment: |-
+  SELECT T1.fname
+  FROM student AS T1
+  JOIN lives_in AS T2 ON T1.stuid = T2.stuid
+  WHERE T2.dormid IN
+      (SELECT T2.dormid
+       FROM dorm AS T3
+       JOIN has_amenity AS T4 ON T3.dormid = T4.dormid
+       JOIN dorm_amenity AS T5 ON T4.amenid = T5.amenid
+       GROUP BY T3.dormid
+       ORDER BY count(*) DESC
+       LIMIT 1)
+
+sql: |-
   SELECT T1.fname
   FROM student AS T1
   JOIN lives_in AS T2 ON T1.stuid = T2.stuid

@@ -1,3 +1,4 @@
+db: tests-examples/spider/department_store/tables/db.sqlite
 inputs:
 - tests-examples/spider/department_store/tables/products.csv
 - tests-examples/spider/department_store/tables/customer_orders.csv
@@ -10,6 +11,14 @@ functions:
 columns:
 - customer_id
 comment: |-
+  SELECT DISTINCT T3.product_name
+  FROM customer_orders AS T1
+  JOIN order_items AS T2 ON T1.order_id = T2.order_id
+  JOIN products AS T3 ON T2.product_id = T3.product_id
+  GROUP BY T3.product_id
+  HAVING COUNT (DISTINCT T1.customer_id) >= 2
+
+sql: |-
   SELECT DISTINCT T3.product_name
   FROM customer_orders AS T1
   JOIN order_items AS T2 ON T1.order_id = T2.order_id

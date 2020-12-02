@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/033.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/033_1.csv
   - tests-examples/scythe/recent_posts/tables/033_2.csv
@@ -15,7 +16,7 @@ solution:
   - summarise
   - left_join
   - mutate
-comment: |
+sql: |
   select t1.id,
         t1.user_id,
         t1.current_total_value,
@@ -29,7 +30,7 @@ comment: |
         group by v.user_id
   ) t2
     on t2.user_id = t1.user_id
-
+comment: |
   df1 <- input2 %>% filter(date > ymd('2016-10-13') - weeks(1))
   df2 <- df1 %>% group_by(user_id) %>% summarise(mvalue = sum(value_awarded)) %>% ungroup()
   df3 <- df2 %>% left_join(input1, by='user_id')

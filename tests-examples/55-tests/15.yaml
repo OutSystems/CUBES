@@ -18,6 +18,30 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT S_name
+  FROM
+    (SELECT *
+     FROM
+       (SELECT S_name,
+               color,
+               n,
+               MAX(n) OVER () AS zzz4
+        FROM
+          (SELECT S_name,
+                  color,
+                  COUNT() AS n
+           FROM
+             (SELECT *
+              FROM
+                (SELECT *
+                 FROM df_15_1 AS LHS
+                 INNER JOIN df_15_2 AS RHS ON (LHS.P_id = RHS.P_id)) AS LHS
+              INNER JOIN df_15_3 AS RHS ON (LHS.S_key = RHS.S_key))
+           GROUP BY S_name,
+                    color))
+     WHERE (color = 'red'
+            AND n = zzz4))
 comment: |
   5.2.3 optimal solution
 

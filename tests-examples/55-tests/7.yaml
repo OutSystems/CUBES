@@ -8,6 +8,21 @@ columns:
 loc: 1
 solution:
   - summarise
+sql: |
+  SELECT LEVEL,
+         meanage
+  FROM
+    (SELECT LHS.level AS LEVEL,
+            LHS.meanage AS meanage,
+            RHS.S_key AS S_key,
+            RHS.age AS age
+     FROM
+       (SELECT LEVEL,
+               AVG(age) AS meanage
+        FROM df_7_1
+        GROUP BY LEVEL) AS LHS
+     LEFT JOIN df_7_1 AS RHS ON (LHS.level = RHS.level))
+  WHERE (meanage <= age)
 comment: |
   5.1.7 optimal solution
 

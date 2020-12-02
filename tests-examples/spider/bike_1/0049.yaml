@@ -1,3 +1,4 @@
+db: tests-examples/spider/bike_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/bike_1/tables/trip.csv
 - tests-examples/spider/bike_1/tables/weather.csv
@@ -11,6 +12,16 @@ functions:
 columns:
 - mean_humidity
 comment: |-
+  SELECT zip_code
+  FROM weather
+  GROUP BY zip_code
+  HAVING avg(mean_humidity) < 70 INTERSECT
+  SELECT zip_code
+  FROM trip
+  GROUP BY zip_code
+  HAVING count(*) >= 100
+
+sql: |-
   SELECT zip_code
   FROM weather
   GROUP BY zip_code

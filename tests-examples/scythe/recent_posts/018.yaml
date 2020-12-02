@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/018.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/018.csv
 output: tests-examples/scythe/recent_posts/tables/018_o.csv
@@ -13,20 +14,22 @@ loc: 2
 solution:
   - summarise
   - filter
-comment: |
+sql: |
   SELECT t1.Course, Count(t2.OrderID)
-  FROM tab AS t1
-  LEFT JOIN -- get all Courses for that day
-   ( -- find the minimum order per customer
+  FROM 018 AS t1
+  LEFT JOIN
+   (
      SELECT CustomerID, Min(OrderID) AS OrderID
-     FROM tab AS t2
+     FROM 018 AS t2
      WHERE Date='17.10.2016'
      GROUP BY CustomerID
    ) AS t2
   ON t1.CustomerID = t2.CustomerID
-  AND t1.OrderID = t2.OrderID -- only one row per customer
+  AND t1.OrderID = t2.OrderID
   WHERE Date='17.10.2016'
   GROUP BY t1.Course
+comment: |
+
 
   df2 <- input1 %>% group_by(Course, Date) %>% summarise(n = n()) %>% ungroup()
   df3 <- df2 %>% filter(n > 2 | Date < mdy('10/17/2016'))

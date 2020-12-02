@@ -1,7 +1,13 @@
+db: tests-examples/scythe/recent_posts/tables/010.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/010.csv
 output: tests-examples/scythe/recent_posts/tables/010_o.csv
 dateorder: ymd
+functions:
+  - max
+columns:
+  - d_End
+  - d_Start
 comment: |
   with Src as(
   SELECT  ROW_NUMBER() Over(Partition by Robot_ID, Certif_ID order by StartDate, EndDate) as RN
@@ -29,3 +35,25 @@ comment: |
       SELECT Robot_ID, Certif_ID, startDate, EndDate
       FROM   LastIsland
       where  RN=1
+
+  ;with cte0 as(
+                  Select A.*,GrpSeq=RetSeq-Row_Number() over (Order by RetSeq)
+                  From (
+                          Select Distinct RetSeq,RetVal
+                           From  [dbo].[udf-Range-Date]((Select min(d_Start) from #certif_span),(Select max(d_End) from #certif_span),'DD',1) A
+                           Join  #certif_span B on  A.RetVal between B.d_Start and B.d_End
+                       ) A
+               )
+      , cte1 as(
+                  Select d_Start  = min(A.RetVal)
+                        ,d_End    = max(A.RetVal)
+                   From  cte0 A
+                   Group By GrpSeq
+               )
+  Select Robot_ID  = min(Robot_ID)
+        ,Certif_ID = min(Certif_ID)
+        ,A.d_Start
+        ,A.d_End
+   from cte1 A
+   Join #certif_span B on B.d_Start Between A.d_Start and A.d_End
+   Group By A.d_Start,A.d_End

@@ -1,3 +1,4 @@
+db: tests-examples/spider/store_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/store_1/tables/customers.csv
 - tests-examples/spider/store_1/tables/invoices.csv
@@ -7,6 +8,16 @@ functions:
 columns:
 - total
 comment: |-
+  SELECT T1.first_name,
+         T1.last_name,
+         SUM(T2.total)
+  FROM customers AS T1
+  JOIN invoices AS T2 ON T2.customer_id = T1.id
+  GROUP BY T1.id
+  ORDER BY SUM(T2.total) DESC
+  LIMIT 10;
+
+sql: |-
   SELECT T1.first_name,
          T1.last_name,
          SUM(T2.total)

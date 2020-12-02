@@ -16,6 +16,28 @@ pick <- function(condition){
   function(d) d %>% filter_(condition)
 }
 
+solved_not_solved <- function(a, b) {
+  inner_join(a, b, by = c('name', 'benchmark')) %>%
+    filter(solved.x & !solved.y) %>%
+    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
+}
+
+solved_slower <- function(a, b) {
+  inner_join(a, b, by = c('name', 'benchmark')) %>%
+    filter(solved.x & solved.y & real.x >= real.y * 1.1) %>%
+    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
+}
+
+basic_solved_not_solved <- function(a, b) {
+  inner_join(a, b, by = c('name', 'benchmark')) %>%
+    filter(solved.x & !solved.y)
+}
+
+join_all <- function(a, b) {
+  inner_join(a, b, by = c('name', 'benchmark')) %>%
+    select(name, status.x, real.x, eval.x, block.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, eval.y, block.y, blocked.y, attempts.y, loc_reached.y)
+}
+
 scatter <- function(exclude = NULL, timelimit = 600, text_size=NULL, transparency=.2, ...) {
   args <- list(...)
   stopifnot(length(args) == 2)
@@ -47,25 +69,32 @@ scatter <- function(exclude = NULL, timelimit = 600, text_size=NULL, transparenc
   tmp
 }
 
-scatter_cpu <- function(exclude = NULL, ...) {
+scatter_cpu <- function(exclude = NULL, timelimit = 600, transparency=.2, ...) {
   args <- list(...)
   stopifnot(length(args) == 2)
   data <- inner_join(args[[1]], args[[2]], by = c('name', 'benchmark'), suffix = c("_A", "_B")) %>%
     filter(!(benchmark %in% exclude)) %>%
     filter(solved_A | solved_B) %>%
-    mutate(real_A = ifelse(!solved_A, timelimit, real_A)) %>%
-    mutate(real_B = ifelse(!solved_B, timelimit, real_B))
-  data %>%
+    mutate(cpu_A = ifelse(!solved_A, timelimit, cpu_A)) %>%
+    mutate(cpu_B = ifelse(!solved_B, timelimit, cpu_B))
+  tmp <- data %>%
     ggplot(aes(x = cpu_A, y = cpu_B)) +
-    geom_point(color = maincolor, alpha = 0.2, size = 1) +
-    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
-    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(n=4), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
+    geom_point(color = maincolor, alpha = transparency, size = 1)
+  if(any(data$cpu_A < 2) | any(data$cpu_B < 2)) {
+    tmp <- tmp + scale_x_continuous(trans = log10_trans(), breaks = c(.5, 2, 10, 60, 600), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B)), labels = c('0.5', '2', '10', '60', '600')) +
+      scale_y_continuous(trans = log10_trans(), breaks = c(.5, 2, 10, 60, 600), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B)), labels = c('0.5', '2', '10', '60', '600'))
+  } else {
+    tmp <- tmp + scale_x_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B))) +
+      scale_y_continuous(trans = log10_trans(), breaks = c(2, 10, 60, 600), limits = c(min(data$cpu_A, data$cpu_B), max(data$cpu_A, data$cpu_B)))
+  }
+  tmp <- tmp +
     geom_abline() +
     annotation_logticks() +
     geom_hline(yintercept = timelimit, linetype = "dashed") +
     geom_vline(xintercept = timelimit, linetype = "dashed") +
     labs(y = names(args)[2], x = names(args)[1]) +
     my_theme
+  tmp
 }
 
 scatter_ram <- function(exclude = NULL, ...) {
@@ -235,12 +264,59 @@ invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
     my_theme + theme(legend.position = legend.position, legend.background = element_rect(fill=F), legend.key = element_rect(fill=F), legend.key.height = unit(.75, 'lines'))
 }
 
+invsolved_cpu <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other=50, step_size=.5, point_size=.75, facet=F, legend.position='bottom', ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  if (use_vbs) {
+    data <- data %>% bind_rows(vbs(...))
+  }
+  data <- data %>%
+    filter(!(benchmark %in% exclude)) %>%
+    arrange(cpu) %>%
+    group_by(try) %>%
+    mutate(val = cumsum(solved) / n_distinct(name)) %>%
+    filter(solved) %>%
+    mutate(id = row_number()) %>%
+    ungroup()
+  tmp <- ggplot(data, aes(y = val, x = cpu, color = try, group=try, shape=try)) +
+    geom_step(size = step_size) +
+    geom_point(size=point_size, data = pick(~id %% every_other == 0))
+  if (full_x) {
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels=label_percent(accuracy = 1, suffix = '\\%'))
+  } else {
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels=label_percent(accuracy = 1, suffix = '\\%'))
+  }
+  if (log) {
+    if(any(data$cpu < 2)) {
+      tmp <- tmp + scale_x_continuous(trans=log_trans(10), breaks = c(.5, 2, 5, 10, 60, 180, 600), labels = c('0.5', '2', '5', '10', '60', '180', '600')) +
+        annotation_logticks(sides='b')
+    } else {
+      tmp <- tmp + scale_x_continuous(trans=log_trans(10), breaks = c(2, 5, 10, 60, 180, 600)) +
+        annotation_logticks(sides='b')
+    }
+  } else {
+    tmp <- tmp + facet_zoom(xy = cpu <= 10, zoom.size = 2 / 3)
+  }
+  if (facet) {
+    tmp <- tmp + facet_wrap(~benchmark)
+  }
+  tmp +
+    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop = F) +
+    scale_shape(breaks = c(names(tries), 'VBS'), drop = F) +
+    labs(y = 'Instances Solved', x = 'CPU Time (s)') +
+    #geom_vline(xintercept = n_distinct(data$name), linetype = "longdash") +
+    #annotation_logticks(sides = 'l') +
+    #geom_vline(xintercept = 600) +
+    my_theme + theme(legend.position = legend.position, legend.background = element_rect(fill=F), legend.key = element_rect(fill=F), legend.key.height = unit(.75, 'lines'))
+}
+
 vbs <- function(..., timelimit = 600) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   data %>%
     group_by(name, benchmark) %>%
     summarise(real = min(ifelse(solved, real, timelimit)),
+              cpu = min(ifelse(solved, cpu, timelimit)),
               status = factor(ifelse(any(status == 0),
                                      0,
                                      ifelse(any(status == 2),
@@ -372,4 +448,101 @@ time_part_dist <- function(filter = NULL, col=NULL, wrap=F, ...) {
     scale_fill_brewer(palette = 'Dark2') +
     labs(y='Number of Instances', x=paste0('Fraction of Time Spent in ', ifelse(col == 'eval', 'Evaluation', col)), legend='Configuration') +
     my_theme
+}
+
+plot_cells_time <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try') %>% mutate(real = ifelse(status ==-2, 600, real))
+  data %>% ggplot(aes(x=total_cells, y=real, color=factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+    geom_point(alpha=0.4, size=1) +
+    scale_x_log10(breaks = log_breaks()) +
+    scale_y_log10(breaks = c(.1, 1, 10, 60, 600)) +
+    # annotation_logticks(sides='lb') +
+    facet_wrap(~try) +
+    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
+      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
+      map(function(x) { x[2] })) +
+    labs(y = 'Time (s)', x = '# Total Cells') +
+    guides(colour = guide_legend(override.aes = list(alpha=1))) +
+    my_theme
+}
+
+plot_cells_ram <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  data %>% ggplot(aes(x=total_cells, y=ram*1000, color=factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+    geom_point(alpha=0.4, size=1) +
+    scale_x_log10(breaks = log_breaks()) +
+    scale_y_log10(breaks = log_breaks(), labels = label_bytes()) +
+    annotation_logticks(sides='lb') +
+    facet_wrap(~try) +
+    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
+      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
+      map(function(x) { x[2] })) +
+    labs(y = 'Time (s)', x = '# Total Cells') +
+    guides(colour = guide_legend(override.aes = list(alpha=1))) +
+    my_theme
+}
+
+scatter_real_cpu <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  data %>% ggplot(aes(x=real, y=cpu, color=factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+    geom_point(alpha=0.4, size=1) +
+    geom_abline(size=.25) +
+    annotate(x = 0.5, y = 0.8, "text", label='slope=1', angle=30, size=2.5) +
+    geom_abline(intercept = log10(4), size=.25) +
+    annotate(x = 0.5, y = 3.5, "text", label='slope=4', angle=30, size=2.5) +
+    geom_abline(intercept = log10(16), size=.25) +
+    annotate(x = 0.5, y = 15, "text", label='slope=16', angle=30, size=2.5) +
+    scale_x_continuous(trans = 'log10', breaks = log_breaks()) +
+    scale_y_log10(breaks = log_breaks()) +
+    annotation_logticks(sides='lb') +
+    facet_wrap(~try) +
+    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
+      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
+      map(function(x) { x[2] })) +
+    labs(y = 'CPU Time', x = 'Real Time') +
+    guides(colour = guide_legend(override.aes = list(alpha=1))) +
+    my_theme
+}
+
+scatter_equiv <- function(x, ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  data %>% ggplot(aes(x=!!as.name(x), y=cpu/real, color=factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+    geom_point(alpha=0.4, size=1) +
+    scale_x_log10(breaks = log_breaks()) +
+    # scale_y_log10(breaks = log_breaks()) +
+    annotation_logticks(sides='b') +
+    facet_wrap(~try) +
+    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
+      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
+      map(function(x) { x[2] })) +
+    labs(y = 'cpu/real', x = x) +
+    guides(colour = guide_legend(override.aes = list(alpha=1))) +
+    my_theme
+}
+
+plot_sql_size <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  data %>% filter(solved) %>% ggplot(aes(x=sql_size)) + geom_histogram() + facet_wrap(~try)
+}
+
+plot_fuzzy <- function(drop_error = F, fill_bars = F, ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try') %>% filter(solved)
+  if (drop_error) {
+    data <- data %>% filter(fuzzy != 'Exec. Error')
+  }
+  tmp <- data %>% ggplot(aes(x = try, fill = fuzzy))
+  if (fill_bars) {
+    tmp <- tmp + geom_bar(position = 'fill')
+  } else {
+    tmp <- tmp + geom_bar(position = 'stack')
+  }
+  tmp +
+    scale_fill_manual(values = map2(fuzzy_levels, fuzzy_colors, c) %>%
+      map(function(x) { x[2] }))
 }

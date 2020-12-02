@@ -1,3 +1,4 @@
+db: tests-examples/spider/tracking_grants_for_research/tables/db.sqlite
 inputs:
 - tests-examples/spider/tracking_grants_for_research/tables/project_staff.csv
 - tests-examples/spider/tracking_grants_for_research/tables/projects.csv
@@ -8,6 +9,14 @@ columns:
 - project_id
 - role_code
 comment: |-
+  SELECT project_details
+  FROM Projects
+  WHERE project_id NOT IN
+      (SELECT project_id
+       FROM Project_Staff
+       WHERE role_code = 'researcher' )
+
+sql: |-
   SELECT project_details
   FROM Projects
   WHERE project_id NOT IN

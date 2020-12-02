@@ -1,3 +1,4 @@
+db: tests-examples/spider/dorm_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/dorm_1/tables/student.csv
 output: tests-examples/spider/dorm_1/tables/0033.csv
@@ -7,6 +8,17 @@ functions:
 columns:
 - major
 comment: |-
+  SELECT fname,
+         lname
+  FROM student
+  WHERE major !=
+      (SELECT major
+       FROM student
+       GROUP BY major
+       ORDER BY count(*) DESC
+       LIMIT 1)
+
+sql: |-
   SELECT fname,
          lname
   FROM student

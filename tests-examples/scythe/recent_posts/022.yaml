@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/022.sqlite
 inputs:
 #  - tests-examples/scythe/recent_posts/tables/022_1.csv
   - tests-examples/scythe/recent_posts/tables/022_2.csv
@@ -14,22 +15,19 @@ solution:
   - summarise
   - filter
   - mutate
-comment: |
-  SELECT [t0].[TrackId], [t0].[UserId], (
-      SELECT [t3].[FolloweeId]
+sql: |
+  SELECT t3.FolloweeId
+  FROM (
+      SELECT TOP (1) t2.FolloweeId
       FROM (
-          SELECT TOP (1) [t2].[FolloweeId]
-          FROM (
-              SELECT COUNT(*) AS [value], [t1].[FolloweeId]
-              FROM [Followers] AS [t1]
-              GROUP BY [t1].[FolloweeId]
-              ) AS [t2]
-          ORDER BY [t2].[value] DESC
-          ) AS [t3]
-      ) AS [MostPopularFolloweeId]
-  FROM [Tracks] AS [t0]
-  WHERE [t0].[TrackId] = @p0
-
+          SELECT COUNT(*) AS value, t1.FolloweeId
+          FROM Followers AS t1
+          GROUP BY t1.FolloweeId
+          ) AS t2
+      ORDER BY t2.value DESC
+      ) AS t3
+  ) AS MostPopularFolloweeId
+comment: |
   df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
   df3 <- df2 %>% filter(n == 3 | n > c1)
   df4 <- df3 %>% mutate(c1 = max(c1))

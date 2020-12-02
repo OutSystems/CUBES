@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/017.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/017.csv
 output: tests-examples/scythe/recent_posts/tables/017_o.csv
@@ -15,17 +16,17 @@ solution:
   - filter
   - summarise
   - left_join
-comment: |
-  https://stackoverflow.com/questions/40118180/retrieve-table-data-based-on-specific-condition-in-teradata
-
+sql: |
   select emp_id,emp_sal,emp_grp
   from (
   select e.*,
   row_number() over(partition by emp_id
                     order by case when emp_grp = 'HMCPR' then 0 else 1 end,emp_sal) as rn
-  from db_wrk.emp_sin e
+  from 017 e
   ) t
   where rn = 1;
+comment: |
+  https://stackoverflow.com/questions/40118180/retrieve-table-data-based-on-specific-condition-in-teradata
 
   df2 <- input1 %>% mutate(minemp_sal = min(emp_sal))
   df3 <- df2 %>% filter(emp_grp == 'HMCPR' | minemp_sal < emp_sal)

@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/028.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/028.csv
 output: tests-examples/scythe/recent_posts/tables/028_o.csv
@@ -13,12 +14,12 @@ solution:
   - filter
   - cross_join
   - summarise
-comment: |
+sql: |
   SELECT a.member, count(a.member) as total
-  FROM t1 a JOIN t1 b
-  WHERE a.element=b.element AND b.member=1 AND a.member > 1
+  FROM 028 a JOIN 028 b
+  WHERE a.element = b.element AND b.member=1 AND a.member > 1
   GROUP BY a.member ORDER BY total DESC
-
+comment: |
   df2 <- input1 %>% filter(Member == 1)
   df3 <- full_join(input1 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(Member != Member.other & Element.other == Element)
   df4 <- df3 %>% group_by(Member) %>% summarise(n = n()) %>% ungroup()

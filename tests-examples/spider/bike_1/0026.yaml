@@ -1,3 +1,4 @@
+db: tests-examples/spider/bike_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/bike_1/tables/weather.csv
 output: tests-examples/spider/bike_1/tables/0026.csv
@@ -9,6 +10,14 @@ columns:
 - min_dew_point_f
 - zip_code
 comment: |-
+  SELECT date , zip_code
+  FROM weather
+  WHERE min_dew_point_f <
+      (SELECT min(min_dew_point_f)
+       FROM weather
+       WHERE zip_code = 94107)
+
+sql: |-
   SELECT date , zip_code
   FROM weather
   WHERE min_dew_point_f <

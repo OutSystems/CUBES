@@ -49,70 +49,46 @@ source('loading.R')
 source('plots.R')
 source('tables.R')
 
-solved_not_solved <- function(a, b) {
-  inner_join(a, b, by = c('name', 'benchmark')) %>%
-    filter(solved.x & !solved.y) %>%
-    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
-}
+sequential %>% filter(fuzzy == 'Exec. Error')
+a <- scythe %>% inner_join(c50_16, by='name') %>% select(name, status_scythe = status.x, real_scythe = real.x, status_cubes = status.y) %>% filter(status_scythe == 1)
 
-solved_slower <- function(a, b) {
-  inner_join(a, b, by = c('name', 'benchmark')) %>%
-    filter(solved.x & solved.y & real.x >= real.y * 1.1) %>%
-    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
-}
+invsolved('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
+invsolved('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
+invsolved(exclude = c('spider', '55-tests', 'scythe/recent-posts', 'textbook'), 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
+invsolved(log = F, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
+invsolved_cpu('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
 
-basic_solved_not_solved <- function(a, b) {
-  inner_join(a, b, by = c('name', 'benchmark')) %>%
-    filter(solved.x & !solved.y)
-}
+bars(use_vbs = F, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'PatSQL' = patsql)
 
-join_all <- function(a, b) {
-  inner_join(a, b, by = c('name', 'benchmark')) %>%
-    select(name, status.x, real.x, eval.x, block.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, eval.y, block.y, blocked.y, attempts.y, loc_reached.y)
-}
+plot_cells_time('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
+plot_cells_ram('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
+scatter_real_cpu('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'CUBES-DC4' = c50_4, 'PatSQL' = patsql)
+scatter_equiv(x = 'real', 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'CUBES-DC4' = c50_4, 'PatSQL' = patsql)
 
-invsolved(legend.position = c(.275, .875), every_other = 200, 'Squares' = squares, 'Scythe' = scythe, 'Cubes-Seq' = bitenum_nosub, 'Cubes-Seq2' = sequential, 'DC' = c49_16_0f_c, 'DC2' = c50_16)
-bars(use_vbs = F, 'Squares' = squares, 'Scythe' = scythe, 'Cubes-Seq' = bitenum_nosub, 'Cubes-Seq2' = sequential, 'DC' = c49_16_0f_c, 'DC2' = c50_16)
-invsolved(legend.position = c(.275, .875), every_other = 200, 'Squares' = squares, 'Scythe' = scythe)
+scatter(patsql = patsql, seq = sequential)
+scatter(squares = squares, seq = sequential)
+scatter(patsql = patsql, dc = c50_16)
+scatter(patsql = patsql, scythe = scythe)
 
-invsolved(legend.position = c(.65, .25), every_other = 200, 'Cubes-Seq' = bitenum, 'No column annotations' = bitenum_nobit, 'No learning' = bitenum_nosub, 'No FD' = bitenum_nofd)
+plot_sql_size('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
 
-invsolved(legend.position = c(.7, .3), every_other = 200, 'Cubes-Seq' = bitenum, 'Cubes-DC16' = c49_16_0f_c,
-          'Static' = c49_16_0f_c_static,
-          'Optimal' = c49_16_0f_c_optimal,
-          'No learning' = c49_16_0f_c_no_unsat,
-          'No force split' = c49_16_0f_c_no_split)
+scythe %>%
+  filter(solved) %>%
+  summarise(m = mean(sql_size, na.rm = T))
+squares %>%
+  filter(solved) %>%
+  summarise(m = mean(sql_size, na.rm = T))
+sequential %>%
+  filter(solved) %>%
+  summarise(m = mean(sql_size, na.rm = T))
 
-bars(use_vbs = F, 'Cubes-Seq' = bitenum, 'Cubes-DC16' = c49_16_0f_c,
-     'Static' = c49_16_0f_c_static,
-     'Optimal' = c49_16_0f_c_optimal,
-     'No learning' = c49_16_0f_c_no_unsat,
-     'No force split' = c49_16_0f_c_no_split)
+instance_info %>% ggplot(aes(x = sql_size)) +
+  geom_histogram(bins = 15) +
+  facet_wrap(~benchmark, scales = 'free_y')
 
-a_all <- join_all(sequential, sequential_subsume) %>% filter(status.x == 0 & status.y == -1)
-
-join_all(sequential, sequential_subsume) %>% pivot_longer(cols = starts_with('real'), names_to = 'try')
-
-time_part_dist(filter = join_all(sequential, sequential_subsume), col = 'eval', 'No Learning from Programs' = sequential, 'Learning from Programs' = sequential_subsume)
-time_part_dist(filter = join_all(sequential, sequential_subsume), wrap = T, col = 'eval', 'No Learning from Programs' = sequential, 'Learning from Programs' = sequential_subsume)
-
-
-a_tmp1 <- inner_join(sequential, sequential_no_learning, by = c('name', 'benchmark')) %>%
-  filter(loc_reached.x != loc_reached.y) %>%
-  select(name, status.x, real.x, block.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, block.y, blocked.y, attempts.y, loc_reached.y)
-
-invsolved('-' = sequential1, '+' = sequential)
-
-scatter('squares' = squares, 'seq' = sequential)
-
-invsolved('Old No Learning' = bitenum_nosub, 'Old Learning' = bitenum, 'No Learning' = sequential, 'Learning' = sequential_subsume)
-scatter('-' = sequential1, '+' = sequential)
-invsolved('-' = c50_16, '+' = c50_16_2)
-scatter('-' = c50_16, '+' = c50_16_2)
-
-bars(use_vbs = F,
-     '\\textsc{Cubes-DC16}' = c50_16,
-     '+ optimal' = c50_16_optimal)
+plot_fuzzy(scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
+plot_fuzzy(fill_bars=T, scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
+plot_fuzzy(drop_error = T, fill_bars=T, scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
 
 intent <- bitenum %>%
   inner_join(squares, by = c('name', 'benchmark')) %>%
@@ -123,19 +99,6 @@ intent <- bitenum %>%
   ungroup() %>%
   select(name) %>%
   mutate(intent = NA)
-
-bitenum %>% summarise(a = sum(real) / 60 / 60 / 24)
-
-scatter_enum('A' = bitenum, 'B' = sequential)
-
-scatter_ram('squares' = squares, 'sequential' = sequential)
-scatter_ram('sequential' = sequential, 'scythe' = scythe)
-
-scatter('sequential' = sequential, 'no qffd' = sequential_no_qffd)
-scatter('sequential' = sequential, 'no bitenum' = sequential_no_bitvec)
-solved_not_solved(sequential_no_bitvec, sequential) %>% count()
-
-bars(use_vbs = F, '\\textsc{Squares}' = squares, '\\textsc{Scythe}' = scythe, '\\textsc{Cubes-Seq}' = sequential, '\\textsc{Cubes-Seq2}' = sequential2)
 
 #######   THESIS   ######
 
@@ -226,7 +189,7 @@ plot_pdf('parallel_solved', 1, .45,
                    '\\textsc{Cubes-Seq}' = sequential,
                    '\\textsc{Cubes-Port4}' = portfolio5_4,
                    '\\textsc{Cubes-Port8}' = portfolio5_8,
-                              #'\\textsc{Cubes-Port16}' = portfolio1,
+                                         #'\\textsc{Cubes-Port16}' = portfolio1,
                    '\\textsc{Cubes-Port16}' = portfolio5_16,
                    '\\textsc{Cubes-DC4}' = c50_4,
                    '\\textsc{Cubes-DC8}' = c50_8,
@@ -367,3 +330,34 @@ plot_pdf('results_slides', 1.2, .675,
                    '\\textsc{Cubes-Seq}' = sequential,
                    '\\textsc{Cubes-Port8}' = portfolio5_8,
                    '\\textsc{Cubes-DC16}' = c50_16))
+
+plot_pdf('seq_ablation_results', 1.2, .675,
+         invsolved(every_other = 150, point_size = 1, step_size = .75,
+                   '\\textsc{Cubes-Seq}' = sequential,
+                   'Learning from Inc. Prog.' = sequential_subsume,
+                   'No QF-FD Theory' = sequential_no_qffd,
+                   'Simple DSL' = sequential_simple_dsl,
+                   'No Inv. Prog. Deduction' = sequential_no_bitvec) + guides(color = guide_legend(nrow = 3)))
+
+plot_pdf('dc_solved_results', 1.2, .675,
+         invsolved(every_other = 150, point_size = 1, step_size = .75,
+                   '\\textsc{Cubes-Seq}' = sequential,
+                   '\\textsc{Cubes-DC4}' = c50_4,
+                   '\\textsc{Cubes-DC8}' = c50_8,
+                   '\\textsc{Cubes-DC16}' = c50_16))
+
+plot_pdf('dc_ablation_results', 1.2, .675,
+         invsolved(every_other = 150, point_size = 1, step_size = .75,
+                   '\\textsc{Cubes-DC16}' = c50_16,
+                   'Optimal' = c50_16_optimal,
+                   'Static Cube Gen.' = c50_16_static,
+                   'No Learning from Cubes' = c50_16_no_dedu,
+                   'No DSL Split' = c50_16_no_split,
+                   '\\textsc{Cubes-Seq}' = sequential))
+
+plot_pdf('port_solved_results', 1.2, .675,
+         invsolved(every_other = 150, point_size = 1, step_size = .75,
+                   '\\textsc{Cubes-Seq}' = sequential,
+                   '\\textsc{Cubes-Port4}' = portfolio5_4,
+                   '\\textsc{Cubes-Port8}' = portfolio5_8,
+                   '\\textsc{Cubes-Port16}' = portfolio5_16))

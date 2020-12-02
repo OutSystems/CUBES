@@ -1,3 +1,4 @@
+db: tests-examples/spider/department_store/tables/db.sqlite
 inputs:
 - tests-examples/spider/department_store/tables/customer_orders.csv
 output: tests-examples/spider/department_store/tables/0023.csv
@@ -9,6 +10,14 @@ columns:
 - order_date
 - order_status_code
 comment: |-
+  SELECT DISTINCT customer_id
+  FROM Customer_Orders
+  WHERE order_date >
+      (SELECT min(order_date)
+       FROM Customer_Orders
+       WHERE order_status_code = "Cancelled")
+
+sql: |-
   SELECT DISTINCT customer_id
   FROM Customer_Orders
   WHERE order_date >

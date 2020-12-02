@@ -1,3 +1,4 @@
+db: tests-examples/spider/phone_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/phone_1/tables/chip_model.csv
 - tests-examples/spider/phone_1/tables/screen_mode.csv
@@ -10,6 +11,14 @@ columns:
 - type
 - ram_mib
 comment: |-
+  SELECT T2.Hardware_Model_name
+  FROM chip_model AS T1
+  JOIN phone AS T2 ON T1.Model_name = T2.chip_model
+  JOIN screen_mode AS T3 ON T2.screen_mode = T3.Graphics_mode
+  WHERE T3.Type = "Text"
+    OR T1.RAM_MiB > 32;
+
+sql: |-
   SELECT T2.Hardware_Model_name
   FROM chip_model AS T1
   JOIN phone AS T2 ON T1.Model_name = T2.chip_model

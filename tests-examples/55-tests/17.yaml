@@ -14,6 +14,21 @@ solution:
   - natural_join3
   - filter
 loc: 3
+sql: |
+  SELECT P_id,
+         S_name
+  FROM
+    (SELECT *
+     FROM
+       (SELECT *
+        FROM df_17_1 AS LHS
+        INNER JOIN df_17_3 AS RHS ON (LHS.S_key = RHS.S_key)) AS LHS
+     INNER JOIN
+       (SELECT P_id,
+               AVG(cost) AS meancost
+        FROM df_17_1
+        GROUP BY P_id) AS RHS ON (LHS.P_id = RHS.P_id))
+  WHERE (meancost < cost)
 comment: |
   5.2.5 optimal solution
 

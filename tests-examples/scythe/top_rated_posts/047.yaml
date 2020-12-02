@@ -9,13 +9,7 @@ loc: 2
 solution:
   - summarise
   - natural_join
-comment: |
-  SELECT t1.*
-  FROM lms_attendance t1
-  WHERE t1.time = (SELECT MAX(t2.time)
-                   FROM lms_attendance t2
-                   WHERE t2.user = t1.user);
-
+sql: |
   SELECT t1.*
   FROM lms_attendance t1
   join (SELECT user, MAX(time) maxTime
@@ -23,6 +17,12 @@ comment: |
         GROUP BY user) t2
   WHERE t1.time = t2.maxTime
     AND t1.user = t2.user
+comment: |
+  SELECT t1.*
+  FROM lms_attendance t1
+  WHERE t1.time = (SELECT MAX(t2.time)
+                   FROM lms_attendance t2
+                   WHERE t2.user = t1.user);
 
   df1 <- df_i047 %>% group_by(user) %>% summarise(time = max(time)) %>% ungroup()
   df2 <- inner_join(df_i047, df1)

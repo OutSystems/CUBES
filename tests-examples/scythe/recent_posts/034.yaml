@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/034.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/034.csv
 output: tests-examples/scythe/recent_posts/tables/034_o.csv
@@ -10,22 +11,15 @@ loc: 2
 solution:
   - mutate
   - filter
+sql: |
+  select *
+  from (SELECT MATERIAL,
+               t2.DISCO_DATE,
+               DATE_UPDATE
+        FROM `034` t2
+       ) t1
+           NATURAL JOIN (SELECT MAX(DATE_UPDATE) AS DATE_UPDATE FROM `034`) t3
 comment: |
-  select * from ( SELECT
-    t1.[MFG_PART_NUMBER]
-   ,t2.[DISCO_DATE]
-    , DATE_UPDATE
-
-    FROM Test.dbo.SKU  where DATE_UPDATE=   @maxdate)   t1
-    LEFT JOIN Test.dbo.Tbl_Disco_Dates t2
-     ON t1.[MFG_PART_NUMBER] = t2.[MATERIAL]
-
-    WHERE t1.[MFG_PART_NUMBER] = 'T6C25AW#ABC'
-
-    group by
-   t1.[MFG_PART_NUMBER]
-   ,t2.[DISCO_DATE]
-
   df2 <- input1 %>% mutate(maxDATE_UPDATE = max(DATE_UPDATE))
   df3 <- df2 %>% filter(maxDATE_UPDATE <= DATE_UPDATE)
   out <- df3 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE) %>% arrange(c1)

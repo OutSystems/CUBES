@@ -1,7 +1,20 @@
+db: tests-examples/scythe/recent_posts/tables/049.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/049.csv
 output: tests-examples/scythe/recent_posts/tables/049_o.csv
 comment: |
+  SELECT sum(sum) AS t_sum,
+         type,
+         array_to_json(
+            array_agg(
+               json_build_object('id', id, 'sum', sum)
+            )
+         ) history
+  FROM history
+  GROUP BY type
+  ORDER BY type;
+
+sql: |-
   SELECT sum(sum) AS t_sum,
          type,
          array_to_json(

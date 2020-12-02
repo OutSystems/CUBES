@@ -11,6 +11,28 @@ loc: 2
 solution:
   - summarise
   - filter
+sql: |
+  SELECT age,
+         LEVEL
+  FROM
+    (SELECT age,
+            LEVEL,
+            n
+     FROM
+       (SELECT age,
+               LEVEL,
+               n,
+               MAX(n) OVER () AS zzz2,
+                           MAX(n) OVER () AS zzz3
+        FROM
+          (SELECT age,
+                  LEVEL,
+                  COUNT() AS n
+           FROM df_12_1
+           GROUP BY age,
+                    LEVEL))
+     WHERE (age != zzz2
+            AND n = zzz3))
 comment: |
   5.1.12 optimal solution
 

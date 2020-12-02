@@ -5,19 +5,19 @@ output: tests-examples/scythe/top_rated_posts/tables/o010.csv
 loc: 1
 solution:
   - anti_join
+sql: |
+  SELECT *
+    FROM   Call
+    WHERE  NOT EXISTS
+      (SELECT *
+       FROM   Phone_book
+       WHERE  Phone_book.phone_number = Call.phone_number)
 comment: |
   SELECT *
   FROM   Call
   LEFT OUTER JOIN Phone_Book
     ON (Call.phone_number = Phone_book.phone_number)
     WHERE Phone_book.phone_number IS NULL;
-
-  SELECT *
-  FROM   Call
-  WHERE  NOT EXISTS
-    (SELECT *
-     FROM   Phone_book
-     WHERE  Phone_book.phone_number = Call.phone_number)
 
   df3 <- anti_join(input2, input1, by=c('phone_number'))
   out <- df3 %>% select(id, date, phone_number) %>% arrange(id)

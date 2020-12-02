@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/009.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/009.csv
 output: tests-examples/scythe/recent_posts/tables/009_o.csv
@@ -6,11 +7,11 @@ functions:
 loc: 1
 solution:
   - summarise
+sql: |
+  SELECT c2, c4, COUNT(*) AS dup_count
+  FROM 009
+  GROUP BY c2, c4
 comment: |
-  SELECT user_id, COUNT(*) AS dup_count
-  FROM t_documents
-  GROUP BY user_id, text
-
   df2 <- input1 %>% group_by(c2, c4) %>% summarise(n = n()) %>% ungroup()
   out <- df2 %>% select(c1 = c2, c2 = c4, c3 = n)
 

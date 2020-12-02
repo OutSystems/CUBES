@@ -13,6 +13,15 @@ solution:
   - summarise
   - natural_join3
   - filter
+sql: |
+  SELECT DISTINCT S.sname
+  FROM Student S
+  WHERE S.snum IN (SELECT E.snum
+  FROM Enrolled E
+  GROUP BY E.snum
+  HAVING COUNT (*) >= ALL (SELECT COUNT (*)
+  FROM Enrolled E2
+  GROUP BY E2.snum ))
 comment: |
   5.1.10 optimal solution
 

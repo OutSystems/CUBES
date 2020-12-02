@@ -1,3 +1,4 @@
+db: tests-examples/spider/local_govt_and_lot/tables/db.sqlite
 inputs:
 - tests-examples/spider/local_govt_and_lot/tables/residents.csv
 - tests-examples/spider/local_govt_and_lot/tables/residents_services.csv
@@ -5,6 +6,15 @@ output: tests-examples/spider/local_govt_and_lot/tables/0003.csv
 functions:
 - count
 comment: |-
+  SELECT T1.resident_id,
+         T1.other_details,
+         count(*)
+  FROM Residents AS T1
+  JOIN Residents_Services AS T2 ON T1.resident_id = T2.resident_id
+  GROUP BY T1.resident_id
+  ORDER BY count(*) DESC
+
+sql: |-
   SELECT T1.resident_id,
          T1.other_details,
          count(*)

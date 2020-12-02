@@ -1,3 +1,4 @@
+db: tests-examples/spider/match_season/tables/db.sqlite
 inputs:
 - tests-examples/spider/match_season/tables/country.csv
 - tests-examples/spider/match_season/tables/match_season.csv
@@ -8,6 +9,15 @@ constants:
 columns:
 - position
 comment: |-
+  SELECT T1.Country_name
+  FROM country AS T1
+  JOIN match_season AS T2 ON T1.Country_id = T2.Country
+  WHERE T2.Position = "Forward" INTERSECT
+    SELECT T1.Country_name
+    FROM country AS T1
+    JOIN match_season AS T2 ON T1.Country_id = T2.Country WHERE T2.Position = "Defender"
+
+sql: |-
   SELECT T1.Country_name
   FROM country AS T1
   JOIN match_season AS T2 ON T1.Country_id = T2.Country

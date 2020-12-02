@@ -14,6 +14,32 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT S_name
+  FROM
+    (SELECT S_name,
+            n
+     FROM
+       (SELECT S_name,
+               n,
+               MAX(n) OVER () AS zzz4
+        FROM
+          (SELECT S_name,
+                  COUNT() AS n
+           FROM
+             (SELECT LHS.S_key AS S_key,
+                     LHS.P_id AS P_id,
+                     LHS.color AS color,
+                     RHS.S_name AS S_name
+              FROM
+                (SELECT LHS.S_key AS S_key,
+                        LHS.P_id AS P_id,
+                        RHS.color AS color
+                 FROM df_14_1 AS LHS
+                 INNER JOIN df_14_2 AS RHS ON (LHS.P_id = RHS.P_id)) AS LHS
+              INNER JOIN df_14_3 AS RHS ON (LHS.S_key = RHS.S_key))
+           GROUP BY S_name))
+     WHERE (n = zzz4))
 comment: |
   5.2.2 optimal solution
 

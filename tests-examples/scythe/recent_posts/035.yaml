@@ -1,10 +1,11 @@
+db: tests-examples/scythe/recent_posts/tables/035.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/035.csv
 output: tests-examples/scythe/recent_posts/tables/035_o.csv
 functions:
   - n
 loc: 4
-comment: |
+sql: |
   SELECT zoom,x,y,
          amount,
          ( amount / Cast(Sum(amount) OVER(partition BY zoom) AS FLOAT) ) * 100 as amt_percentage
@@ -12,13 +13,12 @@ comment: |
                  Count(*) AS amount
           FROM   percentage
           GROUP  BY zoom,x,y) a
-
-
+comment: |
   SELECT zoom,x,y,
-         Count(*) AS amount,
-         ( Count(*) / Cast(Sum(Count(*))OVER(partition BY zoom) AS FLOAT) ) * 100 AS amt_percentage
-  FROM   percentage
-  GROUP  BY zoom,x,y
+           Count(*) AS amount,
+           ( Count(*) / Cast(Sum(Count(*))OVER(partition BY zoom) AS FLOAT) ) * 100 AS amt_percentage
+    FROM   percentage
+    GROUP  BY zoom,x,y
 
   df1 <- input1 %>% group_by(zoom, x, y) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% group_by(zoom) %>% mutate(perc = n / sum(n) * 100) %>% ungroup()

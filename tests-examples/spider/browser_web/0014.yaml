@@ -1,3 +1,4 @@
+db: tests-examples/spider/browser_web/tables/db.sqlite
 inputs:
 - tests-examples/spider/browser_web/tables/web_client_accelerator.csv
 - tests-examples/spider/browser_web/tables/browser.csv
@@ -9,6 +10,17 @@ constants:
 columns:
 - name
 comment: |-
+  SELECT T3.name
+  FROM web_client_accelerator AS T1
+  JOIN accelerator_compatible_browser AS T2 ON T2.accelerator_id = T1.id
+  JOIN browser AS T3 ON T2.browser_id = T3.id
+  WHERE T1.name = 'CACHEbox' INTERSECT
+    SELECT T3.name
+    FROM web_client_accelerator AS T1
+    JOIN accelerator_compatible_browser AS T2 ON T2.accelerator_id = T1.id
+    JOIN browser AS T3 ON T2.browser_id = T3.id WHERE T1.name = 'Fasterfox'
+
+sql: |-
   SELECT T3.name
   FROM web_client_accelerator AS T1
   JOIN accelerator_compatible_browser AS T2 ON T2.accelerator_id = T1.id

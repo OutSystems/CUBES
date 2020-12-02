@@ -1,0 +1,2 @@
+# scythe/recent_posts/002
+- NULL[num]: this is the correct way to specify this instance. It is not a parsing error, rather it is a error when creating the possible aggregations. Changing to "NULL" or "" makes it so that the column is a string instead of a int (where the respective cell is "NULL" or the empty string, respectively. The query would not be synthesizer either way

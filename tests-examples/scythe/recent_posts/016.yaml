@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/016.sqlite
 inputs:
 #  - tests-examples/scythe/recent_posts/tables/016_1.csv
   - tests-examples/scythe/recent_posts/tables/016_2.csv
@@ -17,16 +18,15 @@ solution:
   - summarise
   - natural_join3
   - filter
-comment: |
-  SELECT C.Id,
-         MAX(RP.PullDt) as LastReportPullDt,
+sql: |
+  SELECT C.CustomerId,
+         MAX(C.ReportDt) as LastReportPullDt,
          COUNT(*) AS ReportCount
-  FROM Customer C
-  INNER JOIN ReportPull RP ON C.CustomerId = RP.CustomerId
+  FROM 016_2 C
   GROUP BY C.CustomerId
   HAVING COUNT(*) > 1
-  AND MAX(RP.PullDt) >= "10/19/2016"
-
+  AND MAX(C.ReportDt) >= "10/19/2016"
+comment: |
   df2 <- input1 %>% group_by(CustomerId) %>% summarise(maxReportDt = max(ReportDt)) %>% ungroup()
   df3 <- input1 %>% group_by(CustomerId) %>% summarise(n = n()) %>% ungroup()
   df4 <- inner_join(df2, df3) %>% inner_join(input1)

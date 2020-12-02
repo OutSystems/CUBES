@@ -6,7 +6,7 @@ functions:
 columns:
   - Birthyear
 loc: 2
-comment: |
+sql: |
   SELECT Name, City, Birthyear, COUNT(*) AS ct
   FROM table
   WHERE Birthyear IN (SELECT MIN(Birthyear)
@@ -14,7 +14,7 @@ comment: |
                  GROUP by City)
   GROUP BY City
   ORDER BY Birthyear DESC LIMIT 3;
-
+comment: |
   df1 <- input1 %>% group_by(City) %>% summarise(minBirthyear = min(Birthyear)) %>% ungroup()
   df2 <- inner_join(df1, input1, by=c('minBirthyear' = 'Birthyear','City' = 'City'), suffix = c('', '.other'))
   out <- df2 %>% select(Name, City, minBirthyear)

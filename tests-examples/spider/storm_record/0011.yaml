@@ -1,3 +1,4 @@
+db: tests-examples/spider/storm_record/tables/db.sqlite
 inputs:
 - tests-examples/spider/storm_record/tables/region.csv
 - tests-examples/spider/storm_record/tables/affected_region.csv
@@ -5,6 +6,13 @@ output: tests-examples/spider/storm_record/tables/0011.csv
 columns:
 - region_id
 comment: |-
+  SELECT region_name
+  FROM region
+  WHERE region_id NOT IN
+      (SELECT region_id
+       FROM affected_region)
+
+sql: |-
   SELECT region_name
   FROM region
   WHERE region_id NOT IN

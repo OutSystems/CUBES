@@ -119,8 +119,8 @@ class Specification:
         replacements = {}
 
         for col in df.columns:
-            new_col, n = re.subn('[^a-zA-Z0-9._]', '.', col)
-            new_col, n2 = re.subn('^([0-9])', r'col_\1', new_col)
+            new_col, n = re.subn('[^a-zA-Z0-9_]', '_', col)
+            new_col, n2 = re.subn('^([0-9_])', r'col_\1', new_col)
             if n + n2:
                 logger.warning('Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!')
                 logger.warning('Replacing column "%s" in table %s with %s', col, path, new_col)
@@ -344,7 +344,6 @@ class Specification:
                     if any(pandas.isna(data_frame[column])):
                         return True
                 else:
-                    print(constant, column)
                     if constant in data_frame[column].dropna().values:
                         return True
         return False
@@ -352,16 +351,16 @@ class Specification:
     def __str__(self) -> str:
         buffer = io.StringIO()
         buffer.write(repr(self.generate_dsl()))
-        buffer.write('\nMore restrictive:\n')
-        for type in self.condition_generator.more_restrictive.graphs.keys():
-            max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
-            buffer.write(f'\t{type}:\n')
-            for key in list(self.condition_generator.more_restrictive.graphs[type]):
-                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
-        buffer.write('Less restrictive:\n')
-        for type in self.condition_generator.less_restrictive.graphs.keys():
-            max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
-            buffer.write(f'\t{type}:\n')
-            for key in list(self.condition_generator.less_restrictive.graphs[type]):
-                buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
+        # buffer.write('\nMore restrictive:\n')
+        # for type in self.condition_generator.more_restrictive.graphs.keys():
+        #     max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
+        #     buffer.write(f'\t{type}:\n')
+        #     for key in list(self.condition_generator.more_restrictive.graphs[type]):
+        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
+        # buffer.write('Less restrictive:\n')
+        # for type in self.condition_generator.less_restrictive.graphs.keys():
+        #     max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
+        #     buffer.write(f'\t{type}:\n')
+        #     for key in list(self.condition_generator.less_restrictive.graphs[type]):
+        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
         return buffer.getvalue()

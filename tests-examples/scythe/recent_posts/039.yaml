@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/039.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/039.csv
 output: tests-examples/scythe/recent_posts/tables/039_o.csv
@@ -32,3 +33,28 @@ comment: |
   FROM total
   GROUP BY rollup (zoom)
   order by zoom
+sql: |-
+  select zoom, point, size
+  FROM (
+    SELECT zoom::text as zoom,
+           zoom as zoom_value,
+           count(*) AS point,
+           SUM(size) AS size,
+           1 as sort_order
+    FROM total
+    GROUP BY zoom
+    UNION ALL
+    SELECT 'Total',
+           null,
+           count(*) AS point,
+           SUM(size) AS size,
+           2 as sort_order
+    FROM total
+  ) t
+  order by sort_order, zoom_value;
+  SELECT case when grouping(zoom) = 1 then 'Total' else zoom::text end,
+         count(*) AS point,
+         SUM(size) AS size
+  FROM total
+  GROUP BY rollup (zoom)
+  order by zoomm

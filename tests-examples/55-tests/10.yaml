@@ -13,6 +13,26 @@ solution:
   - natural_join
   - summarise
   - filter
+sql: |
+  SELECT S_name
+  FROM
+    (SELECT S_name,
+            n
+     FROM
+       (SELECT S_name,
+               n,
+               MAX(n) OVER () AS zzz3
+        FROM
+          (SELECT S_name,
+                  COUNT() AS n
+           FROM
+             (SELECT LHS.S_key AS S_key,
+                     LHS.C_name AS C_name,
+                     RHS.S_name AS S_name
+              FROM df_10_1 AS LHS
+              INNER JOIN df_10_2 AS RHS ON (LHS.S_key = RHS.S_key))
+           GROUP BY S_name))
+     WHERE (n = zzz3))
 comment: |
   # 5.1.10 optimal solution
 

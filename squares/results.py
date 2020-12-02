@@ -52,6 +52,7 @@ def handle_sigint(signal, stackframe):
 
 
 def beautifier(sql):
+    sql = sql.replace('.other`', '_other`')
     sql = re.sub(r"""`(?=([^"'\\]*(\\.|"([^"'\\]*\\.)*[^"'\\]*"))*[^"']*$)""", '', sql)  # remove backticks if not inside strings
     return sqlparse.format(sql, reindent=True, keyword_case='upper')
 

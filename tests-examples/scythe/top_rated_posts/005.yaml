@@ -12,16 +12,16 @@ solution:
   - summarise
   - summarise
   - left_join
-comment: |
+sql: |
   SELECT *
-  FROM (SELECT p.customer, p.total, MIN(p.id) AS min_id
-        FROM PURCHASES
-        GROUP BY p.customer, p.total) x
-  JOIN (SELECT p.customer, MAX(total) AS max_total
-  			 FROM PURCHASES p
-  			 GROUP BY p.customer) y
-  ON y.customer = x.customer AND y.max_total = x.total
-
+    FROM (SELECT p.customer, p.total, MIN(p.id) AS min_id
+          FROM PURCHASES
+          GROUP BY p.customer, p.total) x
+    JOIN (SELECT p.customer, MAX(total) AS max_total
+     FROM PURCHASES p
+     GROUP BY p.customer) y
+    ON y.customer = x.customer AND y.max_total = x.total
+comment: |
   df2 <- input1 %>% group_by(customer) %>% summarise(total = max(total)) %>% ungroup()
   df3 <- input1 %>% group_by(total) %>% summarise(id = min(id)) %>% ungroup()
   df4 <- left_join(df2, df3)

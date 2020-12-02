@@ -1,3 +1,4 @@
+db: tests-examples/spider/insurance_policies/tables/db.sqlite
 inputs:
 - tests-examples/spider/insurance_policies/tables/claims.csv
 output: tests-examples/spider/insurance_policies/tables/0007.csv
@@ -6,6 +7,13 @@ functions:
 columns:
 - amount_settled
 comment: |-
+  SELECT Date_Claim_Made
+  FROM Claims
+  WHERE Amount_Settled <=
+      (SELECT avg(Amount_Settled)
+       FROM Claims)
+
+sql: |-
   SELECT Date_Claim_Made
   FROM Claims
   WHERE Amount_Settled <=

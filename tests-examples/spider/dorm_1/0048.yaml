@@ -1,3 +1,4 @@
+db: tests-examples/spider/dorm_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/dorm_1/tables/student.csv
 - tests-examples/spider/dorm_1/tables/dorm_amenity.csv
@@ -10,6 +11,17 @@ columns:
 - dormid
 - amenity_name
 comment: |-
+  SELECT T1.fname,
+         T1.lname
+  FROM student AS T1
+  JOIN lives_in AS T2 ON T1.stuid = T2.stuid
+  WHERE T2.dormid IN
+      (SELECT T3.dormid
+       FROM has_amenity AS T3
+       JOIN dorm_amenity AS T4 ON T3.amenid = T4.amenid
+       WHERE T4.amenity_name = 'TV Lounge')
+
+sql: |-
   SELECT T1.fname,
          T1.lname
   FROM student AS T1

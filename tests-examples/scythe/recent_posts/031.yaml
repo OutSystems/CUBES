@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/031.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/031_1.csv
   - tests-examples/scythe/recent_posts/tables/031_2.csv
@@ -12,13 +13,13 @@ loc: 2
 solution:
   - left_join
   - filter
+sql: |
+  Select `031_2`.channelID, accountID, role
+  From `031_2`
+           INNER JOIN `031_1`
+                      On `031_2`.channelID = `031_1`.channelID
+  Where AccountID = 'Dave' AND type = 'public'
 comment: |
-  SELECT (stuff)
-  FROM ChatChannels CC
-  WHERE CC.type = 'Public'
-    AND CC.channelID NOT IN
-    (SELECT channelID FROM ChatChannelMembers WHERE AccountID = 'Dave')
-
   df3 <- left_join(input2, input1)
   df4 <- df3 %>% filter(type == 'public' & accountID == 'Dave')
   out <- df4 %>% select(c1 = channelID, c2 = accountID, c3 = role)

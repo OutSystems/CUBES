@@ -1,3 +1,4 @@
+db: tests-examples/spider/apartment_rentals/tables/db.sqlite
 inputs:
 - tests-examples/spider/apartment_rentals/tables/apartments.csv
 - tests-examples/spider/apartment_rentals/tables/view_unit_status.csv
@@ -8,6 +9,15 @@ constants:
 columns:
 - available_yn
 comment: |-
+  SELECT T1.apt_number
+  FROM Apartments AS T1
+  JOIN View_Unit_Status AS T2 ON T1.apt_id = T2.apt_id
+  WHERE T2.available_yn = 0 INTERSECT
+    SELECT T1.apt_number
+    FROM Apartments AS T1
+    JOIN View_Unit_Status AS T2 ON T1.apt_id = T2.apt_id WHERE T2.available_yn = 1
+
+sql: |-
   SELECT T1.apt_number
   FROM Apartments AS T1
   JOIN View_Unit_Status AS T2 ON T1.apt_id = T2.apt_id

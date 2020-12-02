@@ -1,3 +1,4 @@
+db: tests-examples/spider/insurance_fnol/tables/db.sqlite
 inputs:
 - tests-examples/spider/insurance_fnol/tables/customers.csv
 - tests-examples/spider/insurance_fnol/tables/services.csv
@@ -9,6 +10,14 @@ constants:
 columns:
 - service_name
 comment: |-
+  SELECT t1.customer_name
+  FROM customers AS t1
+  JOIN first_notification_of_loss AS t2 ON t1.customer_id = t2.customer_id
+  JOIN services AS t3 ON t2.service_id = t3.service_id
+  WHERE t3.service_name = "Close a policy"
+    OR t3.service_name = "Upgrade a policy"
+
+sql: |-
   SELECT t1.customer_name
   FROM customers AS t1
   JOIN first_notification_of_loss AS t2 ON t1.customer_id = t2.customer_id

@@ -16,6 +16,31 @@ solution:
   - summarise
   - filter
   - anti_join
+sql: |
+  SELECT F_name,
+         n
+  FROM
+    (SELECT *
+     FROM
+       (SELECT F_name,
+               ID_key,
+               COUNT() AS n
+        FROM
+          (SELECT LHS.ID_class AS ID_class,
+                  LHS.ID_key AS ID_key,
+                  LHS.Room AS Room,
+                  RHS.F_name AS F_name
+           FROM df_9_1 AS LHS
+           LEFT JOIN df_9_2 AS RHS ON (LHS.ID_key = RHS.ID_key))
+        GROUP BY F_name,
+                 ID_key) AS LHS
+     WHERE NOT EXISTS
+         (SELECT 1
+          FROM
+            (SELECT *
+             FROM df_9_1
+             WHERE (Room != 'R128')) AS RHS
+          WHERE (LHS.ID_key = RHS.ID_key) ))
 comment: |
   5.1.9 optimal solution
 

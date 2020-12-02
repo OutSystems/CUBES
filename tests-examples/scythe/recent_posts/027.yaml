@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/027.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/027.csv
 output: tests-examples/scythe/recent_posts/tables/027_o.csv
@@ -6,7 +7,7 @@ solution:
   - mutate
   - summarise
   - natural_join
-comment: |
+sql: |
   SELECT M1.*,
   (SELECT calls From mytable1 M2 where M2.ts=M1.ts and M2.s_no=M1.s_no) as calls
   FROM
@@ -19,7 +20,7 @@ comment: |
       ) m
       group by m.s_no, m.bucket_window
   ) M1
-
+comment: |
   df1 <- input1 %>% mutate(bucket = hour(ts)*2 + minute(ts) %/% 30)
   df2 <- df1 %>% group_by(s_no, bucket) %>% summarise(ts = max(ts)) %>% ungroup()
   df3 <- df2 %>% inner_join(input1)

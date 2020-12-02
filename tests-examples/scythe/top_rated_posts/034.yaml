@@ -9,7 +9,7 @@ loc: 2
 solution:
   - summarise
   - inner_join
-comment: |
+sql: |
   SELECT t.Train, t.Dest, r.MaxTime
   FROM (
         SELECT Train, MAX(Time) as MaxTime
@@ -18,7 +18,7 @@ comment: |
   ) r
   INNER JOIN TrainTable t
   ON t.Train = r.Train AND t.Time = r.MaxTime
-
+comment: |
   df2 <- input1 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
   df3 <- inner_join(df2, input1, by=c('maxTime' = 'Time'), suffix = c('', '.other')) %>% mutate(Time = maxTime)
   out <- df3 %>% select(Train, Dest, Time = maxTime) %>% arrange(Train)

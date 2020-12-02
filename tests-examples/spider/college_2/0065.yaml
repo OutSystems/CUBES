@@ -1,3 +1,4 @@
+db: tests-examples/spider/college_2/tables/db.sqlite
 inputs:
 - tests-examples/spider/college_2/tables/course.csv
 - tests-examples/spider/college_2/tables/student.csv
@@ -9,6 +10,15 @@ columns:
 - id
 - dept_name
 comment: |-
+  SELECT name
+  FROM student
+  WHERE id NOT IN
+      (SELECT T1.id
+       FROM takes AS T1
+       JOIN course AS T2 ON T1.course_id = T2.course_id
+       WHERE T2.dept_name = 'Biology')
+
+sql: |-
   SELECT name
   FROM student
   WHERE id NOT IN

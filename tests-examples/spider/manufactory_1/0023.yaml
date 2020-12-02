@@ -1,3 +1,4 @@
+db: tests-examples/spider/manufactory_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/manufactory_1/tables/manufacturers.csv
 - tests-examples/spider/manufactory_1/tables/products.csv
@@ -9,6 +10,15 @@ functions:
 columns:
 - name
 comment: |-
+  SELECT count(DISTINCT name)
+  FROM products
+  WHERE name NOT IN
+      (SELECT T1.name
+       FROM products AS T1
+       JOIN manufacturers AS T2 ON T1.Manufacturer = T2.code
+       WHERE T2.name = 'Sony')
+
+sql: |-
   SELECT count(DISTINCT name)
   FROM products
   WHERE name NOT IN

@@ -1,11 +1,15 @@
 status_levels <- rev(c(0, 3, 2, 4, -2, -1, 5, 1, 143))
 status_meanings <- rev(c('R and SQL', 'Non-optimal', 'Just R', 'Just R Non-optimal', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
-status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#CC6387", "#cc241d", "#653e9c", "#3c3836", '#000000'))
+status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#4B44CC", "#cc241d", "#653e9c", "#3c3836", '#000000'))
+
+fuzzy_levels <- rev(c(0, 1, 2, 3, -1))
+fuzzy_meanings <- rev(c('Correct', 'Wrong Output', 'Wrong Fuzzy', 'Timeout', 'Exec. Error'))
+fuzzy_colors <- rev(c("#57853C", "#B4560E", "#d79921", "#4B44CC", "#cc241d"))
 
 instance_info <- read_csv('instances.csv', col_types = cols(
   name = col_character(),
-  loc = col_integer()
-))
+  .default = '?'
+)) %>% mutate(benchmark = ifelse(grepl("spider", name, fixed = TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))))
 
 prr <- function(x) {
   print(x)
@@ -46,6 +50,12 @@ load_result_squares <- function(file) {
     mutate(benchmark = ifelse(grepl("spider", name, fixed = TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
     filter(!(benchmark %in% test_filter)) %>%
     left_join(instance_info)
+  if (file.exists(paste0('fuzzy/', file, '.csv'))) {
+    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default='?', base_eq='c'))
+    result <- left_join(result, result_fuzzy) %>%
+      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == 10, 0, 2))))) %>%
+      mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
+  }
   gc()
   result
 }
@@ -86,6 +96,12 @@ load_result_file <- function(file) {
     filter(!skewed) %>%
     select(-log, -log_content, -log_suff, -several_runs, -skewed) %>%
     left_join(instance_info)
+  if (file.exists(paste0('fuzzy/', file, '.csv'))) {
+    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default='?', base_eq = 'c'))
+    result <- left_join(result, result_fuzzy) %>%
+      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == 10, 0, 2))))) %>%
+      mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
+  }
   gc()
   result
 }
@@ -173,6 +189,7 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
 {
   squares <- load_result_squares('squares')
   scythe <- load_result_squares('scythe')
+  patsql <- load_result_squares('patsql')
 
   #single <- load_result_file('single')
   #single_np <- load_result_file('single_np')

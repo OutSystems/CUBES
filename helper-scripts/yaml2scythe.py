@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 import argparse
+import datetime
 
 import yaml
 
 if __name__ == '__main__':
     parser = argparse.parser = argparse.ArgumentParser(description='Convert yaml spec file to old \'.in\' file.')
     parser.add_argument('input', metavar='INPUT')
-    parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
     with open(args.input) as f:
@@ -20,12 +20,12 @@ if __name__ == '__main__':
             result += f.read()
         result += '\n'
 
-    result += '#output\n\n'
+    result += '\n#output\n\n'
     with open(spec['output']) as f:
         result += f.read()
     result += '\n'
 
-    result += '#constraint\n{\n'
+    result += '\n#constraint\n{\n'
 
     if 'const' in spec:
         spec['constants'] = spec['const']
@@ -39,10 +39,13 @@ if __name__ == '__main__':
     if 'aggregation_functions' not in spec:
         spec['aggregation_functions'] = []
 
-    result += '"constants": ' + repr(spec['constants']) + ',\n'
+    if 'n' in spec['aggregation_functions']:
+        spec['aggregation_functions'].remove('n')
+        spec['aggregation_functions'].append('count')
+
+    result += '"constants": ' + repr(list(map(lambda x: str(x) if isinstance(x, datetime.date) else x, spec['constants']))) + ',\n'
     result += '"aggregation_functions": ' + repr(spec['aggregation_functions'])
 
     result += '\n}\n'
 
-    with open(args.output, 'w') as f:
-        f.write(result)
+    print(result)

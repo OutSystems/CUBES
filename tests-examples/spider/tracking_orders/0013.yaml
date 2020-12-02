@@ -1,3 +1,4 @@
+db: tests-examples/spider/tracking_orders/tables/db.sqlite
 inputs:
 - tests-examples/spider/tracking_orders/tables/customers.csv
 - tests-examples/spider/tracking_orders/tables/orders.csv
@@ -8,6 +9,15 @@ constants:
 columns:
 - order_status
 comment: |-
+  SELECT T1.customer_name
+  FROM customers AS T1
+  JOIN orders AS T2 ON T1.customer_id = T2.customer_id
+  WHERE T2.order_status = "On Road" INTERSECT
+    SELECT T1.customer_name
+    FROM customers AS T1
+    JOIN orders AS T2 ON T1.customer_id = T2.customer_id WHERE T2.order_status = "Shipped"
+
+sql: |-
   SELECT T1.customer_name
   FROM customers AS T1
   JOIN orders AS T2 ON T1.customer_id = T2.customer_id

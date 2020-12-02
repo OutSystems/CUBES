@@ -1,3 +1,4 @@
+db: tests-examples/spider/station_weather/tables/db.sqlite
 inputs:
 - tests-examples/spider/station_weather/tables/station.csv
 - tests-examples/spider/station_weather/tables/weekly_weather.csv
@@ -8,6 +9,15 @@ functions:
 columns:
 - high_temperature
 comment: |-
+  SELECT t2.id,
+         t2.local_authority
+  FROM weekly_weather AS t1
+  JOIN station AS t2 ON t1.station_id = t2.id
+  GROUP BY t1.station_id
+  ORDER BY avg(high_temperature) DESC
+  LIMIT 1
+
+sql: |-
   SELECT t2.id,
          t2.local_authority
   FROM weekly_weather AS t1

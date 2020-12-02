@@ -13,6 +13,18 @@ solution:
   - filter
   - summarise
   - natural_join
+sql: |
+  SELECT S.age, S.level
+  FROM Student S
+  GROUP BY S.age, S.level,
+  HAVING S.level IN (SELECT S1.level
+  FROM Student S1
+  WHERE S1.age = S.age
+  GROUP BY S1.level, S1.age
+  HAVING COUNT (*) >= ALL (SELECT COUNT (*)
+  FROM Student S2
+  WHERE s1.age = S2.age
+  GROUP BY S2.level, S2.age))
 comment: |
   5.1.12 optimal solution
 

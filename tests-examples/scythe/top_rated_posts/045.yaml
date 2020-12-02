@@ -10,7 +10,7 @@ solution:
   - summarise
   - cross_join
   - filter
-comment: |
+sql: |
   SELECT
    user_id ,
    COUNT(*) count
@@ -22,29 +22,29 @@ comment: |
    date
   Having
   COUNT(*) > 1
+comment: |
+  SELECT
+     user_id,
+     account_no ,
+     date,
+         COUNT(*)
+  FROM
+     (SELECT DISTINCT
+             user_id,
+             account_no ,
+             zip,
+             date
+          FROM
+             payment
 
-   SELECT
-      user_id,
-      account_no ,
-      date,
-          COUNT(*)
-   FROM
-      (SELECT DISTINCT
-              user_id,
-              account_no ,
-              zip,
-              date
-           FROM
-              payment
+         )
+         payment
+  GROUP BY
 
-          )
-          payment
-   GROUP BY
+     user_id,
+     account_no ,
 
-      user_id,
-      account_no ,
-
-      date
+     date
   HAVING COUNT(*) > 1
 
   df1 <- df_i045 %>% group_by(account_no,date) %>% summarise(n = n()) %>% ungroup()

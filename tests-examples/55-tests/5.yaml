@@ -13,6 +13,28 @@ solution:
   - natural_join
   - summarise
   - filter
+sql: |
+  SELECT F_name
+  FROM
+    (SELECT F_key,
+            F_name,
+            n
+     FROM
+       (SELECT F_key,
+               F_name,
+               n,
+               MAX(n) OVER () AS zzz3
+        FROM
+          (SELECT LHS.F_key AS F_key,
+                  LHS.F_name AS F_name,
+                  RHS.n AS n
+           FROM df_5_2 AS LHS
+           LEFT JOIN
+             (SELECT F_key,
+                     COUNT() AS n
+              FROM df_5_1
+              GROUP BY F_key) AS RHS ON (LHS.F_key = RHS.F_key)))
+     WHERE (n = zzz3))
 comment: |
   5.1.5 optimal solution
 

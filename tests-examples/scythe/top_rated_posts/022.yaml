@@ -8,6 +8,16 @@ columns:
 loc: 1
 solution:
   - mutate
+sql: |
+  SELECT AVG(dd.val) as median_val
+  FROM (
+  SELECT d.val, @rownum:=@rownum+1 as `row_number`, @total_rows:=@rownum
+    FROM data d, (SELECT @rownum:=0) r
+    WHERE d.val is NOT NULL
+    -- put some where clause here
+    ORDER BY d.val
+  ) as dd
+  WHERE dd.row_number IN ( FLOOR((@total_rows+1)/2), FLOOR((@total_rows+2)/2) );
 comment: |
   df2 <- input1 %>% mutate(medianval = median(val))
   out <- df2 %>% select(median = medianval) %>% distinct() %>% arrange(median)

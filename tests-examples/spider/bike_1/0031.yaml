@@ -1,3 +1,4 @@
+db: tests-examples/spider/bike_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/bike_1/tables/station.csv
 - tests-examples/spider/bike_1/tables/status.csv
@@ -11,6 +12,16 @@ columns:
 - lat
 - bikes_available
 comment: |-
+  SELECT id
+  FROM station
+  WHERE lat > 37.4
+  EXCEPT
+  SELECT station_id
+  FROM status
+  GROUP BY station_id
+  HAVING min(bikes_available) < 7
+
+sql: |-
   SELECT id
   FROM station
   WHERE lat > 37.4

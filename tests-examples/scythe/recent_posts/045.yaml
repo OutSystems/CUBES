@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/045.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/045_1.csv
   - tests-examples/scythe/recent_posts/tables/045_2.csv
@@ -10,13 +11,13 @@ loc: 2
 solution:
   - summarise
   - left_join
-comment: |
+sql: |
   SELECT menu.name, sum(orderregel.quantity)    as quantity
-    FROM `menu`
-    LEFT JOIN orderregel
-    on menu.menu_id = orderregel. menu_id
-    group by menu_id
-
+    FROM 045_1 menu
+    LEFT JOIN 045_2 orderregel
+    on menu.menu_id = orderregel.menu_id
+    group by menu.menu_id
+comment: |
   df3 <- input2 %>% group_by(Menu_id) %>% summarise(sumQuantity = sum(Quantity)) %>% ungroup()
   df4 <- left_join(input1, df3)
   out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity)

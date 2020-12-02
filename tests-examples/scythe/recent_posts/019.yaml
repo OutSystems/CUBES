@@ -1,3 +1,4 @@
+db: tests-examples/scythe/recent_posts/tables/019.sqlite
 inputs:
   - tests-examples/scythe/recent_posts/tables/019.csv
 output: tests-examples/scythe/recent_posts/tables/019_o.csv
@@ -14,13 +15,11 @@ solution:
   - mutate
   - cross_join
   - filter
-comment: |
+sql: |
   select *
-  from tablename t1
-  where not exists (select * from tablename t2
-                    where t2.Balance > 0
-                      and t2.date > t1.date)
-
+  from `019`
+  where date > (select max(date) from `019` where balance > 0)
+comment: |
   mutate(input0, 'maxBalance = max(Balance)')
   cross_join(line0, input0, 'maxBalance == Balance.other & Date.other < Date')
   filter(line1, 'Balance > 0 | maxBalance >= 0')

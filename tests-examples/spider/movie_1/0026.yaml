@@ -1,3 +1,4 @@
+db: tests-examples/spider/movie_1/tables/db.sqlite
 inputs:
 - tests-examples/spider/movie_1/tables/movie.csv
 - tests-examples/spider/movie_1/tables/reviewer.csv
@@ -8,6 +9,16 @@ constants:
 columns:
 - name
 comment: |-
+  SELECT DISTINCT title
+  FROM Movie
+  EXCEPT
+  SELECT T2.title
+  FROM Rating AS T1
+  JOIN Movie AS T2 ON T1.mID = T2.mID
+  JOIN Reviewer AS T3 ON T1.rID = T3.rID
+  WHERE T3.name = 'Chris Jackson'
+
+sql: |-
   SELECT DISTINCT title
   FROM Movie
   EXCEPT
