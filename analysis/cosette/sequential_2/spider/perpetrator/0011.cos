@@ -1,0 +1,57 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select t1.name
+from df_people as t1
+join df_perpetrator as t2 on t1.people_id = t2.people_id
+where t2.country = "china"
+  or t2.country = "japan"`;
+
+query q2
+`select name
+from
+  (select lhs.perpetrator_id as perpetrator_id,
+          lhs.people_id as people_id,
+          lhs.date as date,
+          lhs.year as year,
+          lhs.location as location,
+          lhs.country as country,
+          lhs.killed as killed,
+          lhs.injured as injured,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.weight as weight,
+          lhs.home.town as home.town
+   from
+     (select lhs.perpetrator_id as perpetrator_id,
+             lhs.people_id as people_id,
+             lhs.date as date,
+             lhs.year as year,
+             lhs.location as location,
+             lhs.country as country,
+             lhs.killed as killed,
+             lhs.injured as injured,
+             rhs.name as name,
+             rhs.height as height,
+             rhs.weight as weight,
+             rhs.home.town as home.town
+      from df_perpetrator as lhs
+      inner join df_people as rhs on (lhs.people_id = rhs.people_id)) as lhs
+   inner join
+     (select *
+      from df_perpetrator df_perpetrator
+      where (country = 'china'
+             or country = 'japan')) as rhs on (lhs.perpetrator_id = rhs.perpetrator_id
+                                                 and lhs.people_id = rhs.people_id
+                                                 and lhs.date = rhs.date
+                                                 and lhs.year = rhs.year
+                                                 and lhs.location = rhs.location
+                                                 and lhs.country = rhs.country
+                                                 and lhs.killed = rhs.killed
+                                                 and lhs.injured = rhs.injured))`;
+
+verify q1 q2;

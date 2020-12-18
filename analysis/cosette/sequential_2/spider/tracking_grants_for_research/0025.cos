@@ -1,0 +1,37 @@
+schema df_documents(document_id:int, document_type_code:str, grant_id:int, sent_date:str, response_received_date:str, other_details:str);
+
+table df_documents(df_documents);
+
+query q1
+`select grant_id,
+       count(*)
+from df_documents df_documents
+group by grant_id
+
+limit 1`;
+
+query q2
+`select grant_id.other as grant_id,
+       grant_id as count...
+from
+  (select lhs.grant_id as grant_id,
+          lhs.other_details as other_details,
+          lhs.n as n,
+          rhs.grant_id as grant_id.other,
+          rhs.other_details as other_details.other
+   from
+     (select grant_id,
+             other_details,
+             count(*) as n
+      from df_documents df_documents
+      group by grant_id,
+               other_details) as lhs
+   inner join
+     (select grant_id,
+             other_details,
+             count(*) as n
+      from df_documents df_documents
+      group by grant_id,
+               other_details) as rhs on (lhs.grant_id = rhs.n))`;
+
+verify q1 q2;

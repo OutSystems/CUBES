@@ -1,0 +1,44 @@
+schema df_buildings(id:int, name:str, city:str, height:int, stories:int, status:str);
+schema df_office_locations(building_id:int, company_id:int, move_in_year:int);
+
+table df_buildings(df_buildings);
+table df_office_locations(df_office_locations);
+
+query q1
+`select name
+from df_buildings df_buildings
+where id not in
+    (select building_id
+     from df_office_locations df_office_locations)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_buildings as lhs
+   where not exists
+       (select 1
+        from
+          (select id,
+                  name,
+                  city,
+                  height,
+                  stories,
+                  status,
+                  company_id,
+                  move_in_year,
+                  id as building_id
+           from
+             (select lhs.id as id,
+                     lhs.name as name,
+                     lhs.city as city,
+                     lhs.height as height,
+                     lhs.stories as stories,
+                     lhs.status as status,
+                     rhs.company_id as company_id,
+                     rhs.move_in_year as move_in_year
+              from df_buildings as lhs
+              inner join df_office_locations as rhs on (lhs.id = rhs.building_id))) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

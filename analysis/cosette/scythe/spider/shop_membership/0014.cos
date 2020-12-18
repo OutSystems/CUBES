@@ -1,0 +1,30 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+schema df_membership_register_branch(member_id:int, branch_id:int, register_year:int);
+
+table df_branch(df_branch);
+table df_membership_register_branch(df_membership_register_branch);
+
+query q1
+`select name,
+       city
+from df_branch df_branch
+where branch_id not in
+    (select branch_id
+     from df_membership_register_branch df_membership_register_branch)`;
+
+query q2
+`select t3.name,t3.city
+ from
+  (select
+          t4.register_year, max(t4.member_id) as max_member_id
+        from
+          (select *
+             from
+              input0
+             where input0.branch_id < 5.0) as t4
+        group by
+          t4.register_year) as t2 join 
+      input as t1 as t3
+ where t3.max_member_id = t3.branch_id`;
+
+verify q1 q2;

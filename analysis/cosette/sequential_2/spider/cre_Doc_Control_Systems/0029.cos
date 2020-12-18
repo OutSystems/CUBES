@@ -1,0 +1,22 @@
+schema df_draft_copies(document_id:int, draft_number:int, copy_number:int);
+
+table df_draft_copies(df_draft_copies);
+
+query q1
+`select document_id,
+       count(*)
+from df_draft_copies df_draft_copies
+group by document_id
+having count(*) > 1`;
+
+query q2
+`select document_id,
+       n as count...
+from
+  (select document_id,
+          count(*) as n
+   from df_draft_copies df_draft_copies
+   group by document_id)
+where (n != 1.0)`;
+
+verify q1 q2;

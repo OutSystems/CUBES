@@ -1,0 +1,41 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select ppos
+from df_tryout df_tryout
+group by ppos
+
+limit 1`;
+
+query q2
+`joining, by = "cname"
+joining, by = c("decision", "n")
+select ppos
+from
+  (select pid,
+          cname,
+          ppos,
+          decision,
+          n
+   from
+     (select pid,
+             cname,
+             ppos,
+             decision,
+             n
+      from input0 as lhs
+      inner join
+        (select cname,
+                count(*) as n
+         from input0
+         group by cname) as rhs on (lhs.cname = rhs.cname)) as lhs
+   inner join
+     (select decision,
+             count(*) as n
+      from input0
+      group by decision) as rhs on (lhs.decision = rhs.decision
+                                        and lhs.n = rhs.n))`;
+
+verify q1 q2;

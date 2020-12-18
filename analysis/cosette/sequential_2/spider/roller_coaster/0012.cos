@@ -1,0 +1,33 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+schema df_country(country_id:int, name:str, population:int, area:int, languages:str);
+
+table df_roller_coaster(df_roller_coaster);
+table df_country(df_country);
+
+query q1
+`select t2.name,
+       t1.name
+from df_country as t1
+join df_roller_coaster as t2 on t1.country_id = t2.country_id`;
+
+query q2
+`select name.other as name...1,
+                           name as name...2
+from
+  (select lhs.country_id as country_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.area as area,
+          lhs.languages as languages,
+          rhs.roller_coaster_id as roller_coaster_id,
+          rhs.name as name.other,
+          rhs.park as park,
+          rhs.length as length,
+          rhs.height as height,
+          rhs.speed as speed,
+          rhs.opened as opened,
+          rhs.status as status
+   from df_country as lhs
+   inner join df_roller_coaster as rhs on (lhs.country_id = rhs.country_id))`;
+
+verify q1 q2;

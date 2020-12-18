@@ -1,0 +1,24 @@
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+
+table df_performance(df_performance);
+
+query q1
+`select host
+from df_performance df_performance`;
+
+query q2
+`select host
+from
+  (select lhs.performance_id as performance_id,
+          lhs.date as date,
+          lhs.host as host,
+          lhs.location as location,
+          lhs.attendance as attendance,
+          rhs.host as host.other,
+          rhs.location as location.other,
+          rhs.attendance as attendance.other
+   from df_performance as lhs
+   inner join df_performance as rhs on (lhs.date = rhs.date
+                                        and lhs.performance_id = rhs.performance_id))`;
+
+verify q1 q2;

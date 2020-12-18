@@ -1,0 +1,28 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select cust_name
+from df_customer df_customer
+except
+select t1.cust_name
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+where t2.loan_type = 'mortgages'`;
+
+query q2
+`select t2.cust_name
+ from
+  (select t1.cust_id, t3.cust_id as cust_id1, t3.cust_name, t3.acc_type, t3.acc_bal, t3.no_of_loans, t3.credit_score, t3.branch_id, t3.state
+  from (select
+          t4.cust_id, from
+          input0 as t4
+        group by
+          t4.cust_id) as t1 join 
+      input as t3) as t2
+ where t2.cust_id = t2.branch_id`;
+
+verify q1 q2;

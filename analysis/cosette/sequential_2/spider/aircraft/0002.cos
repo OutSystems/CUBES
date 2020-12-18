@@ -1,0 +1,26 @@
+schema df_aircraft(aircraft_id:int, aircraft:str, description:str, max_gross_weight:str, total_disk_area:str, max_disk_loading:str);
+
+table df_aircraft(df_aircraft);
+
+query q1
+`select description
+from df_aircraft df_aircraft`;
+
+query q2
+`select description
+from
+  (select lhs.aircraft_id as aircraft_id,
+          lhs.aircraft as aircraft,
+          lhs.description as description,
+          lhs.max_gross_weight as max_gross_weight,
+          lhs.total_disk_area as total_disk_area,
+          lhs.max_disk_loading as max_disk_loading,
+          rhs.aircraft_id as aircraft_id.other,
+          rhs.aircraft as aircraft.other,
+          rhs.description as description.other,
+          rhs.max_gross_weight as max_gross_weight.other,
+          rhs.max_disk_loading as max_disk_loading.other
+   from df_aircraft as lhs
+   inner join df_aircraft as rhs on (lhs.total_disk_area = rhs.total_disk_area))`;
+
+verify q1 q2;

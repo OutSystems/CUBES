@@ -1,0 +1,31 @@
+schema df_parts(part_id:int, part_name:str, chargeable_yn:int, chargeable_amount:int, other_part_details:str);
+schema df_asset_parts(asset_id:int, part_id:int);
+
+table df_parts(df_parts);
+table df_asset_parts(df_asset_parts);
+
+query q1
+`select t1.part_name,
+       count(*)
+from df_parts as t1
+join df_asset_parts as t2 on t1.part_id = t2.part_id
+group by t1.part_name`;
+
+query q2
+`select part_name,
+       n as count...
+from
+  (select lhs.part_id as part_id,
+          lhs.n as n,
+          rhs.part_name as part_name,
+          rhs.chargeable_yn as chargeable_yn,
+          rhs.chargeable_amount as chargeable_amount,
+          rhs.other_part_details as other_part_details
+   from
+     (select part_id,
+             count(*) as n
+      from df_asset_parts df_asset_parts
+      group by part_id) as lhs
+   inner join df_parts as rhs on (lhs.part_id = rhs.part_id))`;
+
+verify q1 q2;

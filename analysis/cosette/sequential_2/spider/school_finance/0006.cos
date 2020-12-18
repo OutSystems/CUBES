@@ -1,0 +1,57 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select school_name
+from df_school df_school
+
+limit 1`;
+
+query q2
+`select distinct school_name.other as school_name
+from
+  (select lhs.school_id as school_id,
+          lhs.school_name as school_name,
+          lhs.location as location,
+          lhs.mascot as mascot,
+          lhs.enrollment as enrollment,
+          lhs.ihsaa_class as ihsaa_class,
+          lhs.ihsaa_football_class as ihsaa_football_class,
+          lhs.county as county,
+          lhs.minenrollment as minenrollment,
+          rhs.school_id as school_id.other,
+          rhs.school_name as school_name.other,
+          rhs.location as location.other,
+          rhs.mascot as mascot.other,
+          rhs.enrollment as enrollment.other,
+          rhs.ihsaa_class as ihsaa_class.other,
+          rhs.ihsaa_football_class as ihsaa_football_class.other,
+          rhs.county as county.other,
+          rhs.minenrollment as minenrollment.other
+   from
+     (select school_id,
+             school_name,
+             location,
+             mascot,
+             enrollment,
+             ihsaa_class,
+             ihsaa_football_class,
+             county,
+             min(enrollment) over () as minenrollment
+      from df_school df_school) as lhs
+   cross join
+     (select school_id,
+             school_name,
+             location,
+             mascot,
+             enrollment,
+             ihsaa_class,
+             ihsaa_football_class,
+             county,
+             min(enrollment) over () as minenrollment
+      from df_school df_school) as rhs)
+where (enrollment < minenrollment
+       or enrollment.other = minenrollment.other)`;
+
+verify q1 q2;

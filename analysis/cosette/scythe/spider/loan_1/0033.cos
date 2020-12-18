@@ -1,0 +1,20 @@
+schema df_bank(branch_id:int, bname:str, no_of_customers:int, city:str, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_bank(df_bank);
+table df_loan(df_loan);
+
+query q1
+`select distinct t1.bname
+from df_bank as t1
+join df_loan as t2 on t1.branch_id = t2.branch_id`;
+
+query q2
+`select t2.bname
+ from
+  (select input.branch_id, input.bname, input.no_of_customers, input.city, input.state, t1.loan_id, t1.loan_type, t1.cust_id, t1.branch_id as branch_id1, t1.amount
+  from input join 
+      input0 as t1) as t2
+ where t2.branch_id = t2.loan_id`;
+
+verify q1 q2;

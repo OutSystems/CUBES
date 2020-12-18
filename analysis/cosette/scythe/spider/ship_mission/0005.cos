@@ -1,0 +1,25 @@
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_ship(df_ship);
+
+query q1
+`select name
+from df_ship df_ship
+where nationality = "united states"
+  or nationality = "united kingdom"`;
+
+query q2
+`select t2.name
+ from
+  (select t4.nationality, t1.ship_id, t1.name, t1.type, t1.nationality as nationality1, t1.tonnage
+  from (select
+          t3.nationality, from
+          (select *
+             from
+              input
+             where input.nationality = 'united states') as t3
+        group by
+          t3.nationality) as t4 join 
+      input as t1) as t2`;
+
+verify q1 q2;

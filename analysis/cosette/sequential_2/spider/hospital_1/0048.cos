@@ -1,0 +1,60 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_patient(df_patient);
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+
+query q1
+`select count(*)
+from df_patient df_patient
+where ssn not in
+    (select t1.df_patient
+     from df_prescribes as t1
+     join df_medication as t2 on t1.df_medication = t2.code
+     where t2.name = 'procrastin-x' )`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.ssn as ssn,
+          lhs.name as name,
+          lhs.address as address,
+          lhs.phone as phone,
+          lhs.insuranceid as insuranceid,
+          lhs.pcp as pcp,
+          lhs.code as code,
+          lhs.brand as brand,
+          lhs.description as description,
+          rhs.physician as physician,
+          rhs.patient as patient,
+          rhs.medication as medication,
+          rhs.date as date,
+          rhs.appointment as appointment,
+          rhs.dose as dose,
+          rhs.n as n
+   from
+     (select lhs.ssn as ssn,
+             lhs.name as name,
+             lhs.address as address,
+             lhs.phone as phone,
+             lhs.insuranceid as insuranceid,
+             lhs.pcp as pcp,
+             rhs.code as code,
+             rhs.brand as brand,
+             rhs.description as description
+      from df_patient as lhs
+      inner join
+        (select *
+         from df_medication df_medication
+         where (name != 'procrastin-x')) as rhs on (lhs.name = rhs.name)) as lhs
+   cross join
+     (select physician,
+             patient,
+             medication, date, appointment,
+                               dose,
+                               count(*) over () as n
+      from df_prescribes df_prescribes) as rhs)`;
+
+verify q1 q2;

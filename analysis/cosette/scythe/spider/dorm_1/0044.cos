@@ -1,0 +1,27 @@
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select t1.amenity_name
+from df_dorm_amenity as t1
+join df_has_amenity as t2 on t1.amenid = t2.amenid
+group by t2.amenid
+
+limit 1`;
+
+query q2
+`select t1.amenity_name
+ from
+  (select
+          t4.dormid, avg(t4.amenid) as avg_amenid
+        from
+          input0 as t4
+        group by
+          t4.dormid) as t2 join 
+      input as t3 as t1
+ where t1.avg_amenid = t1.amenid`;
+
+verify q1 q2;

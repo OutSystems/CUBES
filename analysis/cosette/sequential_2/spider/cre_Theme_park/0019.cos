@@ -1,0 +1,39 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_royal_family(royal_family_id:int, royal_family_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_royal_family(df_royal_family);
+
+query q1
+`select t1.royal_family_details,
+       t2.how_to_get_there
+from df_royal_family as t1
+join df_tourist_attractions as t2 on t1.royal_family_id = t2.tourist_attraction_id`;
+
+query q2
+`select description as royal_family_details,
+       how_to_get_there
+from
+  (select tourist_attraction_id,
+          attraction_type_code,
+          location_id,
+          how_to_get_there,
+          name,
+          description,
+          opening_hours,
+          other_details,
+          tourist_attraction_id as royal_family_id
+   from
+     (select lhs.tourist_attraction_id as tourist_attraction_id,
+             lhs.attraction_type_code as attraction_type_code,
+             lhs.location_id as location_id,
+             lhs.how_to_get_there as how_to_get_there,
+             lhs.name as name,
+             lhs.description as description,
+             lhs.opening_hours as opening_hours,
+             lhs.other_details as other_details
+      from df_tourist_attractions as lhs
+      inner join df_royal_family as rhs on (lhs.tourist_attraction_id = rhs.royal_family_id
+                                            and lhs.other_details = rhs.royal_family_details)))`;
+
+verify q1 q2;

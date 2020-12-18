@@ -1,0 +1,29 @@
+schema df_stadium(id:int, name:str, home_games:int, average_attendance:str, total_attendance:str, capacity_percentage:str);
+
+table df_stadium(df_stadium);
+
+query q1
+`select max(home_games),
+       min(home_games),
+       avg(home_games)
+from df_stadium df_stadium`;
+
+query q2
+`select distinct home_games as max.home_games.,
+                meanhome_games as min.home_games.,
+                max(home_games) over () as avg.home_games.
+from
+  (select capacity_percentage,
+          home_games,
+          avg(home_games) as meanhome_games
+   from
+     (select capacity_percentage,
+             home_games,
+             min(home_games) as minhome_games
+      from df_stadium df_stadium
+      group by capacity_percentage,
+               home_games)
+   group by capacity_percentage,
+            home_games)`;
+
+verify q1 q2;

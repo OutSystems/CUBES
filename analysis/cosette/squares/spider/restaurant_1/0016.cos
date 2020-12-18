@@ -1,0 +1,62 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_student(df_student);
+
+query q1
+`select fname,
+       lname
+from df_student df_student
+where age > 18
+  and major != 600
+  and sex = 'f'`;
+
+query q2
+`joining, by = c("stuid", "lname", "fname", "age", "sex", "major", "advisor", "city_code")
+joining, by = c("stuid", "lname", "fname", "age", "sex", "major", "advisor", "city_code")
+select fname,
+       lname
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code
+   from
+     (select stuid,
+             lname,
+             fname,
+             age,
+             sex,
+             major,
+             advisor,
+             city_code
+      from
+        (select *
+         from input0
+         where (age < 600.0
+                and age > 18.0)) as lhs
+      inner join
+        (select *
+         from input0
+         where (sex = 'f'
+                and major < 600.0)) as rhs on (lhs.stuid = rhs.stuid
+                                                   and lhs.lname = rhs.lname
+                                                   and lhs.fname = rhs.fname
+                                                   and lhs.age = rhs.age
+                                                   and lhs.sex = rhs.sex
+                                                   and lhs.major = rhs.major
+                                                   and lhs.advisor = rhs.advisor
+                                                   and lhs.city_code = rhs.city_code)) as lhs
+   inner join input0 as rhs on (lhs.stuid = rhs.stuid
+                                    and lhs.lname = rhs.lname
+                                    and lhs.fname = rhs.fname
+                                    and lhs.age = rhs.age
+                                    and lhs.sex = rhs.sex
+                                    and lhs.major = rhs.major
+                                    and lhs.advisor = rhs.advisor
+                                    and lhs.city_code = rhs.city_code))`;
+
+verify q1 q2;

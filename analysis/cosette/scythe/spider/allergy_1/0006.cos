@@ -1,0 +1,21 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+
+table df_allergy_type(df_allergy_type);
+
+query q1
+`select allergytype
+from df_allergy_type df_allergy_type
+where allergy = "cat"`;
+
+query q2
+`select t1.allergytype
+ from
+  (select
+      t2.allergytype, first(t2.allergy) as first_allergy
+    from
+      input as t2
+    group by
+      t2.allergytype) as t1
+ where t1.first_allergy = 'cat'`;
+
+verify q1 q2;

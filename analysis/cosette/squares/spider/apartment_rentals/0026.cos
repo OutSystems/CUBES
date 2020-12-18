@@ -1,0 +1,34 @@
+schema df_apartment_buildings(building_id:int, building_short_name:str, building_full_name:str, building_description:str, building_address:str, building_manager:str, building_phone:str);
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+
+table df_apartment_buildings(df_apartment_buildings);
+table df_apartments(df_apartments);
+
+query q1
+`select t1.building_address
+from df_apartment_buildings as t1
+join df_apartments as t2 on t1.building_id = t2.building_id
+where t2.bathroom_count > 2`;
+
+query q2
+`joining, by = "building_id"
+select distinct building_address
+from
+  (select apt_id,
+          building_id,
+          apt_type_code,
+          apt_number,
+          bathroom_count,
+          bedroom_count,
+          room_count,
+          building_short_name,
+          building_full_name,
+          building_description,
+          building_address,
+          building_manager,
+          building_phone
+   from input1 as lhs
+   left join input0 as rhs on (lhs.building_id = rhs.building_id))
+where (bathroom_count > 2.0)`;
+
+verify q1 q2;

@@ -1,0 +1,40 @@
+schema df_040(id:int, timestamp:int, first_name:str, last_name:str, action:str);
+
+table df_040(df_040);
+
+query q1
+`select p.*
+from person_log p
+join (select first_name,last_name
+      from person_log
+      group by first_name,last_name
+      having count(*) >=2 and count(distinct action) >= 2) p1
+on p1.first_name=p.first_name and p1.last_name=p.last_name`;
+
+query q2
+`select id,
+       timestamp,
+       first_name,
+       last_name,
+       action
+from
+  (select lhs.id as id,
+          lhs.timestamp as timestamp,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.action as action,
+          rhs.n_distinct as n_distinct
+   from df_040 as lhs
+   inner join
+     (select *
+      from
+        (select first_name,
+                last_name,
+                count(distinct action) as n_distinct
+         from df_040 df_040
+         group by first_name,
+                  last_name)
+      where (n_distinct = 2.0)) as rhs on (lhs.first_name = rhs.first_name
+                                           and lhs.last_name = rhs.last_name))`;
+
+verify q1 q2;

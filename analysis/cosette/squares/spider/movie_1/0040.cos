@@ -1,0 +1,26 @@
+schema df_reviewer(rid:int, name:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_reviewer(df_reviewer);
+table df_rating(df_rating);
+
+query q1
+`select t2.name
+from df_rating as t1
+join df_reviewer as t2 on t1.rid = t2.rid
+where t1.stars > 3`;
+
+query q2
+`joining, by = "rid"
+select name
+from
+  (select rid,
+          mid,
+          stars,
+          ratingdate,
+          name
+   from input1 as lhs
+   left join input0 as rhs on (lhs.rid = rhs.rid))
+where (stars > 3.0)`;
+
+verify q1 q2;

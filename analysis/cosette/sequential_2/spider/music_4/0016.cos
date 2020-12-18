@@ -1,0 +1,48 @@
+schema df_artist(artist_id:int, artist:str, age:int, famous_title:str, famous_release_date:str);
+schema df_volume(volume_id:int, volume_issue:str, issue_date:str, weeks_on_top:str, song:str, artist_id:int);
+
+table df_artist(df_artist);
+table df_volume(df_volume);
+
+query q1
+`select avg(t2.weeks_on_top)
+from df_artist as t1
+join df_volume as t2 on t1.artist_id = t2.artist_id
+where t1.age <= 25`;
+
+query q2
+`select weeks_on_top as avg.t2.weeks_on_top.
+from
+  (select lhs.artist_id as artist_id,
+          lhs.artist as artist,
+          lhs.age as age,
+          lhs.famous_title as famous_title,
+          lhs.famous_release_date as famous_release_date,
+          lhs.volume_id as volume_id,
+          lhs.volume_issue as volume_issue,
+          lhs.issue_date as issue_date,
+          lhs.weeks_on_top as weeks_on_top,
+          lhs.song as song,
+          rhs.meanweeks_on_top as meanweeks_on_top
+   from
+     (select lhs.artist_id as artist_id,
+             lhs.artist as artist,
+             lhs.age as age,
+             lhs.famous_title as famous_title,
+             lhs.famous_release_date as famous_release_date,
+             rhs.volume_id as volume_id,
+             rhs.volume_issue as volume_issue,
+             rhs.issue_date as issue_date,
+             rhs.weeks_on_top as weeks_on_top,
+             rhs.song as song
+      from df_artist as lhs
+      inner join df_volume as rhs on (lhs.artist_id = rhs.artist_id)) as lhs
+   inner join
+     (select volume_issue,
+             avg(weeks_on_top) as meanweeks_on_top
+      from df_volume df_volume
+      group by volume_issue) as rhs on (lhs.volume_issue = rhs.volume_issue))
+where (age <= 25.0
+       or meanweeks_on_top > weeks_on_top)`;
+
+verify q1 q2;

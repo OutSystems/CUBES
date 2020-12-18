@@ -1,0 +1,23 @@
+schema df_farm(farm_id:int, year:int, total_horses:str, working_horses:str, total_cattle:str, oxen:str, bulls:str, cows:str, pigs:str, sheep_and_goats:str);
+
+table df_farm(df_farm);
+
+query q1
+`select max(cows),
+       min(cows)
+from df_farm df_farm`;
+
+query q2
+`select t4.cows,t4.min_cows
+ from
+  (select
+          min(t1.cows) as min_cows
+        from
+          input as t1) as t3 join 
+      (select *
+         from
+          input
+         where input.total_horses < input.pigs) as t2 as t4
+ where t4.min_cows < t4.working_horses`;
+
+verify q1 q2;

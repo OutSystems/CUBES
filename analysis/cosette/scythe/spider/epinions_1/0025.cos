@@ -1,0 +1,26 @@
+schema df_useracct(u_id:int, name:str);
+schema df_trust(source_u_id:int, target_u_id:int, trust:int);
+
+table df_useracct(df_useracct);
+table df_trust(df_trust);
+
+query q1
+`select t1.name,
+       avg(df_trust)
+from df_useracct as t1
+join df_trust as t2 on t1.u_id = t2.target_u_id
+group by t2.target_u_id`;
+
+query q2
+`select t2.name,t2.avg_trust
+ from
+  (select
+          t3.target_u_id, avg(t3.trust) as avg_trust
+        from
+          input0 as t3
+        group by
+          t3.target_u_id) as t1 join 
+      input as t4 as t2
+ where t2.target_u_id = t2.u_id`;
+
+verify q1 q2;

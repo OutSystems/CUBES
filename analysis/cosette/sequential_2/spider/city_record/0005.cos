@@ -1,0 +1,53 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+schema df_match(match_id:int, date:str, venue:str, score:str, result:str, competition:str);
+schema df_hosting_city(year:int, match_id:int, host_city:int);
+
+table df_city(df_city);
+table df_match(df_match);
+table df_hosting_city(df_hosting_city);
+
+query q1
+`select t3.venue
+from df_city as t1
+join df_hosting_city as t2 on t1.city_id = t2.host_city
+join df_match as t3 on t2.match_id = t3.match_id
+where t1.df_city = "nanjing ( jiangsu )"
+  and t3.competition = "1994 fifa world cup qualification"`;
+
+query q2
+`select distinct venue
+from
+  (select lhs.city_id as city_id,
+          lhs.city as city,
+          lhs.hanzi as hanzi,
+          lhs.hanyu_pinyin as hanyu_pinyin,
+          lhs.regional_population as regional_population,
+          lhs.gdp as gdp,
+          lhs.match_id as match_id,
+          lhs.date as date,
+          lhs.venue as venue,
+          lhs.score as score,
+          lhs.result as result,
+          lhs.competition as competition,
+          rhs.year as year,
+          rhs.host_city as host_city
+   from
+     (select lhs.city_id as city_id,
+             lhs.city as city,
+             lhs.hanzi as hanzi,
+             lhs.hanyu_pinyin as hanyu_pinyin,
+             lhs.regional_population as regional_population,
+             lhs.gdp as gdp,
+             rhs.match_id as match_id,
+             rhs.date as date,
+             rhs.venue as venue,
+             rhs.score as score,
+             rhs.result as result,
+             rhs.competition as competition
+      from df_city as lhs
+      cross join df_match as rhs) as lhs
+   inner join df_hosting_city as rhs on (lhs.match_id = rhs.match_id))
+where (city = 'nanjing ( jiangsu )'
+       and competition = '1994 fifa world cup qualification')`;
+
+verify q1 q2;

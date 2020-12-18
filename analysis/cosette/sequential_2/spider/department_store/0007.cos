@@ -1,0 +1,35 @@
+schema df_order_items(order_item_id:int, order_id:int, product_id:int);
+
+table df_order_items(df_order_items);
+
+query q1
+`select product_id
+from df_order_items df_order_items
+group by product_id
+
+limit 1`;
+
+query q2
+`select product_id.other as product_id
+from
+  (select lhs.order_id as order_id,
+          lhs.product_id as product_id,
+          lhs.n as n,
+          rhs.order_id as order_id.other,
+          rhs.product_id as product_id.other
+   from
+     (select order_id,
+             product_id,
+             count(*) as n
+      from df_order_items df_order_items
+      group by order_id,
+               product_id) as lhs
+   inner join
+     (select order_id,
+             product_id,
+             count(*) as n
+      from df_order_items df_order_items
+      group by order_id,
+               product_id) as rhs on (lhs.product_id = rhs.n))`;
+
+verify q1 q2;

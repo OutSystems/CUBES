@@ -1,0 +1,30 @@
+schema df_things(thing_id:int, organization_id:int, type_of_thing_code:str, service_type_code:str, service_details:str);
+schema df_timed_locations_of_things(thing_id:int, date_and_time:str, location_code:str);
+
+table df_things(df_things);
+table df_timed_locations_of_things(df_timed_locations_of_things);
+
+query q1
+`select count(distinct t2.location_code)
+from df_things as t1
+join df_timed_locations_of_things as t2 on t1.thing_id = t2.thing_id
+where t1.service_details = 'unsatisfied'`;
+
+query q2
+`select distinct organization_id as count.distinct.t2.location_code.
+from
+  (select *
+   from
+     (select organization_id,
+             thing_id,
+             count(*) as n
+      from df_things df_things
+      where (service_details = 'unsatisfied')
+      group by organization_id,
+               thing_id) as lhs
+   where not exists
+       (select 1
+        from df_timed_locations_of_things as rhs
+        where (lhs.thing_id = rhs.thing_id) ))`;
+
+verify q1 q2;

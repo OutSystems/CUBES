@@ -1,0 +1,23 @@
+schema df_student_tests_taken(registration_id:int, date_test_taken:str, test_result:str);
+
+table df_student_tests_taken(df_student_tests_taken);
+
+query q1
+`select count(*)
+from df_student_tests_taken df_student_tests_taken
+where test_result = "fail"`;
+
+query q2
+`select t1.count_date_test_taken
+ from
+  (select
+      t2.test_result, count(t2.date_test_taken) as count_date_test_taken
+    from
+      (select *
+         from
+          input
+         where input.test_result = 'fail') as t2
+    group by
+      t2.test_result) as t1`;
+
+verify q1 q2;

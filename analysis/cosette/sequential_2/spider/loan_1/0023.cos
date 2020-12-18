@@ -1,0 +1,51 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+
+table df_customer(df_customer);
+
+query q1
+`select cust_name,
+       acc_type,
+       acc_bal
+from df_customer df_customer
+
+limit 1`;
+
+query q2
+`select cust_name,
+       acc_type,
+       acc_bal
+from
+  (select branch_id as cust_id,
+          cust_name,
+          acc_type,
+          acc_bal,
+          no_of_loans,
+          credit_score,
+          branch_id,
+          state,
+          acc_type.other,
+          acc_bal.other,
+          no_of_loans.other,
+          credit_score.other,
+          branch_id.other,
+          state.other
+   from
+     (select lhs.cust_id as cust_id,
+             lhs.cust_name as cust_name,
+             lhs.acc_type as acc_type,
+             lhs.acc_bal as acc_bal,
+             lhs.no_of_loans as no_of_loans,
+             lhs.credit_score as credit_score,
+             lhs.branch_id as branch_id,
+             lhs.state as state,
+             rhs.acc_type as acc_type.other,
+             rhs.acc_bal as acc_bal.other,
+             rhs.no_of_loans as no_of_loans.other,
+             rhs.credit_score as credit_score.other,
+             rhs.branch_id as branch_id.other,
+             rhs.state as state.other
+      from df_customer as lhs
+      inner join df_customer as rhs on (lhs.branch_id = rhs.cust_id
+                                        and lhs.cust_name = rhs.cust_name)))`;
+
+verify q1 q2;

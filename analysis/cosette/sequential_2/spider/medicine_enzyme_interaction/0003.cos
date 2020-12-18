@@ -1,0 +1,30 @@
+schema df_enzyme(id:int, name:str, location:str, product:str, chromosome:str, omim:int, porphyria:str);
+
+table df_enzyme(df_enzyme);
+
+query q1
+`select name,
+       location
+from df_enzyme df_enzyme`;
+
+query q2
+`select name,
+       location
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.location as location,
+          lhs.product as product,
+          lhs.chromosome as chromosome,
+          lhs.omim as omim,
+          lhs.porphyria as porphyria,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.location as location.other,
+          rhs.product as product.other,
+          rhs.omim as omim.other,
+          rhs.porphyria as porphyria.other
+   from df_enzyme as lhs
+   inner join df_enzyme as rhs on (lhs.chromosome = rhs.chromosome))`;
+
+verify q1 q2;

@@ -1,0 +1,39 @@
+schema df_school(school_id:int, school:str, location:str, enrollment:str, founded:str, denomination:str, boys_or_girls:str, day_or_boarding:str, year_entered_competition:str, school_colors:str);
+schema df_player(player_id:int, player:str, team:str, age:int, position:str, school_id:int);
+
+table df_school(df_school);
+table df_player(df_player);
+
+query q1
+`select t2.denomination
+from df_player as t1
+join df_school as t2 on t1.school_id = t2.school_id
+group by t1.school_id
+
+limit 1`;
+
+query q2
+`select distinct denomination
+from
+  (select lhs.school_id as school_id,
+          lhs.school as school,
+          lhs.location as location,
+          lhs.enrollment as enrollment,
+          lhs.founded as founded,
+          lhs.denomination as denomination,
+          lhs.boys_or_girls as boys_or_girls,
+          lhs.day_or_boarding as day_or_boarding,
+          lhs.year_entered_competition as year_entered_competition,
+          lhs.school_colors as school_colors,
+          rhs.player as player,
+          rhs.position as position
+   from df_school as lhs
+   inner join
+     (select player,
+             position,
+             count(*) as n
+      from df_player df_player
+      group by player,
+               position) as rhs on (lhs.school_id = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_roles(role_code:str, role_name:str, role_description:str);
+schema df_employees(employee_id:int, role_code:str, employee_name:str, gender_mfu:str, date_of_birth:str, other_details:str);
+
+table df_roles(df_roles);
+table df_employees(df_employees);
+
+query q1
+`select t1.employee_name
+from df_employees as t1
+join df_roles as t2 on t1.role_code = t2.role_code
+where t2.role_name = "editor"`;
+
+query q2
+`select employee_name
+from
+  (select lhs.role_code as role_code,
+          lhs.role_name as role_name,
+          lhs.role_description as role_description,
+          rhs.employee_id as employee_id,
+          rhs.employee_name as employee_name,
+          rhs.gender_mfu as gender_mfu,
+          rhs.date_of_birth as date_of_birth,
+          rhs.other_details as other_details
+   from df_roles as lhs
+   inner join df_employees as rhs on (lhs.role_code = rhs.role_code))
+where (role_name = 'editor')`;
+
+verify q1 q2;

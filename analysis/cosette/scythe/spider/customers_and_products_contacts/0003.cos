@@ -1,0 +1,21 @@
+schema df_addresses(address_id:int, line_1_number_building:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+
+table df_addresses(df_addresses);
+
+query q1
+`select state_province_county,
+       count(*)
+from df_addresses df_addresses
+group by state_province_county`;
+
+query q2
+`select t1.state_province_county,t1.count_zip_postcode
+ from
+  (select
+      t2.state_province_county, t2.country, count(t2.zip_postcode) as count_zip_postcode
+    from
+      input as t2
+    group by
+      t2.state_province_county, t2.country) as t1`;
+
+verify q1 q2;

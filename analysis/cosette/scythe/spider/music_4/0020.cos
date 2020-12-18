@@ -1,0 +1,21 @@
+schema df_music_festival(id:int, music_festival:str, date_of_ceremony:str, category:str, volume:int, result:str);
+
+table df_music_festival(df_music_festival);
+
+query q1
+`select category,
+       count(*)
+from df_music_festival df_music_festival
+group by category`;
+
+query q2
+`select t1.category,t1.count_category
+ from
+  (select
+      t2.date_of_ceremony, t2.category, count(t2.category) as count_category
+    from
+      input as t2
+    group by
+      t2.date_of_ceremony, t2.category) as t1`;
+
+verify q1 q2;

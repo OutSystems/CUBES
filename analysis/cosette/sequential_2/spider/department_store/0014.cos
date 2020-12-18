@@ -1,0 +1,37 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_code:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, order_date:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name,
+       t1.customer_address
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where t2.order_status_code = "new" intersect
+  select t1.customer_name,
+         t1.customer_address
+  from df_customers as t1
+  join df_customer_orders as t2 on t1.customer_id = t2.customer_id where t2.order_status_code = "pending"`;
+
+query q2
+`select distinct customer_name,
+                customer_address
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status_code as order_status_code,
+          lhs.order_date as order_date,
+          rhs.payment_method_code as payment_method_code,
+          rhs.customer_code as customer_code,
+          rhs.customer_name as customer_name,
+          rhs.customer_address as customer_address,
+          rhs.customer_phone as customer_phone,
+          rhs.customer_email as customer_email
+   from df_customer_orders as lhs
+   inner join df_customers as rhs on (lhs.customer_id = rhs.customer_id))
+where (order_status_code = 'new'
+       and order_status_code != 'pending')`;
+
+verify q1 q2;

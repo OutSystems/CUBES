@@ -1,0 +1,57 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_department(df_department);
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t1.emp_fname,
+       t2.prof_office
+from df_employee as t1
+join df_professor as t2 on t1.emp_num = t2.emp_num
+join df_department as t3 on t3.dept_code = t2.dept_code
+where t3.dept_name = 'history'
+  and t2.prof_high_degree = 'ph.d.'`;
+
+query q2
+`select emp_fname,
+       prof_office
+from
+  (select lhs.dept_code as dept_code,
+          lhs.dept_name as dept_name,
+          lhs.school_code as school_code,
+          lhs.emp_num as emp_num,
+          lhs.dept_address as dept_address,
+          lhs.dept_extension as dept_extension,
+          lhs.emp_lname as emp_lname,
+          lhs.emp_fname as emp_fname,
+          lhs.emp_initial as emp_initial,
+          lhs.emp_jobcode as emp_jobcode,
+          lhs.emp_hiredate as emp_hiredate,
+          lhs.emp_dob as emp_dob,
+          rhs.prof_office as prof_office,
+          rhs.prof_extension as prof_extension,
+          rhs.prof_high_degree as prof_high_degree
+   from
+     (select lhs.dept_code as dept_code,
+             lhs.dept_name as dept_name,
+             lhs.school_code as school_code,
+             lhs.emp_num as emp_num,
+             lhs.dept_address as dept_address,
+             lhs.dept_extension as dept_extension,
+             rhs.emp_lname as emp_lname,
+             rhs.emp_fname as emp_fname,
+             rhs.emp_initial as emp_initial,
+             rhs.emp_jobcode as emp_jobcode,
+             rhs.emp_hiredate as emp_hiredate,
+             rhs.emp_dob as emp_dob
+      from df_department as lhs
+      inner join df_employee as rhs on (lhs.emp_num = rhs.emp_num)) as lhs
+   inner join df_professor as rhs on (lhs.dept_code = rhs.dept_code
+                                          and lhs.emp_num = rhs.emp_num))
+where (dept_name = 'history'
+       and prof_high_degree = 'ph.d.')`;
+
+verify q1 q2;

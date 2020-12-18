@@ -1,0 +1,53 @@
+schema df_parts(part_id:int, part_name:str, chargeable_yn:int, chargeable_amount:int, other_part_details:str);
+schema df_part_faults(part_fault_id:int, part_id:int, fault_short_name:str, fault_description:str, other_fault_details:str);
+
+table df_parts(df_parts);
+table df_part_faults(df_part_faults);
+
+query q1
+`select t1.part_name,
+       t1.part_id
+from df_parts as t1
+join df_part_faults as t2 on t1.part_id = t2.part_id
+group by t1.part_id
+having count(*) > 2`;
+
+query q2
+`joining, by = c("part_id", "fault_description")
+joining, by = "part_id"
+select distinct part_name,
+                part_id
+from
+  (select part_fault_id,
+          part_id,
+          fault_short_name,
+          fault_description,
+          other_fault_details,
+          n,
+          part_name,
+          chargeable_yn,
+          chargeable_amount,
+          other_part_details
+   from
+     (select part_fault_id,
+             part_id,
+             fault_short_name,
+             fault_description,
+             other_fault_details,
+             n
+      from input1 as lhs
+      inner join
+        (select *
+         from
+           (select fault_description,
+                   part_id,
+                   count(*) as n
+            from input1
+            group by fault_description,
+                     part_id)
+         where (n >= 2.0
+                or n > 2.0)) as rhs on (lhs.part_id = rhs.part_id
+                                            and lhs.fault_description = rhs.fault_description)) as lhs
+   inner join input0 as rhs on (lhs.part_id = rhs.part_id))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_available_policies(policy_id:int, policy_type_code:str, customer_phone:str);
+
+table df_available_policies(df_available_policies);
+
+query q1
+`select policy_type_code
+from df_available_policies df_available_policies
+group by policy_type_code
+having count(*) > 4`;
+
+query q2
+`select t4.policy_type_code1
+ from
+  (select t1.policy_type_code, t1.count_policy_type_code, t5.policy_type_code as policy_type_code1, t5.count_customer_phone
+  from (select *
+       from
+        (select
+            t6.policy_type_code, count(t6.policy_type_code) as count_policy_type_code
+          from
+            input as t6
+          group by
+            t6.policy_type_code) as t1
+       where t1.count_policy_type_code = 4.0) join 
+      (select *
+         from
+          (select
+              t3.policy_type_code, count(t3.customer_phone) as count_customer_phone
+            from
+              input as t3
+            group by
+              t3.policy_type_code) as t2
+         where t2.count_customer_phone = 5.0) as t5) as t4`;
+
+verify q1 q2;

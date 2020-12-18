@@ -1,0 +1,26 @@
+schema df_city(city_id:int, official_name:str, status:str, area_km_2:str, population:str, census_ranking:str);
+
+table df_city(df_city);
+
+query q1
+`select official_name
+from df_city df_city`;
+
+query q2
+`select official_name
+from
+  (select lhs.city_id as city_id,
+          lhs.official_name as official_name,
+          lhs.status as status,
+          lhs.area_km_2 as area_km_2,
+          lhs.population as population,
+          lhs.census_ranking as census_ranking,
+          rhs.city_id as city_id.other,
+          rhs.status as status.other,
+          rhs.population as population.other,
+          rhs.census_ranking as census_ranking.other
+   from df_city as lhs
+   inner join df_city as rhs on (lhs.area_km_2 = rhs.area_km_2
+                                 and lhs.official_name = rhs.official_name))`;
+
+verify q1 q2;

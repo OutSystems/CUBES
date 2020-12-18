@@ -1,0 +1,38 @@
+schema df_employee(fname:str, minit:str, lname:str, ssn:int, bdate:str, address:str, sex:str, salary:int, super_ssn:str, dno:int);
+
+table df_employee(df_employee);
+
+query q1
+`select fname,
+       lname,
+       address
+from df_employee df_employee`;
+
+query q2
+`select fname,
+       lname,
+       address
+from
+  (select lhs.fname as fname,
+          lhs.minit as minit,
+          lhs.lname as lname,
+          lhs.ssn as ssn,
+          lhs.bdate as bdate,
+          lhs.address as address,
+          lhs.sex as sex,
+          lhs.salary as salary,
+          lhs.super_ssn as super_ssn,
+          lhs.dno as dno,
+          rhs.fname as fname.other,
+          rhs.minit as minit.other,
+          rhs.lname as lname.other,
+          rhs.bdate as bdate.other,
+          rhs.address as address.other,
+          rhs.sex as sex.other,
+          rhs.super_ssn as super_ssn.other,
+          rhs.dno as dno.other
+   from df_employee as lhs
+   inner join df_employee as rhs on (lhs.salary = rhs.salary
+                                     and lhs.ssn = rhs.ssn))`;
+
+verify q1 q2;

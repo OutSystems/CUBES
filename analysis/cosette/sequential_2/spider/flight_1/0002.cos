@@ -1,0 +1,22 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+
+table df_aircraft(df_aircraft);
+
+query q1
+`select name,
+       distance
+from df_aircraft df_aircraft`;
+
+query q2
+`select name,
+       distance
+from
+  (select lhs.aid as aid,
+          lhs.name as name,
+          lhs.distance as distance,
+          rhs.name as name.other
+   from df_aircraft as lhs
+   inner join df_aircraft as rhs on (lhs.aid = rhs.aid
+                                     and lhs.distance = rhs.distance))`;
+
+verify q1 q2;

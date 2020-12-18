@@ -1,0 +1,32 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+schema df_aircraft(aid:int, name:str, distance:int);
+
+table df_flight(df_flight);
+table df_aircraft(df_aircraft);
+
+query q1
+`select t1.flno
+from df_flight as t1
+join df_aircraft as t2 on t1.aid = t2.aid
+where t2.name = "airbus a340-300"`;
+
+query q2
+`select flno
+from
+  (select lhs.flno as flno,
+          lhs.origin as origin,
+          lhs.destination as destination,
+          lhs.distance as distance,
+          lhs.departure_date as departure_date,
+          lhs.arrival_date as arrival_date,
+          lhs.price as price,
+          lhs.aid as aid,
+          rhs.name as name,
+          rhs.distance as distance.other
+   from df_flight as lhs
+   inner join
+     (select *
+      from df_aircraft df_aircraft
+      where (name = 'airbus a340-300')) as rhs on (lhs.aid = rhs.aid))`;
+
+verify q1 q2;

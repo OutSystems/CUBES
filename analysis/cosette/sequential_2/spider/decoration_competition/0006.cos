@@ -1,0 +1,30 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+
+table df_member(df_member);
+
+query q1
+`select country
+from df_member df_member
+group by country
+
+limit 1`;
+
+query q2
+`select distinct country
+from
+  (select lhs.college_id as college_id,
+          lhs.member_id as member_id,
+          lhs.n as n,
+          rhs.name as name,
+          rhs.country as country
+   from
+     (select college_id,
+             member_id,
+             count(*) as n
+      from df_member df_member
+      group by college_id,
+               member_id) as lhs
+   inner join df_member as rhs on (lhs.member_id = rhs.member_id
+                                   and lhs.n = rhs.college_id))`;
+
+verify q1 q2;

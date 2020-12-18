@@ -1,0 +1,31 @@
+schema df_third_party_companies(company_id:int, company_type:str, company_name:str, company_address:str, other_company_details:str);
+schema df_assets(asset_id:int, maintenance_contract_id:int, supplier_company_id:int, asset_details:str, asset_make:str, asset_model:str, asset_acquired_date:str, asset_disposed_date:str, other_asset_details:str);
+
+table df_third_party_companies(df_third_party_companies);
+table df_assets(df_assets);
+
+query q1
+`select count(*),
+       t1.company_id
+from df_third_party_companies as t1
+join df_assets as t2 on t1.company_id = t2.supplier_company_id
+group by t1.company_id`;
+
+query q2
+`select n as count...,
+       company_id
+from
+  (select lhs.company_id as company_id,
+          lhs.company_type as company_type,
+          lhs.company_name as company_name,
+          lhs.company_address as company_address,
+          lhs.other_company_details as other_company_details,
+          rhs.n as n
+   from df_third_party_companies as lhs
+   inner join
+     (select supplier_company_id,
+             count(*) as n
+      from df_assets df_assets
+      group by supplier_company_id) as rhs on (lhs.company_id = rhs.supplier_company_id))`;
+
+verify q1 q2;

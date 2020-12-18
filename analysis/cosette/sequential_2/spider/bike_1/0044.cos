@@ -1,0 +1,118 @@
+schema df_weather(date:str, max_temperature_f:str, mean_temperature_f:str, min_temperature_f:str, max_dew_point_f:str, mean_dew_point_f:str, min_dew_point_f:str, max_humidity:str, mean_humidity:str, min_humidity:str, max_sea_level_pressure_inches:str, mean_sea_level_pressure_inches:str, min_sea_level_pressure_inches:str, max_visibility_miles:str, mean_visibility_miles:str, min_visibility_miles:str, max_wind_speed_mph:str, mean_wind_speed_mph:str, max_gust_speed_mph:str, precipitation_inches:str, cloud_cover:str, events:str, wind_dir_degrees:str, zip_code:int);
+
+table df_weather(df_weather);
+
+query q1
+`select distinct zip_code
+from df_weather df_weather
+except
+select distinct zip_code
+from df_weather df_weather
+where max_dew_point_f >= 70`;
+
+query q2
+`select distinct zip_code.other as zip_code
+from
+  (select date, max_temperature_f,
+                mean_temperature_f,
+                min_temperature_f,
+                max_dew_point_f,
+                mean_dew_point_f,
+                min_dew_point_f,
+                max_humidity,
+                mean_humidity,
+                min_humidity,
+                max_sea_level_pressure_inches,
+                max_sea_level_pressure_inches as mean_sea_level_pressure_inches,
+                min_sea_level_pressure_inches,
+                max_visibility_miles,
+                mean_visibility_miles,
+                min_visibility_miles,
+                max_wind_speed_mph,
+                mean_wind_speed_mph,
+                max_gust_speed_mph,
+                precipitation_inches,
+                cloud_cover,
+                events,
+                wind_dir_degrees,
+                zip_code,
+                date.other,
+                mean_temperature_f.other,
+                min_temperature_f.other,
+                max_dew_point_f.other,
+                mean_dew_point_f.other,
+                min_dew_point_f.other,
+                max_humidity.other,
+                mean_humidity.other,
+                min_humidity.other,
+                max_sea_level_pressure_inches.other,
+                min_sea_level_pressure_inches.other,
+                max_visibility_miles.other,
+                mean_visibility_miles.other,
+                min_visibility_miles.other,
+                max_wind_speed_mph.other,
+                mean_wind_speed_mph.other,
+                max_gust_speed_mph.other,
+                precipitation_inches.other,
+                cloud_cover.other,
+                events.other,
+                wind_dir_degrees.other,
+                zip_code.other
+   from
+     (select lhs.date as date,
+             lhs.max_temperature_f as max_temperature_f,
+             lhs.mean_temperature_f as mean_temperature_f,
+             lhs.min_temperature_f as min_temperature_f,
+             lhs.max_dew_point_f as max_dew_point_f,
+             lhs.mean_dew_point_f as mean_dew_point_f,
+             lhs.min_dew_point_f as min_dew_point_f,
+             lhs.max_humidity as max_humidity,
+             lhs.mean_humidity as mean_humidity,
+             lhs.min_humidity as min_humidity,
+             lhs.max_sea_level_pressure_inches as max_sea_level_pressure_inches,
+             lhs.mean_sea_level_pressure_inches as mean_sea_level_pressure_inches,
+             lhs.min_sea_level_pressure_inches as min_sea_level_pressure_inches,
+             lhs.max_visibility_miles as max_visibility_miles,
+             lhs.mean_visibility_miles as mean_visibility_miles,
+             lhs.min_visibility_miles as min_visibility_miles,
+             lhs.max_wind_speed_mph as max_wind_speed_mph,
+             lhs.mean_wind_speed_mph as mean_wind_speed_mph,
+             lhs.max_gust_speed_mph as max_gust_speed_mph,
+             lhs.precipitation_inches as precipitation_inches,
+             lhs.cloud_cover as cloud_cover,
+             lhs.events as events,
+             lhs.wind_dir_degrees as wind_dir_degrees,
+             lhs.zip_code as zip_code,
+             rhs.date as date.other,
+             rhs.mean_temperature_f as mean_temperature_f.other,
+             rhs.min_temperature_f as min_temperature_f.other,
+             rhs.max_dew_point_f as max_dew_point_f.other,
+             rhs.mean_dew_point_f as mean_dew_point_f.other,
+             rhs.min_dew_point_f as min_dew_point_f.other,
+             rhs.max_humidity as max_humidity.other,
+             rhs.mean_humidity as mean_humidity.other,
+             rhs.min_humidity as min_humidity.other,
+             rhs.max_sea_level_pressure_inches as max_sea_level_pressure_inches.other,
+             rhs.min_sea_level_pressure_inches as min_sea_level_pressure_inches.other,
+             rhs.max_visibility_miles as max_visibility_miles.other,
+             rhs.mean_visibility_miles as mean_visibility_miles.other,
+             rhs.min_visibility_miles as min_visibility_miles.other,
+             rhs.max_wind_speed_mph as max_wind_speed_mph.other,
+             rhs.mean_wind_speed_mph as mean_wind_speed_mph.other,
+             rhs.max_gust_speed_mph as max_gust_speed_mph.other,
+             rhs.precipitation_inches as precipitation_inches.other,
+             rhs.cloud_cover as cloud_cover.other,
+             rhs.events as events.other,
+             rhs.wind_dir_degrees as wind_dir_degrees.other,
+             rhs.zip_code as zip_code.other
+      from
+        (select *
+         from df_weather df_weather
+         where (max_dew_point_f != 70.0)) as lhs
+      inner join
+        (select *
+         from df_weather df_weather
+         where (max_dew_point_f != 70.0)) as rhs on (lhs.max_sea_level_pressure_inches = rhs.mean_sea_level_pressure_inches
+                                                     and lhs.max_gust_speed_mph = rhs.max_temperature_f)))`;
+
+verify q1 q2;

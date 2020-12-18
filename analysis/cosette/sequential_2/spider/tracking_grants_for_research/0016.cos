@@ -1,0 +1,32 @@
+schema df_project_staff(staff_id:str, project_id:int, role_code:str, date_from:str, date_to:str, other_details:str);
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+
+table df_project_staff(df_project_staff);
+table df_projects(df_projects);
+
+query q1
+`select t1.project_id,
+       count(*)
+from df_project_staff as t1
+join df_projects as t2 on t1.project_id = t2.project_id
+group by t1.project_id`;
+
+query q2
+`select project_id,
+       n as count...
+from
+  (select lhs.other_details as other_details,
+          lhs.project_id as project_id,
+          lhs.n as n,
+          rhs.organisation_id as organisation_id,
+          rhs.project_details as project_details
+   from
+     (select other_details,
+             project_id,
+             count(*) as n
+      from df_project_staff df_project_staff
+      group by other_details,
+               project_id) as lhs
+   inner join df_projects as rhs on (lhs.project_id = rhs.project_id))`;
+
+verify q1 q2;

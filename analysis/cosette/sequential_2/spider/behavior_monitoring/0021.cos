@@ -1,0 +1,54 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_behavior_incident(incident_id:int, incident_type_code:str, student_id:int, date_incident_start:str, date_incident_end:str, incident_summary:str, recommendations:str, other_details:str);
+
+table df_students(df_students);
+table df_behavior_incident(df_behavior_incident);
+
+query q1
+`select t1.student_id,
+       t2.last_name
+from df_behavior_incident as t1
+join df_students as t2 on t1.student_id = t2.student_id
+group by t1.student_id
+
+limit 1`;
+
+query q2
+`select distinct student_id,
+                last_name
+from
+  (select student_id,
+          address_id,
+          first_name,
+          middle_name,
+          last_name,
+          cell_mobile_number,
+          email_address,
+          date_first_rental,
+          date_left_university,
+          other_student_details,
+          date_incident_start,
+          student_id as n
+   from
+     (select lhs.student_id as student_id,
+             lhs.address_id as address_id,
+             lhs.first_name as first_name,
+             lhs.middle_name as middle_name,
+             lhs.last_name as last_name,
+             lhs.cell_mobile_number as cell_mobile_number,
+             lhs.email_address as email_address,
+             lhs.date_first_rental as date_first_rental,
+             lhs.date_left_university as date_left_university,
+             lhs.other_student_details as other_student_details,
+             rhs.date_incident_start as date_incident_start
+      from df_students as lhs
+      inner join
+        (select date_incident_start,
+                recommendations,
+                count(*) as n
+         from df_behavior_incident df_behavior_incident
+         group by date_incident_start,
+                  recommendations) as rhs on (lhs.student_id = rhs.n
+                                              and lhs.other_student_details = rhs.recommendations)))`;
+
+verify q1 q2;

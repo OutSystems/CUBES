@@ -1,0 +1,37 @@
+schema df_i019(id:int, age:int);
+
+table df_i019(df_i019);
+
+query q1
+`select s.id, s.age, c.cnt
+  from students  s
+       inner join (select age, count(age) as cnt
+                     from students
+                    group by age) c on s.age = c.age`;
+
+query q2
+`joining, by = "age"
+joining, by = "id"
+select id,
+       age,
+       n
+from
+  (select id,
+          age,
+          n
+   from
+     (select id,
+             age,
+             n
+      from input0 as lhs
+      inner join
+        (select age,
+                count(*) as n
+         from input0
+         group by age) as rhs on (lhs.age = rhs.age)) as lhs
+   inner join
+     (select id
+      from input0 intersect select id
+      from input0) as rhs on (lhs.id = rhs.id))`;
+
+verify q1 q2;

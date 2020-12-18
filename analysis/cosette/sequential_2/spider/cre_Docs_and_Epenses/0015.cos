@@ -1,0 +1,32 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_documents(df_documents);
+
+query q1
+`select project_id
+from df_documents df_documents
+group by project_id
+
+limit 1`;
+
+query q2
+`select project_id
+from
+  (select *
+   from
+     (select document_description,
+             project_id,
+             count(*) as n
+      from df_documents df_documents
+      group by document_description,
+               project_id) as lhs
+   where exists
+       (select 1
+        from
+          (select document_date,
+                  count(*) as n
+           from df_documents df_documents
+           group by document_date) as rhs
+        where (lhs.n = rhs.n) ))`;
+
+verify q1 q2;

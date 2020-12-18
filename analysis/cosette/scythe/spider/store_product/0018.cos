@@ -1,0 +1,29 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+
+table df_product(df_product);
+
+query q1
+`select df_product
+from df_product df_product
+where df_product like "%scanner%"`;
+
+query q2
+`select t4.product
+ from
+  (select t3.interface, t3.count_product_id, t1.product_id, t1.product, t1.dimensions, t1.dpi, t1.pages_per_minute_color, t1.max_page_size, t1.interface as interface1
+  from (select
+          t2.interface, count(t2.product_id) as count_product_id
+        from
+          (select *
+             from
+              input
+             where input.pages_per_minute_color <= 4.0) as t2
+        group by
+          t2.interface) as t3 join 
+      (select *
+         from
+          input
+         where input.product_id < 4.0) as t1) as t4
+ where t4.count_product_id <> t4.product_id`;
+
+verify q1 q2;

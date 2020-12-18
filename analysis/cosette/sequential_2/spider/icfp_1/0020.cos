@@ -1,0 +1,62 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_authors(df_authors);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select t3.title
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_papers as t3 on t2.paperid = t3.paperid
+join df_inst as t4 on t2.instid = t4.instid
+where t4.country = "japan"
+  and t2.authorder = 1
+  and t1.lname = "ohori"`;
+
+query q2
+`select title
+from
+  (select *
+   from
+     (select lhs.instid as instid,
+             lhs.name as name,
+             lhs.country as country,
+             lhs.authid as authid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.paperid as paperid,
+             lhs.title as title,
+             rhs.authorder as authorder
+      from
+        (select lhs.instid as instid,
+                lhs.name as name,
+                lhs.country as country,
+                lhs.authid as authid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                rhs.paperid as paperid,
+                rhs.title as title
+         from
+           (select lhs.instid as instid,
+                   lhs.name as name,
+                   lhs.country as country,
+                   rhs.authid as authid,
+                   rhs.lname as lname,
+                   rhs.fname as fname
+            from df_inst as lhs
+            cross join df_authors as rhs) as lhs
+         cross join df_papers as rhs) as lhs
+      inner join df_authorship as rhs on (lhs.instid = rhs.instid
+                                              and lhs.authid = rhs.authid
+                                              and lhs.paperid = rhs.paperid))
+   where (country = 'japan'
+          and authorder >= 1.0))
+where (lname = 'ohori'
+       and authorder <= 1.0)`;
+
+verify q1 q2;

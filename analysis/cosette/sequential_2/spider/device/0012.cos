@@ -1,0 +1,34 @@
+schema df_shop(shop_id:int, shop_name:str, location:str, open_date:str, open_year:int);
+schema df_stock(shop_id:int, device_id:int, quantity:int);
+
+table df_shop(df_shop);
+table df_stock(df_stock);
+
+query q1
+`select t2.shop_name
+from df_stock as t1
+join df_shop as t2 on t1.shop_id = t2.shop_id
+group by t1.shop_id
+
+limit 1`;
+
+query q2
+`select distinct shop_name
+from
+  (select lhs.shop_id as shop_id,
+          lhs.shop_name as shop_name,
+          lhs.location as location,
+          lhs.open_date as open_date,
+          lhs.open_year as open_year,
+          rhs.quantity as quantity,
+          rhs.shop_id as shop_id.other
+   from df_shop as lhs
+   inner join
+     (select quantity,
+             shop_id,
+             count(*) as n
+      from df_stock df_stock
+      group by quantity,
+               shop_id) as rhs on (lhs.shop_id = rhs.n))`;
+
+verify q1 q2;

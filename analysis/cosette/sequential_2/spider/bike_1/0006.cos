@@ -1,0 +1,33 @@
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_trip(df_trip);
+
+query q1
+`select id
+from df_trip df_trip
+
+limit 1`;
+
+query q2
+`select id
+from
+  (select lhs.id as id,
+          lhs.duration as duration,
+          lhs.start_date as start_date,
+          lhs.start_station_name as start_station_name,
+          lhs.start_station_id as start_station_id,
+          lhs.end_date as end_date,
+          lhs.end_station_name as end_station_name,
+          lhs.end_station_id as end_station_id,
+          lhs.bike_id as bike_id,
+          lhs.subscription_type as subscription_type,
+          lhs.zip_code as zip_code
+   from df_trip as lhs
+   inner join
+     (select end_date,
+             min(duration) as duration
+      from df_trip df_trip
+      group by end_date) as rhs on (lhs.duration = rhs.duration
+                                    and lhs.end_date = rhs.end_date))`;
+
+verify q1 q2;

@@ -1,0 +1,47 @@
+schema df_parts(part_id:int, part_name:str, chargeable_yn:int, chargeable_amount:int, other_part_details:str);
+
+table df_parts(df_parts);
+
+query q1
+`select part_id,
+       chargeable_amount
+from df_parts df_parts
+
+limit 1`;
+
+query q2
+`joining, by = "other_part_details"
+joining, by = c("minchargeable_amount", "part_id", "chargeable_amount")
+select distinct part_id,
+                chargeable_amount
+from
+  (select other_part_details,
+          minchargeable_amount,
+          part_id,
+          part_name,
+          chargeable_yn,
+          chargeable_amount
+   from
+     (select other_part_details,
+             minchargeable_amount,
+             part_id,
+             part_name,
+             chargeable_yn,
+             chargeable_amount
+      from
+        (select other_part_details,
+                min(chargeable_amount) as minchargeable_amount
+         from input0
+         group by other_part_details) as lhs
+      inner join input0 as rhs on (lhs.other_part_details = rhs.other_part_details)) as lhs
+   inner join
+     (select part_id,
+             chargeable_amount,
+             min(chargeable_amount) as minchargeable_amount
+      from input0
+      group by part_id,
+               chargeable_amount) as rhs on (lhs.minchargeable_amount = rhs.minchargeable_amount
+                                                 and lhs.part_id = rhs.part_id
+                                                 and lhs.chargeable_amount = rhs.chargeable_amount))`;
+
+verify q1 q2;

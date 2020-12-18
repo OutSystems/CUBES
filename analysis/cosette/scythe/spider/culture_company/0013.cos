@@ -1,0 +1,29 @@
+schema df_movie(movie_id:int, title:str, year:int, director:str, budget_million:str, gross_worldwide:int);
+
+table df_movie(df_movie);
+
+query q1
+`select title,
+       director
+from df_movie df_movie
+where year <= 2000
+
+limit 1`;
+
+query q2
+`select t2.title,t2.director
+ from
+  (select t4.year, t4.max_gross_worldwide, t1.movie_id, t1.title, t1.year as year1, t1.director, t1.budget_million, t1.gross_worldwide
+  from (select
+          t3.year, max(t3.gross_worldwide) as max_gross_worldwide
+        from
+          input as t3
+        group by
+          t3.year) as t4 join 
+      (select *
+         from
+          input
+         where input.year = 2000.0) as t1) as t2
+ where t2.max_gross_worldwide = t2.gross_worldwide`;
+
+verify q1 q2;

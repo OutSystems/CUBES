@@ -1,0 +1,63 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name,
+       t1.acc_type
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+group by t1.cust_name
+having sum(t2.amount) > 5000`;
+
+query q2
+`joining, by = c("cust_id", "branch_id")
+joining, by = c("loan_id", "loan_type", "cust_id", "branch_id", "amount")
+select distinct cust_name,
+                acc_type
+from
+  (select cust_name,
+          acc_type,
+          sum(amount) as sumamount
+   from
+     (select loan_id,
+             loan_type,
+             cust_id,
+             branch_id,
+             amount,
+             cust_name,
+             acc_type,
+             acc_bal,
+             no_of_loans,
+             credit_score,
+             state
+      from
+        (select loan_id,
+                loan_type,
+                cust_id,
+                branch_id,
+                amount,
+                cust_name,
+                acc_type,
+                acc_bal,
+                no_of_loans,
+                credit_score,
+                state
+         from input1 as lhs
+         inner join input0 as rhs on (lhs.cust_id = rhs.cust_id
+                                          and lhs.branch_id = rhs.branch_id)) as lhs
+      inner join
+        (select *
+         from input1
+         where (amount <= 5000.0
+                and amount < 5000.0)) as rhs on (lhs.loan_id = rhs.loan_id
+                                                     and lhs.loan_type = rhs.loan_type
+                                                     and lhs.cust_id = rhs.cust_id
+                                                     and lhs.branch_id = rhs.branch_id
+                                                     and lhs.amount = rhs.amount))
+   group by cust_name,
+            acc_type)`;
+
+verify q1 q2;

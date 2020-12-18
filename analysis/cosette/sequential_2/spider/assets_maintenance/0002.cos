@@ -1,0 +1,40 @@
+schema df_maintenance_contracts(maintenance_contract_id:int, maintenance_contract_company_id:int, contract_start_date:str, contract_end_date:str, other_contract_details:str);
+schema df_assets(asset_id:int, maintenance_contract_id:int, supplier_company_id:int, asset_details:str, asset_make:str, asset_model:str, asset_acquired_date:str, asset_disposed_date:str, other_asset_details:str);
+
+table df_maintenance_contracts(df_maintenance_contracts);
+table df_assets(df_assets);
+
+query q1
+`select count(*),
+       t1.maintenance_contract_id
+from df_maintenance_contracts as t1
+join df_assets as t2 on t1.maintenance_contract_id = t2.maintenance_contract_id
+group by t1.maintenance_contract_id`;
+
+query q2
+`select n as count...,
+       maintenance_contract_id
+from
+  (select contract_end_date,
+          maintenance_contract_id,
+          count(*) as n
+   from
+     (select lhs.asset_id as asset_id,
+             lhs.maintenance_contract_id as maintenance_contract_id,
+             lhs.supplier_company_id as supplier_company_id,
+             lhs.asset_details as asset_details,
+             lhs.asset_make as asset_make,
+             lhs.asset_model as asset_model,
+             lhs.asset_acquired_date as asset_acquired_date,
+             lhs.asset_disposed_date as asset_disposed_date,
+             lhs.other_asset_details as other_asset_details,
+             rhs.maintenance_contract_company_id as maintenance_contract_company_id,
+             rhs.contract_start_date as contract_start_date,
+             rhs.contract_end_date as contract_end_date,
+             rhs.other_contract_details as other_contract_details
+      from df_assets as lhs
+      left join df_maintenance_contracts as rhs on (lhs.maintenance_contract_id = rhs.maintenance_contract_id))
+   group by contract_end_date,
+            maintenance_contract_id)`;
+
+verify q1 q2;

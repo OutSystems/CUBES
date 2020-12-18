@@ -1,0 +1,24 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select t1.title
+from df_item as t1
+join df_review as t2 on t1.i_id = t2.i_id
+where t2.rating = 10`;
+
+query q2
+`select t1.title
+ from
+  (select input.i_id, input.title, t2.a_id, t2.u_id, t2.i_id as i_id1, t2.rating, t2.rank
+  from input join 
+      (select *
+         from
+          input0
+         where input0.rating = 10.0) as t2) as t1
+ where t1.i_id = t1.i_id1`;
+
+verify q1 q2;

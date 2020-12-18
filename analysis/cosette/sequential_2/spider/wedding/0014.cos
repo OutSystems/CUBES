@@ -1,0 +1,49 @@
+schema df_church(church_id:int, name:str, organized_by:str, open_date:int, continuation_of:str);
+schema df_wedding(church_id:int, male_id:int, female_id:int, year:int);
+
+table df_church(df_church);
+table df_wedding(df_wedding);
+
+query q1
+`select name
+from df_church df_church
+except
+select t1.name
+from df_church as t1
+join df_wedding as t2 on t1.church_id = t2.church_id
+where t2.year = 2015`;
+
+query q2
+`select name
+from
+  (select *
+   from df_church as lhs
+   where not exists
+       (select 1
+        from
+          (select church_id,
+                  name,
+                  organized_by,
+                  open_date,
+                  continuation_of,
+                  church_id.other,
+                  male_id,
+                  year,
+                  church_id as female_id
+           from
+             (select lhs.church_id as church_id,
+                     lhs.name as name,
+                     lhs.organized_by as organized_by,
+                     lhs.open_date as open_date,
+                     lhs.continuation_of as continuation_of,
+                     rhs.church_id as church_id.other,
+                     rhs.male_id as male_id,
+                     rhs.year as year
+              from df_church as lhs
+              inner join
+                (select *
+                 from df_wedding df_wedding
+                 where (year > 2015.0)) as rhs on (lhs.church_id = rhs.female_id))) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

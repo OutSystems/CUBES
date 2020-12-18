@@ -1,0 +1,30 @@
+schema df_college(cname:str, state:str, enr:int);
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_college(df_college);
+table df_tryout(df_tryout);
+
+query q1
+`select sum(enr)
+from df_college df_college
+where cname not in
+    (select cname
+     from df_tryout df_tryout
+     where ppos = "goalie")`;
+
+query q2
+`select sumenr as sum.enr.
+from
+  (select sum(enr) as sumenr
+   from
+     (select *
+      from df_college as lhs
+      where not exists
+          (select 1
+           from
+             (select *
+              from df_tryout df_tryout
+              where (ppos = 'goalie')) as rhs
+           where (lhs.cname = rhs.cname) )))`;
+
+verify q1 q2;

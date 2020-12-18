@@ -1,0 +1,24 @@
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+
+table df_pilot(df_pilot);
+
+query q1
+`select pilot_name
+from df_pilot df_pilot
+where team = "bradley"
+  or team = "fordham"`;
+
+query q2
+`select t3.pilot_name
+ from
+  (select
+          max(t1.join_year) as max_join_year
+        from
+          input as t1) as t4 join 
+      (select *
+         from
+          input
+         where input.team = 'bradley'
+           or input.team = 'fordham') as t2 as t3`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_settlements(settlement_id:int, claim_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int, customer_policy_id:int);
+
+table df_settlements(df_settlements);
+
+query q1
+`select date_claim_made,
+       date_claim_settled
+from df_settlements df_settlements`;
+
+query q2
+`select date_claim_made,
+       date_claim_settled
+from
+  (select lhs.settlement_id as settlement_id,
+          lhs.claim_id as claim_id,
+          lhs.date_claim_made as date_claim_made,
+          lhs.date_claim_settled as date_claim_settled,
+          lhs.amount_claimed as amount_claimed,
+          lhs.amount_settled as amount_settled,
+          lhs.customer_policy_id as customer_policy_id,
+          rhs.settlement_id as settlement_id.other,
+          rhs.claim_id as claim_id.other,
+          rhs.date_claim_made as date_claim_made.other,
+          rhs.date_claim_settled as date_claim_settled.other,
+          rhs.amount_settled as amount_settled.other,
+          rhs.customer_policy_id as customer_policy_id.other
+   from df_settlements as lhs
+   inner join df_settlements as rhs on (lhs.amount_claimed = rhs.amount_claimed))`;
+
+verify q1 q2;

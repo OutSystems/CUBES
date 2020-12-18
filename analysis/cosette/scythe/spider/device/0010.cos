@@ -1,0 +1,26 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+schema df_shop(shop_id:int, shop_name:str, location:str, open_date:str, open_year:int);
+schema df_stock(shop_id:int, device_id:int, quantity:int);
+
+table df_device(df_device);
+table df_shop(df_shop);
+table df_stock(df_stock);
+
+query q1
+`select t3.shop_name,
+       t2.carrier
+from df_stock as t1
+join df_device as t2 on t1.device_id = t2.device_id
+join df_shop as t3 on t1.shop_id = t3.shop_id`;
+
+query q2
+`select t4.shop_name,t4.carrier
+ from
+  (select t5.device_id, t5.device, t5.carrier, t5.package_version, t5.applications, t5.software_platform, t5.shop_id, t5.shop_name, t5.location, t5.open_date, t5.open_year, t3.shop_id as shop_id1, t3.device_id as device_id1, t3.quantity
+  from input join 
+          input0 as t2 as t5 join 
+      input1 as t3) as t4
+ where t4.shop_id = t4.shop_id1
+   and t4.device_id = t4.device_id1`;
+
+verify q1 q2;

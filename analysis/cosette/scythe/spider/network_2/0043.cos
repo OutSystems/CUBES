@@ -1,0 +1,22 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select distinct t4.name
+from df_personfriend as t1
+join df_person as t2 on t1.name = t2.name
+join df_personfriend as t3 on t1.friend = t3.name
+join df_personfriend as t4 on t3.friend = t4.name
+where t2.name = 'alice'
+  and t4.name != 'alice'`;
+
+query q2
+`select input0.name
+ from
+  input0
+ where input0.friend = 'alice'`;
+
+verify q1 q2;

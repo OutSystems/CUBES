@@ -1,0 +1,26 @@
+schema df_channel(channel_id:int, name:str, owner:str, share_in_percent:str, rating_in_percent:str);
+
+table df_channel(df_channel);
+
+query q1
+`select owner
+from df_channel df_channel
+
+limit 1`;
+
+query q2
+`select distinct owner
+from
+  (select *
+   from df_channel as lhs
+   where not exists
+       (select 1
+        from
+          (select owner,
+                  max(rating_in_percent) as rating_in_percent
+           from df_channel df_channel
+           group by owner) as rhs
+        where (lhs.owner = rhs.owner
+               and lhs.rating_in_percent = rhs.rating_in_percent) ))`;
+
+verify q1 q2;

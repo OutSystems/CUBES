@@ -1,0 +1,28 @@
+schema df_premises(premise_id:int, premises_type:str, premise_details:str);
+schema df_customer_addresses(customer_id:int, premise_id:int, date_address_from:str, address_type_code:str, date_address_to:str);
+
+table df_premises(df_premises);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t2.premises_type,
+       t1.address_type_code
+from df_customer_addresses as t1
+join df_premises as t2 on t1.premise_id = t2.premise_id`;
+
+query q2
+`joining, by = "premise_id"
+select premises_type,
+       address_type_code
+from
+  (select customer_id,
+          premise_id,
+          date_address_from,
+          address_type_code,
+          date_address_to,
+          premises_type,
+          premise_details
+   from input1 as lhs
+   left join input0 as rhs on (lhs.premise_id = rhs.premise_id))`;
+
+verify q1 q2;

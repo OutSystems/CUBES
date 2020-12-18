@@ -1,0 +1,26 @@
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+
+table df_journalist(df_journalist);
+
+query q1
+`select nationality,
+       age
+from df_journalist df_journalist`;
+
+query q2
+`select nationality,
+       age
+from
+  (select lhs.journalist_id as journalist_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.age as age,
+          lhs.years_working as years_working,
+          rhs.journalist_id as journalist_id.other,
+          rhs.nationality as nationality.other,
+          rhs.age as age.other,
+          rhs.years_working as years_working.other
+   from df_journalist as lhs
+   inner join df_journalist as rhs on (lhs.name = rhs.name))`;
+
+verify q1 q2;

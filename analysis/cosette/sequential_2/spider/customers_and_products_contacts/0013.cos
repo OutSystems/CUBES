@@ -1,0 +1,50 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_number:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_date:str, order_status_code:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where t1.payment_method_code = 'credit card'
+group by t1.customer_id
+having count(*) > 2`;
+
+query q2
+`select distinct customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method_code as payment_method_code,
+          lhs.customer_number as customer_number,
+          lhs.customer_name as customer_name,
+          lhs.customer_address as customer_address,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.order_id as order_id,
+          lhs.order_date as order_date,
+          lhs.order_status_code as order_status_code,
+          rhs.n as n
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method_code as payment_method_code,
+             lhs.customer_number as customer_number,
+             lhs.customer_name as customer_name,
+             lhs.customer_address as customer_address,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             rhs.order_id as order_id,
+             rhs.order_date as order_date,
+             rhs.order_status_code as order_status_code
+      from df_customers as lhs
+      inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join
+     (select customer_id,
+             count(*) as n
+      from df_customer_orders df_customer_orders
+      group by customer_id) as rhs on (lhs.customer_id = rhs.customer_id))
+where (payment_method_code = 'credit card'
+       and n > 2.0)`;
+
+verify q1 q2;

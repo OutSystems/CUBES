@@ -1,0 +1,37 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select name
+from df_stadium df_stadium
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.capacity as capacity,
+          lhs.city as city,
+          lhs.country as country,
+          lhs.opening_year as opening_year,
+          rhs.name as name.other,
+          rhs.capacity as capacity.other,
+          rhs.city as city.other,
+          rhs.country as country.other,
+          rhs.opening_year as opening_year.other
+   from df_stadium as lhs
+   inner join
+     (select id,
+             name,
+             capacity,
+             city,
+             country,
+             opening_year,
+             max(capacity) over () as maxcapacity
+      from df_stadium df_stadium) as rhs on (lhs.id = rhs.id
+                                  and lhs.capacity = rhs.maxcapacity))`;
+
+verify q1 q2;

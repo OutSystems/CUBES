@@ -1,0 +1,22 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+schema df_artwork(artwork_id:int, type:str, name:str);
+schema df_nomination(artwork_id:int, festival_id:int, result:str);
+
+table df_festival_detail(df_festival_detail);
+table df_artwork(df_artwork);
+table df_nomination(df_nomination);
+
+query q1
+`select distinct t2.type
+from df_nomination as t1
+join df_artwork as t2 on t1.artwork_id = t2.artwork_id
+join df_festival_detail as t3 on t1.festival_id = t3.festival_id
+where t3.year = 2007`;
+
+query q2
+`(select
+    first(t2.type) as first_type
+  from
+    input0 as t2) as t1`;
+
+verify q1 q2;

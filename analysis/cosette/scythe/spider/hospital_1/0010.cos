@@ -1,0 +1,26 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_appointment(appointmentid:int, patient:int, prepnurse:str, physician:int, start:str, end:str, examinationroom:str);
+
+table df_patient(df_patient);
+table df_appointment(df_appointment);
+
+query q1
+`select t1.name
+from df_patient as t1
+join df_appointment as t2 on t1.ssn = t2.df_patient
+
+limit 1`;
+
+query q2
+`select t1.name
+ from
+  (select
+          count(t2.address) as count_address
+        from
+          input as t2) as t3 join 
+      (select *
+         from
+          input
+         where input.pcp = 3.0) as t4 as t1`;
+
+verify q1 q2;

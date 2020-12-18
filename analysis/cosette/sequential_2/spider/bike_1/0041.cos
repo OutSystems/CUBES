@@ -1,0 +1,33 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_station(df_station);
+table df_trip(df_trip);
+
+query q1
+`select t1.name,
+       t1.long,
+       avg(t2.duration)
+from df_station as t1
+join df_trip as t2 on t1.id = t2.start_station_id
+group by t2.start_station_id`;
+
+query q2
+`select name, long, meanduration as avg.t2.duration.
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.lat as lat,
+          lhs.long as long,
+          lhs.dock_count as dock_count,
+          lhs.city as city,
+          lhs.installation_date as installation_date,
+          rhs.meanduration as meanduration
+   from df_station as lhs
+   inner join
+     (select start_station_id,
+             avg(duration) as meanduration
+      from df_trip df_trip
+      group by start_station_id) as rhs on (lhs.id = rhs.start_station_id))`;
+
+verify q1 q2;

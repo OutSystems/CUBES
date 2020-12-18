@@ -1,0 +1,66 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_market(market_id:int, district:str, num_of_employees:int, num_of_shops:str, ranking:int);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_market(df_market);
+table df_phone_market(df_phone_market);
+
+query q1
+`select t3.name
+from df_phone_market as t1
+join df_market as t2 on t1.market_id = t2.market_id
+join df_phone as t3 on t1.phone_id = t3.phone_id
+where t2.num_of_shops > 50`;
+
+query q2
+`select name
+from
+  (select lhs.name as name,
+          lhs.phone_id as phone_id,
+          lhs.memory_in_g as memory_in_g,
+          lhs.carrier as carrier,
+          lhs.price as price,
+          lhs.market_id as market_id,
+          lhs.district as district,
+          lhs.num_of_employees as num_of_employees,
+          lhs.num_of_shops as num_of_shops,
+          lhs.ranking as ranking,
+          lhs.num_of_stock as num_of_stock
+   from
+     (select lhs.name as name,
+             lhs.phone_id as phone_id,
+             lhs.memory_in_g as memory_in_g,
+             lhs.carrier as carrier,
+             lhs.price as price,
+             lhs.market_id as market_id,
+             lhs.district as district,
+             lhs.num_of_employees as num_of_employees,
+             lhs.num_of_shops as num_of_shops,
+             lhs.ranking as ranking,
+             rhs.num_of_stock as num_of_stock
+      from
+        (select lhs.name as name,
+                lhs.phone_id as phone_id,
+                lhs.memory_in_g as memory_in_g,
+                lhs.carrier as carrier,
+                lhs.price as price,
+                rhs.market_id as market_id,
+                rhs.district as district,
+                rhs.num_of_employees as num_of_employees,
+                rhs.num_of_shops as num_of_shops,
+                rhs.ranking as ranking
+         from df_phone as lhs
+         cross join df_market as rhs) as lhs
+      inner join df_phone_market as rhs on (lhs.phone_id = rhs.phone_id
+                                            and lhs.market_id = rhs.market_id)) as lhs
+   inner join
+     (select *
+      from df_market df_market
+      where (num_of_shops >= 50.0)) as rhs on (lhs.market_id = rhs.market_id
+                                               and lhs.district = rhs.district
+                                               and lhs.num_of_employees = rhs.num_of_employees
+                                               and lhs.num_of_shops = rhs.num_of_shops
+                                               and lhs.ranking = rhs.ranking))`;
+
+verify q1 q2;

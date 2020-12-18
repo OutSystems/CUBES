@@ -1,0 +1,29 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+
+table df_claims(df_claims);
+
+query q1
+`select amount_settled,
+       amount_claimed
+from df_claims df_claims
+
+limit 1`;
+
+query q2
+`select amount_settled,
+       amount_claimed
+from
+  (select lhs.amount_settled as amount_settled,
+          rhs.claim_id as claim_id,
+          rhs.policy_id as policy_id,
+          rhs.date_claim_made as date_claim_made,
+          rhs.date_claim_settled as date_claim_settled,
+          rhs.amount_claimed as amount_claimed,
+          rhs.amount_settled as amount_settled.other
+   from
+     (select min(amount_settled) as amount_settled
+      from df_claims df_claims) as lhs
+   cross join df_claims as rhs)
+where (amount_settled >= amount_settled.other)`;
+
+verify q1 q2;

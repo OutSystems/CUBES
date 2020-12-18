@@ -1,0 +1,58 @@
+schema df_financial_transactions(transaction_id:int, previous_transaction_id:int, account_id:int, card_id:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select transaction_type
+from df_financial_transactions df_financial_transactions
+group by transaction_type
+
+limit 1`;
+
+query q2
+`select transaction_type
+from
+  (select transaction_comment,
+          transaction_type,
+          sum(transaction_amount) as sumtransaction_amount
+   from
+     (select *
+      from
+        (select lhs.transaction_id as transaction_id,
+                lhs.previous_transaction_id as previous_transaction_id,
+                lhs.account_id as account_id,
+                lhs.card_id as card_id,
+                lhs.transaction_type as transaction_type,
+                lhs.transaction_date as transaction_date,
+                lhs.transaction_amount as transaction_amount,
+                lhs.transaction_comment as transaction_comment,
+                lhs.other_transaction_details as other_transaction_details,
+                lhs.maxtransaction_amount as maxtransaction_amount,
+                rhs.transaction_id as transaction_id.other,
+                rhs.previous_transaction_id as previous_transaction_id.other,
+                rhs.account_id as account_id.other,
+                rhs.card_id as card_id.other,
+                rhs.transaction_type as transaction_type.other,
+                rhs.transaction_date as transaction_date.other,
+                rhs.transaction_amount as transaction_amount.other,
+                rhs.transaction_comment as transaction_comment.other,
+                rhs.other_transaction_details as other_transaction_details.other
+         from
+           (select transaction_id,
+                   previous_transaction_id,
+                   account_id,
+                   card_id,
+                   transaction_type,
+                   transaction_date,
+                   transaction_amount,
+                   transaction_comment,
+                   other_transaction_details,
+                   max(transaction_amount) over () as maxtransaction_amount
+            from df_financial_transactions df_financial_transactions) as lhs
+         cross join df_financial_transactions as rhs)
+      where (transaction_amount >= transaction_amount.other
+             and maxtransaction_amount <= transaction_amount.other))
+   group by transaction_comment,
+            transaction_type)`;
+
+verify q1 q2;

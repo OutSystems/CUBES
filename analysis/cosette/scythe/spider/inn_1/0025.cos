@@ -1,0 +1,30 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select decor,
+       avg(baseprice),
+       min(baseprice)
+from df_rooms df_rooms
+group by decor`;
+
+query q2
+`select t2.decor,t2.avg_baseprice,t2.min_baseprice
+ from
+  (select t5.decor, t5.avg_baseprice, t3.decor as decor1, t3.min_baseprice
+  from (select
+          t4.decor, avg(t4.baseprice) as avg_baseprice
+        from
+          input as t4
+        group by
+          t4.decor) as t5 join 
+      (select
+            t6.decor, min(t6.baseprice) as min_baseprice
+          from
+            input as t6
+          group by
+            t6.decor) as t1 as t3) as t2
+ where t2.decor = t2.decor1`;
+
+verify q1 q2;

@@ -1,0 +1,42 @@
+schema df_document_types(document_type_code:str, document_description:str);
+schema df_documents(document_id:int, document_type_code:str, grant_id:int, sent_date:str, response_received_date:str, other_details:str);
+schema df_grants(grant_id:int, organisation_id:int, grant_amount:str, grant_start_date:str, grant_end_date:str, other_details:str);
+
+table df_document_types(df_document_types);
+table df_documents(df_documents);
+table df_grants(df_grants);
+
+query q1
+`select t1.response_received_date
+from df_documents as t1
+join df_document_types as t2 on t1.document_type_code = t2.document_type_code
+join df_grants as t3 on t1.grant_id = t3.grant_id
+where t2.document_description = 'regular'
+  or t3.grant_amount > 100`;
+
+query q2
+`select response_received_date
+from
+  (select *
+   from df_documents as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.document_type_code as document_type_code,
+                     lhs.document_description as document_description,
+                     rhs.grant_id as grant_id,
+                     rhs.organisation_id as organisation_id,
+                     rhs.grant_amount as grant_amount,
+                     rhs.grant_start_date as grant_start_date,
+                     rhs.grant_end_date as grant_end_date,
+                     rhs.other_details as other_details
+              from df_document_types as lhs
+              cross join df_grants as rhs)
+           where (document_description != 'regular'
+                  and grant_amount < 100.0)) as rhs
+        where (lhs.document_type_code = rhs.document_type_code
+               and lhs.grant_id = rhs.grant_id) ))`;
+
+verify q1 q2;

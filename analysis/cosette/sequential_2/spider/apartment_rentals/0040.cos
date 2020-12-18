@@ -1,0 +1,34 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+schema df_view_unit_status(apt_id:int, apt_booking_id:int, status_date:str, available_yn:int);
+
+table df_apartments(df_apartments);
+table df_view_unit_status(df_view_unit_status);
+
+query q1
+`select t1.apt_number
+from df_apartments as t1
+join df_view_unit_status as t2 on t1.apt_id = t2.apt_id
+where t2.available_yn = 0 intersect
+  select t1.apt_number
+  from df_apartments as t1
+  join df_view_unit_status as t2 on t1.apt_id = t2.apt_id where t2.available_yn = 1`;
+
+query q2
+`select distinct apt_number
+from
+  (select lhs.apt_id as apt_id,
+          lhs.building_id as building_id,
+          lhs.apt_type_code as apt_type_code,
+          lhs.apt_number as apt_number,
+          lhs.bathroom_count as bathroom_count,
+          lhs.bedroom_count as bedroom_count,
+          lhs.room_count as room_count,
+          rhs.apt_booking_id as apt_booking_id,
+          rhs.status_date as status_date,
+          rhs.available_yn as available_yn
+   from df_apartments as lhs
+   inner join df_view_unit_status as rhs on (lhs.apt_id = rhs.apt_id))
+where (available_yn = 0.0
+       or available_yn > 1.0)`;
+
+verify q1 q2;

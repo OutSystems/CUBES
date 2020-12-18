@@ -1,0 +1,28 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+schema df_membership_register_branch(member_id:int, branch_id:int, register_year:int);
+
+table df_branch(df_branch);
+table df_membership_register_branch(df_membership_register_branch);
+
+query q1
+`select t2.name,
+       count(*)
+from df_membership_register_branch as t1
+join df_branch as t2 on t1.branch_id = t2.branch_id
+where t1.register_year > 2015
+group by t2.branch_id`;
+
+query q2
+`select t4.name,t4.count_branch_id
+ from
+  (select t2.branch_id, t2.count_branch_id, t3.branch_id as branch_id1, t3.name, t3.open_year, t3.address_road, t3.city, t3.membership_amount
+  from (select
+          t1.branch_id, count(t1.branch_id) as count_branch_id
+        from
+          input0 as t1
+        group by
+          t1.branch_id) as t2 join 
+      input as t3) as t4
+ where t4.branch_id = t4.branch_id1`;
+
+verify q1 q2;

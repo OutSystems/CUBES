@@ -1,0 +1,39 @@
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+schema df_research_staff(staff_id:int, employer_organisation_id:int, staff_details:str);
+
+table df_organisations(df_organisations);
+table df_research_staff(df_research_staff);
+
+query q1
+`select t1.organisation_type
+from df_organisations as t1
+join df_research_staff as t2 on t1.organisation_id = t2.employer_organisation_id
+group by t1.organisation_type
+
+limit 1`;
+
+query q2
+`select organisation_type
+from
+  (select staff_id,
+          employer_organisation_id,
+          staff_details,
+          organisation_type,
+          organisation_details,
+          staff_id as n
+   from
+     (select lhs.staff_id as staff_id,
+             lhs.employer_organisation_id as employer_organisation_id,
+             lhs.staff_details as staff_details,
+             rhs.organisation_type as organisation_type,
+             rhs.organisation_details as organisation_details
+      from df_research_staff as lhs
+      inner join
+        (select organisation_id,
+                organisation_type,
+                organisation_details,
+                count(*) over () as n
+         from df_organisations df_organisations) as rhs on (lhs.staff_id = rhs.n
+                                           and lhs.employer_organisation_id = rhs.organisation_id)))`;
+
+verify q1 q2;

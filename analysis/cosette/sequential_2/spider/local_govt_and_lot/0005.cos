@@ -1,0 +1,29 @@
+schema df_organizations(organization_id:int, parent_organization_id:int, organization_details:str);
+schema df_things(thing_id:int, organization_id:int, type_of_thing_code:str, service_type_code:str, service_details:str);
+
+table df_organizations(df_organizations);
+table df_things(df_things);
+
+query q1
+`select t1.thing_id,
+       t1.type_of_thing_code,
+       t2.organization_details
+from df_things as t1
+join df_organizations as t2 on t1.organization_id = t2.organization_id`;
+
+query q2
+`select thing_id,
+       type_of_thing_code,
+       organization_details
+from
+  (select lhs.organization_id as organization_id,
+          lhs.parent_organization_id as parent_organization_id,
+          lhs.organization_details as organization_details,
+          rhs.thing_id as thing_id,
+          rhs.type_of_thing_code as type_of_thing_code,
+          rhs.service_type_code as service_type_code,
+          rhs.service_details as service_details
+   from df_organizations as lhs
+   inner join df_things as rhs on (lhs.organization_id = rhs.organization_id))`;
+
+verify q1 q2;

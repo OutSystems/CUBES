@@ -1,0 +1,41 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+schema df_advisor(s_id:int, i_id:int);
+
+table df_instructor(df_instructor);
+table df_advisor(df_advisor);
+
+query q1
+`select t1.name
+from df_instructor as t1
+join df_advisor as t2 on t1.id = t2.i_id
+group by t2.i_id
+having count(*) > 1`;
+
+query q2
+`select distinct name
+from
+  (select id,
+          name,
+          dept_name,
+          salary,
+          n,
+          s_id,
+          id as i_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.dept_name as dept_name,
+             lhs.salary as salary,
+             lhs.n as n,
+             rhs.s_id as s_id
+      from
+        (select id,
+                name,
+                dept_name,
+                salary,
+                count(*) over () as n
+         from df_instructor df_instructor) as lhs
+      inner join df_advisor as rhs on (lhs.id = rhs.i_id)))
+where (n > 1.0)`;
+
+verify q1 q2;

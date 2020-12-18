@@ -1,0 +1,29 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+schema df_apartment_facilities(apt_id:int, facility_code:str);
+
+table df_apartments(df_apartments);
+table df_apartment_facilities(df_apartment_facilities);
+
+query q1
+`select t1.facility_code
+from df_apartment_facilities as t1
+join df_apartments as t2 on t1.apt_id = t2.apt_id
+where t2.bedroom_count > 4`;
+
+query q2
+`joining, by = "apt_id"
+select facility_code
+from
+  (select apt_id,
+          facility_code,
+          building_id,
+          apt_type_code,
+          apt_number,
+          bathroom_count,
+          bedroom_count,
+          room_count
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.apt_id = rhs.apt_id))
+where (bedroom_count > 4.0)`;
+
+verify q1 q2;

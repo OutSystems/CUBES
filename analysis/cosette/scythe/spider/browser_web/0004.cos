@@ -1,0 +1,26 @@
+schema df_browser(id:int, name:str, market_share:str);
+
+table df_browser(df_browser);
+
+query q1
+`select max(market_share),
+       min(market_share),
+       avg(market_share)
+from df_browser df_browser`;
+
+query q2
+`select t5.market_share,t5.market_share1,t5.avg_market_share
+ from
+  (select t2.avg_market_share, t2.id, t2.name, t2.market_share, t6.id as id1, t6.name as name1, t6.market_share as market_share1
+  from (select
+              avg(t3.market_share) as avg_market_share
+            from
+              input as t3) as t4 join 
+          input as t1 as t2 join 
+      (select *
+         from
+          input
+         where input.id > input.market_share) as t6) as t5
+ where t5.id < t5.market_share1`;
+
+verify q1 q2;

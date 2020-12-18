@@ -1,0 +1,26 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+schema df_station_company(station_id:int, company_id:int, rank_of_the_year:int);
+
+table df_company(df_company);
+table df_station_company(df_station_company);
+
+query q1
+`select df_company,
+       main_industry
+from df_company df_company
+where company_id not in
+    (select company_id
+     from df_station_company df_station_company)`;
+
+query q2
+`select company,
+       main_industry
+from
+  (select *
+   from df_company as lhs
+   where not exists
+       (select 1
+        from df_station_company as rhs
+        where (lhs.company_id = rhs.company_id) ))`;
+
+verify q1 q2;

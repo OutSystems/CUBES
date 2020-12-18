@@ -1,0 +1,38 @@
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_wine(df_wine);
+
+query q1
+`select grape,
+       appelation
+from df_wine df_wine`;
+
+query q2
+`select grape,
+       appelation
+from
+  (select lhs.no as no,
+          lhs.grape as grape,
+          lhs.winery as winery,
+          lhs.appelation as appelation,
+          lhs.state as state,
+          lhs.name as name,
+          lhs.year as year,
+          lhs.price as price,
+          lhs.score as score,
+          lhs.cases as cases,
+          lhs.drink as drink,
+          rhs.grape as grape.other,
+          rhs.winery as winery.other,
+          rhs.appelation as appelation.other,
+          rhs.state as state.other,
+          rhs.name as name.other,
+          rhs.year as year.other,
+          rhs.price as price.other,
+          rhs.score as score.other,
+          rhs.cases as cases.other
+   from df_wine as lhs
+   inner join df_wine as rhs on (lhs.drink = rhs.drink
+                                 and lhs.no = rhs.no))`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+
+table df_manufacturers(df_manufacturers);
+
+query q1
+`select name
+from df_manufacturers df_manufacturers
+where revenue between 100 and 150`;
+
+query q2
+`select t1.name
+ from
+  (select input.code, input.name, input.headquarter, input.founder, input.revenue, t2.code as code1, t2.name as name1, t2.headquarter as headquarter1, t2.founder as founder1, t2.revenue as revenue1
+  from (select *
+       from
+        input
+       where input.revenue < 150.0) join 
+      (select *
+         from
+          input
+         where input.revenue = 100.0) as t2) as t1
+ where t1.revenue >= t1.revenue1`;
+
+verify q1 q2;

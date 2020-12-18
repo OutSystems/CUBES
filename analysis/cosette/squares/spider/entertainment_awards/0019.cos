@@ -1,0 +1,35 @@
+schema df_artwork(artwork_id:int, type:str, name:str);
+schema df_nomination(artwork_id:int, festival_id:int, result:str);
+
+table df_artwork(df_artwork);
+table df_nomination(df_nomination);
+
+query q1
+`select name
+from df_artwork df_artwork
+where artwork_id not in
+    (select artwork_id
+     from df_nomination df_nomination)`;
+
+query q2
+`joining, by = "artwork_id"
+joining, by = "artwork_id"
+select distinct name
+from
+  (select artwork_id,
+          type,
+          name
+   from
+     (select *
+      from
+        (select artwork_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select artwork_id
+              from input1) as rhs
+           where (lhs.artwork_id = rhs.artwork_id) )) as lhs
+   left join input0 as rhs on (lhs.artwork_id = rhs.artwork_id))`;
+
+verify q1 q2;

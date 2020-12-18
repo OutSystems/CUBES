@@ -1,0 +1,34 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_department(df_department);
+table df_student(df_student);
+
+query q1
+`select t2.dept_name
+from df_student as t1
+join df_department as t2 on t1.dept_code = t2.dept_code
+
+limit 1`;
+
+query q2
+`select dept_name
+from
+  (select lhs.dept_code as dept_code,
+          lhs.stu_hrs as stu_hrs,
+          lhs.minstu_gpa as minstu_gpa,
+          rhs.dept_name as dept_name,
+          rhs.school_code as school_code,
+          rhs.dept_address as dept_address,
+          rhs.dept_extension as dept_extension
+   from
+     (select dept_code,
+             stu_hrs,
+             min(stu_gpa) as minstu_gpa
+      from df_student df_student
+      group by dept_code,
+               stu_hrs) as lhs
+   inner join df_department as rhs on (lhs.stu_hrs = rhs.emp_num
+                                       and lhs.dept_code = rhs.dept_code))`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+
+table df_phone(df_phone);
+
+query q1
+`select carrier
+from df_phone df_phone
+where memory_in_g < 32 intersect
+  select carrier
+  from df_phone df_phone where memory_in_g > 64`;
+
+query q2
+`select t1.carrier1
+ from
+  (select input.name, input.phone_id, input.memory_in_g, input.carrier, input.price, t2.name as name1, t2.phone_id as phone_id1, t2.memory_in_g as memory_in_g1, t2.carrier as carrier1, t2.price as price1
+  from (select *
+       from
+        input
+       where input.memory_in_g = 32.0) join 
+      (select *
+         from
+          input
+         where input.memory_in_g = 64.0) as t2) as t1`;
+
+verify q1 q2;

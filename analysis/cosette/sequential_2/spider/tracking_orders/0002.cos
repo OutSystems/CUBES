@@ -1,0 +1,47 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_orders(df_orders);
+
+query q1
+`select order_id,
+       customer_id
+from df_orders df_orders
+
+limit 1`;
+
+query q2
+`select distinct order_id,
+                customer_id
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status as order_status,
+          lhs.date_order_placed as date_order_placed,
+          lhs.order_details as order_details,
+          lhs.mindate_order_placed as mindate_order_placed,
+          rhs.order_id as order_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.order_status as order_status.other,
+          rhs.date_order_placed as date_order_placed.other,
+          rhs.order_details as order_details.other,
+          rhs.mindate_order_placed as mindate_order_placed.other
+   from
+     (select order_id,
+             customer_id,
+             order_status,
+             date_order_placed,
+             order_details,
+             min(date_order_placed) over () as mindate_order_placed
+      from df_orders df_orders) as lhs
+   cross join
+     (select order_id,
+             customer_id,
+             order_status,
+             date_order_placed,
+             order_details,
+             min(date_order_placed) over () as mindate_order_placed
+      from df_orders df_orders) as rhs)
+where (date_order_placed <= mindate_order_placed.other
+       and mindate_order_placed <= date_order_placed.other)`;
+
+verify q1 q2;

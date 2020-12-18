@@ -1,0 +1,35 @@
+schema df_member(member_id:int, name:str, nationality:str, role:str);
+schema df_member_attendance(member_id:int, performance_id:int, num_of_pieces:int);
+
+table df_member(df_member);
+table df_member_attendance(df_member_attendance);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_member_attendance df_member_attendance)`;
+
+query q2
+`select t2.name
+ from
+  (select *
+       from
+        (select
+            t3.name, t3.nationality, max(t3.member_id) as max_member_id
+          from
+            (select *
+               from
+                input
+               where input.member_id < 11.0) as t3
+          group by
+            t3.name, t3.nationality) as t4
+       where t4.max_member_id >= 6.0) join 
+      (select *
+         from
+          input0
+         where input0.performance_id = 2.0) as t1 as t2
+ where t2.max_member_id <> t2.member_id`;
+
+verify q1 q2;

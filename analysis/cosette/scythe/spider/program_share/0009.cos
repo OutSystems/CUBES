@@ -1,0 +1,24 @@
+schema df_channel(channel_id:int, name:str, owner:str, share_in_percent:str, rating_in_percent:str);
+schema df_broadcast(channel_id:int, program_id:int, time_of_day:str);
+
+table df_channel(df_channel);
+table df_broadcast(df_broadcast);
+
+query q1
+`select t1.name
+from df_channel as t1
+join df_broadcast as t2 on t1.channel_id = t2.channel_id
+where t2.time_of_day = 'morning'`;
+
+query q2
+`select t1.name
+ from
+  (select input.channel_id, input.name, input.owner, input.share_in_percent, input.rating_in_percent, t2.channel_id as channel_id1, t2.program_id, t2.time_of_day
+  from input join 
+      (select *
+         from
+          input0
+         where input0.time_of_day = 'morning') as t2) as t1
+ where t1.channel_id = t1.channel_id1`;
+
+verify q1 q2;

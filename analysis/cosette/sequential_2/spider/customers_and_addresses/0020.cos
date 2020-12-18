@@ -1,0 +1,20 @@
+schema df_addresses(address_id:int, address_content:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+
+table df_addresses(df_addresses);
+
+query q1
+`select country
+from df_addresses df_addresses
+group by country
+having count(address_id) > 4`;
+
+query q2
+`select country
+from
+  (select country,
+          count(distinct address_id) as n_distinct
+   from df_addresses df_addresses
+   group by country)
+where (n_distinct != 4.0)`;
+
+verify q1 q2;

@@ -1,0 +1,27 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+schema df_aircraft(aid:int, name:str, distance:int);
+
+table df_flight(df_flight);
+table df_aircraft(df_aircraft);
+
+query q1
+`select t2.name,
+       count(*)
+from df_flight as t1
+join df_aircraft as t2 on t1.aid = t2.aid
+group by t1.aid`;
+
+query q2
+`select t2.name,t2.count_distance
+ from
+  (select t3.departure_date, t3.arrival_date, t3.aid, t3.count_distance, t4.aid as aid1, t4.name, t4.distance
+  from (select
+          t1.departure_date, t1.arrival_date, t1.aid, count(t1.distance) as count_distance
+        from
+          input as t1
+        group by
+          t1.departure_date, t1.arrival_date, t1.aid) as t3 join 
+      input0 as t4) as t2
+ where t2.aid = t2.aid1`;
+
+verify q1 q2;

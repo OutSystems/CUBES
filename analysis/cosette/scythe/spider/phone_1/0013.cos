@@ -1,0 +1,26 @@
+schema df_screen_mode(graphics_mode:str, char_cells:str, pixels:str, hardware_colours:str, used_kb:str, map:str, type:str);
+
+table df_screen_mode(df_screen_mode);
+
+query q1
+`select max(used_kb),
+       min(used_kb),
+       avg(used_kb)
+from df_screen_mode df_screen_mode`;
+
+query q2
+`select t1.min_used_kb,t1.hardware_colours,t1.avg_used_kb
+ from
+  (select
+          avg(t3.used_kb) as avg_used_kb
+        from
+          input as t3) as t5 join 
+      (select
+            t4.hardware_colours, t4.type, min(t4.used_kb) as min_used_kb
+          from
+            input as t4
+          group by
+            t4.hardware_colours, t4.type) as t2 as t6 as t1
+ where t1.avg_used_kb < t1.min_used_kb`;
+
+verify q1 q2;

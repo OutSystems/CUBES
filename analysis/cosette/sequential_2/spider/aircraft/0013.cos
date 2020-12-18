@@ -1,0 +1,32 @@
+schema df_aircraft(aircraft_id:int, aircraft:str, description:str, max_gross_weight:str, total_disk_area:str, max_disk_loading:str);
+schema df_match(round:str, location:str, country:str, date:str, fastest_qualifying:str, winning_pilot:int, winning_aircraft:int);
+
+table df_aircraft(df_aircraft);
+table df_match(df_match);
+
+query q1
+`select t2.location,
+       t1.df_aircraft
+from df_aircraft as t1
+join df_match as t2 on t1.aircraft_id = t2.winning_aircraft`;
+
+query q2
+`select location,
+       aircraft
+from
+  (select lhs.aircraft_id as aircraft_id,
+          lhs.aircraft as aircraft,
+          lhs.description as description,
+          lhs.max_gross_weight as max_gross_weight,
+          lhs.total_disk_area as total_disk_area,
+          lhs.max_disk_loading as max_disk_loading,
+          rhs.round as round,
+          rhs.location as location,
+          rhs.country as country,
+          rhs.date as date,
+          rhs.fastest_qualifying as fastest_qualifying,
+          rhs.winning_pilot as winning_pilot
+   from df_aircraft as lhs
+   inner join df_match as rhs on (lhs.aircraft_id = rhs.winning_aircraft))`;
+
+verify q1 q2;

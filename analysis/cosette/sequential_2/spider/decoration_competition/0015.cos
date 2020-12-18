@@ -1,0 +1,24 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_round df_round)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_member as lhs
+   where not exists
+       (select 1
+        from df_round as rhs
+        where (lhs.member_id = rhs.member_id) ))`;
+
+verify q1 q2;

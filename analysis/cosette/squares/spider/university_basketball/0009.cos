@@ -1,0 +1,42 @@
+schema df_basketball_match(team_id:int, school_id:int, team_name:str, acc_regular_season:str, acc_percent:str, acc_home:str, acc_road:str, all_games:str, all_games_percent:str, all_home:str, all_road:str, all_neutral:str);
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_basketball_match(df_basketball_match);
+table df_university(df_university);
+
+query q1
+`select t2.all_games,
+       t1.location
+from df_university as t1
+join df_basketball_match as t2 on t1.school_id = t2.school_id
+where team_name = 'clemson'`;
+
+query q2
+`joining, by = "school_id"
+select distinct all_games,
+                location
+from
+  (select school_id,
+          school,
+          location,
+          founded,
+          affiliation,
+          enrollment,
+          nickname,
+          primary_conference,
+          team_id,
+          team_name,
+          acc_regular_season,
+          acc_percent,
+          acc_home,
+          acc_road,
+          all_games,
+          all_games_percent,
+          all_home,
+          all_road,
+          all_neutral
+   from input1 as lhs
+   left join input0 as rhs on (lhs.school_id = rhs.school_id))
+where (team_name = 'clemson')`;
+
+verify q1 q2;

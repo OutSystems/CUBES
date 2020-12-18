@@ -1,0 +1,25 @@
+schema df_11_1(S_key:str, S_name:str);
+schema df_11_2(S_key:str, C_name:str);
+
+table df_11_1(df_11_1);
+table df_11_2(df_11_2);
+
+query q1
+`select distinct s.sname
+from student s
+where s.snum not in (select e.snum
+from enrolled e )`;
+
+query q2
+`select t2.s_name
+ from
+  (select t3.s_key, t3.s_name, t1.s_key as s_key1
+  from input as t3 left outer join 
+      (select
+            t4.s_key, from
+            input0 as t4
+          group by
+            t4.s_key) as t5 as t1 on t3.s_key = t1.s_key) as t2
+ where t2.s_key1 is null`;
+
+verify q1 q2;

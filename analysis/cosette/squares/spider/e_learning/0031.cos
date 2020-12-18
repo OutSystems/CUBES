@@ -1,0 +1,28 @@
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+schema df_student_tests_taken(registration_id:int, date_test_taken:str, test_result:str);
+
+table df_student_course_enrolment(df_student_course_enrolment);
+table df_student_tests_taken(df_student_tests_taken);
+
+query q1
+`select t1.date_of_enrolment
+from df_student_course_enrolment as t1
+join df_student_tests_taken as t2 on t1.registration_id = t2.registration_id
+where t2.test_result = "pass"`;
+
+query q2
+`joining, by = "registration_id"
+select date_of_enrolment
+from
+  (select registration_id,
+          date_test_taken,
+          test_result,
+          student_id,
+          course_id,
+          date_of_enrolment,
+          date_of_completion
+   from input1 as lhs
+   left join input0 as rhs on (lhs.registration_id = rhs.registration_id))
+where (test_result = 'pass')`;
+
+verify q1 q2;

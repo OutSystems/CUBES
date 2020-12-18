@@ -1,0 +1,40 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+schema df_status(station_id:int, bikes_available:int, docks_available:int, time:str);
+
+table df_station(df_station);
+table df_status(df_status);
+
+query q1
+`select distinct t1.name
+from df_station as t1
+join df_status as t2 on t1.id = t2.station_id
+where t2.bikes_available = 7`;
+
+query q2
+`select distinct name
+from
+  (select id,
+          name,
+          lat, long, dock_count,
+                     city,
+                     installation_date,
+                     bikes_available,
+                     docks_available,
+                     time,
+                     id as station_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.lat as lat,
+             lhs.long as long,
+             lhs.dock_count as dock_count,
+             lhs.city as city,
+             lhs.installation_date as installation_date,
+             rhs.bikes_available as bikes_available,
+             rhs.docks_available as docks_available,
+             rhs.time as time
+      from df_station as lhs
+      inner join df_status as rhs on (lhs.id = rhs.station_id)))
+where (bikes_available = 7.0)`;
+
+verify q1 q2;

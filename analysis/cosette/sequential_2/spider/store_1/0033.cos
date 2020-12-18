@@ -1,0 +1,48 @@
+schema df_employees(id:int, last_name:str, first_name:str, title:str, reports_to:str, birth_date:str, hire_date:str, address:str, city:str, state:str, country:str, postal_code:str, phone:str, fax:str, email:str);
+
+table df_employees(df_employees);
+
+query q1
+`select first_name,
+       last_name
+from df_employees df_employees
+
+limit 10`;
+
+query q2
+`select first_name,
+       last_name
+from
+  (select lhs.id as id,
+          lhs.last_name as last_name,
+          lhs.first_name as first_name,
+          lhs.title as title,
+          lhs.reports_to as reports_to,
+          lhs.birth_date as birth_date,
+          lhs.hire_date as hire_date,
+          lhs.address as address,
+          lhs.city as city,
+          lhs.state as state,
+          lhs.country as country,
+          lhs.postal_code as postal_code,
+          lhs.phone as phone,
+          lhs.fax as fax,
+          lhs.email as email,
+          rhs.id as id.other,
+          rhs.last_name as last_name.other,
+          rhs.first_name as first_name.other,
+          rhs.title as title.other,
+          rhs.reports_to as reports_to.other,
+          rhs.hire_date as hire_date.other,
+          rhs.city as city.other,
+          rhs.state as state.other,
+          rhs.country as country.other,
+          rhs.postal_code as postal_code.other,
+          rhs.phone as phone.other,
+          rhs.fax as fax.other,
+          rhs.email as email.other
+   from df_employees as lhs
+   inner join df_employees as rhs on (lhs.address = rhs.address
+                                      and lhs.birth_date = rhs.birth_date))`;
+
+verify q1 q2;

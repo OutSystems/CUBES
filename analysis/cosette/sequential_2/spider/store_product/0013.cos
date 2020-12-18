@@ -1,0 +1,86 @@
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+schema df_store_district(store_id:int, district_id:int);
+
+table df_store(df_store);
+table df_district(df_district);
+table df_store_district(df_store_district);
+
+query q1
+`select t3.headquartered_city
+from df_store as t1
+join df_store_district as t2 on t1.store_id = t2.store_id
+join df_district as t3 on t2.district_id = t3.district_id
+group by t3.headquartered_city
+
+limit 1`;
+
+query q2
+`select headquartered_city
+from
+  (select lhs.store_id as store_id,
+          lhs.store_name as store_name,
+          lhs.type as type,
+          lhs.area_size as area_size,
+          lhs.number_of_product_category as number_of_product_category,
+          lhs.ranking as ranking,
+          lhs.district_id as district_id,
+          lhs.district_name as district_name,
+          lhs.headquartered_city as headquartered_city,
+          lhs.city_population as city_population,
+          lhs.city_area as city_area,
+          lhs.n as n
+   from
+     (select lhs.store_id as store_id,
+             lhs.store_name as store_name,
+             lhs.type as type,
+             lhs.area_size as area_size,
+             lhs.number_of_product_category as number_of_product_category,
+             lhs.ranking as ranking,
+             lhs.district_id as district_id,
+             lhs.district_name as district_name,
+             lhs.headquartered_city as headquartered_city,
+             lhs.city_population as city_population,
+             lhs.city_area as city_area,
+             rhs.n as n
+      from
+        (select lhs.store_id as store_id,
+                lhs.store_name as store_name,
+                lhs.type as type,
+                lhs.area_size as area_size,
+                lhs.number_of_product_category as number_of_product_category,
+                lhs.ranking as ranking,
+                lhs.district_id as district_id,
+                lhs.district_name as district_name,
+                lhs.headquartered_city as headquartered_city,
+                lhs.city_population as city_population,
+                lhs.city_area as city_area
+         from
+           (select lhs.store_id as store_id,
+                   lhs.store_name as store_name,
+                   lhs.type as type,
+                   lhs.area_size as area_size,
+                   lhs.number_of_product_category as number_of_product_category,
+                   lhs.ranking as ranking,
+                   rhs.district_id as district_id,
+                   rhs.district_name as district_name,
+                   rhs.headquartered_city as headquartered_city,
+                   rhs.city_population as city_population,
+                   rhs.city_area as city_area
+            from df_store as lhs
+            cross join df_district as rhs) as lhs
+         inner join df_store_district as rhs on (lhs.store_id = rhs.store_id
+                                                 and lhs.district_id = rhs.district_id)) as lhs
+      inner join
+        (select ranking,
+                count(*) as n
+         from df_store df_store
+         group by ranking) as rhs on (lhs.ranking = rhs.ranking)) as lhs
+   inner join
+     (select ranking,
+             count(*) as n
+      from df_store df_store
+      group by ranking) as rhs on (lhs.store_id = rhs.n
+                                   and lhs.ranking = rhs.ranking))`;
+
+verify q1 q2;

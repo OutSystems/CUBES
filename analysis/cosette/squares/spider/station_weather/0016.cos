@@ -1,0 +1,22 @@
+schema df_train(id:int, train_number:int, name:str, origin:str, destination:str, time:str, interval:str);
+
+table df_train(df_train);
+
+query q1
+`select origin
+from df_train df_train
+group by origin
+having count(*) > 1`;
+
+query q2
+`select distinct origin
+from
+  (select interval,
+          origin,
+          count(*) as n
+   from input0
+   group by interval,
+            origin)
+where (n > 1.0)`;
+
+verify q1 q2;

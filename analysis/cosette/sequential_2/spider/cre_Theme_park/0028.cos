@@ -1,0 +1,26 @@
+schema df_hotels(hotel_id:int, star_rating_code:int, pets_allowed_yn:str, price_range:str, other_hotel_details:str);
+
+table df_hotels(df_hotels);
+
+query q1
+`select hotel_id,
+       star_rating_code
+from df_hotels df_hotels`;
+
+query q2
+`select distinct hotel_id,
+                star_rating_code
+from
+  (select lhs.hotel_id as hotel_id,
+          lhs.star_rating_code as star_rating_code,
+          lhs.pets_allowed_yn as pets_allowed_yn,
+          lhs.price_range as price_range,
+          lhs.other_hotel_details as other_hotel_details,
+          rhs.hotel_id as hotel_id.other,
+          rhs.star_rating_code as star_rating_code.other,
+          rhs.price_range as price_range.other,
+          rhs.other_hotel_details as other_hotel_details.other
+   from df_hotels as lhs
+   inner join df_hotels as rhs on (lhs.pets_allowed_yn = rhs.pets_allowed_yn))`;
+
+verify q1 q2;

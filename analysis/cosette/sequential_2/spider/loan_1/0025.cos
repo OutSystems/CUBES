@@ -1,0 +1,46 @@
+schema df_bank(branch_id:int, bname:str, no_of_customers:int, city:str, state:str);
+
+table df_bank(df_bank);
+
+query q1
+`select state
+from df_bank df_bank
+group by state
+
+limit 1`;
+
+query q2
+`select distinct state.other as state
+from
+  (select lhs.no_of_customers as no_of_customers,
+          lhs.state as state,
+          lhs.sumno_of_customers as sumno_of_customers,
+          rhs.no_of_customers as no_of_customers.other,
+          rhs.state as state.other,
+          rhs.sumno_of_customers as sumno_of_customers.other
+   from
+     (select max(no_of_customers) over () as no_of_customers,
+                                       state,
+                                       sumno_of_customers
+      from
+        (select no_of_customers,
+                state,
+                sum(no_of_customers) as sumno_of_customers
+         from df_bank df_bank
+         group by no_of_customers,
+                  state)) as lhs
+   cross join
+     (select max(no_of_customers) over () as no_of_customers,
+                                       state,
+                                       sumno_of_customers
+      from
+        (select no_of_customers,
+                state,
+                sum(no_of_customers) as sumno_of_customers
+         from df_bank df_bank
+         group by no_of_customers,
+                  state)) as rhs)
+where (no_of_customers <= no_of_customers.other
+       and no_of_customers <= sumno_of_customers.other)`;
+
+verify q1 q2;

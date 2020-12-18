@@ -1,0 +1,21 @@
+schema df_ref_document_types(document_type_code:str, document_type_name:str, document_type_description:str);
+
+table df_ref_document_types(df_ref_document_types);
+
+query q1
+`select document_type_description
+from df_ref_document_types df_ref_document_types
+where document_type_name = "film"`;
+
+query q2
+`select t1.document_type_description
+ from
+  (select
+      t2.document_type_description, concat(t2.document_type_name) as concat_document_type_name
+    from
+      input as t2
+    group by
+      t2.document_type_description) as t1
+ where t1.concat_document_type_name = 'film'`;
+
+verify q1 q2;

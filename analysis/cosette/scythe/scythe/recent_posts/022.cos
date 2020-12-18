@@ -1,0 +1,36 @@
+schema df_022_2(c1:int, c2:int);
+
+table df_022_2(df_022_2);
+
+query q1
+`select t0.trackid, t0.userid, (
+    select t3.followeeid
+    from (
+        select top (1) t2.followeeid
+        from (
+            select count(*) as value, t1.followeeid
+            from followers as t1
+            group by t1.followeeid
+            ) as t2
+        
+        ) as t3
+    ) as mostpopularfolloweeid
+from tracks as t0
+where t0.trackid = @p0`;
+
+query q2
+`select t6.max_c1
+ from
+  (select
+          min(t5.c2) as min_c2
+        from
+          input0 as t5) as t4 join 
+      (select
+            t3.c2, max(t3.c1) as max_c1
+          from
+            input0 as t3
+          group by
+            t3.c2) as t1 as t2 as t6
+ where t6.min_c2 = t6.c2`;
+
+verify q1 q2;

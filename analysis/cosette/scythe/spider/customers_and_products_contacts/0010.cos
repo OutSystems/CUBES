@@ -1,0 +1,27 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select min(product_price),
+       max(product_price),
+       avg(product_price)
+from df_products df_products`;
+
+query q2
+`select t2.min_product_price,t2.max_product_price,t2.avg_product_price
+ from
+  (select
+              min(t6.product_price) as min_product_price
+            from
+              input as t6) as t4 join 
+          (select
+                avg(t3.product_price) as avg_product_price
+              from
+                input as t3) as t5 as t7 as t8 join 
+      (select
+            max(t9.product_price) as max_product_price
+          from
+            input as t9) as t10 as t1 as t2`;
+
+verify q1 q2;

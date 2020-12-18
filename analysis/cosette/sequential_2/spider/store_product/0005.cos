@@ -1,0 +1,45 @@
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+
+table df_district(df_district);
+
+query q1
+`select district_name
+from df_district df_district
+
+limit 1`;
+
+query q2
+`select distinct district_name.other as district_name
+from
+  (select lhs.district_id as district_id,
+          lhs.district_name as district_name,
+          lhs.headquartered_city as headquartered_city,
+          lhs.city_population as city_population,
+          lhs.city_area as city_area,
+          lhs.maxcity_population as maxcity_population,
+          rhs.district_id as district_id.other,
+          rhs.district_name as district_name.other,
+          rhs.headquartered_city as headquartered_city.other,
+          rhs.city_population as city_population.other,
+          rhs.city_area as city_area.other,
+          rhs.maxcity_population as maxcity_population.other
+   from
+     (select district_id,
+             district_name,
+             headquartered_city,
+             city_population,
+             city_area,
+             max(city_population) over () as maxcity_population
+      from df_district df_district) as lhs
+   cross join
+     (select district_id,
+             district_name,
+             headquartered_city,
+             city_population,
+             city_area,
+             max(city_population) over () as maxcity_population
+      from df_district df_district) as rhs)
+where (maxcity_population <= city_population.other
+       or city_population.other = maxcity_population.other)`;
+
+verify q1 q2;

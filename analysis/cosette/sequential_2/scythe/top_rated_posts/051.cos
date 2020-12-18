@@ -1,0 +1,40 @@
+schema df_i051(id:int, category:str, date:str);
+
+table df_i051(df_i051);
+
+query q1
+`select * from table1 t1
+join
+(
+   select category, max(date) as maxdate
+   from table1
+   group by category
+) t2
+on t1.category = t2.category
+and t1.date = t2.maxdate`;
+
+query q2
+`select distinct id.other as id,
+                category.other as category,
+                maxdate as date
+from
+  (select lhs.id as id,
+          lhs.category as category,
+          lhs.date as date,
+          lhs.maxdate as maxdate,
+          rhs.id as id.other,
+          rhs.category as category.other,
+          rhs.date as date.other,
+          rhs.maxdate as maxdate.other
+   from
+     (select id,
+             category, date, max(date) over () as maxdate
+      from df_i051 df_i051) as lhs
+   cross join
+     (select id,
+             category, date, max(date) over () as maxdate
+      from df_i051 df_i051) as rhs)
+where (date < maxdate
+       and maxdate <= date.other)`;
+
+verify q1 q2;

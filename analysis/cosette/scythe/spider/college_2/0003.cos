@@ -1,0 +1,23 @@
+schema df_department(dept_name:str, building:str, budget:str);
+
+table df_department(df_department);
+
+query q1
+`select dept_name,
+       building
+from df_department df_department
+where budget >
+    (select avg(budget)
+     from df_department df_department)`;
+
+query q2
+`select t3.dept_name,t3.building
+ from
+  (select
+          avg(t4.budget) as avg_budget
+        from
+          input as t4) as t1 join 
+      input as t2 as t3
+ where t3.avg_budget < t3.budget`;
+
+verify q1 q2;

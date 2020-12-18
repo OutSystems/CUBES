@@ -1,0 +1,28 @@
+schema df_movie(movie_id:int, title:str, year:int, director:str, budget_million:str, gross_worldwide:int);
+
+table df_movie(df_movie);
+
+query q1
+`select director
+from df_movie df_movie
+where year = 1999
+  or year = 2000`;
+
+query q2
+`select t4.director
+ from
+  (select t1.year, t3.movie_id, t3.title, t3.year as year1, t3.director, t3.budget_million, t3.gross_worldwide
+  from (select
+          t2.year, from
+          (select *
+             from
+              input
+             where input.year = 1999.0) as t2
+        group by
+          t2.year) as t1 join 
+      (select *
+         from
+          input
+         where input.year <= 2000.0) as t3) as t4`;
+
+verify q1 q2;

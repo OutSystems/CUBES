@@ -1,0 +1,44 @@
+schema df_1_1(C_name:str, F_key:str);
+schema df_1_2(S_key:str, C_name:str);
+schema df_1_3(F_key:str, F_name:str);
+schema df_1_4(S_key:str, S_name:str, level:str);
+
+table df_1_1(df_1_1);
+table df_1_2(df_1_2);
+table df_1_3(df_1_3);
+table df_1_4(df_1_4);
+
+query q1
+`select i1.s_name
+from
+  input1 i1
+  natural join input2 i2
+  natural join input3 i3
+  natural join input4 i4
+where i1.f_name = 'faculty1' and i1.level = 'jr'`;
+
+query q2
+`select t8.s_name
+ from
+  (select t3.c_name, t3.f_key, t3.s_key, t3.c_name1, t3.f_key1, t3.f_name, t7.s_key as s_key1, t7.s_name, t7.level
+  from (select *
+       from
+        (select t6.c_name, t6.f_key, t6.s_key, t6.c_name1, t4.f_key as f_key1, t4.f_name
+        from (select *
+             from
+              (select input.c_name, input.f_key, t5.s_key, t5.c_name as c_name1
+              from input join 
+                  input0 as t5) as t6
+             where t6.c_name = t6.c_name1) join 
+            (select *
+               from
+                input1
+               where input1.f_name = 'faculty1') as t4) as t3
+       where t3.f_key = t3.f_key1) join 
+      (select *
+         from
+          input2
+         where input2.level = 'jr') as t7) as t8
+ where t8.s_key = t8.s_key1`;
+
+verify q1 q2;

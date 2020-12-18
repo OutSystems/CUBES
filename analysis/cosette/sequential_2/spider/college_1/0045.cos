@@ -1,0 +1,31 @@
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t2.emp_fname,
+       t1.prof_office
+from df_professor as t1
+join df_employee as t2 on t1.emp_num = t2.emp_num`;
+
+query q2
+`select emp_fname,
+       prof_office
+from
+  (select lhs.emp_num as emp_num,
+          lhs.dept_code as dept_code,
+          lhs.prof_office as prof_office,
+          lhs.prof_extension as prof_extension,
+          lhs.prof_high_degree as prof_high_degree,
+          rhs.emp_lname as emp_lname,
+          rhs.emp_fname as emp_fname,
+          rhs.emp_initial as emp_initial,
+          rhs.emp_jobcode as emp_jobcode,
+          rhs.emp_hiredate as emp_hiredate,
+          rhs.emp_dob as emp_dob
+   from df_professor as lhs
+   inner join df_employee as rhs on (lhs.emp_num = rhs.emp_num))`;
+
+verify q1 q2;

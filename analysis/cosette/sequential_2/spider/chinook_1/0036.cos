@@ -1,0 +1,25 @@
+schema df_album(albumid:int, title:str, artistid:int);
+schema df_artist(artistid:int, name:str);
+
+table df_album(df_album);
+table df_artist(df_artist);
+
+query q1
+`select name
+from df_artist df_artist
+except
+select t2.name
+from df_album as t1
+join df_artist as t2 on t1.artistid = t2.artistid`;
+
+query q2
+`select name
+from
+  (select *
+   from df_artist as lhs
+   where not exists
+       (select 1
+        from df_album as rhs
+        where (lhs.artistid = rhs.artistid) ))`;
+
+verify q1 q2;

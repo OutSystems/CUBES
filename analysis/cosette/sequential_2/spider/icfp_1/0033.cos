@@ -1,0 +1,22 @@
+schema df_authors(authid:int, lname:str, fname:str);
+
+table df_authors(df_authors);
+
+query q1
+`select fname,
+       lname
+from df_authors df_authors`;
+
+query q2
+`select fname,
+       lname
+from
+  (select lhs.authid as authid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          rhs.lname as lname.other
+   from df_authors as lhs
+   inner join df_authors as rhs on (lhs.authid = rhs.authid
+                                    and lhs.fname = rhs.fname))`;
+
+verify q1 q2;

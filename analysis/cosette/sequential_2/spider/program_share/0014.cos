@@ -1,0 +1,33 @@
+schema df_program(program_id:int, name:str, origin:str, launch:str, owner:str);
+schema df_broadcast(channel_id:int, program_id:int, time_of_day:str);
+
+table df_program(df_program);
+table df_broadcast(df_broadcast);
+
+query q1
+`select t1.owner
+from df_program as t1
+join df_broadcast as t2 on t1.program_id = t2.program_id
+where t2.time_of_day = "morning" intersect
+  select t1.owner
+  from df_program as t1
+  join df_broadcast as t2 on t1.program_id = t2.program_id where t2.time_of_day = "night"`;
+
+query q2
+`select owner
+from
+  (select lhs.program_id as program_id,
+          lhs.name as name,
+          lhs.origin as origin,
+          lhs.launch as launch,
+          lhs.owner as owner,
+          rhs.program_id as program_id.other,
+          rhs.time_of_day as time_of_day
+   from df_program as lhs
+   inner join
+     (select *
+      from df_broadcast df_broadcast
+      where (time_of_day != 'morning'
+             and time_of_day = 'night')) as rhs on (lhs.program_id = rhs.channel_id))`;
+
+verify q1 q2;

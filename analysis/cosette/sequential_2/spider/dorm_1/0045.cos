@@ -1,0 +1,108 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+schema df_lives_in(stuid:int, dormid:int, room_number:int);
+
+table df_student(df_student);
+table df_dorm(df_dorm);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+table df_lives_in(df_lives_in);
+
+query q1
+`select t1.fname
+from df_student as t1
+join df_lives_in as t2 on t1.stuid = t2.stuid
+where t2.dormid in
+    (select t2.dormid
+     from df_dorm as t3
+     join df_has_amenity as t4 on t3.dormid = t4.dormid
+     join df_dorm_amenity as t5 on t4.amenid = t5.amenid
+     group by t3.dormid
+     
+     limit 1)`;
+
+query q2
+`select fname
+from
+  (select fname,
+          stuid,
+          max(dormid) as dormid
+   from
+     (select lhs.amenid as amenid,
+             lhs.amenity_name as amenity_name,
+             lhs.stuid as stuid,
+             lhs.dormid as dormid,
+             lhs.room_number as room_number,
+             lhs.n as n,
+             rhs.lname as lname,
+             rhs.fname as fname,
+             rhs.age as age,
+             rhs.sex as sex,
+             rhs.major as major,
+             rhs.advisor as advisor,
+             rhs.city_code as city_code,
+             rhs.dorm_name as dorm_name,
+             rhs.student_capacity as student_capacity,
+             rhs.gender as gender
+      from
+        (select lhs.amenid as amenid,
+                lhs.amenity_name as amenity_name,
+                lhs.stuid as stuid,
+                lhs.dormid as dormid,
+                lhs.room_number as room_number,
+                rhs.n as n
+         from
+           (select lhs.amenid as amenid,
+                   lhs.amenity_name as amenity_name,
+                   rhs.stuid as stuid,
+                   rhs.dormid as dormid,
+                   rhs.room_number as room_number
+            from df_dorm_amenity as lhs
+            cross join df_lives_in as rhs) as lhs
+         inner join
+           (select dormid,
+                   count(*) as n
+            from df_has_amenity df_has_amenity
+            group by dormid) as rhs on (lhs.dormid = rhs.dormid)) as lhs
+      inner join
+        (select lhs.stuid as stuid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.age as age,
+                lhs.sex as sex,
+                lhs.major as major,
+                lhs.advisor as advisor,
+                lhs.city_code as city_code,
+                lhs.dormid as dormid,
+                lhs.dorm_name as dorm_name,
+                lhs.student_capacity as student_capacity,
+                lhs.gender as gender,
+                rhs.n as n
+         from
+           (select lhs.stuid as stuid,
+                   lhs.lname as lname,
+                   lhs.fname as fname,
+                   lhs.age as age,
+                   lhs.sex as sex,
+                   lhs.major as major,
+                   lhs.advisor as advisor,
+                   lhs.city_code as city_code,
+                   rhs.dormid as dormid,
+                   rhs.dorm_name as dorm_name,
+                   rhs.student_capacity as student_capacity,
+                   rhs.gender as gender
+            from df_student as lhs
+            cross join df_dorm as rhs) as lhs
+         inner join
+           (select dormid,
+                   count(*) as n
+            from df_has_amenity df_has_amenity
+            group by dormid) as rhs on (lhs.dormid = rhs.dormid)) as rhs on (lhs.stuid = rhs.stuid
+                                                                             and lhs.dormid = rhs.dormid
+                                                                             and lhs.n = rhs.n))
+   group by fname,
+            stuid)`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+
+table df_pilot(df_pilot);
+
+query q1
+`select nationality
+from df_pilot df_pilot
+group by nationality
+
+limit 1`;
+
+query q2
+`select nationality
+from
+  (select lhs.pilot_id as pilot_id,
+          lhs.pilot_name as pilot_name,
+          lhs.rank as rank,
+          lhs.age as age,
+          lhs.nationality as nationality,
+          lhs.position as position,
+          lhs.join_year as join_year,
+          lhs.team as team,
+          rhs.pilot_id as pilot_id.other
+   from df_pilot as lhs
+   inner join
+     (select pilot_id,
+             rank,
+             count(*) as n
+      from df_pilot df_pilot
+      group by pilot_id,
+               rank) as rhs on (lhs.pilot_id = rhs.n
+                                and lhs.rank = rhs.rank))`;
+
+verify q1 q2;

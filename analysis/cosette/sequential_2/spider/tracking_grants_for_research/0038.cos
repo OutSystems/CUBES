@@ -1,0 +1,22 @@
+schema df_project_outcomes(project_id:int, outcome_code:str, outcome_details:str);
+schema df_research_outcomes(outcome_code:str, outcome_description:str);
+
+table df_project_outcomes(df_project_outcomes);
+table df_research_outcomes(df_research_outcomes);
+
+query q1
+`select t1.outcome_description
+from df_research_outcomes as t1
+join df_project_outcomes as t2 on t1.outcome_code = t2.outcome_code`;
+
+query q2
+`select outcome_description
+from
+  (select lhs.outcome_code as outcome_code,
+          lhs.outcome_description as outcome_description,
+          rhs.project_id as project_id,
+          rhs.outcome_details as outcome_details
+   from df_research_outcomes as lhs
+   left join df_project_outcomes as rhs on (lhs.outcome_code = rhs.outcome_code))`;
+
+verify q1 q2;

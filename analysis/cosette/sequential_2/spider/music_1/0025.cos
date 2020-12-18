@@ -1,0 +1,22 @@
+schema df_genre(g_name:str, rating:int, most_popular_in:str);
+
+table df_genre(df_genre);
+
+query q1
+`select g_name,
+       rating
+from df_genre df_genre`;
+
+query q2
+`select g_name,
+       rating
+from
+  (select lhs.g_name as g_name,
+          lhs.rating as rating,
+          lhs.most_popular_in as most_popular_in,
+          rhs.rating as rating.other
+   from df_genre as lhs
+   inner join df_genre as rhs on (lhs.g_name = rhs.g_name
+                                  and lhs.most_popular_in = rhs.most_popular_in))`;
+
+verify q1 q2;

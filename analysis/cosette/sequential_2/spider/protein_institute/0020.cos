@@ -1,0 +1,31 @@
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+schema df_protein(common_name:str, protein_name:str, divergence_from_human_lineage:str, accession_number:str, sequence_length:str, sequence_identity_to_human_protein:str, institution_id:int);
+
+table df_institution(df_institution);
+table df_protein(df_protein);
+
+query q1
+`select count(*)
+from df_institution df_institution
+where institution_id not in
+    (select institution_id
+     from df_protein df_protein)`;
+
+query q2
+`select institution_id as count...
+from
+  (select lhs.institution_id as institution_id,
+          lhs.institution as institution,
+          lhs.location as location,
+          lhs.founded as founded,
+          lhs.type as type,
+          lhs.enrollment as enrollment,
+          lhs.team as team,
+          lhs.primary_conference as primary_conference,
+          lhs.building_id as building_id
+   from df_institution as lhs
+   inner join
+     (select count(distinct institution_id) as n_distinct
+      from df_protein df_protein) as rhs on (lhs.building_id = rhs.n_distinct))`;
+
+verify q1 q2;

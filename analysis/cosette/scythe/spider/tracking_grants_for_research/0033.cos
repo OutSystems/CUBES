@@ -1,0 +1,31 @@
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+
+table df_projects(df_projects);
+
+query q1
+`select project_details
+from df_projects df_projects
+where organisation_id in
+    (select organisation_id
+     from df_projects df_projects
+     group by organisation_id
+     
+     limit 1)`;
+
+query q2
+`select t2.project_details
+ from
+  (select t1.organisation_id, t1.count_project_details, t4.project_id, t4.organisation_id as organisation_id1, t4.project_details
+  from (select *
+       from
+        (select
+            t3.organisation_id, count(t3.project_details) as count_project_details
+          from
+            input as t3
+          group by
+            t3.organisation_id) as t1
+       where t1.count_project_details = 3.0) join 
+      input as t4) as t2
+ where t2.organisation_id = t2.organisation_id1`;
+
+verify q1 q2;

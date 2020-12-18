@@ -1,0 +1,30 @@
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+
+table df_player(df_player);
+
+query q1
+`select avg(hs),
+       max(hs),
+       min(hs)
+from df_player df_player`;
+
+query q2
+`select distinct meanhs as avg.hs.,
+                max(hs) over () as max.hs.,
+                             minhs as min.hs.
+from
+  (select pid,
+          pname,
+          ycard,
+          hs,
+          meanhs,
+          min(hs) over () as minhs
+   from
+     (select pid,
+             pname,
+             ycard,
+             hs,
+             avg(hs) over () as meanhs
+      from df_player df_player))`;
+
+verify q1 q2;

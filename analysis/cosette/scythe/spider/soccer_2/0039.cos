@@ -1,0 +1,29 @@
+schema df_college(cname:str, state:str, enr:int);
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_college(df_college);
+table df_player(df_player);
+table df_tryout(df_tryout);
+
+query q1
+`select t2.pname
+from df_tryout as t1
+join df_player as t2 on t1.pid = t2.pid
+where t1.cname =
+    (select cname
+     from df_college df_college
+     
+     limit 1)`;
+
+query q2
+`select t2.pname
+ from
+  (select
+          min(t1.hs) as min_hs
+        from
+          input0 as t1) as t4 join 
+      input0 as t3 as t2
+ where t2.min_hs = t2.hs`;
+
+verify q1 q2;

@@ -1,0 +1,42 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+schema df_player_coach(player_id:int, coach_id:int, starting_year:int);
+
+table df_player(df_player);
+table df_player_coach(df_player_coach);
+
+query q1
+`select player_name
+from df_player df_player
+where player_id not in
+    (select player_id
+     from df_player_coach df_player_coach)`;
+
+query q2
+`joining, by = "player_id"
+joining, by = "player_name"
+select player_name
+from
+  (select *
+   from
+     (select player_name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select player_name
+           from
+             (select player_id,
+                     coach_id,
+                     starting_year,
+                     sponsor_name,
+                     player_name,
+                     gender,
+                     residence,
+                     occupation,
+                     votes,
+                     rank
+              from input1 as lhs
+              left join input0 as rhs on (lhs.player_id = rhs.player_id))) as rhs
+        where (lhs.player_name = rhs.player_name) ))`;
+
+verify q1 q2;

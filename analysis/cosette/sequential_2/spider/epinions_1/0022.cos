@@ -1,0 +1,31 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select t1.name,
+       count(*)
+from df_useracct as t1
+join df_review as t2 on t1.u_id = t2.u_id
+group by t2.u_id`;
+
+query q2
+`select name,
+       n as count...
+from
+  (select name,
+          count(*) as n
+   from
+     (select lhs.u_id as u_id,
+             lhs.name as name,
+             rhs.a_id as a_id,
+             rhs.i_id as i_id,
+             rhs.rating as rating,
+             rhs.rank as rank
+      from df_useracct as lhs
+      inner join df_review as rhs on (lhs.u_id = rhs.u_id))
+   group by name)`;
+
+verify q1 q2;

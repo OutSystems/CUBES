@@ -1,0 +1,27 @@
+schema df_ref_calendar(calendar_date:str, day_number:int);
+schema df_all_documents(document_id:int, date_stored:str, document_type_code:str, document_name:str, document_description:str, other_details:str);
+
+table df_ref_calendar(df_ref_calendar);
+table df_all_documents(df_all_documents);
+
+query q1
+`select t2.day_number,
+       t1.date_stored
+from df_all_documents as t1
+join df_ref_calendar as t2 on t1.date_stored = t2.calendar_date`;
+
+query q2
+`select day_number,
+       calendar_date as date_stored
+from
+  (select lhs.calendar_date as calendar_date,
+          lhs.day_number as day_number,
+          rhs.document_id as document_id,
+          rhs.document_type_code as document_type_code,
+          rhs.document_name as document_name,
+          rhs.document_description as document_description,
+          rhs.other_details as other_details
+   from df_ref_calendar as lhs
+   inner join df_all_documents as rhs on (lhs.calendar_date = rhs.date_stored))`;
+
+verify q1 q2;

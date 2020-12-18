@@ -1,0 +1,31 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm(df_dorm);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select count(*),
+       t1.dormid
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+where t1.student_capacity > 100
+group by t1.dormid`;
+
+query q2
+`select t2.count_amenid,t2.dormid
+ from
+  (select t3.dormid, t3.count_amenid, t1.dormid as dormid1, t1.dorm_name, t1.student_capacity, t1.gender
+  from (select
+          t4.dormid, count(t4.amenid) as count_amenid
+        from
+          input0 as t4
+        group by
+          t4.dormid) as t3 join 
+      (select *
+         from
+          input
+         where input.student_capacity > 100.0) as t1) as t2
+ where t2.dormid = t2.dormid1`;
+
+verify q1 q2;

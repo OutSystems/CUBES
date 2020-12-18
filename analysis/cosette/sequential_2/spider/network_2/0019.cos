@@ -1,0 +1,26 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select name,
+       job
+from df_person df_person`;
+
+query q2
+`select name,
+       job
+from
+  (select lhs.name as name,
+          lhs.age as age,
+          lhs.city as city,
+          lhs.gender as gender,
+          lhs.job as job,
+          rhs.name as name.other,
+          rhs.gender as gender.other,
+          rhs.job as job.other
+   from df_person as lhs
+   inner join df_person as rhs on (lhs.age = rhs.age
+                                   and lhs.city = rhs.city))`;
+
+verify q1 q2;

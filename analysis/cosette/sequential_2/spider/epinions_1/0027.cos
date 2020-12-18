@@ -1,0 +1,24 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select title
+from df_item df_item
+where i_id not in
+    (select i_id
+     from df_review df_review)`;
+
+query q2
+`select title
+from
+  (select *
+   from df_item as lhs
+   where not exists
+       (select 1
+        from df_review as rhs
+        where (lhs.i_id = rhs.i_id) ))`;
+
+verify q1 q2;

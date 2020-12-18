@@ -1,0 +1,36 @@
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+schema df_protein(common_name:str, protein_name:str, divergence_from_human_lineage:str, accession_number:str, sequence_length:str, sequence_identity_to_human_protein:str, institution_id:int);
+
+table df_institution(df_institution);
+table df_protein(df_protein);
+
+query q1
+`select t2.protein_name,
+       t1.df_institution
+from df_institution as t1
+join df_protein as t2 on t1.institution_id = t2.institution_id`;
+
+query q2
+`joining, by = "institution_id"
+select protein_name,
+       institution
+from
+  (select common_name,
+          protein_name,
+          divergence_from_human_lineage,
+          accession_number,
+          sequence_length,
+          sequence_identity_to_human_protein,
+          institution_id,
+          institution,
+          location,
+          founded,
+          type,
+          enrollment,
+          team,
+          primary_conference,
+          building_id
+   from input1 as lhs
+   left join input0 as rhs on (lhs.institution_id = rhs.institution_id))`;
+
+verify q1 q2;

@@ -1,0 +1,48 @@
+schema df_ref_transaction_types(transaction_type_code:str, transaction_type_description:str);
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+
+table df_ref_transaction_types(df_ref_transaction_types);
+table df_transactions(df_transactions);
+
+query q1
+`select t1.transaction_type_description,
+       t2.date_of_transaction
+from df_ref_transaction_types as t1
+join df_transactions as t2 on t1.transaction_type_code = t2.transaction_type_code
+where t2.share_count < 10`;
+
+query q2
+`select transaction_type_description,
+       date_of_transaction
+from
+  (select *
+   from
+     (select lhs.transaction_id as transaction_id,
+             lhs.investor_id as investor_id,
+             lhs.transaction_type_code as transaction_type_code,
+             lhs.date_of_transaction as date_of_transaction,
+             lhs.amount_of_transaction as amount_of_transaction,
+             lhs.share_count as share_count,
+             lhs.other_details as other_details,
+             rhs.transaction_type_description as transaction_type_description
+      from df_transactions as lhs
+      inner join df_ref_transaction_types as rhs on (lhs.transaction_type_code = rhs.transaction_type_code)) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.transaction_id as transaction_id,
+                     lhs.investor_id as investor_id,
+                     lhs.transaction_type_code as transaction_type_code,
+                     lhs.date_of_transaction as date_of_transaction,
+                     lhs.amount_of_transaction as amount_of_transaction,
+                     lhs.share_count as share_count,
+                     lhs.other_details as other_details,
+                     rhs.transaction_type_description as transaction_type_description
+              from df_transactions as lhs
+              inner join df_ref_transaction_types as rhs on (lhs.transaction_type_code = rhs.transaction_type_code))
+           where (share_count != 10.0)) as rhs
+        where (lhs.share_count = rhs.share_count) ))`;
+
+verify q1 q2;

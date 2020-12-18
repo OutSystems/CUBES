@@ -1,0 +1,24 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+
+table df_apartments(df_apartments);
+
+query q1
+`select min(bathroom_count),
+       max(bathroom_count)
+from df_apartments df_apartments`;
+
+query q2
+`select distinct minbathroom_count as min.bathroom_count.,
+                max(bathroom_count) over () as max.bathroom_count.
+from
+  (select apt_id,
+          building_id,
+          apt_type_code,
+          apt_number,
+          bathroom_count,
+          bedroom_count,
+          room_count,
+          min(bathroom_count) over () as minbathroom_count
+   from df_apartments df_apartments)`;
+
+verify q1 q2;

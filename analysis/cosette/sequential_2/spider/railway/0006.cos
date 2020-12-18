@@ -1,0 +1,26 @@
+schema df_manager(manager_id:int, name:str, country:str, working_year_starts:int, age:int, level:int);
+
+table df_manager(df_manager);
+
+query q1
+`select name
+from df_manager df_manager`;
+
+query q2
+`select name
+from
+  (select lhs.manager_id as manager_id,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.working_year_starts as working_year_starts,
+          lhs.age as age,
+          lhs.level as level,
+          rhs.manager_id as manager_id.other,
+          rhs.name as name.other,
+          rhs.country as country.other,
+          rhs.working_year_starts as working_year_starts.other,
+          rhs.level as level.other
+   from df_manager as lhs
+   inner join df_manager as rhs on (lhs.age = rhs.age))`;
+
+verify q1 q2;

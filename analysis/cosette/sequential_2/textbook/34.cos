@@ -1,0 +1,51 @@
+schema df_certified(eid:int, aid:int);
+schema df_employees(eid:int, ename:str, salary:str);
+
+table df_certified(df_certified);
+table df_employees(df_employees);
+
+query q1
+`select e.ename, e.salary
+from df_employees df_employees e
+where e.eid not in (select distinct c.eid
+                    from df_certified df_certified c)
+  and e.salary > (select avg(e1.salary)
+                  from df_employees df_employees e1
+                  where e1.eid in
+                        (select distinct c1.eid
+                         from df_certified df_certified c1))`;
+
+query q2
+`select distinct ename,
+                salary
+from
+  (select lhs.eid as eid,
+          lhs.ename as ename,
+          lhs.salary as salary,
+          lhs.meansalary as meansalary,
+          rhs.eid as eid.other,
+          rhs.ename as ename.other,
+          rhs.salary as salary.other,
+          rhs.meansalary as meansalary.other
+   from
+     (select *
+      from
+        (select eid,
+                ename,
+                salary,
+                avg(salary) over () as meansalary
+         from df_employees df_employees) as lhs
+      where not exists
+          (select 1
+           from df_certified as rhs
+           where (lhs.eid = rhs.eid) )) as lhs
+   cross join
+     (select eid,
+             ename,
+             salary,
+             avg(salary) over () as meansalary
+      from df_employees df_employees) as rhs)
+where (salary > meansalary
+       and salary.other < meansalary.other)`;
+
+verify q1 q2;

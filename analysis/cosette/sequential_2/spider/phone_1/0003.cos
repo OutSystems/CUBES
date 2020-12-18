@@ -1,0 +1,91 @@
+schema df_chip_model(model_name:str, launch_year:str, ram_mib:str, rom_mib:str, slots:str, wifi:str, bluetooth:str);
+schema df_screen_mode(graphics_mode:str, char_cells:str, pixels:str, hardware_colours:str, used_kb:str, map:str, type:str);
+schema df_phone(company_name:str, hardware_model_name:str, accreditation_type:str, accreditation_level:str, date:str, chip_model:str, screen_mode:int);
+
+table df_chip_model(df_chip_model);
+table df_screen_mode(df_screen_mode);
+table df_phone(df_phone);
+
+query q1
+`select df_chip_model,
+       df_screen_mode
+from df_phone df_phone
+where hardware_model_name = "lg-p760"`;
+
+query q2
+`select distinct chip_model,
+                screen_mode
+from
+  (select lhs.model_name as model_name,
+          lhs.launch_year as launch_year,
+          lhs.ram_mib as ram_mib,
+          lhs.rom_mib as rom_mib,
+          lhs.slots as slots,
+          lhs.wifi as wifi,
+          lhs.bluetooth as bluetooth,
+          lhs.graphics_mode as graphics_mode,
+          lhs.char_cells as char_cells,
+          lhs.pixels as pixels,
+          lhs.hardware_colours as hardware_colours,
+          lhs.used_kb as used_kb,
+          lhs.map as map,
+          lhs.type as type,
+          lhs.company_name as company_name,
+          lhs.hardware_model_name as hardware_model_name,
+          lhs.accreditation_type as accreditation_type,
+          lhs.accreditation_level as accreditation_level,
+          lhs.date as date,
+          lhs.chip_model as chip_model,
+          lhs.screen_mode as screen_mode
+   from
+     (select lhs.model_name as model_name,
+             lhs.launch_year as launch_year,
+             lhs.ram_mib as ram_mib,
+             lhs.rom_mib as rom_mib,
+             lhs.slots as slots,
+             lhs.wifi as wifi,
+             lhs.bluetooth as bluetooth,
+             lhs.graphics_mode as graphics_mode,
+             lhs.char_cells as char_cells,
+             lhs.pixels as pixels,
+             lhs.hardware_colours as hardware_colours,
+             lhs.used_kb as used_kb,
+             lhs.map as map,
+             lhs.type as type,
+             rhs.company_name as company_name,
+             rhs.hardware_model_name as hardware_model_name,
+             rhs.accreditation_type as accreditation_type,
+             rhs.accreditation_level as accreditation_level,
+             rhs.date as date,
+             rhs.chip_model as chip_model,
+             rhs.screen_mode as screen_mode
+      from
+        (select lhs.model_name as model_name,
+                lhs.launch_year as launch_year,
+                lhs.ram_mib as ram_mib,
+                lhs.rom_mib as rom_mib,
+                lhs.slots as slots,
+                lhs.wifi as wifi,
+                lhs.bluetooth as bluetooth,
+                rhs.graphics_mode as graphics_mode,
+                rhs.char_cells as char_cells,
+                rhs.pixels as pixels,
+                rhs.hardware_colours as hardware_colours,
+                rhs.used_kb as used_kb,
+                rhs.map as map,
+                rhs.type as type
+         from df_chip_model as lhs
+         cross join df_screen_mode as rhs) as lhs
+      cross join df_phone as rhs) as lhs
+   inner join
+     (select *
+      from df_phone df_phone
+      where (hardware_model_name = 'lg-p760')) as rhs on (lhs.company_name = rhs.company_name
+                                                            and lhs.hardware_model_name = rhs.hardware_model_name
+                                                            and lhs.accreditation_type = rhs.accreditation_type
+                                                            and lhs.accreditation_level = rhs.accreditation_level
+                                                            and lhs.date = rhs.date
+                                                            and lhs.chip_model = rhs.chip_model
+                                                            and lhs.screen_mode = rhs.screen_mode))`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_residents(resident_id:int, property_id:int, date_moved_in:str, date_moved_out:str, other_details:str);
+schema df_residents_services(resident_id:int, service_id:int, date_moved_in:str, property_id:int, date_requested:str, date_provided:str, other_details:str);
+
+table df_residents(df_residents);
+table df_residents_services(df_residents_services);
+
+query q1
+`select t1.resident_id,
+       t1.other_details,
+       count(*)
+from df_residents as t1
+join df_residents_services as t2 on t1.resident_id = t2.resident_id
+group by t1.resident_id`;
+
+query q2
+`select resident_id,
+       other_details,
+       n as count...
+from
+  (select lhs.resident_id as resident_id,
+          lhs.property_id as property_id,
+          lhs.date_moved_in as date_moved_in,
+          lhs.date_moved_out as date_moved_out,
+          lhs.other_details as other_details,
+          rhs.n as n
+   from df_residents as lhs
+   inner join
+     (select property_id,
+             resident_id,
+             count(*) as n
+      from df_residents_services df_residents_services
+      group by property_id,
+               resident_id) as rhs on (lhs.property_id = rhs.property_id
+                                       and lhs.resident_id = rhs.resident_id))`;
+
+verify q1 q2;

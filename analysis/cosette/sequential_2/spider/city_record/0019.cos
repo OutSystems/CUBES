@@ -1,0 +1,49 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+
+table df_city(df_city);
+
+query q1
+`select gdp
+from df_city df_city
+
+limit 1`;
+
+query q2
+`select distinct gdp.other as gdp
+from
+  (select lhs.city_id as city_id,
+          lhs.city as city,
+          lhs.hanzi as hanzi,
+          lhs.hanyu_pinyin as hanyu_pinyin,
+          lhs.regional_population as regional_population,
+          lhs.gdp as gdp,
+          lhs.maxregional_population as maxregional_population,
+          rhs.city_id as city_id.other,
+          rhs.city as city.other,
+          rhs.hanzi as hanzi.other,
+          rhs.hanyu_pinyin as hanyu_pinyin.other,
+          rhs.regional_population as regional_population.other,
+          rhs.gdp as gdp.other,
+          rhs.maxregional_population as maxregional_population.other
+   from
+     (select city_id,
+             city,
+             hanzi,
+             hanyu_pinyin,
+             regional_population,
+             gdp,
+             max(regional_population) over () as maxregional_population
+      from df_city df_city) as lhs
+   cross join
+     (select city_id,
+             city,
+             hanzi,
+             hanyu_pinyin,
+             regional_population,
+             gdp,
+             max(regional_population) over () as maxregional_population
+      from df_city df_city) as rhs)
+where (maxregional_population = regional_population.other
+       or regional_population.other > maxregional_population.other)`;
+
+verify q1 q2;

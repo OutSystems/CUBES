@@ -1,0 +1,30 @@
+schema df_artwork(artwork_id:int, type:str, name:str);
+schema df_nomination(artwork_id:int, festival_id:int, result:str);
+
+table df_artwork(df_artwork);
+table df_nomination(df_nomination);
+
+query q1
+`select name
+from df_artwork df_artwork
+where artwork_id not in
+    (select artwork_id
+     from df_nomination df_nomination)`;
+
+query q2
+`select t3.name
+ from
+  (select
+          count(t2.artwork_id) as count_artwork_id
+        from
+          (select *
+             from
+              input
+             where input.artwork_id >= 2.0) as t2) as t4 join 
+      (select *
+         from
+          input
+         where input.artwork_id > 4.0) as t1 as t3
+ where t3.count_artwork_id > t3.artwork_id`;
+
+verify q1 q2;

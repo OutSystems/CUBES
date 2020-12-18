@@ -1,0 +1,22 @@
+schema df_region(region_id:int, region_code:str, region_name:str);
+
+table df_region(df_region);
+
+query q1
+`select region_code,
+       region_name
+from df_region df_region`;
+
+query q2
+`select region_code,
+       region_name
+from
+  (select lhs.region_id as region_id,
+          lhs.region_code as region_code,
+          lhs.region_name as region_name,
+          rhs.region_name as region_name.other
+   from df_region as lhs
+   inner join df_region as rhs on (lhs.region_code = rhs.region_code
+                                   and lhs.region_id = rhs.region_id))`;
+
+verify q1 q2;

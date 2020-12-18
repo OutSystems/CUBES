@@ -1,0 +1,26 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+
+table df_entrepreneur(df_entrepreneur);
+
+query q1
+`select company,
+       investor
+from df_entrepreneur df_entrepreneur`;
+
+query q2
+`select company,
+       investor
+from
+  (select lhs.entrepreneur_id as entrepreneur_id,
+          lhs.people_id as people_id,
+          lhs.company as company,
+          lhs.money_requested as money_requested,
+          lhs.investor as investor,
+          rhs.entrepreneur_id as entrepreneur_id.other,
+          rhs.company as company.other,
+          rhs.investor as investor.other
+   from df_entrepreneur as lhs
+   inner join df_entrepreneur as rhs on (lhs.money_requested = rhs.money_requested
+                                         and lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

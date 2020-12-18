@@ -1,0 +1,60 @@
+schema df_9_1(ID_class:str, ID_key:str, Room:str);
+schema df_9_2(ID_key:str, F_name:str);
+
+table df_9_1(df_9_1);
+table df_9_2(df_9_2);
+
+query q1
+`select f_name,
+       n
+from
+  (select *
+   from
+     (select f_name,
+             id_key,
+             count(*) as n
+      from
+        (select lhs.id_class as id_class,
+                lhs.id_key as id_key,
+                lhs.room as room,
+                rhs.f_name as f_name
+         from df_9_1 as lhs
+         left join df_9_2 as rhs on (lhs.id_key = rhs.id_key))
+      group by f_name,
+               id_key) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_9_1 df_9_1
+           where (room != 'r128')) as rhs
+        where (lhs.id_key = rhs.id_key) ))`;
+
+query q2
+`select t3.f_name,t3.count_id_class
+ from
+  (select t1.id_key, t1.count_id_class, t1.id_key1, t1.room, t1.count_id_class1, t4.id_key as id_key2, t4.f_name
+  from (select *
+       from
+        (select t5.id_key, t5.count_id_class, t2.id_key as id_key1, t2.room, t2.count_id_class as count_id_class1
+        from (select
+                t6.id_key, count(t6.id_class) as count_id_class
+              from
+                input as t6
+              group by
+                t6.id_key) as t5 join 
+            (select
+                  t8.id_key, t8.room, count(t8.id_class) as count_id_class
+                from
+                  (select *
+                     from
+                      input
+                     where input.room = 'r128') as t8
+                group by
+                  t8.id_key, t8.room) as t7 as t2) as t1
+       where t1.count_id_class = t1.count_id_class1
+         and t1.id_key = t1.id_key1) join 
+      input0 as t4) as t3
+ where t3.id_key = t3.id_key2`;
+
+verify q1 q2;

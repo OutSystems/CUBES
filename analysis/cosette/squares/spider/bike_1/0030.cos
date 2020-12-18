@@ -1,0 +1,124 @@
+schema df_weather(date:str, max_temperature_f:str, mean_temperature_f:str, min_temperature_f:str, max_dew_point_f:str, mean_dew_point_f:str, min_dew_point_f:str, max_humidity:str, mean_humidity:str, min_humidity:str, max_sea_level_pressure_inches:str, mean_sea_level_pressure_inches:str, min_sea_level_pressure_inches:str, max_visibility_miles:str, mean_visibility_miles:str, min_visibility_miles:str, max_wind_speed_mph:str, mean_wind_speed_mph:str, max_gust_speed_mph:str, precipitation_inches:str, cloud_cover:str, events:str, wind_dir_degrees:str, zip_code:int);
+
+table df_weather(df_weather);
+
+query q1
+`select date
+from df_weather df_weather
+where zip_code = 94107
+  and events != "fog"
+  and events != "rain"`;
+
+query q2
+`joining, by = c("date", "max_temperature_f", "mean_temperature_f", "min_temperature_f", "max_dew_point_f", "mean_dew_point_f", "min_dew_point_f", "max_humidity", "mean_humidity", "min_humidity", "max_sea_level_pressure_inches", "mean_sea_level_pressure_inches", "min_sea_level_pressure_inches", "max_visibility_miles", "mean_visibility_miles", "min_visibility_miles", "max_wind_speed_mph", "mean_wind_speed_mph", "max_gust_speed_mph", "precipitation_inches", "cloud_cover", "events", "wind_dir_degrees", "zip_code")
+joining, by = c("date", "max_temperature_f", "mean_temperature_f", "min_temperature_f", "max_dew_point_f", "mean_dew_point_f", "min_dew_point_f", "max_humidity", "mean_humidity", "min_humidity", "max_sea_level_pressure_inches", "mean_sea_level_pressure_inches", "min_sea_level_pressure_inches", "max_visibility_miles", "mean_visibility_miles", "min_visibility_miles", "max_wind_speed_mph", "mean_wind_speed_mph", "max_gust_speed_mph", "precipitation_inches", "cloud_cover", "events", "wind_dir_degrees", "zip_code")
+select distinct date
+from
+  (select date,
+          max_temperature_f,
+          mean_temperature_f,
+          min_temperature_f,
+          max_dew_point_f,
+          mean_dew_point_f,
+          min_dew_point_f,
+          max_humidity,
+          mean_humidity,
+          min_humidity,
+          max_sea_level_pressure_inches,
+          mean_sea_level_pressure_inches,
+          min_sea_level_pressure_inches,
+          max_visibility_miles,
+          mean_visibility_miles,
+          min_visibility_miles,
+          max_wind_speed_mph,
+          mean_wind_speed_mph,
+          max_gust_speed_mph,
+          precipitation_inches,
+          cloud_cover,
+          events,
+          wind_dir_degrees,
+          zip_code
+   from
+     (select date,
+             max_temperature_f,
+             mean_temperature_f,
+             min_temperature_f,
+             max_dew_point_f,
+             mean_dew_point_f,
+             min_dew_point_f,
+             max_humidity,
+             mean_humidity,
+             min_humidity,
+             max_sea_level_pressure_inches,
+             mean_sea_level_pressure_inches,
+             min_sea_level_pressure_inches,
+             max_visibility_miles,
+             mean_visibility_miles,
+             min_visibility_miles,
+             max_wind_speed_mph,
+             mean_wind_speed_mph,
+             max_gust_speed_mph,
+             precipitation_inches,
+             cloud_cover,
+             events,
+             wind_dir_degrees,
+             zip_code
+      from input0 as lhs
+      inner join
+        (select *
+         from input0
+         where (events != 'fog'
+                or events = 'rain')) as rhs on (lhs.date = rhs.date
+                                                    and lhs.max_temperature_f = rhs.max_temperature_f
+                                                    and lhs.mean_temperature_f = rhs.mean_temperature_f
+                                                    and lhs.min_temperature_f = rhs.min_temperature_f
+                                                    and lhs.max_dew_point_f = rhs.max_dew_point_f
+                                                    and lhs.mean_dew_point_f = rhs.mean_dew_point_f
+                                                    and lhs.min_dew_point_f = rhs.min_dew_point_f
+                                                    and lhs.max_humidity = rhs.max_humidity
+                                                    and lhs.mean_humidity = rhs.mean_humidity
+                                                    and lhs.min_humidity = rhs.min_humidity
+                                                    and lhs.max_sea_level_pressure_inches = rhs.max_sea_level_pressure_inches
+                                                    and lhs.mean_sea_level_pressure_inches = rhs.mean_sea_level_pressure_inches
+                                                    and lhs.min_sea_level_pressure_inches = rhs.min_sea_level_pressure_inches
+                                                    and lhs.max_visibility_miles = rhs.max_visibility_miles
+                                                    and lhs.mean_visibility_miles = rhs.mean_visibility_miles
+                                                    and lhs.min_visibility_miles = rhs.min_visibility_miles
+                                                    and lhs.max_wind_speed_mph = rhs.max_wind_speed_mph
+                                                    and lhs.mean_wind_speed_mph = rhs.mean_wind_speed_mph
+                                                    and lhs.max_gust_speed_mph = rhs.max_gust_speed_mph
+                                                    and lhs.precipitation_inches = rhs.precipitation_inches
+                                                    and lhs.cloud_cover = rhs.cloud_cover
+                                                    and lhs.events = rhs.events
+                                                    and lhs.wind_dir_degrees = rhs.wind_dir_degrees
+                                                    and lhs.zip_code = rhs.zip_code)) as lhs
+   inner join
+     (select *
+      from input0
+      where (events != 'rain'
+             and zip_code = 94107.0)) as rhs on (lhs.date = rhs.date
+                                                     and lhs.max_temperature_f = rhs.max_temperature_f
+                                                     and lhs.mean_temperature_f = rhs.mean_temperature_f
+                                                     and lhs.min_temperature_f = rhs.min_temperature_f
+                                                     and lhs.max_dew_point_f = rhs.max_dew_point_f
+                                                     and lhs.mean_dew_point_f = rhs.mean_dew_point_f
+                                                     and lhs.min_dew_point_f = rhs.min_dew_point_f
+                                                     and lhs.max_humidity = rhs.max_humidity
+                                                     and lhs.mean_humidity = rhs.mean_humidity
+                                                     and lhs.min_humidity = rhs.min_humidity
+                                                     and lhs.max_sea_level_pressure_inches = rhs.max_sea_level_pressure_inches
+                                                     and lhs.mean_sea_level_pressure_inches = rhs.mean_sea_level_pressure_inches
+                                                     and lhs.min_sea_level_pressure_inches = rhs.min_sea_level_pressure_inches
+                                                     and lhs.max_visibility_miles = rhs.max_visibility_miles
+                                                     and lhs.mean_visibility_miles = rhs.mean_visibility_miles
+                                                     and lhs.min_visibility_miles = rhs.min_visibility_miles
+                                                     and lhs.max_wind_speed_mph = rhs.max_wind_speed_mph
+                                                     and lhs.mean_wind_speed_mph = rhs.mean_wind_speed_mph
+                                                     and lhs.max_gust_speed_mph = rhs.max_gust_speed_mph
+                                                     and lhs.precipitation_inches = rhs.precipitation_inches
+                                                     and lhs.cloud_cover = rhs.cloud_cover
+                                                     and lhs.events = rhs.events
+                                                     and lhs.wind_dir_degrees = rhs.wind_dir_degrees
+                                                     and lhs.zip_code = rhs.zip_code))`;
+
+verify q1 q2;

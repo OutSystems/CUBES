@@ -1,0 +1,35 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, line_3:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_student_addresses(student_id:int, address_id:int, date_address_from:str, date_address_to:str, monthly_rental:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_student_addresses(df_student_addresses);
+
+query q1
+`select t1.line_1,
+       avg(t2.monthly_rental)
+from df_addresses as t1
+join df_student_addresses as t2 on t1.address_id = t2.address_id
+group by t2.address_id`;
+
+query q2
+`select line_1,
+       meanmonthly_rental as avg.t2.monthly_rental.
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.line_3 as line_3,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.other_address_details as other_address_details,
+          rhs.meanmonthly_rental as meanmonthly_rental
+   from df_addresses as lhs
+   inner join
+     (select address_id,
+             avg(monthly_rental) as meanmonthly_rental
+      from df_student_addresses df_student_addresses
+      group by address_id) as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

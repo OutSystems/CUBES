@@ -1,0 +1,22 @@
+schema df_employee(eid:int, name:str, salary:int);
+
+table df_employee(df_employee);
+
+query q1
+`select name
+from df_employee df_employee
+where salary >
+    (select avg(salary)
+     from df_employee df_employee)`;
+
+query q2
+`select name
+from
+  (select eid,
+          name,
+          salary,
+          avg(salary) over () as meansalary
+   from df_employee df_employee)
+where (meansalary < salary)`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select name
+from df_editor df_editor
+where editor_id not in
+    (select editor_id
+     from df_journal_committee df_journal_committee)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_editor as lhs
+   where not exists
+       (select 1
+        from df_journal_committee as rhs
+        where (lhs.editor_id = rhs.editor_id) ))`;
+
+verify q1 q2;

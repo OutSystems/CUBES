@@ -1,0 +1,44 @@
+schema df_tweets(id:int, uid:int, text:str, createdate:str);
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_tweets(df_tweets);
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select t1.name,
+       count(*)
+from df_user_profiles as t1
+join df_tweets as t2 on t1.uid = t2.uid
+group by t2.uid`;
+
+query q2
+`select distinct name,
+                n as count...
+from
+  (select lhs.id as id,
+          lhs.uid as uid,
+          lhs.text as text,
+          lhs.createdate as createdate,
+          lhs.name as name,
+          lhs.email as email,
+          lhs.partitionid as partitionid,
+          lhs.followers as followers,
+          rhs.n as n
+   from
+     (select lhs.id as id,
+             lhs.uid as uid,
+             lhs.text as text,
+             lhs.createdate as createdate,
+             rhs.name as name,
+             rhs.email as email,
+             rhs.partitionid as partitionid,
+             rhs.followers as followers
+      from df_tweets as lhs
+      inner join df_user_profiles as rhs on (lhs.uid = rhs.uid)) as lhs
+   inner join
+     (select uid,
+             count(*) as n
+      from df_tweets df_tweets
+      group by uid) as rhs on (lhs.uid = rhs.uid))`;
+
+verify q1 q2;

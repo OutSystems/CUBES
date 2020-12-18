@@ -1,0 +1,20 @@
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select document_id,
+       count(distinct employee_id)
+from df_circulation_history df_circulation_history
+group by document_id`;
+
+query q2
+`select document_id,
+       n_distinct as count.distinct.employee_id.
+from
+  (select document_id,
+          count(distinct employee_id) as n_distinct
+   from df_circulation_history df_circulation_history
+   group by document_id)`;
+
+verify q1 q2;

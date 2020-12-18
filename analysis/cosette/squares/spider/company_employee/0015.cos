@@ -1,0 +1,39 @@
+schema df_people(people_id:int, age:int, name:str, nationality:str, graduation_college:str);
+schema df_employment(company_id:int, people_id:int, year_working:int);
+
+table df_people(df_people);
+table df_employment(df_employment);
+
+query q1
+`select name
+from df_people df_people
+where people_id not in
+    (select people_id
+     from df_employment df_employment)`;
+
+query q2
+`joining, by = "people_id"
+joining, by = "name"
+select distinct name
+from
+  (select *
+   from
+     (select name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select name
+           from
+             (select company_id,
+                     people_id,
+                     year_working,
+                     age,
+                     name,
+                     nationality,
+                     graduation_college
+              from input1 as lhs
+              left join input0 as rhs on (lhs.people_id = rhs.people_id))) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

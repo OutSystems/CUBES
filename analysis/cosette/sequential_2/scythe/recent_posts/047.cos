@@ -1,0 +1,29 @@
+schema df_047(ID:str, Payment_type:str, Time:str);
+
+table df_047(df_047);
+
+query q1
+`select id, payment_type, time
+from (select id, payment_type, time, count(*) as cnt,
+             row_number() over (partition by id 
+      from t
+      group by id, payment_type, time
+     ) ipt
+where seqnum = 1`;
+
+query q2
+`select distinct id,
+                payment_type
+from
+  (select lhs.id as id,
+          lhs.payment_type as payment_type,
+          lhs.time as time,
+          rhs.id as id.other
+   from df_047 as lhs
+   inner join
+     (select id,
+             max(time) as maxtime
+      from df_047 df_047
+      group by id) as rhs on (lhs.time = rhs.maxtime))`;
+
+verify q1 q2;

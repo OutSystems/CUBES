@@ -1,0 +1,22 @@
+schema df_swimmer(id:int, name:str, nationality:str, meter_100:str, meter_200:str, meter_300:str, meter_400:str, meter_500:str, meter_600:str, meter_700:str, time:str);
+
+table df_swimmer(df_swimmer);
+
+query q1
+`select nationality,
+       count(*)
+from df_swimmer df_swimmer
+group by nationality
+having count(*) > 1`;
+
+query q2
+`select nationality,
+       n as count...
+from
+  (select nationality,
+          count(*) as n
+   from df_swimmer df_swimmer
+   group by nationality)
+where (n > 1.0)`;
+
+verify q1 q2;

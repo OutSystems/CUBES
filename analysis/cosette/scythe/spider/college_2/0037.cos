@@ -1,0 +1,30 @@
+schema df_classroom(building:str, room_number:int, capacity:int);
+
+table df_classroom(df_classroom);
+
+query q1
+`select max(capacity),
+       avg(capacity),
+       building
+from df_classroom df_classroom
+group by building`;
+
+query q2
+`select t3.capacity,t3.avg_capacity,t3.building
+ from
+  (select t4.building, t4.avg_capacity, t2.building as building1, t2.capacity
+  from (select
+          t5.building, avg(t5.capacity) as avg_capacity
+        from
+          input as t5
+        group by
+          t5.building) as t4 join 
+      (select
+            t6.building, t6.capacity, from
+            input as t6
+          group by
+            t6.building, t6.capacity) as t1 as t2) as t3
+ where t3.avg_capacity <= t3.capacity
+   and t3.building = t3.building1`;
+
+verify q1 q2;

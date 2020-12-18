@@ -1,0 +1,54 @@
+schema df_people(people_id:int, age:int, name:str, nationality:str, graduation_college:str);
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+schema df_employment(company_id:int, people_id:int, year_working:int);
+
+table df_people(df_people);
+table df_company(df_company);
+table df_employment(df_employment);
+
+query q1
+`select t3.name,
+       t2.name
+from df_employment as t1
+join df_people as t2 on t1.people_id = t2.people_id
+join df_company as t3 on t1.company_id = t3.company_id`;
+
+query q2
+`select name as name...1,
+                     name.other as name...2
+from
+  (select lhs.company_id as company_id,
+          lhs.name as name,
+          lhs.headquarters as headquarters,
+          lhs.industry as industry,
+          lhs.sales_in_billion as sales_in_billion,
+          lhs.profits_in_billion as profits_in_billion,
+          lhs.assets_in_billion as assets_in_billion,
+          lhs.market_value_in_billion as market_value_in_billion,
+          rhs.company_id as company_id.other,
+          rhs.people_id as people_id,
+          rhs.year_working as year_working,
+          rhs.people_id.other as people_id.other,
+          rhs.age as age,
+          rhs.name as name.other,
+          rhs.nationality as nationality,
+          rhs.graduation_college as graduation_college
+   from df_company as lhs
+   cross join
+     (select *
+      from
+        (select lhs.company_id as company_id,
+                lhs.people_id as people_id,
+                lhs.year_working as year_working,
+                rhs.people_id as people_id.other,
+                rhs.age as age,
+                rhs.name as name,
+                rhs.nationality as nationality,
+                rhs.graduation_college as graduation_college
+         from df_employment as lhs
+         cross join df_people as rhs)
+      where (people_id = people_id.other
+             and company_id != people_id.other)) as rhs)
+where (company_id = company_id.other)`;
+
+verify q1 q2;

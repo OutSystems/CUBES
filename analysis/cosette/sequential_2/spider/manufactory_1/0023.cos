@@ -1,0 +1,29 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_manufacturers(df_manufacturers);
+table df_products(df_products);
+
+query q1
+`select count(distinct name)
+from df_products df_products
+where name not in
+    (select t1.name
+     from df_products as t1
+     join df_manufacturers as t2 on t1.manufacturer = t2.code
+     where t2.name = 'sony')`;
+
+query q2
+`select distinct count(distinct name) over () as count.distinct.name.
+from
+  (select *
+   from df_products as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_manufacturers df_manufacturers
+           where (name = 'sony')) as rhs
+        where (lhs.code = rhs.code) ))`;
+
+verify q1 q2;

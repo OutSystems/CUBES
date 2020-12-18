@@ -1,0 +1,20 @@
+schema df_market(market_id:int, country:str, number_cities:int);
+
+table df_market(df_market);
+
+query q1
+`select max(number_cities),
+       min(number_cities)
+from df_market df_market`;
+
+query q2
+`select distinct max(number_cities) over () as max.number_cities.,
+                                        minnumber_cities as min.number_cities.
+from
+  (select market_id,
+          country,
+          number_cities,
+          min(number_cities) over () as minnumber_cities
+   from df_market df_market)`;
+
+verify q1 q2;

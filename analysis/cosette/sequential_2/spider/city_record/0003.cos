@@ -1,0 +1,30 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+schema df_hosting_city(year:int, match_id:int, host_city:int);
+
+table df_city(df_city);
+table df_hosting_city(df_hosting_city);
+
+query q1
+`select t1.df_city
+from df_city as t1
+join df_hosting_city as t2 on t1.city_id = t2.host_city
+where t2.year > 2010`;
+
+query q2
+`select city
+from
+  (select lhs.city_id as city_id,
+          lhs.city as city,
+          lhs.hanzi as hanzi,
+          lhs.hanyu_pinyin as hanyu_pinyin,
+          lhs.regional_population as regional_population,
+          lhs.gdp as gdp,
+          rhs.year as year,
+          rhs.match_id as match_id
+   from df_city as lhs
+   inner join
+     (select *
+      from df_hosting_city df_hosting_city
+      where (year > 2010.0)) as rhs on (lhs.city_id = rhs.host_city))`;
+
+verify q1 q2;

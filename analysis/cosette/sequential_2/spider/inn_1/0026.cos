@@ -1,0 +1,28 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select roomname
+from df_rooms df_rooms`;
+
+query q2
+`select roomname
+from
+  (select lhs.roomid as roomid,
+          lhs.roomname as roomname,
+          lhs.beds as beds,
+          lhs.bedtype as bedtype,
+          lhs.maxoccupancy as maxoccupancy,
+          lhs.baseprice as baseprice,
+          lhs.decor as decor,
+          rhs.beds as beds.other,
+          rhs.bedtype as bedtype.other,
+          rhs.maxoccupancy as maxoccupancy.other,
+          rhs.baseprice as baseprice.other,
+          rhs.decor as decor.other
+   from df_rooms as lhs
+   inner join df_rooms as rhs on (lhs.roomid = rhs.roomid
+                                  and lhs.roomname = rhs.roomname))`;
+
+verify q1 q2;

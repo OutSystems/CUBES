@@ -1,0 +1,29 @@
+schema df_participates_in(stuid:int, actid:int);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_participates_in(df_participates_in);
+table df_student(df_student);
+
+query q1
+`select stuid
+from df_student df_student
+except
+select stuid
+from df_participates_in df_participates_in`;
+
+query q2
+`joining, by = "stuid"
+select stuid
+from
+  (select *
+   from
+     (select stuid
+      from input1) as lhs
+   where not exists
+       (select 1
+        from
+          (select stuid
+           from input0) as rhs
+        where (lhs.stuid = rhs.stuid) ))`;
+
+verify q1 q2;

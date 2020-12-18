@@ -1,0 +1,41 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+schema df_apartment_facilities(apt_id:int, facility_code:str);
+
+table df_apartments(df_apartments);
+table df_apartment_facilities(df_apartment_facilities);
+
+query q1
+`select count(*)
+from df_apartments df_apartments
+where apt_id not in
+    (select apt_id
+     from df_apartment_facilities df_apartment_facilities)`;
+
+query q2
+`select room_count as count...
+from
+  (select lhs.apt_id as apt_id,
+          lhs.building_id as building_id,
+          lhs.apt_type_code as apt_type_code,
+          lhs.apt_number as apt_number,
+          lhs.bathroom_count as bathroom_count,
+          lhs.bedroom_count as bedroom_count,
+          lhs.room_count as room_count,
+          lhs.n as n,
+          rhs.apt_id as apt_id.other,
+          rhs.facility_code as facility_code
+   from
+     (select apt_id,
+             building_id,
+             apt_type_code,
+             apt_number,
+             bathroom_count,
+             bedroom_count,
+             room_count,
+             count(*) over () as n
+      from df_apartments df_apartments) as lhs
+   cross join df_apartment_facilities as rhs)
+where (apt_id = n
+       and apt_id <= apt_id.other)`;
+
+verify q1 q2;

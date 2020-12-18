@@ -1,0 +1,25 @@
+schema df_014_1(ID:int, NAME:str, PARENT_ID:int);
+schema df_014_2(ID:int, NAME:str, UNIQUE_ID:int);
+
+table df_014_1(df_014_1);
+table df_014_2(df_014_2);
+
+query q1
+`select      id
+           ,name
+           ,unique_id
+from        (           select 2,id,parent_id,name,null      from child
+            union all   select 1,id,id       ,name,unique_id from parent
+            ) t (source_order,id,pid,name,unique_id)
+
+           ,source_order
+           ,id`;
+
+query q2
+`select * from 
+  input
+  union all 
+   select * from
+    input0 as t1`;
+
+verify q1 q2;

@@ -1,0 +1,133 @@
+schema df_stadium(id:int, name:str, home_games:int, average_attendance:str, total_attendance:str, capacity_percentage:str);
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+schema df_injury_accident(game_id:int, id:int, player:str, injury:str, number_of_matches:str, source:str);
+
+table df_stadium(df_stadium);
+table df_game(df_game);
+table df_injury_accident(df_injury_accident);
+
+query q1
+`select t2.name
+from df_game as t1
+join df_stadium as t2 on t1.stadium_id = t2.id
+join df_injury_accident as t3 on t1.id = t3.game_id
+where t3.player = 'walter samuel' intersect
+  select t2.name
+  from df_game as t1
+  join df_stadium as t2 on t1.stadium_id = t2.id
+  join df_injury_accident as t3 on t1.id = t3.game_id where t3.player = 'thiago motta'`;
+
+query q2
+`select distinct name
+from
+  (select lhs.stadium_id as stadium_id,
+          lhs.id as id,
+          lhs.season as season,
+          lhs.date as date,
+          lhs.home_team as home_team,
+          lhs.away_team as away_team,
+          lhs.score as score,
+          lhs.competition as competition,
+          lhs.name as name,
+          lhs.home_games as home_games,
+          lhs.average_attendance as average_attendance,
+          lhs.total_attendance as total_attendance,
+          lhs.capacity_percentage as capacity_percentage,
+          lhs.id.other as id.other,
+          lhs.player as player,
+          lhs.injury as injury,
+          lhs.number_of_matches as number_of_matches,
+          lhs.source as source,
+          lhs.game_id as game_id
+   from
+     (select lhs.stadium_id as stadium_id,
+             lhs.id as id,
+             lhs.season as season,
+             lhs.date as date,
+             lhs.home_team as home_team,
+             lhs.away_team as away_team,
+             lhs.score as score,
+             lhs.competition as competition,
+             rhs.name as name,
+             rhs.home_games as home_games,
+             rhs.average_attendance as average_attendance,
+             rhs.total_attendance as total_attendance,
+             rhs.capacity_percentage as capacity_percentage,
+             rhs.id.other as id.other,
+             rhs.player as player,
+             rhs.injury as injury,
+             rhs.number_of_matches as number_of_matches,
+             rhs.source as source,
+             rhs.game_id as game_id
+      from df_game as lhs
+      inner join
+        (select id,
+                name,
+                home_games,
+                average_attendance,
+                total_attendance,
+                capacity_percentage,
+                id.other,
+                player,
+                injury,
+                number_of_matches,
+                source,
+                id as game_id
+         from
+           (select lhs.id as id,
+                   lhs.name as name,
+                   lhs.home_games as home_games,
+                   lhs.average_attendance as average_attendance,
+                   lhs.total_attendance as total_attendance,
+                   lhs.capacity_percentage as capacity_percentage,
+                   rhs.id as id.other,
+                   rhs.player as player,
+                   rhs.injury as injury,
+                   rhs.number_of_matches as number_of_matches,
+                   rhs.source as source
+            from df_stadium as lhs
+            inner join df_injury_accident as rhs on (lhs.id = rhs.game_id))) as rhs on (lhs.id = rhs.id)) as lhs
+   inner join
+     (select *
+      from
+        (select id,
+                name,
+                home_games,
+                average_attendance,
+                total_attendance,
+                capacity_percentage,
+                id.other,
+                player,
+                injury,
+                number_of_matches,
+                source,
+                id as game_id
+         from
+           (select lhs.id as id,
+                   lhs.name as name,
+                   lhs.home_games as home_games,
+                   lhs.average_attendance as average_attendance,
+                   lhs.total_attendance as total_attendance,
+                   lhs.capacity_percentage as capacity_percentage,
+                   rhs.id as id.other,
+                   rhs.player as player,
+                   rhs.injury as injury,
+                   rhs.number_of_matches as number_of_matches,
+                   rhs.source as source
+            from df_stadium as lhs
+            inner join df_injury_accident as rhs on (lhs.id = rhs.game_id)))
+      where (player = 'walter samuel'
+             or player = 'thiago motta')) as rhs on (lhs.id = rhs.id
+                                                       and lhs.name = rhs.name
+                                                       and lhs.home_games = rhs.home_games
+                                                       and lhs.average_attendance = rhs.average_attendance
+                                                       and lhs.total_attendance = rhs.total_attendance
+                                                       and lhs.capacity_percentage = rhs.capacity_percentage
+                                                       and lhs.id.other = rhs.id.other
+                                                       and lhs.player = rhs.player
+                                                       and lhs.injury = rhs.injury
+                                                       and lhs.number_of_matches = rhs.number_of_matches
+                                                       and lhs.source = rhs.source
+                                                       and lhs.game_id = rhs.game_id))`;
+
+verify q1 q2;

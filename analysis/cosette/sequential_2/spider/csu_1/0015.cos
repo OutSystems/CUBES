@@ -1,0 +1,29 @@
+schema df_csu_fees(campus:int, year:int, campusfee:int);
+
+table df_csu_fees(df_csu_fees);
+
+query q1
+`select avg(campusfee)
+from df_csu_fees df_csu_fees
+where year = 2005`;
+
+query q2
+`select distinct year.other as avg.campusfee.
+from
+  (select lhs.campus as campus,
+          lhs.year as year,
+          lhs.campusfee as campusfee,
+          rhs.year as year.other,
+          rhs.meancampusfee as meancampusfee
+   from df_csu_fees as lhs
+   cross join
+     (select year,
+             avg(campusfee) as meancampusfee
+      from df_csu_fees df_csu_fees
+      where (year >= 2005.0
+             and campusfee != 2005.0)
+      group by year) as rhs)
+where (year < campusfee
+       or year > year.other)`;
+
+verify q1 q2;

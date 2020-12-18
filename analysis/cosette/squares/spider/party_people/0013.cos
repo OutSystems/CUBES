@@ -1,0 +1,38 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+schema df_member(member_id:int, member_name:str, party_id:int, in_office:str);
+
+table df_party(df_party);
+table df_member(df_member);
+
+query q1
+`select party_name
+from df_party df_party
+where party_id not in
+    (select party_id
+     from df_member df_member)`;
+
+query q2
+`joining, by = "party_id"
+joining, by = "party_id"
+select party_name
+from
+  (select party_id,
+          minister,
+          took_office,
+          left_office,
+          region_id,
+          party_name
+   from
+     (select *
+      from
+        (select party_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select party_id
+              from input1) as rhs
+           where (lhs.party_id = rhs.party_id) )) as lhs
+   left join input0 as rhs on (lhs.party_id = rhs.party_id))`;
+
+verify q1 q2;

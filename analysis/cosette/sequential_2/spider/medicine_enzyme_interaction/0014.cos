@@ -1,0 +1,21 @@
+schema df_medicine(id:int, name:str, trade_name:str, fda_approved:str);
+
+table df_medicine(df_medicine);
+
+query q1
+`select count(*)
+from df_medicine df_medicine
+where fda_approved = 'no'`;
+
+query q2
+`select n as count...
+from
+  (select fda_approved,
+          count(*) as n
+   from
+     (select *
+      from df_medicine df_medicine
+      where (fda_approved = 'no'))
+   group by fda_approved)`;
+
+verify q1 q2;

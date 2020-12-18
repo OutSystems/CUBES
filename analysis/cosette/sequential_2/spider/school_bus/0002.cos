@@ -1,0 +1,28 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+
+table df_driver(df_driver);
+
+query q1
+`select name,
+       home_city,
+       age
+from df_driver df_driver`;
+
+query q2
+`select name,
+       home_city,
+       age
+from
+  (select lhs.driver_id as driver_id,
+          lhs.name as name,
+          lhs.party as party,
+          lhs.home_city as home_city,
+          lhs.age as age,
+          rhs.driver_id as driver_id.other,
+          rhs.party as party.other,
+          rhs.home_city as home_city.other,
+          rhs.age as age.other
+   from df_driver as lhs
+   inner join df_driver as rhs on (lhs.name = rhs.name))`;
+
+verify q1 q2;

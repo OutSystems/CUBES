@@ -1,0 +1,32 @@
+schema df_club(club_id:int, club_name:str, region:str, start_year:int);
+schema df_coach(coach_id:int, coach_name:str, gender:str, club_id:int, rank:int);
+
+table df_club(df_club);
+table df_coach(df_coach);
+
+query q1
+`select t1.club_id,
+       t1.club_name,
+       count(*)
+from df_club as t1
+join df_coach as t2 on t1.club_id = t2.club_id
+group by t1.club_id`;
+
+query q2
+`select club_id,
+       club_name,
+       n as count...
+from
+  (select lhs.club_id as club_id,
+          lhs.n as n,
+          rhs.club_name as club_name,
+          rhs.region as region,
+          rhs.start_year as start_year
+   from
+     (select club_id,
+             count(*) as n
+      from df_coach df_coach
+      group by club_id) as lhs
+   inner join df_club as rhs on (lhs.club_id = rhs.club_id))`;
+
+verify q1 q2;

@@ -1,0 +1,41 @@
+schema df_list(lastname:str, firstname:str, grade:int, classroom:int);
+schema df_teachers(lastname:str, firstname:str, classroom:int);
+
+table df_list(df_list);
+table df_teachers(df_teachers);
+
+query q1
+`select distinct t1.firstname,
+                t1.lastname
+from df_list as t1
+join df_teachers as t2 on t1.classroom = t2.classroom
+where t1.grade = 1
+except
+select t1.firstname,
+       t1.lastname
+from df_list as t1
+join df_teachers as t2 on t1.classroom = t2.classroom
+where t2.firstname = "otha"
+  and t2.lastname = "moyer"`;
+
+query q2
+`select distinct firstname.other as firstname,
+                lastname.other as lastname
+from
+  (select *
+   from
+     (select lhs.lastname as lastname,
+             lhs.firstname as firstname,
+             lhs.classroom as classroom,
+             rhs.lastname as lastname.other,
+             rhs.firstname as firstname.other,
+             rhs.grade as grade,
+             rhs.classroom as classroom.other
+      from df_teachers as lhs
+      cross join df_list as rhs)
+   where (lastname != lastname.other
+          or firstname = lastname.other))
+where (lastname != 'moyer'
+       and grade = 1.0)`;
+
+verify q1 q2;

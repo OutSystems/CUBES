@@ -1,0 +1,25 @@
+schema df_video_games(gameid:int, gname:str, gtype:str);
+schema df_plays_games(stuid:int, gameid:int, hours_played:int);
+
+table df_video_games(df_video_games);
+table df_plays_games(df_plays_games);
+
+query q1
+`select gname
+from df_plays_games as t1
+join df_video_games as t2 on t1.gameid = t2.gameid
+group by t1.gameid
+having sum(hours_played) >= 1000`;
+
+query q2
+`select t1.gname
+ from
+  (select input.gameid, input.gname, input.gtype, t2.stuid, t2.gameid as gameid1, t2.hours_played
+  from input join 
+      (select *
+         from
+          input0
+         where input0.hours_played >= 1000.0) as t2) as t1
+ where t1.gameid = t1.gameid1`;
+
+verify q1 q2;

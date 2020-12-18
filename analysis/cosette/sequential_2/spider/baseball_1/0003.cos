@@ -1,0 +1,55 @@
+schema df_all_star(player_id:str, year:int, game_num:int, game_id:str, team_id:str, league_id:str, gp:str, starting_pos:str);
+schema df_player(player_id:str, birth_year:str, birth_month:str, birth_day:str, birth_country:str, birth_state:str, birth_city:str, death_year:str, death_month:str, death_day:str, death_country:str, death_state:str, death_city:str, name_first:str, name_last:str, name_given:str, weight:str, height:str, bats:str, throws:str, debut:str, final_game:str, retro_id:str, bbref_id:str);
+
+table df_all_star(df_all_star);
+table df_player(df_player);
+
+query q1
+`select name_first,
+       name_last
+from df_player as t1
+join df_all_star as t2 on t1.player_id = t2.player_id
+where year = 1998`;
+
+query q2
+`select name_first,
+       name_last
+from
+  (select lhs.player_id as player_id,
+          lhs.birth_year as birth_year,
+          lhs.birth_month as birth_month,
+          lhs.birth_day as birth_day,
+          lhs.birth_country as birth_country,
+          lhs.birth_state as birth_state,
+          lhs.birth_city as birth_city,
+          lhs.death_year as death_year,
+          lhs.death_month as death_month,
+          lhs.death_day as death_day,
+          lhs.death_country as death_country,
+          lhs.death_state as death_state,
+          lhs.death_city as death_city,
+          lhs.name_first as name_first,
+          lhs.name_last as name_last,
+          lhs.name_given as name_given,
+          lhs.weight as weight,
+          lhs.height as height,
+          lhs.bats as bats,
+          lhs.throws as throws,
+          lhs.debut as debut,
+          lhs.final_game as final_game,
+          lhs.retro_id as retro_id,
+          lhs.bbref_id as bbref_id,
+          rhs.year as year,
+          rhs.game_num as game_num,
+          rhs.game_id as game_id,
+          rhs.team_id as team_id,
+          rhs.league_id as league_id,
+          rhs.gp as gp,
+          rhs.starting_pos as starting_pos
+   from df_player as lhs
+   inner join
+     (select *
+      from df_all_star df_all_star
+      where (year = 1998.0)) as rhs on (lhs.player_id = rhs.player_id))`;
+
+verify q1 q2;

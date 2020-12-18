@@ -1,0 +1,25 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+
+table df_department(df_department);
+
+query q1
+`select avg(num_employees)
+from df_department df_department
+where ranking between 10 and 15`;
+
+query q2
+`select t2.avg_num_employees
+ from
+  (select
+          avg(t3.num_employees) as avg_num_employees
+        from
+          (select *
+             from
+              input
+             where input.department_id >= 10.0) as t3) as t4 join 
+      (select *
+         from
+          input
+         where input.department_id = 15.0) as t1 as t2`;
+
+verify q1 q2;

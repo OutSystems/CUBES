@@ -1,0 +1,44 @@
+schema df_i045(user_id:int, account_no:int, zip:int, date:str);
+
+table df_i045(df_i045);
+
+query q1
+`select
+ user_id ,
+ count(*) count
+from
+ payment
+group by
+ account,
+ user_id ,
+ date
+having
+count(*) > 1`;
+
+query q2
+`select distinct user_id.other as user_id,
+                user_id as n
+from
+  (select user_id,
+          account_no,
+          zip, date, user_id.other,
+                     zip.other,
+                     user_id as n
+   from
+     (select lhs.user_id as user_id,
+             lhs.account_no as account_no,
+             lhs.zip as zip,
+             lhs.date as date,
+             rhs.user_id as user_id.other,
+             rhs.zip as zip.other
+      from df_i045 as lhs
+      inner join
+        (select user_id,
+                zip,
+                count(*) as n
+         from df_i045 df_i045
+         group by user_id,
+                  zip) as rhs on (lhs.user_id = rhs.n)))
+where (n > 1.0)`;
+
+verify q1 q2;

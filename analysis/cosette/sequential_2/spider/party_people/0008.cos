@@ -1,0 +1,49 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+
+table df_party(df_party);
+
+query q1
+`select minister
+from df_party df_party
+
+limit 1`;
+
+query q2
+`select distinct minister
+from
+  (select lhs.party_id as party_id,
+          lhs.minister as minister,
+          lhs.took_office as took_office,
+          lhs.left_office as left_office,
+          lhs.region_id as region_id,
+          lhs.party_name as party_name,
+          lhs.maxleft_office as maxleft_office,
+          rhs.party_id as party_id.other,
+          rhs.minister as minister.other,
+          rhs.took_office as took_office.other,
+          rhs.left_office as left_office.other,
+          rhs.region_id as region_id.other,
+          rhs.party_name as party_name.other,
+          rhs.maxleft_office as maxleft_office.other
+   from
+     (select party_id,
+             minister,
+             took_office,
+             left_office,
+             region_id,
+             party_name,
+             max(left_office) over () as maxleft_office
+      from df_party df_party) as lhs
+   cross join
+     (select party_id,
+             minister,
+             took_office,
+             left_office,
+             region_id,
+             party_name,
+             max(left_office) over () as maxleft_office
+      from df_party df_party) as rhs)
+where (left_office >= maxleft_office.other
+       and maxleft_office > left_office.other)`;
+
+verify q1 q2;

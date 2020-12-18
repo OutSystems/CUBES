@@ -1,0 +1,53 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_station(df_station);
+table df_trip(df_trip);
+
+query q1
+`select t1.id,
+       t2.installation_date
+from df_trip as t1
+join df_station as t2 on t1.end_station_id = t2.id`;
+
+query q2
+`select id.other as id,
+       installation_date
+from
+  (select id,
+          name,
+          lat, long, dock_count,
+                     city,
+                     installation_date,
+                     id.other,
+                     duration,
+                     start_station_name,
+                     start_station_id,
+                     end_date,
+                     end_station_name,
+                     bike_id,
+                     subscription_type,
+                     zip_code,
+                     id as end_station_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.lat as lat,
+             lhs.long as long,
+             lhs.dock_count as dock_count,
+             lhs.city as city,
+             lhs.installation_date as installation_date,
+             rhs.id as id.other,
+             rhs.duration as duration,
+             rhs.start_station_name as start_station_name,
+             rhs.start_station_id as start_station_id,
+             rhs.end_date as end_date,
+             rhs.end_station_name as end_station_name,
+             rhs.bike_id as bike_id,
+             rhs.subscription_type as subscription_type,
+             rhs.zip_code as zip_code
+      from df_station as lhs
+      inner join df_trip as rhs on (lhs.id = rhs.end_station_id
+                                    and lhs.installation_date = rhs.start_date)))`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+
+table df_technician(df_technician);
+
+query q1
+`select starting_year
+from df_technician df_technician
+
+limit 1`;
+
+query q2
+`select distinct starting_year.other as starting_year
+from
+  (select lhs.technician_id as technician_id,
+          lhs.name as name,
+          lhs.team as team,
+          lhs.starting_year as starting_year,
+          lhs.age as age,
+          lhs.maxage as maxage,
+          rhs.technician_id as technician_id.other,
+          rhs.name as name.other,
+          rhs.team as team.other,
+          rhs.starting_year as starting_year.other,
+          rhs.age as age.other,
+          rhs.maxage as maxage.other
+   from
+     (select technician_id,
+             name,
+             team,
+             starting_year,
+             age,
+             max(age) over () as maxage
+      from df_technician df_technician) as lhs
+   cross join
+     (select technician_id,
+             name,
+             team,
+             starting_year,
+             age,
+             max(age) over () as maxage
+      from df_technician df_technician) as rhs)
+where (maxage <= age.other
+       or age.other > maxage.other)`;
+
+verify q1 q2;

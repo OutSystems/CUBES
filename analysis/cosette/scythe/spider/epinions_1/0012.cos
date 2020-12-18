@@ -1,0 +1,31 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select t1.title
+from df_item as t1
+join df_review as t2 on t1.i_id = t2.i_id
+where t2.rating >
+    (select avg(rating)
+     from df_review df_review)`;
+
+query q2
+`select t2.title
+ from
+  (select t1.i_id, t1.count_rating, t4.i_id as i_id1, t4.title
+  from (select *
+       from
+        (select
+            t3.i_id, count(t3.rating) as count_rating
+          from
+            input0 as t3
+          group by
+            t3.i_id) as t1
+       where t1.count_rating = 2.0) join 
+      input as t4) as t2
+ where t2.i_id = t2.i_id1`;
+
+verify q1 q2;

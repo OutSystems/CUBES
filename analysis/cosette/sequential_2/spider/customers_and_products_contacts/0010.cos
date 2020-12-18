@@ -1,0 +1,30 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select min(product_price),
+       max(product_price),
+       avg(product_price)
+from df_products df_products`;
+
+query q2
+`select distinct minproduct_price as min.product_price.,
+                max(product_price) over () as max.product_price.,
+                                        meanproduct_price as avg.product_price.
+from
+  (select product_id,
+          product_type_code,
+          product_name,
+          product_price,
+          meanproduct_price,
+          min(product_price) over () as minproduct_price
+   from
+     (select product_id,
+             product_type_code,
+             product_name,
+             product_price,
+             avg(product_price) over () as meanproduct_price
+      from df_products df_products))`;
+
+verify q1 q2;

@@ -1,0 +1,23 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select count(*)
+from df_tryout df_tryout
+where decision = 'yes'`;
+
+query q2
+`select t1.count_distinct_pid
+ from
+  (select
+      t2.decision, count_distinct(t2.pid) as count_distinct_pid
+    from
+      (select *
+         from
+          input
+         where input.decision = 'yes') as t2
+    group by
+      t2.decision) as t1`;
+
+verify q1 q2;

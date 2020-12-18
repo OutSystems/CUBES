@@ -1,0 +1,30 @@
+schema df_accounts(custid:int, name:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_checking(df_checking);
+
+query q1
+`select t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+where t2.balance <
+    (select avg(balance)
+     from df_checking df_checking)`;
+
+query q2
+`select t5.name
+ from
+  (select t4.avg_balance, t4.custid, t4.balance, t6.custid as custid1, t6.name
+  from (select *
+       from
+        (select
+                avg(t1.balance) as avg_balance
+              from
+                input0 as t1) as t3 join 
+            input0 as t2 as t4
+       where t4.avg_balance > t4.balance) join 
+      input as t6) as t5
+ where t5.custid = t5.custid1`;
+
+verify q1 q2;

@@ -1,0 +1,33 @@
+schema df_endowment(endowment_id:int, school_id:int, donator_name:str, amount:str);
+
+table df_endowment(df_endowment);
+
+query q1
+`select amount,
+       donator_name
+from df_endowment df_endowment
+
+limit 1`;
+
+query q2
+`select distinct amount,
+                donator_name
+from
+  (select lhs.endowment_id as endowment_id,
+          lhs.school_id as school_id,
+          lhs.donator_name as donator_name,
+          lhs.amount as amount,
+          rhs.endowment_id as endowment_id.other,
+          rhs.school_id as school_id.other,
+          rhs.donator_name as donator_name.other,
+          rhs.amount as amount.other
+   from df_endowment as lhs
+   cross join
+     (select endowment_id,
+             school_id,
+             donator_name,
+             max(amount) over () as amount
+      from df_endowment df_endowment) as rhs)
+where (amount = amount.other)`;
+
+verify q1 q2;

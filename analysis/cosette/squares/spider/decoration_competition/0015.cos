@@ -1,0 +1,39 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_round df_round)`;
+
+query q2
+`joining, by = "member_id"
+joining, by = "name"
+select distinct name
+from
+  (select *
+   from
+     (select name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select name
+           from
+             (select round_id,
+                     member_id,
+                     decoration_theme,
+                     rank_in_round,
+                     name,
+                     country,
+                     college_id
+              from input1 as lhs
+              left join input0 as rhs on (lhs.member_id = rhs.member_id))) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

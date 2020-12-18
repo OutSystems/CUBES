@@ -1,0 +1,21 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_election(df_election);
+table df_representative(df_representative);
+
+query q1
+`select t2.name,
+       t1.date
+from df_election as t1
+join df_representative as t2 on t1.representative_id = t2.representative_id`;
+
+query q2
+`select t2.name,t2.date
+ from
+  (select input.election_id, input.representative_id, input.date, input.votes, input.vote_percent, input.seats, input.place, t1.representative_id as representative_id1, t1.name, t1.state, t1.party, t1.lifespan
+  from input join 
+      input0 as t1) as t2
+ where t2.representative_id = t2.representative_id1`;
+
+verify q1 q2;

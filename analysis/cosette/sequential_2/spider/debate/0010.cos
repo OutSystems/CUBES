@@ -1,0 +1,55 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+schema df_debate(debate_id:int, date:str, venue:str, num_of_audience:int);
+schema df_debate_people(debate_id:int, affirmative:int, negative:int, if_affirmative_win:str);
+
+table df_people(df_people);
+table df_debate(df_debate);
+table df_debate_people(df_debate_people);
+
+query q1
+`select t3.name,
+       t2.date,
+       t2.venue
+from df_debate_people as t1
+join df_debate as t2 on t1.debate_id = t2.debate_id
+join df_people as t3 on t1.affirmative = t3.people_id`;
+
+query q2
+`select name, date, venue
+from
+  (select lhs.debate_id as debate_id,
+          lhs.date as date,
+          lhs.venue as venue,
+          lhs.num_of_audience as num_of_audience,
+          rhs.people_id as people_id,
+          rhs.district as district,
+          rhs.name as name,
+          rhs.party as party,
+          rhs.age as age,
+          rhs.negative as negative,
+          rhs.if_affirmative_win as if_affirmative_win,
+          rhs.affirmative as affirmative
+   from df_debate as lhs
+   inner join
+     (select people_id,
+             district,
+             name,
+             party,
+             age,
+             debate_id,
+             negative,
+             if_affirmative_win,
+             people_id as affirmative
+      from
+        (select lhs.people_id as people_id,
+                lhs.district as district,
+                lhs.name as name,
+                lhs.party as party,
+                lhs.age as age,
+                rhs.debate_id as debate_id,
+                rhs.negative as negative,
+                rhs.if_affirmative_win as if_affirmative_win
+         from df_people as lhs
+         inner join df_debate_people as rhs on (lhs.people_id = rhs.affirmative))) as rhs on (lhs.debate_id = rhs.debate_id))`;
+
+verify q1 q2;

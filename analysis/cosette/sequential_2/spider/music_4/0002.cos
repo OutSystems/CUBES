@@ -1,0 +1,24 @@
+schema df_artist(artist_id:int, artist:str, age:int, famous_title:str, famous_release_date:str);
+
+table df_artist(df_artist);
+
+query q1
+`select age
+from df_artist df_artist`;
+
+query q2
+`select age
+from
+  (select lhs.artist_id as artist_id,
+          lhs.artist as artist,
+          lhs.age as age,
+          lhs.famous_title as famous_title,
+          lhs.famous_release_date as famous_release_date,
+          rhs.artist_id as artist_id.other,
+          rhs.artist as artist.other,
+          rhs.age as age.other
+   from df_artist as lhs
+   inner join df_artist as rhs on (lhs.famous_release_date = rhs.famous_release_date
+                                   and lhs.famous_title = rhs.famous_title))`;
+
+verify q1 q2;

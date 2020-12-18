@@ -1,0 +1,36 @@
+schema df_fault_log(fault_log_entry_id:int, asset_id:int, recorded_by_staff_id:int, fault_log_entry_datetime:str, fault_description:str, other_fault_details:str);
+schema df_fault_log_parts(fault_log_entry_id:int, part_fault_id:int, fault_status:str);
+
+table df_fault_log(df_fault_log);
+table df_fault_log_parts(df_fault_log_parts);
+
+query q1
+`select t1.fault_log_entry_id,
+       t1.fault_description,
+       t1.fault_log_entry_datetime
+from df_fault_log as t1
+join df_fault_log_parts as t2 on t1.fault_log_entry_id = t2.fault_log_entry_id
+group by t1.fault_log_entry_id
+
+limit 1`;
+
+query q2
+`select fault_log_entry_id,
+       fault_description,
+       fault_log_entry_datetime
+from
+  (select lhs.fault_log_entry_id as fault_log_entry_id,
+          lhs.asset_id as asset_id,
+          lhs.recorded_by_staff_id as recorded_by_staff_id,
+          lhs.fault_log_entry_datetime as fault_log_entry_datetime,
+          lhs.fault_description as fault_description,
+          lhs.other_fault_details as other_fault_details
+   from df_fault_log as lhs
+   inner join
+     (select fault_log_entry_id,
+             count(*) as n
+      from df_fault_log_parts df_fault_log_parts
+      group by fault_log_entry_id) as rhs on (lhs.fault_log_entry_id = rhs.fault_log_entry_id
+                                              and lhs.asset_id = rhs.n))`;
+
+verify q1 q2;

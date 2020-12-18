@@ -1,0 +1,22 @@
+schema df_department(dept_name:str, building:str, budget:str);
+
+table df_department(df_department);
+
+query q1
+`select dept_name,
+       building
+from df_department df_department`;
+
+query q2
+`select dept_name,
+       building
+from
+  (select lhs.dept_name as dept_name,
+          lhs.building as building,
+          lhs.budget as budget,
+          rhs.dept_name as dept_name.other
+   from df_department as lhs
+   inner join df_department as rhs on (lhs.budget = rhs.budget
+                                       and lhs.building = rhs.building))`;
+
+verify q1 q2;

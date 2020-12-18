@@ -1,0 +1,29 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+
+table df_party(df_party);
+
+query q1
+`select minister
+from df_party df_party
+
+limit 1`;
+
+query q2
+`select t2.minister
+ from
+  (select t3.minister, t3.count_region_id, t4.party_id, t4.minister as minister1, t4.took_office, t4.left_office, t4.region_id, t4.party_name
+  from (select *
+       from
+        (select
+            t1.minister, count(t1.region_id) as count_region_id
+          from
+            input as t1
+          group by
+            t1.minister) as t3
+       where t3.count_region_id = 2.0) join 
+      (select *
+         from
+          input
+         where input.party_id = 2.0) as t4) as t2`;
+
+verify q1 q2;

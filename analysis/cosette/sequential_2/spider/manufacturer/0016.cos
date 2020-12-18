@@ -1,0 +1,71 @@
+schema df_manufacturer(manufacturer_id:int, open_year:str, name:str, num_of_factories:int, num_of_shops:int);
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_manufacturer(df_manufacturer);
+table df_furniture(df_furniture);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select t3.name
+from df_furniture as t1
+join df_furniture_manufacte as t2 on t1.furniture_id = t2.furniture_id
+join df_manufacturer as t3 on t2.manufacturer_id = t3.manufacturer_id
+where t1.num_of_component < 6 intersect
+  select t3.name
+  from df_furniture as t1
+  join df_furniture_manufacte as t2 on t1.furniture_id = t2.furniture_id
+  join df_manufacturer as t3 on t2.manufacturer_id = t3.manufacturer_id where t1.num_of_component > 10`;
+
+query q2
+`select name.other as name
+from
+  (select furniture_id,
+          name,
+          num_of_component,
+          market_rate,
+          open_year,
+          name.other,
+          num_of_shops,
+          manufacturer_id.other,
+          price_in_dollar,
+          furniture_id.other,
+          furniture_id as manufacturer_id
+   from
+     (select lhs.furniture_id as furniture_id,
+             lhs.name as name,
+             lhs.num_of_component as num_of_component,
+             lhs.market_rate as market_rate,
+             rhs.open_year as open_year,
+             rhs.name as name.other,
+             rhs.num_of_shops as num_of_shops,
+             rhs.manufacturer_id.other as manufacturer_id.other,
+             rhs.price_in_dollar as price_in_dollar,
+             rhs.furniture_id as furniture_id.other
+      from
+        (select *
+         from df_furniture df_furniture
+         where (num_of_component = 6.0
+                or num_of_component >= 10.0)) as lhs
+      inner join
+        (select manufacturer_id,
+                open_year,
+                name,
+                num_of_factories,
+                num_of_shops,
+                manufacturer_id.other,
+                price_in_dollar,
+                num_of_shops as furniture_id
+         from
+           (select lhs.manufacturer_id as manufacturer_id,
+                   lhs.open_year as open_year,
+                   lhs.name as name,
+                   lhs.num_of_factories as num_of_factories,
+                   lhs.num_of_shops as num_of_shops,
+                   rhs.manufacturer_id as manufacturer_id.other,
+                   rhs.price_in_dollar as price_in_dollar
+            from df_manufacturer as lhs
+            inner join df_furniture_manufacte as rhs on (lhs.num_of_shops = rhs.furniture_id))) as rhs on (lhs.furniture_id = rhs.manufacturer_id
+                                                                                                           and lhs.num_of_component = rhs.num_of_factories)))`;
+
+verify q1 q2;

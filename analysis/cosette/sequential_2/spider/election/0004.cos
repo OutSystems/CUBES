@@ -1,0 +1,21 @@
+schema df_county(county_id:int, county_name:str, population:str, zip_code:str);
+
+table df_county(df_county);
+
+query q1
+`select max(population),
+       min(population)
+from df_county df_county`;
+
+query q2
+`select distinct maxpopulation as max.population.,
+                min(population) over () as min.population.
+from
+  (select county_id,
+          county_name,
+          population,
+          zip_code,
+          max(population) over () as maxpopulation
+   from df_county df_county)`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select roomid,
+       roomname
+from df_rooms df_rooms
+
+limit 3`;
+
+query q2
+`select t4.roomid,t4.roomname
+ from
+  (select t1.beds, t1.maxoccupancy, t1.baseprice, t1.decor, t1.count_decor, t3.roomid, t3.roomname, t3.beds as beds1, t3.bedtype, t3.maxoccupancy as maxoccupancy1, t3.baseprice as baseprice1, t3.decor as decor1
+  from (select *
+       from
+        (select
+            t2.beds, t2.maxoccupancy, t2.baseprice, t2.decor, count(t2.decor) as count_decor
+          from
+            input as t2
+          group by
+            t2.beds, t2.maxoccupancy, t2.baseprice, t2.decor) as t1
+       where t1.count_decor = 2.0) join 
+      (select *
+         from
+          input
+         where input.beds = 2.0) as t3) as t4
+ where t4.decor = t4.decor1`;
+
+verify q1 q2;

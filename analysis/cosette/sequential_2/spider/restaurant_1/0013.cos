@@ -1,0 +1,39 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_student(df_student);
+
+query q1
+`select major,
+       count(*)
+from df_student df_student
+group by major
+
+limit 1`;
+
+query q2
+`select distinct min(major) over () as major,
+                                n_distinct as count...
+from
+  (select lhs.major as major,
+          lhs.sex as sex,
+          lhs.n_distinct as n_distinct,
+          rhs.stuid as stuid,
+          rhs.lname as lname,
+          rhs.fname as fname,
+          rhs.age as age,
+          rhs.sex as sex.other,
+          rhs.major as major.other,
+          rhs.advisor as advisor,
+          rhs.city_code as city_code
+   from
+     (select major,
+             sex,
+             count(distinct major) as n_distinct
+      from df_student df_student
+      group by major,
+               sex) as lhs
+   cross join df_student as rhs)
+where (major > major.other
+       or n_distinct >= major.other)`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_job_history(employee_id:int, start_date:str, end_date:str, job_id:str, department_id:int);
+
+table df_job_history(df_job_history);
+
+query q1
+`select employee_id
+from df_job_history df_job_history
+group by employee_id
+having count(*) >= 2`;
+
+query q2
+`select t2.employee_id
+ from
+  (select
+      t1.employee_id, t1.department_id, count_distinct(t1.job_id) as count_distinct_job_id
+    from
+      input as t1
+    group by
+      t1.employee_id, t1.department_id) as t2
+ where t2.count_distinct_job_id = 2.0`;
+
+verify q1 q2;

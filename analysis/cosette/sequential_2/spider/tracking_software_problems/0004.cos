@@ -1,0 +1,34 @@
+schema df_problem_log(problem_log_id:int, assigned_to_staff_id:int, problem_id:int, problem_category_code:str, problem_status_code:str, log_entry_date:str, log_entry_description:str, log_entry_fix:str, other_log_details:str);
+
+table df_problem_log(df_problem_log);
+
+query q1
+`select problem_log_id,
+       log_entry_description
+from df_problem_log df_problem_log`;
+
+query q2
+`select distinct problem_log_id,
+                log_entry_description
+from
+  (select lhs.problem_log_id as problem_log_id,
+          lhs.assigned_to_staff_id as assigned_to_staff_id,
+          lhs.problem_id as problem_id,
+          lhs.problem_category_code as problem_category_code,
+          lhs.problem_status_code as problem_status_code,
+          lhs.log_entry_date as log_entry_date,
+          lhs.log_entry_description as log_entry_description,
+          lhs.log_entry_fix as log_entry_fix,
+          lhs.other_log_details as other_log_details,
+          rhs.problem_log_id as problem_log_id.other,
+          rhs.assigned_to_staff_id as assigned_to_staff_id.other,
+          rhs.problem_id as problem_id.other,
+          rhs.problem_status_code as problem_status_code.other,
+          rhs.log_entry_date as log_entry_date.other,
+          rhs.log_entry_fix as log_entry_fix.other,
+          rhs.other_log_details as other_log_details.other
+   from df_problem_log as lhs
+   inner join df_problem_log as rhs on (lhs.log_entry_description = rhs.log_entry_description
+                                        and lhs.problem_category_code = rhs.problem_category_code))`;
+
+verify q1 q2;

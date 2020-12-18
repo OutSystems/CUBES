@@ -1,0 +1,28 @@
+schema df_campuses(id:int, campus:str, location:str, county:str, year:int);
+schema df_csu_fees(campus:int, year:int, campusfee:int);
+
+table df_campuses(df_campuses);
+table df_csu_fees(df_csu_fees);
+
+query q1
+`select campusfee
+from df_campuses as t1
+join df_csu_fees as t2 on t1.id = t2.campus
+where t1.campus = "san francisco state university"
+  and t2.year = 1996`;
+
+query q2
+`select t1.campusfee
+ from
+  (select input.id, input.campus, input.location, input.county, input.year, t2.campus as campus1, t2.year as year1, t2.campusfee
+  from (select *
+       from
+        input
+       where input.campus = 'san francisco state university') join 
+      (select *
+         from
+          input0
+         where input0.year = 1996.0) as t2) as t1
+ where t1.id = t1.campus1`;
+
+verify q1 q2;

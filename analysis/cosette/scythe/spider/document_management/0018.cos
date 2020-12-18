@@ -1,0 +1,24 @@
+schema df_roles(role_code:str, role_description:str);
+schema df_users(user_id:int, role_code:str, user_name:str, user_login:int, password:str);
+
+table df_roles(df_roles);
+table df_users(df_users);
+
+query q1
+`select role_description
+from df_roles df_roles
+where role_code =
+    (select role_code
+     from df_users df_users
+     where user_login = 1
+     group by role_code
+     
+     limit 1)`;
+
+query q2
+`(select
+    first(t2.role_description) as first_role_description
+  from
+    input as t2) as t1`;
+
+verify q1 q2;

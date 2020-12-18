@@ -1,0 +1,20 @@
+schema df_event(event_id:int, date:str, venue:str, name:str, event_attendance:int);
+
+table df_event(df_event);
+
+query q1
+`select avg(event_attendance),
+       max(event_attendance)
+from df_event df_event`;
+
+query q2
+`select distinct avg(event_attendance) over () as avg.event_attendance.,
+                                           maxevent_attendance as max.event_attendance.
+from
+  (select event_id, date, venue,
+                          name,
+                          event_attendance,
+                          max(event_attendance) over () as maxevent_attendance
+   from df_event df_event)`;
+
+verify q1 q2;

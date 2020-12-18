@@ -1,0 +1,31 @@
+schema df_mission(mission_id:int, ship_id:int, code:str, launched_year:int, location:str, speed_knots:int, fate:str);
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_mission(df_mission);
+table df_ship(df_ship);
+
+query q1
+`select distinct t1.fate
+from df_mission as t1
+join df_ship as t2 on t1.ship_id = t2.ship_id
+where t2.nationality = "united states"`;
+
+query q2
+`select fate
+from
+  (select lhs.mission_id as mission_id,
+          lhs.ship_id as ship_id,
+          lhs.code as code,
+          lhs.launched_year as launched_year,
+          lhs.location as location,
+          lhs.speed_knots as speed_knots,
+          lhs.fate as fate,
+          rhs.name as name,
+          rhs.type as type,
+          rhs.nationality as nationality,
+          rhs.tonnage as tonnage
+   from df_mission as lhs
+   left join df_ship as rhs on (lhs.ship_id = rhs.ship_id))
+where (nationality = 'united states')`;
+
+verify q1 q2;

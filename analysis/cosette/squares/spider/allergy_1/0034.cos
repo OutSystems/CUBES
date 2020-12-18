@@ -1,0 +1,20 @@
+schema df_has_allergy(stuid:int, allergy:str);
+
+table df_has_allergy(df_has_allergy);
+
+query q1
+`select stuid
+from df_has_allergy df_has_allergy
+group by stuid
+having count(*) >= 2`;
+
+query q2
+`select distinct stuid
+from
+  (select stuid,
+          count(*) as n
+   from input0
+   group by stuid)
+where (n >= 2.0)`;
+
+verify q1 q2;

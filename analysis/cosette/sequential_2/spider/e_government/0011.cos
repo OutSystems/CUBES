@@ -1,0 +1,67 @@
+schema df_services(service_id:int, service_type_code:str, service_name:str, service_descriptio:str);
+schema df_party_services(booking_id:int, customer_id:int, service_id:int, service_datetime:str, booking_made_date:str);
+
+table df_services(df_services);
+table df_party_services(df_party_services);
+
+query q1
+`select service_name
+from df_services df_services
+except
+select t1.service_name
+from df_services as t1
+join df_party_services as t2 on t1.service_id = t2.service_id`;
+
+query q2
+`select service_descriptio as service_name
+from
+  (select lhs.service_id as service_id,
+          lhs.service_type_code as service_type_code,
+          lhs.service_name as service_name,
+          lhs.service_descriptio as service_descriptio,
+          lhs.booking_id as booking_id,
+          lhs.customer_id as customer_id,
+          lhs.service_datetime as service_datetime,
+          lhs.booking_made_date as booking_made_date,
+          rhs.service_id.other as service_id.other
+   from
+     (select lhs.service_id as service_id,
+             lhs.service_type_code as service_type_code,
+             lhs.service_name as service_name,
+             lhs.service_descriptio as service_descriptio,
+             rhs.booking_id as booking_id,
+             rhs.customer_id as customer_id,
+             rhs.service_datetime as service_datetime,
+             rhs.booking_made_date as booking_made_date
+      from df_services as lhs
+      inner join df_party_services as rhs on (lhs.service_id = rhs.service_id)) as lhs
+   inner join
+     (select service_id,
+             service_type_code,
+             service_name,
+             service_descriptio,
+             customer_id,
+             service_id.other,
+             service_datetime,
+             booking_made_date,
+             service_id as booking_id
+      from
+        (select lhs.service_id as service_id,
+                lhs.service_type_code as service_type_code,
+                lhs.service_name as service_name,
+                lhs.service_descriptio as service_descriptio,
+                rhs.customer_id as customer_id,
+                rhs.service_id as service_id.other,
+                rhs.service_datetime as service_datetime,
+                rhs.booking_made_date as booking_made_date
+         from df_services as lhs
+         inner join df_party_services as rhs on (lhs.service_id = rhs.booking_id))) as rhs on (lhs.service_id = rhs.service_id
+                                                                                               and lhs.service_type_code = rhs.service_type_code
+                                                                                               and lhs.service_name = rhs.service_name
+                                                                                               and lhs.service_descriptio = rhs.service_descriptio
+                                                                                               and lhs.booking_id = rhs.booking_id
+                                                                                               and lhs.customer_id = rhs.customer_id
+                                                                                               and lhs.service_datetime = rhs.service_datetime
+                                                                                               and lhs.booking_made_date = rhs.booking_made_date))`;
+
+verify q1 q2;

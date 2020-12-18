@@ -1,0 +1,25 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_customer_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+
+table df_customers(df_customers);
+table df_customer_policies(df_customer_policies);
+
+query q1
+`select customer_details
+from df_customers df_customers
+except
+select t1.customer_details
+from df_customers as t1
+join df_customer_policies as t2 on t1.customer_id = t2.customer_id`;
+
+query q2
+`select customer_details
+from
+  (select *
+   from df_customers as lhs
+   where not exists
+       (select 1
+        from df_customer_policies as rhs
+        where (lhs.customer_id = rhs.customer_id) ))`;
+
+verify q1 q2;

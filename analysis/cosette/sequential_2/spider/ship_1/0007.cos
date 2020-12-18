@@ -1,0 +1,22 @@
+schema df_captain(captain_id:int, name:str, ship_id:int, age:int, class:str, rank:str);
+
+table df_captain(df_captain);
+
+query q1
+`select class
+from df_captain df_captain
+group by class
+having count(*) > 2`;
+
+query q2
+`select class
+from
+  (select class,
+          rank,
+          count(*) as n
+   from df_captain df_captain
+   group by class,
+            rank)
+where (n = 2.0)`;
+
+verify q1 q2;

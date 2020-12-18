@@ -1,0 +1,35 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_student(df_student);
+table df_faculty(df_faculty);
+
+query q1
+`select t1.facid,
+       count(*)
+from df_faculty as t1
+join df_student as t2 on t1.facid = t2.advisor
+group by t1.facid`;
+
+query q2
+`select distinct advisor as facid,
+                n as count...
+from
+  (select lhs.facid as facid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.rank as rank,
+          lhs.sex as sex,
+          lhs.phone as phone,
+          lhs.room as room,
+          lhs.building as building,
+          rhs.advisor as advisor,
+          rhs.n as n
+   from df_faculty as lhs
+   cross join
+     (select advisor,
+             count(*) as n
+      from df_student df_student
+      group by advisor) as rhs)`;
+
+verify q1 q2;

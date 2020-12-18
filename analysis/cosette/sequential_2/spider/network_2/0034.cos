@@ -1,0 +1,49 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select distinct t2.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.friend
+where t1.age <
+    (select avg(age)
+     from df_person df_person)`;
+
+query q2
+`select distinct name
+from
+  (select *
+   from df_personfriend as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.age as age,
+                     lhs.name as name,
+                     lhs.meanage as meanage,
+                     rhs.age as age.other,
+                     rhs.name as name.other,
+                     rhs.meanage as meanage.other
+              from
+                (select age,
+                        name,
+                        avg(age) as meanage
+                 from df_person df_person
+                 group by age,
+                          name) as lhs
+              cross join
+                (select age,
+                        name,
+                        avg(age) as meanage
+                 from df_person df_person
+                 group by age,
+                          name) as rhs)
+           where (age < age.other
+                  or meanage < meanage.other)) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

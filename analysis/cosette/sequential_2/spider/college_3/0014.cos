@@ -1,0 +1,28 @@
+schema df_course(cid:str, cname:str, credits:int, instructor:int, days:str, hours:str, dno:int);
+
+table df_course(df_course);
+
+query q1
+`select cname
+from df_course df_course`;
+
+query q2
+`select cname
+from
+  (select lhs.cid as cid,
+          lhs.cname as cname,
+          lhs.credits as credits,
+          lhs.instructor as instructor,
+          lhs.days as days,
+          lhs.hours as hours,
+          lhs.dno as dno,
+          rhs.cname as cname.other,
+          rhs.credits as credits.other,
+          rhs.instructor as instructor.other,
+          rhs.days as days.other,
+          rhs.hours as hours.other,
+          rhs.dno as dno.other
+   from df_course as lhs
+   inner join df_course as rhs on (lhs.cid = rhs.cid))`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+schema df_store_district(store_id:int, district_id:int);
+
+table df_store(df_store);
+table df_district(df_district);
+table df_store_district(df_store_district);
+
+query q1
+`select t3.headquartered_city
+from df_store as t1
+join df_store_district as t2 on t1.store_id = t2.store_id
+join df_district as t3 on t2.district_id = t3.district_id
+where t1.store_name = "blackville"`;
+
+query q2
+`joining, by = "store_id"
+joining, by = "district_id"
+select headquartered_city
+from
+  (select store_id,
+          district_id,
+          store_name,
+          type,
+          area_size,
+          number_of_product_category,
+          ranking,
+          district_name,
+          headquartered_city,
+          city_population,
+          city_area
+   from
+     (select store_id,
+             district_id,
+             store_name,
+             type,
+             area_size,
+             number_of_product_category,
+             ranking
+      from input2 as lhs
+      inner join input0 as rhs on (lhs.store_id = rhs.store_id)) as lhs
+   inner join input1 as rhs on (lhs.district_id = rhs.district_id))
+where (store_name = 'blackville')`;
+
+verify q1 q2;

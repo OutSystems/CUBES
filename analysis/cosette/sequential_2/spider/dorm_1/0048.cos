@@ -1,0 +1,70 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+schema df_lives_in(stuid:int, dormid:int, room_number:int);
+
+table df_student(df_student);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+table df_lives_in(df_lives_in);
+
+query q1
+`select t1.fname,
+       t1.lname
+from df_student as t1
+join df_lives_in as t2 on t1.stuid = t2.stuid
+where t2.dormid in
+    (select t3.dormid
+     from df_has_amenity as t3
+     join df_dorm_amenity as t4 on t3.amenid = t4.amenid
+     where t4.amenity_name = 'tv lounge')`;
+
+query q2
+`select fname,
+       lname
+from
+  (select lhs.stuid as stuid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.age as age,
+          lhs.sex as sex,
+          lhs.major as major,
+          lhs.advisor as advisor,
+          lhs.city_code as city_code,
+          lhs.dormid as dormid,
+          lhs.amenid as amenid,
+          lhs.room_number as room_number,
+          rhs.amenity_name as amenity_name
+   from
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             lhs.dormid as dormid,
+             lhs.amenid as amenid,
+             rhs.room_number as room_number
+      from
+        (select lhs.stuid as stuid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.age as age,
+                lhs.sex as sex,
+                lhs.major as major,
+                lhs.advisor as advisor,
+                lhs.city_code as city_code,
+                rhs.dormid as dormid,
+                rhs.amenid as amenid
+         from df_student as lhs
+         cross join df_has_amenity as rhs) as lhs
+      inner join df_lives_in as rhs on (lhs.stuid = rhs.stuid
+                                            and lhs.dormid = rhs.dormid)) as lhs
+   inner join
+     (select *
+      from df_dorm_amenity df_dorm_amenity
+      where (amenity_name = 'tv lounge')) as rhs on (lhs.amenid = rhs.amenid))`;
+
+verify q1 q2;

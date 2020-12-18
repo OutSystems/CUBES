@@ -1,0 +1,61 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+
+table df_county_public_safety(df_county_public_safety);
+
+query q1
+`select name
+from df_county_public_safety df_county_public_safety
+
+limit 1`;
+
+query q2
+`select distinct name
+from
+  (select lhs.county_id as county_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.police_officers as police_officers,
+          lhs.residents_per_officer as residents_per_officer,
+          lhs.case_burden as case_burden,
+          lhs.crime_rate as crime_rate,
+          lhs.police_force as police_force,
+          lhs.location as location,
+          lhs.maxpopulation as maxpopulation,
+          rhs.county_id as county_id.other,
+          rhs.name as name.other,
+          rhs.population as population.other,
+          rhs.police_officers as police_officers.other,
+          rhs.residents_per_officer as residents_per_officer.other,
+          rhs.case_burden as case_burden.other,
+          rhs.crime_rate as crime_rate.other,
+          rhs.police_force as police_force.other,
+          rhs.location as location.other,
+          rhs.maxpopulation as maxpopulation.other
+   from
+     (select county_id,
+             name,
+             population,
+             police_officers,
+             residents_per_officer,
+             case_burden,
+             crime_rate,
+             police_force,
+             location,
+             max(population) over () as maxpopulation
+      from df_county_public_safety df_county_public_safety) as lhs
+   cross join
+     (select county_id,
+             name,
+             population,
+             police_officers,
+             residents_per_officer,
+             case_burden,
+             crime_rate,
+             police_force,
+             location,
+             max(population) over () as maxpopulation
+      from df_county_public_safety df_county_public_safety) as rhs)
+where (population = maxpopulation
+       and maxpopulation >= maxpopulation.other)`;
+
+verify q1 q2;

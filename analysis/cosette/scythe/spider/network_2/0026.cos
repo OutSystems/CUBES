@@ -1,0 +1,26 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select name
+from df_person df_person
+except
+select t2.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.friend
+where t1.job = 'student'`;
+
+query q2
+`select t2.name
+ from
+  (select
+          max(t1.age) as max_age
+        from
+          input as t1) as t3 join 
+      input as t4 as t2
+ where t2.max_age > t2.age`;
+
+verify q1 q2;

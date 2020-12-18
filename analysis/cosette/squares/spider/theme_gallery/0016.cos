@@ -1,0 +1,32 @@
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+schema df_exhibition_record(exhibition_id:int, date:str, attendance:int);
+
+table df_exhibition(df_exhibition);
+table df_exhibition_record(df_exhibition_record);
+
+query q1
+`select t2.theme,
+       t1.date,
+       t1.attendance
+from df_exhibition_record as t1
+join df_exhibition as t2 on t1.exhibition_id = t2.exhibition_id
+where t2.year = 2004`;
+
+query q2
+`joining, by = "exhibition_id"
+select theme,
+       date,
+       attendance
+from
+  (select exhibition_id,
+          date,
+          attendance,
+          year,
+          theme,
+          artist_id,
+          ticket_price
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.exhibition_id = rhs.exhibition_id))
+where (year <= 2004.0)`;
+
+verify q1 q2;

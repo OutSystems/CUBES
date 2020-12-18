@@ -1,0 +1,26 @@
+schema df_i027(cname:str, wmname:str, avg:str);
+
+table df_i027(df_i027);
+
+query q1
+`select m.cname, m.wmname, t.mx
+from (
+    select cname, max(avg) as mx
+    from makerar
+    group by cname
+    ) t join makerar m on m.cname = t.cname and t.mx = m.avg`;
+
+query q2
+`select t1.cname,t1.wmname,t1.max_avg
+ from
+  (select t3.cname, t3.max_avg, t2.cname as cname1, t2.wmname, t2.avg
+  from (select
+          t4.cname, max(t4.avg) as max_avg
+        from
+          input as t4
+        group by
+          t4.cname) as t3 join 
+      input as t2) as t1
+ where t1.max_avg = t1.avg`;
+
+verify q1 q2;

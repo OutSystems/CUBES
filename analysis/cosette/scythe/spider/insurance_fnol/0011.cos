@@ -1,0 +1,32 @@
+schema df_customers(customer_id:int, customer_name:str);
+schema df_available_policies(policy_id:int, policy_type_code:str, customer_phone:str);
+schema df_customers_policies(customer_id:int, policy_id:int, date_opened:str, date_closed:str);
+
+table df_customers(df_customers);
+table df_available_policies(df_available_policies);
+table df_customers_policies(df_customers_policies);
+
+query q1
+`select distinct t3.policy_type_code
+from df_customers as t1
+join df_customers_policies as t2 on t1.customer_id = t2.customer_id
+join df_available_policies as t3 on t2.policy_id = t3.policy_id
+where t1.customer_name = "dayana robel"`;
+
+query q2
+`select t3.policy_type_code
+ from
+  (select t4.policy_id, t4.count_date_opened, t5.policy_id as policy_id1, t5.policy_type_code, t5.customer_phone
+  from (select *
+       from
+        (select
+            t2.policy_id, count(t2.date_opened) as count_date_opened
+          from
+            input1 as t2
+          group by
+            t2.policy_id) as t4
+       where t4.count_date_opened = 2.0) join 
+      input0 as t5) as t3
+ where t3.policy_id = t3.policy_id1`;
+
+verify q1 q2;

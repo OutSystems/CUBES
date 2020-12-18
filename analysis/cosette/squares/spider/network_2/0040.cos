@@ -1,0 +1,29 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select name
+from df_person df_person
+except
+select name
+from df_personfriend df_personfriend`;
+
+query q2
+`joining, by = "name"
+select distinct name
+from
+  (select *
+   from
+     (select name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select name
+           from input1) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

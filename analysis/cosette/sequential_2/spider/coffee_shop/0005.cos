@@ -1,0 +1,32 @@
+schema df_member(member_id:int, name:str, membership_card:str, age:int, time_of_purchase:int, level_of_membership:int, address:str);
+
+table df_member(df_member);
+
+query q1
+`select time_of_purchase,
+       age,
+       address
+from df_member df_member`;
+
+query q2
+`select time_of_purchase,
+       age,
+       address
+from
+  (select lhs.member_id as member_id,
+          lhs.name as name,
+          lhs.membership_card as membership_card,
+          lhs.age as age,
+          lhs.time_of_purchase as time_of_purchase,
+          lhs.level_of_membership as level_of_membership,
+          lhs.address as address,
+          rhs.member_id as member_id.other,
+          rhs.membership_card as membership_card.other,
+          rhs.age as age.other,
+          rhs.level_of_membership as level_of_membership.other,
+          rhs.address as address.other
+   from df_member as lhs
+   inner join df_member as rhs on (lhs.name = rhs.name
+                                   and lhs.time_of_purchase = rhs.time_of_purchase))`;
+
+verify q1 q2;

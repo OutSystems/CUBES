@@ -1,0 +1,32 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select count(*)
+from df_branch df_branch
+where membership_amount >
+    (select avg(membership_amount)
+     from df_branch df_branch)`;
+
+query q2
+`select branch_id as count...
+from
+  (select lhs.branch_id as branch_id,
+          lhs.city as city,
+          lhs.meanmembership_amount as meanmembership_amount
+   from
+     (select branch_id,
+             city,
+             avg(membership_amount) as meanmembership_amount
+      from df_branch df_branch
+      group by branch_id,
+               city) as lhs
+   inner join
+     (select city,
+             count(distinct membership_amount) as n_distinct
+      from df_branch df_branch
+      group by city) as rhs on (lhs.branch_id = rhs.n_distinct
+                                and lhs.city = rhs.city))`;
+
+verify q1 q2;

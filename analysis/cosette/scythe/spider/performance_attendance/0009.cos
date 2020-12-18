@@ -1,0 +1,22 @@
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+
+table df_performance(df_performance);
+
+query q1
+`select location
+from df_performance df_performance
+group by location
+having count(*) >= 2`;
+
+query q2
+`select t1.location
+ from
+  (select
+      t2.location, count(t2.location) as count_location
+    from
+      input as t2
+    group by
+      t2.location) as t1
+ where t1.count_location = 2.0`;
+
+verify q1 q2;

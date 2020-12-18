@@ -1,0 +1,19 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+
+table df_class(df_class);
+
+query q1
+`select count(distinct prof_num)
+from df_class df_class
+where crs_code = "acct-211"`;
+
+query q2
+`select n_distinct as count.distinct.prof_num.
+from
+  (select crs_code,
+          count(distinct prof_num) as n_distinct
+   from df_class df_class
+   group by crs_code)
+where (crs_code = 'acct-211')`;
+
+verify q1 q2;

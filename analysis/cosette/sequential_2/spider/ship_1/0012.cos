@@ -1,0 +1,59 @@
+schema df_captain(captain_id:int, name:str, ship_id:int, age:int, class:str, rank:str);
+
+table df_captain(df_captain);
+
+query q1
+`select name
+from df_captain df_captain
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select ship_id as captain_id,
+          name,
+          ship_id,
+          age,
+          class,
+          rank,
+          minage,
+          name.other,
+          ship_id.other,
+          class.other,
+          rank.other,
+          minage.other
+   from
+     (select lhs.captain_id as captain_id,
+             lhs.name as name,
+             lhs.ship_id as ship_id,
+             lhs.age as age,
+             lhs.class as class,
+             lhs.rank as rank,
+             lhs.minage as minage,
+             rhs.name as name.other,
+             rhs.ship_id as ship_id.other,
+             rhs.class as class.other,
+             rhs.rank as rank.other,
+             rhs.minage as minage.other
+      from
+        (select captain_id,
+                name,
+                ship_id,
+                age,
+                class,
+                rank,
+                min(age) over () as minage
+         from df_captain df_captain) as lhs
+      inner join
+        (select captain_id,
+                name,
+                ship_id,
+                age,
+                class,
+                rank,
+                min(age) over () as minage
+         from df_captain df_captain) as rhs on (lhs.ship_id = rhs.captain_id
+                                     and lhs.minage = rhs.age)))`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_weekly_weather(station_id:int, day_of_week:str, high_temperature:int, low_temperature:int, precipitation:str, wind_speed_mph:int);
+
+table df_weekly_weather(df_weekly_weather);
+
+query q1
+`select min(low_temperature),
+       max(wind_speed_mph)
+from df_weekly_weather df_weekly_weather`;
+
+query q2
+`select distinct min(low_temperature) over () as min.low_temperature.,
+                                          wind_speed_mph as max.wind_speed_mph.
+from
+  (select station_id,
+          day_of_week,
+          high_temperature,
+          low_temperature,
+          precipitation,
+          max(wind_speed_mph) over () as wind_speed_mph
+   from df_weekly_weather df_weekly_weather)`;
+
+verify q1 q2;

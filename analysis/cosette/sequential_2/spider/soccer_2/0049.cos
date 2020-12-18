@@ -1,0 +1,36 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select distinct cname
+from df_college df_college
+where enr >
+    (select min(enr)
+     from df_college df_college
+     where state = 'fl')`;
+
+query q2
+`select cname.other as cname
+from
+  (select *
+   from
+     (select lhs.cname as cname,
+             lhs.state as state,
+             lhs.enr as enr,
+             rhs.cname as cname.other,
+             rhs.state as state.other,
+             rhs.minenr as minenr
+      from df_college as lhs
+      cross join
+        (select cname,
+                state,
+                min(enr) as minenr
+         from df_college df_college
+         group by cname,
+                  state) as rhs)
+   where (state != state.other))
+where (state = 'fl'
+       and minenr >= enr)`;
+
+verify q1 q2;

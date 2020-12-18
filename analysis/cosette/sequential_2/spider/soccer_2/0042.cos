@@ -1,0 +1,40 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select cname
+from df_tryout df_tryout
+where ppos = 'goalie' intersect
+  select cname
+  from df_tryout df_tryout where ppos = 'mid'`;
+
+query q2
+`select cname
+from
+  (select *
+   from
+     (select lhs.pid as pid,
+             lhs.cname as cname,
+             lhs.ppos as ppos,
+             lhs.decision as decision,
+             rhs.pid as pid.other,
+             rhs.ppos as ppos.other,
+             rhs.decision as decision.other
+      from df_tryout as lhs
+      inner join
+        (select *
+         from df_tryout df_tryout
+         where (ppos != 'goalie'
+                and ppos = 'mid')) as rhs on (lhs.cname = rhs.cname)) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_tryout df_tryout
+           where (ppos != 'goalie'
+                  and ppos = 'mid')) as rhs
+        where (lhs.decision = rhs.decision
+               and lhs.pid = rhs.pid) ))`;
+
+verify q1 q2;

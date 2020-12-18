@@ -1,0 +1,27 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+schema df_station_company(station_id:int, company_id:int, rank_of_the_year:int);
+
+table df_company(df_company);
+table df_station_company(df_station_company);
+
+query q1
+`select t2.df_company,
+       count(*)
+from df_station_company as t1
+join df_company as t2 on t1.company_id = t2.company_id
+group by t1.company_id`;
+
+query q2
+`select t1.company,t1.count_company_id
+ from
+  (select t4.company_id, t4.count_company_id, t2.company_id as company_id1, t2.rank, t2.company, t2.headquarters, t2.main_industry, t2.sales_billion, t2.profits_billion, t2.assets_billion, t2.market_value
+  from (select
+          t3.company_id, count(t3.company_id) as count_company_id
+        from
+          input0 as t3
+        group by
+          t3.company_id) as t4 join 
+      input as t2) as t1
+ where t1.company_id = t1.company_id1`;
+
+verify q1 q2;

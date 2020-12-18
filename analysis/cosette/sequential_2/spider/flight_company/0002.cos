@@ -1,0 +1,30 @@
+schema df_flight(id:int, vehicle_flight_number:str, date:str, pilot:str, velocity:str, altitude:str, airport_id:int, company_id:int);
+
+table df_flight(df_flight);
+
+query q1
+`select vehicle_flight_number , date , pilot
+from df_flight df_flight`;
+
+query q2
+`select vehicle_flight_number, date, pilot
+from
+  (select lhs.id as id,
+          lhs.vehicle_flight_number as vehicle_flight_number,
+          lhs.date as date,
+          lhs.pilot as pilot,
+          lhs.velocity as velocity,
+          lhs.altitude as altitude,
+          lhs.airport_id as airport_id,
+          lhs.company_id as company_id,
+          rhs.vehicle_flight_number as vehicle_flight_number.other,
+          rhs.date as date.other,
+          rhs.pilot as pilot.other,
+          rhs.velocity as velocity.other,
+          rhs.altitude as altitude.other,
+          rhs.airport_id as airport_id.other,
+          rhs.company_id as company_id.other
+   from df_flight as lhs
+   inner join df_flight as rhs on (lhs.id = rhs.id))`;
+
+verify q1 q2;

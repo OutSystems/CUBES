@@ -1,0 +1,26 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, line_3:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_student_addresses(student_id:int, address_id:int, date_address_from:str, date_address_to:str, monthly_rental:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_student_addresses(df_student_addresses);
+
+query q1
+`select t2.monthly_rental
+from df_addresses as t1
+join df_student_addresses as t2 on t1.address_id = t2.address_id
+where t1.state_province_county = "texas"`;
+
+query q2
+`select monthly_rental
+from
+  (select *
+   from df_student_addresses as lhs
+   where exists
+       (select 1
+        from
+          (select *
+           from df_addresses df_addresses
+           where (state_province_county = 'texas')) as rhs
+        where (lhs.address_id = rhs.address_id) ))`;
+
+verify q1 q2;

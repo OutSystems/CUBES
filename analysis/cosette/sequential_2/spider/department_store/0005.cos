@@ -1,0 +1,31 @@
+schema df_staff(staff_id:int, staff_gender:int, staff_name:str);
+schema df_staff_department_assignments(staff_id:int, department_id:int, date_assigned_from:str, job_title_code:str, date_assigned_to:str);
+
+table df_staff(df_staff);
+table df_staff_department_assignments(df_staff_department_assignments);
+
+query q1
+`select t1.staff_id,
+       t1.staff_gender
+from df_staff as t1
+join df_staff_department_assignments as t2 on t1.staff_id = t2.staff_id
+where t2.job_title_code = "department manager"`;
+
+query q2
+`select staff_id,
+       staff_gender
+from
+  (select lhs.staff_id as staff_id,
+          lhs.staff_gender as staff_gender,
+          lhs.staff_name as staff_name,
+          rhs.department_id as department_id,
+          rhs.date_assigned_from as date_assigned_from,
+          rhs.job_title_code as job_title_code,
+          rhs.date_assigned_to as date_assigned_to
+   from df_staff as lhs
+   inner join
+     (select *
+      from df_staff_department_assignments df_staff_department_assignments
+      where (job_title_code = 'department manager')) as rhs on (lhs.staff_id = rhs.staff_id))`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_plays_games(stuid:int, gameid:int, hours_played:int);
+
+table df_student(df_student);
+table df_plays_games(df_plays_games);
+
+query q1
+`select stuid
+from df_student df_student
+except
+select stuid
+from df_plays_games df_plays_games`;
+
+query q2
+`joining, by = "stuid"
+select distinct stuid
+from
+  (select *
+   from
+     (select stuid
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select stuid
+           from input1) as rhs
+        where (lhs.stuid = rhs.stuid) ))`;
+
+verify q1 q2;

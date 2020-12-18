@@ -1,0 +1,21 @@
+schema df_invoices(invoice_id:int, order_id:int, payment_method_code:str, product_id:int, order_quantity:int, other_item_details:str, order_item_id:int);
+
+table df_invoices(df_invoices);
+
+query q1
+`select avg(order_quantity)
+from df_invoices df_invoices
+where payment_method_code = "mastercard"`;
+
+query q2
+`select meanorder_quantity as avg.order_quantity.
+from
+  (select other_item_details,
+          payment_method_code,
+          avg(order_quantity) as meanorder_quantity
+   from df_invoices df_invoices
+   group by other_item_details,
+            payment_method_code)
+where (payment_method_code = 'mastercard')`;
+
+verify q1 q2;

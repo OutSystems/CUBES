@@ -1,0 +1,42 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_reviewer(rid:int, name:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_reviewer(df_reviewer);
+table df_rating(df_rating);
+
+query q1
+`select distinct t2.title
+from df_rating as t1
+join df_movie as t2 on t1.mid = t2.mid
+join df_reviewer as t3 on t1.rid = t3.rid
+where t3.name = 'brittany harris'
+  or t2.year > 2000`;
+
+query q2
+`select distinct title
+from
+  (select lhs.mid as mid,
+          lhs.title as title,
+          lhs.year as year,
+          lhs.director as director,
+          lhs.rid as rid,
+          lhs.name as name,
+          rhs.stars as stars,
+          rhs.ratingdate as ratingdate
+   from
+     (select lhs.mid as mid,
+             lhs.title as title,
+             lhs.year as year,
+             lhs.director as director,
+             rhs.rid as rid,
+             rhs.name as name
+      from df_movie as lhs
+      cross join df_reviewer as rhs) as lhs
+   inner join df_rating as rhs on (lhs.mid = rhs.mid
+                                       and lhs.rid = rhs.rid))
+where (name = 'brittany harris'
+       or year >= 2000.0)`;
+
+verify q1 q2;

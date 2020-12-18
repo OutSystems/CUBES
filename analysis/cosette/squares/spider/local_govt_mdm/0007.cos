@@ -1,0 +1,27 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_electoral_register(electoral_register_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_electoral_register(df_electoral_register);
+
+query q1
+`select t1.electoral_register_id
+from df_electoral_register as t1
+join df_cmi_cross_references as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+where t2.source_system_code = 'electoral'
+  or t2.source_system_code = 'tax'`;
+
+query q2
+`joining, by = "cmi_cross_ref_id"
+select electoral_register_id
+from
+  (select electoral_register_id,
+          cmi_cross_ref_id,
+          master_customer_id,
+          source_system_code
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id))
+where (source_system_code = 'tax'
+       or source_system_code = 'electoral')`;
+
+verify q1 q2;

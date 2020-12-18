@@ -1,0 +1,48 @@
+schema df_activity(actid:int, activity_name:str);
+schema df_faculty_participates_in(facid:int, actid:int);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_activity(df_activity);
+table df_faculty_participates_in(df_faculty_participates_in);
+table df_faculty(df_faculty);
+
+query q1
+`select distinct t1.lname
+from df_faculty as t1
+join df_faculty_participates_in as t2 on t1.facid = t2.facid
+join df_activity as t3 on t2.actid = t2.actid
+where t3.activity_name = 'canoeing'
+  or t3.activity_name = 'kayaking'`;
+
+query q2
+`joining, by = "facid"
+joining, by = "actid"
+select distinct lname
+from
+  (select facid,
+          actid,
+          lname,
+          fname,
+          rank,
+          sex,
+          phone,
+          room,
+          building,
+          activity_name
+   from
+     (select facid,
+             actid,
+             lname,
+             fname,
+             rank,
+             sex,
+             phone,
+             room,
+             building
+      from input1 as lhs
+      inner join input2 as rhs on (lhs.facid = rhs.facid)) as lhs
+   inner join input0 as rhs on (lhs.actid = rhs.actid))
+where (activity_name != 'canoeing'
+       or activity_name = 'kayaking')`;
+
+verify q1 q2;

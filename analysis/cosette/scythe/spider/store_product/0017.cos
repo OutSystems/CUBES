@@ -1,0 +1,24 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+
+table df_product(df_product);
+
+query q1
+`select df_product
+from df_product df_product
+where max_page_size = "a4"
+  or pages_per_minute_color < 5`;
+
+query q2
+`select t3.product
+ from
+  (select input.product_id, input.product, input.dimensions, input.dpi, input.pages_per_minute_color, input.max_page_size, input.interface, t2.product_id as product_id1, t2.product as product1, t2.dimensions as dimensions1, t2.dpi as dpi1, t2.pages_per_minute_color as pages_per_minute_color1, t2.max_page_size as max_page_size1, t2.interface as interface1
+  from (select *
+       from
+        input
+       where input.max_page_size = 'a4') join 
+      (select *
+         from
+          input
+         where input.product_id = 5.0) as t2) as t3`;
+
+verify q1 q2;

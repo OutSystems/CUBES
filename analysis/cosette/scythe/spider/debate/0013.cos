@@ -1,0 +1,26 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+schema df_debate_people(debate_id:int, affirmative:int, negative:int, if_affirmative_win:str);
+
+table df_people(df_people);
+table df_debate_people(df_debate_people);
+
+query q1
+`select t2.name,
+       count(*)
+from df_debate_people as t1
+join df_people as t2 on t1.affirmative = t2.people_id
+group by t2.name`;
+
+query q2
+`select t1.name,t1.count_negative
+ from
+  (select
+          t2.affirmative, count(t2.negative) as count_negative
+        from
+          input0 as t2
+        group by
+          t2.affirmative) as t3 join 
+      input as t4 as t1
+ where t1.affirmative = t1.people_id`;
+
+verify q1 q2;

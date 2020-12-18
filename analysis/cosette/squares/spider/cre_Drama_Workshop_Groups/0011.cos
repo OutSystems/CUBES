@@ -1,0 +1,48 @@
+schema df_products(product_id:int, product_name:str, product_price:int, product_description:str, other_product_service_details:str);
+
+table df_products(df_products);
+
+query q1
+`select product_name
+from df_products df_products
+
+limit 1`;
+
+query q2
+`joining, by = c("product_description", "other_product_service_details")
+joining, by = c("product_name", "other_product_service_details", "maxproduct_price")
+select distinct product_name
+from
+  (select product_id,
+          product_name,
+          product_price,
+          product_description,
+          other_product_service_details,
+          maxproduct_price
+   from
+     (select product_id,
+             product_name,
+             product_price,
+             product_description,
+             other_product_service_details,
+             maxproduct_price
+      from input0 as lhs
+      inner join
+        (select product_description,
+                other_product_service_details,
+                max(product_price) as maxproduct_price
+         from input0
+         group by product_description,
+                  other_product_service_details) as rhs on (lhs.product_description = rhs.product_description
+                                                                and lhs.other_product_service_details = rhs.other_product_service_details)) as lhs
+   inner join
+     (select other_product_service_details,
+             product_name,
+             max(product_price) as maxproduct_price
+      from input0
+      group by other_product_service_details,
+               product_name) as rhs on (lhs.product_name = rhs.product_name
+                                            and lhs.other_product_service_details = rhs.other_product_service_details
+                                            and lhs.maxproduct_price = rhs.maxproduct_price))`;
+
+verify q1 q2;

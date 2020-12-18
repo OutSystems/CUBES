@@ -1,0 +1,22 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+
+table df_entrepreneur(df_entrepreneur);
+
+query q1
+`select investor
+from df_entrepreneur df_entrepreneur
+group by investor
+having count(*) >= 2`;
+
+query q2
+`select t2.investor
+ from
+  (select
+      t1.investor, count(t1.people_id) as count_people_id
+    from
+      input as t1
+    group by
+      t1.investor) as t2
+ where t2.count_people_id = 2.0`;
+
+verify q1 q2;

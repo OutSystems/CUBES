@@ -1,0 +1,29 @@
+schema df_faculty_participates_in(facid:int, actid:int);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty_participates_in(df_faculty_participates_in);
+table df_faculty(df_faculty);
+
+query q1
+`select facid
+from df_faculty df_faculty
+except
+select facid
+from df_faculty_participates_in df_faculty_participates_in`;
+
+query q2
+`joining, by = "facid"
+select facid
+from
+  (select *
+   from
+     (select facid
+      from input1) as lhs
+   where not exists
+       (select 1
+        from
+          (select facid
+           from input0) as rhs
+        where (lhs.facid = rhs.facid) ))`;
+
+verify q1 q2;

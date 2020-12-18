@@ -1,0 +1,34 @@
+schema df_school(school_id:int, school:str, location:str, enrollment:str, founded:str, denomination:str, boys_or_girls:str, day_or_boarding:str, year_entered_competition:str, school_colors:str);
+
+table df_school(df_school);
+
+query q1
+`select location
+from df_school df_school`;
+
+query q2
+`select distinct location
+from
+  (select lhs.school_id as school_id,
+          lhs.school as school,
+          lhs.location as location,
+          lhs.enrollment as enrollment,
+          lhs.founded as founded,
+          lhs.denomination as denomination,
+          lhs.boys_or_girls as boys_or_girls,
+          lhs.day_or_boarding as day_or_boarding,
+          lhs.year_entered_competition as year_entered_competition,
+          lhs.school_colors as school_colors,
+          rhs.school_id as school_id.other,
+          rhs.school as school.other,
+          rhs.location as location.other,
+          rhs.enrollment as enrollment.other,
+          rhs.founded as founded.other,
+          rhs.boys_or_girls as boys_or_girls.other,
+          rhs.year_entered_competition as year_entered_competition.other,
+          rhs.school_colors as school_colors.other
+   from df_school as lhs
+   inner join df_school as rhs on (lhs.day_or_boarding = rhs.day_or_boarding
+                                   and lhs.denomination = rhs.denomination))`;
+
+verify q1 q2;

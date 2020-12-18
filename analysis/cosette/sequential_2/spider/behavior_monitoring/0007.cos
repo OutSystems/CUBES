@@ -1,0 +1,28 @@
+schema df_detention(detention_id:int, detention_type_code:str, teacher_id:int, datetime_detention_start:str, datetime_detention_end:str, detention_summary:str, other_details:str);
+
+table df_detention(df_detention);
+
+query q1
+`select detention_summary
+from df_detention df_detention`;
+
+query q2
+`select detention_summary
+from
+  (select lhs.detention_id as detention_id,
+          lhs.detention_type_code as detention_type_code,
+          lhs.teacher_id as teacher_id,
+          lhs.datetime_detention_start as datetime_detention_start,
+          lhs.datetime_detention_end as datetime_detention_end,
+          lhs.detention_summary as detention_summary,
+          lhs.other_details as other_details,
+          rhs.detention_id as detention_id.other,
+          rhs.detention_type_code as detention_type_code.other,
+          rhs.teacher_id as teacher_id.other,
+          rhs.datetime_detention_start as datetime_detention_start.other,
+          rhs.other_details as other_details.other
+   from df_detention as lhs
+   inner join df_detention as rhs on (lhs.datetime_detention_end = rhs.datetime_detention_end
+                                      and lhs.detention_summary = rhs.detention_summary))`;
+
+verify q1 q2;

@@ -1,0 +1,105 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_number:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_date:str, order_status_code:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, order_quantity:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.customer_name,
+       t1.customer_phone
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+join df_order_items as t3 on t3.order_id = t2.order_id
+group by t1.customer_id
+
+limit 1`;
+
+query q2
+`select distinct customer_name,
+                customer_phone
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method_code as payment_method_code,
+          lhs.customer_number as customer_number,
+          lhs.customer_name as customer_name,
+          lhs.customer_address as customer_address,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.order_id as order_id,
+          lhs.order_date as order_date,
+          lhs.order_status_code as order_status_code,
+          lhs.order_item_id as order_item_id,
+          lhs.product_id as product_id,
+          lhs.order_quantity as order_quantity,
+          rhs.customer_id as customer_id.other,
+          rhs.payment_method_code as payment_method_code.other,
+          rhs.customer_number as customer_number.other,
+          rhs.customer_name as customer_name.other,
+          rhs.customer_address as customer_address.other,
+          rhs.customer_email as customer_email.other,
+          rhs.order_date as order_date.other,
+          rhs.order_status_code as order_status_code.other,
+          rhs.order_item_id as order_item_id.other,
+          rhs.product_id as product_id.other,
+          rhs.order_quantity as order_quantity.other
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method_code as payment_method_code,
+             lhs.customer_number as customer_number,
+             lhs.customer_name as customer_name,
+             lhs.customer_address as customer_address,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             lhs.order_id as order_id,
+             lhs.order_date as order_date,
+             lhs.order_status_code as order_status_code,
+             rhs.order_item_id as order_item_id,
+             rhs.product_id as product_id,
+             rhs.order_quantity as order_quantity
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method_code as payment_method_code,
+                lhs.customer_number as customer_number,
+                lhs.customer_name as customer_name,
+                lhs.customer_address as customer_address,
+                lhs.customer_phone as customer_phone,
+                lhs.customer_email as customer_email,
+                rhs.order_id as order_id,
+                rhs.order_date as order_date,
+                rhs.order_status_code as order_status_code
+         from df_customers as lhs
+         inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join df_order_items as rhs on (lhs.order_id = rhs.order_id)) as lhs
+   inner join
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method_code as payment_method_code,
+             lhs.customer_number as customer_number,
+             lhs.customer_name as customer_name,
+             lhs.customer_address as customer_address,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             lhs.order_id as order_id,
+             lhs.order_date as order_date,
+             lhs.order_status_code as order_status_code,
+             rhs.order_item_id as order_item_id,
+             rhs.product_id as product_id,
+             rhs.order_quantity as order_quantity
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method_code as payment_method_code,
+                lhs.customer_number as customer_number,
+                lhs.customer_name as customer_name,
+                lhs.customer_address as customer_address,
+                lhs.customer_phone as customer_phone,
+                lhs.customer_email as customer_email,
+                rhs.order_id as order_id,
+                rhs.order_date as order_date,
+                rhs.order_status_code as order_status_code
+         from df_customers as lhs
+         inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join df_order_items as rhs on (lhs.order_id = rhs.order_id)) as rhs on (lhs.order_item_id = rhs.order_id
+                                                                                    and lhs.customer_phone = rhs.customer_phone))`;
+
+verify q1 q2;

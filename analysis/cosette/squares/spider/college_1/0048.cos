@@ -1,0 +1,35 @@
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_enroll(df_enroll);
+table df_student(df_student);
+
+query q1
+`select distinct stu_fname
+from df_student as t1
+join df_enroll as t2 on t1.stu_num = t2.stu_num
+where enroll_grade = 'c'`;
+
+query q2
+`joining, by = "stu_num"
+select distinct stu_fname
+from
+  (select class_code,
+          stu_num,
+          enroll_grade,
+          stu_lname,
+          stu_fname,
+          stu_init,
+          stu_dob,
+          stu_hrs,
+          stu_class,
+          stu_gpa,
+          stu_transfer,
+          dept_code,
+          stu_phone,
+          prof_num
+   from input0 as lhs
+   left join input1 as rhs on (lhs.stu_num = rhs.stu_num))
+where (enroll_grade = 'c')`;
+
+verify q1 q2;

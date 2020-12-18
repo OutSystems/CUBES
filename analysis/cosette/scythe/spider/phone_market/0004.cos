@@ -1,0 +1,24 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+
+table df_phone(df_phone);
+
+query q1
+`select distinct carrier
+from df_phone df_phone
+where memory_in_g > 32`;
+
+query q2
+`select t2.carrier
+ from
+  (select t4.carrier, t1.name, t1.phone_id, t1.memory_in_g, t1.carrier as carrier1, t1.price
+  from (select
+          t3.carrier, from
+          input as t3
+        group by
+          t3.carrier) as t4 join 
+      (select *
+         from
+          input
+         where input.memory_in_g = 32.0) as t1) as t2`;
+
+verify q1 q2;

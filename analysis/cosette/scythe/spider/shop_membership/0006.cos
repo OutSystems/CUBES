@@ -1,0 +1,26 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select min(membership_amount),
+       max(membership_amount)
+from df_branch df_branch
+where open_year = 2011
+  or city = 'london'`;
+
+query q2
+`select t2.membership_amount1,t2.membership_amount
+ from
+  (select input.branch_id, input.name, input.open_year, input.address_road, input.city, input.membership_amount, t3.branch_id as branch_id1, t3.name as name1, t3.open_year as open_year1, t3.address_road as address_road1, t3.city as city1, t3.membership_amount as membership_amount1
+  from (select *
+       from
+        input
+       where input.city = 'london'
+         and input.branch_id > 5.0) join 
+      (select *
+         from
+          input
+         where input.branch_id = 2.0) as t3) as t2`;
+
+verify q1 q2;

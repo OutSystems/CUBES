@@ -1,0 +1,25 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_benefits_overpayments(council_tax_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_benefits_overpayments(df_benefits_overpayments);
+
+query q1
+`select t1.source_system_code,
+       t2.council_tax_id
+from df_cmi_cross_references as t1
+join df_benefits_overpayments as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id`;
+
+query q2
+`joining, by = "cmi_cross_ref_id"
+select source_system_code,
+       council_tax_id
+from
+  (select council_tax_id,
+          cmi_cross_ref_id,
+          master_customer_id,
+          source_system_code
+   from input1 as lhs
+   left join input0 as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id))`;
+
+verify q1 q2;

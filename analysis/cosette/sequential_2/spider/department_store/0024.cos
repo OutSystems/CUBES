@@ -1,0 +1,26 @@
+schema df_staff_department_assignments(staff_id:int, department_id:int, date_assigned_from:str, job_title_code:str, date_assigned_to:str);
+
+table df_staff_department_assignments(df_staff_department_assignments);
+
+query q1
+`select staff_id
+from df_staff_department_assignments df_staff_department_assignments
+where date_assigned_to <
+    (select max(date_assigned_to)
+     from df_staff_department_assignments df_staff_department_assignments
+     where job_title_code = 'clerical staff')`;
+
+query q2
+`select staff_id
+from
+  (select staff_id,
+          department_id,
+          date_assigned_from,
+          job_title_code,
+          date_assigned_to,
+          max(date_assigned_to) over () as maxdate_assigned_to
+   from df_staff_department_assignments df_staff_department_assignments)
+where (job_title_code != 'clerical staff'
+       or maxdate_assigned_to != date_assigned_to)`;
+
+verify q1 q2;

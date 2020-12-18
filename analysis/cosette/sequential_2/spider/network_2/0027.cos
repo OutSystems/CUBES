@@ -1,0 +1,20 @@
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_personfriend(df_personfriend);
+
+query q1
+`select name
+from df_personfriend df_personfriend
+group by name
+having count(*) = 1`;
+
+query q2
+`select name
+from
+  (select name,
+          count(*) as n
+   from df_personfriend df_personfriend
+   group by name)
+where (n <= 1.0)`;
+
+verify q1 q2;

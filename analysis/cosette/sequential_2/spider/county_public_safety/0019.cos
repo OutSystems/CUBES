@@ -1,0 +1,43 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+schema df_city(city_id:int, county_id:int, name:str, white:str, black:str, amerindian:str, asian:str, multiracial:str, hispanic:str);
+
+table df_county_public_safety(df_county_public_safety);
+table df_city(df_city);
+
+query q1
+`select name
+from df_city df_city
+where county_id in
+    (select county_id
+     from df_county_public_safety df_county_public_safety
+     where crime_rate < 100)`;
+
+query q2
+`select name.other as name
+from
+  (select *
+   from
+     (select lhs.county_id as county_id,
+             lhs.name as name,
+             lhs.population as population,
+             lhs.police_officers as police_officers,
+             lhs.residents_per_officer as residents_per_officer,
+             lhs.case_burden as case_burden,
+             lhs.crime_rate as crime_rate,
+             lhs.police_force as police_force,
+             lhs.location as location,
+             rhs.city_id as city_id,
+             rhs.county_id as county_id.other,
+             rhs.name as name.other,
+             rhs.white as white,
+             rhs.black as black,
+             rhs.amerindian as amerindian,
+             rhs.asian as asian,
+             rhs.multiracial as multiracial,
+             rhs.hispanic as hispanic
+      from df_county_public_safety as lhs
+      cross join df_city as rhs)
+   where (county_id = county_id.other))
+where (crime_rate <= 100.0)`;
+
+verify q1 q2;

@@ -1,0 +1,21 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+
+table df_publication(df_publication);
+
+query q1
+`select distinct publisher
+from df_publication df_publication
+where price > 5000000`;
+
+query q2
+`select t1.publisher
+ from
+  (select
+      t2.publisher, max(t2.price) as max_price
+    from
+      input as t2
+    group by
+      t2.publisher) as t1
+ where t1.max_price > 5000000.0`;
+
+verify q1 q2;

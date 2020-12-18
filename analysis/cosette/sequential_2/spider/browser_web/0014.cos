@@ -1,0 +1,58 @@
+schema df_web_client_accelerator(id:int, name:str, operating_system:str, client:str, connection:str);
+schema df_browser(id:int, name:str, market_share:str);
+schema df_accelerator_compatible_browser(accelerator_id:int, browser_id:int, compatible_since_year:int);
+
+table df_web_client_accelerator(df_web_client_accelerator);
+table df_browser(df_browser);
+table df_accelerator_compatible_browser(df_accelerator_compatible_browser);
+
+query q1
+`select t3.name
+from df_web_client_accelerator as t1
+join df_accelerator_compatible_browser as t2 on t2.accelerator_id = t1.id
+join df_browser as t3 on t2.browser_id = t3.id
+where t1.name = 'cachebox' intersect
+  select t3.name
+  from df_web_client_accelerator as t1
+  join df_accelerator_compatible_browser as t2 on t2.accelerator_id = t1.id
+  join df_browser as t3 on t2.browser_id = t3.id where t1.name = 'fasterfox'`;
+
+query q2
+`select name
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.market_share as market_share,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.operating_system as operating_system,
+          rhs.client as client,
+          rhs.connection as connection,
+          rhs.compatible_since_year as compatible_since_year,
+          rhs.accelerator_id as accelerator_id
+   from df_browser as lhs
+   inner join
+     (select *
+      from
+        (select id,
+                name,
+                operating_system,
+                client,
+                connection,
+                browser_id,
+                compatible_since_year,
+                id as accelerator_id
+         from
+           (select lhs.id as id,
+                   lhs.name as name,
+                   lhs.operating_system as operating_system,
+                   lhs.client as client,
+                   lhs.connection as connection,
+                   rhs.browser_id as browser_id,
+                   rhs.compatible_since_year as compatible_since_year
+            from df_web_client_accelerator as lhs
+            inner join df_accelerator_compatible_browser as rhs on (lhs.id = rhs.accelerator_id)))
+      where (name = 'cachebox'
+             and name != 'fasterfox')) as rhs on (lhs.id = rhs.browser_id))`;
+
+verify q1 q2;

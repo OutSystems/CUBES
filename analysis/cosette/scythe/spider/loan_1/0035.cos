@@ -1,0 +1,31 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+where amount > 3000`;
+
+query q2
+`select t3.cust_name
+ from
+  (select t4.cust_id, t4.max_amount, t2.cust_id as cust_id1, t2.cust_name, t2.acc_type, t2.acc_bal, t2.no_of_loans, t2.credit_score, t2.branch_id, t2.state
+  from (select *
+       from
+        (select
+            t1.cust_id, max(t1.amount) as max_amount
+          from
+            input0 as t1
+          group by
+            t1.cust_id) as t4
+       where t4.max_amount = 3000.0) join 
+      (select *
+         from
+          input
+         where input.cust_id = 3.0) as t2) as t3`;
+
+verify q1 q2;

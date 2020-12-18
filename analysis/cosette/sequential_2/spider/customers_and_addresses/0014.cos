@@ -1,0 +1,51 @@
+schema df_addresses(address_id:int, address_content:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_address_from:str, address_type:str, date_address_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_addresses as t2 on t1.customer_id = t2.customer_id
+join df_addresses as t3 on t2.address_id = t3.address_id
+where t3.state_province_county = "colorado"`;
+
+query q2
+`select customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method as payment_method,
+          lhs.customer_name as customer_name,
+          lhs.date_became_customer as date_became_customer,
+          lhs.other_customer_details as other_customer_details,
+          lhs.address_id as address_id,
+          lhs.date_address_from as date_address_from,
+          lhs.address_type as address_type,
+          lhs.date_address_to as date_address_to,
+          rhs.address_content as address_content,
+          rhs.city as city,
+          rhs.zip_postcode as zip_postcode,
+          rhs.state_province_county as state_province_county,
+          rhs.country as country,
+          rhs.other_address_details as other_address_details
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.date_became_customer as date_became_customer,
+             lhs.other_customer_details as other_customer_details,
+             rhs.address_id as address_id,
+             rhs.date_address_from as date_address_from,
+             rhs.address_type as address_type,
+             rhs.date_address_to as date_address_to
+      from df_customers as lhs
+      inner join df_customer_addresses as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join
+     (select *
+      from df_addresses df_addresses
+      where (state_province_county = 'colorado')) as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

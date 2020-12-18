@@ -1,0 +1,51 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_procedures(code:int, name:str, cost:str);
+schema df_trained_in(physician:int, treatment:int, certificationdate:str, certificationexpires:str);
+
+table df_physician(df_physician);
+table df_procedures(df_procedures);
+table df_trained_in(df_trained_in);
+
+query q1
+`select t3.name
+from df_physician as t1
+join df_trained_in as t2 on t1.employeeid = t2.df_physician
+join df_procedures as t3 on t3.code = t2.treatment
+where t1.name = "john wen"`;
+
+query q2
+`select distinct name.other as name
+from
+  (select lhs.employeeid as employeeid,
+          lhs.name as name,
+          lhs.position as position,
+          lhs.ssn as ssn,
+          lhs.name.other as name.other,
+          lhs.cost as cost,
+          lhs.code as code,
+          rhs.physician as physician,
+          rhs.certificationdate as certificationdate,
+          rhs.certificationexpires as certificationexpires
+   from
+     (select employeeid,
+             name,
+             position,
+             ssn,
+             name.other,
+             cost,
+             employeeid as code
+      from
+        (select lhs.employeeid as employeeid,
+                lhs.name as name,
+                lhs.position as position,
+                lhs.ssn as ssn,
+                rhs.name as name.other,
+                rhs.cost as cost
+         from df_physician as lhs
+         inner join
+           (select *
+            from df_procedures df_procedures
+            where (name != 'john wen')) as rhs on (lhs.employeeid = rhs.code))) as lhs
+   inner join df_trained_in as rhs on (lhs.employeeid = rhs.treatment))`;
+
+verify q1 q2;

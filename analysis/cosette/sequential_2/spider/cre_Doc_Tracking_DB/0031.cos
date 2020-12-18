@@ -1,0 +1,66 @@
+schema df_ref_locations(location_code:str, location_name:str, location_description:str);
+schema df_all_documents(document_id:int, date_stored:str, document_type_code:str, document_name:str, document_description:str, other_details:str);
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_ref_locations(df_ref_locations);
+table df_all_documents(df_all_documents);
+table df_document_locations(df_document_locations);
+
+query q1
+`select t3.location_name
+from df_all_documents as t1
+join df_document_locations as t2 on t1.document_id = t2.document_id
+join df_ref_locations as t3 on t2.location_code = t3.location_code
+where t1.document_name = "robin cv"`;
+
+query q2
+`select location_name
+from
+  (select lhs.location_code as location_code,
+          lhs.location_name as location_name,
+          lhs.location_description as location_description,
+          lhs.document_id as document_id,
+          lhs.date_stored as date_stored,
+          lhs.document_type_code as document_type_code,
+          lhs.document_name as document_name,
+          lhs.document_description as document_description,
+          lhs.other_details as other_details,
+          lhs.date_in_location_from as date_in_location_from,
+          lhs.date_in_locaton_to as date_in_locaton_to
+   from
+     (select lhs.location_code as location_code,
+             lhs.location_name as location_name,
+             lhs.location_description as location_description,
+             lhs.document_id as document_id,
+             lhs.date_stored as date_stored,
+             lhs.document_type_code as document_type_code,
+             lhs.document_name as document_name,
+             lhs.document_description as document_description,
+             lhs.other_details as other_details,
+             rhs.date_in_location_from as date_in_location_from,
+             rhs.date_in_locaton_to as date_in_locaton_to
+      from
+        (select lhs.location_code as location_code,
+                lhs.location_name as location_name,
+                lhs.location_description as location_description,
+                rhs.document_id as document_id,
+                rhs.date_stored as date_stored,
+                rhs.document_type_code as document_type_code,
+                rhs.document_name as document_name,
+                rhs.document_description as document_description,
+                rhs.other_details as other_details
+         from df_ref_locations as lhs
+         cross join df_all_documents as rhs) as lhs
+      inner join df_document_locations as rhs on (lhs.location_code = rhs.location_code
+                                                      and lhs.document_id = rhs.document_id)) as lhs
+   inner join
+     (select *
+      from df_all_documents df_all_documents
+      where (document_name = 'robin cv')) as rhs on (lhs.document_id = rhs.document_id
+                                                       and lhs.date_stored = rhs.date_stored
+                                                       and lhs.document_type_code = rhs.document_type_code
+                                                       and lhs.document_name = rhs.document_name
+                                                       and lhs.document_description = rhs.document_description
+                                                       and lhs.other_details = rhs.other_details))`;
+
+verify q1 q2;

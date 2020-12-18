@@ -1,0 +1,32 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+
+table df_player(df_player);
+
+query q1
+`select gender,
+       occupation
+from df_player df_player`;
+
+query q2
+`select gender,
+       occupation
+from
+  (select lhs.player_id as player_id,
+          lhs.sponsor_name as sponsor_name,
+          lhs.player_name as player_name,
+          lhs.gender as gender,
+          lhs.residence as residence,
+          lhs.occupation as occupation,
+          lhs.votes as votes,
+          lhs.rank as rank,
+          rhs.player_id as player_id.other,
+          rhs.sponsor_name as sponsor_name.other,
+          rhs.player_name as player_name.other,
+          rhs.gender as gender.other,
+          rhs.residence as residence.other,
+          rhs.occupation as occupation.other,
+          rhs.rank as rank.other
+   from df_player as lhs
+   inner join df_player as rhs on (lhs.votes = rhs.votes))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_i009(username:str, ip:str, time_stamp:int);
+
+table df_i009(df_i009);
+
+query q1
+`select u.username
+      ,u.ip
+      ,q.time_stamp
+from users as u
+inner join (
+    select username
+          ,max(time_stamp) as time_stamp
+    from users
+    group by username) as q
+on u.username = q.username
+and u.time_stamp = q.time_stamp`;
+
+query q2
+`select t1.username,t1.ip,t1.max_time_stamp
+ from
+  (select t3.username, t3.max_time_stamp, t2.username as username1, t2.ip, t2.time_stamp
+  from (select
+          t4.username, max(t4.time_stamp) as max_time_stamp
+        from
+          input as t4
+        group by
+          t4.username) as t3 join 
+      input as t2) as t1
+ where t1.max_time_stamp = t1.time_stamp`;
+
+verify q1 q2;

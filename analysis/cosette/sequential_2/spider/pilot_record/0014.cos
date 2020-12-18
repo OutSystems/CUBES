@@ -1,0 +1,37 @@
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+schema df_pilot_record(record_id:int, pilot_id:int, aircraft_id:int, date:str);
+
+table df_pilot(df_pilot);
+table df_pilot_record(df_pilot_record);
+
+query q1
+`select t2.pilot_name,
+       count(*)
+from df_pilot_record as t1
+join df_pilot as t2 on t1.pilot_id = t2.pilot_id
+group by t2.pilot_name
+having count(*) > 1`;
+
+query q2
+`select pilot_name,
+       n as count...
+from
+  (select lhs.date as date,
+          lhs.pilot_id as pilot_id,
+          lhs.n as n,
+          rhs.pilot_name as pilot_name,
+          rhs.rank as rank,
+          rhs.age as age,
+          rhs.nationality as nationality,
+          rhs.position as position,
+          rhs.join_year as join_year,
+          rhs.team as team
+   from
+     (select date, pilot_id,
+                   count(*) as n
+      from df_pilot_record df_pilot_record
+      group by date, pilot_id) as lhs
+   inner join df_pilot as rhs on (lhs.pilot_id = rhs.pilot_id))
+where (n != 1.0)`;
+
+verify q1 q2;

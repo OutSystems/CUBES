@@ -1,0 +1,38 @@
+schema df_building(building_id:int, name:str, street_address:str, years_as_tallest:str, height_feet:int, floors:int);
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+
+table df_building(df_building);
+table df_institution(df_institution);
+
+query q1
+`select name
+from df_building df_building
+where building_id not in
+    (select building_id
+     from df_institution df_institution)`;
+
+query q2
+`joining, by = "building_id"
+joining, by = "building_id"
+select distinct name
+from
+  (select building_id,
+          name,
+          street_address,
+          years_as_tallest,
+          height_feet,
+          floors
+   from
+     (select *
+      from
+        (select building_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select building_id
+              from input1) as rhs
+           where (lhs.building_id = rhs.building_id) )) as lhs
+   inner join input0 as rhs on (lhs.building_id = rhs.building_id))`;
+
+verify q1 q2;

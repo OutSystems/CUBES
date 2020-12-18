@@ -1,0 +1,32 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_type_code
+from df_products df_products
+group by product_type_code
+having avg(product_price) >
+  (select avg(product_price)
+   from df_products df_products)`;
+
+query q2
+`select product_type_code.other as product_type_code
+from
+  (select lhs.product_type_code as product_type_code,
+          lhs.meanproduct_price as meanproduct_price,
+          rhs.product_type_code as product_type_code.other,
+          rhs.meanproduct_price as meanproduct_price.other
+   from
+     (select product_type_code,
+             avg(product_price) as meanproduct_price
+      from df_products df_products
+      group by product_type_code) as lhs
+   cross join
+     (select product_type_code,
+             avg(product_price) as meanproduct_price
+      from df_products df_products
+      group by product_type_code) as rhs)
+where (meanproduct_price < meanproduct_price.other)`;
+
+verify q1 q2;

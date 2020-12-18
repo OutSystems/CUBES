@@ -1,0 +1,40 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_behavior_incident(incident_id:int, incident_type_code:str, student_id:int, date_incident_start:str, date_incident_end:str, incident_summary:str, recommendations:str, other_details:str);
+
+table df_students(df_students);
+table df_behavior_incident(df_behavior_incident);
+
+query q1
+`select t1.date_incident_start,
+       date_incident_end
+from df_behavior_incident as t1
+join df_students as t2 on t1.student_id = t2.student_id
+where t2.last_name = "fahey"`;
+
+query q2
+`joining, by = "student_id"
+select distinct date_incident_start,
+                date_incident_end
+from
+  (select incident_id,
+          incident_type_code,
+          student_id,
+          date_incident_start,
+          date_incident_end,
+          incident_summary,
+          recommendations,
+          other_details,
+          address_id,
+          first_name,
+          middle_name,
+          last_name,
+          cell_mobile_number,
+          email_address,
+          date_first_rental,
+          date_left_university,
+          other_student_details
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.student_id = rhs.student_id))
+where (last_name = 'fahey')`;
+
+verify q1 q2;

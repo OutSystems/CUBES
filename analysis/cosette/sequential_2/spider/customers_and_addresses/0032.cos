@@ -1,0 +1,19 @@
+schema df_customer_orders(order_id:int, customer_id:int, order_status:str, order_date:str, order_details:str);
+
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select count(distinct customer_id)
+from df_customer_orders df_customer_orders
+where order_status = "cancelled"`;
+
+query q2
+`select n_distinct as count.distinct.customer_id.
+from
+  (select order_status,
+          count(distinct customer_id) as n_distinct
+   from df_customer_orders df_customer_orders
+   group by order_status)
+where (order_status = 'cancelled')`;
+
+verify q1 q2;

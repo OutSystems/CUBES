@@ -1,0 +1,31 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+
+table df_artist(df_artist);
+
+query q1
+`select avg(age),
+       min(age)
+from df_artist df_artist
+where country = 'united states'`;
+
+query q2
+`select t6.avg_age,t6.first_age
+ from
+  (select
+          first(t4.age) as first_age
+        from
+          (select *
+             from
+              input
+             where input.country = 'united states') as t4) as t2 join 
+      (select
+            t1.country, avg(t1.age) as avg_age
+          from
+            (select *
+               from
+                input
+               where input.country = 'united states') as t1
+          group by
+            t1.country) as t3 as t5 as t6`;
+
+verify q1 q2;

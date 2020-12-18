@@ -1,0 +1,32 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_code:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, order_date:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select distinct t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where t2.order_status_code = "pending"`;
+
+query q2
+`select customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method_code as payment_method_code,
+          lhs.customer_code as customer_code,
+          lhs.customer_name as customer_name,
+          lhs.customer_address as customer_address,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          rhs.order_id as order_id,
+          rhs.order_status_code as order_status_code,
+          rhs.order_date as order_date
+   from df_customers as lhs
+   inner join
+     (select *
+      from df_customer_orders df_customer_orders
+      where (order_status_code = 'pending')) as rhs on (lhs.customer_id = rhs.customer_id))`;
+
+verify q1 q2;

@@ -1,0 +1,54 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, line_3:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_student_addresses(student_id:int, address_id:int, date_address_from:str, date_address_to:str, monthly_rental:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_student_addresses(df_student_addresses);
+
+query q1
+`select t2.address_id,
+       t1.zip_postcode
+from df_addresses as t1
+join df_student_addresses as t2 on t1.address_id = t2.address_id
+
+limit 1`;
+
+query q2
+`select address_id,
+       zip_postcode
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.line_3 as line_3,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.other_address_details as other_address_details,
+          lhs.student_id as student_id,
+          lhs.date_address_from as date_address_from,
+          lhs.date_address_to as date_address_to,
+          lhs.monthly_rental as monthly_rental,
+          lhs.other_details as other_details
+   from
+     (select lhs.address_id as address_id,
+             lhs.line_1 as line_1,
+             lhs.line_2 as line_2,
+             lhs.line_3 as line_3,
+             lhs.city as city,
+             lhs.zip_postcode as zip_postcode,
+             lhs.state_province_county as state_province_county,
+             lhs.country as country,
+             lhs.other_address_details as other_address_details,
+             rhs.student_id as student_id,
+             rhs.date_address_from as date_address_from,
+             rhs.date_address_to as date_address_to,
+             rhs.monthly_rental as monthly_rental,
+             rhs.other_details as other_details
+      from df_addresses as lhs
+      inner join df_student_addresses as rhs on (lhs.address_id = rhs.address_id)) as lhs
+   inner join
+     (select max(monthly_rental) as monthly_rental
+      from df_student_addresses df_student_addresses) as rhs on (lhs.monthly_rental = rhs.monthly_rental))`;
+
+verify q1 q2;

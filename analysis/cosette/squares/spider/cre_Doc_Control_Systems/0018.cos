@@ -1,0 +1,30 @@
+schema df_ref_shipping_agents(shipping_agent_code:str, shipping_agent_name:str, shipping_agent_description:str);
+schema df_documents(document_id:int, document_status_code:str, document_type_code:str, shipping_agent_code:str, receipt_date:str, receipt_number:int, other_details:str);
+
+table df_ref_shipping_agents(df_ref_shipping_agents);
+table df_documents(df_documents);
+
+query q1
+`select df_ref_shipping_agents.shipping_agent_name
+from df_ref_shipping_agents df_ref_shipping_agents
+join df_documents on df_documents.shipping_agent_code = df_ref_shipping_agents.shipping_agent_code
+where df_documents.document_id = 2`;
+
+query q2
+`joining, by = "shipping_agent_code"
+select shipping_agent_name
+from
+  (select document_id,
+          document_status_code,
+          document_type_code,
+          shipping_agent_code,
+          receipt_date,
+          receipt_number,
+          other_details,
+          shipping_agent_name,
+          shipping_agent_description
+   from input1 as lhs
+   left join input0 as rhs on (lhs.shipping_agent_code = rhs.shipping_agent_code))
+where (document_id = 2.0)`;
+
+verify q1 q2;

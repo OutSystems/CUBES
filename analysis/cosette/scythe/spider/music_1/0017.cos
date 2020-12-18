@@ -1,0 +1,21 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+
+table df_artist(df_artist);
+
+query q1
+`select count(*),
+       gender
+from df_artist df_artist
+group by gender`;
+
+query q2
+`select t2.count_distinct_artist_name,t2.gender
+ from
+  (select
+      t1.gender, count_distinct(t1.artist_name) as count_distinct_artist_name
+    from
+      input as t1
+    group by
+      t1.gender) as t2`;
+
+verify q1 q2;

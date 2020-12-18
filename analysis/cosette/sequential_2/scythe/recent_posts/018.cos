@@ -1,0 +1,33 @@
+schema df_018(OrderID:int, CustomerID:int, Date:str, Course:str);
+
+table df_018(df_018);
+
+query q1
+`select t1.course, count(t2.orderid)
+from tab as t1
+left join
+ (
+   select customerid, min(orderid) as orderid
+   from tab as t2
+   where date='17.10.2016'
+   group by customerid
+ ) as t2
+on t1.customerid = t2.customerid
+and t1.orderid = t2.orderid
+where date='17.10.2016'
+group by t1.course`;
+
+query q2
+`select course as c1,
+       n as c2
+from
+  (select course,
+          date,
+          count(*) as n
+   from df_018 df_018
+   group by course,
+            date)
+where (n >= 2.0
+       or date < mdy('10/17/2016'))`;
+
+verify q1 q2;

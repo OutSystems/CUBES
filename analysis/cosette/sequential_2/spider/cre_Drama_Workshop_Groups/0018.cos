@@ -1,0 +1,32 @@
+schema df_marketing_regions(marketing_region_code:str, marketing_region_name:str, marketing_region_descriptrion:str, other_details:str);
+schema df_stores(store_id:int, address_id:int, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+
+table df_marketing_regions(df_marketing_regions);
+table df_stores(df_stores);
+
+query q1
+`select t1.marketing_region_name
+from df_marketing_regions as t1
+join df_stores as t2 on t1.marketing_region_code = t2.marketing_region_code
+where t2.store_name = "rob dinning"`;
+
+query q2
+`select marketing_region_name
+from
+  (select lhs.store_id as store_id,
+          lhs.address_id as address_id,
+          lhs.marketing_region_code as marketing_region_code,
+          lhs.store_name as store_name,
+          lhs.store_phone as store_phone,
+          lhs.store_email_address as store_email_address,
+          lhs.other_details as other_details,
+          rhs.marketing_region_name as marketing_region_name,
+          rhs.marketing_region_descriptrion as marketing_region_descriptrion,
+          rhs.other_details as other_details.other
+   from
+     (select *
+      from df_stores df_stores
+      where (store_name = 'rob dinning')) as lhs
+   inner join df_marketing_regions as rhs on (lhs.marketing_region_code = rhs.marketing_region_code))`;
+
+verify q1 q2;

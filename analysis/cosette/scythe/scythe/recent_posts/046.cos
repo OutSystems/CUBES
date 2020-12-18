@@ -1,0 +1,42 @@
+schema df_046(ID:str, Type:str, Value:int);
+
+table df_046(df_046);
+
+query q1
+`select *
+from table
+where type = 'z01'
+union all
+select *
+from table
+where type = 'z09'
+and not exists (
+    select 1
+    from table
+    where id = t.id and type = 'z01')`;
+
+query q2
+`select * from 
+(select t3.id,t3.type,t3.max_value
+   from
+    (select t4.id, t4.max_value, t1.id as id1, t1.type, t1.value
+    from (select
+            t2.id, max(t2.value) as max_value
+          from
+            input as t2
+          group by
+            t2.id) as t4 join 
+        (select *
+           from
+            input
+           where input.type = 'z09') as t1) as t3
+   where t3.max_value = t3.value
+     and t3.id <> t3.id1)
+union all 
+ select * from
+  (select *
+   from
+    input
+   where input.type = 'z01')`;
+
+verify q1 q2;

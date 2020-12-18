@@ -1,0 +1,43 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_procedures(code:int, name:str, cost:str);
+schema df_trained_in(physician:int, treatment:int, certificationdate:str, certificationexpires:str);
+
+table df_physician(df_physician);
+table df_procedures(df_procedures);
+table df_trained_in(df_trained_in);
+
+query q1
+`select avg(t3.cost)
+from df_physician as t1
+join df_trained_in as t2 on t1.employeeid = t2.df_physician
+join df_procedures as t3 on t3.code = t2.treatment
+where t1.name = "john wen"`;
+
+query q2
+`select distinct meancost as avg.t3.cost.
+from
+  (select lhs.physician as physician,
+          lhs.treatment as treatment,
+          lhs.certificationdate as certificationdate,
+          lhs.certificationexpires as certificationexpires,
+          lhs.meancost as meancost,
+          rhs.employeeid as employeeid,
+          rhs.name as name,
+          rhs.position as position,
+          rhs.ssn as ssn
+   from
+     (select lhs.physician as physician,
+             lhs.treatment as treatment,
+             lhs.certificationdate as certificationdate,
+             lhs.certificationexpires as certificationexpires,
+             rhs.meancost as meancost
+      from df_trained_in as lhs
+      cross join
+        (select avg(cost) as meancost
+         from df_procedures df_procedures) as rhs) as lhs
+   cross join
+     (select *
+      from df_physician df_physician
+      where (name != 'john wen')) as rhs)`;
+
+verify q1 q2;

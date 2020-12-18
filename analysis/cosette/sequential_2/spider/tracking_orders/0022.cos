@@ -1,0 +1,24 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_orders(df_orders);
+
+query q1
+`select distinct order_id
+from df_orders df_orders`;
+
+query q2
+`select order_id
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status as order_status,
+          lhs.date_order_placed as date_order_placed,
+          lhs.order_details as order_details,
+          rhs.order_id as order_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.order_details as order_details.other
+   from df_orders as lhs
+   inner join df_orders as rhs on (lhs.date_order_placed = rhs.date_order_placed
+                                   and lhs.order_status = rhs.order_status))`;
+
+verify q1 q2;

@@ -1,0 +1,20 @@
+schema df_i028_1(PID:str);
+schema df_i028_2(PID:str, SEQ:int, Desc:str);
+
+table df_i028_1(df_i028_1);
+table df_i028_2(df_i028_2);
+
+query q1
+`select pid, listagg(desc, ' ') within group (
+from   b
+group by pid`;
+
+query q2
+`(select
+    t2.pid, concat(t2.desc) as concat_desc
+  from
+    input0 as t2
+  group by
+    t2.pid) as t1`;
+
+verify q1 q2;

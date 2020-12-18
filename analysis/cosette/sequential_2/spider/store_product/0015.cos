@@ -1,0 +1,52 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_store_product(store_id:int, product_id:int);
+
+table df_product(df_product);
+table df_store(df_store);
+table df_store_product(df_store_product);
+
+query q1
+`select t1.df_product
+from df_product as t1
+join df_store_product as t2 on t1.product_id = t2.product_id
+join df_store as t3 on t2.store_id = t3.store_id
+where t3.store_name = "miramichi"`;
+
+query q2
+`select distinct product
+from
+  (select lhs.product_id as product_id,
+          lhs.product as product,
+          lhs.dimensions as dimensions,
+          lhs.dpi as dpi,
+          lhs.pages_per_minute_color as pages_per_minute_color,
+          lhs.max_page_size as max_page_size,
+          lhs.interface as interface,
+          lhs.store_id as store_id,
+          lhs.store_name as store_name,
+          lhs.type as type,
+          lhs.area_size as area_size,
+          lhs.number_of_product_category as number_of_product_category,
+          lhs.ranking as ranking
+   from
+     (select lhs.product_id as product_id,
+             lhs.product as product,
+             lhs.dimensions as dimensions,
+             lhs.dpi as dpi,
+             lhs.pages_per_minute_color as pages_per_minute_color,
+             lhs.max_page_size as max_page_size,
+             lhs.interface as interface,
+             rhs.store_id as store_id,
+             rhs.store_name as store_name,
+             rhs.type as type,
+             rhs.area_size as area_size,
+             rhs.number_of_product_category as number_of_product_category,
+             rhs.ranking as ranking
+      from df_product as lhs
+      cross join df_store as rhs) as lhs
+   inner join df_store_product as rhs on (lhs.product_id = rhs.product_id
+                                              and lhs.store_id = rhs.store_id))
+where (store_name != 'miramichi')`;
+
+verify q1 q2;

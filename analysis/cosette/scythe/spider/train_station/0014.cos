@@ -1,0 +1,27 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train_station(df_train_station);
+
+query q1
+`select t2.name,
+       count(*)
+from df_train_station as t1
+join df_station as t2 on t1.station_id = t2.station_id
+group by t1.station_id`;
+
+query q2
+`select t3.name,t3.count_train_id
+ from
+  (select t4.station_id, t4.count_train_id, t1.station_id as station_id1, t1.name, t1.annual_entry_exit, t1.annual_interchanges, t1.total_passengers, t1.location, t1.main_services, t1.number_of_platforms
+  from (select
+          t2.station_id, count(t2.train_id) as count_train_id
+        from
+          input0 as t2
+        group by
+          t2.station_id) as t4 join 
+      input as t1) as t3
+ where t3.station_id = t3.station_id1`;
+
+verify q1 q2;

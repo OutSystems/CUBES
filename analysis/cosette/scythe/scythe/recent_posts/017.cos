@@ -1,0 +1,44 @@
+schema df_017(emp_id:int, emp_sal:int, emp_grp:str);
+
+table df_017(df_017);
+
+query q1
+`select emp_id,emp_sal,emp_grp
+from (
+select e.*,
+row_number() over(partition by emp_id
+                  
+from db_wrk.emp_sin e
+) t
+where rn = 1`;
+
+query q2
+`select * from 
+(select t3.emp_id,t3.min_emp_sal,t3.emp_grp
+   from
+    (select
+        t5.emp_id, t5.emp_grp, min(t5.emp_sal) as min_emp_sal
+      from
+        (select *
+           from
+            input
+           where input.emp_grp = 'hmcpr') as t5
+      group by
+        t5.emp_id, t5.emp_grp) as t3
+  )
+union all 
+ select * from
+  (select t1.emp_id,t1.min_emp_sal,t1.emp_grp
+   from
+    (select t6.emp_id, t6.min_emp_sal, t4.emp_id as emp_id1, t4.emp_sal, t4.emp_grp
+    from (select
+            t2.emp_id, min(t2.emp_sal) as min_emp_sal
+          from
+            input as t2
+          group by
+            t2.emp_id) as t6 join 
+        input as t4) as t1
+   where t1.min_emp_sal = t1.emp_sal
+     and t1.emp_id > t1.emp_id1)`;
+
+verify q1 q2;

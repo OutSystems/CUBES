@@ -1,0 +1,47 @@
+schema df_follows(f1:int, f2:int);
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_follows(df_follows);
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select t1.name
+from df_user_profiles as t1
+join df_follows as t2 on t1.uid = t2.f1
+group by t2.f1
+having count(*) >
+  (select count(*)
+   from df_user_profiles as t1
+   join df_follows as t2 on t1.uid = t2.f1
+   where t1.name = 'tyler swift')`;
+
+query q2
+`select distinct name
+from
+  (select uid,
+          name,
+          email,
+          partitionid,
+          followers,
+          f1,
+          f2,
+          uid as n
+   from
+     (select lhs.uid as uid,
+             lhs.name as name,
+             lhs.email as email,
+             lhs.partitionid as partitionid,
+             lhs.followers as followers,
+             rhs.f1 as f1,
+             rhs.f2 as f2
+      from df_user_profiles as lhs
+      inner join
+        (select f1,
+                f2,
+                count(*) as n
+         from df_follows df_follows
+         group by f1,
+                  f2) as rhs on (lhs.uid = rhs.n)))
+where (name != 'tyler swift')`;
+
+verify q1 q2;

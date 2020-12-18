@@ -1,0 +1,32 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+schema df_party_events(event_id:int, event_name:str, party_id:int, member_in_charge_id:int);
+
+table df_party(df_party);
+table df_party_events(df_party_events);
+
+query q1
+`select t2.party_name
+from df_party_events as t1
+join df_party as t2 on t1.party_id = t2.party_id
+group by t1.party_id
+having count(*) >= 2`;
+
+query q2
+`select t2.party_name
+ from
+  (select t4.minister, t4.count_left_office, t1.party_id, t1.minister as minister1, t1.took_office, t1.left_office, t1.region_id, t1.party_name
+  from (select *
+       from
+        (select
+            t3.minister, count(t3.left_office) as count_left_office
+          from
+            input as t3
+          group by
+            t3.minister) as t4
+       where t4.count_left_office = 2.0) join 
+      (select *
+         from
+          input
+         where input.party_id <= 3.0) as t1) as t2`;
+
+verify q1 q2;

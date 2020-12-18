@@ -1,0 +1,30 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_publication(df_publication);
+table df_book(df_book);
+
+query q1
+`select t1.writer
+from df_book as t1
+join df_publication as t2 on t1.book_id = t2.book_id
+where t2.price > 4000000`;
+
+query q2
+`select writer
+from
+  (select lhs.book_id as book_id,
+          lhs.title as title,
+          lhs.issues as issues,
+          lhs.writer as writer,
+          rhs.publication_id as publication_id,
+          rhs.publisher as publisher,
+          rhs.publication_date as publication_date,
+          rhs.price as price
+   from df_book as lhs
+   inner join
+     (select *
+      from df_publication df_publication
+      where (price >= 4000000.0)) as rhs on (lhs.book_id = rhs.book_id))`;
+
+verify q1 q2;

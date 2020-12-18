@@ -1,0 +1,24 @@
+schema df_investors(investor_id:int, investor_details:str);
+schema df_lots(lot_id:int, investor_id:int, lot_details:str);
+
+table df_investors(df_investors);
+table df_lots(df_lots);
+
+query q1
+`select t2.lot_details
+from df_investors as t1
+join df_lots as t2 on t1.investor_id = t2.investor_id
+where t1.investor_details = "l"`;
+
+query q2
+`select t2.lot_details
+ from
+  (select input.investor_id, input.investor_details, t1.lot_id, t1.investor_id as investor_id1, t1.lot_details
+  from (select *
+       from
+        input
+       where input.investor_details = 'l') join 
+      input0 as t1) as t2
+ where t2.investor_id = t2.investor_id1`;
+
+verify q1 q2;

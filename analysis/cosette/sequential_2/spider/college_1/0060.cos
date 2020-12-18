@@ -1,0 +1,50 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_employee(df_employee);
+
+query q1
+`select t1.emp_fname
+from df_employee as t1
+join df_class as t2 on t1.emp_num = t2.prof_num
+where crs_code = 'cis-220' intersect
+  select t1.emp_fname
+  from df_employee as t1
+  join df_class as t2 on t1.emp_num = t2.prof_num where crs_code = 'qm-261'`;
+
+query q2
+`select distinct emp_fname
+from
+  (select class_code,
+          crs_code,
+          class_section,
+          class_time,
+          class_room,
+          prof_num,
+          emp_lname,
+          emp_fname,
+          emp_initial,
+          emp_jobcode,
+          emp_hiredate,
+          emp_dob,
+          prof_num as emp_num
+   from
+     (select lhs.class_code as class_code,
+             lhs.crs_code as crs_code,
+             lhs.class_section as class_section,
+             lhs.class_time as class_time,
+             lhs.class_room as class_room,
+             lhs.prof_num as prof_num,
+             rhs.emp_lname as emp_lname,
+             rhs.emp_fname as emp_fname,
+             rhs.emp_initial as emp_initial,
+             rhs.emp_jobcode as emp_jobcode,
+             rhs.emp_hiredate as emp_hiredate,
+             rhs.emp_dob as emp_dob
+      from df_class as lhs
+      inner join df_employee as rhs on (lhs.prof_num = rhs.emp_num)))
+where (crs_code != 'cis-220'
+       and crs_code = 'qm-261')`;
+
+verify q1 q2;

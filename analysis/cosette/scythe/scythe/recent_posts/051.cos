@@ -1,0 +1,25 @@
+schema df_051_1(isbn:str, title:str);
+schema df_051_2(isbn:str, Author:str);
+
+table df_051_1(df_051_1);
+table df_051_2(df_051_2);
+
+query q1
+`select a.isbn, a.title, group_concat(b.author )
+from book_title,
+inner join on book_authoron a.isbn = b.isbn_id
+group by a.isbn, a.title`;
+
+query q2
+`select t2.isbn_id,t2.title,t2.concat_author
+ from
+  (select
+          t3.isbn_id, concat(t3.author) as concat_author
+        from
+          input0 as t3
+        group by
+          t3.isbn_id) as t4 join 
+      input as t1 as t2
+ where t2.isbn_id = t2.isbn`;
+
+verify q1 q2;

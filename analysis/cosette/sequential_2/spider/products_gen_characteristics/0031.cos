@@ -1,0 +1,65 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_characteristics(characteristic_id:int, characteristic_type_code:str, characteristic_data_type:str, characteristic_name:str, other_characteristic_details:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+schema df_product_characteristics(product_id:int, characteristic_id:int, product_characteristic_value:str);
+
+table df_ref_colors(df_ref_colors);
+table df_characteristics(df_characteristics);
+table df_products(df_products);
+table df_product_characteristics(df_product_characteristics);
+
+query q1
+`select count(*)
+from df_products as t1
+join df_product_characteristics as t2 on t1.product_id = t2.product_id
+join df_characteristics as t3 on t2.characteristic_id = t3.characteristic_id
+join df_ref_colors as t4 on t1.color_code = t4.color_code
+where t4.color_description = "white"
+  or t3.characteristic_name = "hot"`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.color_code as color_code,
+          lhs.color_description as color_description,
+          lhs.characteristic_id as characteristic_id,
+          lhs.characteristic_type_code as characteristic_type_code,
+          lhs.characteristic_data_type as characteristic_data_type,
+          lhs.characteristic_name as characteristic_name,
+          lhs.other_characteristic_details as other_characteristic_details,
+          lhs.product_id as product_id,
+          lhs.product_characteristic_value as product_characteristic_value,
+          rhs.typical_selling_price as typical_selling_price,
+          rhs.n as n
+   from
+     (select lhs.color_code as color_code,
+             lhs.color_description as color_description,
+             lhs.characteristic_id as characteristic_id,
+             lhs.characteristic_type_code as characteristic_type_code,
+             lhs.characteristic_data_type as characteristic_data_type,
+             lhs.characteristic_name as characteristic_name,
+             lhs.other_characteristic_details as other_characteristic_details,
+             rhs.product_id as product_id,
+             rhs.product_characteristic_value as product_characteristic_value
+      from
+        (select lhs.color_code as color_code,
+                lhs.color_description as color_description,
+                rhs.characteristic_id as characteristic_id,
+                rhs.characteristic_type_code as characteristic_type_code,
+                rhs.characteristic_data_type as characteristic_data_type,
+                rhs.characteristic_name as characteristic_name,
+                rhs.other_characteristic_details as other_characteristic_details
+         from df_ref_colors as lhs
+         cross join df_characteristics as rhs) as lhs
+      inner join df_product_characteristics as rhs on (lhs.characteristic_id = rhs.characteristic_id)) as lhs
+   inner join
+     (select color_code,
+             typical_selling_price,
+             count(*) as n
+      from df_products df_products
+      group by color_code,
+               typical_selling_price) as rhs on (lhs.color_code = rhs.color_code))
+where (color_description = 'white'
+       and characteristic_name != 'hot')`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+
+table df_artist(df_artist);
+
+query q1
+`select name
+from df_artist df_artist
+
+limit 1`;
+
+query q2
+`select distinct name
+from
+  (select lhs.artist_id as artist_id,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.year_join as year_join,
+          lhs.age as age,
+          lhs.maxyear_join as maxyear_join,
+          rhs.artist_id as artist_id.other,
+          rhs.name as name.other,
+          rhs.country as country.other,
+          rhs.year_join as year_join.other,
+          rhs.age as age.other,
+          rhs.maxyear_join as maxyear_join.other
+   from
+     (select artist_id,
+             name,
+             country,
+             year_join,
+             age,
+             max(year_join) over () as maxyear_join
+      from df_artist df_artist) as lhs
+   cross join
+     (select artist_id,
+             name,
+             country,
+             year_join,
+             age,
+             max(year_join) over () as maxyear_join
+      from df_artist df_artist) as rhs)
+where (year_join = maxyear_join
+       or year_join = maxyear_join.other)`;
+
+verify q1 q2;

@@ -1,0 +1,42 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+
+table df_publication(df_publication);
+
+query q1
+`select publication_date
+from df_publication df_publication
+
+limit 3`;
+
+query q2
+`select publication_date
+from
+  (select *
+   from
+     (select publication_id,
+             publication_id as book_id,
+             publisher,
+             publication_date,
+             price,
+             publication_id.other,
+             publisher.other,
+             price.other
+      from
+        (select lhs.publication_id as publication_id,
+                lhs.book_id as book_id,
+                lhs.publisher as publisher,
+                lhs.publication_date as publication_date,
+                lhs.price as price,
+                rhs.publication_id as publication_id.other,
+                rhs.publisher as publisher.other,
+                rhs.price as price.other
+         from df_publication as lhs
+         inner join df_publication as rhs on (lhs.publication_id = rhs.book_id
+                                              and lhs.publication_date = rhs.publication_date))) as lhs
+   where not exists
+       (select 1
+        from df_publication as rhs
+        where (lhs.book_id = rhs.book_id
+               and lhs.price = rhs.price) ))`;
+
+verify q1 q2;

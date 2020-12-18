@@ -1,0 +1,26 @@
+schema df_documents_to_be_destroyed(document_id:int, destruction_authorised_by_employee_id:int, destroyed_by_employee_id:int, planned_destruction_date:str, actual_destruction_date:str, other_details:str);
+
+table df_documents_to_be_destroyed(df_documents_to_be_destroyed);
+
+query q1
+`select distinct destroyed_by_employee_id
+from df_documents_to_be_destroyed df_documents_to_be_destroyed`;
+
+query q2
+`select distinct destroyed_by_employee_id
+from
+  (select lhs.document_id as document_id,
+          lhs.destruction_authorised_by_employee_id as destruction_authorised_by_employee_id,
+          lhs.destroyed_by_employee_id as destroyed_by_employee_id,
+          lhs.planned_destruction_date as planned_destruction_date,
+          lhs.actual_destruction_date as actual_destruction_date,
+          lhs.other_details as other_details,
+          rhs.document_id as document_id.other,
+          rhs.destruction_authorised_by_employee_id as destruction_authorised_by_employee_id.other,
+          rhs.planned_destruction_date as planned_destruction_date.other,
+          rhs.actual_destruction_date as actual_destruction_date.other
+   from df_documents_to_be_destroyed as lhs
+   inner join df_documents_to_be_destroyed as rhs on (lhs.destroyed_by_employee_id = rhs.destroyed_by_employee_id
+                                                      and lhs.other_details = rhs.other_details))`;
+
+verify q1 q2;

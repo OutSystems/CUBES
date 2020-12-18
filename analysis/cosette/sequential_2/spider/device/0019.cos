@@ -1,0 +1,24 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+schema df_stock(shop_id:int, device_id:int, quantity:int);
+
+table df_device(df_device);
+table df_stock(df_stock);
+
+query q1
+`select carrier
+from df_device df_device
+where device_id not in
+    (select device_id
+     from df_stock df_stock)`;
+
+query q2
+`select carrier
+from
+  (select *
+   from df_device as lhs
+   where not exists
+       (select 1
+        from df_stock as rhs
+        where (lhs.device_id = rhs.device_id) ))`;
+
+verify q1 q2;

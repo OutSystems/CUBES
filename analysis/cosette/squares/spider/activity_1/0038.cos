@@ -1,0 +1,22 @@
+schema df_participates_in(stuid:int, actid:int);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_participates_in(df_participates_in);
+table df_student(df_student);
+
+query q1
+`select stuid
+from df_participates_in df_participates_in intersect
+select stuid
+from df_student df_student
+where age < 20`;
+
+query q2
+`select stuid
+from
+  (select stuid
+   from input0 intersect select stuid
+   from input1
+   where (age < 20.0))`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_scientists(ssn:int, name:str);
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_scientists(df_scientists);
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select t1.name,
+       t3.name,
+       t3.hours
+from df_scientists as t1
+join df_assignedto as t2 on t1.ssn = t2.scientist
+join df_projects as t3 on t2.project = t3.code
+
+         t1.name`;
+
+query q2
+`select t4.name,t4.name1,t4.hours
+ from
+  (select input.ssn, input.name, t3.code, t3.name as name1, t3.hours
+      from input join 
+          input0 as t3) as t2 join 
+      input1 as t5 as t4
+ where t4.code = t4.project
+   and t4.ssn = t4.scientist`;
+
+verify q1 q2;

@@ -1,0 +1,50 @@
+schema df_10_1(S_key:str, C_name:str);
+schema df_10_2(S_key:str, S_name:str);
+
+table df_10_1(df_10_1);
+table df_10_2(df_10_2);
+
+query q1
+`select s_name
+from
+  (select s_name,
+          n
+   from
+     (select s_name,
+             n,
+             max(n) over () as zzz3
+      from
+        (select s_name,
+                count(*) as n
+         from
+           (select lhs.s_key as s_key,
+                   lhs.c_name as c_name,
+                   rhs.s_name as s_name
+            from df_10_1 as lhs
+            inner join df_10_2 as rhs on (lhs.s_key = rhs.s_key))
+         group by s_name))
+   where (n = zzz3))`;
+
+query q2
+`joining, by = "s_key"
+select distinct s_name
+from
+  (select s_name,
+          n
+   from
+     (select s_name,
+             n,
+             max(n) over () as zzz3
+      from
+        (select s_name,
+                count(*) as n
+         from
+           (select s_key,
+                   c_name,
+                   s_name
+            from input0 as lhs
+            left join input1 as rhs on (lhs.s_key = rhs.s_key))
+         group by s_name))
+   where (n = zzz3))`;
+
+verify q1 q2;

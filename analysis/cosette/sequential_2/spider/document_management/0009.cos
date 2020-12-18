@@ -1,0 +1,23 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+
+table df_documents(df_documents);
+
+query q1
+`select document_type_code
+from df_documents df_documents
+group by document_type_code
+having sum(access_count) > 10000`;
+
+query q2
+`select distinct document_type_code
+from
+  (select access_count,
+          document_type_code,
+          sum(access_count) as sumaccess_count
+   from df_documents df_documents
+   group by access_count,
+            document_type_code)
+where (access_count <= 10000.0
+       and sumaccess_count <= access_count)`;
+
+verify q1 q2;

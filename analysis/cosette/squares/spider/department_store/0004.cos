@@ -1,0 +1,26 @@
+schema df_addresses(address_id:int, address_details:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_from:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t1.address_details
+from df_addresses as t1
+join df_customer_addresses as t2 on t1.address_id = t2.address_id
+where t2.customer_id = 10`;
+
+query q2
+`joining, by = "address_id"
+select distinct address_details
+from
+  (select address_id,
+          address_details,
+          customer_id,
+          date_from,
+          date_to
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.address_id = rhs.address_id))
+where (customer_id = 10.0)`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_customer_master_index(master_customer_id:int, cmi_details:str);
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+
+table df_customer_master_index(df_customer_master_index);
+table df_cmi_cross_references(df_cmi_cross_references);
+
+query q1
+`select t1.cmi_details
+from df_customer_master_index as t1
+join df_cmi_cross_references as t2 on t1.master_customer_id = t2.master_customer_id
+where t2.source_system_code = 'tax'`;
+
+query q2
+`select cmi_details
+from
+  (select lhs.master_customer_id as master_customer_id,
+          lhs.cmi_details as cmi_details,
+          rhs.cmi_cross_ref_id as cmi_cross_ref_id,
+          rhs.source_system_code as source_system_code
+   from df_customer_master_index as lhs
+   inner join df_cmi_cross_references as rhs on (lhs.master_customer_id = rhs.master_customer_id))
+where (source_system_code = 'tax')`;
+
+verify q1 q2;

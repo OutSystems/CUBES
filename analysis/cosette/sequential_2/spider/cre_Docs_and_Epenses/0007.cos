@@ -1,0 +1,44 @@
+schema df_statements(statement_id:int, statement_details:str);
+schema df_accounts(account_id:int, statement_id:int, account_details:str);
+
+table df_statements(df_statements);
+table df_accounts(df_accounts);
+
+query q1
+`select t1.statement_id,
+       t2.statement_details
+from df_accounts as t1
+join df_statements as t2 on t1.statement_id = t2.statement_id
+group by t1.statement_id
+
+limit 1`;
+
+query q2
+`select statement_id,
+       statement_details
+from
+  (select *
+   from df_statements as lhs
+   where exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.statement_id as statement_id,
+                     lhs.n as n,
+                     rhs.statement_id as statement_id.other,
+                     rhs.n as n.other
+              from
+                (select statement_id,
+                        count(*) as n
+                 from df_accounts df_accounts
+                 group by statement_id) as lhs
+              cross join
+                (select statement_id,
+                        count(*) as n
+                 from df_accounts df_accounts
+                 group by statement_id) as rhs)
+           where (n > n.other)) as rhs
+        where (lhs.statement_id = rhs.statement_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,72 @@
+schema df_team(team_id:int, name:str);
+schema df_match_season(season:str, player:str, position:str, country:int, team:int, draft_pick_number:int, draft_class:str, college:str);
+schema df_player(player_id:int, player:str, years_played:str, total_wl:str, singles_wl:str, doubles_wl:str, team:int);
+
+table df_team(df_team);
+table df_match_season(df_match_season);
+table df_player(df_player);
+
+query q1
+`select t1.season,
+       t1.df_player,
+       t2.name
+from df_match_season as t1
+join df_team as t2 on t1.df_team = t2.team_id`;
+
+query q2
+`select season,
+       player,
+       name
+from
+  (select lhs.team_id as team_id,
+          lhs.name as name,
+          rhs.season as season,
+          rhs.player as player,
+          rhs.position as position,
+          rhs.country as country,
+          rhs.draft_pick_number as draft_pick_number,
+          rhs.draft_class as draft_class,
+          rhs.college as college,
+          rhs.player.other as player.other,
+          rhs.years_played as years_played,
+          rhs.total_wl as total_wl,
+          rhs.singles_wl as singles_wl,
+          rhs.doubles_wl as doubles_wl,
+          rhs.team.other as team.other,
+          rhs.player_id as player_id
+   from df_team as lhs
+   inner join
+     (select season,
+             player,
+             position,
+             country,
+             team,
+             draft_pick_number,
+             draft_class,
+             college,
+             player.other,
+             years_played,
+             total_wl,
+             singles_wl,
+             doubles_wl,
+             team.other,
+             country as player_id
+      from
+        (select lhs.season as season,
+                lhs.player as player,
+                lhs.position as position,
+                lhs.country as country,
+                lhs.team as team,
+                lhs.draft_pick_number as draft_pick_number,
+                lhs.draft_class as draft_class,
+                lhs.college as college,
+                rhs.player as player.other,
+                rhs.years_played as years_played,
+                rhs.total_wl as total_wl,
+                rhs.singles_wl as singles_wl,
+                rhs.doubles_wl as doubles_wl,
+                rhs.team as team.other
+         from df_match_season as lhs
+         inner join df_player as rhs on (lhs.country = rhs.player_id))) as rhs on (lhs.team_id = rhs.team))`;
+
+verify q1 q2;

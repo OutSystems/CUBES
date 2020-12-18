@@ -1,0 +1,30 @@
+schema df_7_1(S_key:str, level:str, age:int);
+
+table df_7_1(df_7_1);
+
+query q1
+`select level,
+       meanage
+from
+  (select lhs.level as level,
+          lhs.meanage as meanage,
+          rhs.s_key as s_key,
+          rhs.age as age
+   from
+     (select level,
+             avg(age) as meanage
+      from df_7_1 df_7_1
+      group by level) as lhs
+   left join df_7_1 as rhs on (lhs.level = rhs.level))
+where (meanage <= age)`;
+
+query q2
+`select level,
+       meanage
+from
+  (select level,
+          avg(age) as meanage
+   from df_7_1 df_7_1
+   group by level)`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_volume(volume_id:int, volume_issue:str, issue_date:str, weeks_on_top:str, song:str, artist_id:int);
+
+table df_volume(df_volume);
+
+query q1
+`select song
+from df_volume df_volume`;
+
+query q2
+`select song
+from
+  (select lhs.volume_id as volume_id,
+          lhs.volume_issue as volume_issue,
+          lhs.issue_date as issue_date,
+          lhs.weeks_on_top as weeks_on_top,
+          lhs.song as song,
+          lhs.artist_id as artist_id,
+          rhs.volume_issue as volume_issue.other,
+          rhs.issue_date as issue_date.other,
+          rhs.weeks_on_top as weeks_on_top.other,
+          rhs.song as song.other,
+          rhs.artist_id as artist_id.other
+   from df_volume as lhs
+   inner join df_volume as rhs on (lhs.volume_id = rhs.volume_id))`;
+
+verify q1 q2;

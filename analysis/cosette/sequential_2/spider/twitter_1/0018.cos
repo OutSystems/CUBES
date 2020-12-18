@@ -1,0 +1,26 @@
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select name,
+       email
+from df_user_profiles df_user_profiles
+
+limit 1`;
+
+query q2
+`select name,
+       email
+from
+  (select lhs.followers as followers,
+          rhs.uid as uid,
+          rhs.name as name,
+          rhs.email as email,
+          rhs.partitionid as partitionid
+   from
+     (select min(followers) as followers
+      from df_user_profiles df_user_profiles) as lhs
+   left join df_user_profiles as rhs on (lhs.followers = rhs.followers))`;
+
+verify q1 q2;

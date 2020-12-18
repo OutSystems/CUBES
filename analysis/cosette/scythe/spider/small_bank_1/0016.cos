@@ -1,0 +1,22 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+
+query q1
+`select sum(t2.balance),
+       t1.name
+from df_accounts as t1
+join df_savings as t2 on t1.custid = t2.custid
+group by t1.name`;
+
+query q2
+`select t2.balance,t2.name
+ from
+  (select input.custid, input.name, t1.custid as custid1, t1.balance
+  from input join 
+      input0 as t1) as t2
+ where t2.custid = t2.custid1`;
+
+verify q1 q2;

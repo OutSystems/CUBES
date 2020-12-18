@@ -1,0 +1,39 @@
+schema df_list(lastname:str, firstname:str, grade:int, classroom:int);
+schema df_teachers(lastname:str, firstname:str, classroom:int);
+
+table df_list(df_list);
+table df_teachers(df_teachers);
+
+query q1
+`select count(*)
+from df_list as t1
+join df_teachers as t2 on t1.classroom = t2.classroom
+where t1.firstname = "chrissy"
+  and t1.lastname = "nabozny"`;
+
+query q2
+`select n_distinct as count...
+from
+  (select lhs.lastname as lastname,
+          lhs.firstname as firstname,
+          lhs.grade as grade,
+          lhs.classroom as classroom,
+          rhs.n_distinct as n_distinct
+   from
+     (select lhs.lastname as lastname,
+             lhs.firstname as firstname,
+             lhs.grade as grade,
+             lhs.classroom as classroom
+      from df_list as lhs
+      inner join
+        (select *
+         from df_teachers df_teachers
+         where (lastname = 'nabozny')) as rhs on (lhs.lastname = rhs.lastname
+                                                      and lhs.firstname = rhs.firstname
+                                                      and lhs.classroom = rhs.classroom)) as lhs
+   cross join
+     (select count(distinct lastname) as n_distinct
+      from df_teachers df_teachers
+      where (lastname = 'nabozny')) as rhs)`;
+
+verify q1 q2;

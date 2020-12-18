@@ -1,0 +1,24 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_driver(df_driver);
+table df_school_bus(df_school_bus);
+
+query q1
+`select name
+from df_driver df_driver
+where driver_id not in
+    (select driver_id
+     from df_school_bus df_school_bus)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_driver as lhs
+   where not exists
+       (select 1
+        from df_school_bus as rhs
+        where (lhs.driver_id = rhs.driver_id) ))`;
+
+verify q1 q2;

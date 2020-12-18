@@ -1,0 +1,28 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select t1.name
+from df_member as t1
+join df_round as t2 on t1.member_id = t2.member_id
+where t2.rank_in_round > 3`;
+
+query q2
+`joining, by = "member_id"
+select name
+from
+  (select round_id,
+          member_id,
+          decoration_theme,
+          rank_in_round,
+          name,
+          country,
+          college_id
+   from input1 as lhs
+   left join input0 as rhs on (lhs.member_id = rhs.member_id))
+where (rank_in_round > 3.0)`;
+
+verify q1 q2;

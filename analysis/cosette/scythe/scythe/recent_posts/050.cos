@@ -1,0 +1,46 @@
+schema df_050_1(role_id:int, role_type:str, company:str, ref_id:int);
+schema df_050_2(employee_id:int, employee_name:str, joining_date:str);
+schema df_050_3(org_id:int, org_name:str, org_max:int);
+
+table df_050_1(df_050_1);
+table df_050_2(df_050_2);
+table df_050_3(df_050_3);
+
+query q1
+`select t1.role_id,
+       t1.role_type,
+       t1.company,
+       t1.ref_id,
+       coalesce(e.employee_name, o.org_id) as ref_name,
+       e.joining_date                      as ref_joining_date,
+       o.org_max                           as ref_org_max
+from   roles t1
+       left join employee
+              on e.employee_id = t1.ref_id
+                 and t1.role_type = 'a'
+       left join organisations o
+              on o.org_id = t1.ref_id
+                 and t1.role_type = 'b'`;
+
+query q2
+`select * from 
+(select t5.role_id,t5.role_type,t5.employee_id,t5.employee_name,t5.joining_date
+   from
+    input0 join 
+        (select *
+           from
+            input
+           where input.role_type = 'a') as t3 as t5
+   where t5.employee_id = t5.ref_id)
+union all 
+ select * from
+  (select t4.role_id,t4.role_type,t4.org_id,t4.org_name,t4.org_max
+   from
+    input1 join 
+        (select *
+           from
+            input
+           where input.role_type = 'b') as t2 as t4
+   where t4.org_id = t4.ref_id)`;
+
+verify q1 q2;

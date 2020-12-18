@@ -1,0 +1,28 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+schema df_order_items(order_item_id:int, product_id:int, order_id:int, order_item_status:str, order_item_details:str);
+
+table df_orders(df_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select distinct t2.product_id
+from df_orders as t1
+join df_order_items as t2 on t1.order_id = t2.order_id
+where t1.date_order_placed >= "1975-01-01"
+  and t1.date_order_placed <= "1976-01-01"`;
+
+query q2
+`select product_id
+from
+  (select *
+   from df_order_items as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_orders df_orders
+           where (date_order_placed <= parse_datetime('1975-01-01')
+                  or date_order_placed > parse_datetime('1976-01-01'))) as rhs
+        where (lhs.order_id = rhs.order_id) ))`;
+
+verify q1 q2;

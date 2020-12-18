@@ -1,0 +1,28 @@
+schema df_music_festival(id:int, music_festival:str, date_of_ceremony:str, category:str, volume:int, result:str);
+
+table df_music_festival(df_music_festival);
+
+query q1
+`select date_of_ceremony,
+       result
+from df_music_festival df_music_festival`;
+
+query q2
+`select date_of_ceremony,
+       result
+from
+  (select lhs.id as id,
+          lhs.music_festival as music_festival,
+          lhs.date_of_ceremony as date_of_ceremony,
+          lhs.category as category,
+          lhs.volume as volume,
+          lhs.result as result,
+          rhs.id as id.other,
+          rhs.date_of_ceremony as date_of_ceremony.other,
+          rhs.category as category.other,
+          rhs.result as result.other
+   from df_music_festival as lhs
+   inner join df_music_festival as rhs on (lhs.id = rhs.volume
+                                           and lhs.music_festival = rhs.music_festival))`;
+
+verify q1 q2;

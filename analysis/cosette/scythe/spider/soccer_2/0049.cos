@@ -1,0 +1,23 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select distinct cname
+from df_college df_college
+where enr >
+    (select min(enr)
+     from df_college df_college
+     where state = 'fl')`;
+
+query q2
+`select t1.cname
+ from
+  (select
+          max(t4.enr) as max_enr
+        from
+          input as t4) as t3 join 
+      input as t2 as t1
+ where t1.max_enr = t1.enr`;
+
+verify q1 q2;

@@ -1,0 +1,32 @@
+schema df_block(blockfloor:int, blockcode:int);
+schema df_room(roomnumber:int, roomtype:str, blockfloor:int, blockcode:int, unavailable:int);
+
+table df_block(df_block);
+table df_room(df_room);
+
+query q1
+`select count(*),
+       t1.blockcode
+from df_block as t1
+join df_room as t2 on t1.blockfloor = t2.blockfloor
+and t1.blockcode = t2.blockcode
+group by t1.blockcode`;
+
+query q2
+`select n as count...,
+       blockcode
+from
+  (select blockcode,
+          count(*) as n
+   from
+     (select lhs.blockfloor as blockfloor,
+             lhs.blockcode as blockcode,
+             rhs.roomnumber as roomnumber,
+             rhs.roomtype as roomtype,
+             rhs.unavailable as unavailable
+      from df_block as lhs
+      inner join df_room as rhs on (lhs.blockcode = rhs.blockcode
+                                    and lhs.blockfloor = rhs.blockfloor))
+   group by blockcode)`;
+
+verify q1 q2;

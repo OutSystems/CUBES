@@ -1,0 +1,54 @@
+schema df_people(people_id:int, age:int, name:str, nationality:str, graduation_college:str);
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+schema df_employment(company_id:int, people_id:int, year_working:int);
+
+table df_people(df_people);
+table df_company(df_company);
+table df_employment(df_employment);
+
+query q1
+`select t3.name,
+       count(*)
+from df_employment as t1
+join df_people as t2 on t1.people_id = t2.people_id
+join df_company as t3 on t1.company_id = t3.company_id
+group by t3.name`;
+
+query q2
+`select name,
+       n as count...
+from
+  (select lhs.company_id as company_id,
+          lhs.name as name,
+          lhs.headquarters as headquarters,
+          lhs.industry as industry,
+          lhs.sales_in_billion as sales_in_billion,
+          lhs.profits_in_billion as profits_in_billion,
+          lhs.assets_in_billion as assets_in_billion,
+          lhs.market_value_in_billion as market_value_in_billion,
+          lhs.people_id as people_id,
+          lhs.year_working as year_working,
+          rhs.age as age,
+          rhs.n as n
+   from
+     (select lhs.company_id as company_id,
+             lhs.name as name,
+             lhs.headquarters as headquarters,
+             lhs.industry as industry,
+             lhs.sales_in_billion as sales_in_billion,
+             lhs.profits_in_billion as profits_in_billion,
+             lhs.assets_in_billion as assets_in_billion,
+             lhs.market_value_in_billion as market_value_in_billion,
+             rhs.people_id as people_id,
+             rhs.year_working as year_working
+      from df_company as lhs
+      inner join df_employment as rhs on (lhs.company_id = rhs.company_id)) as lhs
+   inner join
+     (select age,
+             people_id,
+             count(*) as n
+      from df_people df_people
+      group by age,
+               people_id) as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

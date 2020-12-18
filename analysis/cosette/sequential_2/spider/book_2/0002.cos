@@ -1,0 +1,22 @@
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_book(df_book);
+
+query q1
+`select writer
+from df_book df_book`;
+
+query q2
+`select writer
+from
+  (select lhs.book_id as book_id,
+          lhs.title as title,
+          lhs.issues as issues,
+          lhs.writer as writer,
+          rhs.book_id as book_id.other,
+          rhs.writer as writer.other
+   from df_book as lhs
+   inner join df_book as rhs on (lhs.issues = rhs.issues
+                                 and lhs.title = rhs.title))`;
+
+verify q1 q2;

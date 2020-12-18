@@ -1,0 +1,58 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_restaurant(resid:int, resname:str, address:str, rating:int);
+schema df_visits_restaurant(stuid:int, resid:int, time:str, spent:str);
+
+table df_student(df_student);
+table df_restaurant(df_restaurant);
+table df_visits_restaurant(df_visits_restaurant);
+
+query q1
+`select time
+from df_student df_student
+join df_visits_restaurant on df_student.stuid = df_visits_restaurant.stuid
+join df_restaurant on df_visits_restaurant.resid = df_restaurant.resid
+where df_student.fname = "linda"
+  and df_student.lname = "smith"
+  and df_restaurant.resname = "subway"`;
+
+query q2
+`joining, by = "stuid"
+joining, by = "resid"
+select distinct time
+from
+  (select stuid,
+          resid,
+          time,
+          spent,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          resname,
+          address,
+          rating
+   from
+     (select stuid,
+             resid,
+             time,
+             spent,
+             lname,
+             fname,
+             age,
+             sex,
+             major,
+             advisor,
+             city_code
+      from input2 as lhs
+      inner join
+        (select *
+         from input0
+         where (fname = 'linda')) as rhs on (lhs.stuid = rhs.stuid)) as lhs
+   inner join input1 as rhs on (lhs.resid = rhs.resid))
+where (lname != 'smith'
+       or resname = 'subway')`;
+
+verify q1 q2;

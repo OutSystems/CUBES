@@ -1,0 +1,32 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+schema df_document_sections(section_id:int, document_code:int, section_sequence:int, section_code:int, section_title:str);
+
+table df_documents(df_documents);
+table df_document_sections(df_document_sections);
+
+query q1
+`select t1.document_name
+from df_documents as t1
+join df_document_sections as t2 on t1.document_code = t2.document_code
+group by t1.document_code
+
+limit 1`;
+
+query q2
+`select t4.document_name
+ from
+  (select t2.document_type_code, t2.count_document_structure_code, t3.document_code, t3.document_structure_code, t3.document_type_code as document_type_code1, t3.access_count, t3.document_name
+  from (select
+          t1.document_type_code, count(t1.document_structure_code) as count_document_structure_code
+        from
+          (select *
+             from
+              input
+             where input.document_structure_code = 9.0) as t1
+        group by
+          t1.document_type_code) as t2 join 
+      input as t3) as t4
+ where t4.document_type_code = t4.document_type_code1
+   and t4.count_document_structure_code = t4.document_structure_code`;
+
+verify q1 q2;

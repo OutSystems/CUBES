@@ -1,0 +1,79 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_physician(df_physician);
+table df_patient(df_patient);
+table df_prescribes(df_prescribes);
+
+query q1
+`select count(t1.ssn)
+from df_patient as t1
+join df_prescribes as t2 on t1.ssn = t2.df_patient
+join df_physician as t3 on t2.df_physician = t3.employeeid
+where t3.name = "john dorian"`;
+
+query q2
+`select distinct n_distinct as count.t1.ssn.
+from
+  (select lhs.ssn as ssn,
+          lhs.name as name,
+          lhs.address as address,
+          lhs.phone as phone,
+          lhs.insuranceid as insuranceid,
+          lhs.pcp as pcp,
+          lhs.physician as physician,
+          lhs.patient as patient,
+          lhs.medication as medication,
+          lhs.date as date,
+          lhs.appointment as appointment,
+          lhs.dose as dose,
+          rhs.employeeid as employeeid,
+          rhs.position as position,
+          rhs.n_distinct as n_distinct
+   from
+     (select lhs.ssn as ssn,
+             lhs.name as name,
+             lhs.address as address,
+             lhs.phone as phone,
+             lhs.insuranceid as insuranceid,
+             lhs.pcp as pcp,
+             lhs.physician as physician,
+             lhs.patient as patient,
+             lhs.medication as medication,
+             lhs.date as date,
+             lhs.appointment as appointment,
+             lhs.dose as dose
+      from
+        (select lhs.ssn as ssn,
+                lhs.name as name,
+                lhs.address as address,
+                lhs.phone as phone,
+                lhs.insuranceid as insuranceid,
+                lhs.pcp as pcp,
+                rhs.physician as physician,
+                rhs.patient as patient,
+                rhs.medication as medication,
+                rhs.date as date,
+                rhs.appointment as appointment,
+                rhs.dose as dose
+         from df_patient as lhs
+         cross join df_prescribes as rhs) as lhs
+      inner join
+        (select *
+         from df_patient df_patient
+         where (name != 'john dorian')) as rhs on (lhs.ssn = rhs.ssn
+                                                     and lhs.name = rhs.name
+                                                     and lhs.address = rhs.address
+                                                     and lhs.phone = rhs.phone
+                                                     and lhs.insuranceid = rhs.insuranceid
+                                                     and lhs.pcp = rhs.pcp)) as lhs
+   cross join
+     (select employeeid,
+             position,
+             count(distinct ssn) as n_distinct
+      from df_physician df_physician
+      group by employeeid,
+               position) as rhs)`;
+
+verify q1 q2;

@@ -1,0 +1,44 @@
+schema df_reviewer(rid:int, name:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_reviewer(df_reviewer);
+table df_rating(df_rating);
+
+query q1
+`select mid,
+       avg(stars)
+from df_rating df_rating
+where mid not in
+    (select t1.mid
+     from df_rating as t1
+     join df_reviewer as t2 on t1.rid = t2.rid
+     where t2.name = "brittany harris")
+group by mid`;
+
+query q2
+`select mid,
+       meanstars as avg.stars.
+from
+  (select lhs.rid as rid,
+          lhs.name as name,
+          lhs.mid as mid,
+          lhs.stars as stars,
+          lhs.ratingdate as ratingdate,
+          rhs.meanstars as meanstars
+   from
+     (select lhs.rid as rid,
+             lhs.name as name,
+             rhs.mid as mid,
+             rhs.stars as stars,
+             rhs.ratingdate as ratingdate
+      from df_reviewer as lhs
+      inner join df_rating as rhs on (lhs.rid = rhs.rid)) as lhs
+   inner join
+     (select mid,
+             avg(stars) as meanstars
+      from df_rating df_rating
+      group by mid) as rhs on (lhs.mid = rhs.mid))
+where (name != 'brittany harris'
+       and meanstars > stars)`;
+
+verify q1 q2;

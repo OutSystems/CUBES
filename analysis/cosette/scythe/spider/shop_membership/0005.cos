@@ -1,0 +1,22 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select open_year
+from df_branch df_branch
+group by open_year
+having count(*) >= 2`;
+
+query q2
+`select t1.open_year
+ from
+  (select
+      t2.open_year, t2.city, min(t2.branch_id) as min_branch_id
+    from
+      input as t2
+    group by
+      t2.open_year, t2.city) as t1
+ where t1.min_branch_id = 2.0`;
+
+verify q1 q2;

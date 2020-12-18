@@ -1,0 +1,42 @@
+schema df_i048(CName:str, AddressID:int, AddressLine:str);
+
+table df_i048(df_i048);
+
+query q1
+`select
+    m.cname, m.addressline,
+from(
+    select
+        cname, min(inserted) as first
+    from
+        mytable
+    group by
+        cname
+    ) foo
+join mytable m
+on foo.cname = m.cname and foo.first = m.inserted`;
+
+query q2
+`select cname,
+       minaddressid,
+       addressline
+from
+  (select addressline,
+          cname,
+          min(addressid) as minaddressid
+   from
+     (select *
+      from
+        (select lhs.cname as cname,
+                lhs.addressid as addressid,
+                lhs.addressline as addressline,
+                rhs.cname as cname.other,
+                rhs.addressid as addressid.other,
+                rhs.addressline as addressline.other
+         from df_i048 as lhs
+         cross join df_i048 as rhs)
+      where (addressid < addressid.other))
+   group by addressline,
+            cname)`;
+
+verify q1 q2;

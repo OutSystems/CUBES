@@ -1,0 +1,38 @@
+schema df_appellations(no:int, appelation:str, county:str, state:str, area:str, isava:str);
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_appellations(df_appellations);
+table df_wine(df_wine);
+
+query q1
+`select distinct t2.name
+from df_appellations as t1
+join df_wine as t2 on t1.appelation = t2.appelation
+where t1.area = "north coast"`;
+
+query q2
+`select distinct name
+from
+  (select lhs.no as no,
+          lhs.grape as grape,
+          lhs.winery as winery,
+          lhs.appelation as appelation,
+          lhs.state as state,
+          lhs.name as name,
+          lhs.year as year,
+          lhs.price as price,
+          lhs.score as score,
+          lhs.cases as cases,
+          lhs.drink as drink,
+          rhs.no as no.other,
+          rhs.county as county,
+          rhs.state as state.other,
+          rhs.area as area,
+          rhs.isava as isava
+   from df_wine as lhs
+   inner join
+     (select *
+      from df_appellations df_appellations
+      where (area = 'north coast')) as rhs on (lhs.appelation = rhs.appelation))`;
+
+verify q1 q2;

@@ -1,0 +1,43 @@
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+
+table df_furniture(df_furniture);
+
+query q1
+`select name,
+       furniture_id
+from df_furniture df_furniture
+
+limit 1`;
+
+query q2
+`select distinct name.other as name,
+                furniture_id.other as furniture_id
+from
+  (select lhs.furniture_id as furniture_id,
+          lhs.name as name,
+          lhs.num_of_component as num_of_component,
+          lhs.market_rate as market_rate,
+          lhs.maxmarket_rate as maxmarket_rate,
+          rhs.furniture_id as furniture_id.other,
+          rhs.name as name.other,
+          rhs.num_of_component as num_of_component.other,
+          rhs.market_rate as market_rate.other,
+          rhs.maxmarket_rate as maxmarket_rate.other
+   from
+     (select furniture_id,
+             name,
+             num_of_component,
+             market_rate,
+             max(market_rate) over () as maxmarket_rate
+      from df_furniture df_furniture) as lhs
+   cross join
+     (select furniture_id,
+             name,
+             num_of_component,
+             market_rate,
+             max(market_rate) over () as maxmarket_rate
+      from df_furniture df_furniture) as rhs)
+where (maxmarket_rate < market_rate.other
+       or market_rate.other = maxmarket_rate.other)`;
+
+verify q1 q2;

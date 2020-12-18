@@ -1,0 +1,32 @@
+schema df_invoice(invoiceid:int, customerid:int, invoicedate:str, billingaddress:str, billingcity:str, billingstate:str, billingcountry:str, billingpostalcode:str, total:str);
+
+table df_invoice(df_invoice);
+
+query q1
+`select distinct(billingcountry)
+from df_invoice df_invoice`;
+
+query q2
+`select distinct billingcountry
+from
+  (select lhs.invoiceid as invoiceid,
+          lhs.customerid as customerid,
+          lhs.invoicedate as invoicedate,
+          lhs.billingaddress as billingaddress,
+          lhs.billingcity as billingcity,
+          lhs.billingstate as billingstate,
+          lhs.billingcountry as billingcountry,
+          lhs.billingpostalcode as billingpostalcode,
+          lhs.total as total,
+          rhs.invoiceid as invoiceid.other,
+          rhs.invoicedate as invoicedate.other,
+          rhs.billingaddress as billingaddress.other,
+          rhs.billingstate as billingstate.other,
+          rhs.billingcountry as billingcountry.other,
+          rhs.billingpostalcode as billingpostalcode.other,
+          rhs.total as total.other
+   from df_invoice as lhs
+   inner join df_invoice as rhs on (lhs.billingcity = rhs.billingcity
+                                    and lhs.customerid = rhs.customerid))`;
+
+verify q1 q2;

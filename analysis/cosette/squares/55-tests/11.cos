@@ -1,0 +1,35 @@
+schema df_11_1(S_key:str, S_name:str);
+schema df_11_2(S_key:str, C_name:str);
+
+table df_11_1(df_11_1);
+table df_11_2(df_11_2);
+
+query q1
+`select s_name
+   from df_11_1 as lhs
+   where not exists
+       (select 1
+        from df_11_2 as rhs
+        where (lhs.s_key = rhs.s_key))`;
+
+query q2
+`joining, by = "s_key"
+joining, by = "s_key"
+select distinct s_name
+from
+  (select s_key,
+          s_name
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select s_key
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select s_key
+              from input1) as rhs
+           where (lhs.s_key = rhs.s_key) )) as rhs on (lhs.s_key = rhs.s_key))`;
+
+verify q1 q2;

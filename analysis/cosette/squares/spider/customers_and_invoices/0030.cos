@@ -1,0 +1,29 @@
+schema df_orders(order_id:int, customer_id:int, date_order_placed:str, order_details:str);
+schema df_invoices(invoice_number:int, order_id:int, invoice_date:str);
+
+table df_orders(df_orders);
+table df_invoices(df_invoices);
+
+query q1
+`select t1.invoice_date,
+       t1.order_id,
+       t2.order_details
+from df_invoices as t1
+join df_orders as t2 on t1.order_id = t2.order_id`;
+
+query q2
+`joining, by = "order_id"
+select invoice_date,
+       order_id,
+       order_details
+from
+  (select invoice_number,
+          order_id,
+          invoice_date,
+          customer_id,
+          date_order_placed,
+          order_details
+   from input1 as lhs
+   left join input0 as rhs on (lhs.order_id = rhs.order_id))`;
+
+verify q1 q2;

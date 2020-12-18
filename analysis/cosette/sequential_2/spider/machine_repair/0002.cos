@@ -1,0 +1,24 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+
+table df_technician(df_technician);
+
+query q1
+`select name
+from df_technician df_technician`;
+
+query q2
+`select name
+from
+  (select lhs.technician_id as technician_id,
+          lhs.name as name,
+          lhs.team as team,
+          lhs.starting_year as starting_year,
+          lhs.age as age,
+          rhs.name as name.other,
+          rhs.starting_year as starting_year.other,
+          rhs.age as age.other
+   from df_technician as lhs
+   inner join df_technician as rhs on (lhs.team = rhs.team
+                                       and lhs.technician_id = rhs.technician_id))`;
+
+verify q1 q2;

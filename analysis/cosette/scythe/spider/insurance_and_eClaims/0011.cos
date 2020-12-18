@@ -1,0 +1,21 @@
+schema df_claims_processing_stages(claim_stage_id:int, next_claim_stage_id:int, claim_status_name:str, claim_status_description:str);
+schema df_claims_processing(claim_processing_id:int, claim_id:int, claim_outcome_code:str, claim_stage_id:int, staff_id:int);
+
+table df_claims_processing_stages(df_claims_processing_stages);
+table df_claims_processing(df_claims_processing);
+
+query q1
+`select t2.claim_status_name
+from df_claims_processing as t1
+join df_claims_processing_stages as t2 on t1.claim_stage_id = t2.claim_stage_id
+group by t1.claim_stage_id
+
+limit 1`;
+
+query q2
+`(select
+    first(t2.claim_status_name) as first_claim_status_name
+  from
+    input as t2) as t1`;
+
+verify q1 q2;

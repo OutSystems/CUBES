@@ -1,0 +1,24 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+
+table df_festival_detail(df_festival_detail);
+
+query q1
+`select num_of_audience
+from df_festival_detail df_festival_detail
+where year = 2008
+  or year = 2010`;
+
+query q2
+`select t2.num_of_audience1
+ from
+  (select input.festival_id, input.festival_name, input.chair_name, input.location, input.year, input.num_of_audience, t1.festival_id as festival_id1, t1.festival_name as festival_name1, t1.chair_name as chair_name1, t1.location as location1, t1.year as year1, t1.num_of_audience as num_of_audience1
+  from (select *
+       from
+        input
+       where input.year = 2010.0) join 
+      (select *
+         from
+          input
+         where input.year >= 2008.0) as t1) as t2`;
+
+verify q1 q2;

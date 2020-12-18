@@ -1,0 +1,79 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_employee(df_employee);
+
+query q1
+`select count(*)
+from df_employee as t1
+join df_class as t2 on t1.emp_num = t2.prof_num
+where t1.emp_lname = 'graztevski'`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select lhs.class_code as class_code,
+          lhs.crs_code as crs_code,
+          lhs.class_section as class_section,
+          lhs.class_time as class_time,
+          lhs.class_room as class_room,
+          lhs.prof_num as prof_num,
+          lhs.emp_num as emp_num,
+          lhs.emp_lname as emp_lname,
+          lhs.emp_fname as emp_fname,
+          lhs.emp_initial as emp_initial,
+          lhs.emp_jobcode as emp_jobcode,
+          lhs.emp_hiredate as emp_hiredate,
+          lhs.emp_dob as emp_dob,
+          rhs.n_distinct as n_distinct
+   from
+     (select lhs.class_code as class_code,
+             lhs.crs_code as crs_code,
+             lhs.class_section as class_section,
+             lhs.class_time as class_time,
+             lhs.class_room as class_room,
+             lhs.prof_num as prof_num,
+             lhs.emp_num as emp_num,
+             lhs.emp_lname as emp_lname,
+             lhs.emp_fname as emp_fname,
+             lhs.emp_initial as emp_initial,
+             lhs.emp_jobcode as emp_jobcode,
+             lhs.emp_hiredate as emp_hiredate,
+             lhs.emp_dob as emp_dob
+      from
+        (select lhs.class_code as class_code,
+                lhs.crs_code as crs_code,
+                lhs.class_section as class_section,
+                lhs.class_time as class_time,
+                lhs.class_room as class_room,
+                lhs.prof_num as prof_num,
+                rhs.emp_num as emp_num,
+                rhs.emp_lname as emp_lname,
+                rhs.emp_fname as emp_fname,
+                rhs.emp_initial as emp_initial,
+                rhs.emp_jobcode as emp_jobcode,
+                rhs.emp_hiredate as emp_hiredate,
+                rhs.emp_dob as emp_dob
+         from df_class as lhs
+         cross join df_employee as rhs) as lhs
+      inner join
+        (select *
+         from df_employee df_employee
+         where (emp_lname = 'graztevski')) as rhs on (lhs.emp_num = rhs.emp_num
+                                                        and lhs.emp_lname = rhs.emp_lname
+                                                        and lhs.emp_fname = rhs.emp_fname
+                                                        and lhs.emp_initial = rhs.emp_initial
+                                                        and lhs.emp_jobcode = rhs.emp_jobcode
+                                                        and lhs.emp_hiredate = rhs.emp_hiredate
+                                                        and lhs.emp_dob = rhs.emp_dob)) as lhs
+   inner join
+     (select emp_dob,
+             emp_initial,
+             count(distinct emp_lname) as n_distinct
+      from df_employee df_employee
+      group by emp_dob,
+               emp_initial) as rhs on (lhs.emp_initial = rhs.emp_initial
+                                       and lhs.emp_dob = rhs.emp_dob))`;
+
+verify q1 q2;

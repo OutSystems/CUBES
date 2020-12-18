@@ -1,0 +1,29 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm(df_dorm);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select t1.dorm_name,
+       t1.student_capacity
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+join df_dorm_amenity as t3 on t2.amenid = t3.amenid
+group by t2.dormid
+
+limit 1`;
+
+query q2
+`select t1.dorm_name,t1.min_student_capacity
+ from
+  (select
+          min(t4.student_capacity) as min_student_capacity
+        from
+          input as t4) as t2 join 
+      input as t3 as t1
+ where t1.min_student_capacity = t1.student_capacity`;
+
+verify q1 q2;

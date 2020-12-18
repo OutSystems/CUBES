@@ -1,0 +1,51 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select distinct t1.title
+from df_papers as t1
+join df_authorship as t2 on t1.paperid = t2.paperid
+join df_inst as t3 on t2.instid = t3.instid
+where t3.name = "google"`;
+
+query q2
+`select title
+from
+  (select lhs.instid as instid,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.paperid as paperid,
+          lhs.title as title,
+          lhs.authid as authid,
+          lhs.authorder as authorder
+   from
+     (select lhs.instid as instid,
+             lhs.name as name,
+             lhs.country as country,
+             lhs.paperid as paperid,
+             lhs.title as title,
+             rhs.authid as authid,
+             rhs.authorder as authorder
+      from
+        (select lhs.instid as instid,
+                lhs.name as name,
+                lhs.country as country,
+                rhs.paperid as paperid,
+                rhs.title as title
+         from df_inst as lhs
+         cross join df_papers as rhs) as lhs
+      inner join df_authorship as rhs on (lhs.instid = rhs.instid
+                                              and lhs.paperid = rhs.paperid)) as lhs
+   inner join
+     (select *
+      from df_inst df_inst
+      where (name = 'google')) as rhs on (lhs.instid = rhs.instid
+                                            and lhs.name = rhs.name
+                                            and lhs.country = rhs.country))`;
+
+verify q1 q2;

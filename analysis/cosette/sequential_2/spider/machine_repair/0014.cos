@@ -1,0 +1,24 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+schema df_repair_assignment(technician_id:int, repair_id:int, machine_id:int);
+
+table df_technician(df_technician);
+table df_repair_assignment(df_repair_assignment);
+
+query q1
+`select name
+from df_technician df_technician
+where technician_id not in
+    (select technician_id
+     from df_repair_assignment df_repair_assignment)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_technician as lhs
+   where not exists
+       (select 1
+        from df_repair_assignment as rhs
+        where (lhs.technician_id = rhs.technician_id) ))`;
+
+verify q1 q2;

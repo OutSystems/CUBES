@@ -1,0 +1,26 @@
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_rating(df_rating);
+
+query q1
+`select rid
+from df_rating df_rating
+except
+select rid
+from df_rating df_rating
+where stars = 4`;
+
+query q2
+`select distinct rid
+from
+  (select *
+   from df_rating as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_rating df_rating
+           where (stars = 4.0)) as rhs
+        where (lhs.rid = rhs.rid) ))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+schema df_country(country_id:int, name:str, population:int, area:int, languages:str);
+
+table df_roller_coaster(df_roller_coaster);
+table df_country(df_country);
+
+query q1
+`select t1.name,
+       avg(t2.speed)
+from df_country as t1
+join df_roller_coaster as t2 on t1.country_id = t2.country_id
+group by t1.name`;
+
+query q2
+`select name,
+       meanspeed as avg.t2.speed.
+from
+  (select lhs.country_id as country_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.area as area,
+          lhs.languages as languages,
+          rhs.status as status,
+          rhs.meanspeed as meanspeed
+   from df_country as lhs
+   inner join
+     (select country_id,
+             status,
+             avg(speed) as meanspeed
+      from df_roller_coaster df_roller_coaster
+      group by country_id,
+               status) as rhs on (lhs.country_id = rhs.country_id))`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+
+table df_claims(df_claims);
+
+query q1
+`select date_claim_made
+from df_claims df_claims
+where amount_settled <=
+    (select avg(amount_settled)
+     from df_claims df_claims)`;
+
+query q2
+`select t3.date_claim_made
+ from
+  (select
+          avg(t2.amount_settled) as avg_amount_settled
+        from
+          input as t2) as t4 join 
+      input as t1 as t3
+ where t3.avg_amount_settled > t3.amount_settled`;
+
+verify q1 q2;

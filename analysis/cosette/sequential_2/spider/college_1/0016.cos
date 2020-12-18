@@ -1,0 +1,22 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+
+table df_class(df_class);
+
+query q1
+`select count(*),
+       class_room
+from df_class df_class
+group by class_room
+having count(*) >= 2`;
+
+query q2
+`select n as count...,
+       class_room
+from
+  (select class_room,
+          count(*) as n
+   from df_class df_class
+   group by class_room)
+where (n >= 2.0)`;
+
+verify q1 q2;

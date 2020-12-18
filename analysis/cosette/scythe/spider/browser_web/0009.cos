@@ -1,0 +1,26 @@
+schema df_browser(id:int, name:str, market_share:str);
+schema df_accelerator_compatible_browser(accelerator_id:int, browser_id:int, compatible_since_year:int);
+
+table df_browser(df_browser);
+table df_accelerator_compatible_browser(df_accelerator_compatible_browser);
+
+query q1
+`select t1.id,
+       t1.name
+from df_browser as t1
+join df_accelerator_compatible_browser as t2 on t1.id = t2.browser_id
+group by t1.id
+
+limit 1`;
+
+query q2
+`select t4.id,t4.name
+ from
+  (select
+          max(t1.market_share) as max_market_share
+        from
+          input as t1) as t3 join 
+      input as t2 as t4
+ where t4.max_market_share = t4.market_share`;
+
+verify q1 q2;

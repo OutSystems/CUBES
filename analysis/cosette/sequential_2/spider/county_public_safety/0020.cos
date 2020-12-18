@@ -1,0 +1,32 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+
+table df_county_public_safety(df_county_public_safety);
+
+query q1
+`select case_burden
+from df_county_public_safety df_county_public_safety`;
+
+query q2
+`select case_burden
+from
+  (select lhs.county_id as county_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.police_officers as police_officers,
+          lhs.residents_per_officer as residents_per_officer,
+          lhs.case_burden as case_burden,
+          lhs.crime_rate as crime_rate,
+          lhs.police_force as police_force,
+          lhs.location as location,
+          rhs.county_id as county_id.other,
+          rhs.name as name.other,
+          rhs.population as population.other,
+          rhs.police_officers as police_officers.other,
+          rhs.residents_per_officer as residents_per_officer.other,
+          rhs.case_burden as case_burden.other,
+          rhs.location as location.other
+   from df_county_public_safety as lhs
+   inner join df_county_public_safety as rhs on (lhs.crime_rate = rhs.crime_rate
+                                                 and lhs.police_force = rhs.police_force))`;
+
+verify q1 q2;

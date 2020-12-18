@@ -1,0 +1,37 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_authors(df_authors);
+table df_authorship(df_authorship);
+
+query q1
+`select distinct t1.fname,
+                t1.lname
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_inst as t3 on t2.instid = t3.instid
+where t3.name = "university of oxford"`;
+
+query q2
+`select t3.fname,t3.lname
+ from
+  (select t6.authid, t6.instid, t6.instid1, t6.name, t6.country, t4.authid as authid1, t4.lname, t4.fname
+  from (select *
+       from
+        (select t7.authid, t7.instid, t5.instid as instid1, t5.name, t5.country
+        from (select
+                t2.authid, t2.instid, from
+                input1 as t2
+              group by
+                t2.authid, t2.instid) as t7 join 
+            (select *
+               from
+                input
+               where input.name = 'university of oxford') as t5) as t6
+       where t6.instid = t6.instid1) join 
+      input0 as t4) as t3
+ where t3.authid = t3.authid1`;
+
+verify q1 q2;

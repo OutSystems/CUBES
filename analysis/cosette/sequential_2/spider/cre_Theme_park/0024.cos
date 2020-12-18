@@ -1,0 +1,49 @@
+schema df_visitors(tourist_id:int, tourist_details:str);
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_visits(visit_id:int, tourist_attraction_id:int, tourist_id:int, visit_date:str, visit_details:str);
+
+table df_visitors(df_visitors);
+table df_tourist_attractions(df_tourist_attractions);
+table df_visits(df_visits);
+
+query q1
+`select t1.name
+from df_tourist_attractions as t1
+join df_visits as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+join df_visitors as t3 on t2.tourist_id = t3.tourist_id
+where t3.tourist_details = "vincent"`;
+
+query q2
+`select name
+from
+  (select lhs.tourist_id as tourist_id,
+          lhs.tourist_details as tourist_details,
+          lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.visit_id as visit_id,
+          rhs.visit_date as visit_date,
+          rhs.visit_details as visit_details
+   from
+     (select lhs.tourist_id as tourist_id,
+             lhs.tourist_details as tourist_details,
+             rhs.tourist_attraction_id as tourist_attraction_id,
+             rhs.attraction_type_code as attraction_type_code,
+             rhs.location_id as location_id,
+             rhs.how_to_get_there as how_to_get_there,
+             rhs.name as name,
+             rhs.description as description,
+             rhs.opening_hours as opening_hours,
+             rhs.other_details as other_details
+      from df_visitors as lhs
+      cross join df_tourist_attractions as rhs) as lhs
+   inner join df_visits as rhs on (lhs.tourist_id = rhs.tourist_id
+                                       and lhs.tourist_attraction_id = rhs.tourist_attraction_id))
+where (tourist_details = 'vincent')`;
+
+verify q1 q2;

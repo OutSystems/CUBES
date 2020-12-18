@@ -1,0 +1,23 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select avg(credit_score)
+from df_customer df_customer
+where cust_id in
+    (select cust_id
+     from df_loan df_loan)`;
+
+query q2
+`(select
+    avg(t2.credit_score) as avg_credit_score
+  from
+    (select *
+       from
+        input
+       where input.cust_id <= input.branch_id) as t2) as t1`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_i044(id:int, count:int);
+
+table df_i044(df_i044);
+
+query q1
+`select t.id,
+       t.count,
+       (select sum(x.count)
+          from table x
+         where x.id <= t.id) as cumulative_sum
+from table t`;
+
+query q2
+`select id,
+       count,
+       sum(count) over (rows unbounded preceding) as sumcount
+from df_i044 df_i044`;
+
+verify q1 q2;

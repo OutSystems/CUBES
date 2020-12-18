@@ -1,0 +1,76 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+schema df_claim_headers(claim_header_id:int, claim_status_code:str, claim_type_code:str, policy_id:int, date_of_claim:str, date_of_settlement:str, amount_claimed:str, amount_piad:str);
+
+table df_customers(df_customers);
+table df_policies(df_policies);
+table df_claim_headers(df_claim_headers);
+
+query q1
+`select t3.customer_details
+from df_claim_headers as t1
+join df_policies as t2 on t1.policy_id = t2.policy_id
+join df_customers as t3 on t2.customer_id = t3.customer_id
+where t1.amount_claimed =
+    (select max(amount_claimed)
+     from df_claim_headers df_claim_headers)`;
+
+query q2
+`select customer_details
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_details as customer_details,
+          lhs.policy_id as policy_id,
+          lhs.policy_type_code as policy_type_code,
+          lhs.start_date as start_date,
+          lhs.end_date as end_date,
+          lhs.claim_header_id as claim_header_id,
+          lhs.claim_status_code as claim_status_code,
+          lhs.claim_type_code as claim_type_code,
+          lhs.date_of_claim as date_of_claim,
+          lhs.date_of_settlement as date_of_settlement,
+          lhs.amount_claimed as amount_claimed,
+          lhs.amount_piad as amount_piad
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.customer_details as customer_details,
+             lhs.policy_id as policy_id,
+             lhs.policy_type_code as policy_type_code,
+             lhs.start_date as start_date,
+             lhs.end_date as end_date,
+             rhs.claim_header_id as claim_header_id,
+             rhs.claim_status_code as claim_status_code,
+             rhs.claim_type_code as claim_type_code,
+             rhs.date_of_claim as date_of_claim,
+             rhs.date_of_settlement as date_of_settlement,
+             rhs.amount_claimed as amount_claimed,
+             rhs.amount_piad as amount_piad
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.customer_details as customer_details,
+                rhs.policy_id as policy_id,
+                rhs.policy_type_code as policy_type_code,
+                rhs.start_date as start_date,
+                rhs.end_date as end_date
+         from df_customers as lhs
+         inner join df_policies as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join df_claim_headers as rhs on (lhs.policy_id = rhs.policy_id)) as lhs
+   inner join
+     (select claim_header_id,
+             claim_status_code,
+             claim_type_code,
+             policy_id,
+             date_of_claim,
+             date_of_settlement,
+             max(amount_claimed) over () as amount_claimed,
+                                      amount_piad
+      from df_claim_headers df_claim_headers) as rhs on (lhs.policy_id = rhs.policy_id
+                                        and lhs.claim_header_id = rhs.claim_header_id
+                                        and lhs.claim_status_code = rhs.claim_status_code
+                                        and lhs.claim_type_code = rhs.claim_type_code
+                                        and lhs.date_of_claim = rhs.date_of_claim
+                                        and lhs.date_of_settlement = rhs.date_of_settlement
+                                        and lhs.amount_claimed = rhs.amount_claimed
+                                        and lhs.amount_piad = rhs.amount_piad))`;
+
+verify q1 q2;

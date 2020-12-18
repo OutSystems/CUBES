@@ -1,0 +1,63 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_assessment_notes(notes_id:int, student_id:int, teacher_id:int, date_of_notes:str, text_of_notes:str, other_details:str);
+
+table df_students(df_students);
+table df_assessment_notes(df_assessment_notes);
+
+query q1
+`select t1.date_of_notes
+from df_assessment_notes as t1
+join df_students as t2 on t1.student_id = t2.student_id
+where t2.first_name = "fanny"`;
+
+query q2
+`select date_of_notes
+from
+  (select lhs.student_id as student_id,
+          lhs.address_id as address_id,
+          lhs.first_name as first_name,
+          lhs.middle_name as middle_name,
+          lhs.last_name as last_name,
+          lhs.cell_mobile_number as cell_mobile_number,
+          lhs.email_address as email_address,
+          lhs.date_first_rental as date_first_rental,
+          lhs.date_left_university as date_left_university,
+          lhs.other_student_details as other_student_details,
+          lhs.notes_id as notes_id,
+          lhs.teacher_id as teacher_id,
+          lhs.date_of_notes as date_of_notes,
+          lhs.text_of_notes as text_of_notes,
+          lhs.other_details as other_details
+   from
+     (select lhs.student_id as student_id,
+             lhs.address_id as address_id,
+             lhs.first_name as first_name,
+             lhs.middle_name as middle_name,
+             lhs.last_name as last_name,
+             lhs.cell_mobile_number as cell_mobile_number,
+             lhs.email_address as email_address,
+             lhs.date_first_rental as date_first_rental,
+             lhs.date_left_university as date_left_university,
+             lhs.other_student_details as other_student_details,
+             rhs.notes_id as notes_id,
+             rhs.teacher_id as teacher_id,
+             rhs.date_of_notes as date_of_notes,
+             rhs.text_of_notes as text_of_notes,
+             rhs.other_details as other_details
+      from df_students as lhs
+      inner join df_assessment_notes as rhs on (lhs.student_id = rhs.student_id)) as lhs
+   inner join
+     (select *
+      from df_students df_students
+      where (first_name = 'fanny')) as rhs on (lhs.student_id = rhs.student_id
+                                                 and lhs.address_id = rhs.address_id
+                                                 and lhs.first_name = rhs.first_name
+                                                 and lhs.middle_name = rhs.middle_name
+                                                 and lhs.last_name = rhs.last_name
+                                                 and lhs.cell_mobile_number = rhs.cell_mobile_number
+                                                 and lhs.email_address = rhs.email_address
+                                                 and lhs.date_first_rental = rhs.date_first_rental
+                                                 and lhs.date_left_university = rhs.date_left_university
+                                                 and lhs.other_student_details = rhs.other_student_details))`;
+
+verify q1 q2;

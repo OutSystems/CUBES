@@ -1,0 +1,90 @@
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+schema df_protein(common_name:str, protein_name:str, divergence_from_human_lineage:str, accession_number:str, sequence_length:str, sequence_identity_to_human_protein:str, institution_id:int);
+
+table df_institution(df_institution);
+table df_protein(df_protein);
+
+query q1
+`select count(*)
+from df_institution as t1
+join df_protein as t2 on t1.institution_id = t2.institution_id
+where t1.founded > 1880
+  or t1.type = 'private'`;
+
+query q2
+`select distinct institution_id as count...
+from
+  (select lhs.institution_id as institution_id,
+          lhs.institution as institution,
+          lhs.location as location,
+          lhs.founded as founded,
+          lhs.type as type,
+          lhs.enrollment as enrollment,
+          lhs.team as team,
+          lhs.primary_conference as primary_conference,
+          lhs.building_id as building_id,
+          lhs.common_name as common_name,
+          lhs.protein_name as protein_name,
+          lhs.divergence_from_human_lineage as divergence_from_human_lineage,
+          lhs.accession_number as accession_number,
+          lhs.sequence_length as sequence_length,
+          lhs.sequence_identity_to_human_protein as sequence_identity_to_human_protein,
+          lhs.n as n
+   from
+     (select lhs.institution_id as institution_id,
+             lhs.institution as institution,
+             lhs.location as location,
+             lhs.founded as founded,
+             lhs.type as type,
+             lhs.enrollment as enrollment,
+             lhs.team as team,
+             lhs.primary_conference as primary_conference,
+             lhs.building_id as building_id,
+             lhs.common_name as common_name,
+             lhs.protein_name as protein_name,
+             lhs.divergence_from_human_lineage as divergence_from_human_lineage,
+             lhs.accession_number as accession_number,
+             lhs.sequence_length as sequence_length,
+             lhs.sequence_identity_to_human_protein as sequence_identity_to_human_protein,
+             rhs.n as n
+      from
+        (select lhs.institution_id as institution_id,
+                lhs.institution as institution,
+                lhs.location as location,
+                lhs.founded as founded,
+                lhs.type as type,
+                lhs.enrollment as enrollment,
+                lhs.team as team,
+                lhs.primary_conference as primary_conference,
+                lhs.building_id as building_id,
+                rhs.common_name as common_name,
+                rhs.protein_name as protein_name,
+                rhs.divergence_from_human_lineage as divergence_from_human_lineage,
+                rhs.accession_number as accession_number,
+                rhs.sequence_length as sequence_length,
+                rhs.sequence_identity_to_human_protein as sequence_identity_to_human_protein
+         from df_institution as lhs
+         inner join df_protein as rhs on (lhs.institution_id = rhs.institution_id)) as lhs
+      inner join
+        (select institution,
+                institution_id,
+                count(*) as n
+         from df_institution df_institution
+         group by institution,
+                  institution_id) as rhs on (lhs.institution_id = rhs.institution_id
+                                                 and lhs.institution = rhs.institution)) as lhs
+   inner join
+     (select *
+      from df_institution df_institution
+      where (type = 'private'
+             or founded <= 1880.0)) as rhs on (lhs.institution_id = rhs.institution_id
+                                               and lhs.institution = rhs.institution
+                                               and lhs.location = rhs.location
+                                               and lhs.founded = rhs.founded
+                                               and lhs.type = rhs.type
+                                               and lhs.enrollment = rhs.enrollment
+                                               and lhs.team = rhs.team
+                                               and lhs.primary_conference = rhs.primary_conference
+                                               and lhs.building_id = rhs.building_id))`;
+
+verify q1 q2;

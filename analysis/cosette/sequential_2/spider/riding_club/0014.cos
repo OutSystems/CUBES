@@ -1,0 +1,24 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+schema df_player_coach(player_id:int, coach_id:int, starting_year:int);
+
+table df_player(df_player);
+table df_player_coach(df_player_coach);
+
+query q1
+`select player_name
+from df_player df_player
+where player_id not in
+    (select player_id
+     from df_player_coach df_player_coach)`;
+
+query q2
+`select player_name
+from
+  (select *
+   from df_player as lhs
+   where not exists
+       (select 1
+        from df_player_coach as rhs
+        where (lhs.player_id = rhs.player_id) ))`;
+
+verify q1 q2;

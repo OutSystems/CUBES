@@ -1,0 +1,64 @@
+schema df_parts(part_id:int, part_name:str, chargeable_yn:int, chargeable_amount:int, other_part_details:str);
+schema df_part_faults(part_fault_id:int, part_id:int, fault_short_name:str, fault_description:str, other_fault_details:str);
+schema df_skills_required_to_fix(part_fault_id:int, skill_id:int);
+
+table df_parts(df_parts);
+table df_part_faults(df_part_faults);
+table df_skills_required_to_fix(df_skills_required_to_fix);
+
+query q1
+`select t1.part_id,
+       t1.part_name
+from df_parts as t1
+join df_part_faults as t2 on t1.part_id = t2.part_id
+join df_skills_required_to_fix as t3 on t2.part_fault_id = t3.part_fault_id
+group by t1.part_id
+
+limit 1`;
+
+query q2
+`select distinct part_id,
+                part_name
+from
+  (select lhs.part_id as part_id,
+          lhs.part_name as part_name,
+          lhs.chargeable_yn as chargeable_yn,
+          lhs.chargeable_amount as chargeable_amount,
+          lhs.other_part_details as other_part_details,
+          lhs.part_fault_id as part_fault_id,
+          lhs.fault_short_name as fault_short_name,
+          lhs.fault_description as fault_description,
+          lhs.other_fault_details as other_fault_details,
+          lhs.skill_id as skill_id,
+          rhs.fault_short_name as fault_short_name.other
+   from
+     (select lhs.part_id as part_id,
+             lhs.part_name as part_name,
+             lhs.chargeable_yn as chargeable_yn,
+             lhs.chargeable_amount as chargeable_amount,
+             lhs.other_part_details as other_part_details,
+             lhs.part_fault_id as part_fault_id,
+             lhs.fault_short_name as fault_short_name,
+             lhs.fault_description as fault_description,
+             lhs.other_fault_details as other_fault_details,
+             rhs.skill_id as skill_id
+      from
+        (select lhs.part_id as part_id,
+                lhs.part_name as part_name,
+                lhs.chargeable_yn as chargeable_yn,
+                lhs.chargeable_amount as chargeable_amount,
+                lhs.other_part_details as other_part_details,
+                rhs.part_fault_id as part_fault_id,
+                rhs.fault_short_name as fault_short_name,
+                rhs.fault_description as fault_description,
+                rhs.other_fault_details as other_fault_details
+         from df_parts as lhs
+         inner join df_part_faults as rhs on (lhs.part_id = rhs.part_id)) as lhs
+      inner join df_skills_required_to_fix as rhs on (lhs.part_fault_id = rhs.part_fault_id)) as lhs
+   inner join
+     (select fault_short_name,
+             count(*) as n
+      from df_part_faults df_part_faults
+      group by fault_short_name) as rhs on (lhs.chargeable_amount = rhs.n))`;
+
+verify q1 q2;

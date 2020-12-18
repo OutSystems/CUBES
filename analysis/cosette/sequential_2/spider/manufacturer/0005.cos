@@ -1,0 +1,31 @@
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+
+table df_furniture(df_furniture);
+
+query q1
+`select name,
+       num_of_component
+from df_furniture df_furniture
+
+limit 1`;
+
+query q2
+`select name.other as name,
+       num_of_component.other as num_of_component
+from
+  (select lhs.furniture_id as furniture_id,
+          lhs.name as name,
+          lhs.num_of_component as num_of_component,
+          lhs.market_rate as market_rate,
+          rhs.name as name.other,
+          rhs.num_of_component as num_of_component.other
+   from
+     (select furniture_id,
+             name,
+             num_of_component,
+             min(market_rate) over () as market_rate
+      from df_furniture df_furniture) as lhs
+   inner join df_furniture as rhs on (lhs.num_of_component = rhs.furniture_id
+                                      and lhs.market_rate = rhs.market_rate))`;
+
+verify q1 q2;

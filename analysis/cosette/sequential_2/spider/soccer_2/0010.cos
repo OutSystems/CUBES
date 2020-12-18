@@ -1,0 +1,21 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select count(*)
+from df_tryout df_tryout
+where decision = 'yes'`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select pid,
+          cname,
+          ppos,
+          decision,
+          count(distinct decision) over () as n_distinct
+   from df_tryout df_tryout)
+where (decision != 'yes')`;
+
+verify q1 q2;

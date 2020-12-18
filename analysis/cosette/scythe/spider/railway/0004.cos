@@ -1,0 +1,21 @@
+schema df_manager(manager_id:int, name:str, country:str, working_year_starts:int, age:int, level:int);
+
+table df_manager(df_manager);
+
+query q1
+`select max(level)
+from df_manager df_manager
+where country != "australia "`;
+
+query q2
+`select t2.level
+ from
+  (select
+      t1.country, t1.level, first(t1.country) as first_country
+    from
+      input as t1
+    group by
+      t1.country, t1.level) as t2
+ where t2.first_country = 'australia'`;
+
+verify q1 q2;

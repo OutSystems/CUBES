@@ -1,0 +1,29 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_appointment(appointmentid:int, patient:int, prepnurse:str, physician:int, start:str, end:str, examinationroom:str);
+
+table df_patient(df_patient);
+table df_appointment(df_appointment);
+
+query q1
+`select name
+from df_appointment as t1
+join df_patient as t2 on t1.df_patient = t2.ssn`;
+
+query q2
+`select name
+from
+  (select lhs.ssn as ssn,
+          lhs.name as name,
+          lhs.address as address,
+          lhs.phone as phone,
+          lhs.insuranceid as insuranceid,
+          lhs.pcp as pcp,
+          rhs.appointmentid as appointmentid,
+          rhs.prepnurse as prepnurse,
+          rhs.physician as physician,
+          rhs.start as start, rhs.end as end,
+                              rhs.examinationroom as examinationroom
+   from df_patient as lhs
+   inner join df_appointment as rhs on (lhs.ssn = rhs.patient))`;
+
+verify q1 q2;

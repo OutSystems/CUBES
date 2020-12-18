@@ -1,0 +1,36 @@
+schema df_mountain(id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_mountain(df_mountain);
+table df_photos(df_photos);
+
+query q1
+`select t1.id,
+       t1.name
+from df_mountain as t1
+join df_photos as t2 on t1.id = t2.mountain_id
+group by t1.id
+having count(*) >= 2`;
+
+query q2
+`select id,
+       name
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.prominence as prominence,
+          lhs.range as range,
+          lhs.country as country,
+          rhs.n as n
+   from df_mountain as lhs
+   inner join
+     (select *
+      from
+        (select mountain_id,
+                count(*) as n
+         from df_photos df_photos
+         group by mountain_id)
+      where (n >= 2.0)) as rhs on (lhs.id = rhs.mountain_id))`;
+
+verify q1 q2;

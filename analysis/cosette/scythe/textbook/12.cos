@@ -1,0 +1,37 @@
+schema df_12_1(S_key:str, age:int, level:str);
+
+table df_12_1(df_12_1);
+
+query q1
+`select s.age, s.level
+from student s
+group by s.age, s.level,
+having s.level in (select s1.level
+from student s1
+where s1.age = s.age
+group by s1.level, s1.age
+having count (*) >= all (select count (*)
+from student s2
+where s1.age = s2.age
+group by s2.level, s2.age))`;
+
+query q2
+`select t6.age,t6.level
+ from
+  (select t4.age, t4.count_distinct_level, t5.age as age1, t5.level, t5.count_level
+  from (select
+          t3.age, count_distinct(t3.level) as count_distinct_level
+        from
+          input as t3
+        group by
+          t3.age) as t4 join 
+      (select
+            t1.age, t1.level, count(t1.level) as count_level
+          from
+            input as t1
+          group by
+            t1.age, t1.level) as t2 as t5) as t6
+ where t6.count_distinct_level = t6.count_level
+   and t6.age = t6.age1`;
+
+verify q1 q2;

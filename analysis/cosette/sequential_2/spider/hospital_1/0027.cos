@@ -1,0 +1,65 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_stay(stayid:int, patient:int, room:int, staystart:str, stayend:str);
+schema df_undergoes(patient:int, procedures:int, stay:int, dateundergoes:str, physician:int, assistingnurse:int);
+
+table df_patient(df_patient);
+table df_stay(df_stay);
+table df_undergoes(df_undergoes);
+
+query q1
+`select distinct t2.name
+from df_undergoes as t1
+join df_patient as t2 on t1.df_patient = t2.ssn
+join df_stay as t3 on t1.df_stay = t3.stayid
+where t3.room = 111`;
+
+query q2
+`select name
+from
+  (select lhs.ssn as ssn,
+          lhs.name as name,
+          lhs.address as address,
+          lhs.phone as phone,
+          lhs.insuranceid as insuranceid,
+          lhs.pcp as pcp,
+          rhs.stayid as stayid,
+          rhs.patient as patient,
+          rhs.room as room,
+          rhs.staystart as staystart,
+          rhs.stayend as stayend,
+          rhs.patient.other as patient.other,
+          rhs.dateundergoes as dateundergoes,
+          rhs.physician as physician,
+          rhs.assistingnurse as assistingnurse,
+          rhs.stay as stay
+   from df_patient as lhs
+   inner join
+     (select stayid,
+             patient,
+             room,
+             staystart,
+             stayend,
+             patient.other,
+             procedures,
+             dateundergoes,
+             physician,
+             assistingnurse,
+             stayid as stay
+      from
+        (select lhs.stayid as stayid,
+                lhs.patient as patient,
+                lhs.room as room,
+                lhs.staystart as staystart,
+                lhs.stayend as stayend,
+                rhs.patient as patient.other,
+                rhs.procedures as procedures,
+                rhs.dateundergoes as dateundergoes,
+                rhs.physician as physician,
+                rhs.assistingnurse as assistingnurse
+         from
+           (select *
+            from df_stay df_stay
+            where (room > 111.0)) as lhs
+         inner join df_undergoes as rhs on (lhs.stayid = rhs.stay))) as rhs on (lhs.pcp = rhs.procedures))`;
+
+verify q1 q2;

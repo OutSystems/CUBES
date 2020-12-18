@@ -1,0 +1,58 @@
+schema df_activity(actid:int, activity_name:str);
+schema df_faculty_participates_in(facid:int, actid:int);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_activity(df_activity);
+table df_faculty_participates_in(df_faculty_participates_in);
+table df_faculty(df_faculty);
+
+query q1
+`select t1.lname
+from df_faculty as t1
+join df_faculty_participates_in as t2 on t1.facid = t2.facid
+join df_activity as t3 on t2.actid = t2.actid
+where t3.activity_name = 'canoeing' intersect
+  select t1.lname
+  from df_faculty as t1
+  join df_faculty_participates_in as t2 on t1.facid = t2.facid
+  join df_activity as t3 on t2.actid = t2.actid where t3.activity_name = 'kayaking'`;
+
+query q2
+`select distinct lname
+from
+  (select lhs.actid as actid,
+          lhs.activity_name as activity_name,
+          lhs.facid as facid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.rank as rank,
+          lhs.sex as sex,
+          lhs.phone as phone,
+          lhs.room as room,
+          lhs.building as building
+   from
+     (select lhs.actid as actid,
+             lhs.activity_name as activity_name,
+             lhs.facid as facid,
+             rhs.lname as lname,
+             rhs.fname as fname,
+             rhs.rank as rank,
+             rhs.sex as sex,
+             rhs.phone as phone,
+             rhs.room as room,
+             rhs.building as building
+      from
+        (select lhs.actid as actid,
+                lhs.activity_name as activity_name,
+                rhs.facid as facid
+         from df_activity as lhs
+         inner join df_faculty_participates_in as rhs on (lhs.actid = rhs.actid)) as lhs
+      inner join df_faculty as rhs on (lhs.facid = rhs.facid)) as lhs
+   inner join
+     (select *
+      from df_activity df_activity
+      where (activity_name != 'canoeing'
+             or activity_name != 'kayaking')) as rhs on (lhs.actid = rhs.actid
+                                                           and lhs.activity_name = rhs.activity_name))`;
+
+verify q1 q2;

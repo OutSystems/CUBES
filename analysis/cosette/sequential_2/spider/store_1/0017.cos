@@ -1,0 +1,30 @@
+schema df_artists(id:int, name:str);
+schema df_albums(id:int, title:str, artist_id:int);
+
+table df_artists(df_artists);
+table df_albums(df_albums);
+
+query q1
+`select t1.title
+from df_albums as t1
+join df_artists as t2 on t1.artist_id = t2.id
+where t2.name = "aerosmith"`;
+
+query q2
+`select title
+from
+  (select id,
+          name,
+          id.other,
+          title,
+          id as artist_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             rhs.id as id.other,
+             rhs.title as title
+      from df_artists as lhs
+      inner join df_albums as rhs on (lhs.id = rhs.artist_id)))
+where (name = 'aerosmith')`;
+
+verify q1 q2;

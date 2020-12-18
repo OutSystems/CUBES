@@ -1,0 +1,49 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+schema df_shop(shop_id:int, shop_name:str, location:str, open_date:str, open_year:int);
+schema df_stock(shop_id:int, device_id:int, quantity:int);
+
+table df_device(df_device);
+table df_shop(df_shop);
+table df_stock(df_stock);
+
+query q1
+`select t3.shop_name,
+       t2.carrier
+from df_stock as t1
+join df_device as t2 on t1.device_id = t2.device_id
+join df_shop as t3 on t1.shop_id = t3.shop_id`;
+
+query q2
+`select shop_name,
+       carrier
+from
+  (select lhs.device_id as device_id,
+          lhs.device as device,
+          lhs.carrier as carrier,
+          lhs.package_version as package_version,
+          lhs.applications as applications,
+          lhs.software_platform as software_platform,
+          lhs.shop_id as shop_id,
+          lhs.shop_name as shop_name,
+          lhs.location as location,
+          lhs.open_date as open_date,
+          lhs.open_year as open_year,
+          rhs.quantity as quantity
+   from
+     (select lhs.device_id as device_id,
+             lhs.device as device,
+             lhs.carrier as carrier,
+             lhs.package_version as package_version,
+             lhs.applications as applications,
+             lhs.software_platform as software_platform,
+             rhs.shop_id as shop_id,
+             rhs.shop_name as shop_name,
+             rhs.location as location,
+             rhs.open_date as open_date,
+             rhs.open_year as open_year
+      from df_device as lhs
+      cross join df_shop as rhs) as lhs
+   inner join df_stock as rhs on (lhs.device_id = rhs.device_id
+                                  and lhs.shop_id = rhs.shop_id))`;
+
+verify q1 q2;

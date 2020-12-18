@@ -1,0 +1,29 @@
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_book(df_book);
+
+query q1
+`select writer
+from df_book df_book
+group by writer
+having count(*) > 1`;
+
+query q2
+`select t2.writer
+ from
+  (select t4.writer, t4.count_issues, t1.book_id, t1.title, t1.issues, t1.writer as writer1
+  from (select *
+       from
+        (select
+            t3.writer, count(t3.issues) as count_issues
+          from
+            input as t3
+          group by
+            t3.writer) as t4
+       where t4.count_issues = 2.0) join 
+      (select *
+         from
+          input
+         where input.book_id = 1.0) as t1) as t2`;
+
+verify q1 q2;

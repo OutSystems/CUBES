@@ -1,0 +1,40 @@
+schema df_party(party_id:int, year:str, party:str, governor:str, lieutenant_governor:str, comptroller:str, attorney_general:str, us_senate:str);
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_party(df_party);
+table df_election(df_election);
+
+query q1
+`select t1.committee
+from df_election as t1
+join df_party as t2 on t1.df_party = t2.party_id
+where t2.df_party = "democratic" intersect
+  select t1.committee
+  from df_election as t1
+  join df_party as t2 on t1.df_party = t2.party_id where t2.df_party = "liberal"`;
+
+query q2
+`select committee
+from
+  (select lhs.party_id as party_id,
+          lhs.year as year,
+          lhs.party as party,
+          lhs.governor as governor,
+          lhs.lieutenant_governor as lieutenant_governor,
+          lhs.comptroller as comptroller,
+          lhs.attorney_general as attorney_general,
+          lhs.us_senate as us_senate,
+          rhs.election_id as election_id,
+          rhs.counties_represented as counties_represented,
+          rhs.delegate as delegate,
+          rhs.party as party.other,
+          rhs.first_elected as first_elected,
+          rhs.committee as committee
+   from
+     (select *
+      from df_party df_party
+      where (party != 'democratic'
+             and party != 'liberal')) as lhs
+   inner join df_election as rhs on (lhs.party_id = rhs.district))`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select lifespan
+from df_representative df_representative
+where state = "new york"
+  or state = "indiana"`;
+
+query q2
+`select t2.lifespan
+ from
+  (select
+          max(t3.representative_id) as max_representative_id
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.state = 'indiana'
+           or input.state = 'new york') as t4 as t2`;
+
+verify q1 q2;

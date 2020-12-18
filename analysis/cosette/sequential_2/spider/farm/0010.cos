@@ -1,0 +1,30 @@
+schema df_city(city_id:int, official_name:str, status:str, area_km_2:str, population:str, census_ranking:str);
+schema df_farm_competition(competition_id:int, year:int, theme:str, host_city_id:int, hosts:str);
+
+table df_city(df_city);
+table df_farm_competition(df_farm_competition);
+
+query q1
+`select t2.year,
+       t1.official_name
+from df_city as t1
+join df_farm_competition as t2 on t1.city_id = t2.host_city_id`;
+
+query q2
+`select year,
+       official_name
+from
+  (select lhs.city_id as city_id,
+          lhs.official_name as official_name,
+          lhs.status as status,
+          lhs.area_km_2 as area_km_2,
+          lhs.population as population,
+          lhs.census_ranking as census_ranking,
+          rhs.competition_id as competition_id,
+          rhs.year as year,
+          rhs.theme as theme,
+          rhs.hosts as hosts
+   from df_city as lhs
+   inner join df_farm_competition as rhs on (lhs.city_id = rhs.host_city_id))`;
+
+verify q1 q2;

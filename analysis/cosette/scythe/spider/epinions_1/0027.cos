@@ -1,0 +1,37 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select title
+from df_item df_item
+where i_id not in
+    (select i_id
+     from df_review df_review)`;
+
+query q2
+`select * from 
+(select t1.title
+   from
+    (select input.i_id, input.title, t2.a_id, t2.u_id, t2.i_id as i_id1, t2.rating, t2.rank
+    from input join 
+        (select *
+           from
+            input0
+           where input0.u_id = input0.i_id) as t2) as t1
+   where t1.i_id < t1.i_id1)
+union all 
+ select * from
+  (select t3.title
+   from
+    (select input.i_id, input.title, t4.a_id, t4.u_id, t4.i_id as i_id1, t4.rating, t4.rank
+    from input join 
+        (select *
+           from
+            input0
+           where input0.a_id > input0.i_id) as t4) as t3
+   where t3.i_id = t3.a_id)`;
+
+verify q1 q2;

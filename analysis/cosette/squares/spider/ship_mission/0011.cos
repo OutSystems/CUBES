@@ -1,0 +1,34 @@
+schema df_mission(mission_id:int, ship_id:int, code:str, launched_year:int, location:str, speed_knots:int, fate:str);
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_mission(df_mission);
+table df_ship(df_ship);
+
+query q1
+`select t1.code,
+       t1.fate,
+       t2.name
+from df_mission as t1
+join df_ship as t2 on t1.ship_id = t2.ship_id`;
+
+query q2
+`joining, by = "ship_id"
+select code,
+       fate,
+       name
+from
+  (select mission_id,
+          ship_id,
+          code,
+          launched_year,
+          location,
+          speed_knots,
+          fate,
+          name,
+          type,
+          nationality,
+          tonnage
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.ship_id = rhs.ship_id))`;
+
+verify q1 q2;

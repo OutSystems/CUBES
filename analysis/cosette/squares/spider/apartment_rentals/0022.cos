@@ -1,0 +1,33 @@
+schema df_guests(guest_id:int, gender_code:str, guest_first_name:str, guest_last_name:str, date_of_birth:str);
+schema df_apartment_bookings(apt_booking_id:int, apt_id:int, guest_id:int, booking_status_code:str, booking_start_date:str, booking_end_date:str);
+
+table df_guests(df_guests);
+table df_apartment_bookings(df_apartment_bookings);
+
+query q1
+`select t2.guest_first_name,
+       t2.guest_last_name
+from df_apartment_bookings as t1
+join df_guests as t2 on t1.guest_id = t2.guest_id
+where t1.booking_status_code = "confirmed"`;
+
+query q2
+`joining, by = "guest_id"
+select distinct guest_first_name,
+                guest_last_name
+from
+  (select apt_booking_id,
+          apt_id,
+          guest_id,
+          booking_status_code,
+          booking_start_date,
+          booking_end_date,
+          gender_code,
+          guest_first_name,
+          guest_last_name,
+          date_of_birth
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.guest_id = rhs.guest_id))
+where (booking_status_code = 'confirmed')`;
+
+verify q1 q2;

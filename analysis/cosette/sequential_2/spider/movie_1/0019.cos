@@ -1,0 +1,83 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_rating(df_rating);
+
+query q1
+`select t2.title,
+       t2.director
+from df_rating as t1
+join df_movie as t2 on t1.mid = t2.mid
+where t1.stars >
+    (select avg(t1.stars)
+     from df_rating as t1
+     join df_movie as t2 on t1.mid = t2.mid
+     where t2.director = "james cameron")`;
+
+query q2
+`select title.other as title,
+       director.other as director
+from
+  (select *
+   from
+     (select lhs.mid as mid,
+             lhs.title as title,
+             lhs.year as year,
+             lhs.director as director,
+             lhs.rid as rid,
+             lhs.stars as stars,
+             lhs.ratingdate as ratingdate,
+             lhs.meanstars as meanstars,
+             rhs.mid as mid.other,
+             rhs.title as title.other,
+             rhs.year as year.other,
+             rhs.director as director.other,
+             rhs.rid as rid.other,
+             rhs.stars as stars.other,
+             rhs.ratingdate as ratingdate.other,
+             rhs.meanstars as meanstars.other
+      from
+        (select mid,
+                title,
+                year,
+                director,
+                rid,
+                stars,
+                ratingdate,
+                avg(stars) over () as meanstars
+         from
+           (select lhs.mid as mid,
+                   lhs.title as title,
+                   lhs.year as year,
+                   lhs.director as director,
+                   rhs.rid as rid,
+                   rhs.stars as stars,
+                   rhs.ratingdate as ratingdate
+            from df_movie as lhs
+            inner join df_rating as rhs on (lhs.mid = rhs.mid))) as lhs
+      cross join
+        (select mid,
+                title,
+                year,
+                director,
+                rid,
+                stars,
+                ratingdate,
+                avg(stars) over () as meanstars
+         from
+           (select lhs.mid as mid,
+                   lhs.title as title,
+                   lhs.year as year,
+                   lhs.director as director,
+                   rhs.rid as rid,
+                   rhs.stars as stars,
+                   rhs.ratingdate as ratingdate
+            from df_movie as lhs
+            inner join df_rating as rhs on (lhs.mid = rhs.mid))) as rhs)
+   where (stars <= stars.other
+          and meanstars = meanstars.other))
+where (director = 'james cameron'
+       and meanstars < stars)`;
+
+verify q1 q2;

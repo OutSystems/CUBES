@@ -1,0 +1,21 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+schema df_acceptance(submission_id:int, workshop_id:int, result:str);
+
+table df_submission(df_submission);
+table df_acceptance(df_acceptance);
+
+query q1
+`select t2.author,
+       t1.result
+from df_acceptance as t1
+join df_submission as t2 on t1.submission_id = t2.submission_id`;
+
+query q2
+`select t2.author,t2.result
+ from
+  (select input.submission_id, input.scores, input.author, input.college, t1.submission_id as submission_id1, t1.workshop_id, t1.result
+  from input join 
+      input0 as t1) as t2
+ where t2.submission_id = t2.submission_id1`;
+
+verify q1 q2;

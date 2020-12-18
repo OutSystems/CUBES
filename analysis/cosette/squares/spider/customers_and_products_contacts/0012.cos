@@ -1,0 +1,56 @@
+schema df_addresses(address_id:int, line_1_number_building:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_customers(customer_id:int, payment_method_code:str, customer_number:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_address_history(customer_id:int, address_id:int, date_from:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_address_history(df_customer_address_history);
+
+query q1
+`select t2.customer_name,
+       t3.city,
+       t1.date_from,
+       t1.date_to
+from df_customer_address_history as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+join df_addresses as t3 on t1.address_id = t3.address_id`;
+
+query q2
+`joining, by = "customer_id"
+joining, by = "address_id"
+select customer_name,
+       city,
+       date_from,
+       date_to
+from
+  (select customer_id,
+          address_id,
+          date_from,
+          date_to,
+          payment_method_code,
+          customer_number,
+          customer_name,
+          customer_address,
+          customer_phone,
+          customer_email,
+          line_1_number_building,
+          city,
+          zip_postcode,
+          state_province_county,
+          country
+   from
+     (select customer_id,
+             address_id,
+             date_from,
+             date_to,
+             payment_method_code,
+             customer_number,
+             customer_name,
+             customer_address,
+             customer_phone,
+             customer_email
+      from input2 as lhs
+      inner join input1 as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join input0 as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

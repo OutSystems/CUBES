@@ -1,0 +1,28 @@
+schema df_college(college_id:int, name:str, leader_name:str, college_location:str);
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+
+table df_college(df_college);
+table df_member(df_member);
+
+query q1
+`select distinct t1.leader_name
+from df_college as t1
+join df_member as t2 on t1.college_id = t2.college_id
+where t2.country = "canada"`;
+
+query q2
+`select t3.leader_name
+ from
+  (select t2.country, t2.college_id, t4.college_id as college_id1, t4.name, t4.leader_name, t4.college_location
+  from (select
+          t1.country, t1.college_id, from
+          (select *
+             from
+              input0
+             where input0.country = 'canada') as t1
+        group by
+          t1.country, t1.college_id) as t2 join 
+      input as t4) as t3
+ where t3.college_id = t3.college_id1`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+schema df_stock(shop_id:int, device_id:int, quantity:int);
+
+table df_device(df_device);
+table df_stock(df_stock);
+
+query q1
+`select t2.carrier
+from df_stock as t1
+join df_device as t2 on t1.device_id = t2.device_id
+group by t1.device_id
+having count(*) > 1`;
+
+query q2
+`select t1.carrier
+ from
+  (select input.device_id, input.device, input.carrier, input.package_version, input.applications, input.software_platform, t2.shop_id, t2.device_id as device_id1, t2.quantity
+  from input join 
+      (select *
+         from
+          input0
+         where input0.shop_id = 1.0) as t2) as t1
+ where t1.device_id = t1.device_id1`;
+
+verify q1 q2;

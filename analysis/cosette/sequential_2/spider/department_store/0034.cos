@@ -1,0 +1,24 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_code:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+
+table df_customers(df_customers);
+
+query q1
+`select max(customer_code),
+       min(customer_code)
+from df_customers df_customers`;
+
+query q2
+`select distinct maxcustomer_code as max.customer_code.,
+                min(customer_code) over () as min.customer_code.
+from
+  (select customer_id,
+          payment_method_code,
+          customer_code,
+          customer_name,
+          customer_address,
+          customer_phone,
+          customer_email,
+          max(customer_code) over () as maxcustomer_code
+   from df_customers df_customers)`;
+
+verify q1 q2;

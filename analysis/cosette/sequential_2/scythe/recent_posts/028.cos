@@ -1,0 +1,33 @@
+schema df_028(Member:int, Element:str);
+
+table df_028(df_028);
+
+query q1
+`select a.member, count(a.member) as total
+from t1 a join t1 b
+where a.element = b.element and b.member=1 and a.member > 1
+group by a.member`;
+
+query q2
+`select member as c1,
+       n as c2
+from
+  (select member,
+          count(*) as n
+   from
+     (select *
+      from
+        (select lhs.member as member,
+                lhs.element as element,
+                rhs.member as member.other,
+                rhs.element as element.other
+         from df_028 as lhs
+         cross join
+           (select *
+            from df_028 df_028
+            where (member = 1.0)) as rhs)
+      where (member != member.other
+             and element = element.other))
+   group by member)`;
+
+verify q1 q2;

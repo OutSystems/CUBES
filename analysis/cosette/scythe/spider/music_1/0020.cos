@@ -1,0 +1,21 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+
+table df_files(df_files);
+
+query q1
+`select count(*),
+       formats
+from df_files df_files
+group by formats`;
+
+query q2
+`select t1.count_duration,t1.formats
+ from
+  (select
+      t2.formats, count(t2.duration) as count_duration
+    from
+      input as t2
+    group by
+      t2.formats) as t1`;
+
+verify q1 q2;

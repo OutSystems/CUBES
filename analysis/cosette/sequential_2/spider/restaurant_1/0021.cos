@@ -1,0 +1,47 @@
+schema df_restaurant(resid:int, resname:str, address:str, rating:int);
+schema df_visits_restaurant(stuid:int, resid:int, time:str, spent:str);
+
+table df_restaurant(df_restaurant);
+table df_visits_restaurant(df_visits_restaurant);
+
+query q1
+`select df_restaurant.resname,
+       sum(df_visits_restaurant.spent)
+from df_visits_restaurant df_visits_restaurant
+join df_restaurant on df_visits_restaurant.resid = df_restaurant.resid
+group by df_restaurant.resid
+
+limit 1`;
+
+query q2
+`select resname,
+       sumspent as sum.visits_restaurant.spent.
+from
+  (select resname,
+          time,
+          sum(spent) as sumspent
+   from
+     (select lhs.resid as resid,
+             lhs.resname as resname,
+             lhs.address as address,
+             lhs.rating as rating,
+             lhs.stuid as stuid,
+             lhs.time as time,
+             lhs.spent as spent
+      from
+        (select lhs.resid as resid,
+                lhs.resname as resname,
+                lhs.address as address,
+                lhs.rating as rating,
+                rhs.stuid as stuid,
+                rhs.time as time,
+                rhs.spent as spent
+         from df_restaurant as lhs
+         inner join df_visits_restaurant as rhs on (lhs.resid = rhs.resid)) as lhs
+      inner join
+        (select min(spent) as spent
+         from df_visits_restaurant df_visits_restaurant) as rhs on (lhs.spent = rhs.spent))
+   group by resname,
+            time)`;
+
+verify q1 q2;

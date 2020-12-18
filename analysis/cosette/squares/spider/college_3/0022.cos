@@ -1,0 +1,55 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty(df_faculty);
+
+query q1
+`select rank
+from df_faculty df_faculty
+group by rank
+
+limit 1`;
+
+query q2
+`joining, by = c("rank", "sex")
+joining, by = c("n", "lname", "fname")
+select rank
+from
+  (select rank,
+          sex,
+          n,
+          facid,
+          lname,
+          fname,
+          phone,
+          room,
+          building
+   from
+     (select rank,
+             sex,
+             n,
+             facid,
+             lname,
+             fname,
+             phone,
+             room,
+             building
+      from
+        (select rank,
+                sex,
+                count(*) as n
+         from input0
+         group by rank,
+                  sex) as lhs
+      inner join input0 as rhs on (lhs.rank = rhs.rank
+                                       and lhs.sex = rhs.sex)) as lhs
+   inner join
+     (select fname,
+             lname,
+             count(*) as n
+      from input0
+      group by fname,
+               lname) as rhs on (lhs.n = rhs.n
+                                     and lhs.lname = rhs.lname
+                                     and lhs.fname = rhs.fname))`;
+
+verify q1 q2;

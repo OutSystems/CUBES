@@ -1,0 +1,22 @@
+schema df_stay(stayid:int, patient:int, room:int, staystart:str, stayend:str);
+
+table df_stay(df_stay);
+
+query q1
+`select count(patient)
+from df_stay df_stay
+where room = 112`;
+
+query q2
+`select distinct n_distinct as count.patient.
+from
+  (select room,
+          count(distinct patient) as n_distinct
+   from
+     (select *
+      from df_stay df_stay
+      where (patient != 112.0
+             or room != patient))
+   group by room)`;
+
+verify q1 q2;

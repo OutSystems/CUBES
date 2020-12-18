@@ -1,0 +1,111 @@
+schema df_countries(country_id:str, country_name:str, region_id:int);
+schema df_departments(department_id:int, department_name:str, manager_id:int, location_id:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+schema df_locations(location_id:int, street_address:str, postal_code:str, city:str, state_province:str, country_id:str);
+
+table df_countries(df_countries);
+table df_departments(df_departments);
+table df_employees(df_employees);
+table df_locations(df_locations);
+
+query q1
+`select t1.employee_id,
+       t4.country_name
+from df_employees as t1
+join df_departments as t2 on t1.department_id = t2.department_id
+join df_locations as t3 on t2.location_id = t3.location_id
+join df_countries as t4 on t3.country_id = t4.country_id`;
+
+query q2
+`select employee_id,
+       country_name
+from
+  (select lhs.country_id as country_id,
+          lhs.country_name as country_name,
+          lhs.region_id as region_id,
+          lhs.employee_id as employee_id,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.email as email,
+          lhs.phone_number as phone_number,
+          lhs.hire_date as hire_date,
+          lhs.job_id as job_id,
+          lhs.salary as salary,
+          lhs.commission_pct as commission_pct,
+          lhs.manager_id as manager_id,
+          lhs.department_id as department_id,
+          lhs.location_id as location_id,
+          lhs.street_address as street_address,
+          lhs.postal_code as postal_code,
+          lhs.city as city,
+          lhs.state_province as state_province,
+          rhs.department_name as department_name,
+          rhs.manager_id.other as manager_id.other
+   from
+     (select lhs.country_id as country_id,
+             lhs.country_name as country_name,
+             lhs.region_id as region_id,
+             lhs.employee_id as employee_id,
+             lhs.first_name as first_name,
+             lhs.last_name as last_name,
+             lhs.email as email,
+             lhs.phone_number as phone_number,
+             lhs.hire_date as hire_date,
+             lhs.job_id as job_id,
+             lhs.salary as salary,
+             lhs.commission_pct as commission_pct,
+             lhs.manager_id as manager_id,
+             lhs.department_id as department_id,
+             rhs.location_id as location_id,
+             rhs.street_address as street_address,
+             rhs.postal_code as postal_code,
+             rhs.city as city,
+             rhs.state_province as state_province
+      from
+        (select lhs.country_id as country_id,
+                lhs.country_name as country_name,
+                lhs.region_id as region_id,
+                rhs.employee_id as employee_id,
+                rhs.first_name as first_name,
+                rhs.last_name as last_name,
+                rhs.email as email,
+                rhs.phone_number as phone_number,
+                rhs.hire_date as hire_date,
+                rhs.job_id as job_id,
+                rhs.salary as salary,
+                rhs.commission_pct as commission_pct,
+                rhs.manager_id as manager_id,
+                rhs.department_id as department_id
+         from df_countries as lhs
+         cross join df_employees as rhs) as lhs
+      inner join df_locations as rhs on (lhs.country_id = rhs.country_id)) as lhs
+   inner join
+     (select lhs.employee_id as employee_id,
+             lhs.first_name as first_name,
+             lhs.last_name as last_name,
+             lhs.email as email,
+             lhs.phone_number as phone_number,
+             lhs.hire_date as hire_date,
+             lhs.job_id as job_id,
+             lhs.salary as salary,
+             lhs.commission_pct as commission_pct,
+             lhs.manager_id as manager_id,
+             lhs.department_id as department_id,
+             rhs.department_name as department_name,
+             rhs.manager_id as manager_id.other,
+             rhs.location_id as location_id
+      from df_employees as lhs
+      inner join df_departments as rhs on (lhs.department_id = rhs.department_id)) as rhs on (lhs.employee_id = rhs.employee_id
+                                                                                              and lhs.first_name = rhs.first_name
+                                                                                              and lhs.last_name = rhs.last_name
+                                                                                              and lhs.email = rhs.email
+                                                                                              and lhs.phone_number = rhs.phone_number
+                                                                                              and lhs.hire_date = rhs.hire_date
+                                                                                              and lhs.job_id = rhs.job_id
+                                                                                              and lhs.salary = rhs.salary
+                                                                                              and lhs.commission_pct = rhs.commission_pct
+                                                                                              and lhs.manager_id = rhs.manager_id
+                                                                                              and lhs.department_id = rhs.department_id
+                                                                                              and lhs.location_id = rhs.location_id))`;
+
+verify q1 q2;

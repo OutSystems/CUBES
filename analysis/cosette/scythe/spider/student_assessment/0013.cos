@@ -1,0 +1,22 @@
+schema df_students(student_id:int, student_details:str);
+schema df_student_course_registrations(student_id:int, course_id:int, registration_date:str);
+
+table df_students(df_students);
+table df_student_course_registrations(df_student_course_registrations);
+
+query q1
+`select t1.student_id,
+       count(*)
+from df_students as t1
+join df_student_course_registrations as t2 on t1.student_id = t2.student_id
+group by t1.student_id`;
+
+query q2
+`(select
+    t1.student_id, count(t1.registration_date) as count_registration_date
+  from
+    input0 as t1
+  group by
+    t1.student_id) as t2`;
+
+verify q1 q2;

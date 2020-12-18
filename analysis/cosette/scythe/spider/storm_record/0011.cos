@@ -1,0 +1,33 @@
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select region_name
+from df_region df_region
+where region_id not in
+    (select region_id
+     from df_affected_region df_affected_region)`;
+
+query q2
+`select t2.region_name
+ from
+  (select t1.region_id, t1.max_storm_id, t3.region_id as region_id1, t3.region_code, t3.region_name
+  from (select *
+       from
+        (select
+            t4.region_id, max(t4.storm_id) as max_storm_id
+          from
+            input0 as t4
+          group by
+            t4.region_id) as t1
+       where t1.max_storm_id = t1.region_id) join 
+      (select *
+         from
+          input
+         where input.region_id <> 12.0) as t3) as t2
+ where t2.max_storm_id < t2.region_id1`;
+
+verify q1 q2;

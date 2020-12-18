@@ -1,0 +1,33 @@
+schema df_products_for_hire(product_id:int, product_type_code:str, daily_hire_cost:str, product_name:str, product_description:str);
+schema df_products_booked(booking_id:int, product_id:int, returned_yn:int, returned_late_yn:int, booked_count:int, booked_amount:str);
+
+table df_products_for_hire(df_products_for_hire);
+table df_products_booked(df_products_booked);
+
+query q1
+`select count(*)
+from df_products_for_hire df_products_for_hire
+where product_id not in
+    (select product_id
+     from df_products_booked df_products_booked
+     where booked_amount > 200 )`;
+
+query q2
+`select distinct n as count...
+from
+  (select *
+   from
+     (select product_id,
+             count(*) as n
+      from df_products_for_hire df_products_for_hire
+      group by product_id) as lhs
+   where exists
+       (select 1
+        from
+          (select *
+           from df_products_booked df_products_booked
+           where (product_id != 200.0
+                  or booked_amount <= product_id)) as rhs
+        where (lhs.product_id = rhs.product_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_photos(df_photos);
+
+query q1
+`select id,
+       color,
+       name
+from df_photos df_photos`;
+
+query q2
+`select id,
+       color,
+       name
+from
+  (select lhs.id as id,
+          lhs.camera_lens_id as camera_lens_id,
+          lhs.mountain_id as mountain_id,
+          lhs.color as color,
+          lhs.name as name,
+          rhs.camera_lens_id as camera_lens_id.other,
+          rhs.mountain_id as mountain_id.other,
+          rhs.color as color.other,
+          rhs.name as name.other
+   from df_photos as lhs
+   inner join df_photos as rhs on (lhs.id = rhs.id))`;
+
+verify q1 q2;

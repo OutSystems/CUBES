@@ -1,0 +1,28 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+schema df_member_of(facid:int, dno:int, appt_type:str);
+
+table df_faculty(df_faculty);
+table df_member_of(df_member_of);
+
+query q1
+`select t1.fname,
+       t1.lname
+from df_faculty as t1
+join df_member_of as t2 on t1.facid = t2.facid
+where t2.dno = 520`;
+
+query q2
+`select fname,
+       lname
+from
+  (select *
+   from df_faculty as lhs
+   where exists
+       (select 1
+        from
+          (select *
+           from df_member_of df_member_of
+           where (dno = 520.0)) as rhs
+        where (lhs.facid = rhs.facid) ))`;
+
+verify q1 q2;

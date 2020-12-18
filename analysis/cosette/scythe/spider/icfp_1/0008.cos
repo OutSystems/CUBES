@@ -1,0 +1,30 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_authors(df_authors);
+table df_authorship(df_authorship);
+
+query q1
+`select distinct t3.name
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_inst as t3 on t2.instid = t3.instid
+where t1.fname = "katsuhiro"
+  and t1.lname = "ueno"`;
+
+query q2
+`select t3.name
+ from
+  (select t4.instid, t4.name, t4.country, t4.authid, t4.lname, t4.fname, t2.authid as authid1, t2.instid as instid1, t2.paperid, t2.authorder
+  from input join 
+          (select *
+             from
+              input0
+             where input0.lname = 'ueno') as t5 as t4 join 
+      input1 as t2) as t3
+ where t3.authid = t3.authid1
+   and t3.instid = t3.instid1`;
+
+verify q1 q2;

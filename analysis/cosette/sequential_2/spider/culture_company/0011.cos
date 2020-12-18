@@ -1,0 +1,30 @@
+schema df_movie(movie_id:int, title:str, year:int, director:str, budget_million:str, gross_worldwide:int);
+
+table df_movie(df_movie);
+
+query q1
+`select title,
+       year,
+       director
+from df_movie df_movie`;
+
+query q2
+`select title,
+       year,
+       director
+from
+  (select lhs.movie_id as movie_id,
+          lhs.title as title,
+          lhs.year as year,
+          lhs.director as director,
+          lhs.budget_million as budget_million,
+          lhs.gross_worldwide as gross_worldwide,
+          rhs.title as title.other,
+          rhs.year as year.other,
+          rhs.director as director.other,
+          rhs.budget_million as budget_million.other
+   from df_movie as lhs
+   inner join df_movie as rhs on (lhs.gross_worldwide = rhs.gross_worldwide
+                                  and lhs.movie_id = rhs.movie_id))`;
+
+verify q1 q2;

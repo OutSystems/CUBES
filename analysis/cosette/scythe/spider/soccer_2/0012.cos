@@ -1,0 +1,37 @@
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+
+table df_player(df_player);
+
+query q1
+`select avg(hs),
+       max(hs),
+       min(hs)
+from df_player df_player`;
+
+query q2
+`select t5.avg_hs,t5.hs1,t5.hs
+ from
+  (select *
+       from
+        (select t7.ycard, t7.hs, t7.avg_pid, t2.hs as hs1, t2.avg_pid as avg_pid1
+        from (select
+                t10.ycard, t10.hs, avg(t10.pid) as avg_pid
+              from
+                input as t10
+              group by
+                t10.ycard, t10.hs) as t7 join 
+            (select
+                  t4.hs, avg(t4.pid) as avg_pid
+                from
+                  input as t4
+                group by
+                  t4.hs) as t3 as t2) as t1
+       where t1.avg_pid < t1.avg_pid1) join 
+      (select
+            avg(t9.hs) as avg_hs
+          from
+            input as t9) as t8 as t6 as t5
+ where t5.hs1 > t5.avg_hs
+   and t5.hs < t5.avg_hs`;
+
+verify q1 q2;

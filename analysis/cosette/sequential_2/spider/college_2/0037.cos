@@ -1,0 +1,39 @@
+schema df_classroom(building:str, room_number:int, capacity:int);
+
+table df_classroom(df_classroom);
+
+query q1
+`select max(capacity),
+       avg(capacity),
+       building
+from df_classroom df_classroom
+group by building`;
+
+query q2
+`select distinct maxcapacity as max.capacity.,
+                meancapacity as avg.capacity.,
+                building
+from
+  (select lhs.building as building,
+          lhs.room_number as room_number,
+          lhs.capacity as capacity,
+          lhs.maxcapacity as maxcapacity,
+          rhs.meancapacity as meancapacity
+   from
+     (select lhs.building as building,
+             lhs.room_number as room_number,
+             lhs.capacity as capacity,
+             rhs.maxcapacity as maxcapacity
+      from df_classroom as lhs
+      inner join
+        (select building,
+                max(capacity) as maxcapacity
+         from df_classroom df_classroom
+         group by building) as rhs on (lhs.building = rhs.building)) as lhs
+   inner join
+     (select building,
+             avg(capacity) as meancapacity
+      from df_classroom df_classroom
+      group by building) as rhs on (lhs.building = rhs.building))`;
+
+verify q1 q2;

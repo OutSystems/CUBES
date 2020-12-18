@@ -1,0 +1,41 @@
+schema df_camera_lens(id:int, brand:str, name:str, focal_length_mm:str, max_aperture:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_camera_lens(df_camera_lens);
+table df_photos(df_photos);
+
+query q1
+`select t2.name
+from df_photos as t1
+join df_camera_lens as t2 on t1.camera_lens_id = t2.id
+group by t2.id
+
+limit 1`;
+
+query q2
+`select name.other as name
+from
+  (select camera_lens_id as id,
+          camera_lens_id,
+          mountain_id,
+          color,
+          name,
+          name.other
+   from
+     (select lhs.id as id,
+             lhs.camera_lens_id as camera_lens_id,
+             lhs.mountain_id as mountain_id,
+             lhs.color as color,
+             lhs.name as name,
+             rhs.name as name.other
+      from df_photos as lhs
+      inner join
+        (select id,
+                name,
+                count(*) as n
+         from df_camera_lens df_camera_lens
+         group by id,
+                  name) as rhs on (lhs.camera_lens_id = rhs.id
+                                   and lhs.mountain_id = rhs.n)))`;
+
+verify q1 q2;

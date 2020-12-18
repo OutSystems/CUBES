@@ -1,0 +1,25 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select party
+from df_representative df_representative
+where state = "new york" intersect
+  select party
+  from df_representative df_representative where state = "pennsylvania"`;
+
+query q2
+`select t2.party
+ from
+  (select
+      t1.party, concat(t1.state) as concat_state
+    from
+      (select *
+         from
+          input
+         where input.state = 'pennsylvania') as t1
+    group by
+      t1.party) as t2`;
+
+verify q1 q2;

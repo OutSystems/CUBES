@@ -1,0 +1,37 @@
+schema df_county(county_id:int, county_name:str, population:str, zip_code:str);
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_county(df_county);
+table df_election(df_election);
+
+query q1
+`select t1.county_name
+from df_county as t1
+join df_election as t2 on t1.county_id = t2.district
+group by t1.county_id
+having count(*) >= 2`;
+
+query q2
+`select county_name
+from
+  (select county_id,
+          county_name,
+          population,
+          zip_code,
+          n,
+          county_id as district
+   from
+     (select lhs.county_id as county_id,
+             lhs.county_name as county_name,
+             lhs.population as population,
+             lhs.zip_code as zip_code,
+             rhs.n as n
+      from df_county as lhs
+      inner join
+        (select district,
+                count(*) as n
+         from df_election df_election
+         group by district) as rhs on (lhs.county_id = rhs.district)))
+where (n >= 2.0)`;
+
+verify q1 q2;

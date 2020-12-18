@@ -1,0 +1,35 @@
+schema df_044_1(OriginalID:int, Area:str);
+schema df_044_2(Part:str, OriginalID:int);
+
+table df_044_1(df_044_1);
+table df_044_2(df_044_2);
+
+query q1
+`select a.originalid, b.part
+from a
+join b
+on a.area = b.area
+where not exists (select * from t c where c.originalid = a.originalid and c.part = b.part)`;
+
+query q2
+`select originalid,
+       area
+from
+  (select *
+   from df_044_1 as lhs
+   where not exists
+       (select 1
+        from
+          (select part,
+                  originalid,
+                  part as area
+           from
+             (select lhs.part as part,
+                     lhs.originalid as originalid
+              from df_044_2 as lhs
+              inner join df_044_1 as rhs on (lhs.originalid = rhs.originalid
+                                             and lhs.part = rhs.area))) as rhs
+        where (lhs.area = rhs.area
+               and lhs.originalid = rhs.originalid) ))`;
+
+verify q1 q2;

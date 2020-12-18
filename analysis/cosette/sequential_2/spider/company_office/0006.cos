@@ -1,0 +1,29 @@
+schema df_companies(id:int, name:str, headquarters:str, industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value_billion:str);
+
+table df_companies(df_companies);
+
+query q1
+`select max(sales_billion),
+       min(sales_billion)
+from df_companies df_companies
+where industry != "banking"`;
+
+query q2
+`select distinct maxsales_billion as max.sales_billion.,
+                min(sales_billion) over () as min.sales_billion.
+from
+  (select id,
+          name,
+          headquarters,
+          industry,
+          sales_billion,
+          profits_billion,
+          assets_billion,
+          market_value_billion,
+          max(sales_billion) over () as maxsales_billion
+   from
+     (select *
+      from df_companies df_companies
+      where (industry != 'banking')))`;
+
+verify q1 q2;

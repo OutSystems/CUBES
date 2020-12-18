@@ -1,0 +1,49 @@
+schema df_county(county_id:int, county_name:str, population:str, zip_code:str);
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_county(df_county);
+table df_election(df_election);
+
+query q1
+`select t2.delegate
+from df_county as t1
+join df_election as t2 on t1.county_id = t2.district
+where t1.population < 100000`;
+
+query q2
+`select distinct delegate
+from
+  (select lhs.county_id as county_id,
+          lhs.county_name as county_name,
+          lhs.population as population,
+          lhs.zip_code as zip_code,
+          lhs.election_id as election_id,
+          lhs.counties_represented as counties_represented,
+          lhs.district as district,
+          lhs.delegate as delegate,
+          lhs.party as party,
+          lhs.first_elected as first_elected,
+          lhs.committee as committee
+   from
+     (select lhs.county_id as county_id,
+             lhs.county_name as county_name,
+             lhs.population as population,
+             lhs.zip_code as zip_code,
+             rhs.election_id as election_id,
+             rhs.counties_represented as counties_represented,
+             rhs.district as district,
+             rhs.delegate as delegate,
+             rhs.party as party,
+             rhs.first_elected as first_elected,
+             rhs.committee as committee
+      from df_county as lhs
+      cross join df_election as rhs) as lhs
+   inner join
+     (select *
+      from df_county df_county
+      where (population <= 100000.0)) as rhs on (lhs.county_id = rhs.county_id
+                                                 and lhs.county_name = rhs.county_name
+                                                 and lhs.population = rhs.population
+                                                 and lhs.zip_code = rhs.zip_code))`;
+
+verify q1 q2;

@@ -1,0 +1,46 @@
+schema df_invoices(invoice_id:int, order_id:int, payment_method_code:str, product_id:int, order_quantity:int, other_item_details:str, order_item_id:int);
+
+table df_invoices(df_invoices);
+
+query q1
+`select product_id
+from df_invoices df_invoices
+group by product_id
+
+limit 1`;
+
+query q2
+`select n as product_id
+from
+  (select count(*) as n
+   from
+     (select invoice_id,
+             order_id,
+             payment_method_code,
+             product_id,
+             order_quantity,
+             other_item_details,
+             order_id as order_item_id,
+             invoice_id.other,
+             order_id.other,
+             payment_method_code.other,
+             order_quantity.other,
+             other_item_details.other
+      from
+        (select lhs.invoice_id as invoice_id,
+                lhs.order_id as order_id,
+                lhs.payment_method_code as payment_method_code,
+                lhs.product_id as product_id,
+                lhs.order_quantity as order_quantity,
+                lhs.other_item_details as other_item_details,
+                lhs.order_item_id as order_item_id,
+                rhs.invoice_id as invoice_id.other,
+                rhs.order_id as order_id.other,
+                rhs.payment_method_code as payment_method_code.other,
+                rhs.order_quantity as order_quantity.other,
+                rhs.other_item_details as other_item_details.other
+         from df_invoices as lhs
+         inner join df_invoices as rhs on (lhs.order_id = rhs.order_item_id
+                                           and lhs.product_id = rhs.product_id))))`;
+
+verify q1 q2;

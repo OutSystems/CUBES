@@ -1,0 +1,40 @@
+schema df_wrestler(wrestler_id:int, name:str, reign:int, days_held:int, location:str, event:str);
+
+table df_wrestler(df_wrestler);
+
+query q1
+`select name
+from df_wrestler df_wrestler
+where days_held < 100`;
+
+query q2
+`select distinct name.other as name
+from
+  (select wrestler_id,
+          name,
+          reign,
+          reign as days_held,
+          location,
+          event,
+          wrestler_id.other,
+          name.other,
+          reign.other,
+          location.other,
+          event.other
+   from
+     (select lhs.wrestler_id as wrestler_id,
+             lhs.name as name,
+             lhs.reign as reign,
+             lhs.days_held as days_held,
+             lhs.location as location,
+             lhs.event as event,
+             rhs.wrestler_id as wrestler_id.other,
+             rhs.name as name.other,
+             rhs.reign as reign.other,
+             rhs.location as location.other,
+             rhs.event as event.other
+      from df_wrestler as lhs
+      inner join df_wrestler as rhs on (lhs.reign = rhs.days_held)))
+where (days_held < 100.0)`;
+
+verify q1 q2;

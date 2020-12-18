@@ -1,0 +1,34 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+
+table df_dorm(df_dorm);
+
+query q1
+`select dorm_name
+from df_dorm df_dorm
+
+limit 1`;
+
+query q2
+`select distinct dorm_name.other as dorm_name
+from
+  (select lhs.dormid as dormid,
+          lhs.dorm_name as dorm_name,
+          lhs.student_capacity as student_capacity,
+          lhs.gender as gender,
+          lhs.maxstudent_capacity as maxstudent_capacity,
+          rhs.dormid as dormid.other,
+          rhs.dorm_name as dorm_name.other,
+          rhs.student_capacity as student_capacity.other,
+          rhs.gender as gender.other
+   from
+     (select dormid,
+             dorm_name,
+             student_capacity,
+             gender,
+             max(student_capacity) over () as maxstudent_capacity
+      from df_dorm df_dorm) as lhs
+   cross join df_dorm as rhs)
+where (student_capacity > maxstudent_capacity
+       or maxstudent_capacity <= student_capacity.other)`;
+
+verify q1 q2;

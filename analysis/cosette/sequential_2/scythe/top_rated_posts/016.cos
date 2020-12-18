@@ -1,0 +1,19 @@
+schema df_i016(ID:int, COMPANY_ID:int, EMPLOYEE:str);
+
+table df_i016(df_i016);
+
+query q1
+`select company_id, array_to_string(array_agg(employee), ', ')
+from mytable
+group by company_id`;
+
+query q2
+`select company_id,
+       concatemployee
+from
+  (select company_id,
+          string_agg(employee, ', ') as concatemployee
+   from df_i016 df_i016
+   group by company_id)`;
+
+verify q1 q2;

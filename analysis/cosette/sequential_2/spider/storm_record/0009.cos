@@ -1,0 +1,28 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+
+table df_storm(df_storm);
+
+query q1
+`select name,
+       damage_millions_usd
+from df_storm df_storm`;
+
+query q2
+`select name,
+       damage_millions_usd
+from
+  (select lhs.storm_id as storm_id,
+          lhs.name as name,
+          lhs.dates_active as dates_active,
+          lhs.max_speed as max_speed,
+          lhs.damage_millions_usd as damage_millions_usd,
+          lhs.number_deaths as number_deaths,
+          rhs.dates_active as dates_active.other,
+          rhs.max_speed as max_speed.other,
+          rhs.damage_millions_usd as damage_millions_usd.other,
+          rhs.number_deaths as number_deaths.other
+   from df_storm as lhs
+   inner join df_storm as rhs on (lhs.name = rhs.name
+                                  and lhs.storm_id = rhs.storm_id))`;
+
+verify q1 q2;

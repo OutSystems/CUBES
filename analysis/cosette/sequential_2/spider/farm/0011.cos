@@ -1,0 +1,54 @@
+schema df_city(city_id:int, official_name:str, status:str, area_km_2:str, population:str, census_ranking:str);
+schema df_farm_competition(competition_id:int, year:int, theme:str, host_city_id:int, hosts:str);
+
+table df_city(df_city);
+table df_farm_competition(df_farm_competition);
+
+query q1
+`select t1.official_name
+from df_city as t1
+join df_farm_competition as t2 on t1.city_id = t2.host_city_id
+group by t2.host_city_id
+having count(*) > 1`;
+
+query q2
+`select official_name
+from
+  (select competition_id,
+          year,
+          theme,
+          host_city_id,
+          hosts,
+          official_name,
+          status,
+          area_km_2,
+          population,
+          census_ranking,
+          competition_id as n
+   from
+     (select lhs.competition_id as competition_id,
+             lhs.year as year,
+             lhs.theme as theme,
+             lhs.host_city_id as host_city_id,
+             lhs.hosts as hosts,
+             rhs.official_name as official_name,
+             rhs.status as status,
+             rhs.area_km_2 as area_km_2,
+             rhs.population as population,
+             rhs.census_ranking as census_ranking
+      from df_farm_competition as lhs
+      inner join
+        (select *
+         from
+           (select city_id,
+                   official_name,
+                   status,
+                   area_km_2,
+                   population,
+                   census_ranking,
+                   count(*) over () as n
+            from df_city df_city)
+         where (n > 1.0)) as rhs on (lhs.competition_id = rhs.n
+                                     and lhs.host_city_id = rhs.city_id)))`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_elimination(elimination_id:int, wrestler_id:int, team:str, eliminated_by:str, elimination_move:str, time:str);
+
+table df_elimination(df_elimination);
+
+query q1
+`select team,
+       count(*)
+from df_elimination df_elimination
+group by team`;
+
+query q2
+`(select
+    t2.team, count_distinct(t2.eliminated_by) as count_distinct_eliminated_by
+  from
+    input as t2
+  group by
+    t2.team) as t1`;
+
+verify q1 q2;

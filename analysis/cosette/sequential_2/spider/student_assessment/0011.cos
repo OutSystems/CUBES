@@ -1,0 +1,41 @@
+schema df_candidate_assessments(candidate_id:int, qualification:str, assessment_date:str, asessment_outcome_code:str);
+
+table df_candidate_assessments(df_candidate_assessments);
+
+query q1
+`select candidate_id
+from df_candidate_assessments df_candidate_assessments
+
+limit 1`;
+
+query q2
+`select distinct candidate_id.other as candidate_id
+from
+  (select lhs.candidate_id as candidate_id,
+          lhs.qualification as qualification,
+          lhs.assessment_date as assessment_date,
+          lhs.asessment_outcome_code as asessment_outcome_code,
+          lhs.maxassessment_date as maxassessment_date,
+          rhs.candidate_id as candidate_id.other,
+          rhs.qualification as qualification.other,
+          rhs.assessment_date as assessment_date.other,
+          rhs.asessment_outcome_code as asessment_outcome_code.other,
+          rhs.maxassessment_date as maxassessment_date.other
+   from
+     (select candidate_id,
+             qualification,
+             assessment_date,
+             asessment_outcome_code,
+             max(assessment_date) over () as maxassessment_date
+      from df_candidate_assessments df_candidate_assessments) as lhs
+   cross join
+     (select candidate_id,
+             qualification,
+             assessment_date,
+             asessment_outcome_code,
+             max(assessment_date) over () as maxassessment_date
+      from df_candidate_assessments df_candidate_assessments) as rhs)
+where (maxassessment_date != maxassessment_date.other
+       or assessment_date.other = maxassessment_date.other)`;
+
+verify q1 q2;

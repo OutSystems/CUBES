@@ -1,0 +1,34 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_student(df_student);
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select t2.lname
+from df_sportsinfo as t1
+join df_student as t2 on t1.stuid = t2.stuid
+where t1.onscholarship = 'y'`;
+
+query q2
+`select lname
+from
+  (select lhs.stuid as stuid,
+          lhs.sportname as sportname,
+          lhs.hoursperweek as hoursperweek,
+          lhs.gamesplayed as gamesplayed,
+          lhs.onscholarship as onscholarship,
+          rhs.lname as lname,
+          rhs.fname as fname,
+          rhs.age as age,
+          rhs.sex as sex,
+          rhs.major as major,
+          rhs.advisor as advisor,
+          rhs.city_code as city_code
+   from
+     (select *
+      from df_sportsinfo df_sportsinfo
+      where (onscholarship = 'y')) as lhs
+   inner join df_student as rhs on (lhs.stuid = rhs.stuid))`;
+
+verify q1 q2;

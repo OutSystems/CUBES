@@ -1,0 +1,34 @@
+schema df_projects(project_id:int, project_details:str);
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_projects(df_projects);
+table df_documents(df_documents);
+
+query q1
+`select t1.project_id,
+       t1.project_details
+from df_projects as t1
+join df_documents as t2 on t1.project_id = t2.project_id
+group by t1.project_id
+having count(*) > 2`;
+
+query q2
+`joining, by = "project_id"
+select project_id,
+       project_details
+from
+  (select other_details,
+          project_id,
+          n,
+          project_details
+   from
+     (select other_details,
+             project_id,
+             count(*) as n
+      from input1
+      group by other_details,
+               project_id) as lhs
+   left join input0 as rhs on (lhs.project_id = rhs.project_id))
+where (n > 2.0)`;
+
+verify q1 q2;

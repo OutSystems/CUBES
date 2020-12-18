@@ -1,0 +1,59 @@
+schema df_aircraft(aircraft_id:int, aircraft:str, description:str, max_gross_weight:str, total_disk_area:str, max_disk_loading:str);
+schema df_airport(airport_id:int, airport_name:str, total_passengers:str, ._change_2007:str, international_passengers:str, domestic_passengers:str, transit_passengers:str, aircraft_movements:str, freight_metric_tonnes:str);
+schema df_airport_aircraft(id:int, airport_id:int, aircraft_id:int);
+
+table df_aircraft(df_aircraft);
+table df_airport(df_airport);
+table df_airport_aircraft(df_airport_aircraft);
+
+query q1
+`select t1.df_aircraft,
+       t1.description
+from df_aircraft as t1
+join df_airport_aircraft as t2 on t1.aircraft_id = t2.aircraft_id
+join df_airport as t3 on t2.airport_id = t3.airport_id
+where t3.total_passengers > 10000000`;
+
+query q2
+`select aircraft,
+       description
+from
+  (select lhs.aircraft_id as aircraft_id,
+          lhs.aircraft as aircraft,
+          lhs.description as description,
+          lhs.max_gross_weight as max_gross_weight,
+          lhs.total_disk_area as total_disk_area,
+          lhs.max_disk_loading as max_disk_loading,
+          lhs.airport_id as airport_id,
+          lhs.airport_name as airport_name,
+          lhs.total_passengers as total_passengers,
+          lhs.._change_2007 as ._change_2007,
+          lhs.international_passengers as international_passengers,
+          lhs.domestic_passengers as domestic_passengers,
+          lhs.transit_passengers as transit_passengers,
+          lhs.aircraft_movements as aircraft_movements,
+          lhs.freight_metric_tonnes as freight_metric_tonnes,
+          rhs.id as id
+   from
+     (select lhs.aircraft_id as aircraft_id,
+             lhs.aircraft as aircraft,
+             lhs.description as description,
+             lhs.max_gross_weight as max_gross_weight,
+             lhs.total_disk_area as total_disk_area,
+             lhs.max_disk_loading as max_disk_loading,
+             rhs.airport_id as airport_id,
+             rhs.airport_name as airport_name,
+             rhs.total_passengers as total_passengers,
+             rhs.._change_2007 as ._change_2007,
+             rhs.international_passengers as international_passengers,
+             rhs.domestic_passengers as domestic_passengers,
+             rhs.transit_passengers as transit_passengers,
+             rhs.aircraft_movements as aircraft_movements,
+             rhs.freight_metric_tonnes as freight_metric_tonnes
+      from df_aircraft as lhs
+      cross join df_airport as rhs) as lhs
+   inner join df_airport_aircraft as rhs on (lhs.aircraft_id = rhs.aircraft_id
+                                             and lhs.airport_id = rhs.airport_id))
+where (total_passengers >= 10000000.0)`;
+
+verify q1 q2;

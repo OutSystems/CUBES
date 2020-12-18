@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/011.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i011_1.csv
   - tests-examples/scythe/top_rated_posts/tables/i011_2.csv
@@ -11,12 +12,12 @@ solution:
   - summarise
   - natural_join
 sql: |
-  select t1.VehicleID, t1.Name, t2.concatLocations
+  select i011_1.VehicleID, i011_1.Name, t.concatLocations
   from (select VehicleID, concat(City) As concatLocations
-        from  t2
+        from i011_2
         group by VehicleID) t
-  join t1
-  on t1.VehicleID = t2.VehicleID
+           join i011_1
+                on i011_1.VehicleID = t.VehicleID
 comment: |
   string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
 

@@ -1,0 +1,39 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+schema df_country(country_id:int, name:str, population:int, area:int, languages:str);
+
+table df_roller_coaster(df_roller_coaster);
+table df_country(df_country);
+
+query q1
+`select count(*)
+from df_country df_country
+where country_id not in
+    (select country_id
+     from df_roller_coaster df_roller_coaster
+     where length > 3000 )`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.country_id as country_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.area as area,
+          lhs.languages as languages,
+          rhs.length as length,
+          rhs.speed as speed,
+          rhs.n as n
+   from df_country as lhs
+   cross join
+     (select *
+      from
+        (select length,
+                speed,
+                count(*) as n
+         from df_roller_coaster df_roller_coaster
+         group by length,
+                  speed)
+      where (n <= 3000.0
+             or length >= 3000.0)) as rhs)`;
+
+verify q1 q2;

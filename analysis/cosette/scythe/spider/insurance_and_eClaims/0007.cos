@@ -1,0 +1,34 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+schema df_claim_headers(claim_header_id:int, claim_status_code:str, claim_type_code:str, policy_id:int, date_of_claim:str, date_of_settlement:str, amount_claimed:str, amount_piad:str);
+
+table df_customers(df_customers);
+table df_policies(df_policies);
+table df_claim_headers(df_claim_headers);
+
+query q1
+`select t3.customer_details
+from df_claim_headers as t1
+join df_policies as t2 on t1.policy_id = t2.policy_id
+join df_customers as t3 on t2.customer_id = t3.customer_id
+where t1.amount_claimed =
+    (select max(amount_claimed)
+     from df_claim_headers df_claim_headers)`;
+
+query q2
+`select t2.customer_details
+ from
+  (select t1.customer_id, t1.policy_type_code, t1.count_policy_type_code, t3.customer_id as customer_id1, t3.customer_details
+  from (select *
+       from
+        (select
+            t4.customer_id, t4.policy_type_code, count(t4.policy_type_code) as count_policy_type_code
+          from
+            input0 as t4
+          group by
+            t4.customer_id, t4.policy_type_code) as t1
+       where t1.count_policy_type_code = 2.0) join 
+      input as t3) as t2
+ where t2.customer_id = t2.customer_id1`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+
+table df_company(df_company);
+
+query q1
+`select main_industry,
+       count(*)
+from df_company df_company
+group by main_industry
+
+limit 1`;
+
+query q2
+`select t1.main_industry,t1.count_sales_billion
+ from
+  (select t2.main_industry, t2.count_sales_billion, t3.company_id, t3.rank, t3.company, t3.headquarters, t3.main_industry as main_industry1, t3.sales_billion, t3.profits_billion, t3.assets_billion, t3.market_value
+  from (select *
+       from
+        (select
+            t4.main_industry, count(t4.sales_billion) as count_sales_billion
+          from
+            input as t4
+          group by
+            t4.main_industry) as t2
+       where t2.count_sales_billion = 5.0) join 
+      (select *
+         from
+          input
+         where input.company_id = 2.0) as t3) as t1`;
+
+verify q1 q2;

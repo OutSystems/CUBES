@@ -1,0 +1,25 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+
+table df_phone(df_phone);
+
+query q1
+`select name
+from df_phone df_phone
+where carrier = "sprint"
+  or carrier = "tmobile"`;
+
+query q2
+`select t2.name
+ from
+  (select t4.carrier, t3.name, t3.phone_id, t3.memory_in_g, t3.carrier as carrier1, t3.price
+  from (select
+          t1.carrier, from
+          (select *
+             from
+              input
+             where input.carrier = 'sprint') as t1
+        group by
+          t1.carrier) as t4 join 
+      input as t3) as t2`;
+
+verify q1 q2;

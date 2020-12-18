@@ -1,0 +1,33 @@
+schema df_10_1(S_key:str, C_name:str);
+schema df_10_2(S_key:str, S_name:str);
+
+table df_10_1(df_10_1);
+table df_10_2(df_10_2);
+
+query q1
+`select distinct s.sname
+from student s
+where s.snum in (select e.snum
+from enrolled e
+group by e.snum
+having count (*) >= all (select count (*)
+from enrolled e2
+group by e2.snum ))`;
+
+query q2
+`select t1.s_name
+ from
+  (select t2.s_key, t2.count_c_name, t3.s_key as s_key1, t3.s_name
+  from (select *
+       from
+        (select
+            t4.s_key, count(t4.c_name) as count_c_name
+          from
+            input as t4
+          group by
+            t4.s_key) as t2
+       where t2.count_c_name = 3.0) join 
+      input0 as t3) as t1
+ where t1.s_key = t1.s_key1`;
+
+verify q1 q2;

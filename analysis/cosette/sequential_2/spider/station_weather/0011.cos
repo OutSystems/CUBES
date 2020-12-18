@@ -1,0 +1,57 @@
+schema df_train(id:int, train_number:int, name:str, origin:str, destination:str, time:str, interval:str);
+schema df_station(id:int, network_name:str, services:str, local_authority:str);
+schema df_route(train_id:int, station_id:int);
+
+table df_train(df_train);
+table df_station(df_station);
+table df_route(df_route);
+
+query q1
+`select t3.name,
+       t3.time
+from df_station as t1
+join df_route as t2 on t1.id = t2.station_id
+join df_train as t3 on t2.train_id = t3.id
+where t1.local_authority = "chiltern"`;
+
+query q2
+`select name,
+       time
+from
+  (select lhs.id as id,
+          lhs.network_name as network_name,
+          lhs.services as services,
+          lhs.local_authority as local_authority,
+          rhs.id as id.other,
+          rhs.train_number as train_number,
+          rhs.name as name,
+          rhs.origin as origin,
+          rhs.destination as destination,
+          rhs.time as time,
+          rhs.interval as interval,
+          rhs.train_id as train_id
+   from
+     (select *
+      from df_station df_station
+      where (local_authority = 'chiltern')) as lhs
+   inner join
+     (select id,
+             train_number,
+             name,
+             origin,
+             destination,
+             time, interval, station_id,
+                             id as train_id
+      from
+        (select lhs.id as id,
+                lhs.train_number as train_number,
+                lhs.name as name,
+                lhs.origin as origin,
+                lhs.destination as destination,
+                lhs.time as time,
+                lhs.interval as interval,
+                rhs.station_id as station_id
+         from df_train as lhs
+         inner join df_route as rhs on (lhs.id = rhs.train_id))) as rhs on (lhs.id = rhs.station_id))`;
+
+verify q1 q2;

@@ -1,0 +1,32 @@
+schema df_people(people_id:int, name:str, age:str, height:str, hometown:str);
+
+table df_people(df_people);
+
+query q1
+`select name
+from df_people df_people
+
+limit 5`;
+
+query q2
+`select t4.first_name
+ from
+  (select t6.age, t6.height, t6.first_name, t5.age as age1, t5.height as height1, t5.count_height
+  from (select
+          t7.age, t7.height, first(t7.name) as first_name
+        from
+          input as t7
+        group by
+          t7.age, t7.height) as t6 join 
+      (select *
+         from
+          (select
+              t3.age, t3.height, count(t3.height) as count_height
+            from
+              input as t3
+            group by
+              t3.age, t3.height) as t2
+         where t2.count_height > t2.height) as t5) as t4
+ where t4.age >= t4.age1`;
+
+verify q1 q2;

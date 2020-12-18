@@ -1,0 +1,26 @@
+schema df_i044(id:int, count:int);
+
+table df_i044(df_i044);
+
+query q1
+`select t.id,
+       t.count,
+       (select sum(x.count)
+          from table x
+         where x.id <= t.id) as cumulative_sum
+from table t`;
+
+query q2
+`(select
+    t5.id1, t5.count1, sum(t5.count) as sum_count
+  from
+    (select *
+       from
+        (select input.id, input.count, t2.id as id1, t2.count as count1
+        from input join 
+            input as t2) as t4
+       where t4.id <= t4.id1) as t5
+  group by
+    t5.id1, t5.count1) as t3`;
+
+verify q1 q2;

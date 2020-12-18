@@ -1,0 +1,48 @@
+schema df_market(market_id:int, country:str, number_cities:int);
+schema df_film_market_estimation(estimation_id:int, low_estimate:str, high_estimate:str, film_id:int, type:str, market_id:int, year:int);
+
+table df_market(df_market);
+table df_film_market_estimation(df_film_market_estimation);
+
+query q1
+`select avg(t2.number_cities)
+from df_film_market_estimation as t1
+join df_market as t2 on t1.market_id = t2.market_id
+where t1.low_estimate > 10000`;
+
+query q2
+`select number_cities as avg.t2.number_cities.
+from
+  (select lhs.market_id as market_id,
+          lhs.country as country,
+          lhs.number_cities as number_cities,
+          lhs.estimation_id as estimation_id,
+          lhs.low_estimate as low_estimate,
+          lhs.high_estimate as high_estimate,
+          lhs.film_id as film_id,
+          lhs.type as type,
+          lhs.year as year,
+          rhs.meannumber_cities as meannumber_cities
+   from
+     (select lhs.market_id as market_id,
+             lhs.country as country,
+             lhs.number_cities as number_cities,
+             rhs.estimation_id as estimation_id,
+             rhs.low_estimate as low_estimate,
+             rhs.high_estimate as high_estimate,
+             rhs.film_id as film_id,
+             rhs.type as type,
+             rhs.year as year
+      from df_market as lhs
+      inner join df_film_market_estimation as rhs on (lhs.market_id = rhs.market_id)) as lhs
+   inner join
+     (select market_id,
+             country,
+             number_cities,
+             avg(number_cities) over () as meannumber_cities
+      from df_market df_market) as rhs on (lhs.market_id = rhs.market_id
+                                 and lhs.country = rhs.country
+                                 and lhs.number_cities = rhs.number_cities))
+where (low_estimate > 10000.0)`;
+
+verify q1 q2;

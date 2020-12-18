@@ -1,0 +1,58 @@
+schema df_bookings(booking_id:int, customer_id:int, workshop_group_id:int, status_code:str, store_id:int, order_date:str, planned_delivery_date:str, actual_delivery_date:str, other_order_details:str);
+
+table df_bookings(df_bookings);
+
+query q1
+`select status_code
+from df_bookings df_bookings
+group by status_code
+
+limit 1`;
+
+query q2
+`select status_code
+from
+  (select other_order_details,
+          status_code,
+          count(*) as n
+   from
+     (select booking_id,
+             customer_id,
+             customer_id as workshop_group_id,
+             status_code,
+             store_id,
+             order_date,
+             planned_delivery_date,
+             actual_delivery_date,
+             other_order_details,
+             booking_id.other,
+             customer_id.other,
+             store_id.other,
+             order_date.other,
+             planned_delivery_date.other,
+             actual_delivery_date.other,
+             other_order_details.other
+      from
+        (select lhs.booking_id as booking_id,
+                lhs.customer_id as customer_id,
+                lhs.workshop_group_id as workshop_group_id,
+                lhs.status_code as status_code,
+                lhs.store_id as store_id,
+                lhs.order_date as order_date,
+                lhs.planned_delivery_date as planned_delivery_date,
+                lhs.actual_delivery_date as actual_delivery_date,
+                lhs.other_order_details as other_order_details,
+                rhs.booking_id as booking_id.other,
+                rhs.customer_id as customer_id.other,
+                rhs.store_id as store_id.other,
+                rhs.order_date as order_date.other,
+                rhs.planned_delivery_date as planned_delivery_date.other,
+                rhs.actual_delivery_date as actual_delivery_date.other,
+                rhs.other_order_details as other_order_details.other
+         from df_bookings as lhs
+         inner join df_bookings as rhs on (lhs.customer_id = rhs.workshop_group_id
+                                           and lhs.status_code = rhs.status_code)))
+   group by other_order_details,
+            status_code)`;
+
+verify q1 q2;

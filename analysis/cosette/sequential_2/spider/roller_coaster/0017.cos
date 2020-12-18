@@ -1,0 +1,45 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+schema df_country(country_id:int, name:str, population:int, area:int, languages:str);
+
+table df_roller_coaster(df_roller_coaster);
+table df_country(df_country);
+
+query q1
+`select t1.name,
+       t1.area,
+       t1.population
+from df_country as t1
+join df_roller_coaster as t2 on t1.country_id = t2.country_id
+where t2.speed > 60 intersect
+  select t1.name,
+         t1.area,
+         t1.population
+  from df_country as t1
+  join df_roller_coaster as t2 on t1.country_id = t2.country_id where t2.speed < 55`;
+
+query q2
+`select name.other as name,
+       area,
+       population
+from
+  (select lhs.roller_coaster_id as roller_coaster_id,
+          lhs.name as name,
+          lhs.park as park,
+          lhs.country_id as country_id,
+          lhs.length as length,
+          lhs.height as height,
+          lhs.speed as speed,
+          lhs.opened as opened,
+          lhs.status as status,
+          rhs.name as name.other,
+          rhs.population as population,
+          rhs.area as area,
+          rhs.languages as languages
+   from
+     (select *
+      from df_roller_coaster df_roller_coaster
+      where (speed < 60.0
+             and speed < 55.0)) as lhs
+   inner join df_country as rhs on (lhs.roller_coaster_id = rhs.country_id))`;
+
+verify q1 q2;

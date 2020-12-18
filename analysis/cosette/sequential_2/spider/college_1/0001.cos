@@ -1,0 +1,28 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_department(df_department);
+table df_professor(df_professor);
+
+query q1
+`select count(*)
+from df_professor as t1
+join df_department as t2 on t1.dept_code = t2.dept_code
+where dept_name = "accounting"`;
+
+query q2
+`select n as count...
+from
+  (select count(*) as n
+   from
+     (select *
+      from df_professor as lhs
+      where not exists
+          (select 1
+           from
+             (select *
+              from df_department df_department
+              where (dept_name != 'accounting')) as rhs
+           where (lhs.dept_code = rhs.dept_code) )))`;
+
+verify q1 q2;

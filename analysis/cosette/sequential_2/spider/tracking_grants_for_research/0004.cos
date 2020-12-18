@@ -1,0 +1,44 @@
+schema df_project_staff(staff_id:str, project_id:int, role_code:str, date_from:str, date_to:str, other_details:str);
+
+table df_project_staff(df_project_staff);
+
+query q1
+`select date_from,
+       date_to
+from df_project_staff df_project_staff
+where project_id in
+    (select project_id
+     from df_project_staff df_project_staff
+     group by project_id
+     
+     limit 1)
+union
+select date_from,
+       date_to
+from df_project_staff df_project_staff
+where role_code = 'leader'`;
+
+query q2
+`select date_from,
+       date_to
+from
+  (select date_from,
+          date_to,
+          max(project_id) as maxproject_id
+   from
+     (select *
+      from
+        (select staff_id,
+                project_id,
+                role_code,
+                date_from,
+                date_to,
+                other_details,
+                count(distinct role_code) over () as n_distinct
+         from df_project_staff df_project_staff)
+      where (role_code = 'leader'
+             or n_distinct = project_id))
+   group by date_from,
+            date_to)`;
+
+verify q1 q2;

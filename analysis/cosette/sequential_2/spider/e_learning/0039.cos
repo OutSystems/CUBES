@@ -1,0 +1,24 @@
+schema df_students(student_id:int, date_of_registration:str, date_of_latest_logon:str, login_name:str, password:str, personal_name:str, middle_name:str, family_name:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_students(df_students);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select count(*)
+from df_students df_students
+where student_id not in
+    (select student_id
+     from df_student_course_enrolment df_student_course_enrolment)`;
+
+query q2
+`select distinct count(distinct student_id) over () as count...
+from
+  (select *
+   from df_students as lhs
+   where not exists
+       (select 1
+        from df_student_course_enrolment as rhs
+        where (lhs.student_id = rhs.student_id) ))`;
+
+verify q1 q2;

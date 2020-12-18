@@ -1,0 +1,32 @@
+schema df_album(albumid:int, title:str, artistid:int);
+schema df_artist(artistid:int, name:str);
+
+table df_album(df_album);
+table df_artist(df_artist);
+
+query q1
+`select count(*)
+from df_album as t1
+join df_artist as t2 on t1.artistid = t2.artistid
+where t2.name = "metallica"`;
+
+query q2
+`select n as count...
+from
+  (select artistid,
+          name,
+          count(*) as n
+   from
+     (select *
+      from
+        (select lhs.albumid as albumid,
+                lhs.title as title,
+                lhs.artistid as artistid,
+                rhs.name as name
+         from df_album as lhs
+         inner join df_artist as rhs on (lhs.artistid = rhs.artistid))
+      where (name = 'metallica'))
+   group by artistid,
+            name)`;
+
+verify q1 q2;

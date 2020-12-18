@@ -1,0 +1,79 @@
+schema df_addresses(address_id:int, address_details:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, customer_phone:str, customer_email:str, date_became_customer:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_from:str, address_type:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t1.customer_name,
+       t1.customer_phone
+from df_customers as t1
+join df_customer_addresses as t2 on t1.customer_id = t2.customer_id
+join df_addresses as t3 on t2.address_id = t3.address_id
+where t3.state_province_county = 'california'`;
+
+query q2
+`select customer_name,
+       customer_phone
+from
+  (select lhs.address_id as address_id,
+          lhs.address_details as address_details,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.customer_id as customer_id,
+          lhs.payment_method as payment_method,
+          lhs.customer_name as customer_name,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.date_became_customer as date_became_customer,
+          lhs.date_from as date_from,
+          lhs.address_type as address_type,
+          lhs.date_to as date_to
+   from
+     (select lhs.address_id as address_id,
+             lhs.address_details as address_details,
+             lhs.city as city,
+             lhs.zip_postcode as zip_postcode,
+             lhs.state_province_county as state_province_county,
+             lhs.country as country,
+             lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             lhs.date_became_customer as date_became_customer,
+             rhs.date_from as date_from,
+             rhs.address_type as address_type,
+             rhs.date_to as date_to
+      from
+        (select lhs.address_id as address_id,
+                lhs.address_details as address_details,
+                lhs.city as city,
+                lhs.zip_postcode as zip_postcode,
+                lhs.state_province_county as state_province_county,
+                lhs.country as country,
+                rhs.customer_id as customer_id,
+                rhs.payment_method as payment_method,
+                rhs.customer_name as customer_name,
+                rhs.customer_phone as customer_phone,
+                rhs.customer_email as customer_email,
+                rhs.date_became_customer as date_became_customer
+         from df_addresses as lhs
+         cross join df_customers as rhs) as lhs
+      inner join df_customer_addresses as rhs on (lhs.address_id = rhs.address_id
+                                                      and lhs.customer_id = rhs.customer_id)) as lhs
+   inner join
+     (select *
+      from df_addresses df_addresses
+      where (state_province_county = 'california')) as rhs on (lhs.address_id = rhs.address_id
+                                                                 and lhs.address_details = rhs.address_details
+                                                                 and lhs.city = rhs.city
+                                                                 and lhs.zip_postcode = rhs.zip_postcode
+                                                                 and lhs.state_province_county = rhs.state_province_county
+                                                                 and lhs.country = rhs.country))`;
+
+verify q1 q2;

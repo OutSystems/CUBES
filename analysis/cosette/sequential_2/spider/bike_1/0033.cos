@@ -1,0 +1,53 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+
+table df_station(df_station);
+
+query q1
+`select name,
+       lat,
+       city
+from df_station df_station
+
+limit 1`;
+
+query q2
+`select distinct name.other as name,
+                minlat as lat,
+                city.other as city
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.lat as lat,
+          lhs.long as long,
+          lhs.dock_count as dock_count,
+          lhs.city as city,
+          lhs.installation_date as installation_date,
+          lhs.minlat as minlat,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.lat as lat.other,
+          rhs.long as long.other,
+          rhs.dock_count as dock_count.other,
+          rhs.city as city.other,
+          rhs.installation_date as installation_date.other,
+          rhs.minlat as minlat.other
+   from
+     (select id,
+             name,
+             lat, long, dock_count,
+                        city,
+                        installation_date,
+                        min(lat) over () as minlat
+      from df_station df_station) as lhs
+   cross join
+     (select id,
+             name,
+             lat, long, dock_count,
+                        city,
+                        installation_date,
+                        min(lat) over () as minlat
+      from df_station df_station) as rhs)
+where (minlat > minlat.other
+       or lat.other <= minlat.other)`;
+
+verify q1 q2;

@@ -1,0 +1,59 @@
+schema df_products(product_id:int, parent_product_id:int, product_category_code:str, date_product_first_available:str, date_product_discontinued:str, product_name:str, product_description:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_name,
+       product_category_code
+from df_products df_products
+
+limit 1`;
+
+query q2
+`select distinct product_name,
+                product_category_code
+from
+  (select lhs.product_id as product_id,
+          lhs.parent_product_id as parent_product_id,
+          lhs.product_category_code as product_category_code,
+          lhs.date_product_first_available as date_product_first_available,
+          lhs.date_product_discontinued as date_product_discontinued,
+          lhs.product_name as product_name,
+          lhs.product_description as product_description,
+          lhs.product_price as product_price,
+          lhs.maxproduct_price as maxproduct_price,
+          rhs.product_id as product_id.other,
+          rhs.parent_product_id as parent_product_id.other,
+          rhs.product_category_code as product_category_code.other,
+          rhs.date_product_first_available as date_product_first_available.other,
+          rhs.date_product_discontinued as date_product_discontinued.other,
+          rhs.product_name as product_name.other,
+          rhs.product_description as product_description.other,
+          rhs.product_price as product_price.other,
+          rhs.maxproduct_price as maxproduct_price.other
+   from
+     (select product_id,
+             parent_product_id,
+             product_category_code,
+             date_product_first_available,
+             date_product_discontinued,
+             product_name,
+             product_description,
+             product_price,
+             max(product_price) over () as maxproduct_price
+      from df_products df_products) as lhs
+   cross join
+     (select product_id,
+             parent_product_id,
+             product_category_code,
+             date_product_first_available,
+             date_product_discontinued,
+             product_name,
+             product_description,
+             product_price,
+             max(product_price) over () as maxproduct_price
+      from df_products df_products) as rhs)
+where (product_price >= maxproduct_price
+       or product_price >= maxproduct_price.other)`;
+
+verify q1 q2;

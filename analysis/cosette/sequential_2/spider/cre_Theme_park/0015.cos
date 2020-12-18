@@ -1,0 +1,35 @@
+schema df_ref_hotel_star_ratings(star_rating_code:int, star_rating_description:str);
+schema df_hotels(hotel_id:int, star_rating_code:int, pets_allowed_yn:str, price_range:str, other_hotel_details:str);
+
+table df_ref_hotel_star_ratings(df_ref_hotel_star_ratings);
+table df_hotels(df_hotels);
+
+query q1
+`select t2.star_rating_description
+from df_hotels as t1
+join df_ref_hotel_star_ratings as t2 on t1.star_rating_code = t2.star_rating_code
+where t1.price_range > 10000`;
+
+query q2
+`select star_rating_description
+from
+  (select lhs.star_rating_code as star_rating_code,
+          lhs.star_rating_description as star_rating_description,
+          rhs.hotel_id as hotel_id,
+          rhs.pets_allowed_yn as pets_allowed_yn,
+          rhs.price_range as price_range,
+          rhs.other_hotel_details as other_hotel_details
+   from df_ref_hotel_star_ratings as lhs
+   inner join
+     (select *
+      from df_hotels as lhs
+      where not exists
+          (select 1
+           from
+             (select *
+              from df_hotels df_hotels
+              where (price_range < 10000.0)) as rhs
+           where (lhs.hotel_id = rhs.hotel_id
+                  and lhs.star_rating_code = rhs.star_rating_code) )) as rhs on (lhs.star_rating_code = rhs.star_rating_code))`;
+
+verify q1 q2;

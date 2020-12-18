@@ -1,0 +1,38 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+schema df_course(cid:str, cname:str, credits:int, instructor:int, days:str, hours:str, dno:int);
+
+table df_faculty(df_faculty);
+table df_course(df_course);
+
+query q1
+`select t2.fname,
+       t2.lname
+from df_course as t1
+join df_faculty as t2 on t1.instructor = t2.facid
+where t1.cname = "computer literacy"`;
+
+query q2
+`select fname,
+       lname
+from
+  (select lhs.facid as facid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.rank as rank,
+          lhs.sex as sex,
+          lhs.phone as phone,
+          lhs.room as room,
+          lhs.building as building,
+          rhs.cid as cid,
+          rhs.cname as cname,
+          rhs.credits as credits,
+          rhs.days as days,
+          rhs.hours as hours,
+          rhs.dno as dno
+   from df_faculty as lhs
+   inner join
+     (select *
+      from df_course df_course
+      where (cname = 'computer literacy')) as rhs on (lhs.facid = rhs.instructor))`;
+
+verify q1 q2;

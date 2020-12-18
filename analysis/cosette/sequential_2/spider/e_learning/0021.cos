@@ -1,0 +1,56 @@
+schema df_course_authors_and_tutors(author_id:int, author_tutor_atb:int, login_name:str, password:str, personal_name:str, middle_name:str, family_name:str, gender_mf:int, address_line_1:str);
+schema df_courses(course_id:int, author_id:int, subject_id:int, course_name:str, course_description:str);
+
+table df_course_authors_and_tutors(df_course_authors_and_tutors);
+table df_courses(df_courses);
+
+query q1
+`select t1.address_line_1,
+       t2.author_id
+from df_course_authors_and_tutors as t1
+join df_courses as t2 on t1.author_id = t2.author_id
+group by t2.author_id
+having count(*) >= 2`;
+
+query q2
+`select address_line_1,
+       author_id
+from
+  (select lhs.author_id as author_id,
+          lhs.author_tutor_atb as author_tutor_atb,
+          lhs.login_name as login_name,
+          lhs.password as password,
+          lhs.personal_name as personal_name,
+          lhs.middle_name as middle_name,
+          lhs.family_name as family_name,
+          lhs.gender_mf as gender_mf,
+          lhs.address_line_1 as address_line_1,
+          lhs.n as n
+   from
+     (select lhs.author_id as author_id,
+             lhs.author_tutor_atb as author_tutor_atb,
+             lhs.login_name as login_name,
+             lhs.password as password,
+             lhs.personal_name as personal_name,
+             lhs.middle_name as middle_name,
+             lhs.family_name as family_name,
+             lhs.gender_mf as gender_mf,
+             lhs.address_line_1 as address_line_1,
+             rhs.n as n
+      from df_course_authors_and_tutors as lhs
+      inner join
+        (select author_id,
+                count(*) as n
+         from df_courses df_courses
+         group by author_id) as rhs on (lhs.author_id = rhs.author_id)) as lhs
+   inner join
+     (select *
+      from
+        (select author_id,
+                count(*) as n
+         from df_courses df_courses
+         group by author_id)
+      where (n = 2.0)) as rhs on (lhs.author_id = rhs.author_id
+                                  and lhs.n = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_course(course_id:int, title:str, dept_name:str, credits:int);
+schema df_prereq(course_id:int, prereq_id:int);
+
+table df_course(df_course);
+table df_prereq(df_prereq);
+
+query q1
+`select t1.title
+from df_course as t1
+join df_prereq as t2 on t1.course_id = t2.course_id
+group by t2.course_id
+having count(*) = 2`;
+
+query q2
+`select title
+from
+  (select lhs.course_id as course_id,
+          lhs.n as n,
+          rhs.title as title,
+          rhs.dept_name as dept_name,
+          rhs.credits as credits
+   from
+     (select course_id,
+             count(*) as n
+      from df_prereq df_prereq
+      group by course_id) as lhs
+   left join df_course as rhs on (lhs.course_id = rhs.course_id))
+where (n = 2.0)`;
+
+verify q1 q2;

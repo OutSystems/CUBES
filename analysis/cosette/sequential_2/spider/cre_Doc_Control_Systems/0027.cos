@@ -1,0 +1,21 @@
+schema df_draft_copies(document_id:int, draft_number:int, copy_number:int);
+
+table df_draft_copies(df_draft_copies);
+
+query q1
+`select count(*)
+from df_draft_copies df_draft_copies
+where document_id = 2`;
+
+query q2
+`select distinct document_id as count...
+from
+  (select document_id,
+          draft_number,
+          copy_number,
+          count(distinct document_id) over () as n_distinct
+   from df_draft_copies df_draft_copies)
+where (document_id = 2.0
+       or n_distinct < 2.0)`;
+
+verify q1 q2;

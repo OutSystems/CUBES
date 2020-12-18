@@ -1,0 +1,36 @@
+schema df_screen_mode(graphics_mode:str, char_cells:str, pixels:str, hardware_colours:str, used_kb:str, map:str, type:str);
+schema df_phone(company_name:str, hardware_model_name:str, accreditation_type:str, accreditation_level:str, date:str, chip_model:str, screen_mode:int);
+
+table df_screen_mode(df_screen_mode);
+table df_phone(df_phone);
+
+query q1
+`select distinct t2.hardware_model_name
+from df_screen_mode as t1
+join df_phone as t2 on t1.graphics_mode = t2.df_screen_mode
+where t2.company_name = "nokia corporation"
+  and t1.type != "text"`;
+
+query q2
+`select distinct hardware_model_name
+from
+  (select lhs.graphics_mode as graphics_mode,
+          lhs.char_cells as char_cells,
+          lhs.pixels as pixels,
+          lhs.hardware_colours as hardware_colours,
+          lhs.used_kb as used_kb,
+          lhs.map as map,
+          lhs.type as type,
+          rhs.company_name as company_name,
+          rhs.hardware_model_name as hardware_model_name,
+          rhs.accreditation_type as accreditation_type,
+          rhs.accreditation_level as accreditation_level,
+          rhs.date as date,
+          rhs.chip_model as chip_model,
+          rhs.screen_mode as screen_mode
+   from df_screen_mode as lhs
+   cross join df_phone as rhs)
+where (company_name = 'nokia corporation'
+       and type != 'text')`;
+
+verify q1 q2;

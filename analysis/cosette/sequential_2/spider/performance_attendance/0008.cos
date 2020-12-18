@@ -1,0 +1,31 @@
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+
+table df_performance(df_performance);
+
+query q1
+`select location
+from df_performance df_performance
+group by location
+
+limit 1`;
+
+query q2
+`select distinct location.other as location
+from
+  (select lhs.location as location,
+          lhs.n as n,
+          rhs.location as location.other,
+          rhs.n as n.other
+   from
+     (select location,
+             count(*) as n
+      from df_performance df_performance
+      group by location) as lhs
+   cross join
+     (select location,
+             count(*) as n
+      from df_performance df_performance
+      group by location) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

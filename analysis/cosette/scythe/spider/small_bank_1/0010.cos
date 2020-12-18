@@ -1,0 +1,33 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+table df_checking(df_checking);
+
+query q1
+`select t2.balance
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+where t1.name in
+    (select t1.name
+     from df_accounts as t1
+     join df_savings as t2 on t1.custid = t2.custid
+     where t2.balance >
+         (select avg(balance)
+          from df_savings df_savings))`;
+
+query q2
+`select t2.balance
+ from
+  (select
+          max(t3.custid) as max_custid
+        from
+          input as t3) as t4 join 
+      (select *
+         from
+          input1
+         where input1.custid = 2.0) as t5 as t2`;
+
+verify q1 q2;

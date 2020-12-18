@@ -1,0 +1,24 @@
+schema df_college(college_id:int, name:str, leader_name:str, college_location:str);
+
+table df_college(df_college);
+
+query q1
+`select leader_name,
+       college_location
+from df_college df_college`;
+
+query q2
+`select leader_name,
+       college_location
+from
+  (select lhs.college_id as college_id,
+          lhs.name as name,
+          lhs.leader_name as leader_name,
+          lhs.college_location as college_location,
+          rhs.college_id as college_id.other,
+          rhs.name as name.other,
+          rhs.college_location as college_location.other
+   from df_college as lhs
+   inner join df_college as rhs on (lhs.leader_name = rhs.leader_name))`;
+
+verify q1 q2;

@@ -1,0 +1,54 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+
+table df_station(df_station);
+
+query q1
+`select location
+from df_station df_station
+group by location
+
+limit 1`;
+
+query q2
+`select location
+from
+  (select annual_entry_exit,
+          location,
+          count(*) as n
+   from
+     (select station_id,
+             name,
+             annual_entry_exit,
+             annual_interchanges,
+             total_passengers,
+             location,
+             main_services,
+             station_id as number_of_platforms,
+             station_id.other,
+             name.other,
+             annual_entry_exit.other,
+             total_passengers.other,
+             location.other,
+             main_services.other
+      from
+        (select lhs.station_id as station_id,
+                lhs.name as name,
+                lhs.annual_entry_exit as annual_entry_exit,
+                lhs.annual_interchanges as annual_interchanges,
+                lhs.total_passengers as total_passengers,
+                lhs.location as location,
+                lhs.main_services as main_services,
+                lhs.number_of_platforms as number_of_platforms,
+                rhs.station_id as station_id.other,
+                rhs.name as name.other,
+                rhs.annual_entry_exit as annual_entry_exit.other,
+                rhs.total_passengers as total_passengers.other,
+                rhs.location as location.other,
+                rhs.main_services as main_services.other
+         from df_station as lhs
+         inner join df_station as rhs on (lhs.station_id = rhs.number_of_platforms
+                                          and lhs.annual_interchanges = rhs.annual_interchanges)))
+   group by annual_entry_exit,
+            location)`;
+
+verify q1 q2;

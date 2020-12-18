@@ -1,0 +1,35 @@
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+
+table df_journalist(df_journalist);
+
+query q1
+`select nationality
+from df_journalist df_journalist
+group by nationality
+
+limit 1`;
+
+query q2
+`select nationality
+from
+  (select lhs.journalist_id as journalist_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.age as age,
+          lhs.years_working as years_working,
+          lhs.n as n,
+          rhs.journalist_id as journalist_id.other,
+          rhs.name as name.other,
+          rhs.nationality as nationality.other
+   from
+     (select journalist_id,
+             name,
+             nationality,
+             age,
+             years_working,
+             count(*) over () as n
+      from df_journalist df_journalist) as lhs
+   inner join df_journalist as rhs on (lhs.journalist_id = rhs.years_working
+                                       and lhs.age = rhs.age))`;
+
+verify q1 q2;

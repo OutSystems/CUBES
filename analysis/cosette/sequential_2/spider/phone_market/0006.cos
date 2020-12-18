@@ -1,0 +1,24 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+
+table df_phone(df_phone);
+
+query q1
+`select carrier
+from df_phone df_phone
+
+limit 1`;
+
+query q2
+`select carrier
+from
+  (select lhs.name as name,
+          lhs.phone_id as phone_id,
+          lhs.memory_in_g as memory_in_g,
+          lhs.carrier as carrier,
+          lhs.price as price
+   from df_phone as lhs
+   inner join
+     (select max(price) as price
+      from df_phone df_phone) as rhs on (lhs.price = rhs.price))`;
+
+verify q1 q2;

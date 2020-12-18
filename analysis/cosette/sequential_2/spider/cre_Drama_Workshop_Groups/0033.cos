@@ -1,0 +1,32 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, city_town:str, state_county:str, other_details:str);
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_drama_workshop_groups(df_drama_workshop_groups);
+
+query q1
+`select t1.city_town,
+       count(*)
+from df_addresses as t1
+join df_drama_workshop_groups as t2 on t1.address_id = t2.address_id
+group by t1.city_town`;
+
+query q2
+`select city_town,
+       n as count...
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.city_town as city_town,
+          lhs.state_county as state_county,
+          lhs.other_details as other_details,
+          rhs.n as n
+   from df_addresses as lhs
+   inner join
+     (select address_id,
+             count(*) as n
+      from df_drama_workshop_groups df_drama_workshop_groups
+      group by address_id) as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

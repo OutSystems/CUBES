@@ -1,0 +1,58 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select t1.artist_name,
+       count(*)
+from df_artist as t1
+join df_song as t2 on t1.artist_name = t2.artist_name
+where t2.languages = "english"
+group by t2.artist_name
+having count(*) >= 1`;
+
+query q2
+`select artist_name,
+       n_distinct as count...
+from
+  (select lhs.artist_name as artist_name,
+          lhs.country as country,
+          lhs.gender as gender,
+          lhs.preferred_genre as preferred_genre,
+          lhs.song_name as song_name,
+          lhs.f_id as f_id,
+          lhs.genre_is as genre_is,
+          lhs.rating as rating,
+          lhs.languages as languages,
+          lhs.releasedate as releasedate,
+          lhs.resolution as resolution,
+          rhs.n_distinct as n_distinct
+   from
+     (select lhs.artist_name as artist_name,
+             lhs.country as country,
+             lhs.gender as gender,
+             lhs.preferred_genre as preferred_genre,
+             rhs.song_name as song_name,
+             rhs.f_id as f_id,
+             rhs.genre_is as genre_is,
+             rhs.rating as rating,
+             rhs.languages as languages,
+             rhs.releasedate as releasedate,
+             rhs.resolution as resolution
+      from df_artist as lhs
+      inner join df_song as rhs on (lhs.artist_name = rhs.artist_name
+                                        and lhs.country = rhs.country)) as lhs
+   inner join
+     (select artist_name,
+             releasedate,
+             count(distinct languages) as n_distinct
+      from df_song df_song
+      group by artist_name,
+               releasedate) as rhs on (lhs.artist_name = rhs.artist_name
+                                           and lhs.releasedate = rhs.releasedate))
+where (languages = 'english'
+       and n_distinct >= 1.0)`;
+
+verify q1 q2;

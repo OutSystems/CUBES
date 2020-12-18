@@ -1,0 +1,38 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_affected_region(df_affected_region);
+
+query q1
+`select name
+from df_storm df_storm
+where storm_id not in
+    (select storm_id
+     from df_affected_region df_affected_region)`;
+
+query q2
+`joining, by = "storm_id"
+joining, by = "storm_id"
+select name
+from
+  (select storm_id,
+          name,
+          dates_active,
+          max_speed,
+          damage_millions_usd,
+          number_deaths
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select storm_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select storm_id
+              from input1) as rhs
+           where (lhs.storm_id = rhs.storm_id) )) as rhs on (lhs.storm_id = rhs.storm_id))`;
+
+verify q1 q2;

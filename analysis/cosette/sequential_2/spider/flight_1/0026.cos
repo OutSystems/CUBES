@@ -1,0 +1,23 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+
+table df_flight(df_flight);
+
+query q1
+`select avg(price)
+from df_flight df_flight
+where origin = "los angeles"
+  and destination = "honolulu"`;
+
+query q2
+`select meanprice as avg.price.
+from
+  (select departure_date,
+          avg(price) as meanprice
+   from
+     (select *
+      from df_flight df_flight
+      where (origin = 'los angeles'
+             and destination = 'honolulu'))
+   group by departure_date)`;
+
+verify q1 q2;

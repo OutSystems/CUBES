@@ -1,0 +1,31 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+
+table df_files(df_files);
+
+query q1
+`select formats
+from df_files df_files
+group by formats
+
+limit 1`;
+
+query q2
+`select formats
+from
+  (select lhs.file_size as file_size,
+          lhs.formats as formats,
+          lhs.n as n,
+          rhs.artist_name as artist_name,
+          rhs.duration as duration,
+          rhs.formats as formats.other
+   from
+     (select file_size,
+             formats,
+             count(*) as n
+      from df_files df_files
+      group by file_size,
+               formats) as lhs
+   inner join df_files as rhs on (lhs.n = rhs.f_id
+                                  and lhs.file_size = rhs.file_size))`;
+
+verify q1 q2;

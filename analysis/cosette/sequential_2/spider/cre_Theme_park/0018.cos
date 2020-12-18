@@ -1,0 +1,37 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_photos(photo_id:int, tourist_attraction_id:int, name:str, description:str, filename:int, other_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_photos(df_photos);
+
+query q1
+`select t1.name,
+       t1.description
+from df_photos as t1
+join df_tourist_attractions as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+where t2.name = "film festival"`;
+
+query q2
+`select name.other as name,
+       opening_hours as description
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.photo_id as photo_id,
+          rhs.name as name.other,
+          rhs.filename as filename,
+          rhs.other_details as other_details.other
+   from
+     (select *
+      from df_tourist_attractions df_tourist_attractions
+      where (name = 'film festival')) as lhs
+   inner join df_photos as rhs on (lhs.tourist_attraction_id = rhs.tourist_attraction_id
+                                   and lhs.opening_hours = rhs.description))`;
+
+verify q1 q2;

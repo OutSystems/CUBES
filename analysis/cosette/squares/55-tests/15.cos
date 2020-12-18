@@ -1,0 +1,68 @@
+schema df_15_1(S_key:str, P_id:str);
+schema df_15_2(P_id:str, color:str);
+schema df_15_3(S_key:str, S_name:str);
+
+table df_15_1(df_15_1);
+table df_15_2(df_15_2);
+table df_15_3(df_15_3);
+
+query q1
+`select s_name
+from
+  (select *
+   from
+     (select s_name,
+             color,
+             n,
+             max(n) over () as zzz4
+      from
+        (select s_name,
+                color,
+                count(*) as n
+         from
+           (select *
+            from
+              (select *
+               from df_15_1 as lhs
+               inner join df_15_2 as rhs on (lhs.p_id = rhs.p_id)) as lhs
+            inner join df_15_3 as rhs on (lhs.s_key = rhs.s_key))
+         group by s_name,
+                  color))
+   where (color = 'red'
+          and n = zzz4))`;
+
+query q2
+`joining, by = "p_id"
+joining, by = "s_key"
+select distinct s_name
+from
+  (select color,
+          s_name,
+          n
+   from
+     (select color,
+             s_name,
+             n,
+             max(n) over () as zzz4
+      from
+        (select color,
+                s_name,
+                count(*) as n
+         from
+           (select p_id,
+                   color,
+                   s_key,
+                   s_name
+            from
+              (select p_id,
+                      color,
+                      s_key
+               from input1 as lhs
+               inner join input0 as rhs on (lhs.p_id = rhs.p_id)) as lhs
+            inner join input2 as rhs on (lhs.s_key = rhs.s_key))
+         group by color,
+                  s_name))
+   where (color = 'red'
+          and n = zzz4))`;
+
+verify q1 q2;

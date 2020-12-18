@@ -1,0 +1,35 @@
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+
+query q1
+`select count(*),
+       t1.name
+from df_medication as t1
+join df_prescribes as t2 on t1.code = t2.df_medication
+group by t1.brand`;
+
+query q2
+`select distinct code as count...,
+                name
+from
+  (select lhs.code as code,
+          lhs.name as name,
+          lhs.n as n,
+          rhs.physician as physician,
+          rhs.patient as patient,
+          rhs.date as date,
+          rhs.appointment as appointment,
+          rhs.dose as dose
+   from
+     (select code,
+             name,
+             count(*) as n
+      from df_medication df_medication
+      group by code,
+               name) as lhs
+   inner join df_prescribes as rhs on (lhs.code = rhs.medication))`;
+
+verify q1 q2;

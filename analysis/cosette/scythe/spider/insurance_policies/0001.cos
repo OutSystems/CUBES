@@ -1,0 +1,37 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+schema df_settlements(settlement_id:int, claim_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int, customer_policy_id:int);
+
+table df_claims(df_claims);
+table df_settlements(df_settlements);
+
+query q1
+`select t1.date_claim_made,
+       t1.claim_id
+from df_claims as t1
+join df_settlements as t2 on t1.claim_id = t2.claim_id
+group by t1.claim_id
+having count(*) > 2
+union
+select t1.date_claim_made,
+       t1.claim_id
+from df_claims as t1
+join df_settlements as t2 on t1.claim_id = t2.claim_id
+where t1.amount_claimed =
+    (select max(amount_claimed)
+     from df_claims df_claims)`;
+
+query q2
+`select t3.date_claim_made,t3.claim_id
+ from
+  (select t2.claim_id, t2.max_settlement_id, t1.claim_id as claim_id1, t1.policy_id, t1.date_claim_made, t1.date_claim_settled, t1.amount_claimed, t1.amount_settled
+  from (select
+          t4.claim_id, max(t4.settlement_id) as max_settlement_id
+        from
+          input0 as t4
+        group by
+          t4.claim_id) as t2 join 
+      input as t1) as t3
+ where t3.max_settlement_id < t3.policy_id
+   and t3.claim_id = t3.claim_id1`;
+
+verify q1 q2;

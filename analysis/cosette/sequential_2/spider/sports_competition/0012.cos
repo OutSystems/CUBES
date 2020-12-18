@@ -1,0 +1,30 @@
+schema df_club(club_id:int, name:str, region:str, start_year:int);
+schema df_player(player_id:int, name:str, position:str, club_id:int, apps:str, tries:str, goals:str, points:str);
+
+table df_club(df_club);
+table df_player(df_player);
+
+query q1
+`select avg(t2.points)
+from df_club as t1
+join df_player as t2 on t1.club_id = t2.club_id
+where t1.name = "aib"`;
+
+query q2
+`select meanpoints as avg.t2.points.
+from
+  (select goals,
+          avg(points) as meanpoints
+   from
+     (select *
+      from df_player as lhs
+      where not exists
+          (select 1
+           from
+             (select *
+              from df_club df_club
+              where (name != 'aib')) as rhs
+           where (lhs.club_id = rhs.club_id) ))
+   group by goals)`;
+
+verify q1 q2;

@@ -1,0 +1,37 @@
+schema df_member(member_id:int, card_number:str, name:str, hometown:str, level:int);
+schema df_membership_register_branch(member_id:int, branch_id:int, register_year:int);
+
+table df_member(df_member);
+table df_membership_register_branch(df_membership_register_branch);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_membership_register_branch df_membership_register_branch)`;
+
+query q2
+`joining, by = "member_id"
+joining, by = "member_id"
+select name
+from
+  (select member_id,
+          card_number,
+          name,
+          hometown,
+          level
+   from
+     (select *
+      from
+        (select member_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select member_id
+              from input1) as rhs
+           where (lhs.member_id = rhs.member_id) )) as lhs
+   inner join input0 as rhs on (lhs.member_id = rhs.member_id))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+
+table df_participants(df_participants);
+
+query q1
+`select participant_type_code
+from df_participants df_participants
+group by participant_type_code
+
+limit 1`;
+
+query q2
+`select participant_type_code.other as participant_type_code
+from
+  (select lhs.participant_type_code as participant_type_code,
+          lhs.n as n,
+          rhs.participant_type_code as participant_type_code.other,
+          rhs.n as n.other
+   from
+     (select participant_type_code,
+             count(*) as n
+      from df_participants df_participants
+      group by participant_type_code) as lhs
+   cross join
+     (select participant_type_code,
+             count(*) as n
+      from df_participants df_participants
+      group by participant_type_code) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

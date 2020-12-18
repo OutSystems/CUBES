@@ -1,0 +1,41 @@
+schema df_organizations(organization_id:int, date_formed:str, organization_name:str, uk_vat_number:int);
+
+table df_organizations(df_organizations);
+
+query q1
+`select organization_name
+from df_organizations df_organizations
+
+limit 1`;
+
+query q2
+`select distinct organization_name
+from
+  (select lhs.organization_id as organization_id,
+          lhs.date_formed as date_formed,
+          lhs.organization_name as organization_name,
+          lhs.uk_vat_number as uk_vat_number,
+          lhs.maxdate_formed as maxdate_formed,
+          rhs.organization_id as organization_id.other,
+          rhs.date_formed as date_formed.other,
+          rhs.organization_name as organization_name.other,
+          rhs.uk_vat_number as uk_vat_number.other,
+          rhs.maxdate_formed as maxdate_formed.other
+   from
+     (select organization_id,
+             date_formed,
+             organization_name,
+             uk_vat_number,
+             max(date_formed) over () as maxdate_formed
+      from df_organizations df_organizations) as lhs
+   cross join
+     (select organization_id,
+             date_formed,
+             organization_name,
+             uk_vat_number,
+             max(date_formed) over () as maxdate_formed
+      from df_organizations df_organizations) as rhs)
+where (date_formed >= maxdate_formed.other
+       or maxdate_formed != maxdate_formed.other)`;
+
+verify q1 q2;

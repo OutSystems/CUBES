@@ -1,0 +1,42 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+schema df_employee(eid:int, name:str, salary:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_employee(df_employee);
+table df_certificate(df_certificate);
+
+query q1
+`select name
+from df_employee df_employee
+except
+select t1.name
+from df_employee as t1
+join df_certificate as t2 on t1.eid = t2.eid
+join df_aircraft as t3 on t3.aid = t2.aid
+where t3.name = "boeing 737-800"`;
+
+query q2
+`select distinct name.other as name
+from
+  (select *
+   from
+     (select *
+      from
+        (select lhs.aid as aid,
+                lhs.name as name,
+                lhs.distance as distance,
+                rhs.eid as eid,
+                rhs.name as name.other,
+                rhs.salary as salary
+         from df_aircraft as lhs
+         cross join df_employee as rhs)
+      where (name != name.other)) as lhs
+   where not exists
+       (select 1
+        from df_certificate as rhs
+        where (lhs.aid = rhs.aid
+               and lhs.eid = rhs.eid) ))
+where (name = 'boeing 737-800')`;
+
+verify q1 q2;

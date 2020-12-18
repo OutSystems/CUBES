@@ -1,0 +1,23 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select count(*)
+from df_stadium df_stadium
+where country != 'russia'`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select id,
+          name,
+          capacity,
+          city,
+          country,
+          opening_year,
+          count(distinct country) over () as n_distinct
+   from df_stadium df_stadium)
+where (country != 'russia')`;
+
+verify q1 q2;

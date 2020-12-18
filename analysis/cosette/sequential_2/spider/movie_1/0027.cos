@@ -1,0 +1,31 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+
+table df_movie(df_movie);
+
+query q1
+`select t1.title,
+       t1.director
+from df_movie as t1
+join df_movie as t2 on t1.director = t2.director
+where t1.title != t2.title
+
+         t1.title`;
+
+query q2
+`select title,
+       director
+from
+  (select lhs.mid as mid,
+          lhs.title as title,
+          lhs.year as year,
+          lhs.director as director,
+          rhs.mid as mid.other,
+          rhs.title as title.other,
+          rhs.year as year.other,
+          rhs.director as director.other
+   from df_movie as lhs
+   cross join df_movie as rhs)
+where (title != title.other
+       and director = director.other)`;
+
+verify q1 q2;

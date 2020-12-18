@@ -1,0 +1,22 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select *
+from df_college df_college`;
+
+query q2
+`select cname,
+       state,
+       enr
+from
+  (select lhs.cname as cname,
+          lhs.state as state,
+          lhs.enr as enr,
+          rhs.state as state.other
+   from df_college as lhs
+   inner join df_college as rhs on (lhs.cname = rhs.cname
+                                    and lhs.enr = rhs.enr))`;
+
+verify q1 q2;

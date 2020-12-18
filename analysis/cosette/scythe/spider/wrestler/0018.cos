@@ -1,0 +1,25 @@
+schema df_elimination(elimination_id:int, wrestler_id:int, team:str, eliminated_by:str, elimination_move:str, time:str);
+
+table df_elimination(df_elimination);
+
+query q1
+`select team
+from df_elimination df_elimination
+where eliminated_by = "orton" intersect
+  select team
+  from df_elimination df_elimination where eliminated_by = "benjamin"`;
+
+query q2
+`select t1.team
+ from
+  (select input.elimination_id, input.wrestler_id, input.team, input.eliminated_by, input.elimination_move, input.time, t2.elimination_id as elimination_id1, t2.wrestler_id as wrestler_id1, t2.team as team1, t2.eliminated_by as eliminated_by1, t2.elimination_move as elimination_move1, t2.time as time1
+  from (select *
+       from
+        input
+       where input.eliminated_by = 'benjamin') join 
+      (select *
+         from
+          input
+         where input.eliminated_by = 'orton') as t2) as t1`;
+
+verify q1 q2;

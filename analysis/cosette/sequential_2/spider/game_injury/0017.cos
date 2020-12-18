@@ -1,0 +1,53 @@
+schema df_stadium(id:int, name:str, home_games:int, average_attendance:str, total_attendance:str, capacity_percentage:str);
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+
+table df_stadium(df_stadium);
+table df_game(df_game);
+
+query q1
+`select t1.id,
+       count(*)
+from df_stadium as t1
+join df_game as t2 on t1.id = t2.stadium_id
+group by t1.id`;
+
+query q2
+`select id,
+       n as count...
+from
+  (select id,
+          stadium_id,
+          count(*) as n
+   from
+     (select id,
+             name,
+             home_games,
+             average_attendance,
+             total_attendance,
+             capacity_percentage,
+             id.other,
+             season, date, home_team,
+                           away_team,
+                           score,
+                           competition,
+                           id as stadium_id
+      from
+        (select lhs.id as id,
+                lhs.name as name,
+                lhs.home_games as home_games,
+                lhs.average_attendance as average_attendance,
+                lhs.total_attendance as total_attendance,
+                lhs.capacity_percentage as capacity_percentage,
+                rhs.id as id.other,
+                rhs.season as season,
+                rhs.date as date,
+                rhs.home_team as home_team,
+                rhs.away_team as away_team,
+                rhs.score as score,
+                rhs.competition as competition
+         from df_stadium as lhs
+         inner join df_game as rhs on (lhs.id = rhs.stadium_id)))
+   group by id,
+            stadium_id)`;
+
+verify q1 q2;

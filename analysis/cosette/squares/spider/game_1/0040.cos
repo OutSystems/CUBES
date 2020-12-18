@@ -1,0 +1,53 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_video_games(gameid:int, gname:str, gtype:str);
+schema df_plays_games(stuid:int, gameid:int, hours_played:int);
+
+table df_student(df_student);
+table df_video_games(df_video_games);
+table df_plays_games(df_plays_games);
+
+query q1
+`select gname
+from df_plays_games as t1
+join df_video_games as t2 on t1.gameid = t2.gameid
+join df_student as t3 on t3.stuid = t1.stuid
+where t3.lname = "smith"
+  and t3.fname = "linda"`;
+
+query q2
+`joining, by = "stuid"
+joining, by = "gameid"
+select distinct gname
+from
+  (select stuid,
+          gameid,
+          hours_played,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          gname,
+          gtype
+   from
+     (select stuid,
+             gameid,
+             hours_played,
+             lname,
+             fname,
+             age,
+             sex,
+             major,
+             advisor,
+             city_code
+      from input2 as lhs
+      inner join
+        (select *
+         from input0
+         where (fname = 'linda'
+                and lname = 'smith')) as rhs on (lhs.stuid = rhs.stuid)) as lhs
+   inner join input1 as rhs on (lhs.gameid = rhs.gameid))`;
+
+verify q1 q2;

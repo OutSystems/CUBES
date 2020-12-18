@@ -1,0 +1,29 @@
+schema df_021(id_order:str, id_product:int);
+
+table df_021(df_021);
+
+query q1
+`select od.product_id, count(od2.id_order) as numtimeswith2 from ps_order_detail od left join ps_order_detail od2 on od.id_order = od2.id_order and od2.product_id = 22 where od.product_id <> 22 group by od.product_id`;
+
+query q2
+`select t3.id_product,t3.count_id_product
+ from
+  (select
+      t2.id_product, t2.id_product1, count(t2.id_product) as count_id_product
+    from
+      (select *
+         from
+          (select input.id_order, input.id_product, t5.id_order as id_order1, t5.id_product as id_product1
+          from (select *
+               from
+                input
+               where input.id_product <> 22.0) join 
+              (select *
+                 from
+                  input
+                 where input.id_product = 22.0) as t5) as t4
+         where t4.id_order = t4.id_order1) as t2
+    group by
+      t2.id_product, t2.id_product1) as t3`;
+
+verify q1 q2;

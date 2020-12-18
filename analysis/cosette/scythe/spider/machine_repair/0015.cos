@@ -1,0 +1,31 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+
+table df_technician(df_technician);
+
+query q1
+`select starting_year
+from df_technician df_technician
+where team = "cle" intersect
+  select starting_year
+  from df_technician df_technician where team = "cws"`;
+
+query q2
+`select t3.max_starting_year
+ from
+  (select t1.name, t1.max_starting_year, t2.technician_id, t2.name as name1, t2.team, t2.starting_year, t2.age
+  from (select
+          t4.name, max(t4.starting_year) as max_starting_year
+        from
+          (select *
+             from
+              input
+             where input.team = 'cws') as t4
+        group by
+          t4.name) as t1 join 
+      (select *
+         from
+          input
+         where input.technician_id = 4.0
+           and input.team = 'cle') as t2) as t3`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t1.emp_lname,
+       t1.emp_hiredate
+from df_employee as t1
+join df_professor as t2 on t1.emp_num = t2.emp_num
+where t2.prof_office = 'dre 102'`;
+
+query q2
+`select t1.emp_lname,t1.emp_hiredate
+ from
+  (select input.emp_num, input.emp_lname, input.emp_fname, input.emp_initial, input.emp_jobcode, input.emp_hiredate, input.emp_dob, t2.emp_num as emp_num1, t2.dept_code, t2.prof_office, t2.prof_extension, t2.prof_high_degree
+  from input join 
+      (select *
+         from
+          input0
+         where input0.prof_office = 'dre 102') as t2) as t1
+ where t1.emp_num = t1.emp_num1`;
+
+verify q1 q2;

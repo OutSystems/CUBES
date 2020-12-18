@@ -1,0 +1,19 @@
+schema df_dependent(essn:int, dependent_name:str, sex:str, bdate:str, relationship:str);
+
+table df_dependent(df_dependent);
+
+query q1
+`select count(*)
+from df_dependent df_dependent
+where sex = 'f'`;
+
+query q2
+`(select
+    count(t1.essn) as count_essn
+  from
+    (select *
+       from
+        input
+       where input.sex = 'f') as t1) as t2`;
+
+verify q1 q2;

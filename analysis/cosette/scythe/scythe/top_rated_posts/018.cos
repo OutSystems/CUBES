@@ -1,0 +1,30 @@
+schema df_i018(id:int, section_id:int, name:str);
+
+table df_i018(df_i018);
+
+query q1
+`select this.*
+from input1 this
+join ( select x1.id, count(x2.id) as rnk
+        from input1 x1
+        left join input1 x2 on x1.section_id = x2.section_id and x2.name <= x1.name
+        group by x1.id
+        ) rnk
+on rnk.id = this.id
+where rnk.rnk <=2`;
+
+query q2
+`select t4.id,t4.section_id,t4.name
+ from
+  (select t1.section_id, t1.avg_id, t3.id, t3.section_id as section_id1, t3.name
+  from (select
+          t2.section_id, avg(t2.id) as avg_id
+        from
+          input as t2
+        group by
+          t2.section_id) as t1 join 
+      input as t3) as t4
+ where t4.section_id = t4.section_id1
+   and t4.avg_id >= t4.id`;
+
+verify q1 q2;

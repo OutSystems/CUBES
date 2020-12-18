@@ -1,0 +1,31 @@
+schema df_individuals(individual_id:int, individual_first_name:str, individual_middle_name:str, inidividual_phone:str, individual_email:str, individual_address:str, individual_last_name:str);
+schema df_organizations(organization_id:int, date_formed:str, organization_name:str, uk_vat_number:int);
+schema df_organization_contact_individuals(individual_id:int, organization_id:int, date_contact_from:str, date_contact_to:str);
+
+table df_individuals(df_individuals);
+table df_organizations(df_organizations);
+table df_organization_contact_individuals(df_organization_contact_individuals);
+
+query q1
+`select t3.individual_last_name
+from df_organizations as t1
+join df_organization_contact_individuals as t2 on t1.organization_id = t2.organization_id
+join df_individuals as t3 on t2.individual_id = t3.individual_id
+where t1.organization_name = "labour party"
+
+limit 1`;
+
+query q2
+`select t4.individual_last_name
+ from
+  (select
+          max(t2.individual_id) as max_individual_id
+        from
+          (select *
+             from
+              input1
+             where input1.organization_id = 3.0) as t2) as t5 join 
+      input as t3 as t4
+ where t4.max_individual_id = t4.individual_id`;
+
+verify q1 q2;

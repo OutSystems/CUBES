@@ -1,0 +1,31 @@
+schema df_3_1(ID_key:str, Room:str);
+schema df_3_2(ID_key_student:str, ID_key:str);
+
+table df_3_1(df_3_1);
+table df_3_2(df_3_2);
+
+query q1
+`select c.name
+from class c
+where c.room = 'r128'
+or c.name in (select e.cname
+from enrolled e
+group by e.cname
+having count (*) >= 5)`;
+
+query q2
+`select id_key
+from
+  (select lhs.id_key as id_key,
+          lhs.n as n,
+          rhs.room as room
+   from
+     (select id_key,
+             count(*) as n
+      from df_3_2 df_3_2
+      group by id_key) as lhs
+   inner join df_3_1 as rhs on (lhs.id_key = rhs.id_key))
+where (room = 'r128'
+       or n > 4.0)`;
+
+verify q1 q2;

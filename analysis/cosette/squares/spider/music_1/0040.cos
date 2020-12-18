@@ -1,0 +1,59 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select t1.artist_name,
+       t1.country
+from df_artist as t1
+join df_song as t2 on t1.artist_name = t2.artist_name
+where t2.resolution > 900
+group by t2.artist_name
+having count(*) >= 1`;
+
+query q2
+`joining, by = c("releasedate", "resolution")
+joining, by = c("artist_name", "country")
+select distinct artist_name,
+                country
+from
+  (select releasedate,
+          resolution,
+          n,
+          song_name,
+          artist_name,
+          country,
+          f_id,
+          genre_is,
+          rating,
+          languages,
+          gender,
+          preferred_genre
+   from
+     (select releasedate,
+             resolution,
+             n,
+             song_name,
+             artist_name,
+             country,
+             f_id,
+             genre_is,
+             rating,
+             languages
+      from
+        (select releasedate,
+                resolution,
+                count(*) as n
+         from input1
+         group by releasedate,
+                  resolution) as lhs
+      inner join input1 as rhs on (lhs.releasedate = rhs.releasedate
+                                       and lhs.resolution = rhs.resolution)) as lhs
+   inner join input0 as rhs on (lhs.artist_name = rhs.artist_name
+                                    and lhs.country = rhs.country))
+where (resolution > 900.0
+       or resolution = 1.0)`;
+
+verify q1 q2;

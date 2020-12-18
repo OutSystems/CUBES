@@ -1,0 +1,33 @@
+schema df_department(dept_name:str, building:str, budget:str);
+
+table df_department(df_department);
+
+query q1
+`select dept_name,
+       building
+from df_department df_department
+
+limit 1`;
+
+query q2
+`select distinct dept_name.other as dept_name,
+                building.other as building
+from
+  (select lhs.dept_name as dept_name,
+          lhs.building as building,
+          lhs.budget as budget,
+          lhs.maxbudget as maxbudget,
+          rhs.dept_name as dept_name.other,
+          rhs.building as building.other,
+          rhs.budget as budget.other
+   from
+     (select dept_name,
+             building,
+             budget,
+             max(budget) over () as maxbudget
+      from df_department df_department) as lhs
+   cross join df_department as rhs)
+where (budget <= maxbudget
+       and maxbudget = budget.other)`;
+
+verify q1 q2;

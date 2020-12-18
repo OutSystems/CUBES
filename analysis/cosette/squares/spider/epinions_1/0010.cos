@@ -1,0 +1,34 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select name
+from df_useracct df_useracct
+where u_id not in
+    (select u_id
+     from df_review df_review)`;
+
+query q2
+`joining, by = "u_id"
+joining, by = "u_id"
+select name
+from
+  (select u_id,
+          name
+   from input1 as lhs
+   inner join
+     (select *
+      from
+        (select u_id
+         from input1) as lhs
+      where not exists
+          (select 1
+           from
+             (select u_id
+              from input0) as rhs
+           where (lhs.u_id = rhs.u_id) )) as rhs on (lhs.u_id = rhs.u_id))`;
+
+verify q1 q2;

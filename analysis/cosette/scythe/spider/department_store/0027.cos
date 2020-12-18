@@ -1,0 +1,30 @@
+schema df_staff(staff_id:int, staff_gender:int, staff_name:str);
+schema df_staff_department_assignments(staff_id:int, department_id:int, date_assigned_from:str, job_title_code:str, date_assigned_to:str);
+
+table df_staff(df_staff);
+table df_staff_department_assignments(df_staff_department_assignments);
+
+query q1
+`select t1.staff_name
+from df_staff as t1
+join df_staff_department_assignments as t2 on t1.staff_id = t2.staff_id
+group by t2.staff_id
+having count (*) > 1`;
+
+query q2
+`select t3.staff_name
+ from
+  (select t4.staff_id, t4.count_staff_id, t1.staff_id as staff_id1, t1.staff_gender, t1.staff_name
+  from (select *
+       from
+        (select
+            t2.staff_id, count(t2.staff_id) as count_staff_id
+          from
+            input0 as t2
+          group by
+            t2.staff_id) as t4
+       where t4.count_staff_id > 1.0) join 
+      input as t1) as t3
+ where t3.staff_id = t3.staff_id1`;
+
+verify q1 q2;

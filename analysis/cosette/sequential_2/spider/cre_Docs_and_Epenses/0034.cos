@@ -1,0 +1,26 @@
+schema df_ref_budget_codes(budget_type_code:str, budget_type_description:str);
+schema df_documents_with_expenses(document_id:int, budget_type_code:str, document_details:str);
+
+table df_ref_budget_codes(df_ref_budget_codes);
+table df_documents_with_expenses(df_documents_with_expenses);
+
+query q1
+`select t1.document_id
+from df_documents_with_expenses as t1
+join df_ref_budget_codes as t2 on t1.budget_type_code = t2.budget_type_code
+where t2.budget_type_description = "government"`;
+
+query q2
+`select document_id
+from
+  (select lhs.document_id as document_id,
+          lhs.budget_type_code as budget_type_code,
+          lhs.document_details as document_details,
+          rhs.budget_type_description as budget_type_description
+   from df_documents_with_expenses as lhs
+   inner join
+     (select *
+      from df_ref_budget_codes df_ref_budget_codes
+      where (budget_type_description = 'government')) as rhs on (lhs.budget_type_code = rhs.budget_type_code))`;
+
+verify q1 q2;

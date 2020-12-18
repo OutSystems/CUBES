@@ -1,0 +1,25 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_publication(df_publication);
+table df_book(df_book);
+
+query q1
+`select t1.writer
+from df_book as t1
+join df_publication as t2 on t1.book_id = t2.book_id
+where t2.price > 4000000`;
+
+query q2
+`select t2.writer
+ from
+  (select
+          t1.price, sum(t1.book_id) as sum_book_id
+        from
+          input as t1
+        group by
+          t1.price) as t3 join 
+      input0 as t4 as t2
+ where t2.sum_book_id = t2.book_id`;
+
+verify q1 q2;

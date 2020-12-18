@@ -1,0 +1,40 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_middle_initial:str, customer_last_name:str, gender:int, email_address:str, login_name:str, login_password:str, phone_number:str, town_city:str, state_county_province:str, country:str);
+schema df_accounts(account_id:int, customer_id:int, date_account_opened:str, account_name:int, other_account_details:str);
+
+table df_customers(df_customers);
+table df_accounts(df_accounts);
+
+query q1
+`select t1.account_name,
+       t1.other_account_details
+from df_accounts as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.customer_first_name = "meaghan"
+  and t2.customer_last_name = "keeling"`;
+
+query q2
+`select account_name,
+       other_account_details
+from
+  (select lhs.account_id as account_id,
+          lhs.customer_id as customer_id,
+          lhs.date_account_opened as date_account_opened,
+          lhs.account_name as account_name,
+          lhs.other_account_details as other_account_details,
+          rhs.customer_first_name as customer_first_name,
+          rhs.customer_middle_initial as customer_middle_initial,
+          rhs.customer_last_name as customer_last_name,
+          rhs.gender as gender,
+          rhs.email_address as email_address,
+          rhs.login_name as login_name,
+          rhs.login_password as login_password,
+          rhs.phone_number as phone_number,
+          rhs.town_city as town_city,
+          rhs.state_county_province as state_county_province,
+          rhs.country as country
+   from df_accounts as lhs
+   inner join df_customers as rhs on (lhs.customer_id = rhs.customer_id))
+where (customer_first_name = 'meaghan'
+       or customer_last_name = 'keeling')`;
+
+verify q1 q2;

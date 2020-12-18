@@ -1,0 +1,22 @@
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, product_quantity:int, other_order_item_details:str);
+
+table df_order_items(df_order_items);
+
+query q1
+`select product_id,
+       count(distinct order_id)
+from df_order_items df_order_items
+group by product_id`;
+
+query q2
+`select product_id,
+       n_distinct as count.distinct.order_id.
+from
+  (select other_order_item_details,
+          product_id,
+          count(distinct order_id) as n_distinct
+   from df_order_items df_order_items
+   group by other_order_item_details,
+            product_id)`;
+
+verify q1 q2;

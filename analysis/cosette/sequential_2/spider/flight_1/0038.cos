@@ -1,0 +1,31 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+schema df_aircraft(aid:int, name:str, distance:int);
+
+table df_flight(df_flight);
+table df_aircraft(df_aircraft);
+
+query q1
+`select t2.name
+from df_flight as t1
+join df_aircraft as t2 on t1.aid = t2.aid
+group by t1.aid
+having count(*) >= 2`;
+
+query q2
+`select name
+from
+  (select lhs.aid as aid,
+          lhs.name as name,
+          lhs.distance as distance,
+          rhs.n as n
+   from df_aircraft as lhs
+   inner join
+     (select *
+      from
+        (select aid,
+                count(*) as n
+         from df_flight df_flight
+         group by aid)
+      where (n >= 2.0)) as rhs on (lhs.aid = rhs.aid))`;
+
+verify q1 q2;

@@ -1,0 +1,51 @@
+schema df_characteristics(characteristic_id:int, characteristic_type_code:str, characteristic_data_type:str, characteristic_name:str, other_characteristic_details:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+schema df_product_characteristics(product_id:int, characteristic_id:int, product_characteristic_value:str);
+
+table df_characteristics(df_characteristics);
+table df_products(df_products);
+table df_product_characteristics(df_product_characteristics);
+
+query q1
+`select t3.characteristic_name
+from df_products as t1
+join df_product_characteristics as t2 on t1.product_id = t2.product_id
+join df_characteristics as t3 on t2.characteristic_id = t3.characteristic_id
+where t1.product_name = "sesame"`;
+
+query q2
+`joining, by = "product_id"
+joining, by = "characteristic_id"
+select characteristic_name
+from
+  (select product_id,
+          color_code,
+          product_category_code,
+          product_name,
+          typical_buying_price,
+          typical_selling_price,
+          product_description,
+          other_product_details,
+          characteristic_id,
+          product_characteristic_value,
+          characteristic_type_code,
+          characteristic_data_type,
+          characteristic_name,
+          other_characteristic_details
+   from
+     (select product_id,
+             color_code,
+             product_category_code,
+             product_name,
+             typical_buying_price,
+             typical_selling_price,
+             product_description,
+             other_product_details,
+             characteristic_id,
+             product_characteristic_value
+      from input1 as lhs
+      inner join input2 as rhs on (lhs.product_id = rhs.product_id)) as lhs
+   inner join input0 as rhs on (lhs.characteristic_id = rhs.characteristic_id))
+where (product_name = 'sesame')`;
+
+verify q1 q2;

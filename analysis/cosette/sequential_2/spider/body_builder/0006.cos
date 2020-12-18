@@ -1,0 +1,26 @@
+schema df_people(people_id:int, name:str, height:str, weight:str, birth_date:str, birth_place:str);
+
+table df_people(df_people);
+
+query q1
+`select birth_date
+from df_people df_people`;
+
+query q2
+`select birth_date
+from
+  (select lhs.people_id as people_id,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.weight as weight,
+          lhs.birth_date as birth_date,
+          lhs.birth_place as birth_place,
+          rhs.people_id as people_id.other,
+          rhs.name as name.other,
+          rhs.height as height.other,
+          rhs.birth_date as birth_date.other
+   from df_people as lhs
+   inner join df_people as rhs on (lhs.birth_place = rhs.birth_place
+                                   and lhs.weight = rhs.weight))`;
+
+verify q1 q2;

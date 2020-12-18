@@ -1,0 +1,39 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+schema df_employee(eid:int, name:str, salary:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_employee(df_employee);
+table df_certificate(df_certificate);
+
+query q1
+`select t1.name
+from df_employee as t1
+join df_certificate as t2 on t1.eid = t2.eid
+join df_aircraft as t3 on t3.aid = t2.aid
+where t3.name = "boeing 737-800" intersect
+  select t1.name
+  from df_employee as t1
+  join df_certificate as t2 on t1.eid = t2.eid
+  join df_aircraft as t3 on t3.aid = t2.aid where t3.name = "airbus a340-300"`;
+
+query q2
+`select t2.name
+ from
+  (select t4.eid, t4.count_eid, t5.eid as eid1, t5.name, t5.salary
+  from (select *
+       from
+        (select
+            t3.eid, count(t3.eid) as count_eid
+          from
+            (select *
+               from
+                input1
+               where input1.aid <= 3.0) as t3
+          group by
+            t3.eid) as t4
+       where t4.count_eid >= 2.0) join 
+      input0 as t5) as t2
+ where t2.eid = t2.eid1`;
+
+verify q1 q2;

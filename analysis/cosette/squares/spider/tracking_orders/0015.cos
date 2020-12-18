@@ -1,0 +1,31 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+schema df_shipments(shipment_id:int, order_id:int, invoice_number:int, shipment_tracking_number:int, shipment_date:str, other_shipment_details:str);
+
+table df_orders(df_orders);
+table df_shipments(df_shipments);
+
+query q1
+`select t1.date_order_placed
+from df_orders as t1
+join df_shipments as t2 on t1.order_id = t2.order_id
+where t2.shipment_tracking_number = 3452`;
+
+query q2
+`joining, by = "order_id"
+select distinct date_order_placed
+from
+  (select shipment_id,
+          order_id,
+          invoice_number,
+          shipment_tracking_number,
+          shipment_date,
+          other_shipment_details,
+          customer_id,
+          order_status,
+          date_order_placed,
+          order_details
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.order_id = rhs.order_id))
+where (shipment_tracking_number = 3452.0)`;
+
+verify q1 q2;

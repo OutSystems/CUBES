@@ -1,0 +1,71 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_code:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, order_date:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int);
+
+table df_customers(df_customers);
+table df_products(df_products);
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select distinct t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+join df_order_items as t3 on t2.order_id = t3.order_id
+join df_products as t4 on t3.product_id = t4.product_id
+where t4.product_name = "keyboard"`;
+
+query q2
+`select distinct customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method_code as payment_method_code,
+          lhs.customer_code as customer_code,
+          lhs.customer_name as customer_name,
+          lhs.customer_address as customer_address,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.product_id as product_id,
+          lhs.product_type_code as product_type_code,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          lhs.order_id as order_id,
+          lhs.order_status_code as order_status_code,
+          lhs.order_date as order_date,
+          rhs.order_item_id as order_item_id
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method_code as payment_method_code,
+             lhs.customer_code as customer_code,
+             lhs.customer_name as customer_name,
+             lhs.customer_address as customer_address,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             lhs.product_id as product_id,
+             lhs.product_type_code as product_type_code,
+             lhs.product_name as product_name,
+             lhs.product_price as product_price,
+             rhs.order_id as order_id,
+             rhs.order_status_code as order_status_code,
+             rhs.order_date as order_date
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method_code as payment_method_code,
+                lhs.customer_code as customer_code,
+                lhs.customer_name as customer_name,
+                lhs.customer_address as customer_address,
+                lhs.customer_phone as customer_phone,
+                lhs.customer_email as customer_email,
+                rhs.product_id as product_id,
+                rhs.product_type_code as product_type_code,
+                rhs.product_name as product_name,
+                rhs.product_price as product_price
+         from df_customers as lhs
+         cross join df_products as rhs) as lhs
+      inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join df_order_items as rhs on (lhs.product_id = rhs.product_id
+                                            and lhs.order_id = rhs.order_id))
+where (product_name = 'keyboard')`;
+
+verify q1 q2;

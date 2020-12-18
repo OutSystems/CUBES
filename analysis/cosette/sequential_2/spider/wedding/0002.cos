@@ -1,0 +1,28 @@
+schema df_church(church_id:int, name:str, organized_by:str, open_date:int, continuation_of:str);
+
+table df_church(df_church);
+
+query q1
+`select name,
+       open_date,
+       organized_by
+from df_church df_church`;
+
+query q2
+`select name,
+       open_date,
+       organized_by
+from
+  (select lhs.church_id as church_id,
+          lhs.name as name,
+          lhs.organized_by as organized_by,
+          lhs.open_date as open_date,
+          lhs.continuation_of as continuation_of,
+          rhs.church_id as church_id.other,
+          rhs.name as name.other,
+          rhs.organized_by as organized_by.other,
+          rhs.continuation_of as continuation_of.other
+   from df_church as lhs
+   inner join df_church as rhs on (lhs.open_date = rhs.open_date))`;
+
+verify q1 q2;

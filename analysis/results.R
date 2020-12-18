@@ -12,7 +12,7 @@ library(xtable)
 
 setwd('analysis')
 
-arial <- T
+arial <- F
 
 if (arial) {
   options(tikzDefaultEngine = 'xetex',
@@ -28,7 +28,7 @@ if (arial) {
           tikzMetricsDictionary = './metrics_cache_arial',
           standAlone = T)
   textwidth <- 6.30045
-  my_theme <- theme_bw() + theme(legend.position = "bottom", legend.title = element_blank(), text = element_text(size = 10))
+  my_theme <- theme_bw() + theme(legend.position = "bottom", legend.title = element_blank(), text = element_text(size = 10), strip.text.x = element_text(size = 9))
 } else {
   options(tikzDefaultEngine = 'xetex',
           tikzXelatexPackages = c(
@@ -42,7 +42,7 @@ if (arial) {
           standAlone = T)
   textwidth <- 3.34
   my_theme <- theme_bw() +
-    theme(legend.position = "bottom", legend.title = element_blank(), text = element_text(size = 9))
+    theme(legend.position = "bottom", legend.title = element_blank(), text = element_text(size = 9), strip.text.x = element_text(size = 8))
 }
 
 source('loading.R')
@@ -50,25 +50,35 @@ source('plots.R')
 source('tables.R')
 
 sequential %>% filter(fuzzy == 'Exec. Error')
-a <- scythe %>% inner_join(c50_16, by='name') %>% select(name, status_scythe = status.x, real_scythe = real.x, status_cubes = status.y) %>% filter(status_scythe == 1)
+a <- scythe %>%
+  inner_join(c50_16, by = 'name') %>%
+  select(name, status_scythe = status.x, real_scythe = real.x, status_cubes = status.y) %>%
+  filter(status_scythe == 1)
 
-invsolved('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
-invsolved('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
-invsolved(exclude = c('spider', '55-tests', 'scythe/recent-posts', 'textbook'), 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
-invsolved(log = F, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
-invsolved_cpu('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16, 'vbs(CUBES-DC16,Scythe,PatSQL)' = vbs(vbs(c50_16, scythe), patsql))
 
-bars(use_vbs = F, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'PatSQL' = patsql)
+scythe_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
+sequential_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
+sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% count()
+sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% sample_n(1) %>% select(name, status, fuzzy)
+sequential_3 %>% filter(solved) %>% count()
 
-plot_cells_time('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
-plot_cells_ram('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
-scatter_real_cpu('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'CUBES-DC4' = c50_4, 'PatSQL' = patsql)
-scatter_equiv(x = 'real', 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC16' = c50_16, 'CUBES-DC4' = c50_4, 'PatSQL' = patsql)
+
+a <- squares %>% filter(status == 1) %>% select(name) %>% arrange(name)
+
+invsolved('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'SQUARES2' = squares_2, 'CUBES-SEQ' = sequential, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
+
+plot_cells_time('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'SQUARES2' = squares_2, 'CUBES-SEQ' = sequential_3, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
+plot_cells_ram('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'CUBES-SEQ' = sequential_3, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
+scatter_real_cpu('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'CUBES-SEQ' = sequential_3, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
+scatter_equiv(x = 'real', 'Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'CUBES-SEQ' = sequential_3, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
 
 scatter(patsql = patsql, seq = sequential)
 scatter(squares = squares, seq = sequential)
 scatter(patsql = patsql, dc = c50_16)
 scatter(patsql = patsql, scythe = scythe)
+
+scatter(seq2 = sequential, seq3 = sequential_3)
+scatter('Scythe' = scythe, 'Scythe3' = scythe_3)
 
 plot_sql_size('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-DC' = c50_16, 'PatSQL' = patsql)
 
@@ -86,9 +96,31 @@ instance_info %>% ggplot(aes(x = sql_size)) +
   geom_histogram(bins = 15) +
   facet_wrap(~benchmark, scales = 'free_y')
 
-plot_fuzzy(scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
-plot_fuzzy(fill_bars=T, scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
-plot_fuzzy(drop_error = T, fill_bars=T, scythe = scythe, squares = squares, seq = sequential, patsql = patsql, dc = c50_16)
+plot_fuzzy(scythe = scythe_3, squares = squares, squares2 = squares_2, patsql = patsql, seq = sequential_3, dc = c50_16)
+plot_fuzzy(facet=T,scythe = scythe_3, squares = squares, patsql = patsql, seq = sequential_3, dc = c50_16)
+plot_fuzzy(scythe = scythe_3)
+plot_fuzzy(filter_all = T, scythe = scythe_3, squares = squares, patsql = patsql, seq = sequential_3, dc = c50_16)
+plot_fuzzy(filter_all = T, fill_bars = T, scythe = scythe_3, squares = squares, patsql = patsql, seq = sequential_3, dc = c50_16)
+plot_fuzzy(fill_bars = T, scythe = scythe_3, squares = squares, patsql = patsql, seq = sequential_3, dc = c50_16)
+plot_fuzzy(drop_error = T, fill_bars = T, scythe = scythe_3, squares = squares, patsql = patsql, seq = sequential_3, dc = c50_16)
+
+sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
+scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
+
+sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% count()
+patsql %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / patsql %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
+scythe %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / scythe %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
+sequential_3 %>% filter(benchmark == 'textbook' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'textbook' & solved& fuzzy != 'Error') %>% count()
+
+
+
+sequential_3 %>% filter(fuzzy == 'Correct') %>% count()
+scythe_3 %>% filter(fuzzy == 'Correct') %>% count()
+patsql %>% filter(fuzzy == 'Correct') %>% count()
+
+a <- sequential_3 %>%
+  filter(fuzzy == 'Incorrect') %>%
+  select(name) %>% arrange(name)
 
 intent <- bitenum %>%
   inner_join(squares, by = c('name', 'benchmark')) %>%
@@ -189,7 +221,7 @@ plot_pdf('parallel_solved', 1, .45,
                    '\\textsc{Cubes-Seq}' = sequential,
                    '\\textsc{Cubes-Port4}' = portfolio5_4,
                    '\\textsc{Cubes-Port8}' = portfolio5_8,
-                                         #'\\textsc{Cubes-Port16}' = portfolio1,
+                                                               #'\\textsc{Cubes-Port16}' = portfolio1,
                    '\\textsc{Cubes-Port16}' = portfolio5_16,
                    '\\textsc{Cubes-DC4}' = c50_4,
                    '\\textsc{Cubes-DC8}' = c50_8,
@@ -252,6 +284,36 @@ determ2 %>% summarise(a = max(solution_n, na.rm = T))
 determ2 %>% summarise(a = getmode(solution_n))
 
 ####### PAPER PLOTS ######
+
+plot_pdf('weird_plot', 2, 1.1,
+         plot_cells_time('\\textsc{Scythe}' = scythe_3,
+                         '\\textsc{Squares}' = squares,
+                         '\\textsc{PatSQL}' = patsql,
+                         '\\textsc{Cubes-Seq}' = sequential_3,
+                         '\\textsc{Cubes-DC16}' = c50_16))
+
+plot_pdf('fuzzy', 1.5, 0.6,
+         plot_fuzzy('\\textsc{Scythe}' = scythe_3,
+                    '\\textsc{Squares}' = squares,
+                    '\\textsc{PatSQL}' = patsql,
+                    '\\textsc{Cubes-Seq}' = sequential_3,
+                    '\\textsc{Cubes-DC16}' = c50_16))
+
+scythe_3 %>%
+  filter(solved) %>%
+  ggplot(aes(x = total_cells)) +
+  geom_histogram() +
+  scale_x_log10()
+squares %>%
+  filter(solved) %>%
+  ggplot(aes(x = total_cells)) +
+  geom_histogram() +
+  scale_x_log10()
+sequential_3 %>%
+  filter(solved) %>%
+  ggplot(aes(x = total_cells)) +
+  geom_histogram() +
+  scale_x_log10()
 
 plot_pdf('squares_scatter', .65, .65,
          scatter('\\textsc{Squares}' = squares, '\\textsc{Scythe}' = scythe))

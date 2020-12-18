@@ -1,0 +1,67 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+schema df_exhibition_record(exhibition_id:int, date:str, attendance:int);
+
+table df_artist(df_artist);
+table df_exhibition(df_exhibition);
+table df_exhibition_record(df_exhibition_record);
+
+query q1
+`select t3.name
+from df_exhibition_record as t1
+join df_exhibition as t2 on t1.exhibition_id = t2.exhibition_id
+join df_artist as t3 on t3.artist_id = t2.artist_id
+group by t3.artist_id
+having avg(t1.attendance) > 200`;
+
+query q2
+`select distinct name
+from
+  (select lhs.artist_id as artist_id,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.year_join as year_join,
+          lhs.age as age,
+          lhs.exhibition_id as exhibition_id,
+          lhs.year as year,
+          lhs.theme as theme,
+          lhs.ticket_price as ticket_price,
+          lhs.date as date,
+          lhs.attendance as attendance,
+          rhs.meanattendance as meanattendance
+   from
+     (select lhs.artist_id as artist_id,
+             lhs.name as name,
+             lhs.country as country,
+             lhs.year_join as year_join,
+             lhs.age as age,
+             lhs.exhibition_id as exhibition_id,
+             lhs.year as year,
+             lhs.theme as theme,
+             lhs.ticket_price as ticket_price,
+             rhs.date as date,
+             rhs.attendance as attendance
+      from
+        (select lhs.artist_id as artist_id,
+                lhs.name as name,
+                lhs.country as country,
+                lhs.year_join as year_join,
+                lhs.age as age,
+                rhs.exhibition_id as exhibition_id,
+                rhs.year as year,
+                rhs.theme as theme,
+                rhs.ticket_price as ticket_price
+         from df_artist as lhs
+         inner join df_exhibition as rhs on (lhs.artist_id = rhs.artist_id)) as lhs
+      inner join df_exhibition_record as rhs on (lhs.exhibition_id = rhs.exhibition_id)) as lhs
+   inner join
+     (select *
+      from
+        (select attendance,
+                avg(attendance) as meanattendance
+         from df_exhibition_record df_exhibition_record
+         group by attendance)
+      where (attendance >= 200.0
+             and meanattendance > 200.0)) as rhs on (lhs.attendance = rhs.attendance))`;
+
+verify q1 q2;

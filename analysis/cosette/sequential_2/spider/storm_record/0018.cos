@@ -1,0 +1,45 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t2.region_name
+from df_affected_region as t1
+join df_region as t2 on t1.region_id = t2.region_id
+join df_storm as t3 on t1.storm_id = t3.storm_id
+where t3.number_deaths >= 10`;
+
+query q2
+`select region_name
+from
+  (select lhs.storm_id as storm_id,
+          lhs.name as name,
+          lhs.dates_active as dates_active,
+          lhs.max_speed as max_speed,
+          lhs.damage_millions_usd as damage_millions_usd,
+          lhs.number_deaths as number_deaths,
+          lhs.region_id as region_id,
+          lhs.region_code as region_code,
+          lhs.region_name as region_name,
+          rhs.number_city_affected as number_city_affected
+   from
+     (select lhs.storm_id as storm_id,
+             lhs.name as name,
+             lhs.dates_active as dates_active,
+             lhs.max_speed as max_speed,
+             lhs.damage_millions_usd as damage_millions_usd,
+             lhs.number_deaths as number_deaths,
+             rhs.region_id as region_id,
+             rhs.region_code as region_code,
+             rhs.region_name as region_name
+      from df_storm as lhs
+      cross join df_region as rhs) as lhs
+   inner join df_affected_region as rhs on (lhs.storm_id = rhs.storm_id
+                                            and lhs.region_id = rhs.region_id))
+where (number_deaths > 10.0)`;
+
+verify q1 q2;

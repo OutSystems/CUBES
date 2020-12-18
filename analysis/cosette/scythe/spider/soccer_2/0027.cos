@@ -1,0 +1,24 @@
+schema df_college(cname:str, state:str, enr:int);
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_college(df_college);
+table df_tryout(df_tryout);
+
+query q1
+`select distinct t1.state
+from df_college as t1
+join df_tryout as t2 on t1.cname = t2.cname
+where t2.decision = 'yes'`;
+
+query q2
+`select t2.state
+ from
+  (select input.cname, input.state, input.enr, t1.pid, t1.cname as cname1, t1.ppos, t1.decision
+  from input join 
+      (select *
+         from
+          input0
+         where input0.decision = 'yes') as t1) as t2
+ where t2.cname = t2.cname1`;
+
+verify q1 q2;

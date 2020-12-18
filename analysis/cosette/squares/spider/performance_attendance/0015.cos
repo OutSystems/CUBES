@@ -1,0 +1,36 @@
+schema df_member(member_id:int, name:str, nationality:str, role:str);
+schema df_member_attendance(member_id:int, performance_id:int, num_of_pieces:int);
+
+table df_member(df_member);
+table df_member_attendance(df_member_attendance);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_member_attendance df_member_attendance)`;
+
+query q2
+`joining, by = "member_id"
+joining, by = "member_id"
+select distinct name
+from
+  (select member_id,
+          name,
+          nationality,
+          role
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select member_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select member_id
+              from input1) as rhs
+           where (lhs.member_id = rhs.member_id) )) as rhs on (lhs.member_id = rhs.member_id))`;
+
+verify q1 q2;

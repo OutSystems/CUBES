@@ -1,0 +1,33 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+schema df_apartment_bookings(apt_booking_id:int, apt_id:int, guest_id:int, booking_status_code:str, booking_start_date:str, booking_end_date:str);
+
+table df_apartments(df_apartments);
+table df_apartment_bookings(df_apartment_bookings);
+
+query q1
+`select distinct t2.apt_number
+from df_apartment_bookings as t1
+join df_apartments as t2 on t1.apt_id = t2.apt_id
+where t1.booking_status_code = "confirmed"`;
+
+query q2
+`joining, by = "apt_id"
+select distinct apt_number
+from
+  (select apt_booking_id,
+          apt_id,
+          guest_id,
+          booking_status_code,
+          booking_start_date,
+          booking_end_date,
+          building_id,
+          apt_type_code,
+          apt_number,
+          bathroom_count,
+          bedroom_count,
+          room_count
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.apt_id = rhs.apt_id))
+where (booking_status_code = 'confirmed')`;
+
+verify q1 q2;

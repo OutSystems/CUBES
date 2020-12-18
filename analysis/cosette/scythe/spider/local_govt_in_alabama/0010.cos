@@ -1,0 +1,34 @@
+schema df_services(service_id:int, service_type_code:str);
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+schema df_events(event_id:int, service_id:int, event_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_services(df_services);
+table df_participants(df_participants);
+table df_events(df_events);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select t3.service_id,
+       t4.service_type_code
+from df_participants as t1
+join df_participants_in_events as t2 on t1.participant_id = t2.participant_id
+join df_events as t3 on t2.event_id = t3.event_id
+join df_services as t4 on t3.service_id = t4.service_id
+group by t3.service_id
+
+limit 1`;
+
+query q2
+`select t3.count_event_details,t3.service_type_code
+ from
+  (select
+          t4.event_details, count(t4.event_details) as count_event_details
+        from
+          input1 as t4
+        group by
+          t4.event_details) as t2 join 
+      input as t5 as t3
+ where t3.count_event_details = t3.service_id`;
+
+verify q1 q2;

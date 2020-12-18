@@ -1,0 +1,45 @@
+schema df_player(player_id:int, player:str, team:str, age:int, position:str, school_id:int);
+
+table df_player(df_player);
+
+query q1
+`select team
+from df_player df_player
+
+limit 5`;
+
+query q2
+`select team
+from
+  (select *
+   from df_player as lhs
+   where not exists
+       (select 1
+        from
+          (select school_id as player_id,
+                  player,
+                  team,
+                  age,
+                  position,
+                  school_id,
+                  player.other,
+                  team.other,
+                  age.other,
+                  school_id.other
+           from
+             (select lhs.player_id as player_id,
+                     lhs.player as player,
+                     lhs.team as team,
+                     lhs.age as age,
+                     lhs.position as position,
+                     lhs.school_id as school_id,
+                     rhs.player as player.other,
+                     rhs.team as team.other,
+                     rhs.age as age.other,
+                     rhs.school_id as school_id.other
+              from df_player as lhs
+              inner join df_player as rhs on (lhs.school_id = rhs.player_id
+                                              and lhs.position = rhs.position))) as rhs
+        where (lhs.age = rhs.age) ))`;
+
+verify q1 q2;

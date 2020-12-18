@@ -1,0 +1,41 @@
+schema df_home_game(year:int, league_id:str, team_id:str, park_id:str, span_first:str, span_last:str, games:int, openings:int, attendance:int);
+schema df_park(park_id:str, park_name:str, park_alias:str, city:str, state:str, country:str);
+
+table df_home_game(df_home_game);
+table df_park(df_park);
+
+query q1
+`select count(*)
+from df_home_game as t1
+join df_park as t2 on t1.park_id = t2.park_id
+where t1.year = 1907
+  and t2.park_name = 'columbia df_park'`;
+
+query q2
+`select distinct openings as count...
+from
+  (select lhs.year as year,
+          lhs.league_id as league_id,
+          lhs.team_id as team_id,
+          lhs.park_id as park_id,
+          lhs.span_first as span_first,
+          lhs.span_last as span_last,
+          lhs.games as games,
+          lhs.openings as openings,
+          lhs.attendance as attendance,
+          rhs.park_name as park_name
+   from df_home_game as lhs
+   inner join
+     (select *
+      from
+        (select park_id,
+                park_name,
+                count(*) as n
+         from df_park df_park
+         group by park_id,
+                  park_name)
+      where (park_name != 'columbia park'
+             and n != 1907.0)) as rhs on (lhs.openings = rhs.n
+                                          and lhs.park_id = rhs.park_id))`;
+
+verify q1 q2;

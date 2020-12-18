@@ -1,0 +1,46 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t2.region_name
+from df_affected_region as t1
+join df_region as t2 on t1.region_id = t2.region_id
+join df_storm as t3 on t1.storm_id = t3.storm_id
+
+limit 1`;
+
+query q2
+`select region_name
+from
+  (select lhs.region_id as region_id,
+          lhs.storm_id as storm_id,
+          lhs.number_city_affected as number_city_affected,
+          rhs.region_id as region_id.other,
+          rhs.region_code as region_code,
+          rhs.region_name as region_name,
+          rhs.damage_millions_usd as damage_millions_usd
+   from df_affected_region as lhs
+   inner join
+     (select region_id,
+             region_code,
+             region_name,
+             damage_millions_usd,
+             region_id as maxnumber_deaths
+      from
+        (select lhs.region_id as region_id,
+                lhs.region_code as region_code,
+                lhs.region_name as region_name,
+                rhs.damage_millions_usd as damage_millions_usd
+         from df_region as lhs
+         inner join
+           (select damage_millions_usd,
+                   max(number_deaths) as maxnumber_deaths
+            from df_storm df_storm
+            group by damage_millions_usd) as rhs on (lhs.region_id = rhs.maxnumber_deaths))) as rhs on (lhs.storm_id = rhs.maxnumber_deaths))`;
+
+verify q1 q2;

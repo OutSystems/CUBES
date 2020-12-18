@@ -1,0 +1,26 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_manufacturers(df_manufacturers);
+table df_products(df_products);
+
+query q1
+`select count(*),
+       t2.name
+from df_products as t1
+join df_manufacturers as t2 on t1.manufacturer = t2.code
+group by t2.name`;
+
+query q2
+`select t2.count_name,t2.name
+ from
+  (select
+          t3.manufacturer, count(t3.name) as count_name
+        from
+          input0 as t3
+        group by
+          t3.manufacturer) as t4 join 
+      input as t1 as t2
+ where t2.manufacturer = t2.code`;
+
+verify q1 q2;

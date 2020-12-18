@@ -1,0 +1,20 @@
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+schema df_exhibition_record(exhibition_id:int, date:str, attendance:int);
+
+table df_exhibition(df_exhibition);
+table df_exhibition_record(df_exhibition_record);
+
+query q1
+`select count(*)
+from df_exhibition_record as t1
+join df_exhibition as t2 on t1.exhibition_id = t2.exhibition_id
+where t1.attendance > 100
+  or t2.ticket_price < 10`;
+
+query q2
+`(select
+    count_distinct(t2.date) as count_distinct_date
+  from
+    input0 as t2) as t1`;
+
+verify q1 q2;

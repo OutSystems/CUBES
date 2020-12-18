@@ -1,0 +1,37 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select ppos
+from df_tryout df_tryout
+group by ppos
+
+limit 1`;
+
+query q2
+`select distinct ppos.other as ppos
+from
+  (select lhs.pid as pid,
+          lhs.ppos as ppos,
+          lhs.n as n,
+          rhs.pid as pid.other,
+          rhs.ppos as ppos.other,
+          rhs.n as n.other
+   from
+     (select pid,
+             ppos,
+             count(*) as n
+      from df_tryout df_tryout
+      group by pid,
+               ppos) as lhs
+   cross join
+     (select pid,
+             ppos,
+             count(*) as n
+      from df_tryout df_tryout
+      group by pid,
+               ppos) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

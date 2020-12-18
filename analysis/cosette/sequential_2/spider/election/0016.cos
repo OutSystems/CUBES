@@ -1,0 +1,32 @@
+schema df_county(county_id:int, county_name:str, population:str, zip_code:str);
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_county(df_county);
+table df_election(df_election);
+
+query q1
+`select t1.county_name
+from df_county as t1
+join df_election as t2 on t1.county_id = t2.district
+where t2.committee = "appropriations"`;
+
+query q2
+`select county_name
+from
+  (select lhs.county_id as county_id,
+          lhs.county_name as county_name,
+          lhs.population as population,
+          lhs.zip_code as zip_code,
+          rhs.election_id as election_id,
+          rhs.counties_represented as counties_represented,
+          rhs.delegate as delegate,
+          rhs.party as party,
+          rhs.first_elected as first_elected,
+          rhs.committee as committee
+   from df_county as lhs
+   inner join
+     (select *
+      from df_election df_election
+      where (committee = 'appropriations')) as rhs on (lhs.county_id = rhs.district))`;
+
+verify q1 q2;

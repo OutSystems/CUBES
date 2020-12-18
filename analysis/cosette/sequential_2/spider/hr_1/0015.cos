@@ -1,0 +1,39 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_employees(df_employees);
+
+query q1
+`select salary,
+       manager_id
+from df_employees df_employees
+where manager_id != "null"`;
+
+query q2
+`select salary,
+       manager_id
+from
+  (select lhs.employee_id as employee_id,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.email as email,
+          lhs.phone_number as phone_number,
+          lhs.hire_date as hire_date,
+          lhs.job_id as job_id,
+          lhs.salary as salary,
+          lhs.commission_pct as commission_pct,
+          lhs.manager_id as manager_id,
+          lhs.department_id as department_id,
+          rhs.employee_id as employee_id.other,
+          rhs.first_name as first_name.other,
+          rhs.email as email.other,
+          rhs.phone_number as phone_number.other,
+          rhs.job_id as job_id.other,
+          rhs.salary as salary.other,
+          rhs.commission_pct as commission_pct.other,
+          rhs.manager_id as manager_id.other,
+          rhs.department_id as department_id.other
+   from df_employees as lhs
+   inner join df_employees as rhs on (lhs.hire_date = rhs.hire_date
+                                      and lhs.last_name = rhs.last_name))`;
+
+verify q1 q2;

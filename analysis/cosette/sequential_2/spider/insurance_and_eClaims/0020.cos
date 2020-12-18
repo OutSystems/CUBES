@@ -1,0 +1,59 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+
+table df_customers(df_customers);
+table df_policies(df_policies);
+
+query q1
+`select t2.customer_details
+from df_policies as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t1.start_date =
+    (select max(start_date)
+     from df_policies df_policies)`;
+
+query q2
+`select distinct customer_details
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_details as customer_details,
+          lhs.policy_id as policy_id,
+          lhs.policy_type_code as policy_type_code,
+          lhs.start_date as start_date,
+          lhs.end_date as end_date,
+          lhs.maxstart_date as maxstart_date,
+          rhs.policy_id as policy_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.policy_type_code as policy_type_code.other,
+          rhs.start_date as start_date.other,
+          rhs.end_date as end_date.other,
+          rhs.maxstart_date as maxstart_date.other
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.customer_details as customer_details,
+             rhs.policy_id as policy_id,
+             rhs.policy_type_code as policy_type_code,
+             rhs.start_date as start_date,
+             rhs.end_date as end_date,
+             rhs.maxstart_date as maxstart_date
+      from df_customers as lhs
+      inner join
+        (select policy_id,
+                customer_id,
+                policy_type_code,
+                start_date,
+                end_date,
+                max(start_date) over () as maxstart_date
+         from df_policies df_policies) as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   cross join
+     (select policy_id,
+             customer_id,
+             policy_type_code,
+             start_date,
+             end_date,
+             max(start_date) over () as maxstart_date
+      from df_policies df_policies) as rhs)
+where (start_date = maxstart_date
+       or start_date.other > maxstart_date.other)`;
+
+verify q1 q2;

@@ -1,0 +1,74 @@
+schema df_customers(id:int, first_name:str, last_name:str, company:str, address:str, city:str, state:str, country:str, postal_code:str, phone:str, fax:str, email:str, support_rep_id:int);
+schema df_invoices(id:int, customer_id:int, invoice_date:str, billing_address:str, billing_city:str, billing_state:str, billing_country:str, billing_postal_code:str, total:str);
+
+table df_customers(df_customers);
+table df_invoices(df_invoices);
+
+query q1
+`select count(*)
+from df_customers as t1
+join df_invoices as t2 on t1.id = t2.customer_id
+where t1.first_name = "lucas"
+  and t1.last_name = "mancini"`;
+
+query q2
+`select n as count...
+from
+  (select billing_postal_code,
+          country,
+          count(*) as n
+   from
+     (select id,
+             first_name,
+             last_name,
+             company,
+             address,
+             city,
+             state,
+             country,
+             postal_code,
+             phone,
+             fax,
+             email,
+             support_rep_id,
+             id.other,
+             invoice_date,
+             billing_address,
+             billing_city,
+             billing_state,
+             billing_country,
+             billing_postal_code,
+             total,
+             id as customer_id
+      from
+        (select lhs.id as id,
+                lhs.first_name as first_name,
+                lhs.last_name as last_name,
+                lhs.company as company,
+                lhs.address as address,
+                lhs.city as city,
+                lhs.state as state,
+                lhs.country as country,
+                lhs.postal_code as postal_code,
+                lhs.phone as phone,
+                lhs.fax as fax,
+                lhs.email as email,
+                lhs.support_rep_id as support_rep_id,
+                rhs.id as id.other,
+                rhs.invoice_date as invoice_date,
+                rhs.billing_address as billing_address,
+                rhs.billing_city as billing_city,
+                rhs.billing_state as billing_state,
+                rhs.billing_country as billing_country,
+                rhs.billing_postal_code as billing_postal_code,
+                rhs.total as total
+         from
+           (select *
+            from df_customers df_customers
+            where (first_name = 'lucas'
+                   or last_name = 'mancini')) as lhs
+         inner join df_invoices as rhs on (lhs.id = rhs.customer_id)))
+   group by billing_postal_code,
+            country)`;
+
+verify q1 q2;

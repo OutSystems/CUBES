@@ -1,0 +1,36 @@
+schema df_004(id:int, call_ref:int, job_num:int);
+
+table df_004(df_004);
+
+query q1
+`select *
+from
+(select *
+from calls
+where parent_id = '$term'
+   and job_num != 0
+group by job_num
+union select *
+from calls
+where parent_id = '$term'
+   and job_num = 0) as t`;
+
+query q2
+`select t1.call_ref,t1.job_num1
+ from
+  (select t4.job_num, t4.count_call_ref, t2.id, t2.call_ref, t2.job_num as job_num1
+  from (select
+          t3.job_num, count(t3.call_ref) as count_call_ref
+        from
+          (select *
+             from
+              input
+             where input.job_num = 0.0) as t3
+        group by
+          t3.job_num) as t4 join 
+      (select *
+         from
+          input
+         where input.id >= 2.0) as t2) as t1`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_customer(customerid:int, firstname:str, lastname:str, company:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str, supportrepid:int);
+schema df_invoice(invoiceid:int, customerid:int, invoicedate:str, billingaddress:str, billingcity:str, billingstate:str, billingcountry:str, billingpostalcode:str, total:str);
+
+table df_customer(df_customer);
+table df_invoice(df_invoice);
+
+query q1
+`select distinct t1.address
+from df_customer as t1
+join df_invoice as t2 on t1.customerid = t2.customerid
+where t1.country = "germany"`;
+
+query q2
+`select distinct billingaddress as address
+from
+  (select *
+   from df_invoice as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_customer df_customer
+           where (country != 'germany')) as rhs
+        where (lhs.customerid = rhs.customerid) ))`;
+
+verify q1 q2;

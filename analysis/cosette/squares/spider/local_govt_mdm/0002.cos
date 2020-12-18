@@ -1,0 +1,43 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_council_tax(council_tax_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_council_tax(df_council_tax);
+
+query q1
+`select t1.cmi_cross_ref_id,
+       t1.source_system_code
+from df_cmi_cross_references as t1
+join df_council_tax as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+group by t1.cmi_cross_ref_id
+having count(*) >= 1`;
+
+query q2
+`joining, by = c("cmi_cross_ref_id", "source_system_code")
+joining, by = "cmi_cross_ref_id"
+select distinct cmi_cross_ref_id,
+                source_system_code
+from
+  (select cmi_cross_ref_id,
+          master_customer_id,
+          source_system_code,
+          n,
+          council_tax_id
+   from
+     (select cmi_cross_ref_id,
+             master_customer_id,
+             source_system_code,
+             n
+      from input0 as lhs
+      inner join
+        (select source_system_code,
+                cmi_cross_ref_id,
+                count(*) as n
+         from input0
+         group by source_system_code,
+                  cmi_cross_ref_id) as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id
+                                                   and lhs.source_system_code = rhs.source_system_code)) as lhs
+   inner join input1 as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id))
+where (n >= 1.0)`;
+
+verify q1 q2;

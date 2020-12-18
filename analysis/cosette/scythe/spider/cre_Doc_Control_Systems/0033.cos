@@ -1,0 +1,20 @@
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select document_id,
+       count(distinct employee_id)
+from df_circulation_history df_circulation_history
+group by document_id`;
+
+query q2
+`select t1.document_id,t1.min_document_id
+ from
+  (select
+          min(t2.document_id) as min_document_id
+        from
+          input as t2) as t3 join 
+      input as t4 as t1`;
+
+verify q1 q2;

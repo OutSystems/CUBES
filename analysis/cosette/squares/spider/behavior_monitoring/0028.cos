@@ -1,0 +1,35 @@
+schema df_teachers(teacher_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, gender:int, cell_mobile_number:str, email_address:str, other_details:str);
+schema df_assessment_notes(notes_id:int, student_id:int, teacher_id:int, date_of_notes:str, text_of_notes:str, other_details:str);
+
+table df_teachers(df_teachers);
+table df_assessment_notes(df_assessment_notes);
+
+query q1
+`select t1.text_of_notes
+from df_assessment_notes as t1
+join df_teachers as t2 on t1.teacher_id = t2.teacher_id
+where t2.last_name = "schuster"`;
+
+query q2
+`joining, by = c("teacher_id", "other_details")
+select distinct text_of_notes
+from
+  (select notes_id,
+          student_id,
+          teacher_id,
+          date_of_notes,
+          text_of_notes,
+          other_details,
+          address_id,
+          first_name,
+          middle_name,
+          last_name,
+          gender,
+          cell_mobile_number,
+          email_address
+   from input1 as lhs
+   left join input0 as rhs on (lhs.teacher_id = rhs.teacher_id
+                                   and lhs.other_details = rhs.other_details))
+where (last_name != 'schuster')`;
+
+verify q1 q2;

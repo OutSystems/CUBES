@@ -1,0 +1,22 @@
+schema df_gradeconversion(lettergrade:str, gradepoint:str);
+
+table df_gradeconversion(df_gradeconversion);
+
+query q1
+`select max(gradepoint),
+       min(gradepoint)
+from df_gradeconversion df_gradeconversion`;
+
+query q2
+`select t6.max_gradepoint,t6.min_gradepoint
+ from
+  (select
+          min(t3.gradepoint) as min_gradepoint
+        from
+          input as t3) as t4 join 
+      (select
+            max(t1.gradepoint) as max_gradepoint
+          from
+            input as t1) as t2 as t5 as t6`;
+
+verify q1 q2;

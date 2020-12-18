@@ -1,0 +1,30 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t2.name,
+       avg(t1.age)
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.friend
+group by t2.name
+
+limit 1`;
+
+query q2
+`select t4.name,t4.min_age
+ from
+  (select t2.gender, t2.job, t2.min_age, t3.name, t3.age, t3.city, t3.gender as gender1, t3.job as job1
+  from (select
+          t1.gender, t1.job, min(t1.age) as min_age
+        from
+          input as t1
+        group by
+          t1.gender, t1.job) as t2 join 
+      input as t3) as t4
+ where t4.gender = t4.gender1
+   and t4.min_age > t4.age`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select location
+from df_cinema df_cinema
+where capacity > 300
+group by location
+having count(*) > 1`;
+
+query q2
+`select location
+from
+  (select location,
+          openning_year,
+          count(*) as n
+   from df_cinema df_cinema
+   group by location,
+            openning_year)
+where (n = 300.0
+       or n > 1.0)`;
+
+verify q1 q2;

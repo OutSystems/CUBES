@@ -1,0 +1,56 @@
+schema df_students(student_id:int, student_details:str);
+schema df_student_course_registrations(student_id:int, course_id:int, registration_date:str);
+
+table df_students(df_students);
+table df_student_course_registrations(df_student_course_registrations);
+
+query q1
+`select t2.student_details
+from df_student_course_registrations as t1
+join df_students as t2 on t1.student_id = t2.student_id
+
+limit 1`;
+
+query q2
+`select distinct student_details.other as student_details
+from
+  (select lhs.student_id as student_id,
+          lhs.student_details as student_details,
+          lhs.course_id as course_id,
+          lhs.registration_date as registration_date,
+          lhs.maxregistration_date as maxregistration_date,
+          rhs.student_id as student_id.other,
+          rhs.student_details as student_details.other,
+          rhs.course_id as course_id.other,
+          rhs.registration_date as registration_date.other,
+          rhs.maxregistration_date as maxregistration_date.other
+   from
+     (select student_id,
+             student_details,
+             course_id,
+             registration_date,
+             max(registration_date) over () as maxregistration_date
+      from
+        (select lhs.student_id as student_id,
+                lhs.student_details as student_details,
+                rhs.course_id as course_id,
+                rhs.registration_date as registration_date
+         from df_students as lhs
+         inner join df_student_course_registrations as rhs on (lhs.student_id = rhs.student_id))) as lhs
+   cross join
+     (select student_id,
+             student_details,
+             course_id,
+             registration_date,
+             max(registration_date) over () as maxregistration_date
+      from
+        (select lhs.student_id as student_id,
+                lhs.student_details as student_details,
+                rhs.course_id as course_id,
+                rhs.registration_date as registration_date
+         from df_students as lhs
+         inner join df_student_course_registrations as rhs on (lhs.student_id = rhs.student_id))) as rhs)
+where (registration_date != registration_date.other
+       and maxregistration_date = registration_date.other)`;
+
+verify q1 q2;

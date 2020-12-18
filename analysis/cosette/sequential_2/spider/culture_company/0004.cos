@@ -1,0 +1,32 @@
+schema df_book_club(book_club_id:int, year:int, author_or_editor:str, book_title:str, publisher:str, category:str, result:str);
+
+table df_book_club(df_book_club);
+
+query q1
+`select year,
+       book_title,
+       publisher
+from df_book_club df_book_club`;
+
+query q2
+`select year,
+       book_title,
+       publisher
+from
+  (select lhs.book_club_id as book_club_id,
+          lhs.year as year,
+          lhs.author_or_editor as author_or_editor,
+          lhs.book_title as book_title,
+          lhs.publisher as publisher,
+          lhs.category as category,
+          lhs.result as result,
+          rhs.book_club_id as book_club_id.other,
+          rhs.year as year.other,
+          rhs.book_title as book_title.other,
+          rhs.publisher as publisher.other,
+          rhs.category as category.other,
+          rhs.result as result.other
+   from df_book_club as lhs
+   inner join df_book_club as rhs on (lhs.author_or_editor = rhs.author_or_editor))`;
+
+verify q1 q2;

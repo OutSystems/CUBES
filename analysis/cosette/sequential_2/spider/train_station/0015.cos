@@ -1,0 +1,42 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train(train_id:int, name:str, time:str, service:str);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train(df_train);
+table df_train_station(df_train_station);
+
+query q1
+`select t2.name,
+       t3.name
+from df_train_station as t1
+join df_station as t2 on t1.station_id = t2.station_id
+join df_train as t3 on t3.train_id = t1.train_id`;
+
+query q2
+`select name.other as name...1,
+                           name as name...2
+from
+  (select lhs.train_id as train_id,
+          lhs.name as name,
+          lhs.time as time,
+          lhs.service as service,
+          lhs.station_id as station_id,
+          rhs.name as name.other,
+          rhs.annual_entry_exit as annual_entry_exit,
+          rhs.annual_interchanges as annual_interchanges,
+          rhs.total_passengers as total_passengers,
+          rhs.location as location,
+          rhs.main_services as main_services,
+          rhs.number_of_platforms as number_of_platforms
+   from
+     (select lhs.train_id as train_id,
+             lhs.name as name,
+             lhs.time as time,
+             lhs.service as service,
+             rhs.station_id as station_id
+      from df_train as lhs
+      inner join df_train_station as rhs on (lhs.train_id = rhs.train_id)) as lhs
+   inner join df_station as rhs on (lhs.station_id = rhs.station_id))`;
+
+verify q1 q2;

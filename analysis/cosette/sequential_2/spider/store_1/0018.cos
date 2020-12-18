@@ -1,0 +1,27 @@
+schema df_artists(id:int, name:str);
+schema df_albums(id:int, title:str, artist_id:int);
+
+table df_artists(df_artists);
+table df_albums(df_albums);
+
+query q1
+`select count(*)
+from df_albums as t1
+join df_artists as t2 on t1.artist_id = t2.id
+where t2.name = "billy cobham"`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          rhs.n as n
+   from df_artists as lhs
+   left join
+     (select id,
+             count(*) as n
+      from df_albums df_albums
+      group by id) as rhs on (lhs.id = rhs.id))
+where (name != 'billy cobham')`;
+
+verify q1 q2;

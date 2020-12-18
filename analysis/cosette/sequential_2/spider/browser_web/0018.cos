@@ -1,0 +1,47 @@
+schema df_web_client_accelerator(id:int, name:str, operating_system:str, client:str, connection:str);
+schema df_browser(id:int, name:str, market_share:str);
+schema df_accelerator_compatible_browser(accelerator_id:int, browser_id:int, compatible_since_year:int);
+
+table df_web_client_accelerator(df_web_client_accelerator);
+table df_browser(df_browser);
+table df_accelerator_compatible_browser(df_accelerator_compatible_browser);
+
+query q1
+`select t2.name,
+       t3.name
+from df_accelerator_compatible_browser as t1
+join df_browser as t2 on t1.browser_id = t2.id
+join df_web_client_accelerator as t3 on t1.accelerator_id = t3.id`;
+
+query q2
+`select name.other as name...1,
+                           name as name...2
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.operating_system as operating_system,
+          lhs.client as client,
+          lhs.connection as connection,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.market_share as market_share,
+          rhs.compatible_since_year as compatible_since_year,
+          rhs.browser_id as browser_id
+   from df_web_client_accelerator as lhs
+   inner join
+     (select id,
+             name,
+             market_share,
+             accelerator_id,
+             compatible_since_year,
+             id as browser_id
+      from
+        (select lhs.id as id,
+                lhs.name as name,
+                lhs.market_share as market_share,
+                rhs.accelerator_id as accelerator_id,
+                rhs.compatible_since_year as compatible_since_year
+         from df_browser as lhs
+         inner join df_accelerator_compatible_browser as rhs on (lhs.id = rhs.browser_id))) as rhs on (lhs.id = rhs.accelerator_id))`;
+
+verify q1 q2;

@@ -1,0 +1,59 @@
+schema df_12_1(S_key:str, age:int, level:str);
+
+table df_12_1(df_12_1);
+
+query q1
+`select age,
+       level
+from
+  (select age,
+          level,
+          n
+   from
+     (select age,
+             level,
+             n,
+             max(n) over () as zzz2,
+                         max(n) over () as zzz3
+      from
+        (select age,
+                level,
+                count(*) as n
+         from df_12_1 df_12_1
+         group by age,
+                  level))
+   where (age != zzz2
+          and n = zzz3))`;
+
+query q2
+`joining, by = c("age", "level")
+select distinct age,
+                level
+from
+  (select s_key,
+          age,
+          level,
+          n
+   from
+     (select s_key,
+             age,
+             level,
+             n,
+             max(n) over () as zzz2
+      from
+        (select s_key,
+                age,
+                level,
+                n
+         from input0 as lhs
+         inner join
+           (select level,
+                   age,
+                   count(*) as n
+            from input0
+            group by level,
+                     age) as rhs on (lhs.age = rhs.age
+                                         and lhs.level = rhs.level)))
+   where (n = zzz2))`;
+
+verify q1 q2;

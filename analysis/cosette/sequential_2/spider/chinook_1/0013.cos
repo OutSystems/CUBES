@@ -1,0 +1,26 @@
+schema df_track(trackid:int, name:str, albumid:int, mediatypeid:int, genreid:int, composer:str, milliseconds:int, bytes:int, unitprice:str);
+
+table df_track(df_track);
+
+query q1
+`select max(milliseconds),
+       min(milliseconds)
+from df_track df_track`;
+
+query q2
+`select distinct max(milliseconds) over () as max.milliseconds.,
+                                       minmilliseconds as min.milliseconds.
+from
+  (select trackid,
+          name,
+          albumid,
+          mediatypeid,
+          genreid,
+          composer,
+          milliseconds,
+          bytes,
+          unitprice,
+          min(milliseconds) over () as minmilliseconds
+   from df_track df_track)`;
+
+verify q1 q2;

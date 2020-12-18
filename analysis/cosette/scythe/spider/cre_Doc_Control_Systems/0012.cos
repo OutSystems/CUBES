@@ -1,0 +1,28 @@
+schema df_roles(role_code:str, role_description:str);
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+
+table df_roles(df_roles);
+table df_employees(df_employees);
+
+query q1
+`select t1.role_description,
+       t2.role_code,
+       count(*)
+from df_roles as t1
+join df_employees as t2 on t1.role_code = t2.role_code
+group by t2.role_code`;
+
+query q2
+`select t2.role_description,t2.role_code,t2.count_employee_id
+ from
+  (select t4.role_code, t4.count_employee_id, t1.role_code as role_code1, t1.role_description
+  from (select
+          t3.role_code, count(t3.employee_id) as count_employee_id
+        from
+          input0 as t3
+        group by
+          t3.role_code) as t4 join 
+      input as t1) as t2
+ where t2.role_code = t2.role_code1`;
+
+verify q1 q2;

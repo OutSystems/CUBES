@@ -1,0 +1,68 @@
+schema df_third_party_companies(company_id:int, company_type:str, company_name:str, company_address:str, other_company_details:str);
+schema df_maintenance_contracts(maintenance_contract_id:int, maintenance_contract_company_id:int, contract_start_date:str, contract_end_date:str, other_contract_details:str);
+
+table df_third_party_companies(df_third_party_companies);
+table df_maintenance_contracts(df_maintenance_contracts);
+
+query q1
+`select t1.company_name
+from df_third_party_companies as t1
+join df_maintenance_contracts as t2 on t1.company_id = t2.maintenance_contract_company_id
+
+limit 1`;
+
+query q2
+`select distinct company_name
+from
+  (select lhs.company_id as company_id,
+          lhs.company_type as company_type,
+          lhs.company_name as company_name,
+          lhs.company_address as company_address,
+          lhs.other_company_details as other_company_details,
+          rhs.maintenance_contract_id as maintenance_contract_id,
+          rhs.contract_start_date as contract_start_date,
+          rhs.contract_end_date as contract_end_date,
+          rhs.other_contract_details as other_contract_details,
+          rhs.mincontract_start_date as mincontract_start_date,
+          rhs.maintenance_contract_id.other as maintenance_contract_id.other,
+          rhs.maintenance_contract_company_id.other as maintenance_contract_company_id.other,
+          rhs.contract_start_date.other as contract_start_date.other,
+          rhs.contract_end_date.other as contract_end_date.other,
+          rhs.other_contract_details.other as other_contract_details.other,
+          rhs.mincontract_start_date.other as mincontract_start_date.other
+   from df_third_party_companies as lhs
+   inner join
+     (select *
+      from
+        (select lhs.maintenance_contract_id as maintenance_contract_id,
+                lhs.maintenance_contract_company_id as maintenance_contract_company_id,
+                lhs.contract_start_date as contract_start_date,
+                lhs.contract_end_date as contract_end_date,
+                lhs.other_contract_details as other_contract_details,
+                lhs.mincontract_start_date as mincontract_start_date,
+                rhs.maintenance_contract_id as maintenance_contract_id.other,
+                rhs.maintenance_contract_company_id as maintenance_contract_company_id.other,
+                rhs.contract_start_date as contract_start_date.other,
+                rhs.contract_end_date as contract_end_date.other,
+                rhs.other_contract_details as other_contract_details.other,
+                rhs.mincontract_start_date as mincontract_start_date.other
+         from
+           (select maintenance_contract_id,
+                   maintenance_contract_company_id,
+                   contract_start_date,
+                   contract_end_date,
+                   other_contract_details,
+                   min(contract_start_date) over () as mincontract_start_date
+            from df_maintenance_contracts df_maintenance_contracts) as lhs
+         cross join
+           (select maintenance_contract_id,
+                   maintenance_contract_company_id,
+                   contract_start_date,
+                   contract_end_date,
+                   other_contract_details,
+                   min(contract_start_date) over () as mincontract_start_date
+            from df_maintenance_contracts df_maintenance_contracts) as rhs)
+      where (contract_start_date <= mincontract_start_date.other
+             and mincontract_start_date = mincontract_start_date.other)) as rhs on (lhs.company_id = rhs.maintenance_contract_company_id))`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_students(student_id:int, student_details:str);
+schema df_people_addresses(person_address_id:int, person_id:int, address_id:int, date_from:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_students(df_students);
+table df_people_addresses(df_people_addresses);
+
+query q1
+`select distinct t1.city
+from df_addresses as t1
+join df_people_addresses as t2 on t1.address_id = t2.address_id
+join df_students as t3 on t2.person_id = t3.student_id`;
+
+query q2
+`select distinct city
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.student_id as student_id,
+          lhs.student_details as student_details,
+          rhs.person_address_id as person_address_id,
+          rhs.person_id as person_id,
+          rhs.date_from as date_from,
+          rhs.date_to as date_to
+   from
+     (select lhs.address_id as address_id,
+             lhs.line_1 as line_1,
+             lhs.line_2 as line_2,
+             lhs.city as city,
+             lhs.zip_postcode as zip_postcode,
+             lhs.state_province_county as state_province_county,
+             lhs.country as country,
+             rhs.student_id as student_id,
+             rhs.student_details as student_details
+      from df_addresses as lhs
+      cross join df_students as rhs) as lhs
+   inner join df_people_addresses as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_products(df_products);
+
+query q1
+`select name,
+       price
+from df_products df_products
+
+limit 1`;
+
+query q2
+`select name.other as name,
+       manufacturer as price
+from
+  (select lhs.code as code,
+          lhs.name as name,
+          lhs.price as price,
+          lhs.manufacturer as manufacturer,
+          rhs.manufacturer as manufacturer.other,
+          rhs.name as name.other
+   from df_products as lhs
+   inner join
+     (select manufacturer,
+             name,
+             min(price) as minprice
+      from df_products df_products
+      group by manufacturer,
+               name) as rhs on (lhs.manufacturer = rhs.minprice))`;
+
+verify q1 q2;

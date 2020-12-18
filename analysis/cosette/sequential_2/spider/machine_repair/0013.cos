@@ -1,0 +1,31 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+schema df_repair_assignment(technician_id:int, repair_id:int, machine_id:int);
+
+table df_technician(df_technician);
+table df_repair_assignment(df_repair_assignment);
+
+query q1
+`select t2.name,
+       count(*)
+from df_repair_assignment as t1
+join df_technician as t2 on t1.technician_id = t2.technician_id
+group by t2.name`;
+
+query q2
+`select name,
+       n as count...
+from
+  (select lhs.technician_id as technician_id,
+          lhs.name as name,
+          lhs.team as team,
+          lhs.starting_year as starting_year,
+          lhs.age as age,
+          rhs.n as n
+   from df_technician as lhs
+   inner join
+     (select technician_id,
+             count(*) as n
+      from df_repair_assignment df_repair_assignment
+      group by technician_id) as rhs on (lhs.technician_id = rhs.technician_id))`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+
+table df_perpetrator(df_perpetrator);
+
+query q1
+`select location
+from df_perpetrator df_perpetrator
+
+limit 1`;
+
+query q2
+`select location
+from
+  (select lhs.killed as killed,
+          rhs.perpetrator_id as perpetrator_id,
+          rhs.people_id as people_id,
+          rhs.date as date,
+          rhs.year as year,
+          rhs.location as location,
+          rhs.country as country,
+          rhs.killed as killed.other,
+          rhs.injured as injured
+   from
+     (select max(killed) as killed
+      from df_perpetrator df_perpetrator) as lhs
+   cross join df_perpetrator as rhs)
+where (killed = killed.other)`;
+
+verify q1 q2;

@@ -1,0 +1,71 @@
+schema df_has_allergy(stuid:int, allergy:str);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_has_allergy(df_has_allergy);
+table df_student(df_student);
+
+query q1
+`select lname,
+       age
+from df_student df_student
+where stuid in
+    (select stuid
+     from df_has_allergy df_has_allergy
+     where allergy = "milk" intersect
+       select stuid
+       from df_has_allergy df_has_allergy where allergy = "cat")`;
+
+query q2
+`select distinct lname.other as lname,
+                age.other as age
+from
+  (select lhs.stuid as stuid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.age as age,
+          lhs.sex as sex,
+          lhs.major as major,
+          lhs.advisor as advisor,
+          lhs.city_code as city_code,
+          lhs.allergy as allergy,
+          rhs.stuid as stuid.other,
+          rhs.lname as lname.other,
+          rhs.fname as fname.other,
+          rhs.age as age.other,
+          rhs.sex as sex.other,
+          rhs.major as major.other,
+          rhs.advisor as advisor.other,
+          rhs.city_code as city_code.other,
+          rhs.allergy as allergy.other
+   from
+     (select *
+      from
+        (select lhs.stuid as stuid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.age as age,
+                lhs.sex as sex,
+                lhs.major as major,
+                lhs.advisor as advisor,
+                lhs.city_code as city_code,
+                rhs.allergy as allergy
+         from df_student as lhs
+         inner join df_has_allergy as rhs on (lhs.stuid = rhs.stuid))
+      where (allergy = 'milk'
+             and allergy != 'cat')) as lhs
+   cross join
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             rhs.allergy as allergy
+      from df_student as lhs
+      inner join df_has_allergy as rhs on (lhs.stuid = rhs.stuid)) as rhs)
+where (stuid > stuid.other
+       and allergy = allergy.other)`;
+
+verify q1 q2;

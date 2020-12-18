@@ -1,0 +1,23 @@
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+
+table df_pilot(df_pilot);
+
+query q1
+`select distinct position
+from df_pilot df_pilot
+where age > 30`;
+
+query q2
+`select t2.position
+ from
+  (select
+      t1.position, count_distinct(t1.rank) as count_distinct_rank
+    from
+      (select *
+         from
+          input
+         where input.age > 30.0) as t1
+    group by
+      t1.position) as t2`;
+
+verify q1 q2;

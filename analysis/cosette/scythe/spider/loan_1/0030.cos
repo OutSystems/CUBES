@@ -1,0 +1,33 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name,
+       t1.acc_type
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+group by t1.cust_name
+having sum(t2.amount) > 5000`;
+
+query q2
+`select t1.cust_name,t1.acc_type
+ from
+  (select t3.cust_id, t3.max_amount, t4.cust_id as cust_id1, t4.cust_name, t4.acc_type, t4.acc_bal, t4.no_of_loans, t4.credit_score, t4.branch_id, t4.state
+  from (select *
+       from
+        (select
+            t2.cust_id, max(t2.amount) as max_amount
+          from
+            input0 as t2
+          group by
+            t2.cust_id) as t3
+       where t3.max_amount = 5000.0) join 
+      (select *
+         from
+          input
+         where input.no_of_loans = 2.0) as t4) as t1`;
+
+verify q1 q2;

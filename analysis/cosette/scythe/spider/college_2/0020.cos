@@ -1,0 +1,28 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+
+table df_instructor(df_instructor);
+
+query q1
+`select name
+from df_instructor df_instructor
+where dept_name = 'statistics'
+
+limit 1`;
+
+query q2
+`select t2.name
+ from
+  (select t4.dept_name, t4.min_salary, t1.id, t1.name, t1.dept_name as dept_name1, t1.salary
+  from (select
+          t3.dept_name, min(t3.salary) as min_salary
+        from
+          input as t3
+        group by
+          t3.dept_name) as t4 join 
+      (select *
+         from
+          input
+         where input.dept_name = 'statistics') as t1) as t2
+ where t2.min_salary = t2.salary`;
+
+verify q1 q2;

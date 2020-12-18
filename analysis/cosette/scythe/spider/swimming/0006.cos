@@ -1,0 +1,25 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select name
+from df_stadium df_stadium
+where capacity <
+    (select avg(capacity)
+     from df_stadium df_stadium)`;
+
+query q2
+`select t1.name
+ from
+  (select t3.opening_year, t3.max_id, t2.id, t2.name, t2.capacity, t2.city, t2.country, t2.opening_year as opening_year1
+  from (select
+          t4.opening_year, max(t4.id) as max_id
+        from
+          input as t4
+        group by
+          t4.opening_year) as t3 join 
+      input as t2) as t1
+ where t1.max_id = t1.id`;
+
+verify q1 q2;

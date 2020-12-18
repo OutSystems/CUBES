@@ -1,0 +1,34 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_number:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_date:str, order_status_code:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where t1.payment_method_code = 'credit card'
+group by t1.customer_id
+having count(*) > 2`;
+
+query q2
+`select t2.customer_name
+ from
+  (select t3.customer_id, t3.order_status_code, t3.count_order_status_code, t4.customer_id as customer_id1, t4.payment_method_code, t4.customer_number, t4.customer_name, t4.customer_address, t4.customer_phone, t4.customer_email
+  from (select *
+       from
+        (select
+            t1.customer_id, t1.order_status_code, count(t1.order_status_code) as count_order_status_code
+          from
+            input0 as t1
+          group by
+            t1.customer_id, t1.order_status_code) as t3
+       where t3.count_order_status_code = 2.0) join 
+      (select *
+         from
+          input
+         where input.payment_method_code = 'credit card') as t4) as t2
+ where t2.customer_id = t2.customer_id1`;
+
+verify q1 q2;

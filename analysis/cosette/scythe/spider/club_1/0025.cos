@@ -1,0 +1,25 @@
+schema df_club(clubid:int, clubname:str, clubdesc:str, clublocation:str);
+schema df_member_of_club(stuid:int, clubid:int, position:str);
+
+table df_club(df_club);
+table df_member_of_club(df_member_of_club);
+
+query q1
+`select count(distinct t2.position)
+from df_club as t1
+join df_member_of_club as t2 on t1.clubid = t2.clubid
+where t1.clubname = "bootup baltimore"`;
+
+query q2
+`select t4.avg_clubid
+ from
+  (select
+          avg(t1.clubid) as avg_clubid
+        from
+          input0 as t1) as t2 join 
+      (select *
+         from
+          input
+         where input.clubname = 'bootup baltimore') as t3 as t4`;
+
+verify q1 q2;

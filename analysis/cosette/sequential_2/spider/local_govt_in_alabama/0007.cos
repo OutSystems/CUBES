@@ -1,0 +1,22 @@
+schema df_events(event_id:int, service_id:int, event_details:str);
+
+table df_events(df_events);
+
+query q1
+`select service_id,
+       event_details
+from df_events df_events`;
+
+query q2
+`select service_id,
+       event_details
+from
+  (select lhs.event_id as event_id,
+          lhs.service_id as service_id,
+          lhs.event_details as event_details,
+          rhs.service_id as service_id.other
+   from df_events as lhs
+   inner join df_events as rhs on (lhs.event_details = rhs.event_details
+                                   and lhs.event_id = rhs.event_id))`;
+
+verify q1 q2;

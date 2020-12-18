@@ -1,0 +1,26 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+
+table df_physician(df_physician);
+table df_patient(df_patient);
+
+query q1
+`select t1.name,
+       count(*)
+from df_physician as t1
+join df_patient as t2 on t1.employeeid = t2.pcp
+group by t1.employeeid`;
+
+query q2
+`select t2.name,t2.count_phone
+ from
+  (select
+          t1.pcp, count(t1.phone) as count_phone
+        from
+          input0 as t1
+        group by
+          t1.pcp) as t3 join 
+      input as t4 as t2
+ where t2.pcp = t2.employeeid`;
+
+verify q1 q2;

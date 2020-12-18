@@ -1,0 +1,60 @@
+schema df_region(region_id:int, region_name:str, date:str, label:str, format:str, catalogue:str);
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+schema df_party_events(event_id:int, event_name:str, party_id:int, member_in_charge_id:int);
+
+table df_region(df_region);
+table df_party(df_party);
+table df_party_events(df_party_events);
+
+query q1
+`select count(*)
+from df_region as t1
+join df_party as t2 on t1.region_id = t2.region_id
+join df_party_events as t3 on t2.party_id = t3.party_id
+where t1.region_name = "united kingdom"
+  and t3.event_name = "annaual meeting"`;
+
+query q2
+`select n as count...
+from
+  (select catalogue,
+          party_id,
+          count(*) as n
+   from
+     (select *
+      from
+        (select lhs.region_id as region_id,
+                lhs.region_name as region_name,
+                lhs.date as date,
+                lhs.label as label,
+                lhs.format as format,
+                lhs.catalogue as catalogue,
+                lhs.party_id as party_id,
+                lhs.minister as minister,
+                lhs.took_office as took_office,
+                lhs.left_office as left_office,
+                lhs.party_name as party_name,
+                rhs.event_id as event_id,
+                rhs.event_name as event_name,
+                rhs.member_in_charge_id as member_in_charge_id
+         from
+           (select lhs.region_id as region_id,
+                   lhs.region_name as region_name,
+                   lhs.date as date,
+                   lhs.label as label,
+                   lhs.format as format,
+                   lhs.catalogue as catalogue,
+                   rhs.party_id as party_id,
+                   rhs.minister as minister,
+                   rhs.took_office as took_office,
+                   rhs.left_office as left_office,
+                   rhs.party_name as party_name
+            from df_region as lhs
+            inner join df_party as rhs on (lhs.region_id = rhs.region_id)) as lhs
+         inner join df_party_events as rhs on (lhs.party_id = rhs.party_id))
+      where (region_name != 'united kingdom'
+             and event_name != 'annaual meeting'))
+   group by catalogue,
+            party_id)`;
+
+verify q1 q2;

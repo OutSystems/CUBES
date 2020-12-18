@@ -1,0 +1,24 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, date_of_birth:str);
+
+table df_entrepreneur(df_entrepreneur);
+table df_people(df_people);
+
+query q1
+`select t1.company
+from df_entrepreneur as t1
+join df_people as t2 on t1.people_id = t2.people_id
+
+limit 1`;
+
+query q2
+`select t4.company
+ from
+  (select
+          max(t1.entrepreneur_id) as max_entrepreneur_id
+        from
+          input as t1) as t3 join 
+      input as t2 as t4
+ where t4.max_entrepreneur_id = t4.entrepreneur_id`;
+
+verify q1 q2;

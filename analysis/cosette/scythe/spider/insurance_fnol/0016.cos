@@ -1,0 +1,29 @@
+schema df_customers(customer_id:int, customer_name:str);
+schema df_services(service_id:int, service_name:str);
+schema df_first_notification_of_loss(fnol_id:int, customer_id:int, policy_id:int, service_id:int);
+
+table df_customers(df_customers);
+table df_services(df_services);
+table df_first_notification_of_loss(df_first_notification_of_loss);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_first_notification_of_loss as t2 on t1.customer_id = t2.customer_id
+join df_services as t3 on t2.service_id = t3.service_id
+where t3.service_name = "close a policy"
+  or t3.service_name = "upgrade a policy"`;
+
+query q2
+`select t2.customer_name
+ from
+  (select
+          t5.service_id, avg(t5.customer_id) as avg_customer_id
+        from
+          input1 as t5
+        group by
+          t5.service_id) as t4 join 
+      input as t3 as t2
+ where t2.avg_customer_id = t2.customer_id`;
+
+verify q1 q2;

@@ -1,0 +1,73 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+schema df_job_history(employee_id:int, start_date:str, end_date:str, job_id:str, department_id:int);
+
+table df_employees(df_employees);
+table df_job_history(df_job_history);
+
+query q1
+`select *
+from df_employees df_employees
+where employee_id not in
+    (select employee_id
+     from df_job_history df_job_history)`;
+
+query q2
+`joining, by = "employee_id"
+joining, by = c("employee_id", "job_id", "department_id")
+joining, by = "employee_id"
+select employee_id,
+       first_name,
+       last_name,
+       email,
+       phone_number,
+       hire_date,
+       job_id,
+       salary,
+       commission_pct,
+       manager_id,
+       department_id
+from
+  (select employee_id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          hire_date,
+          job_id,
+          salary,
+          commission_pct,
+          manager_id,
+          department_id,
+          start_date,
+          end_date
+   from
+     (select *
+      from
+        (select employee_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select employee_id
+              from input1) as rhs
+           where (lhs.employee_id = rhs.employee_id) )) as lhs
+   inner join
+     (select employee_id,
+             first_name,
+             last_name,
+             email,
+             phone_number,
+             hire_date,
+             job_id,
+             salary,
+             commission_pct,
+             manager_id,
+             department_id,
+             start_date,
+             end_date
+      from input0 as lhs
+      left join input1 as rhs on (lhs.employee_id = rhs.employee_id
+                                      and lhs.job_id = rhs.job_id
+                                      and lhs.department_id = rhs.department_id)) as rhs on (lhs.employee_id = rhs.employee_id))`;
+
+verify q1 q2;

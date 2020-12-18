@@ -1,0 +1,29 @@
+schema df_suppliers(supplier_id:int, supplier_name:str, supplier_phone:str);
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_product_suppliers(product_id:int, supplier_id:int, date_supplied_from:str, date_supplied_to:str, total_amount_purchased:str, total_value_purchased:str);
+
+table df_suppliers(df_suppliers);
+table df_products(df_products);
+table df_product_suppliers(df_product_suppliers);
+
+query q1
+`select distinct t1.supplier_name,
+                t1.supplier_phone
+from df_suppliers as t1
+join df_product_suppliers as t2 on t1.supplier_id = t2.supplier_id
+join df_products as t3 on t2.product_id = t3.product_id
+where t3.product_name = "red jeans"`;
+
+query q2
+`select t4.supplier_name,t4.supplier_phone
+ from
+  (select
+          count(t2.product_id) as count_product_id
+        from
+          input1 as t2) as t5 join 
+      (select *
+         from
+          input
+         where input.supplier_id = 2.0) as t3 as t4`;
+
+verify q1 q2;

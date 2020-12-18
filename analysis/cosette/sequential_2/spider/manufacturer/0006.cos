@@ -1,0 +1,68 @@
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_furniture(df_furniture);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select t1.name
+from df_furniture as t1
+join df_furniture_manufacte as t2 on t1.furniture_id = t2.furniture_id
+where t2.price_in_dollar <
+    (select max(price_in_dollar)
+     from df_furniture_manufacte df_furniture_manufacte)`;
+
+query q2
+`select distinct name
+from
+  (select lhs.furniture_id as furniture_id,
+          lhs.name as name,
+          lhs.num_of_component as num_of_component,
+          lhs.market_rate as market_rate,
+          lhs.manufacturer_id as manufacturer_id,
+          lhs.price_in_dollar as price_in_dollar,
+          lhs.maxprice_in_dollar as maxprice_in_dollar,
+          rhs.manufacturer_id.other as manufacturer_id.other,
+          rhs.furniture_id.other as furniture_id.other,
+          rhs.price_in_dollar.other as price_in_dollar.other
+   from
+     (select lhs.furniture_id as furniture_id,
+             lhs.name as name,
+             lhs.num_of_component as num_of_component,
+             lhs.market_rate as market_rate,
+             lhs.manufacturer_id as manufacturer_id,
+             lhs.price_in_dollar as price_in_dollar,
+             rhs.maxprice_in_dollar as maxprice_in_dollar
+      from
+        (select lhs.furniture_id as furniture_id,
+                lhs.name as name,
+                lhs.num_of_component as num_of_component,
+                lhs.market_rate as market_rate,
+                rhs.manufacturer_id as manufacturer_id,
+                rhs.price_in_dollar as price_in_dollar
+         from df_furniture as lhs
+         inner join df_furniture_manufacte as rhs on (lhs.furniture_id = rhs.furniture_id)) as lhs
+      inner join
+        (select furniture_id,
+                manufacturer_id,
+                max(price_in_dollar) as maxprice_in_dollar
+         from df_furniture_manufacte df_furniture_manufacte
+         group by furniture_id,
+                  manufacturer_id) as rhs on (lhs.furniture_id = rhs.furniture_id
+                                              and lhs.manufacturer_id = rhs.manufacturer_id)) as lhs
+   inner join
+     (select *
+      from
+        (select lhs.manufacturer_id as manufacturer_id,
+                lhs.furniture_id as furniture_id,
+                lhs.price_in_dollar as price_in_dollar,
+                rhs.manufacturer_id as manufacturer_id.other,
+                rhs.furniture_id as furniture_id.other,
+                rhs.price_in_dollar as price_in_dollar.other
+         from df_furniture_manufacte as lhs
+         cross join df_furniture_manufacte as rhs)
+      where (price_in_dollar < price_in_dollar.other)) as rhs on (lhs.furniture_id = rhs.furniture_id
+                                                                  and lhs.manufacturer_id = rhs.manufacturer_id
+                                                                  and lhs.price_in_dollar = rhs.price_in_dollar))`;
+
+verify q1 q2;

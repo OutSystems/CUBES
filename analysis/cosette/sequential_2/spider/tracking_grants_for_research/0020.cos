@@ -1,0 +1,24 @@
+schema df_project_outcomes(project_id:int, outcome_code:str, outcome_details:str);
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+
+table df_project_outcomes(df_project_outcomes);
+table df_projects(df_projects);
+
+query q1
+`select project_details
+from df_projects df_projects
+where project_id not in
+    (select project_id
+     from df_project_outcomes df_project_outcomes)`;
+
+query q2
+`select project_details
+from
+  (select *
+   from df_projects as lhs
+   where not exists
+       (select 1
+        from df_project_outcomes as rhs
+        where (lhs.project_id = rhs.project_id) ))`;
+
+verify q1 q2;

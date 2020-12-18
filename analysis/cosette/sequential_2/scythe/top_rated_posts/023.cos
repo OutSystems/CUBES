@@ -1,0 +1,16 @@
+schema df_i023(itemID:int, ordercount:int);
+
+table df_i023(df_i023);
+
+query q1
+`select @rank:=@rank+1 as rank, itemid, count(*) as ordercount
+  from orders
+  group by itemid`;
+
+query q2
+`select row_number() over () as rank,
+                         itemid,
+                         ordercount
+from df_i023 df_i023`;
+
+verify q1 q2;

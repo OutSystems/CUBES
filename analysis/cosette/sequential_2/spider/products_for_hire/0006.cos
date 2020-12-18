@@ -1,0 +1,42 @@
+schema df_products_for_hire(product_id:int, product_type_code:str, daily_hire_cost:str, product_name:str, product_description:str);
+schema df_products_booked(booking_id:int, product_id:int, returned_yn:int, returned_late_yn:int, booked_count:int, booked_amount:str);
+
+table df_products_for_hire(df_products_for_hire);
+table df_products_booked(df_products_booked);
+
+query q1
+`select t2.product_description
+from df_products_booked as t1
+join df_products_for_hire as t2 on t1.product_id = t2.product_id
+where t1.booked_amount = 102.76`;
+
+query q2
+`select distinct product_description
+from
+  (select product_id,
+          product_type_code,
+          daily_hire_cost,
+          product_name,
+          product_description,
+          booking_id,
+          product_id.other,
+          returned_late_yn,
+          booked_count,
+          booked_amount,
+          product_id as returned_yn
+   from
+     (select lhs.product_id as product_id,
+             lhs.product_type_code as product_type_code,
+             lhs.daily_hire_cost as daily_hire_cost,
+             lhs.product_name as product_name,
+             lhs.product_description as product_description,
+             rhs.booking_id as booking_id,
+             rhs.product_id as product_id.other,
+             rhs.returned_late_yn as returned_late_yn,
+             rhs.booked_count as booked_count,
+             rhs.booked_amount as booked_amount
+      from df_products_for_hire as lhs
+      inner join df_products_booked as rhs on (lhs.product_id = rhs.returned_yn)))
+where (booked_amount != 102.76)`;
+
+verify q1 q2;

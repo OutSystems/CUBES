@@ -1,0 +1,31 @@
+schema df_people(people_id:int, age:int, name:str, nationality:str, graduation_college:str);
+schema df_employment(company_id:int, people_id:int, year_working:int);
+
+table df_people(df_people);
+table df_employment(df_employment);
+
+query q1
+`select name
+from df_people df_people
+where people_id not in
+    (select people_id
+     from df_employment df_employment)`;
+
+query q2
+`select t4.name
+ from
+  (select t1.nationality, t1.max_age, t3.people_id, t3.age, t3.name, t3.nationality as nationality1, t3.graduation_college
+  from (select
+          t2.nationality, max(t2.age) as max_age
+        from
+          (select *
+             from
+              input
+             where input.people_id >= 4.0) as t2
+        group by
+          t2.nationality) as t1 join 
+      input as t3) as t4
+ where t4.nationality = t4.nationality1
+   and t4.max_age = t4.age`;
+
+verify q1 q2;

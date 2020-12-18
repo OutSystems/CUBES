@@ -1,0 +1,30 @@
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, order_date:str);
+
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select distinct customer_id
+from df_customer_orders df_customer_orders
+where order_date >
+    (select min(order_date)
+     from df_customer_orders df_customer_orders
+     where order_status_code = "cancelled")`;
+
+query q2
+`select t1.customer_id
+ from
+  (select t2.customer_id, t2.max_order_date, t3.order_id, t3.customer_id as customer_id1, t3.order_status_code, t3.order_date
+  from (select
+          t4.customer_id, max(t4.order_date) as max_order_date
+        from
+          input as t4
+        group by
+          t4.customer_id) as t2 join 
+      (select *
+         from
+          input
+         where input.customer_id < 3.0
+           and input.order_status_code = 'cancelled') as t3) as t1
+ where t1.max_order_date >= t1.order_date`;
+
+verify q1 q2;

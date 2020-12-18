@@ -1,0 +1,58 @@
+schema df_apartment_buildings(building_id:int, building_short_name:str, building_full_name:str, building_description:str, building_address:str, building_manager:str, building_phone:str);
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+
+table df_apartment_buildings(df_apartment_buildings);
+table df_apartments(df_apartments);
+
+query q1
+`select t2.apt_type_code,
+       t2.apt_number
+from df_apartment_buildings as t1
+join df_apartments as t2 on t1.building_id = t2.building_id
+where t1.building_manager = "kyle"`;
+
+query q2
+`select apt_type_code,
+       apt_number
+from
+  (select lhs.building_id as building_id,
+          lhs.building_short_name as building_short_name,
+          lhs.building_full_name as building_full_name,
+          lhs.building_description as building_description,
+          lhs.building_address as building_address,
+          lhs.building_manager as building_manager,
+          lhs.building_phone as building_phone,
+          lhs.apt_id as apt_id,
+          lhs.apt_type_code as apt_type_code,
+          lhs.apt_number as apt_number,
+          lhs.bathroom_count as bathroom_count,
+          lhs.bedroom_count as bedroom_count,
+          lhs.room_count as room_count
+   from
+     (select lhs.building_id as building_id,
+             lhs.building_short_name as building_short_name,
+             lhs.building_full_name as building_full_name,
+             lhs.building_description as building_description,
+             lhs.building_address as building_address,
+             lhs.building_manager as building_manager,
+             lhs.building_phone as building_phone,
+             rhs.apt_id as apt_id,
+             rhs.apt_type_code as apt_type_code,
+             rhs.apt_number as apt_number,
+             rhs.bathroom_count as bathroom_count,
+             rhs.bedroom_count as bedroom_count,
+             rhs.room_count as room_count
+      from df_apartment_buildings as lhs
+      inner join df_apartments as rhs on (lhs.building_id = rhs.building_id)) as lhs
+   inner join
+     (select *
+      from df_apartment_buildings df_apartment_buildings
+      where (building_manager = 'kyle')) as rhs on (lhs.building_id = rhs.building_id
+                                                      and lhs.building_short_name = rhs.building_short_name
+                                                      and lhs.building_full_name = rhs.building_full_name
+                                                      and lhs.building_description = rhs.building_description
+                                                      and lhs.building_address = rhs.building_address
+                                                      and lhs.building_manager = rhs.building_manager
+                                                      and lhs.building_phone = rhs.building_phone))`;
+
+verify q1 q2;

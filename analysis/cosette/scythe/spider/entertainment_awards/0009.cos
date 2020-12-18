@@ -1,0 +1,27 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+
+table df_festival_detail(df_festival_detail);
+
+query q1
+`select festival_name
+from df_festival_detail df_festival_detail
+
+limit 3`;
+
+query q2
+`select t1.festival_name
+ from
+  (select t4.num_of_audience, t4.max_festival_id, t3.festival_id, t3.festival_name, t3.chair_name, t3.location, t3.year, t3.num_of_audience as num_of_audience1
+  from (select *
+       from
+        (select
+            t2.num_of_audience, max(t2.festival_id) as max_festival_id
+          from
+            input as t2
+          group by
+            t2.num_of_audience) as t4
+       where t4.max_festival_id >= 2.0) join 
+      input as t3) as t1
+ where t1.max_festival_id = t1.festival_id`;
+
+verify q1 q2;

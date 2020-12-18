@@ -1,0 +1,30 @@
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+
+table df_performance(df_performance);
+
+query q1
+`select location
+from df_performance df_performance
+group by location
+
+limit 1`;
+
+query q2
+`select t2.location
+ from
+  (select t4.location, t4.count_date, t1.performance_id, t1.date, t1.host, t1.location as location1, t1.attendance
+  from (select *
+       from
+        (select
+            t3.location, count(t3.date) as count_date
+          from
+            input as t3
+          group by
+            t3.location) as t4
+       where t4.count_date = 2.0) join 
+      (select *
+         from
+          input
+         where input.performance_id = 2.0) as t1) as t2`;
+
+verify q1 q2;

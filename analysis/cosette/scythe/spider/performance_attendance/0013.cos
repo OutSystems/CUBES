@@ -1,0 +1,29 @@
+schema df_member(member_id:int, name:str, nationality:str, role:str);
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+schema df_member_attendance(member_id:int, performance_id:int, num_of_pieces:int);
+
+table df_member(df_member);
+table df_performance(df_performance);
+table df_member_attendance(df_member_attendance);
+
+query q1
+`select t3.date
+from df_member_attendance as t1
+join df_member as t2 on t1.member_id = t2.member_id
+join df_performance as t3 on t1.performance_id = t3.performance_id
+where t2.role = "violin"`;
+
+query q2
+`select t5.date
+ from
+  (select t3.member_id, t3.name, t3.nationality, t3.role, t3.performance_id, t3.date, t3.host, t3.location, t3.attendance, t4.member_id as member_id1, t4.performance_id as performance_id1, t4.num_of_pieces
+  from (select *
+           from
+            input
+           where input.role = 'violin') join 
+          input0 as t2 as t3 join 
+      input1 as t4) as t5
+ where t5.member_id = t5.member_id1
+   and t5.performance_id = t5.performance_id1`;
+
+verify q1 q2;

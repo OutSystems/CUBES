@@ -1,0 +1,61 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_procedures(code:int, name:str, cost:str);
+schema df_trained_in(physician:int, treatment:int, certificationdate:str, certificationexpires:str);
+
+table df_physician(df_physician);
+table df_procedures(df_procedures);
+table df_trained_in(df_trained_in);
+
+query q1
+`select t1.name
+from df_physician as t1
+join df_trained_in as t2 on t1.employeeid = t2.df_physician
+join df_procedures as t3 on t3.code = t2.treatment
+where t3.cost > 5000`;
+
+query q2
+`select name
+from
+  (select employeeid,
+          name,
+          position,
+          ssn,
+          code,
+          name.other,
+          cost,
+          certificationdate,
+          certificationexpires,
+          treatment,
+          employeeid as physician
+   from
+     (select lhs.employeeid as employeeid,
+             lhs.name as name,
+             lhs.position as position,
+             lhs.ssn as ssn,
+             rhs.code as code,
+             rhs.name as name.other,
+             rhs.cost as cost,
+             rhs.certificationdate as certificationdate,
+             rhs.certificationexpires as certificationexpires,
+             rhs.treatment as treatment
+      from df_physician as lhs
+      inner join
+        (select code,
+                name,
+                cost,
+                physician,
+                certificationdate,
+                certificationexpires,
+                code as treatment
+         from
+           (select lhs.code as code,
+                   lhs.name as name,
+                   lhs.cost as cost,
+                   rhs.physician as physician,
+                   rhs.certificationdate as certificationdate,
+                   rhs.certificationexpires as certificationexpires
+            from df_procedures as lhs
+            inner join df_trained_in as rhs on (lhs.code = rhs.treatment))) as rhs on (lhs.employeeid = rhs.physician)))
+where (cost > 5000.0)`;
+
+verify q1 q2;

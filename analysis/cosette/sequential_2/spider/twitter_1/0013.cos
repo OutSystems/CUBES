@@ -1,0 +1,35 @@
+schema df_follows(f1:int, f2:int);
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_follows(df_follows);
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select t1.name,
+       t1.email
+from df_user_profiles as t1
+join df_follows as t2 on t1.uid = t2.f1
+group by t2.f1
+having count(*) > 1`;
+
+query q2
+`select name,
+       email
+from
+  (select lhs.f1 as f1,
+          lhs.n as n,
+          rhs.name as name,
+          rhs.email as email,
+          rhs.partitionid as partitionid,
+          rhs.followers as followers
+   from
+     (select *
+      from
+        (select f1,
+                count(*) as n
+         from df_follows df_follows
+         group by f1)
+      where (n > 1.0)) as lhs
+   inner join df_user_profiles as rhs on (lhs.f1 = rhs.uid))`;
+
+verify q1 q2;

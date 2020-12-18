@@ -1,0 +1,41 @@
+schema df_basketball_match(team_id:int, school_id:int, team_name:str, acc_regular_season:str, acc_percent:str, acc_home:str, acc_road:str, all_games:str, all_games_percent:str, all_home:str, all_road:str, all_neutral:str);
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_basketball_match(df_basketball_match);
+table df_university(df_university);
+
+query q1
+`select t2.all_games,
+       t1.location
+from df_university as t1
+join df_basketball_match as t2 on t1.school_id = t2.school_id
+where team_name = 'clemson'`;
+
+query q2
+`select all_games,
+       location
+from
+  (select lhs.team_id as team_id,
+          lhs.school_id as school_id,
+          lhs.team_name as team_name,
+          lhs.acc_regular_season as acc_regular_season,
+          lhs.acc_percent as acc_percent,
+          lhs.acc_home as acc_home,
+          lhs.acc_road as acc_road,
+          lhs.all_games as all_games,
+          lhs.all_games_percent as all_games_percent,
+          lhs.all_home as all_home,
+          lhs.all_road as all_road,
+          lhs.all_neutral as all_neutral,
+          rhs.school as school,
+          rhs.location as location,
+          rhs.founded as founded,
+          rhs.affiliation as affiliation,
+          rhs.enrollment as enrollment,
+          rhs.nickname as nickname,
+          rhs.primary_conference as primary_conference
+   from df_basketball_match as lhs
+   inner join df_university as rhs on (lhs.school_id = rhs.school_id))
+where (team_name = 'clemson')`;
+
+verify q1 q2;

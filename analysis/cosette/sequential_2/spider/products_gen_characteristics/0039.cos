@@ -1,0 +1,126 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select t2.color_description
+from df_products as t1
+join df_ref_colors as t2 on t1.color_code = t2.color_code
+group by t2.color_description
+
+limit 1`;
+
+query q2
+`select distinct color_description
+from
+  (select lhs.color_code as color_code,
+          lhs.color_description as color_description,
+          lhs.product_id as product_id,
+          lhs.product_category_code as product_category_code,
+          lhs.product_name as product_name,
+          lhs.typical_buying_price as typical_buying_price,
+          lhs.typical_selling_price as typical_selling_price,
+          lhs.product_description as product_description,
+          lhs.other_product_details as other_product_details,
+          lhs.product_id.other as product_id.other,
+          lhs.color_code.other as color_code.other,
+          lhs.product_category_code.other as product_category_code.other,
+          lhs.product_name.other as product_name.other,
+          lhs.typical_selling_price.other as typical_selling_price.other,
+          lhs.product_description.other as product_description.other,
+          rhs.n as n
+   from
+     (select lhs.color_code as color_code,
+             lhs.color_description as color_description,
+             lhs.product_id as product_id,
+             lhs.product_category_code as product_category_code,
+             lhs.product_name as product_name,
+             lhs.typical_buying_price as typical_buying_price,
+             lhs.typical_selling_price as typical_selling_price,
+             lhs.product_description as product_description,
+             lhs.other_product_details as other_product_details,
+             rhs.product_id.other as product_id.other,
+             rhs.color_code.other as color_code.other,
+             rhs.product_category_code.other as product_category_code.other,
+             rhs.product_name.other as product_name.other,
+             rhs.typical_selling_price.other as typical_selling_price.other,
+             rhs.product_description.other as product_description.other
+      from
+        (select lhs.color_code as color_code,
+                lhs.color_description as color_description,
+                rhs.product_id as product_id,
+                rhs.product_category_code as product_category_code,
+                rhs.product_name as product_name,
+                rhs.typical_buying_price as typical_buying_price,
+                rhs.typical_selling_price as typical_selling_price,
+                rhs.product_description as product_description,
+                rhs.other_product_details as other_product_details
+         from df_ref_colors as lhs
+         inner join df_products as rhs on (lhs.color_code = rhs.color_code)) as lhs
+      inner join
+        (select product_id,
+                color_code,
+                product_category_code,
+                product_name,
+                other_product_details as typical_buying_price,
+                typical_selling_price,
+                product_description,
+                other_product_details,
+                product_id.other,
+                color_code.other,
+                product_category_code.other,
+                product_name.other,
+                typical_selling_price.other,
+                product_description.other
+         from
+           (select product_id,
+                   color_code,
+                   product_category_code,
+                   product_name,
+                   typical_buying_price,
+                   typical_selling_price,
+                   product_description,
+                   typical_selling_price as other_product_details,
+                   product_id.other,
+                   color_code.other,
+                   product_category_code.other,
+                   product_name.other,
+                   typical_selling_price.other,
+                   product_description.other
+            from
+              (select lhs.product_id as product_id,
+                      lhs.color_code as color_code,
+                      lhs.product_category_code as product_category_code,
+                      lhs.product_name as product_name,
+                      lhs.typical_buying_price as typical_buying_price,
+                      lhs.typical_selling_price as typical_selling_price,
+                      lhs.product_description as product_description,
+                      lhs.other_product_details as other_product_details,
+                      rhs.product_id as product_id.other,
+                      rhs.color_code as color_code.other,
+                      rhs.product_category_code as product_category_code.other,
+                      rhs.product_name as product_name.other,
+                      rhs.typical_selling_price as typical_selling_price.other,
+                      rhs.product_description as product_description.other
+               from df_products as lhs
+               inner join df_products as rhs on (lhs.typical_selling_price = rhs.other_product_details
+                                                 and lhs.other_product_details = rhs.typical_buying_price)))) as rhs on (lhs.color_code = rhs.color_code
+                                                                                                                         and lhs.product_id = rhs.product_id
+                                                                                                                         and lhs.product_category_code = rhs.product_category_code
+                                                                                                                         and lhs.product_name = rhs.product_name
+                                                                                                                         and lhs.typical_buying_price = rhs.typical_buying_price
+                                                                                                                         and lhs.typical_selling_price = rhs.typical_selling_price
+                                                                                                                         and lhs.product_description = rhs.product_description
+                                                                                                                         and lhs.other_product_details = rhs.other_product_details)) as lhs
+   inner join
+     (select other_product_details,
+             product_description,
+             count(*) as n
+      from df_products df_products
+      group by other_product_details,
+               product_description) as rhs on (lhs.product_description = rhs.product_description
+                                               and lhs.other_product_details = rhs.other_product_details))`;
+
+verify q1 q2;

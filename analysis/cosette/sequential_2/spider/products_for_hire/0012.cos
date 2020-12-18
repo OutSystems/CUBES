@@ -1,0 +1,28 @@
+schema df_products_booked(booking_id:int, product_id:int, returned_yn:int, returned_late_yn:int, booked_count:int, booked_amount:str);
+
+table df_products_booked(df_products_booked);
+
+query q1
+`select max(booked_count),
+       min(booked_count),
+       avg(booked_count)
+from df_products_booked df_products_booked`;
+
+query q2
+`select distinct max(booked_count) over () as max.booked_count.,
+                                       returned_yn as min.booked_count.,
+                                       meanbooked_count as avg.booked_count.
+from
+  (select booked_amount,
+          returned_yn,
+          booked_count,
+          avg(booked_count) over () as meanbooked_count
+   from
+     (select booked_amount,
+             returned_yn,
+             min(booked_count) as booked_count
+      from df_products_booked df_products_booked
+      group by booked_amount,
+               returned_yn))`;
+
+verify q1 q2;

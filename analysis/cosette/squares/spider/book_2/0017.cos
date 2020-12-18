@@ -1,0 +1,36 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_publication(df_publication);
+table df_book(df_book);
+
+query q1
+`select title
+from df_book df_book
+where book_id not in
+    (select book_id
+     from df_publication df_publication)`;
+
+query q2
+`joining, by = "book_id"
+joining, by = "book_id"
+select distinct title
+from
+  (select book_id,
+          title,
+          issues,
+          writer
+   from
+     (select *
+      from
+        (select book_id
+         from input1) as lhs
+      where not exists
+          (select 1
+           from
+             (select book_id
+              from input0) as rhs
+           where (lhs.book_id = rhs.book_id) )) as lhs
+   inner join input1 as rhs on (lhs.book_id = rhs.book_id))`;
+
+verify q1 q2;

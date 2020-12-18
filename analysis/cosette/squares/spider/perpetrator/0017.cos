@@ -1,0 +1,37 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select name
+from df_people df_people
+where people_id not in
+    (select people_id
+     from df_perpetrator df_perpetrator)`;
+
+query q2
+`joining, by = "people_id"
+joining, by = "people_id"
+select distinct name
+from
+  (select people_id,
+          name,
+          height,
+          weight,
+          home.town
+   from input1 as lhs
+   inner join
+     (select *
+      from
+        (select people_id
+         from input1) as lhs
+      where not exists
+          (select 1
+           from
+             (select people_id
+              from input0) as rhs
+           where (lhs.people_id = rhs.people_id) )) as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

@@ -1,0 +1,54 @@
+schema df_restaurant(resid:int, resname:str, address:str, rating:int);
+schema df_type_of_restaurant(resid:int, restypeid:int);
+schema df_restaurant_type(restypeid:int, restypename:str, restypedescription:str);
+
+table df_restaurant(df_restaurant);
+table df_type_of_restaurant(df_type_of_restaurant);
+table df_restaurant_type(df_restaurant_type);
+
+query q1
+`select count(*)
+from df_restaurant df_restaurant
+join df_type_of_restaurant on df_restaurant.resid = df_type_of_restaurant.resid
+join df_restaurant_type on df_type_of_restaurant.restypeid = df_restaurant_type.restypeid
+group by df_type_of_restaurant.restypeid
+having df_restaurant_type.restypename = 'sandwich'`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.resid as resid,
+          lhs.resname as resname,
+          lhs.address as address,
+          lhs.rating as rating,
+          lhs.restypeid as restypeid,
+          lhs.restypename as restypename,
+          lhs.restypedescription as restypedescription,
+          rhs.n as n
+   from
+     (select lhs.resid as resid,
+             lhs.resname as resname,
+             lhs.address as address,
+             lhs.rating as rating,
+             lhs.restypeid as restypeid,
+             rhs.restypename as restypename,
+             rhs.restypedescription as restypedescription
+      from
+        (select lhs.resid as resid,
+                lhs.resname as resname,
+                lhs.address as address,
+                lhs.rating as rating,
+                rhs.restypeid as restypeid
+         from df_restaurant as lhs
+         inner join df_type_of_restaurant as rhs on (lhs.resid = rhs.resid)) as lhs
+      inner join df_restaurant_type as rhs on (lhs.restypeid = rhs.restypeid)) as lhs
+   inner join
+     (select resid,
+             restypeid,
+             count(*) as n
+      from df_type_of_restaurant df_type_of_restaurant
+      group by resid,
+               restypeid) as rhs on (lhs.resid = rhs.resid
+                                     and lhs.restypeid = rhs.restypeid))`;
+
+verify q1 q2;

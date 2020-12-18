@@ -1,0 +1,40 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+
+table df_product(df_product);
+
+query q1
+`select df_product
+from df_product df_product
+where df_product !=
+    (select max_page_size
+     from df_product df_product
+     group by max_page_size
+     
+     limit 1)`;
+
+query q2
+`select product
+from
+  (select interface,
+          product,
+          count(*) as n
+   from
+     (select lhs.product_id as product_id,
+             lhs.product as product,
+             lhs.dimensions as dimensions,
+             lhs.dpi as dpi,
+             lhs.pages_per_minute_color as pages_per_minute_color,
+             lhs.max_page_size as max_page_size,
+             lhs.interface as interface,
+             rhs.product_id as product_id.other,
+             rhs.dimensions as dimensions.other,
+             rhs.dpi as dpi.other,
+             rhs.pages_per_minute_color as pages_per_minute_color.other,
+             rhs.max_page_size as max_page_size.other
+      from df_product as lhs
+      inner join df_product as rhs on (lhs.interface = rhs.interface
+                                       and lhs.product = rhs.product))
+   group by interface,
+            product)`;
+
+verify q1 q2;

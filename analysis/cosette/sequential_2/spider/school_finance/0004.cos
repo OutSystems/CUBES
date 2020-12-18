@@ -1,0 +1,25 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select sum(enrollment),
+       avg(enrollment)
+from df_school df_school`;
+
+query q2
+`select distinct sum(enrollment) over () as sum.enrollment.,
+                                     meanenrollment as avg.enrollment.
+from
+  (select school_id,
+          school_name,
+          location,
+          mascot,
+          enrollment,
+          ihsaa_class,
+          ihsaa_football_class,
+          county,
+          avg(enrollment) over () as meanenrollment
+   from df_school df_school)`;
+
+verify q1 q2;

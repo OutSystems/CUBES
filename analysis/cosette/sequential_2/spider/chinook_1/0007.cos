@@ -1,0 +1,24 @@
+schema df_album(albumid:int, title:str, artistid:int);
+schema df_artist(artistid:int, name:str);
+
+table df_album(df_album);
+table df_artist(df_artist);
+
+query q1
+`select title
+from df_album as t1
+join df_artist as t2 on t1.artistid = t2.artistid
+where t2.name = "ac/dc"`;
+
+query q2
+`select title
+from
+  (select lhs.artistid as artistid,
+          lhs.name as name,
+          rhs.albumid as albumid,
+          rhs.title as title
+   from df_artist as lhs
+   left join df_album as rhs on (lhs.artistid = rhs.artistid))
+where (name = 'ac/dc')`;
+
+verify q1 q2;

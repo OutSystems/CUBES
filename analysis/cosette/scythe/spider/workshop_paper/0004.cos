@@ -1,0 +1,24 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+
+table df_submission(df_submission);
+
+query q1
+`select author
+from df_submission df_submission
+where college = "florida"
+  or college = "temple"`;
+
+query q2
+`select t3.author
+ from
+  (select
+          max(t2.submission_id) as max_submission_id
+        from
+          input as t2) as t4 join 
+      (select *
+         from
+          input
+         where input.college = 'florida'
+           or input.college = 'temple') as t1 as t3`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_i021(ID:int, CHARGEID:int, CHARGETYPE:str, SERVICEMONTH:str);
+
+table df_i021(df_i021);
+
+query q1
+`select
+  chargeid,
+  chargetype,
+  max(servicemonth) as "mostrecentservicemonth"
+from invoice
+group by chargeid, chargetype`;
+
+query q2
+`select chargeid,
+       chargetype,
+       maxservicemonth
+from
+  (select chargeid,
+          chargetype,
+          max(servicemonth) as maxservicemonth
+   from df_i021 df_i021
+   group by chargeid,
+            chargetype)`;
+
+verify q1 q2;

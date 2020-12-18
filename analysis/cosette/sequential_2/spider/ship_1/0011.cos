@@ -1,0 +1,26 @@
+schema df_captain(captain_id:int, name:str, ship_id:int, age:int, class:str, rank:str);
+
+table df_captain(df_captain);
+
+query q1
+`select rank
+from df_captain df_captain
+except
+select rank
+from df_captain df_captain
+where class = 'third-rate ship of the line'`;
+
+query q2
+`select rank
+from
+  (select *
+   from df_captain as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_captain df_captain
+           where (class = 'third-rate ship of the line')) as rhs
+        where (lhs.rank = rhs.rank) ))`;
+
+verify q1 q2;

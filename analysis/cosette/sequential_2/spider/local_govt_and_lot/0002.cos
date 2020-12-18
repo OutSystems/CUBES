@@ -1,0 +1,38 @@
+schema df_organizations(organization_id:int, parent_organization_id:int, organization_details:str);
+schema df_services(service_id:int, organization_id:int, service_type_code:str, service_details:str);
+
+table df_organizations(df_organizations);
+table df_services(df_services);
+
+query q1
+`select distinct t1.service_type_code
+from df_services as t1
+join df_organizations as t2 on t1.organization_id = t2.organization_id
+where t2.organization_details = 'denesik and sons party'`;
+
+query q2
+`select distinct service_type_code
+from
+  (select lhs.organization_id as organization_id,
+          lhs.parent_organization_id as parent_organization_id,
+          lhs.organization_details as organization_details,
+          lhs.service_id as service_id,
+          lhs.service_type_code as service_type_code,
+          lhs.service_details as service_details
+   from
+     (select lhs.organization_id as organization_id,
+             lhs.parent_organization_id as parent_organization_id,
+             lhs.organization_details as organization_details,
+             rhs.service_id as service_id,
+             rhs.service_type_code as service_type_code,
+             rhs.service_details as service_details
+      from df_organizations as lhs
+      inner join df_services as rhs on (lhs.organization_id = rhs.organization_id)) as lhs
+   inner join
+     (select *
+      from df_organizations df_organizations
+      where (organization_details = 'denesik and sons party')) as rhs on (lhs.organization_id = rhs.organization_id
+                                                                            and lhs.parent_organization_id = rhs.parent_organization_id
+                                                                            and lhs.organization_details = rhs.organization_details))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_employees(df_employees);
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select employee_name
+from df_employees df_employees
+except
+select df_employees.employee_name
+from df_employees df_employees
+join df_circulation_history on df_circulation_history.employee_id = df_employees.employee_id`;
+
+query q2
+`select t1.employee_name
+ from
+  (select
+          max(t3.employee_id) as max_employee_id
+        from
+          input as t3) as t2 join 
+      (select *
+         from
+          input
+         where input.employee_id > 2.0) as t4 as t1
+ where t1.max_employee_id > t1.employee_id`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select country
+from df_stadium df_stadium
+group by country
+having count(*) <= 3`;
+
+query q2
+`select t1.country
+ from
+  (select
+      t2.country, count_distinct(t2.name) as count_distinct_name
+    from
+      input as t2
+    group by
+      t2.country) as t1
+ where t1.count_distinct_name < 3.0`;
+
+verify q1 q2;

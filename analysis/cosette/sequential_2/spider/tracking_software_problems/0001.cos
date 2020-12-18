@@ -1,0 +1,45 @@
+schema df_problem_log(problem_log_id:int, assigned_to_staff_id:int, problem_id:int, problem_category_code:str, problem_status_code:str, log_entry_date:str, log_entry_description:str, log_entry_fix:str, other_log_details:str);
+
+table df_problem_log(df_problem_log);
+
+query q1
+`select problem_log_id
+from df_problem_log df_problem_log
+
+limit 1`;
+
+query q2
+`select problem_log_id
+from
+  (select problem_log_id,
+          assigned_to_staff_id,
+          problem_id,
+          problem_category_code,
+          problem_status_code,
+          log_entry_date,
+          log_entry_fix as log_entry_description,
+          log_entry_fix,
+          other_log_details,
+          maxlog_entry_date
+   from
+     (select lhs.problem_log_id as problem_log_id,
+             lhs.assigned_to_staff_id as assigned_to_staff_id,
+             lhs.problem_id as problem_id,
+             lhs.problem_category_code as problem_category_code,
+             lhs.problem_status_code as problem_status_code,
+             lhs.log_entry_date as log_entry_date,
+             lhs.log_entry_description as log_entry_description,
+             lhs.log_entry_fix as log_entry_fix,
+             lhs.other_log_details as other_log_details,
+             rhs.maxlog_entry_date as maxlog_entry_date
+      from df_problem_log as lhs
+      inner join
+        (select log_entry_description,
+                log_entry_fix,
+                max(log_entry_date) as maxlog_entry_date
+         from df_problem_log df_problem_log
+         group by log_entry_description,
+                  log_entry_fix) as rhs on (lhs.log_entry_fix = rhs.log_entry_description
+                                            and lhs.other_log_details = rhs.log_entry_fix)))`;
+
+verify q1 q2;

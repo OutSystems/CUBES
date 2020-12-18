@@ -1,0 +1,28 @@
+schema df_005(g_event_id:int, prim_cid:int, event_id:int, event_time:str);
+
+table df_005(df_005);
+
+query q1
+`select count(distinct seventeens.prim_cid)
+from events as seventeens
+  left join events as laters on (seventeens.prim_cid = laters.prim_cid and laters.g_event_id > seventeens.g_event_id)
+where seventeens.event_id = 17
+  and isnull(laters.prim_cid)`;
+
+query q2
+`select t2.max_g_event_id,t2.prim_cid,t2.event_id,t2.event_time
+ from
+  (select t4.prim_cid, t4.max_g_event_id, t1.g_event_id, t1.prim_cid as prim_cid1, t1.event_id, t1.event_time
+  from (select
+          t3.prim_cid, max(t3.g_event_id) as max_g_event_id
+        from
+          input as t3
+        group by
+          t3.prim_cid) as t4 join 
+      (select *
+         from
+          input
+         where input.event_id = 17.0) as t1) as t2
+ where t2.max_g_event_id = t2.g_event_id`;
+
+verify q1 q2;

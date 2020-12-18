@@ -1,0 +1,32 @@
+schema df_department_store_chain(dept_store_chain_id:int, dept_store_chain_name:str);
+schema df_department_stores(dept_store_id:int, dept_store_chain_id:int, store_name:str, store_address:str, store_phone:str, store_email:str);
+
+table df_department_store_chain(df_department_store_chain);
+table df_department_stores(df_department_stores);
+
+query q1
+`select count(*)
+from df_department_stores as t1
+join df_department_store_chain as t2 on t1.dept_store_chain_id = t2.dept_store_chain_id
+where t2.dept_store_chain_name = "south"`;
+
+query q2
+`select n as count...
+from
+  (select lhs.dept_store_chain_id as dept_store_chain_id,
+          lhs.store_name as store_name,
+          lhs.n as n,
+          rhs.dept_store_chain_name as dept_store_chain_name
+   from
+     (select dept_store_chain_id,
+             store_name,
+             count(*) as n
+      from df_department_stores df_department_stores
+      group by dept_store_chain_id,
+               store_name) as lhs
+   inner join
+     (select *
+      from df_department_store_chain df_department_store_chain
+      where (dept_store_chain_name = 'south')) as rhs on (lhs.dept_store_chain_id = rhs.dept_store_chain_id))`;
+
+verify q1 q2;

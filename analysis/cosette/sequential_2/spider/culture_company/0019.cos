@@ -1,0 +1,33 @@
+schema df_movie(movie_id:int, title:str, year:int, director:str, budget_million:str, gross_worldwide:int);
+schema df_culture_company(company_name:str, type:str, incorporated_in:str, group_equity_shareholding:str, book_club_id:int, movie_id:int);
+
+table df_movie(df_movie);
+table df_culture_company(df_culture_company);
+
+query q1
+`select t2.company_name
+from df_movie as t1
+join df_culture_company as t2 on t1.movie_id = t2.movie_id
+where t1.year = 1999`;
+
+query q2
+`select company_name
+from
+  (select lhs.company_name as company_name,
+          lhs.type as type,
+          lhs.incorporated_in as incorporated_in,
+          lhs.group_equity_shareholding as group_equity_shareholding,
+          lhs.book_club_id as book_club_id,
+          lhs.movie_id as movie_id,
+          rhs.title as title,
+          rhs.year as year,
+          rhs.director as director,
+          rhs.budget_million as budget_million,
+          rhs.gross_worldwide as gross_worldwide
+   from df_culture_company as lhs
+   inner join
+     (select *
+      from df_movie df_movie
+      where (year <= 1999.0)) as rhs on (lhs.movie_id = rhs.movie_id))`;
+
+verify q1 q2;

@@ -1,0 +1,39 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+
+table df_publication(df_publication);
+
+query q1
+`select publication_date
+from df_publication df_publication
+group by publication_date
+
+limit 1`;
+
+query q2
+`select publisher as publication_date
+from
+  (select publication_id,
+          book_id,
+          publisher,
+          publication_date,
+          price,
+          publication_date.other,
+          publication_id as n
+   from
+     (select lhs.publication_id as publication_id,
+             lhs.book_id as book_id,
+             lhs.publisher as publisher,
+             lhs.publication_date as publication_date,
+             lhs.price as price,
+             rhs.publication_date as publication_date.other
+      from df_publication as lhs
+      inner join
+        (select publication_date,
+                publication_id,
+                count(*) as n
+         from df_publication df_publication
+         group by publication_date,
+                  publication_id) as rhs on (lhs.publication_id = rhs.n
+                                             and lhs.book_id = rhs.publication_id)))`;
+
+verify q1 q2;

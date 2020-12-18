@@ -1,0 +1,32 @@
+schema df_people(person_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, login_name:str, password:str);
+schema df_candidates(candidate_id:int, candidate_details:str);
+
+table df_people(df_people);
+table df_candidates(df_candidates);
+
+query q1
+`select t2.candidate_id
+from df_people as t1
+join df_candidates as t2 on t1.person_id = t2.candidate_id
+where t1.email_address = "stanley.monahan@example.org"`;
+
+query q2
+`select distinct person_id as candidate_id
+from
+  (select lhs.candidate_id as candidate_id,
+          lhs.candidate_details as candidate_details,
+          rhs.person_id as person_id,
+          rhs.first_name as first_name,
+          rhs.middle_name as middle_name,
+          rhs.last_name as last_name,
+          rhs.cell_mobile_number as cell_mobile_number,
+          rhs.email_address as email_address,
+          rhs.login_name as login_name,
+          rhs.password as password
+   from df_candidates as lhs
+   cross join
+     (select *
+      from df_people df_people
+      where (email_address = 'stanley.monahan@example.org')) as rhs)`;
+
+verify q1 q2;

@@ -1,0 +1,33 @@
+schema df_body_builder(body_builder_id:int, people_id:int, snatch:str, clean_jerk:str, total:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, birth_date:str, birth_place:str);
+
+table df_body_builder(df_body_builder);
+table df_people(df_people);
+
+query q1
+`select count(*)
+from df_people df_people
+where people_id not in
+    (select people_id
+     from df_body_builder df_body_builder)`;
+
+query q2
+`select distinct body_builder_id as count...
+from
+  (select lhs.body_builder_id as body_builder_id,
+          lhs.people_id as people_id,
+          lhs.snatch as snatch,
+          lhs.clean_jerk as clean_jerk,
+          lhs.total as total,
+          rhs.birth_date as birth_date,
+          rhs.height as height
+   from df_body_builder as lhs
+   inner join
+     (select birth_date,
+             height,
+             count(*) as n
+      from df_people df_people
+      group by birth_date,
+               height) as rhs on (lhs.body_builder_id = rhs.n))`;
+
+verify q1 q2;

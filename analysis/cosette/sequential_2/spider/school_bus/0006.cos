@@ -1,0 +1,31 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+
+table df_driver(df_driver);
+
+query q1
+`select home_city
+from df_driver df_driver
+group by home_city
+
+limit 1`;
+
+query q2
+`select distinct home_city
+from
+  (select lhs.driver_id as driver_id,
+          lhs.name as name,
+          lhs.party as party,
+          lhs.home_city as home_city,
+          lhs.age as age,
+          rhs.driver_id as driver_id.other,
+          rhs.party as party.other
+   from df_driver as lhs
+   inner join
+     (select driver_id,
+             party,
+             count(*) as n
+      from df_driver df_driver
+      group by driver_id,
+               party) as rhs on (lhs.driver_id = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+schema df_acceptance(submission_id:int, workshop_id:int, result:str);
+
+table df_submission(df_submission);
+table df_acceptance(df_acceptance);
+
+query q1
+`select author
+from df_submission df_submission
+where submission_id not in
+    (select submission_id
+     from df_acceptance df_acceptance)`;
+
+query q2
+`select t3.author
+ from
+  (select
+          count(t2.author) as count_author
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          input
+         where input.submission_id >= 6.0) as t4 as t3`;
+
+verify q1 q2;

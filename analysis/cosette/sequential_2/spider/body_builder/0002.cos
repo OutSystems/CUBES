@@ -1,0 +1,24 @@
+schema df_body_builder(body_builder_id:int, people_id:int, snatch:str, clean_jerk:str, total:str);
+
+table df_body_builder(df_body_builder);
+
+query q1
+`select total
+from df_body_builder df_body_builder`;
+
+query q2
+`select total
+from
+  (select lhs.body_builder_id as body_builder_id,
+          lhs.people_id as people_id,
+          lhs.snatch as snatch,
+          lhs.clean_jerk as clean_jerk,
+          lhs.total as total,
+          rhs.body_builder_id as body_builder_id.other,
+          rhs.snatch as snatch.other,
+          rhs.clean_jerk as clean_jerk.other,
+          rhs.total as total.other
+   from df_body_builder as lhs
+   inner join df_body_builder as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

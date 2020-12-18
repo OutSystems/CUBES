@@ -1,0 +1,21 @@
+schema df_addresses(address_id:int, line_1_number_building:str, town_city:str, zip_postcode:int, state_province_county:str, country:str);
+
+table df_addresses(df_addresses);
+
+query q1
+`select count(*)
+from df_addresses df_addresses
+where state_province_county = "colorado"`;
+
+query q2
+`select distinct n as count...
+from
+  (select state_province_county,
+          zip_postcode,
+          count(*) as n
+   from df_addresses df_addresses
+   group by state_province_county,
+            zip_postcode)
+where (state_province_county != 'colorado')`;
+
+verify q1 q2;

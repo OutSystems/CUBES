@@ -1,0 +1,31 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+schema df_event(id:int, name:str, stadium_id:int, year:int);
+
+table df_stadium(df_stadium);
+table df_event(df_event);
+
+query q1
+`select name
+from df_stadium df_stadium
+where id not in
+    (select stadium_id
+     from df_event df_event)`;
+
+query q2
+`select t2.name
+ from
+  (select t1.country, t1.max_opening_year, t3.id, t3.name, t3.capacity, t3.city, t3.country as country1, t3.opening_year
+  from (select
+          t4.country, max(t4.opening_year) as max_opening_year
+        from
+          input as t4
+        group by
+          t4.country) as t1 join 
+      (select *
+         from
+          input
+         where input.id > 4.0) as t3) as t2
+ where t2.country = t2.country1
+   and t2.max_opening_year = t2.opening_year`;
+
+verify q1 q2;

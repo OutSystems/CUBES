@@ -1,0 +1,44 @@
+schema df_genres(id:int, name:str);
+schema df_tracks(id:int, name:str, album_id:int, media_type_id:int, genre_id:int, composer:str, milliseconds:int, bytes:int, unit_price:str);
+
+table df_genres(df_genres);
+table df_tracks(df_tracks);
+
+query q1
+`select t2.name
+from df_genres as t1
+join df_tracks as t2 on t1.id = t2.genre_id
+where t1.name = "rock"
+  or t1.name = "jazz"`;
+
+query q2
+`select name.other as name
+from
+  (select id,
+          name,
+          id.other,
+          name.other,
+          album_id,
+          media_type_id,
+          composer,
+          milliseconds,
+          bytes,
+          unit_price,
+          id as genre_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             rhs.id as id.other,
+             rhs.name as name.other,
+             rhs.album_id as album_id,
+             rhs.media_type_id as media_type_id,
+             rhs.composer as composer,
+             rhs.milliseconds as milliseconds,
+             rhs.bytes as bytes,
+             rhs.unit_price as unit_price
+      from df_genres as lhs
+      inner join df_tracks as rhs on (lhs.id = rhs.genre_id)))
+where (name = 'rock'
+       or name = 'jazz')`;
+
+verify q1 q2;

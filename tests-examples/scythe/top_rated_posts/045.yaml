@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/045.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i045.csv
 output: tests-examples/scythe/top_rated_posts/tables/o045.csv
@@ -11,42 +12,19 @@ solution:
   - cross_join
   - filter
 sql: |
-  SELECT
-   user_id ,
-   COUNT(*) count
-  FROM
-   PAYMENT
-  GROUP BY
-   account,
-   user_id ,
-   date
-  Having
-  COUNT(*) > 1
-comment: |
-  SELECT
-     user_id,
-     account_no ,
-     date,
+  SELECT user_id,
          COUNT(*)
-  FROM
-     (SELECT DISTINCT
-             user_id,
-             account_no ,
-             zip,
-             date
-          FROM
-             payment
-
-         )
-         payment
-  GROUP BY
-
-     user_id,
-     account_no ,
-
-     date
+  FROM (SELECT DISTINCT user_id,
+                        account_no,
+                        zip,
+                        date
+        FROM i045
+       ) payment
+  GROUP BY user_id,
+           account_no,
+           date
   HAVING COUNT(*) > 1
-
+comment: |
   df1 <- df_i045 %>% group_by(account_no,date) %>% summarise(n = n()) %>% ungroup()
   df2 <- full_join(df1, df1, by=character(), suffix = c("", ".other")) %>% filter(n < n.other)
   df3 <- df2 %>% filter(n == 1)

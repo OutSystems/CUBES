@@ -1,0 +1,22 @@
+schema df_financial_transactions(transaction_id:int, account_id:int, invoice_number:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select invoice_number,
+       count(*)
+from df_financial_transactions df_financial_transactions
+group by invoice_number`;
+
+query q2
+`select invoice_number,
+       n as count...
+from
+  (select invoice_number,
+          transaction_comment,
+          count(*) as n
+   from df_financial_transactions df_financial_transactions
+   group by invoice_number,
+            transaction_comment)`;
+
+verify q1 q2;

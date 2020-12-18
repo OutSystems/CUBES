@@ -1,0 +1,21 @@
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_furniture(df_furniture);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select t1.name,
+       t2.price_in_dollar
+from df_furniture as t1
+join df_furniture_manufacte as t2 on t1.furniture_id = t2.furniture_id`;
+
+query q2
+`select t2.name,t2.price_in_dollar
+ from
+  (select input.furniture_id, input.name, input.num_of_component, input.market_rate, t1.manufacturer_id, t1.furniture_id as furniture_id1, t1.price_in_dollar
+  from input join 
+      input0 as t1) as t2
+ where t2.furniture_id = t2.furniture_id1`;
+
+verify q1 q2;

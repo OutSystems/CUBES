@@ -1,0 +1,37 @@
+schema df_student_course_registrations(student_id:int, course_id:int, registration_date:str);
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_student_course_registrations(df_student_course_registrations);
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select *
+from df_student_course_registrations df_student_course_registrations
+where student_id not in
+    (select student_id
+     from df_student_course_attendance df_student_course_attendance)`;
+
+query q2
+`joining, by = "student_id"
+joining, by = "student_id"
+select distinct student_id,
+                course_id,
+                registration_date
+from
+  (select student_id,
+          course_id,
+          registration_date
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select student_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select student_id
+              from input1) as rhs
+           where (lhs.student_id = rhs.student_id) )) as rhs on (lhs.student_id = rhs.student_id))`;
+
+verify q1 q2;

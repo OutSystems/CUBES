@@ -1,0 +1,43 @@
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+
+table df_host(df_host);
+
+query q1
+`select name,
+       nationality
+from df_host df_host
+
+limit 1`;
+
+query q2
+`select distinct name.other as name,
+                nationality.other as nationality
+from
+  (select lhs.host_id as host_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.age as age,
+          lhs.maxage as maxage,
+          rhs.host_id as host_id.other,
+          rhs.name as name.other,
+          rhs.nationality as nationality.other,
+          rhs.age as age.other,
+          rhs.maxage as maxage.other
+   from
+     (select host_id,
+             name,
+             nationality,
+             age,
+             max(age) over () as maxage
+      from df_host df_host) as lhs
+   cross join
+     (select host_id,
+             name,
+             nationality,
+             age,
+             max(age) over () as maxage
+      from df_host df_host) as rhs)
+where (maxage <= age.other
+       or age.other > maxage.other)`;
+
+verify q1 q2;

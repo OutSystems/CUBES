@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/048.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i048.csv
 output: tests-examples/scythe/top_rated_posts/tables/o048.csv
@@ -10,18 +11,17 @@ solution:
   - summarise
   - natural_join
 sql: |
-  SELECT
-      M.CName, M.AddressLine,
-  FROM(
-      SELECT
-          CName, MIN(Inserted) AS First
-      FROM
-          MyTable
-      GROUP BY
-          CName
-      ) foo
-  JOIN MyTable M
-  ON foo.CName = M.CName AND foo.First = M.Inserted
+  SELECT M.CName,
+         first,
+         M.AddressLine
+  FROM (
+           SELECT CName,
+                  MIN(AddressID) AS First
+           FROM i048
+           GROUP BY CName
+       ) foo
+           JOIN i048 M
+                ON foo.CName = M.CName AND foo.First = M.AddressID
 comment: |
   df1 <- df_i048 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
   df2 <- inner_join(df_i048, df1)

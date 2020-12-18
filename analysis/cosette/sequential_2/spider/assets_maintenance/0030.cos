@@ -1,0 +1,30 @@
+schema df_staff(staff_id:int, staff_name:str, gender:int, other_staff_details:str);
+schema df_engineer_visits(engineer_visit_id:int, contact_staff_id:int, engineer_id:int, fault_log_entry_id:int, fault_status:str, visit_start_datetime:str, visit_end_datetime:str, other_visit_details:str);
+
+table df_staff(df_staff);
+table df_engineer_visits(df_engineer_visits);
+
+query q1
+`select t1.staff_name,
+       count(*)
+from df_staff as t1
+join df_engineer_visits as t2 on t1.staff_id = t2.contact_staff_id
+group by t1.staff_name`;
+
+query q2
+`select staff_name,
+       n as count...
+from
+  (select lhs.staff_id as staff_id,
+          lhs.staff_name as staff_name,
+          lhs.gender as gender,
+          lhs.other_staff_details as other_staff_details,
+          rhs.n as n
+   from df_staff as lhs
+   inner join
+     (select contact_staff_id,
+             count(*) as n
+      from df_engineer_visits df_engineer_visits
+      group by contact_staff_id) as rhs on (lhs.staff_id = rhs.contact_staff_id))`;
+
+verify q1 q2;

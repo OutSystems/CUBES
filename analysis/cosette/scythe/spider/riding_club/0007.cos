@@ -1,0 +1,21 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+
+table df_player(df_player);
+
+query q1
+`select occupation,
+       count(*)
+from df_player df_player
+group by occupation`;
+
+query q2
+`select t1.occupation,t1.count_distinct_player_id
+ from
+  (select
+      t2.occupation, t2.rank, count_distinct(t2.player_id) as count_distinct_player_id
+    from
+      input as t2
+    group by
+      t2.occupation, t2.rank) as t1`;
+
+verify q1 q2;

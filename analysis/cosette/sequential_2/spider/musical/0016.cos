@@ -1,0 +1,33 @@
+schema df_musical(musical_id:int, name:str, year:int, award:str, category:str, nominee:str, result:str);
+
+table df_musical(df_musical);
+
+query q1
+`select result
+from df_musical df_musical
+group by result
+
+limit 1`;
+
+query q2
+`select distinct result
+from
+  (select lhs.musical_id as musical_id,
+          lhs.name as name,
+          lhs.year as year,
+          lhs.award as award,
+          lhs.category as category,
+          lhs.nominee as nominee,
+          lhs.result as result,
+          rhs.result as result.other
+   from df_musical as lhs
+   inner join
+     (select nominee,
+             result,
+             count(*) as n
+      from df_musical df_musical
+      group by nominee,
+               result) as rhs on (lhs.musical_id = rhs.n
+                                  and lhs.nominee = rhs.nominee))`;
+
+verify q1 q2;

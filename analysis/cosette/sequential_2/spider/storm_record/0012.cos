@@ -1,0 +1,30 @@
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t1.region_name,
+       count(*)
+from df_region as t1
+join df_affected_region as t2 on t1.region_id = t2.region_id
+group by t1.region_id`;
+
+query q2
+`select region_name,
+       n as count...
+from
+  (select region_name,
+          count(*) as n
+   from
+     (select lhs.region_id as region_id,
+             lhs.region_code as region_code,
+             lhs.region_name as region_name,
+             rhs.storm_id as storm_id,
+             rhs.number_city_affected as number_city_affected
+      from df_region as lhs
+      inner join df_affected_region as rhs on (lhs.region_id = rhs.region_id))
+   group by region_name)`;
+
+verify q1 q2;

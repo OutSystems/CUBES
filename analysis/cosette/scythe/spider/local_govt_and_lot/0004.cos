@@ -1,0 +1,34 @@
+schema df_services(service_id:int, organization_id:int, service_type_code:str, service_details:str);
+schema df_residents_services(resident_id:int, service_id:int, date_moved_in:str, property_id:int, date_requested:str, date_provided:str, other_details:str);
+
+table df_services(df_services);
+table df_residents_services(df_residents_services);
+
+query q1
+`select t1.service_id,
+       t1.service_details,
+       count(*)
+from df_services as t1
+join df_residents_services as t2 on t1.service_id = t2.service_id
+group by t1.service_id
+
+limit 1`;
+
+query q2
+`select t2.service_id,t2.other_details,t2.count_property_id
+ from
+  (select t1.service_id, t1.other_details, t1.count_property_id, t4.service_id as service_id1, t4.organization_id, t4.service_type_code, t4.service_details
+  from (select *
+       from
+        (select
+            t3.service_id, t3.other_details, count(t3.property_id) as count_property_id
+          from
+            input0 as t3
+          group by
+            t3.service_id, t3.other_details) as t1
+       where t1.count_property_id = 2.0) join 
+      input as t4) as t2
+ where t2.service_id = t2.service_id1
+   and t2.other_details = t2.service_details`;
+
+verify q1 q2;

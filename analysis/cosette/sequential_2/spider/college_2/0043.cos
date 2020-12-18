@@ -1,0 +1,45 @@
+schema df_section(course_id:int, sec_id:int, semester:str, year:int, building:str, room_number:int, time_slot_id:str);
+
+table df_section(df_section);
+
+query q1
+`select semester,
+       year
+from df_section df_section
+group by semester,
+         year
+
+limit 1`;
+
+query q2
+`select semester,
+       year
+from
+  (select course_id,
+          sec_id,
+          semester,
+          year,
+          building,
+          course_id as room_number,
+          time_slot_id,
+          building.other
+   from
+     (select lhs.course_id as course_id,
+             lhs.sec_id as sec_id,
+             lhs.semester as semester,
+             lhs.year as year,
+             lhs.building as building,
+             lhs.room_number as room_number,
+             lhs.time_slot_id as time_slot_id,
+             rhs.building as building.other
+      from df_section as lhs
+      inner join
+        (select building,
+                room_number,
+                count(*) as n
+         from df_section df_section
+         group by building,
+                  room_number) as rhs on (lhs.course_id = rhs.room_number
+                                          and lhs.sec_id = rhs.n)))`;
+
+verify q1 q2;

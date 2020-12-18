@@ -1,0 +1,38 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_student(df_student);
+
+query q1
+`select min(age),
+       avg(age),
+       max(age)
+from df_student df_student`;
+
+query q2
+`select distinct minage as min.age.,
+                meanage as avg.age.,
+                max(age) over () as max.age.
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          minage,
+          avg(age) over () as meanage
+   from
+     (select stuid,
+             lname,
+             fname,
+             age,
+             sex,
+             major,
+             advisor,
+             city_code,
+             min(age) over () as minage
+      from df_student df_student))`;
+
+verify q1 q2;

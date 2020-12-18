@@ -1,0 +1,33 @@
+schema df_locations(location_id:int, location_name:str, address:str, other_details:str);
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+
+table df_locations(df_locations);
+table df_tourist_attractions(df_tourist_attractions);
+
+query q1
+`select t2.name
+from df_locations as t1
+join df_tourist_attractions as t2 on t1.location_id = t2.location_id
+where t1.address = "254 ottilie junction"
+  or t2.how_to_get_there = "bus"`;
+
+query q2
+`select name
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.location_name as location_name,
+          rhs.address as address,
+          rhs.other_details as other_details.other
+   from df_tourist_attractions as lhs
+   inner join df_locations as rhs on (lhs.location_id = rhs.location_id))
+where (address = '254 ottilie junction'
+       or how_to_get_there = 'bus')`;
+
+verify q1 q2;

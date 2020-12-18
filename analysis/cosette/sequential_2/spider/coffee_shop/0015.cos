@@ -1,0 +1,32 @@
+schema df_shop(shop_id:int, address:str, num_of_staff:int, score:str, open_year:int);
+schema df_happy_hour(hh_id:int, shop_id:int, month:str, num_of_shaff_in_charge:int);
+
+table df_shop(df_shop);
+table df_happy_hour(df_happy_hour);
+
+query q1
+`select t1.address,
+       t1.shop_id
+from df_shop as t1
+join df_happy_hour as t2 on t1.shop_id = t2.shop_id
+where month = 'may'`;
+
+query q2
+`select address,
+       shop_id
+from
+  (select lhs.hh_id as hh_id,
+          lhs.shop_id as shop_id,
+          lhs.month as month,
+          lhs.num_of_shaff_in_charge as num_of_shaff_in_charge,
+          rhs.address as address,
+          rhs.num_of_staff as num_of_staff,
+          rhs.score as score,
+          rhs.open_year as open_year
+   from
+     (select *
+      from df_happy_hour df_happy_hour
+      where (month = 'may')) as lhs
+   inner join df_shop as rhs on (lhs.shop_id = rhs.shop_id))`;
+
+verify q1 q2;

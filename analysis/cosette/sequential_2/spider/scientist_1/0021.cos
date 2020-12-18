@@ -1,0 +1,34 @@
+schema df_scientists(ssn:int, name:str);
+schema df_assignedto(scientist:int, project:str);
+
+table df_scientists(df_scientists);
+table df_assignedto(df_assignedto);
+
+query q1
+`select count(*)
+from df_scientists df_scientists
+where ssn not in
+    (select scientist
+     from df_assignedto df_assignedto)`;
+
+query q2
+`select n_distinct as count...
+from
+  (select count(distinct ssn) as n_distinct
+   from
+     (select scientist,
+             project,
+             ssn,
+             project as name
+      from
+        (select scientist,
+                project,
+                scientist as ssn
+         from
+           (select lhs.scientist as scientist,
+                   lhs.project as project
+            from df_assignedto as lhs
+            inner join df_scientists as rhs on (lhs.scientist = rhs.ssn
+                                                and lhs.project = rhs.name)))))`;
+
+verify q1 q2;

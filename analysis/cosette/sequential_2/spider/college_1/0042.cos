@@ -1,0 +1,26 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+
+table df_department(df_department);
+
+query q1
+`select dept_name
+from df_department df_department`;
+
+query q2
+`select dept_name
+from
+  (select lhs.dept_code as dept_code,
+          lhs.dept_name as dept_name,
+          lhs.school_code as school_code,
+          lhs.emp_num as emp_num,
+          lhs.dept_address as dept_address,
+          lhs.dept_extension as dept_extension,
+          rhs.dept_name as dept_name.other,
+          rhs.emp_num as emp_num.other,
+          rhs.dept_address as dept_address.other,
+          rhs.dept_extension as dept_extension.other
+   from df_department as lhs
+   inner join df_department as rhs on (lhs.dept_code = rhs.dept_code
+                                       and lhs.school_code = rhs.school_code))`;
+
+verify q1 q2;

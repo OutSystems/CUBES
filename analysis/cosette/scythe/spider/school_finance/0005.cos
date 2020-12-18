@@ -1,0 +1,23 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select mascot
+from df_school df_school
+where enrollment >
+    (select avg(enrollment)
+     from df_school df_school)`;
+
+query q2
+`select t3.mascot1
+ from
+  (select input.school_id, input.school_name, input.location, input.mascot, input.enrollment, input.ihsaa_class, input.ihsaa_football_class, input.county, t2.school_id as school_id1, t2.school_name as school_name1, t2.location as location1, t2.mascot as mascot1, t2.enrollment as enrollment1, t2.ihsaa_class as ihsaa_class1, t2.ihsaa_football_class as ihsaa_football_class1, t2.county as county1
+  from (select *
+       from
+        input
+       where input.school_id = 4.0) join 
+      input as t2) as t3
+ where t3.ihsaa_class = t3.ihsaa_class1`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_031_1(channelID:int, accountID:str, role:int);
+schema df_031_2(channelID:int, channelName:str, type:str);
+
+table df_031_1(df_031_1);
+table df_031_2(df_031_2);
+
+query q1
+`select (stuff)
+from chatchannels cc
+where cc.type = 'public'
+  and cc.channelid not in
+  (select channelid from chatchannelmembers where accountid = 'dave')`;
+
+query q2
+`select channelid as c1,
+       accountid as c2,
+       role as c3
+from
+  (select lhs.channelid as channelid,
+          lhs.channelname as channelname,
+          lhs.type as type,
+          rhs.accountid as accountid,
+          rhs.role as role
+   from df_031_2 as lhs
+   inner join df_031_1 as rhs on (lhs.channelid = rhs.channelid))
+where (type = 'public'
+       and accountid = 'dave')`;
+
+verify q1 q2;

@@ -1,0 +1,23 @@
+schema df_club_rank(rank:str, club_id:int, gold:str, silver:str, bronze:str, total:str);
+
+table df_club_rank(df_club_rank);
+
+query q1
+`select max(silver),
+       min(silver)
+from df_club_rank df_club_rank`;
+
+query q2
+`select distinct max(silver) over () as max.silver.,
+                                 minsilver as min.silver.
+from
+  (select rank,
+          club_id,
+          gold,
+          silver,
+          bronze,
+          total,
+          min(silver) over () as minsilver
+   from df_club_rank df_club_rank)`;
+
+verify q1 q2;

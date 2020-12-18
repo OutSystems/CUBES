@@ -1,0 +1,29 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm(df_dorm);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select t3.amenity_name
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+join df_dorm_amenity as t3 on t2.amenid = t3.amenid
+where t1.dorm_name = 'smith hall'`;
+
+query q2
+`select t2.amenity_name
+ from
+  (select t4.dormid, t4.dorm_name, t4.student_capacity, t4.gender, t4.amenid, t4.amenity_name, t3.dormid as dormid1, t3.amenid as amenid1
+  from (select *
+           from
+            input
+           where input.dorm_name = 'smith hall') join 
+          input0 as t5 as t4 join 
+      input1 as t3) as t2
+ where t2.dormid = t2.dormid1
+   and t2.amenid = t2.amenid1`;
+
+verify q1 q2;

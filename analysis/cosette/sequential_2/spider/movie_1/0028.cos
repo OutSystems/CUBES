@@ -1,0 +1,52 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+
+table df_movie(df_movie);
+
+query q1
+`select t1.title,
+       t1.year
+from df_movie as t1
+join df_movie as t2 on t1.director = t2.director
+where t1.title != t2.title`;
+
+query q2
+`select distinct title,
+                year
+from
+  (select lhs.mid as mid,
+          lhs.title as title,
+          lhs.year as year,
+          lhs.director as director,
+          lhs.mid.other as mid.other,
+          lhs.title.other as title.other,
+          lhs.year.other as year.other,
+          rhs.mid as mid.other.other,
+          rhs.title as title.other.other,
+          rhs.year as year.other.other,
+          rhs.director as director.other,
+          rhs.mid.other as mid.other.other.other,
+          rhs.title.other as title.other.other.other,
+          rhs.year.other as year.other.other.other
+   from
+     (select lhs.mid as mid,
+             lhs.title as title,
+             lhs.year as year,
+             lhs.director as director,
+             rhs.mid as mid.other,
+             rhs.title as title.other,
+             rhs.year as year.other
+      from df_movie as lhs
+      inner join df_movie as rhs on (lhs.director = rhs.director)) as lhs
+   cross join
+     (select lhs.mid as mid,
+             lhs.title as title,
+             lhs.year as year,
+             lhs.director as director,
+             rhs.mid as mid.other,
+             rhs.title as title.other,
+             rhs.year as year.other
+      from df_movie as lhs
+      inner join df_movie as rhs on (lhs.director = rhs.director)) as rhs)
+where (title != title.other)`;
+
+verify q1 q2;

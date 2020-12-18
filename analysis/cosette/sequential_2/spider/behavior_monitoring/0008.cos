@@ -1,0 +1,36 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+
+table df_students(df_students);
+
+query q1
+`select cell_mobile_number,
+       email_address
+from df_students df_students`;
+
+query q2
+`select cell_mobile_number,
+       email_address
+from
+  (select lhs.student_id as student_id,
+          lhs.address_id as address_id,
+          lhs.first_name as first_name,
+          lhs.middle_name as middle_name,
+          lhs.last_name as last_name,
+          lhs.cell_mobile_number as cell_mobile_number,
+          lhs.email_address as email_address,
+          lhs.date_first_rental as date_first_rental,
+          lhs.date_left_university as date_left_university,
+          lhs.other_student_details as other_student_details,
+          rhs.student_id as student_id.other,
+          rhs.address_id as address_id.other,
+          rhs.middle_name as middle_name.other,
+          rhs.last_name as last_name.other,
+          rhs.cell_mobile_number as cell_mobile_number.other,
+          rhs.date_first_rental as date_first_rental.other,
+          rhs.date_left_university as date_left_university.other,
+          rhs.other_student_details as other_student_details.other
+   from df_students as lhs
+   inner join df_students as rhs on (lhs.email_address = rhs.email_address
+                                     and lhs.first_name = rhs.first_name))`;
+
+verify q1 q2;

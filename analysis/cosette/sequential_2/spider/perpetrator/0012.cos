@@ -1,0 +1,30 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select t1.height
+from df_people as t1
+join df_perpetrator as t2 on t1.people_id = t2.people_id`;
+
+query q2
+`select height
+from
+  (select lhs.perpetrator_id as perpetrator_id,
+          lhs.people_id as people_id,
+          lhs.date as date,
+          lhs.year as year,
+          lhs.location as location,
+          lhs.country as country,
+          lhs.killed as killed,
+          lhs.injured as injured,
+          rhs.name as name,
+          rhs.height as height,
+          rhs.weight as weight,
+          rhs.home.town as home.town
+   from df_perpetrator as lhs
+   inner join df_people as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

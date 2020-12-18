@@ -1,0 +1,31 @@
+schema df_match_season(season:str, player:str, position:str, country:int, team:int, draft_pick_number:int, draft_class:str, college:str);
+
+table df_match_season(df_match_season);
+
+query q1
+`select college
+from df_match_season df_match_season
+group by college
+
+limit 3`;
+
+query q2
+`select distinct college.other as college
+from
+  (select lhs.college as college,
+          lhs.n as n,
+          rhs.college as college.other,
+          rhs.n as n.other
+   from
+     (select college,
+             count(*) as n
+      from df_match_season df_match_season
+      group by college) as lhs
+   cross join
+     (select college,
+             count(*) as n
+      from df_match_season df_match_season
+      group by college) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_customers(customer_id:int, payment_method_code:str, customer_number:int, customer_name:str, customer_address:str, customer_phone:str, customer_email:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_date:str, order_status_code:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where t2.order_status_code = 'completed' intersect
+  select t1.customer_name
+  from df_customers as t1
+  join df_customer_orders as t2 on t1.customer_id = t2.customer_id where t2.order_status_code = 'part'`;
+
+query q2
+`select t1.customer_name
+ from
+  (select t3.customer_id, t3.count_customer_id, t2.customer_id as customer_id1, t2.payment_method_code, t2.customer_number, t2.customer_name, t2.customer_address, t2.customer_phone, t2.customer_email
+  from (select *
+       from
+        (select
+            t4.customer_id, count(t4.customer_id) as count_customer_id
+          from
+            (select *
+               from
+                input0
+               where input0.order_status_code = 'completed'
+                 or input0.order_id >= 8.0) as t4
+          group by
+            t4.customer_id) as t3
+       where t3.count_customer_id = 2.0) join 
+      input as t2) as t1
+ where t1.customer_id = t1.customer_id1`;
+
+verify q1 q2;

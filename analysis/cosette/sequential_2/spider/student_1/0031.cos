@@ -1,0 +1,26 @@
+schema df_list(lastname:str, firstname:str, grade:int, classroom:int);
+
+table df_list(df_list);
+
+query q1
+`select classroom,
+       count(*)
+from df_list df_list
+where grade = "0"
+group by classroom`;
+
+query q2
+`select classroom,
+       n as count...
+from
+  (select classroom,
+          grade,
+          count(*) as n
+   from
+     (select *
+      from df_list df_list
+      where (grade = 0.0))
+   group by classroom,
+            grade)`;
+
+verify q1 q2;

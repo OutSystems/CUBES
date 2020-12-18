@@ -1,0 +1,19 @@
+schema df_organisation_types(organisation_type:str, organisation_type_description:str);
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+
+table df_organisation_types(df_organisation_types);
+table df_organisations(df_organisations);
+
+query q1
+`select t1.organisation_type_description
+from df_organisation_types as t1
+join df_organisations as t2 on t1.organisation_type = t2.organisation_type
+where t2.organisation_details = 'quo'`;
+
+query q2
+`(select
+    first(t1.organisation_type_description) as first_organisation_type_description
+  from
+    input as t1) as t2`;
+
+verify q1 q2;

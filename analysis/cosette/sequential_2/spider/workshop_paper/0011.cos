@@ -1,0 +1,44 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+schema df_acceptance(submission_id:int, workshop_id:int, result:str);
+
+table df_submission(df_submission);
+table df_acceptance(df_acceptance);
+
+query q1
+`select t1.result
+from df_acceptance as t1
+join df_submission as t2 on t1.submission_id = t2.submission_id
+
+limit 1`;
+
+query q2
+`select distinct result
+from
+  (select *
+   from
+     (select college,
+             submission_id,
+             maxscores,
+             submission_id.other,
+             result,
+             submission_id as workshop_id
+      from
+        (select lhs.college as college,
+                lhs.submission_id as submission_id,
+                lhs.maxscores as maxscores,
+                rhs.submission_id as submission_id.other,
+                rhs.result as result
+         from
+           (select college,
+                   submission_id,
+                   max(scores) as maxscores
+            from df_submission df_submission
+            group by college,
+                     submission_id) as lhs
+         inner join df_acceptance as rhs on (lhs.submission_id = rhs.workshop_id))) as lhs
+   where not exists
+       (select 1
+        from df_acceptance as rhs
+        where (lhs.submission_id = rhs.submission_id) ))`;
+
+verify q1 q2;

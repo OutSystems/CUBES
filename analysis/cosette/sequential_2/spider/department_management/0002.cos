@@ -1,0 +1,26 @@
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+
+table df_head(df_head);
+
+query q1
+`select name,
+       born_state,
+       age
+from df_head df_head`;
+
+query q2
+`select name,
+       born_state,
+       age
+from
+  (select lhs.head_id as head_id,
+          lhs.name as name,
+          lhs.born_state as born_state,
+          lhs.age as age,
+          rhs.name as name.other,
+          rhs.born_state as born_state.other
+   from df_head as lhs
+   inner join df_head as rhs on (lhs.age = rhs.age
+                                 and lhs.head_id = rhs.head_id))`;
+
+verify q1 q2;

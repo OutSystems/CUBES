@@ -1,0 +1,61 @@
+schema df_courses(course_id:int, course_name:str, course_description:str, other_details:str);
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_courses(df_courses);
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select count(*)
+from df_courses as t1
+join df_student_course_attendance as t2 on t1.course_id = t2.course_id
+where t2.student_id = 171`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.course_id as course_id,
+          lhs.course_name as course_name,
+          lhs.course_description as course_description,
+          lhs.other_details as other_details,
+          lhs.student_id as student_id,
+          lhs.date_of_attendance as date_of_attendance,
+          lhs.n as n
+   from
+     (select lhs.course_id as course_id,
+             lhs.course_name as course_name,
+             lhs.course_description as course_description,
+             lhs.other_details as other_details,
+             lhs.student_id as student_id,
+             lhs.date_of_attendance as date_of_attendance,
+             rhs.n as n
+      from
+        (select lhs.course_id as course_id,
+                lhs.course_name as course_name,
+                lhs.course_description as course_description,
+                lhs.other_details as other_details,
+                rhs.student_id as student_id,
+                rhs.date_of_attendance as date_of_attendance
+         from df_courses as lhs
+         inner join df_student_course_attendance as rhs on (lhs.course_id = rhs.course_id)) as lhs
+      inner join
+        (select course_description,
+                other_details,
+                count(*) as n
+         from df_courses df_courses
+         group by course_description,
+                  other_details) as rhs on (lhs.course_description = rhs.course_description
+                                            and lhs.other_details = rhs.other_details)) as lhs
+   inner join
+     (select *
+      from
+        (select course_description,
+                other_details,
+                count(*) as n
+         from df_courses df_courses
+         group by course_description,
+                  other_details)
+      where (n < 171.0)) as rhs on (lhs.course_description = rhs.course_description
+                                    and lhs.other_details = rhs.other_details
+                                    and lhs.n = rhs.n))`;
+
+verify q1 q2;

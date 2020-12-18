@@ -1,0 +1,26 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+
+table df_dorm(df_dorm);
+
+query q1
+`select dorm_name,
+       gender
+from df_dorm df_dorm
+where student_capacity > 300
+  or student_capacity < 100`;
+
+query q2
+`select t1.dorm_name,t1.gender
+ from
+  (select input.dormid, input.dorm_name, input.student_capacity, input.gender, t2.dormid as dormid1, t2.dorm_name as dorm_name1, t2.student_capacity as student_capacity1, t2.gender as gender1
+  from (select *
+       from
+        input
+       where input.student_capacity > 300.0
+         or input.dormid > input.student_capacity) join 
+      (select *
+         from
+          input
+         where input.dormid = 100.0) as t2) as t1`;
+
+verify q1 q2;

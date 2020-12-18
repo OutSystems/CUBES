@@ -1,0 +1,45 @@
+schema df_people(people_id:int, name:str, height:str, weight:str, date_of_birth:str);
+
+table df_people(df_people);
+
+query q1
+`select weight
+from df_people df_people
+
+limit 1`;
+
+query q2
+`select distinct weight
+from
+  (select lhs.people_id as people_id,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.weight as weight,
+          lhs.date_of_birth as date_of_birth,
+          lhs.minheight as minheight,
+          rhs.people_id as people_id.other,
+          rhs.name as name.other,
+          rhs.height as height.other,
+          rhs.weight as weight.other,
+          rhs.date_of_birth as date_of_birth.other,
+          rhs.minheight as minheight.other
+   from
+     (select people_id,
+             name,
+             height,
+             weight,
+             date_of_birth,
+             min(height) over () as minheight
+      from df_people df_people) as lhs
+   cross join
+     (select people_id,
+             name,
+             height,
+             weight,
+             date_of_birth,
+             min(height) over () as minheight
+      from df_people df_people) as rhs)
+where (height <= minheight
+       and height.other > minheight.other)`;
+
+verify q1 q2;

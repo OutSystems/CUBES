@@ -1,0 +1,36 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+
+table df_perpetrator(df_perpetrator);
+
+query q1
+`select country,
+       count(*)
+from df_perpetrator df_perpetrator
+group by country
+
+limit 1`;
+
+query q2
+`select country,
+       perpetrator_id as count...
+from
+  (select lhs.perpetrator_id as perpetrator_id,
+          lhs.people_id as people_id,
+          lhs.date as date,
+          lhs.year as year,
+          lhs.location as location,
+          lhs.country as country,
+          lhs.killed as killed,
+          lhs.injured as injured,
+          rhs.country as country.other,
+          rhs.n as n
+   from df_perpetrator as lhs
+   inner join
+     (select country,
+             injured,
+             count(*) as n
+      from df_perpetrator df_perpetrator
+      group by country,
+               injured) as rhs on (lhs.people_id = rhs.injured))`;
+
+verify q1 q2;

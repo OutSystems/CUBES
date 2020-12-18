@@ -1,0 +1,45 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_manufacturers(df_manufacturers);
+table df_products(df_products);
+
+query q1
+`select count(distinct t1.name),
+       t2.headquarter
+from df_products as t1
+join df_manufacturers as t2 on t1.manufacturer = t2.code
+group by t2.headquarter`;
+
+query q2
+`select n as count.distinct.t1.name.,
+       headquarter
+from
+  (select headquarter,
+          manufacturer,
+          count(*) as n
+   from
+     (select code,
+             name,
+             headquarter,
+             founder,
+             revenue,
+             code.other,
+             name.other,
+             price,
+             code as manufacturer
+      from
+        (select lhs.code as code,
+                lhs.name as name,
+                lhs.headquarter as headquarter,
+                lhs.founder as founder,
+                lhs.revenue as revenue,
+                rhs.code as code.other,
+                rhs.name as name.other,
+                rhs.price as price
+         from df_manufacturers as lhs
+         inner join df_products as rhs on (lhs.code = rhs.manufacturer)))
+   group by headquarter,
+            manufacturer)`;
+
+verify q1 q2;

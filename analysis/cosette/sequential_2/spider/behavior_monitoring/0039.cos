@@ -1,0 +1,25 @@
+schema df_teachers(teacher_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, gender:int, cell_mobile_number:str, email_address:str, other_details:str);
+schema df_detention(detention_id:int, detention_type_code:str, teacher_id:int, datetime_detention_start:str, datetime_detention_end:str, detention_summary:str, other_details:str);
+
+table df_teachers(df_teachers);
+table df_detention(df_detention);
+
+query q1
+`select last_name
+from df_teachers df_teachers
+except
+select t1.last_name
+from df_teachers as t1
+join df_detention as t2 on t1.teacher_id = t2.teacher_id`;
+
+query q2
+`select distinct last_name
+from
+  (select *
+   from df_teachers as lhs
+   where not exists
+       (select 1
+        from df_detention as rhs
+        where (lhs.teacher_id = rhs.teacher_id) ))`;
+
+verify q1 q2;

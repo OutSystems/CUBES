@@ -1,0 +1,28 @@
+schema df_body_builder(body_builder_id:int, people_id:int, snatch:str, clean_jerk:str, total:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, birth_date:str, birth_place:str);
+
+table df_body_builder(df_body_builder);
+table df_people(df_people);
+
+query q1
+`select t2.name
+from df_body_builder as t1
+join df_people as t2 on t1.people_id = t2.people_id`;
+
+query q2
+`select name
+from
+  (select lhs.body_builder_id as body_builder_id,
+          lhs.people_id as people_id,
+          lhs.snatch as snatch,
+          lhs.clean_jerk as clean_jerk,
+          lhs.total as total,
+          rhs.name as name,
+          rhs.height as height,
+          rhs.weight as weight,
+          rhs.birth_date as birth_date,
+          rhs.birth_place as birth_place
+   from df_body_builder as lhs
+   inner join df_people as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

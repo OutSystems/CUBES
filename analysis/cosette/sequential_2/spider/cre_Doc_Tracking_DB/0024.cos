@@ -1,0 +1,37 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, gender_mfu:str, date_of_birth:str, other_details:str);
+
+table df_employees(df_employees);
+
+query q1
+`select role_code
+from df_employees df_employees
+group by role_code
+
+limit 1`;
+
+query q2
+`select role_code
+from
+  (select lhs.gender_mfu as gender_mfu,
+          lhs.other_details as other_details,
+          lhs.n as n,
+          rhs.other_details as other_details.other,
+          rhs.role_code as role_code,
+          rhs.n as n.other
+   from
+     (select gender_mfu,
+             other_details,
+             count(*) as n
+      from df_employees df_employees
+      group by gender_mfu,
+               other_details) as lhs
+   cross join
+     (select other_details,
+             role_code,
+             count(*) as n
+      from df_employees df_employees
+      group by other_details,
+               role_code) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

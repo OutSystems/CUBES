@@ -1,0 +1,24 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+
+table df_driver(df_driver);
+
+query q1
+`select home_city
+from df_driver df_driver
+except
+select home_city
+from df_driver df_driver
+where age > 40`;
+
+query q2
+`select t1.home_city
+ from
+  (select
+      t2.party, t2.home_city, max(t2.age) as max_age
+    from
+      input as t2
+    group by
+      t2.party, t2.home_city) as t1
+ where t1.max_age < 40.0`;
+
+verify q1 q2;

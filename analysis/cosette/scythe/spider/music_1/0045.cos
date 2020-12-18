@@ -1,0 +1,28 @@
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_song(df_song);
+
+query q1
+`select f_id
+from df_song df_song
+where resolution >
+    (select avg(resolution)
+     from df_song df_song
+     where genre_is = "modern")`;
+
+query q2
+`select t2.min_f_id
+ from
+  (select t4.country, t4.languages, t4.min_f_id, t1.song_name, t1.artist_name, t1.country as country1, t1.f_id, t1.genre_is, t1.rating, t1.languages as languages1, t1.releasedate, t1.resolution
+  from (select
+          t3.country, t3.languages, min(t3.f_id) as min_f_id
+        from
+          input as t3
+        group by
+          t3.country, t3.languages) as t4 join 
+      (select *
+         from
+          input
+         where input.genre_is = 'modern') as t1) as t2`;
+
+verify q1 q2;

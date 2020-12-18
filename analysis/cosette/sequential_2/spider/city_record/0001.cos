@@ -1,0 +1,45 @@
+schema df_hosting_city(year:int, match_id:int, host_city:int);
+
+table df_hosting_city(df_hosting_city);
+
+query q1
+`select host_city
+from df_hosting_city df_hosting_city
+
+limit 1`;
+
+query q2
+`select host_city.other as host_city
+from
+  (select *
+   from
+     (select lhs.year as year,
+             lhs.match_id as match_id,
+             lhs.host_city as host_city,
+             lhs.year.other as year.other,
+             lhs.match_id.other as match_id.other,
+             rhs.match_id as match_id.other.other,
+             rhs.host_city as host_city.other
+      from
+        (select year,
+                match_id,
+                match_id as host_city,
+                year.other,
+                match_id.other
+         from
+           (select lhs.year as year,
+                   lhs.match_id as match_id,
+                   lhs.host_city as host_city,
+                   rhs.year as year.other,
+                   rhs.match_id as match_id.other
+            from df_hosting_city as lhs
+            inner join df_hosting_city as rhs on (lhs.match_id = rhs.host_city))) as lhs
+      inner join df_hosting_city as rhs on (lhs.year = rhs.year)) as lhs
+   where not exists
+       (select 1
+        from df_hosting_city as rhs
+        where (lhs.year = rhs.year
+               and lhs.match_id = rhs.match_id
+               and lhs.host_city = rhs.host_city) ))`;
+
+verify q1 q2;

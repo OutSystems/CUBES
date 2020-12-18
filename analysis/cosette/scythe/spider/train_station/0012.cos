@@ -1,0 +1,19 @@
+schema df_train(train_id:int, name:str, time:str, service:str);
+
+table df_train(df_train);
+
+query q1
+`select count(*)
+from df_train df_train`;
+
+query q2
+`select t2.count_distinct_time
+ from
+  (select
+      t1.service, count_distinct(t1.time) as count_distinct_time
+    from
+      input as t1
+    group by
+      t1.service) as t2`;
+
+verify q1 q2;

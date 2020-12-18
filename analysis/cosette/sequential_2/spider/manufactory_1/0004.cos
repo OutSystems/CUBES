@@ -1,0 +1,32 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+
+table df_manufacturers(df_manufacturers);
+
+query q1
+`select avg(revenue),
+       max(revenue),
+       sum(revenue)
+from df_manufacturers df_manufacturers`;
+
+query q2
+`select distinct meanrevenue as avg.revenue.,
+                maxrevenue as max.revenue.,
+                sum(revenue) over () as sum.revenue.
+from
+  (select code,
+          name,
+          headquarter,
+          founder,
+          revenue,
+          maxrevenue,
+          avg(revenue) over () as meanrevenue
+   from
+     (select code,
+             name,
+             headquarter,
+             founder,
+             revenue,
+             max(revenue) over () as maxrevenue
+      from df_manufacturers df_manufacturers))`;
+
+verify q1 q2;

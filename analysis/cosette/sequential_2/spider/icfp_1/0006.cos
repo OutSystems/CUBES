@@ -1,0 +1,57 @@
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_authors(df_authors);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select count(*)
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_papers as t3 on t2.paperid = t3.paperid
+where t1.fname = "atsushi"
+  and t1.lname = "ohori"`;
+
+query q2
+`select distinct n as count...
+from
+  (select lhs.paperid as paperid,
+          lhs.title as title,
+          lhs.authid as authid,
+          lhs.instid as instid,
+          lhs.authorder as authorder,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          rhs.n as n
+   from
+     (select lhs.paperid as paperid,
+             lhs.title as title,
+             lhs.authid as authid,
+             lhs.instid as instid,
+             lhs.authorder as authorder,
+             rhs.lname as lname,
+             rhs.fname as fname
+      from
+        (select lhs.paperid as paperid,
+                lhs.title as title,
+                rhs.authid as authid,
+                rhs.instid as instid,
+                rhs.authorder as authorder
+         from df_papers as lhs
+         inner join df_authorship as rhs on (lhs.paperid = rhs.paperid)) as lhs
+      inner join
+        (select *
+         from df_authors df_authors
+         where (fname = 'atsushi'
+                or lname != 'ohori')) as rhs on (lhs.authid = rhs.authid)) as lhs
+   inner join
+     (select fname,
+             count(*) as n
+      from df_authors df_authors
+      where (fname = 'atsushi'
+             or lname != 'ohori')
+      group by fname) as rhs on (lhs.fname = rhs.fname))`;
+
+verify q1 q2;

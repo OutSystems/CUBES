@@ -1,0 +1,53 @@
+schema df_competition(competition_id:int, year:str, competition_type:str, country:str);
+
+table df_competition(df_competition);
+
+query q1
+`select country
+from df_competition df_competition
+where competition_type = 'friendly' intersect
+  select country
+  from df_competition df_competition where competition_type = 'tournament'`;
+
+query q2
+`select distinct country
+from
+  (select lhs.competition_id as competition_id,
+          lhs.year as year,
+          lhs.competition_type as competition_type,
+          lhs.country as country,
+          lhs.competition_id.other as competition_id.other,
+          lhs.competition_type.other as competition_type.other,
+          rhs.competition_id as competition_id.other.other,
+          rhs.year as year.other,
+          rhs.competition_type as competition_type.other.other,
+          rhs.country as country.other,
+          rhs.competition_id.other as competition_id.other.other.other,
+          rhs.competition_type.other as competition_type.other.other.other
+   from
+     (select *
+      from
+        (select lhs.competition_id as competition_id,
+                lhs.year as year,
+                lhs.competition_type as competition_type,
+                lhs.country as country,
+                rhs.competition_id as competition_id.other,
+                rhs.competition_type as competition_type.other
+         from df_competition as lhs
+         inner join df_competition as rhs on (lhs.country = rhs.country
+                                                  and lhs.year = rhs.year))
+      where (competition_type != 'friendly'
+             or competition_type = 'tournament')) as lhs
+   cross join
+     (select lhs.competition_id as competition_id,
+             lhs.year as year,
+             lhs.competition_type as competition_type,
+             lhs.country as country,
+             rhs.competition_id as competition_id.other,
+             rhs.competition_type as competition_type.other
+      from df_competition as lhs
+      inner join df_competition as rhs on (lhs.country = rhs.country
+                                           and lhs.year = rhs.year)) as rhs)
+where (competition_type != competition_type.other)`;
+
+verify q1 q2;

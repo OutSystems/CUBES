@@ -1,0 +1,28 @@
+schema df_customers(customer_id:int, customer_name:str, customer_details:str);
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_customers(df_customers);
+table df_orders(df_orders);
+
+query q1
+`select distinct t1.customer_name
+from df_customers as t1
+join df_orders as t2 on t1.customer_id = t2.customer_id
+where t2.order_status = "packing"`;
+
+query q2
+`joining, by = "customer_id"
+select distinct customer_name
+from
+  (select order_id,
+          customer_id,
+          order_status,
+          date_order_placed,
+          order_details,
+          customer_name,
+          customer_details
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.customer_id = rhs.customer_id))
+where (order_status = 'packing')`;
+
+verify q1 q2;

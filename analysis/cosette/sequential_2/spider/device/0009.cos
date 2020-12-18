@@ -1,0 +1,24 @@
+schema df_shop(shop_id:int, shop_name:str, location:str, open_date:str, open_year:int);
+
+table df_shop(df_shop);
+
+query q1
+`select shop_name
+from df_shop df_shop
+
+limit 1`;
+
+query q2
+`select shop_name
+from
+  (select lhs.open_year as open_year,
+          rhs.shop_id as shop_id,
+          rhs.shop_name as shop_name,
+          rhs.location as location,
+          rhs.open_date as open_date
+   from
+     (select max(open_year) as open_year
+      from df_shop df_shop) as lhs
+   inner join df_shop as rhs on (lhs.open_year = rhs.open_year))`;
+
+verify q1 q2;

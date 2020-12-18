@@ -1,0 +1,34 @@
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_election(df_election);
+
+query q1
+`select *
+from df_election df_election`;
+
+query q2
+`select election_id,
+       counties_represented,
+       district,
+       delegate,
+       party,
+       first_elected,
+       committee
+from
+  (select lhs.election_id as election_id,
+          lhs.counties_represented as counties_represented,
+          lhs.district as district,
+          lhs.delegate as delegate,
+          lhs.party as party,
+          lhs.first_elected as first_elected,
+          lhs.committee as committee,
+          rhs.election_id as election_id.other,
+          rhs.counties_represented as counties_represented.other,
+          rhs.district as district.other,
+          rhs.party as party.other,
+          rhs.committee as committee.other
+   from df_election as lhs
+   inner join df_election as rhs on (lhs.delegate = rhs.delegate
+                                     and lhs.first_elected = rhs.first_elected))`;
+
+verify q1 q2;

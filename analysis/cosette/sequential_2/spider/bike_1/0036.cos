@@ -1,0 +1,24 @@
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_trip(df_trip);
+
+query q1
+`select start_station_id,
+       start_station_name
+from df_trip df_trip
+group by start_station_name
+having count(*) >= 200`;
+
+query q2
+`select start_station_id,
+       start_station_name
+from
+  (select start_station_id,
+          start_station_name,
+          count(*) as n
+   from df_trip df_trip
+   group by start_station_id,
+            start_station_name)
+where (n >= 200.0)`;
+
+verify q1 q2;

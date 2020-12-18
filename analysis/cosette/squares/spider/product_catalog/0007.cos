@@ -1,0 +1,32 @@
+schema df_catalogs(catalog_id:int, catalog_name:str, catalog_publisher:str, date_of_publication:str, date_of_latest_revision:str);
+schema df_catalog_structure(catalog_level_number:int, catalog_id:int, catalog_level_name:str);
+
+table df_catalogs(df_catalogs);
+table df_catalog_structure(df_catalog_structure);
+
+query q1
+`select t1.catalog_name,
+       t1.date_of_publication
+from df_catalogs as t1
+join df_catalog_structure as t2 on t1.catalog_id = t2.catalog_id
+where catalog_level_number > 5`;
+
+query q2
+`joining, by = "catalog_id"
+select distinct catalog_name,
+                date_of_publication
+from
+  (select catalog_id,
+          catalog_name,
+          catalog_publisher,
+          date_of_publication,
+          date_of_latest_revision,
+          catalog_level_number,
+          catalog_level_name
+   from input0 as lhs
+   inner join
+     (select *
+      from input1
+      where (catalog_level_number >= 5.0)) as rhs on (lhs.catalog_id = rhs.catalog_id))`;
+
+verify q1 q2;

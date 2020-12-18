@@ -1,0 +1,46 @@
+schema df_degrees(year:int, campus:int, degrees:int);
+
+table df_degrees(df_degrees);
+
+query q1
+`select year
+from df_degrees df_degrees
+group by year
+
+limit 1`;
+
+query q2
+`select year
+from
+  (select degrees,
+          year,
+          sum(degrees) as sumdegrees
+   from
+     (select *
+      from
+        (select lhs.year as year,
+                lhs.campus as campus,
+                lhs.degrees as degrees,
+                lhs.maxdegrees as maxdegrees,
+                rhs.year as year.other,
+                rhs.campus as campus.other,
+                rhs.degrees as degrees.other,
+                rhs.maxdegrees as maxdegrees.other
+         from
+           (select year,
+                   campus,
+                   degrees,
+                   max(degrees) over () as maxdegrees
+            from df_degrees df_degrees) as lhs
+         cross join
+           (select year,
+                   campus,
+                   degrees,
+                   max(degrees) over () as maxdegrees
+            from df_degrees df_degrees) as rhs)
+      where (degrees >= maxdegrees
+             and maxdegrees >= maxdegrees.other))
+   group by degrees,
+            year)`;
+
+verify q1 q2;

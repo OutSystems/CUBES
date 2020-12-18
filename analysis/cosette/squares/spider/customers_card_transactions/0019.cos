@@ -1,0 +1,38 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_last_name:str, customer_address:str, customer_phone:str, customer_email:str, other_customer_details:str);
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers(df_customers);
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select t2.customer_first_name,
+       t2.customer_last_name,
+       t2.customer_phone
+from df_customers_cards as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t1.card_number = "4560596484842"`;
+
+query q2
+`joining, by = "customer_id"
+select distinct customer_first_name,
+                customer_last_name,
+                customer_phone
+from
+  (select customer_id,
+          customer_first_name,
+          customer_last_name,
+          customer_address,
+          customer_phone,
+          customer_email,
+          other_customer_details,
+          card_id,
+          card_type_code,
+          card_number,
+          date_valid_from,
+          date_valid_to,
+          other_card_details
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.customer_id = rhs.customer_id))
+where (card_number = 4560596484842.0)`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_school_bus(df_school_bus);
+
+query q1
+`select max(years_working),
+       min(years_working),
+       avg(years_working)
+from df_school_bus df_school_bus`;
+
+query q2
+`select distinct maxyears_working as max.years_working.,
+                minyears_working as min.years_working.,
+                avg(years_working) over () as avg.years_working.
+from
+  (select school_id,
+          driver_id,
+          years_working,
+          if_full_time,
+          maxyears_working,
+          min(years_working) over () as minyears_working
+   from
+     (select school_id,
+             driver_id,
+             years_working,
+             if_full_time,
+             max(years_working) over () as maxyears_working
+      from df_school_bus df_school_bus))`;
+
+verify q1 q2;

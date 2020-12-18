@@ -1,0 +1,44 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_employees(df_employees);
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select df_employees.employee_name,
+       count(*)
+from df_employees df_employees
+join df_circulation_history on df_circulation_history.employee_id = df_employees.employee_id
+group by df_circulation_history.document_id,
+         df_circulation_history.draft_number,
+         df_circulation_history.copy_number
+
+limit 1`;
+
+query q2
+`select employee_name,
+       document_id as count...
+from
+  (select document_id,
+          draft_number,
+          copy_number,
+          employee_id,
+          employee_name,
+          employee_id as n
+   from
+     (select lhs.document_id as document_id,
+             lhs.draft_number as draft_number,
+             lhs.copy_number as copy_number,
+             lhs.employee_id as employee_id,
+             rhs.employee_name as employee_name
+      from df_circulation_history as lhs
+      inner join
+        (select employee_id,
+                employee_name,
+                count(*) as n
+         from df_employees df_employees
+         group by employee_id,
+                  employee_name) as rhs on (lhs.employee_id = rhs.n
+                                            and lhs.document_id = rhs.employee_id)))`;
+
+verify q1 q2;

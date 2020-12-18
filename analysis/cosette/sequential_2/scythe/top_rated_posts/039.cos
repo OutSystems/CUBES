@@ -1,0 +1,35 @@
+schema df_i039(c:str);
+
+table df_i039(df_i039);
+
+query q1
+`select t2.c
+from (select max(cnt)
+ from (select c, count(*) cnt
+   from t
+   group by c) t3) t1
+join (select c, count(*) cnt
+      from t
+      group by c) t2
+on t1.maxcnt = t2.cnt`;
+
+query q2
+`select distinct c.other as c
+from
+  (select lhs.c as c,
+          lhs.n as n,
+          rhs.c as c.other,
+          rhs.n as n.other
+   from
+     (select c,
+             count(*) as n
+      from df_i039 df_i039
+      group by c) as lhs
+   cross join
+     (select c,
+             count(*) as n
+      from df_i039 df_i039
+      group by c) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

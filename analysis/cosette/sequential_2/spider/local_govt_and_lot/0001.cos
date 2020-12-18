@@ -1,0 +1,29 @@
+schema df_properties(property_id:int, property_type_code:str, property_address:str, other_details:str);
+schema df_residents(resident_id:int, property_id:int, date_moved_in:str, date_moved_out:str, other_details:str);
+
+table df_properties(df_properties);
+table df_residents(df_residents);
+
+query q1
+`select t1.property_id,
+       count(*)
+from df_properties as t1
+join df_residents as t2 on t1.property_id = t2.property_id
+group by t1.property_id`;
+
+query q2
+`select property_id,
+       n as count...
+from
+  (select property_id,
+          count(*) as n
+   from
+     (select *
+      from df_residents as lhs
+      where not exists
+          (select 1
+           from df_properties as rhs
+           where (lhs.other_details = rhs.other_details) ))
+   group by property_id)`;
+
+verify q1 q2;

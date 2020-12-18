@@ -1,0 +1,39 @@
+schema df_12_1(S_key:str, age:int, level:str);
+
+table df_12_1(df_12_1);
+
+query q1
+`select s.age, s.level
+from df_12_1 s
+group by s.age, s.level,
+having s.level in (select s1.level
+from df_12_1 s1
+where s1.age = s.age
+group by s1.level, s1.age
+having count (*) >= all (select count (*)
+from df_12_1 s2
+where s1.age = s2.age
+group by s2.level, s2.age))`;
+
+query q2
+`select age,
+       level
+from
+  (select age,
+          level,
+          n
+   from
+     (select age,
+             level,
+             n,
+             max(n) over (partition by age) as zzz2
+      from
+        (select age,
+                level,
+                count(*) as n
+         from input0
+         group by age,
+                  level))
+   where (n = zzz2))`;
+
+verify q1 q2;

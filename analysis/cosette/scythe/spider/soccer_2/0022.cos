@@ -1,0 +1,21 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select count(*),
+       cname
+from df_tryout df_tryout
+group by cname`;
+
+query q2
+`select t2.count_distinct_pid,t2.cname
+ from
+  (select
+      t1.cname, count_distinct(t1.pid) as count_distinct_pid
+    from
+      input as t1
+    group by
+      t1.cname) as t2`;
+
+verify q1 q2;

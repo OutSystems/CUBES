@@ -1,0 +1,38 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select avg(enrollment),
+       max(enrollment),
+       min(enrollment)
+from df_school df_school`;
+
+query q2
+`select distinct meanenrollment as avg.enrollment.,
+                maxenrollment as max.enrollment.,
+                min(enrollment) over () as min.enrollment.
+from
+  (select school_id,
+          school_name,
+          location,
+          mascot,
+          enrollment,
+          ihsaa_class,
+          ihsaa_football_class,
+          county,
+          maxenrollment,
+          avg(enrollment) over () as meanenrollment
+   from
+     (select school_id,
+             school_name,
+             location,
+             mascot,
+             enrollment,
+             ihsaa_class,
+             ihsaa_football_class,
+             county,
+             max(enrollment) over () as maxenrollment
+      from df_school df_school))`;
+
+verify q1 q2;

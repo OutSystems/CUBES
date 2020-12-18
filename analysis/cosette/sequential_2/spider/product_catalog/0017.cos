@@ -1,0 +1,41 @@
+schema df_attribute_definitions(attribute_id:int, attribute_name:str, attribute_data_type:str);
+schema df_catalog_contents_additional_attributes(catalog_entry_id:int, catalog_level_number:int, attribute_id:int, attribute_value:int);
+
+table df_attribute_definitions(df_attribute_definitions);
+table df_catalog_contents_additional_attributes(df_catalog_contents_additional_attributes);
+
+query q1
+`select t1.attribute_name,
+       t1.attribute_id
+from df_attribute_definitions as t1
+join df_catalog_contents_additional_attributes as t2 on t1.attribute_id = t2.attribute_id
+where t2.attribute_value = 0`;
+
+query q2
+`select attribute_name,
+       attribute_id
+from
+  (select lhs.attribute_id as attribute_id,
+          lhs.attribute_name as attribute_name,
+          lhs.attribute_data_type as attribute_data_type,
+          lhs.catalog_entry_id as catalog_entry_id,
+          lhs.catalog_level_number as catalog_level_number,
+          lhs.attribute_value as attribute_value
+   from
+     (select lhs.attribute_id as attribute_id,
+             lhs.attribute_name as attribute_name,
+             lhs.attribute_data_type as attribute_data_type,
+             rhs.catalog_entry_id as catalog_entry_id,
+             rhs.catalog_level_number as catalog_level_number,
+             rhs.attribute_value as attribute_value
+      from df_attribute_definitions as lhs
+      inner join df_catalog_contents_additional_attributes as rhs on (lhs.attribute_id = rhs.attribute_id)) as lhs
+   inner join
+     (select *
+      from df_catalog_contents_additional_attributes df_catalog_contents_additional_attributes
+      where (attribute_value = 0.0)) as rhs on (lhs.attribute_id = rhs.attribute_id
+                                                and lhs.catalog_entry_id = rhs.catalog_entry_id
+                                                and lhs.catalog_level_number = rhs.catalog_level_number
+                                                and lhs.attribute_value = rhs.attribute_value))`;
+
+verify q1 q2;

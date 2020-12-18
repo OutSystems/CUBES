@@ -1,0 +1,36 @@
+schema df_club(club_id:int, name:str, region:str, start_year:int);
+schema df_player(player_id:int, name:str, position:str, club_id:int, apps:str, tries:str, goals:str, points:str);
+
+table df_club(df_club);
+table df_player(df_player);
+
+query q1
+`select name
+from df_club df_club
+where club_id not in
+    (select club_id
+     from df_player df_player)`;
+
+query q2
+`joining, by = "club_id"
+joining, by = "club_id"
+select name
+from
+  (select club_id,
+          name,
+          region,
+          start_year
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select club_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select club_id
+              from input1) as rhs
+           where (lhs.club_id = rhs.club_id) )) as rhs on (lhs.club_id = rhs.club_id))`;
+
+verify q1 q2;

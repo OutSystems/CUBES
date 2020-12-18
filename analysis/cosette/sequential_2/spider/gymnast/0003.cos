@@ -1,0 +1,30 @@
+schema df_gymnast(gymnast_id:int, floor_exercise_points:str, pommel_horse_points:str, rings_points:str, vault_points:str, parallel_bars_points:str, horizontal_bar_points:str, total_points:str);
+
+table df_gymnast(df_gymnast);
+
+query q1
+`select total_points
+from df_gymnast df_gymnast`;
+
+query q2
+`select total_points
+from
+  (select lhs.gymnast_id as gymnast_id,
+          lhs.floor_exercise_points as floor_exercise_points,
+          lhs.pommel_horse_points as pommel_horse_points,
+          lhs.rings_points as rings_points,
+          lhs.vault_points as vault_points,
+          lhs.parallel_bars_points as parallel_bars_points,
+          lhs.horizontal_bar_points as horizontal_bar_points,
+          lhs.total_points as total_points,
+          rhs.floor_exercise_points as floor_exercise_points.other,
+          rhs.pommel_horse_points as pommel_horse_points.other,
+          rhs.vault_points as vault_points.other,
+          rhs.parallel_bars_points as parallel_bars_points.other,
+          rhs.horizontal_bar_points as horizontal_bar_points.other,
+          rhs.total_points as total_points.other
+   from df_gymnast as lhs
+   inner join df_gymnast as rhs on (lhs.gymnast_id = rhs.gymnast_id
+                                    and lhs.rings_points = rhs.rings_points))`;
+
+verify q1 q2;

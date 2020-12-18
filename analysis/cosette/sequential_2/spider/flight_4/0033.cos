@@ -1,0 +1,36 @@
+schema df_routes(rid:int, dst_apid:int, dst_ap:str, src_apid:int, src_ap:str, alid:str, airline:str, codeshare:str);
+schema df_airlines(alid:int, name:str, iata:str, icao:str, callsign:str, country:str, active:str);
+
+table df_routes(df_routes);
+table df_airlines(df_airlines);
+
+query q1
+`select t1.country,
+       t1.name,
+       count(*)
+from df_airlines as t1
+join df_routes as t2 on t1.alid = t2.alid
+group by t1.country,
+         t1.name`;
+
+query q2
+`select country,
+       name,
+       n as count...
+from
+  (select lhs.alid as alid,
+          lhs.n as n,
+          rhs.name as name,
+          rhs.iata as iata,
+          rhs.icao as icao,
+          rhs.callsign as callsign,
+          rhs.country as country,
+          rhs.active as active
+   from
+     (select alid,
+             count(*) as n
+      from df_routes df_routes
+      group by alid) as lhs
+   inner join df_airlines as rhs on (lhs.alid = rhs.alid))`;
+
+verify q1 q2;

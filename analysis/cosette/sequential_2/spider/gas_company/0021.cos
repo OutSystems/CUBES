@@ -1,0 +1,26 @@
+schema df_gas_station(station_id:int, open_year:int, location:str, manager_name:str, vice_manager_name:str, representative_name:str);
+
+table df_gas_station(df_gas_station);
+
+query q1
+`select location
+from df_gas_station df_gas_station`;
+
+query q2
+`select location
+from
+  (select lhs.station_id as station_id,
+          lhs.open_year as open_year,
+          lhs.location as location,
+          lhs.manager_name as manager_name,
+          lhs.vice_manager_name as vice_manager_name,
+          lhs.representative_name as representative_name,
+          rhs.open_year as open_year.other,
+          rhs.location as location.other,
+          rhs.vice_manager_name as vice_manager_name.other,
+          rhs.representative_name as representative_name.other
+   from df_gas_station as lhs
+   inner join df_gas_station as rhs on (lhs.manager_name = rhs.manager_name
+                                        and lhs.station_id = rhs.station_id))`;
+
+verify q1 q2;

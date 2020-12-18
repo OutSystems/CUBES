@@ -1,0 +1,26 @@
+schema df_i010_1(id:str, name:str, phone_number:str);
+schema df_i010_2(id:str, date:str, phone_number:str);
+
+table df_i010_1(df_i010_1);
+table df_i010_2(df_i010_2);
+
+query q1
+`select *
+  from   call
+  where  not exists
+    (select *
+     from   phone_book
+     where  phone_book.phone_number = call.phone_number)`;
+
+query q2
+`select id, date, phone_number
+from
+  (select *
+   from df_i010_2 as lhs
+   where not exists
+       (select 1
+        from df_i010_1 as rhs
+        where (lhs.id = rhs.id
+               and lhs.phone_number = rhs.phone_number) ))`;
+
+verify q1 q2;

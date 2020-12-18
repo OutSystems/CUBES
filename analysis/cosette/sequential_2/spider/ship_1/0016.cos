@@ -1,0 +1,40 @@
+schema df_ship(ship_id:int, name:str, type:str, built_year:str, class:str, flag:str);
+
+table df_ship(df_ship);
+
+query q1
+`select flag
+from df_ship df_ship
+group by flag
+
+limit 1`;
+
+query q2
+`select flag
+from
+  (select flag,
+          ship_id,
+          ship_id as n,
+          flag.other
+   from
+     (select lhs.flag as flag,
+             lhs.ship_id as ship_id,
+             lhs.n as n,
+             rhs.flag as flag.other
+      from
+        (select flag,
+                ship_id,
+                count(*) as n
+         from df_ship df_ship
+         group by flag,
+                  ship_id) as lhs
+      inner join
+        (select flag,
+                ship_id,
+                count(*) as n
+         from df_ship df_ship
+         group by flag,
+                  ship_id) as rhs on (lhs.ship_id = rhs.n
+                                      and lhs.n = rhs.ship_id)))`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_addresses(address_id:int, address_details:str);
+schema df_documents_mailed(document_id:int, mailed_to_address_id:int, mailing_date:str);
+
+table df_addresses(df_addresses);
+table df_documents_mailed(df_documents_mailed);
+
+query q1
+`select df_addresses.address_details
+from df_addresses df_addresses
+join df_documents_mailed on df_documents_mailed.mailed_to_address_id = df_addresses.address_id
+where document_id = 4`;
+
+query q2
+`select address_details
+from
+  (select address_id,
+          address_details,
+          document_id,
+          mailing_date,
+          address_id as mailed_to_address_id
+   from
+     (select lhs.address_id as address_id,
+             lhs.address_details as address_details,
+             rhs.document_id as document_id,
+             rhs.mailing_date as mailing_date
+      from df_addresses as lhs
+      inner join df_documents_mailed as rhs on (lhs.address_id = rhs.mailed_to_address_id)))
+where (document_id = 4.0)`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+
+table df_instructor(df_instructor);
+
+query q1
+`select name,
+       salary
+from df_instructor df_instructor
+where salary <
+    (select avg(salary)
+     from df_instructor df_instructor
+     where dept_name = 'physics')`;
+
+query q2
+`select t1.name,t1.salary
+ from
+  (select t3.dept_name, t3.min_salary, t2.id, t2.name, t2.dept_name as dept_name1, t2.salary
+  from (select
+          t4.dept_name, min(t4.salary) as min_salary
+        from
+          (select *
+             from
+              input
+             where input.dept_name = 'physics') as t4
+        group by
+          t4.dept_name) as t3 join 
+      input as t2) as t1
+ where t1.min_salary >= t1.salary`;
+
+verify q1 q2;

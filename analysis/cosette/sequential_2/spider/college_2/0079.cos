@@ -1,0 +1,26 @@
+schema df_section(course_id:int, sec_id:int, semester:str, year:int, building:str, room_number:int, time_slot_id:str);
+
+table df_section(df_section);
+
+query q1
+`select course_id
+from df_section df_section
+where semester = 'fall'
+  and year = 2009
+except
+select course_id
+from df_section df_section
+where semester = 'spring'
+  and year = 2010`;
+
+query q2
+`select course_id
+from
+  (select *
+   from df_section df_section
+   where (semester = 'fall'
+          and year = 2009.0))
+where (semester != 'spring'
+       or year > 2010.0)`;
+
+verify q1 q2;

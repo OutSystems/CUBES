@@ -1,0 +1,60 @@
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_enroll(df_enroll);
+table df_student(df_student);
+
+query q1
+`select t1.stu_fname,
+       t1.stu_lname
+from df_student as t1
+join df_enroll as t2 on t1.stu_num = t2.stu_num
+where t2.enroll_grade = 'c'
+  or t2.enroll_grade = 'a'`;
+
+query q2
+`joining, by = "stu_num"
+joining, by = c("class_code", "stu_num", "enroll_grade")
+select stu_fname,
+       stu_lname
+from
+  (select class_code,
+          stu_num,
+          enroll_grade,
+          stu_lname,
+          stu_fname,
+          stu_init,
+          stu_dob,
+          stu_hrs,
+          stu_class,
+          stu_gpa,
+          stu_transfer,
+          dept_code,
+          stu_phone,
+          prof_num
+   from
+     (select class_code,
+             stu_num,
+             enroll_grade,
+             stu_lname,
+             stu_fname,
+             stu_init,
+             stu_dob,
+             stu_hrs,
+             stu_class,
+             stu_gpa,
+             stu_transfer,
+             dept_code,
+             stu_phone,
+             prof_num
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.stu_num = rhs.stu_num)) as lhs
+   inner join
+     (select *
+      from input0
+      where (enroll_grade = 'a'
+             or enroll_grade = 'c')) as rhs on (lhs.class_code = rhs.class_code
+                                                    and lhs.stu_num = rhs.stu_num
+                                                    and lhs.enroll_grade = rhs.enroll_grade))`;
+
+verify q1 q2;

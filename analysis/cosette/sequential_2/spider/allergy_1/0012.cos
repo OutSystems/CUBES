@@ -1,0 +1,32 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_student(df_student);
+
+query q1
+`select fname,
+       lname
+from df_student df_student`;
+
+query q2
+`select distinct fname,
+                lname
+from
+  (select lhs.stuid as stuid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.age as age,
+          lhs.sex as sex,
+          lhs.major as major,
+          lhs.advisor as advisor,
+          lhs.city_code as city_code,
+          rhs.stuid as stuid.other,
+          rhs.lname as lname.other,
+          rhs.fname as fname.other,
+          rhs.age as age.other,
+          rhs.sex as sex.other,
+          rhs.major as major.other,
+          rhs.city_code as city_code.other
+   from df_student as lhs
+   inner join df_student as rhs on (lhs.advisor = rhs.advisor))`;
+
+verify q1 q2;

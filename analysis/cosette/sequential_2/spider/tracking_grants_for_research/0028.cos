@@ -1,0 +1,23 @@
+schema df_project_outcomes(project_id:int, outcome_code:str, outcome_details:str);
+
+table df_project_outcomes(df_project_outcomes);
+
+query q1
+`select count(*)
+from df_project_outcomes df_project_outcomes
+where outcome_code = 'patent'`;
+
+query q2
+`select n as count...
+from
+  (select outcome_code,
+          outcome_details,
+          count(*) as n
+   from
+     (select *
+      from df_project_outcomes df_project_outcomes
+      where (outcome_code = 'patent'))
+   group by outcome_code,
+            outcome_details)`;
+
+verify q1 q2;

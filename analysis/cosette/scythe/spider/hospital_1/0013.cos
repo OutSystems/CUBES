@@ -1,0 +1,29 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+schema df_stay(stayid:int, patient:int, room:int, staystart:str, stayend:str);
+
+table df_patient(df_patient);
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+table df_stay(df_stay);
+
+query q1
+`select t4.name
+from df_stay as t1
+join df_patient as t2 on t1.df_patient = t2.ssn
+join df_prescribes as t3 on t3.df_patient = t2.ssn
+join df_medication as t4 on t3.df_medication = t4.code
+where room = 111`;
+
+query q2
+`select t1.first_name
+ from
+  (select
+      t2.description, first(t2.name) as first_name
+    from
+      input0 as t2
+    group by
+      t2.description) as t1`;
+
+verify q1 q2;

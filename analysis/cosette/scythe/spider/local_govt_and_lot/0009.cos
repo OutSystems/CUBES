@@ -1,0 +1,30 @@
+schema df_things(thing_id:int, organization_id:int, type_of_thing_code:str, service_type_code:str, service_details:str);
+schema df_timed_status_of_things(thing_id:int, date_and_date:str, status_of_thing_code:str);
+
+table df_things(df_things);
+table df_timed_status_of_things(df_timed_status_of_things);
+
+query q1
+`select distinct t2.thing_id,
+                t2.type_of_thing_code
+from df_timed_status_of_things as t1
+join df_things as t2 on t1.thing_id = t2.thing_id
+where t1.status_of_thing_code = 'close'
+  or t1.date_and_date < '2017-06-19 02:59:21'`;
+
+query q2
+`select t3.thing_id,t3.type_of_thing_code
+ from
+  (select t1.thing_id, t2.thing_id as thing_id1, t2.organization_id, t2.type_of_thing_code, t2.service_type_code, t2.service_details
+  from (select
+          t4.thing_id, from
+          (select *
+             from
+              input0
+             where input0.date_and_date <= mon jun 19 02:59:21 west 2017) as t4
+        group by
+          t4.thing_id) as t1 join 
+      input as t2) as t3
+ where t3.thing_id = t3.thing_id1`;
+
+verify q1 q2;

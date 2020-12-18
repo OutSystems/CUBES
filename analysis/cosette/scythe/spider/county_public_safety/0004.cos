@@ -1,0 +1,21 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+
+table df_county_public_safety(df_county_public_safety);
+
+query q1
+`select min(crime_rate),
+       max(crime_rate)
+from df_county_public_safety df_county_public_safety`;
+
+query q2
+`select t2.crime_rate1,t2.crime_rate
+ from
+  (select input.county_id, input.name, input.population, input.police_officers, input.residents_per_officer, input.case_burden, input.crime_rate, input.police_force, input.location, t1.county_id as county_id1, t1.name as name1, t1.population as population1, t1.police_officers as police_officers1, t1.residents_per_officer as residents_per_officer1, t1.case_burden as case_burden1, t1.crime_rate as crime_rate1, t1.police_force as police_force1, t1.location as location1
+  from (select *
+       from
+        input
+       where input.county_id = 3.0) join 
+      input as t1) as t2
+ where t2.police_officers > t2.case_burden1`;
+
+verify q1 q2;

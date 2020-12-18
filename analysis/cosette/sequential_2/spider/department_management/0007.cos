@@ -1,0 +1,39 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_head(df_head);
+table df_management(df_management);
+
+query q1
+`select distinct t1.creation
+from df_department as t1
+join df_management as t2 on t1.department_id = t2.department_id
+join df_head as t3 on t2.head_id = t3.head_id
+where t3.born_state = 'alabama'`;
+
+query q2
+`select creation
+from
+  (select *
+   from
+     (select lhs.department_id as department_id,
+             lhs.head_id as head_id,
+             lhs.temporary_acting as temporary_acting,
+             rhs.name as name,
+             rhs.creation as creation,
+             rhs.ranking as ranking,
+             rhs.budget_in_billions as budget_in_billions,
+             rhs.num_employees as num_employees
+      from df_management as lhs
+      left join df_department as rhs on (lhs.department_id = rhs.department_id)) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_head df_head
+           where (born_state != 'alabama')) as rhs
+        where (lhs.head_id = rhs.head_id) ))`;
+
+verify q1 q2;

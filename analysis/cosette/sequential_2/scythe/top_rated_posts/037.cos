@@ -1,0 +1,32 @@
+schema df_i037(c1:int, c2:str, c3:str);
+
+table df_i037(df_i037);
+
+query q1
+`select t1.*
+from
+(select c2, min(c1) minc1
+ from c2
+ group by c2) t1
+join t2
+on t1.minc1 = t2.c1`;
+
+query q2
+`select c1,
+       c2,
+       c3
+from
+  (select lhs.c2 as c2,
+          lhs.c1 as c1,
+          rhs.c1 as c1.other,
+          rhs.c2 as c2.other,
+          rhs.c3 as c3
+   from
+     (select c2,
+             min(c1) as c1
+      from df_i037 df_i037
+      group by c2) as lhs
+   cross join df_i037 as rhs)
+where (c1 = c1.other)`;
+
+verify q1 q2;

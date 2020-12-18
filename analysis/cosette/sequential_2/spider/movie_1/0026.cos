@@ -1,0 +1,39 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_reviewer(rid:int, name:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_reviewer(df_reviewer);
+table df_rating(df_rating);
+
+query q1
+`select distinct title
+from df_movie df_movie
+except
+select t2.title
+from df_rating as t1
+join df_movie as t2 on t1.mid = t2.mid
+join df_reviewer as t3 on t1.rid = t3.rid
+where t3.name = 'chris jackson'`;
+
+query q2
+`select title
+from
+  (select *
+   from df_movie as lhs
+   where not exists
+       (select 1
+        from
+          (select lhs.rid as rid,
+                  lhs.name as name,
+                  rhs.mid as mid,
+                  rhs.stars as stars,
+                  rhs.ratingdate as ratingdate
+           from
+             (select *
+              from df_reviewer df_reviewer
+              where (name = 'chris jackson')) as lhs
+           inner join df_rating as rhs on (lhs.rid = rhs.rid)) as rhs
+        where (lhs.mid = rhs.mid) ))`;
+
+verify q1 q2;

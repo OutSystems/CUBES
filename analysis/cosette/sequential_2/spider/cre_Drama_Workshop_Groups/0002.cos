@@ -1,0 +1,32 @@
+schema df_bookings(booking_id:int, customer_id:int, workshop_group_id:int, status_code:str, store_id:int, order_date:str, planned_delivery_date:str, actual_delivery_date:str, other_order_details:str);
+
+table df_bookings(df_bookings);
+
+query q1
+`select order_date
+from df_bookings df_bookings`;
+
+query q2
+`select distinct order_date
+from
+  (select lhs.booking_id as booking_id,
+          lhs.customer_id as customer_id,
+          lhs.workshop_group_id as workshop_group_id,
+          lhs.status_code as status_code,
+          lhs.store_id as store_id,
+          lhs.order_date as order_date,
+          lhs.planned_delivery_date as planned_delivery_date,
+          lhs.actual_delivery_date as actual_delivery_date,
+          lhs.other_order_details as other_order_details,
+          rhs.booking_id as booking_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.workshop_group_id as workshop_group_id.other,
+          rhs.status_code as status_code.other,
+          rhs.order_date as order_date.other,
+          rhs.planned_delivery_date as planned_delivery_date.other,
+          rhs.actual_delivery_date as actual_delivery_date.other,
+          rhs.other_order_details as other_order_details.other
+   from df_bookings as lhs
+   inner join df_bookings as rhs on (lhs.store_id = rhs.store_id))`;
+
+verify q1 q2;

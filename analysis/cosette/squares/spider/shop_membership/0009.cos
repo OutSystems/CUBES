@@ -1,0 +1,31 @@
+schema df_member(member_id:int, card_number:str, name:str, hometown:str, level:int);
+
+table df_member(df_member);
+
+query q1
+`select card_number,
+       name,
+       hometown
+from df_member df_member`;
+
+query q2
+`joining, by = "level"
+select card_number,
+       name,
+       hometown
+from
+  (select level,
+          member_id,
+          card_number,
+          name,
+          hometown
+   from
+     (select level
+      from
+        (select level
+         from input0 intersect select level
+         from input0) intersect select level
+      from input0) as lhs
+   inner join input0 as rhs on (lhs.level = rhs.level))`;
+
+verify q1 q2;

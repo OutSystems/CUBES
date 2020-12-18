@@ -1,0 +1,31 @@
+schema df_customer_contact_channels(customer_id:int, channel_code:str, active_from_date:str, active_to_date:str, contact_number:str);
+
+table df_customer_contact_channels(df_customer_contact_channels);
+
+query q1
+`select channel_code,
+       contact_number
+from df_customer_contact_channels df_customer_contact_channels
+where active_to_date - active_from_date =
+    (select active_to_date - active_from_date
+     from df_customer_contact_channels df_customer_contact_channels
+     
+     limit 1)`;
+
+query q2
+`select t2.channel_code,t2.contact_number
+ from
+  (select t3.customer_id, t3.max_active_from_date, t1.customer_id as customer_id1, t1.channel_code, t1.active_from_date, t1.active_to_date, t1.contact_number
+  from (select
+          t4.customer_id, max(t4.active_from_date) as max_active_from_date
+        from
+          (select *
+             from
+              input
+             where input.customer_id = 9.0) as t4
+        group by
+          t4.customer_id) as t3 join 
+      input as t1) as t2
+ where t2.max_active_from_date > t2.active_from_date`;
+
+verify q1 q2;

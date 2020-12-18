@@ -1,0 +1,26 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select name,
+       openning_year
+from df_cinema df_cinema`;
+
+query q2
+`select name,
+       openning_year
+from
+  (select lhs.cinema_id as cinema_id,
+          lhs.name as name,
+          lhs.openning_year as openning_year,
+          lhs.capacity as capacity,
+          lhs.location as location,
+          rhs.cinema_id as cinema_id.other,
+          rhs.openning_year as openning_year.other,
+          rhs.capacity as capacity.other,
+          rhs.location as location.other
+   from df_cinema as lhs
+   inner join df_cinema as rhs on (lhs.name = rhs.name))`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_customer_contact_channels(customer_id:int, channel_code:str, active_from_date:str, active_to_date:str, contact_number:str);
+
+table df_customer_contact_channels(df_customer_contact_channels);
+
+query q1
+`select channel_code
+from df_customer_contact_channels df_customer_contact_channels
+group by channel_code
+having count(customer_id) < 5`;
+
+query q2
+`select t2.channel_code
+ from
+  (select
+      t1.channel_code, count(t1.active_to_date) as count_active_to_date
+    from
+      input as t1
+    group by
+      t1.channel_code) as t2
+ where t2.count_active_to_date < 5.0`;
+
+verify q1 q2;

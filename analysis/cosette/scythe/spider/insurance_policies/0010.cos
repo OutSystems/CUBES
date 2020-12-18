@@ -1,0 +1,32 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+schema df_settlements(settlement_id:int, claim_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int, customer_policy_id:int);
+
+table df_claims(df_claims);
+table df_settlements(df_settlements);
+
+query q1
+`select count(*),
+       t1.claim_id
+from df_claims as t1
+join df_settlements as t2 on t1.claim_id = t2.claim_id
+group by t1.claim_id
+
+limit 1`;
+
+query q2
+`select t2.count_date_claim_settled,t2.claim_id
+ from
+  (select t1.date_claim_settled, t1.count_date_claim_settled, t4.settlement_id, t4.claim_id, t4.date_claim_made, t4.date_claim_settled as date_claim_settled1, t4.amount_claimed, t4.amount_settled, t4.customer_policy_id
+  from (select
+          t3.date_claim_settled, count(t3.date_claim_settled) as count_date_claim_settled
+        from
+          input as t3
+        group by
+          t3.date_claim_settled) as t1 join 
+      (select *
+         from
+          input0
+         where input0.settlement_id > input0.claim_id) as t4) as t2
+ where t2.date_claim_settled = t2.date_claim_settled1`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+
+table df_people(df_people);
+
+query q1
+`select name
+from df_people df_people
+where age = 35
+  or age = 36`;
+
+query q2
+`select t3.name1
+ from
+  (select input.people_id, input.district, input.name, input.party, input.age, t2.people_id as people_id1, t2.district as district1, t2.name as name1, t2.party as party1, t2.age as age1
+  from (select *
+       from
+        input
+       where input.age = 35.0) join 
+      (select *
+         from
+          input
+         where input.age <= 36.0) as t2) as t3`;
+
+verify q1 q2;

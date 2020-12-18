@@ -1,0 +1,40 @@
+schema df_team(team_id:int, name:str);
+schema df_player(player_id:int, player:str, years_played:str, total_wl:str, singles_wl:str, doubles_wl:str, team:int);
+
+table df_team(df_team);
+table df_player(df_player);
+
+query q1
+`select t1.df_player,
+       t1.years_played
+from df_player as t1
+join df_team as t2 on t1.df_team = t2.team_id
+where t2.name = "columbus crew"`;
+
+query q2
+`select player,
+       years_played
+from
+  (select team_id,
+          name,
+          player_id,
+          player,
+          years_played,
+          total_wl,
+          singles_wl,
+          doubles_wl,
+          team_id as team
+   from
+     (select lhs.team_id as team_id,
+             lhs.name as name,
+             rhs.player_id as player_id,
+             rhs.player as player,
+             rhs.years_played as years_played,
+             rhs.total_wl as total_wl,
+             rhs.singles_wl as singles_wl,
+             rhs.doubles_wl as doubles_wl
+      from df_team as lhs
+      inner join df_player as rhs on (lhs.team_id = rhs.team)))
+where (name = 'columbus crew')`;
+
+verify q1 q2;

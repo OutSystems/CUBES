@@ -1,0 +1,63 @@
+schema df_course(course_id:int, title:str, dept_name:str, credits:int);
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+schema df_teaches(id:int, course_id:int, sec_id:int, semester:str, year:int);
+
+table df_course(df_course);
+table df_instructor(df_instructor);
+table df_teaches(df_teaches);
+
+query q1
+`select t1.title,
+       t3.name
+from df_course as t1
+join df_teaches as t2 on t1.course_id = t2.course_id
+join df_instructor as t3 on t2.id = t3.id
+where year = 2008`;
+
+query q2
+`select title,
+       name
+from
+  (select lhs.course_id as course_id,
+          lhs.title as title,
+          lhs.dept_name as dept_name,
+          lhs.credits as credits,
+          lhs.id as id,
+          lhs.name as name,
+          lhs.salary as salary,
+          lhs.sec_id as sec_id,
+          lhs.semester as semester,
+          lhs.year as year
+   from
+     (select lhs.course_id as course_id,
+             lhs.title as title,
+             lhs.dept_name as dept_name,
+             lhs.credits as credits,
+             lhs.id as id,
+             lhs.name as name,
+             lhs.salary as salary,
+             rhs.sec_id as sec_id,
+             rhs.semester as semester,
+             rhs.year as year
+      from
+        (select lhs.course_id as course_id,
+                lhs.title as title,
+                lhs.dept_name as dept_name,
+                lhs.credits as credits,
+                rhs.id as id,
+                rhs.name as name,
+                rhs.salary as salary
+         from df_course as lhs
+         inner join df_instructor as rhs on (lhs.dept_name = rhs.dept_name)) as lhs
+      inner join df_teaches as rhs on (lhs.course_id = rhs.course_id
+                                       and lhs.id = rhs.id)) as lhs
+   inner join
+     (select *
+      from df_teaches df_teaches
+      where (year = 2008.0)) as rhs on (lhs.course_id = rhs.course_id
+                                        and lhs.id = rhs.id
+                                        and lhs.sec_id = rhs.sec_id
+                                        and lhs.semester = rhs.semester
+                                        and lhs.year = rhs.year))`;
+
+verify q1 q2;

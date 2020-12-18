@@ -1,0 +1,32 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+schema df_shipments(shipment_id:int, order_id:int, invoice_number:int, shipment_tracking_number:int, shipment_date:str, other_shipment_details:str);
+
+table df_orders(df_orders);
+table df_shipments(df_shipments);
+
+query q1
+`select t1.date_order_placed
+from df_orders as t1
+join df_shipments as t2 on t1.order_id = t2.order_id
+where t2.invoice_number = 10`;
+
+query q2
+`select date_order_placed
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status as order_status,
+          lhs.date_order_placed as date_order_placed,
+          lhs.order_details as order_details,
+          rhs.shipment_id as shipment_id,
+          rhs.invoice_number as invoice_number,
+          rhs.shipment_tracking_number as shipment_tracking_number,
+          rhs.shipment_date as shipment_date,
+          rhs.other_shipment_details as other_shipment_details
+   from df_orders as lhs
+   inner join
+     (select *
+      from df_shipments df_shipments
+      where (invoice_number = 10.0)) as rhs on (lhs.order_id = rhs.order_id))`;
+
+verify q1 q2;

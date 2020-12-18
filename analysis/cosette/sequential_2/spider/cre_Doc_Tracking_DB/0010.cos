@@ -1,0 +1,37 @@
+schema df_ref_document_types(document_type_code:str, document_type_name:str, document_type_description:str);
+schema df_all_documents(document_id:int, date_stored:str, document_type_code:str, document_name:str, document_description:str, other_details:str);
+
+table df_ref_document_types(df_ref_document_types);
+table df_all_documents(df_all_documents);
+
+query q1
+`select t2.document_type_name
+from df_all_documents as t1
+join df_ref_document_types as t2 on t1.document_type_code = t2.document_type_code
+where t1.document_name = "how to read a book"`;
+
+query q2
+`select document_type_name
+from
+  (select document_type_code,
+          document_type_name,
+          document_type_description,
+          document_id,
+          date_stored,
+          document_name,
+          other_details,
+          document_type_description as document_description
+   from
+     (select lhs.document_type_code as document_type_code,
+             lhs.document_type_name as document_type_name,
+             lhs.document_type_description as document_type_description,
+             rhs.document_id as document_id,
+             rhs.date_stored as date_stored,
+             rhs.document_name as document_name,
+             rhs.other_details as other_details
+      from df_ref_document_types as lhs
+      inner join df_all_documents as rhs on (lhs.document_type_code = rhs.document_type_code
+                                                 and lhs.document_type_description = rhs.document_description)))
+where (document_name = 'how to read a book')`;
+
+verify q1 q2;

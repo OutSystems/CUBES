@@ -1,0 +1,62 @@
+schema df_useracct(u_id:int, name:str);
+schema df_trust(source_u_id:int, target_u_id:int, trust:int);
+
+table df_useracct(df_useracct);
+table df_trust(df_trust);
+
+query q1
+`select t1.name
+from df_useracct as t1
+join df_trust as t2 on t1.u_id = t2.target_u_id
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select source_u_id as u_id,
+          name,
+          source_u_id,
+          target_u_id,
+          trust,
+          name.other,
+          source_u_id.other,
+          trust.other
+   from
+     (select lhs.u_id as u_id,
+             lhs.name as name,
+             lhs.source_u_id as source_u_id,
+             lhs.target_u_id as target_u_id,
+             lhs.trust as trust,
+             rhs.name as name.other,
+             rhs.source_u_id as source_u_id.other,
+             rhs.trust as trust.other
+      from
+        (select u_id,
+                name,
+                source_u_id,
+                target_u_id,
+                u_id as trust
+         from
+           (select lhs.u_id as u_id,
+                   lhs.name as name,
+                   rhs.source_u_id as source_u_id,
+                   rhs.target_u_id as target_u_id
+            from df_useracct as lhs
+            inner join df_trust as rhs on (lhs.u_id = rhs.trust))) as lhs
+      inner join
+        (select u_id,
+                name,
+                source_u_id,
+                target_u_id,
+                u_id as trust
+         from
+           (select lhs.u_id as u_id,
+                   lhs.name as name,
+                   rhs.source_u_id as source_u_id,
+                   rhs.target_u_id as target_u_id
+            from df_useracct as lhs
+            inner join df_trust as rhs on (lhs.u_id = rhs.trust))) as rhs on (lhs.source_u_id = rhs.u_id
+                                                                              and lhs.target_u_id = rhs.target_u_id)))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_musical(musical_id:int, name:str, year:int, award:str, category:str, nominee:str, result:str);
+schema df_actor(actor_id:int, name:str, musical_id:int, character:str, duration:str, age:int);
+
+table df_musical(df_musical);
+table df_actor(df_actor);
+
+query q1
+`select t1.name
+from df_actor as t1
+join df_musical as t2 on t1.musical_id = t2.musical_id`;
+
+query q2
+`joining, by = "musical_id"
+select distinct name
+from
+  (select actor_id,
+          name,
+          musical_id,
+          character,
+          duration,
+          age
+   from input1 as lhs
+   inner join
+     (select musical_id
+      from input1 intersect select musical_id
+      from input0) as rhs on (lhs.musical_id = rhs.musical_id))`;
+
+verify q1 q2;

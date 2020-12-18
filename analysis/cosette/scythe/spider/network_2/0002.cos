@@ -1,0 +1,23 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select count(*)
+from df_person df_person
+where gender = 'female'`;
+
+query q2
+`select t1.count_age
+ from
+  (select
+      t2.gender, count(t2.age) as count_age
+    from
+      (select *
+         from
+          input
+         where input.gender = 'female') as t2
+    group by
+      t2.gender) as t1`;
+
+verify q1 q2;

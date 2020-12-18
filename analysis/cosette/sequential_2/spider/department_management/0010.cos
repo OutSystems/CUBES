@@ -1,0 +1,40 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_management(df_management);
+
+query q1
+`select t1.name,
+       t1.num_employees
+from df_department as t1
+join df_management as t2 on t1.department_id = t2.department_id
+where t2.temporary_acting = 'yes'`;
+
+query q2
+`select name,
+       num_employees
+from
+  (select department_id,
+          head_id,
+          temporary_acting,
+          department_id.other,
+          name,
+          creation,
+          budget_in_billions,
+          num_employees,
+          department_id as ranking
+   from
+     (select lhs.department_id as department_id,
+             lhs.head_id as head_id,
+             lhs.temporary_acting as temporary_acting,
+             rhs.department_id as department_id.other,
+             rhs.name as name,
+             rhs.creation as creation,
+             rhs.budget_in_billions as budget_in_billions,
+             rhs.num_employees as num_employees
+      from df_management as lhs
+      inner join df_department as rhs on (lhs.department_id = rhs.ranking)))
+where (temporary_acting = 'yes')`;
+
+verify q1 q2;

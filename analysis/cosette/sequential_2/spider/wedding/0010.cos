@@ -1,0 +1,32 @@
+schema df_people(people_id:int, name:str, country:str, is_male:str, age:int);
+
+table df_people(df_people);
+
+query q1
+`select min(age),
+       max(age),
+       avg(age)
+from df_people df_people`;
+
+query q2
+`select distinct minage as min.age.,
+                max(age) over () as max.age.,
+                              meanage as avg.age.
+from
+  (select people_id,
+          name,
+          country,
+          is_male,
+          age,
+          meanage,
+          min(age) over () as minage
+   from
+     (select people_id,
+             name,
+             country,
+             is_male,
+             age,
+             avg(age) over () as meanage
+      from df_people df_people))`;
+
+verify q1 q2;

@@ -1,0 +1,37 @@
+schema df_accounts(custid:int, name:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_checking(df_checking);
+
+query q1
+`select t1.custid,
+       t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+where t2.balance <
+    (select max(balance)
+     from df_checking df_checking)`;
+
+query q2
+`select custid,
+       name
+from
+  (select lhs.custid as custid,
+          lhs.balance as balance,
+          rhs.name as name
+   from
+     (select custid,
+             max(balance) as balance
+      from
+        (select lhs.custid as custid,
+                lhs.balance as balance,
+                rhs.custid as custid.other,
+                rhs.balance as balance.other
+         from df_checking as lhs
+         cross join df_checking as rhs)
+      where (balance < balance.other)
+      group by custid) as lhs
+   inner join df_accounts as rhs on (lhs.custid = rhs.custid))`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select decor,
+       count(*)
+from df_rooms df_rooms
+where bedtype = "king"
+group by decor`;
+
+query q2
+`select t2.decor,t2.count_distinct_roomid
+ from
+  (select
+      t1.bedtype, t1.decor, count_distinct(t1.roomid) as count_distinct_roomid
+    from
+      (select *
+         from
+          input
+         where input.bedtype = 'king') as t1
+    group by
+      t1.bedtype, t1.decor) as t2`;
+
+verify q1 q2;

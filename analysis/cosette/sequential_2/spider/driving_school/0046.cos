@@ -1,0 +1,25 @@
+schema df_staff(staff_id:int, staff_address_id:int, nickname:str, first_name:str, middle_name:str, last_name:str, date_of_birth:str, date_joined_staff:str, date_left_staff:str);
+schema df_lessons(lesson_id:int, customer_id:int, lesson_status_code:str, staff_id:int, vehicle_id:int, lesson_date:str, lesson_time:int, price:str);
+
+table df_staff(df_staff);
+table df_lessons(df_lessons);
+
+query q1
+`select first_name
+from df_staff df_staff
+except
+select t2.first_name
+from df_lessons as t1
+join df_staff as t2 on t1.staff_id = t2.staff_id`;
+
+query q2
+`select first_name
+from
+  (select *
+   from df_staff as lhs
+   where not exists
+       (select 1
+        from df_lessons as rhs
+        where (lhs.staff_id = rhs.staff_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,64 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status:str, order_date:str, order_details:str);
+schema df_order_items(order_id:int, product_id:int, order_quantity:int);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select count(distinct t3.product_id)
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+join df_order_items as t3 on t2.order_id = t3.order_id
+where t1.customer_name = "rodrick heaney"`;
+
+query q2
+`select distinct product_id as count.distinct.t3.product_id.
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method as payment_method,
+          lhs.customer_name as customer_name,
+          lhs.date_became_customer as date_became_customer,
+          lhs.other_customer_details as other_customer_details,
+          lhs.order_id as order_id,
+          lhs.order_status as order_status,
+          lhs.order_date as order_date,
+          lhs.order_details as order_details,
+          lhs.product_id as product_id,
+          lhs.order_quantity as order_quantity,
+          rhs.n_distinct as n_distinct
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.date_became_customer as date_became_customer,
+             lhs.other_customer_details as other_customer_details,
+             lhs.order_id as order_id,
+             lhs.order_status as order_status,
+             lhs.order_date as order_date,
+             lhs.order_details as order_details,
+             rhs.product_id as product_id,
+             rhs.order_quantity as order_quantity
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method as payment_method,
+                lhs.customer_name as customer_name,
+                lhs.date_became_customer as date_became_customer,
+                lhs.other_customer_details as other_customer_details,
+                rhs.order_id as order_id,
+                rhs.order_status as order_status,
+                rhs.order_date as order_date,
+                rhs.order_details as order_details
+         from df_customers as lhs
+         inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join df_order_items as rhs on (lhs.order_id = rhs.order_id)) as lhs
+   inner join
+     (select product_id,
+             count(distinct product_id) as n_distinct
+      from df_order_items df_order_items
+      group by product_id) as rhs on (lhs.product_id = rhs.product_id))
+where (customer_name = 'rodrick heaney'
+       and n_distinct != product_id)`;
+
+verify q1 q2;

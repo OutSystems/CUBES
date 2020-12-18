@@ -1,0 +1,36 @@
+schema df_jobs(job_id:str, job_title:str, min_salary:int, max_salary:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_jobs(df_jobs);
+table df_employees(df_employees);
+
+query q1
+`select t1.employee_id,
+       t2.job_title
+from df_employees as t1
+join df_jobs as t2 on t1.job_id = t2.job_id
+where t1.department_id = 80`;
+
+query q2
+`select employee_id,
+       job_title
+from
+  (select lhs.job_id as job_id,
+          lhs.job_title as job_title,
+          lhs.min_salary as min_salary,
+          lhs.max_salary as max_salary,
+          rhs.employee_id as employee_id,
+          rhs.first_name as first_name,
+          rhs.last_name as last_name,
+          rhs.email as email,
+          rhs.phone_number as phone_number,
+          rhs.hire_date as hire_date,
+          rhs.salary as salary,
+          rhs.commission_pct as commission_pct,
+          rhs.manager_id as manager_id,
+          rhs.department_id as department_id
+   from df_jobs as lhs
+   inner join df_employees as rhs on (lhs.job_id = rhs.job_id))
+where (department_id = 80.0)`;
+
+verify q1 q2;

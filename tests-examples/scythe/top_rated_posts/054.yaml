@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/054.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i054.csv
 output: tests-examples/scythe/top_rated_posts/tables/o054.csv
@@ -10,11 +11,10 @@ loc: 1
 solution:
   - mutate
 sql: |
-  SELECT
-    s1.created_at,
-    COUNT(s2.email) AS cumul_count
-  FROM subscriptions s1
-    INNER JOIN subscriptions s2 ON s1.created_at >= s2.created_at
+  SELECT s1.created_at,
+         SUM(s2.count) AS cumul_count
+  FROM i054 s1
+           INNER JOIN i054 s2 ON s1.created_at >= s2.created_at
   GROUP BY s1.created_at
 comment: |
   df2 <- input1 %>% mutate(cumsumcount = cumsum(count))

@@ -1,0 +1,50 @@
+schema df_customers(customer_id:int, customer_address_id:int, customer_status_code:str, date_became_customer:str, date_of_birth:str, first_name:str, last_name:str, amount_outstanding:str, email_address:str, phone_number:str, cell_mobile_phone_number:str);
+
+table df_customers(df_customers);
+
+query q1
+`select customer_status_code
+from df_customers df_customers
+group by customer_status_code
+
+limit 1`;
+
+query q2
+`select customer_status_code.other as customer_status_code
+from
+  (select customer_id,
+          customer_id as customer_address_id,
+          customer_status_code,
+          date_became_customer,
+          date_of_birth,
+          first_name,
+          last_name,
+          amount_outstanding,
+          email_address,
+          phone_number,
+          cell_mobile_phone_number,
+          customer_status_code.other
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.customer_address_id as customer_address_id,
+             lhs.customer_status_code as customer_status_code,
+             lhs.date_became_customer as date_became_customer,
+             lhs.date_of_birth as date_of_birth,
+             lhs.first_name as first_name,
+             lhs.last_name as last_name,
+             lhs.amount_outstanding as amount_outstanding,
+             lhs.email_address as email_address,
+             lhs.phone_number as phone_number,
+             lhs.cell_mobile_phone_number as cell_mobile_phone_number,
+             rhs.customer_status_code as customer_status_code.other
+      from df_customers as lhs
+      inner join
+        (select customer_address_id,
+                customer_status_code,
+                count(*) as n
+         from df_customers df_customers
+         group by customer_address_id,
+                  customer_status_code) as rhs on (lhs.customer_id = rhs.customer_address_id
+                                                   and lhs.customer_address_id = rhs.n)))`;
+
+verify q1 q2;

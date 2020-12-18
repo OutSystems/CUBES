@@ -1,0 +1,29 @@
+schema df_race(race_id:int, name:str, class:str, date:str, track_id:int);
+schema df_track(track_id:int, name:str, location:str, seating:str, year_opened:str);
+
+table df_race(df_race);
+table df_track(df_track);
+
+query q1
+`select t1.name,
+       t1.date,
+       t2.name
+from df_race as t1
+join df_track as t2 on t1.track_id = t2.track_id`;
+
+query q2
+`select name.other as name...1, date, name as name...3
+from
+  (select lhs.track_id as track_id,
+          lhs.name as name,
+          lhs.location as location,
+          lhs.seating as seating,
+          lhs.year_opened as year_opened,
+          rhs.race_id as race_id,
+          rhs.name as name.other,
+          rhs.class as class,
+          rhs.date as date
+   from df_track as lhs
+   inner join df_race as rhs on (lhs.track_id = rhs.track_id))`;
+
+verify q1 q2;

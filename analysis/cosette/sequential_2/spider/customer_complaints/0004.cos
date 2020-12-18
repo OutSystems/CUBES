@@ -1,0 +1,34 @@
+schema df_products(product_id:int, parent_product_id:int, product_category_code:str, date_product_first_available:str, date_product_discontinued:str, product_name:str, product_description:str, product_price:str);
+schema df_complaints(complaint_id:int, product_id:int, customer_id:int, complaint_outcome_code:str, complaint_status_code:str, complaint_type_code:str, date_complaint_raised:str, date_complaint_closed:str, staff_id:int);
+
+table df_products(df_products);
+table df_complaints(df_complaints);
+
+query q1
+`select t1.product_name,
+       count(*)
+from df_products as t1
+join df_complaints as t2 on t1.product_id = t2.product_id
+group by t1.product_name`;
+
+query q2
+`select product_name,
+       n as count...
+from
+  (select lhs.product_id as product_id,
+          lhs.parent_product_id as parent_product_id,
+          lhs.product_category_code as product_category_code,
+          lhs.date_product_first_available as date_product_first_available,
+          lhs.date_product_discontinued as date_product_discontinued,
+          lhs.product_name as product_name,
+          lhs.product_description as product_description,
+          lhs.product_price as product_price,
+          rhs.n as n
+   from df_products as lhs
+   inner join
+     (select product_id,
+             count(*) as n
+      from df_complaints df_complaints
+      group by product_id) as rhs on (lhs.product_id = rhs.product_id))`;
+
+verify q1 q2;

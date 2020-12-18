@@ -1,0 +1,28 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+
+table df_party(df_party);
+
+query q1
+`select minister,
+       party_name
+from df_party df_party`;
+
+query q2
+`select minister,
+       party_name
+from
+  (select lhs.party_id as party_id,
+          lhs.minister as minister,
+          lhs.took_office as took_office,
+          lhs.left_office as left_office,
+          lhs.region_id as region_id,
+          lhs.party_name as party_name,
+          rhs.party_id as party_id.other,
+          rhs.took_office as took_office.other,
+          rhs.left_office as left_office.other,
+          rhs.region_id as region_id.other
+   from df_party as lhs
+   inner join df_party as rhs on (lhs.minister = rhs.minister
+                                  and lhs.party_name = rhs.party_name))`;
+
+verify q1 q2;

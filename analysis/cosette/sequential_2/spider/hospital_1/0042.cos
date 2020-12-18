@@ -1,0 +1,43 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_procedures(code:int, name:str, cost:str);
+schema df_trained_in(physician:int, treatment:int, certificationdate:str, certificationexpires:str);
+
+table df_physician(df_physician);
+table df_procedures(df_procedures);
+table df_trained_in(df_trained_in);
+
+query q1
+`select name
+from df_procedures df_procedures
+where cost > 1000
+union
+select t3.name
+from df_physician as t1
+join df_trained_in as t2 on t1.employeeid = t2.df_physician
+join df_procedures as t3 on t3.code = t2.treatment
+where t1.name = "john wen"`;
+
+query q2
+`select distinct name
+from
+  (select lhs.physician as physician,
+          lhs.treatment as treatment,
+          lhs.certificationdate as certificationdate,
+          lhs.certificationexpires as certificationexpires,
+          rhs.code as code,
+          rhs.name as name,
+          rhs.cost as cost
+   from df_trained_in as lhs
+   cross join
+     (select *
+      from
+        (select *
+         from df_procedures df_procedures
+         where (name != 'john wen'
+                or cost <= 1000.0)) as lhs
+      where not exists
+          (select 1
+           from df_physician as rhs
+           where (lhs.name = rhs.name) )) as rhs)`;
+
+verify q1 q2;

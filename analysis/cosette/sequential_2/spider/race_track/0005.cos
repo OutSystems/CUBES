@@ -1,0 +1,32 @@
+schema df_track(track_id:int, name:str, location:str, seating:str, year_opened:str);
+
+table df_track(df_track);
+
+query q1
+`select min(seating),
+       max(seating),
+       avg(seating)
+from df_track df_track`;
+
+query q2
+`select distinct min(seating) over () as min.seating.,
+                                  maxseating as max.seating.,
+                                  meanseating as avg.seating.
+from
+  (select track_id,
+          name,
+          location,
+          seating,
+          year_opened,
+          maxseating,
+          avg(seating) over () as meanseating
+   from
+     (select track_id,
+             name,
+             location,
+             seating,
+             year_opened,
+             max(seating) over () as maxseating
+      from df_track df_track))`;
+
+verify q1 q2;

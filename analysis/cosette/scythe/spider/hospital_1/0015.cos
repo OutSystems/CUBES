@@ -1,0 +1,21 @@
+schema df_nurse(employeeid:int, name:str, position:str, registered:int, ssn:int);
+schema df_appointment(appointmentid:int, patient:int, prepnurse:str, physician:int, start:str, end:str, examinationroom:str);
+
+table df_nurse(df_nurse);
+table df_appointment(df_appointment);
+
+query q1
+`select t1.name
+from df_nurse as t1
+join df_appointment as t2 on t1.employeeid = t2.prepnurse
+group by t1.employeeid
+
+limit 1`;
+
+query q2
+`(select
+    first(t1.name) as first_name
+  from
+    input as t1) as t2`;
+
+verify q1 q2;

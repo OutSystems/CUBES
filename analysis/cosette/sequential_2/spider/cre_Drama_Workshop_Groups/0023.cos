@@ -1,0 +1,38 @@
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+schema df_services(service_id:int, service_type_code:int, workshop_group_id:int, product_description:str, product_name:str, product_price:str, other_product_service_details:str);
+
+table df_drama_workshop_groups(df_drama_workshop_groups);
+table df_services(df_services);
+
+query q1
+`select t1.store_phone,
+       t1.store_email_address
+from df_drama_workshop_groups as t1
+join df_services as t2 on t1.workshop_group_id = t2.workshop_group_id
+where t2.product_name = "film"`;
+
+query q2
+`select store_phone,
+       store_email_address
+from
+  (select lhs.service_id as service_id,
+          lhs.service_type_code as service_type_code,
+          lhs.workshop_group_id as workshop_group_id,
+          lhs.product_description as product_description,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          lhs.other_product_service_details as other_product_service_details,
+          rhs.address_id as address_id,
+          rhs.currency_code as currency_code,
+          rhs.marketing_region_code as marketing_region_code,
+          rhs.store_name as store_name,
+          rhs.store_phone as store_phone,
+          rhs.store_email_address as store_email_address,
+          rhs.other_details as other_details
+   from
+     (select *
+      from df_services df_services
+      where (product_name = 'film')) as lhs
+   inner join df_drama_workshop_groups as rhs on (lhs.workshop_group_id = rhs.workshop_group_id))`;
+
+verify q1 q2;

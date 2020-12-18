@@ -1,0 +1,21 @@
+schema df_settlements(settlement_id:int, claim_id:int, effective_date:str, settlement_amount:str);
+
+table df_settlements(df_settlements);
+
+query q1
+`select max(settlement_amount),
+       min(settlement_amount)
+from df_settlements df_settlements`;
+
+query q2
+`select distinct maxsettlement_amount as max.settlement_amount.,
+                min(settlement_amount) over () as min.settlement_amount.
+from
+  (select settlement_id,
+          claim_id,
+          effective_date,
+          settlement_amount,
+          max(settlement_amount) over () as maxsettlement_amount
+   from df_settlements df_settlements)`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+
+table df_technician(df_technician);
+
+query q1
+`select team
+from df_technician df_technician
+group by team
+having count(*) >= 2`;
+
+query q2
+`select t1.team
+ from
+  (select
+      t2.team, count_distinct(t2.age) as count_distinct_age
+    from
+      input as t2
+    group by
+      t2.team) as t1
+ where t1.count_distinct_age >= 2.0`;
+
+verify q1 q2;

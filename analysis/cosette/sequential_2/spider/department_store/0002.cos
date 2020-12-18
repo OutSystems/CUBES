@@ -1,0 +1,36 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_id,
+       product_type_code
+from df_products df_products
+
+limit 1`;
+
+query q2
+`select distinct product_id.other as product_id,
+                product_type_code.other as product_type_code
+from
+  (select lhs.product_id as product_id,
+          lhs.product_type_code as product_type_code,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          lhs.minproduct_price as minproduct_price,
+          rhs.product_id as product_id.other,
+          rhs.product_type_code as product_type_code.other,
+          rhs.product_name as product_name.other,
+          rhs.product_price as product_price.other
+   from
+     (select product_id,
+             product_type_code,
+             product_name,
+             product_price,
+             min(product_price) over () as minproduct_price
+      from df_products df_products) as lhs
+   cross join df_products as rhs)
+where (product_price >= product_price.other
+       and minproduct_price = product_price.other)`;
+
+verify q1 q2;

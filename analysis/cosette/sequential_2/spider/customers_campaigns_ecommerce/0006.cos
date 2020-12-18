@@ -1,0 +1,26 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, customer_phone:str, customer_email:str, customer_address:str, customer_login:str, customer_password:str);
+schema df_mailshot_customers(mailshot_id:int, customer_id:int, outcome_code:str, mailshot_customer_date:str);
+
+table df_customers(df_customers);
+table df_mailshot_customers(df_mailshot_customers);
+
+query q1
+`select customer_name,
+       customer_phone
+from df_customers df_customers
+where customer_id not in
+    (select customer_id
+     from df_mailshot_customers df_mailshot_customers)`;
+
+query q2
+`select customer_name,
+       customer_phone
+from
+  (select *
+   from df_customers as lhs
+   where not exists
+       (select 1
+        from df_mailshot_customers as rhs
+        where (lhs.customer_id = rhs.customer_id) ))`;
+
+verify q1 q2;

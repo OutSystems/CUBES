@@ -1,0 +1,30 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t1.name,
+       t1.age,
+       t1.job
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t2.friend = 'alice'
+  and t2.year =
+    (select max(year)
+     from df_personfriend df_personfriend
+     where friend = 'alice')`;
+
+query q2
+`select t1.name,t1.age,t1.job
+ from
+  (select input.name, input.age, input.city, input.gender, input.job, t2.name as name1, t2.friend, t2.year
+  from input join 
+      (select *
+         from
+          input0
+         where input0.friend = 'alice') as t2) as t1
+ where t1.name = t1.name1`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_products(product_id:int, parent_product_id:int, production_type_code:str, unit_price:str, product_name:str, product_color:str, product_size:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, product_quantity:int, other_order_item_details:str);
+
+table df_products(df_products);
+table df_order_items(df_order_items);
+
+query q1
+`select product_name
+from df_products df_products
+except
+select t1.product_name
+from df_products as t1
+join df_order_items as t2 on t1.product_id = t2.product_id`;
+
+query q2
+`select product_name
+from
+  (select *
+   from df_products as lhs
+   where not exists
+       (select 1
+        from df_order_items as rhs
+        where (lhs.product_id = rhs.product_id) ))`;
+
+verify q1 q2;

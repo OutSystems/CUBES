@@ -1,0 +1,26 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+
+table df_manufacturers(df_manufacturers);
+
+query q1
+`select count(*)
+from df_manufacturers df_manufacturers
+where headquarter = 'tokyo'
+  or headquarter = 'beijing'`;
+
+query q2
+`select t3.min_code
+ from
+  (select
+          min(t2.code) as min_code
+        from
+          (select *
+             from
+              input
+             where input.headquarter <> 'tokyo') as t2) as t1 join 
+      (select *
+         from
+          input
+         where input.headquarter = 'beijing') as t4 as t3`;
+
+verify q1 q2;

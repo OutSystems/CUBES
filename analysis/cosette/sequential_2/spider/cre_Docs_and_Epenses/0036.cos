@@ -1,0 +1,31 @@
+schema df_documents_with_expenses(document_id:int, budget_type_code:str, document_details:str);
+
+table df_documents_with_expenses(df_documents_with_expenses);
+
+query q1
+`select budget_type_code
+from df_documents_with_expenses df_documents_with_expenses
+group by budget_type_code
+
+limit 1`;
+
+query q2
+`select distinct budget_type_code.other as budget_type_code
+from
+  (select lhs.budget_type_code as budget_type_code,
+          lhs.n as n,
+          rhs.budget_type_code as budget_type_code.other,
+          rhs.n as n.other
+   from
+     (select budget_type_code,
+             count(*) as n
+      from df_documents_with_expenses df_documents_with_expenses
+      group by budget_type_code) as lhs
+   cross join
+     (select budget_type_code,
+             count(*) as n
+      from df_documents_with_expenses df_documents_with_expenses
+      group by budget_type_code) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

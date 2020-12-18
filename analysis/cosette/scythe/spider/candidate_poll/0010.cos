@@ -1,0 +1,30 @@
+schema df_people(people_id:int, sex:str, name:str, date_of_birth:str, height:str, weight:str);
+
+table df_people(df_people);
+
+query q1
+`select avg(weight),
+       min(weight),
+       sex
+from df_people df_people
+group by sex`;
+
+query q2
+`select t6.avg_weight,t6.min_weight,t6.sex
+ from
+  (select t4.sex, t4.avg_weight, t5.sex as sex1, t5.min_weight
+  from (select
+          t3.sex, avg(t3.weight) as avg_weight
+        from
+          input as t3
+        group by
+          t3.sex) as t4 join 
+      (select
+            t1.sex, min(t1.weight) as min_weight
+          from
+            input as t1
+          group by
+            t1.sex) as t2 as t5) as t6
+ where t6.sex = t6.sex1`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_ref_budget_codes(budget_type_code:str, budget_type_description:str);
+schema df_documents_with_expenses(document_id:int, budget_type_code:str, document_details:str);
+
+table df_ref_budget_codes(df_ref_budget_codes);
+table df_documents_with_expenses(df_documents_with_expenses);
+
+query q1
+`select t2.budget_type_code,
+       t2.budget_type_description,
+       t1.document_id
+from df_documents_with_expenses as t1
+join df_ref_budget_codes as t2 on t1.budget_type_code = t2.budget_type_code`;
+
+query q2
+`select budget_type_code,
+       budget_type_description,
+       document_id
+from
+  (select lhs.budget_type_code as budget_type_code,
+          lhs.budget_type_description as budget_type_description,
+          rhs.document_id as document_id,
+          rhs.document_details as document_details
+   from df_ref_budget_codes as lhs
+   inner join df_documents_with_expenses as rhs on (lhs.budget_type_code = rhs.budget_type_code))`;
+
+verify q1 q2;

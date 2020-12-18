@@ -1,0 +1,22 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select state
+from df_representative df_representative
+group by state
+having count(*) >= 2`;
+
+query q2
+`select t1.state
+ from
+  (select
+      t2.state, count(t2.name) as count_name
+    from
+      input as t2
+    group by
+      t2.state) as t1
+ where t1.count_name = 2.0`;
+
+verify q1 q2;

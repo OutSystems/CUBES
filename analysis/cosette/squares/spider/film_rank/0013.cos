@@ -1,0 +1,30 @@
+schema df_market(market_id:int, country:str, number_cities:int);
+schema df_film_market_estimation(estimation_id:int, low_estimate:str, high_estimate:str, film_id:int, type:str, market_id:int, year:int);
+
+table df_market(df_market);
+table df_film_market_estimation(df_film_market_estimation);
+
+query q1
+`select t2.country,
+       t1.year
+from df_film_market_estimation as t1
+join df_market as t2 on t1.market_id = t2.market_id`;
+
+query q2
+`joining, by = "market_id"
+select country,
+       year
+from
+  (select estimation_id,
+          low_estimate,
+          high_estimate,
+          film_id,
+          type,
+          market_id,
+          year,
+          country,
+          number_cities
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.market_id = rhs.market_id))`;
+
+verify q1 q2;

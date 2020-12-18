@@ -1,0 +1,39 @@
+schema df_12_1(S_key:str, age:int, level:str);
+
+table df_12_1(df_12_1);
+
+query q1
+`select age,
+       level
+from
+  (select age,
+          level,
+          n
+   from
+     (select age,
+             level,
+             n,
+             max(n) over () as zzz2,
+                         max(n) over () as zzz3
+      from
+        (select age,
+                level,
+                count(*) as n
+         from df_12_1 df_12_1
+         group by age,
+                  level))
+   where (age != zzz2
+          and n = zzz3))`;
+
+query q2
+`select t1.age,t1.level
+ from
+  (select
+      t2.age, t2.level, sum(t2.age) as sum_age
+    from
+      input as t2
+    group by
+      t2.age, t2.level) as t1
+ where t1.sum_age > t1.age`;
+
+verify q1 q2;

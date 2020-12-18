@@ -1,0 +1,25 @@
+schema df_customers(customer_id:int, customer_type_code:str, address_line_1:str, address_line_2:str, town_city:str, state:str, email_address:str, phone_number:str);
+
+table df_customers(df_customers);
+
+query q1
+`select town_city
+from df_customers df_customers
+where customer_type_code = "good credit rating"
+group by town_city
+
+limit 1`;
+
+query q2
+`select t1.town_city1
+ from
+  (select input.customer_id, input.customer_type_code, input.address_line_1, input.address_line_2, input.town_city, input.state, input.email_address, input.phone_number, t2.customer_id as customer_id1, t2.customer_type_code as customer_type_code1, t2.address_line_1 as address_line_11, t2.address_line_2 as address_line_21, t2.town_city as town_city1, t2.state as state1, t2.email_address as email_address1, t2.phone_number as phone_number1
+  from (select *
+       from
+        input
+       where input.customer_type_code = 'good credit rating') join 
+      input as t2) as t1
+ where t1.customer_id < t1.customer_id1
+   and t1.state = t1.state1`;
+
+verify q1 q2;

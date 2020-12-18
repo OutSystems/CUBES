@@ -1,0 +1,22 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_customer_events(customer_event_id:int, customer_id:int, date_moved_in:str, property_id:int, resident_id:int, thing_id:int);
+
+table df_customers(df_customers);
+table df_customer_events(df_customer_events);
+
+query q1
+`select t2.date_moved_in,
+       t1.customer_id,
+       t1.customer_details
+from df_customers as t1
+join df_customer_events as t2 on t1.customer_id = t2.customer_id`;
+
+query q2
+`select t1.date_moved_in,t1.customer_id,t1.customer_details
+ from
+  (select input.customer_id, input.customer_details, t2.customer_event_id, t2.customer_id as customer_id1, t2.date_moved_in, t2.property_id, t2.resident_id, t2.thing_id
+  from input join 
+      input0 as t2) as t1
+ where t1.customer_id = t1.customer_id1`;
+
+verify q1 q2;

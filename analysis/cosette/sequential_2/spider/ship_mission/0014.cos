@@ -1,0 +1,24 @@
+schema df_mission(mission_id:int, ship_id:int, code:str, launched_year:int, location:str, speed_knots:int, fate:str);
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_mission(df_mission);
+table df_ship(df_ship);
+
+query q1
+`select name
+from df_ship df_ship
+where ship_id not in
+    (select ship_id
+     from df_mission df_mission)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_ship as lhs
+   where not exists
+       (select 1
+        from df_mission as rhs
+        where (lhs.ship_id = rhs.ship_id) ))`;
+
+verify q1 q2;

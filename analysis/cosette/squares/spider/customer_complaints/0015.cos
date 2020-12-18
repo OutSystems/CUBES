@@ -1,0 +1,22 @@
+schema df_complaints(complaint_id:int, product_id:int, customer_id:int, complaint_outcome_code:str, complaint_status_code:str, complaint_type_code:str, date_complaint_raised:str, date_complaint_closed:str, staff_id:int);
+
+table df_complaints(df_complaints);
+
+query q1
+`select complaint_status_code
+from df_complaints df_complaints
+group by complaint_status_code
+having count(*) > 3`;
+
+query q2
+`select distinct complaint_status_code
+from
+  (select complaint_outcome_code,
+          complaint_status_code,
+          count(*) as n
+   from input0
+   group by complaint_outcome_code,
+            complaint_status_code)
+where (n >= 3.0)`;
+
+verify q1 q2;

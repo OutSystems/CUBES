@@ -1,0 +1,24 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_documents(df_documents);
+
+query q1
+`select count(*),
+       project_id
+from df_documents df_documents
+where document_type_code = "bk"
+group by project_id`;
+
+query q2
+`select n as count...,
+       project_id
+from
+  (select document_type_code,
+          project_id,
+          count(*) as n
+   from df_documents df_documents
+   group by document_type_code,
+            project_id)
+where (document_type_code = 'bk')`;
+
+verify q1 q2;

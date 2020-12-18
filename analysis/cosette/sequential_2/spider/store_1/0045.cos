@@ -1,0 +1,33 @@
+schema df_albums(id:int, title:str, artist_id:int);
+schema df_tracks(id:int, name:str, album_id:int, media_type_id:int, genre_id:int, composer:str, milliseconds:int, bytes:int, unit_price:str);
+
+table df_albums(df_albums);
+table df_tracks(df_tracks);
+
+query q1
+`select t2.name
+from df_albums as t1
+join df_tracks as t2 on t1.id = t2.genre_id
+where t1.title = "balls to the wall"`;
+
+query q2
+`select name
+from
+  (select lhs.id as id,
+          lhs.title as title,
+          lhs.artist_id as artist_id,
+          rhs.id as id.other,
+          rhs.name as name,
+          rhs.album_id as album_id,
+          rhs.media_type_id as media_type_id,
+          rhs.composer as composer,
+          rhs.milliseconds as milliseconds,
+          rhs.bytes as bytes,
+          rhs.unit_price as unit_price
+   from
+     (select *
+      from df_albums df_albums
+      where (title = 'balls to the wall')) as lhs
+   inner join df_tracks as rhs on (lhs.artist_id = rhs.genre_id))`;
+
+verify q1 q2;

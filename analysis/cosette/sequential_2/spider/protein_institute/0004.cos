@@ -1,0 +1,34 @@
+schema df_building(building_id:int, name:str, street_address:str, years_as_tallest:str, height_feet:int, floors:int);
+
+table df_building(df_building);
+
+query q1
+`select avg(floors),
+       max(floors),
+       min(floors)
+from df_building df_building`;
+
+query q2
+`select distinct meanfloors as avg.floors.,
+                max(floors) over () as max.floors.,
+                                 minfloors as min.floors.
+from
+  (select building_id,
+          name,
+          street_address,
+          years_as_tallest,
+          height_feet,
+          floors,
+          meanfloors,
+          min(floors) over () as minfloors
+   from
+     (select building_id,
+             name,
+             street_address,
+             years_as_tallest,
+             height_feet,
+             floors,
+             avg(floors) over () as meanfloors
+      from df_building df_building))`;
+
+verify q1 q2;

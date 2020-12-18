@@ -1,0 +1,21 @@
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+
+table df_transactions(df_transactions);
+
+query q1
+`select avg(amount_of_transaction)
+from df_transactions df_transactions
+where transaction_type_code = "sale"`;
+
+query q2
+`select meanamount_of_transaction as avg.amount_of_transaction.
+from
+  (select other_details,
+          avg(amount_of_transaction) as meanamount_of_transaction
+   from
+     (select *
+      from df_transactions df_transactions
+      where (transaction_type_code = 'sale'))
+   group by other_details)`;
+
+verify q1 q2;

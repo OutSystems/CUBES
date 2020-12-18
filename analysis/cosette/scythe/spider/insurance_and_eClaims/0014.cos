@@ -1,0 +1,25 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+
+table df_customers(df_customers);
+table df_policies(df_policies);
+
+query q1
+`select distinct t2.customer_details
+from df_policies as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t1.policy_type_code = "deputy"
+  or t1.policy_type_code = "uniform"`;
+
+query q2
+`select t1.customer_details
+ from
+  (select input.customer_id, input.customer_details, t2.policy_id, t2.customer_id as customer_id1, t2.policy_type_code, t2.start_date, t2.end_date
+  from input join 
+      (select *
+         from
+          input0
+         where input0.policy_type_code = 'deputy') as t2) as t1
+ where t1.customer_id = t1.customer_id1`;
+
+verify q1 q2;

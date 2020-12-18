@@ -1,0 +1,24 @@
+schema df_complaints(complaint_id:int, product_id:int, customer_id:int, complaint_outcome_code:str, complaint_status_code:str, complaint_type_code:str, date_complaint_raised:str, date_complaint_closed:str, staff_id:int);
+
+table df_complaints(df_complaints);
+
+query q1
+`select complaint_status_code,
+       count(*)
+from df_complaints df_complaints
+where complaint_type_code = "product failure"
+group by complaint_status_code`;
+
+query q2
+`select complaint_status_code,
+       n as count...
+from
+  (select complaint_status_code,
+          complaint_type_code,
+          count(*) as n
+   from df_complaints df_complaints
+   group by complaint_status_code,
+            complaint_type_code)
+where (complaint_type_code = 'product failure')`;
+
+verify q1 q2;

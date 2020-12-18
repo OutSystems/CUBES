@@ -1,0 +1,38 @@
+schema df_addresses(address_id:int, line_1_number_building:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_staff(staff_id:int, staff_address_id:int, nickname:str, first_name:str, middle_name:str, last_name:str, date_of_birth:str, date_joined_staff:str, date_left_staff:str);
+
+table df_addresses(df_addresses);
+table df_staff(df_staff);
+
+query q1
+`select t2.first_name,
+       t2.last_name
+from df_addresses as t1
+join df_staff as t2 on t1.address_id = t2.staff_address_id
+where t1.city = "damianfort"`;
+
+query q2
+`select first_name,
+       last_name
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1_number_building as line_1_number_building,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          rhs.staff_id as staff_id,
+          rhs.nickname as nickname,
+          rhs.first_name as first_name,
+          rhs.middle_name as middle_name,
+          rhs.last_name as last_name,
+          rhs.date_of_birth as date_of_birth,
+          rhs.date_joined_staff as date_joined_staff,
+          rhs.date_left_staff as date_left_staff
+   from
+     (select *
+      from df_addresses df_addresses
+      where (city = 'damianfort')) as lhs
+   inner join df_staff as rhs on (lhs.address_id = rhs.staff_address_id))`;
+
+verify q1 q2;

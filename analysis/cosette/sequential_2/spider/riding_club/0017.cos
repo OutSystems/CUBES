@@ -1,0 +1,38 @@
+schema df_coach(coach_id:int, coach_name:str, gender:str, club_id:int, rank:int);
+schema df_match_result(rank:int, club_id:int, gold:int, big_silver:int, small_silver:int, bronze:int, points:int);
+
+table df_coach(df_coach);
+table df_match_result(df_match_result);
+
+query q1
+`select t1.club_id,
+       t1.gold
+from df_match_result as t1
+join df_coach as t2 on t1.club_id = t2.club_id
+group by t1.club_id
+
+limit 1`;
+
+query q2
+`select distinct rank as club_id,
+                gold
+from
+  (select lhs.rank as rank,
+          lhs.club_id as club_id,
+          lhs.gold as gold,
+          lhs.big_silver as big_silver,
+          lhs.small_silver as small_silver,
+          lhs.bronze as bronze,
+          lhs.points as points,
+          rhs.coach_id as coach_id,
+          rhs.gender as gender
+   from df_match_result as lhs
+   inner join
+     (select coach_id,
+             gender,
+             count(*) as n
+      from df_coach df_coach
+      group by coach_id,
+               gender) as rhs on (lhs.club_id = rhs.n))`;
+
+verify q1 q2;

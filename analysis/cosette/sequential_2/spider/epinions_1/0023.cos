@@ -1,0 +1,62 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select t1.name
+from df_useracct as t1
+join df_review as t2 on t1.u_id = t2.u_id
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select name,
+          max(rating) as rating
+   from
+     (select lhs.u_id as u_id,
+             lhs.name as name,
+             rhs.a_id as a_id,
+             rhs.i_id as i_id,
+             rhs.rating as rating,
+             rhs.rank as rank,
+             rhs.a_id.other as a_id.other,
+             rhs.u_id.other as u_id.other,
+             rhs.rating.other as rating.other
+      from df_useracct as lhs
+      inner join
+        (select a_id,
+                u_id,
+                rank as i_id,
+                rating,
+                rank,
+                a_id.other,
+                u_id.other,
+                rating.other
+         from
+           (select a_id,
+                   u_id,
+                   i_id,
+                   rating,
+                   u_id as rank,
+                   a_id.other,
+                   u_id.other,
+                   rating.other
+            from
+              (select lhs.a_id as a_id,
+                      lhs.u_id as u_id,
+                      lhs.i_id as i_id,
+                      lhs.rating as rating,
+                      lhs.rank as rank,
+                      rhs.a_id as a_id.other,
+                      rhs.u_id as u_id.other,
+                      rhs.rating as rating.other
+               from df_review as lhs
+               inner join df_review as rhs on (lhs.u_id = rhs.rank
+                                               and lhs.rank = rhs.i_id)))) as rhs on (lhs.u_id = rhs.u_id))
+   group by name)`;
+
+verify q1 q2;

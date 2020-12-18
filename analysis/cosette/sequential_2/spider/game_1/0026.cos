@@ -1,0 +1,30 @@
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select sportname
+from df_sportsinfo df_sportsinfo
+where onscholarship = 'y'
+group by sportname
+
+limit 1`;
+
+query q2
+`select sportname
+from
+  (select onscholarship,
+          sportname,
+          n,
+          count(distinct onscholarship) over () as n_distinct
+   from
+     (select onscholarship,
+             sportname,
+             count(*) as n
+      from df_sportsinfo df_sportsinfo
+      group by onscholarship,
+               sportname))
+where (onscholarship = 'y'
+       and n_distinct <= n)`;
+
+verify q1 q2;

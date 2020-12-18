@@ -1,0 +1,24 @@
+schema df_i010_1(id:str, name:str, phone_number:str);
+schema df_i010_2(id:str, date:str, phone_number:str);
+
+table df_i010_1(df_i010_1);
+table df_i010_2(df_i010_2);
+
+query q1
+`select *
+  from   call
+  where  not exists
+    (select *
+     from   phone_book
+     where  phone_book.phone_number = call.phone_number)`;
+
+query q2
+`select t1.id,t1.date,t1.phone_number
+ from
+  (select t3.id, t3.date, t3.phone_number, t2.id as id1, t2.name, t2.phone_number as phone_number1
+  from input0 as t3 left outer join 
+      input as t2 on t3.id = t2.id
+    	 andt3.phone_number = t2.phone_number) as t1
+ where t1.id1 is null`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select customer_id,
+       count(*)
+from df_customers_cards df_customers_cards
+group by customer_id`;
+
+query q2
+`(select
+    t1.customer_id, count(t1.card_id) as count_card_id
+  from
+    input as t1
+  group by
+    t1.customer_id) as t2`;
+
+verify q1 q2;

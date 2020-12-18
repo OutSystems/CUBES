@@ -1,0 +1,26 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+
+table df_device(df_device);
+
+query q1
+`select carrier
+from df_device df_device`;
+
+query q2
+`select carrier
+from
+  (select lhs.device_id as device_id,
+          lhs.device as device,
+          lhs.carrier as carrier,
+          lhs.package_version as package_version,
+          lhs.applications as applications,
+          lhs.software_platform as software_platform,
+          rhs.device_id as device_id.other,
+          rhs.device as device.other,
+          rhs.package_version as package_version.other,
+          rhs.software_platform as software_platform.other
+   from df_device as lhs
+   inner join df_device as rhs on (lhs.applications = rhs.applications
+                                   and lhs.carrier = rhs.carrier))`;
+
+verify q1 q2;

@@ -1,0 +1,38 @@
+schema df_problem_log(problem_log_id:int, assigned_to_staff_id:int, problem_id:int, problem_category_code:str, problem_status_code:str, log_entry_date:str, log_entry_description:str, log_entry_fix:str, other_log_details:str);
+schema df_staff(staff_id:int, staff_first_name:str, staff_last_name:str, other_staff_details:str);
+
+table df_problem_log(df_problem_log);
+table df_staff(df_staff);
+
+query q1
+`select distinct t2.problem_id,
+                t2.problem_log_id
+from df_staff as t1
+join df_problem_log as t2 on t1.staff_id = t2.assigned_to_staff_id
+where t1.staff_first_name = "rylan"
+  and t1.staff_last_name = "homenick"`;
+
+query q2
+`select problem_id,
+       problem_log_id
+from
+  (select lhs.problem_log_id as problem_log_id,
+          lhs.assigned_to_staff_id as assigned_to_staff_id,
+          lhs.problem_id as problem_id,
+          lhs.problem_category_code as problem_category_code,
+          lhs.problem_status_code as problem_status_code,
+          lhs.log_entry_date as log_entry_date,
+          lhs.log_entry_description as log_entry_description,
+          lhs.log_entry_fix as log_entry_fix,
+          lhs.other_log_details as other_log_details,
+          rhs.staff_first_name as staff_first_name,
+          rhs.staff_last_name as staff_last_name,
+          rhs.other_staff_details as other_staff_details
+   from df_problem_log as lhs
+   inner join
+     (select *
+      from df_staff df_staff
+      where (staff_first_name = 'rylan'
+             or staff_last_name = 'homenick')) as rhs on (lhs.assigned_to_staff_id = rhs.staff_id))`;
+
+verify q1 q2;

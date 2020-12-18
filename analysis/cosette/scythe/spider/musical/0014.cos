@@ -1,0 +1,21 @@
+schema df_musical(musical_id:int, name:str, year:int, award:str, category:str, nominee:str, result:str);
+
+table df_musical(df_musical);
+
+query q1
+`select nominee,
+       count(*)
+from df_musical df_musical
+group by nominee`;
+
+query q2
+`select t1.nominee,t1.count_award
+ from
+  (select
+      t2.year, t2.nominee, count(t2.award) as count_award
+    from
+      input as t2
+    group by
+      t2.year, t2.nominee) as t1`;
+
+verify q1 q2;

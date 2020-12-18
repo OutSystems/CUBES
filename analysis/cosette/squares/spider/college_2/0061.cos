@@ -1,0 +1,38 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+schema df_teaches(id:int, course_id:int, sec_id:int, semester:str, year:int);
+
+table df_instructor(df_instructor);
+table df_teaches(df_teaches);
+
+query q1
+`select name
+from df_instructor df_instructor
+where id not in
+    (select id
+     from df_teaches df_teaches
+     where semester = 'spring')`;
+
+query q2
+`joining, by = "id"
+joining, by = "id"
+select name
+from
+  (select id,
+          name,
+          dept_name,
+          salary
+   from
+     (select *
+      from
+        (select id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select id
+              from input1
+              where (semester = 'spring')) as rhs
+           where (lhs.id = rhs.id) )) as lhs
+   left join input0 as rhs on (lhs.id = rhs.id))`;
+
+verify q1 q2;

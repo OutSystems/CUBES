@@ -1,0 +1,46 @@
+schema df_skills(skill_id:int, skill_code:str, skill_description:str);
+schema df_maintenance_engineers(engineer_id:int, company_id:int, first_name:str, last_name:str, other_details:str);
+schema df_engineer_skills(engineer_id:int, skill_id:int);
+
+table df_skills(df_skills);
+table df_maintenance_engineers(df_maintenance_engineers);
+table df_engineer_skills(df_engineer_skills);
+
+query q1
+`select t1.first_name,
+       t1.last_name,
+       t1.other_details,
+       t3.skill_description
+from df_maintenance_engineers as t1
+join df_engineer_skills as t2 on t1.engineer_id = t2.engineer_id
+join df_skills as t3 on t2.skill_id = t3.skill_id`;
+
+query q2
+`select first_name,
+       last_name,
+       other_details,
+       skill_description
+from
+  (select lhs.skill_id as skill_id,
+          lhs.skill_code as skill_code,
+          lhs.skill_description as skill_description,
+          lhs.engineer_id as engineer_id,
+          lhs.company_id as company_id,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.other_details as other_details
+   from
+     (select lhs.skill_id as skill_id,
+             lhs.skill_code as skill_code,
+             lhs.skill_description as skill_description,
+             rhs.engineer_id as engineer_id,
+             rhs.company_id as company_id,
+             rhs.first_name as first_name,
+             rhs.last_name as last_name,
+             rhs.other_details as other_details
+      from df_skills as lhs
+      cross join df_maintenance_engineers as rhs) as lhs
+   inner join df_engineer_skills as rhs on (lhs.skill_id = rhs.skill_id
+                                            and lhs.engineer_id = rhs.engineer_id))`;
+
+verify q1 q2;

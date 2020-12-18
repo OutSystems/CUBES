@@ -1,0 +1,30 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+
+table df_dorm(df_dorm);
+
+query q1
+`select count(*),
+       sum(student_capacity),
+       gender
+from df_dorm df_dorm
+group by gender`;
+
+query q2
+`select t1.count_gender,t1.sum_student_capacity,t1.gender
+ from
+  (select t6.gender, t6.count_gender, t2.gender as gender1, t2.sum_student_capacity
+  from (select
+          t4.gender, count(t4.gender) as count_gender
+        from
+          input as t4
+        group by
+          t4.gender) as t6 join 
+      (select
+            t3.gender, sum(t3.student_capacity) as sum_student_capacity
+          from
+            input as t3
+          group by
+            t3.gender) as t5 as t2) as t1
+ where t1.gender = t1.gender1`;
+
+verify q1 q2;

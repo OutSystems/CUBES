@@ -1,0 +1,38 @@
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+schema df_bookings(booking_id:int, customer_id:int, workshop_group_id:int, status_code:str, store_id:int, order_date:str, planned_delivery_date:str, actual_delivery_date:str, other_order_details:str);
+
+table df_drama_workshop_groups(df_drama_workshop_groups);
+table df_bookings(df_bookings);
+
+query q1
+`select t2.store_name
+from df_bookings as t1
+join df_drama_workshop_groups as t2 on t1.workshop_group_id = t2.workshop_group_id
+where t1.status_code = "stop"`;
+
+query q2
+`select store_name
+from
+  (select lhs.booking_id as booking_id,
+          lhs.customer_id as customer_id,
+          lhs.workshop_group_id as workshop_group_id,
+          lhs.status_code as status_code,
+          lhs.store_id as store_id,
+          lhs.order_date as order_date,
+          lhs.planned_delivery_date as planned_delivery_date,
+          lhs.actual_delivery_date as actual_delivery_date,
+          lhs.other_order_details as other_order_details,
+          rhs.address_id as address_id,
+          rhs.currency_code as currency_code,
+          rhs.marketing_region_code as marketing_region_code,
+          rhs.store_name as store_name,
+          rhs.store_phone as store_phone,
+          rhs.store_email_address as store_email_address,
+          rhs.other_details as other_details
+   from
+     (select *
+      from df_bookings df_bookings
+      where (status_code = 'stop')) as lhs
+   left join df_drama_workshop_groups as rhs on (lhs.workshop_group_id = rhs.workshop_group_id))`;
+
+verify q1 q2;

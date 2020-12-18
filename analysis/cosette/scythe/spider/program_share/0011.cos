@@ -1,0 +1,21 @@
+schema df_broadcast(channel_id:int, program_id:int, time_of_day:str);
+
+table df_broadcast(df_broadcast);
+
+query q1
+`select count(*),
+       time_of_day
+from df_broadcast df_broadcast
+group by time_of_day`;
+
+query q2
+`select t1.count_distinct_channel_id,t1.time_of_day
+ from
+  (select
+      t2.time_of_day, count_distinct(t2.channel_id) as count_distinct_channel_id
+    from
+      input as t2
+    group by
+      t2.time_of_day) as t1`;
+
+verify q1 q2;

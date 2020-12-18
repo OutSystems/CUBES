@@ -1,0 +1,30 @@
+schema df_student_course_registrations(student_id:int, course_id:int, registration_date:str);
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_student_course_registrations(df_student_course_registrations);
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select course_id
+from df_student_course_registrations df_student_course_registrations
+where student_id = 121
+union
+select course_id
+from df_student_course_attendance df_student_course_attendance
+where student_id = 121`;
+
+query q2
+`select course_id
+from
+  (select *
+   from
+     (select *
+      from df_student_course_registrations df_student_course_registrations
+      where (student_id = 121.0)) as lhs
+   where exists
+       (select 1
+        from df_student_course_attendance as rhs
+        where (lhs.student_id = rhs.student_id
+               and lhs.course_id = rhs.course_id) ))`;
+
+verify q1 q2;

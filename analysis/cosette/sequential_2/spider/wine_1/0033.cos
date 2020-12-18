@@ -1,0 +1,31 @@
+schema df_appellations(no:int, appelation:str, county:str, state:str, area:str, isava:str);
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_appellations(df_appellations);
+table df_wine(df_wine);
+
+query q1
+`select t1.county
+from df_appellations as t1
+join df_wine as t2 on t1.appelation = t2.appelation
+group by t2.appelation
+having count(*) <= 3`;
+
+query q2
+`select county
+from
+  (select *
+   from df_appellations as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select appelation,
+                     count(*) as n
+              from df_wine df_wine
+              group by appelation)
+           where (n > 3.0)) as rhs
+        where (lhs.appelation = rhs.appelation) ))`;
+
+verify q1 q2;

@@ -1,0 +1,53 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_documents(df_documents);
+
+query q1
+`select project_id
+from df_documents df_documents
+group by project_id
+
+limit 1`;
+
+query q2
+`joining, by = c("project_id", "other_details")
+joining, by = c("n", "document_id", "document_date")
+select distinct project_id
+from
+  (select project_id,
+          other_details,
+          n,
+          document_id,
+          document_type_code,
+          document_date,
+          document_name,
+          document_description
+   from
+     (select project_id,
+             other_details,
+             n,
+             document_id,
+             document_type_code,
+             document_date,
+             document_name,
+             document_description
+      from
+        (select project_id,
+                other_details,
+                count(*) as n
+         from input0
+         group by project_id,
+                  other_details) as lhs
+      inner join input0 as rhs on (lhs.project_id = rhs.project_id
+                                       and lhs.other_details = rhs.other_details)) as lhs
+   inner join
+     (select document_id,
+             document_date,
+             count(*) as n
+      from input0
+      group by document_id,
+               document_date) as rhs on (lhs.n = rhs.n
+                                             and lhs.document_id = rhs.document_id
+                                             and lhs.document_date = rhs.document_date))`;
+
+verify q1 q2;

@@ -1,0 +1,53 @@
+schema df_machine(machine_id:int, making_year:int, class:str, team:str, machine_series:str, value_points:str, quality_rank:int);
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+schema df_repair_assignment(technician_id:int, repair_id:int, machine_id:int);
+
+table df_machine(df_machine);
+table df_technician(df_technician);
+table df_repair_assignment(df_repair_assignment);
+
+query q1
+`select t3.name
+from df_repair_assignment as t1
+join df_machine as t2 on t1.machine_id = t2.machine_id
+join df_technician as t3 on t1.technician_id = t3.technician_id`;
+
+query q2
+`select name
+from
+  (select lhs.technician_id as technician_id,
+          lhs.name as name,
+          lhs.team as team,
+          lhs.starting_year as starting_year,
+          lhs.age as age,
+          rhs.machine_id as machine_id,
+          rhs.making_year as making_year,
+          rhs.class as class,
+          rhs.team as team.other,
+          rhs.machine_series as machine_series,
+          rhs.value_points as value_points,
+          rhs.quality_rank as quality_rank,
+          rhs.technician_id as technician_id.other,
+          rhs.repair_id as repair_id,
+          rhs.machine_id.other as machine_id.other
+   from df_technician as lhs
+   cross join
+     (select *
+      from
+        (select lhs.machine_id as machine_id,
+                lhs.making_year as making_year,
+                lhs.class as class,
+                lhs.team as team,
+                lhs.machine_series as machine_series,
+                lhs.value_points as value_points,
+                lhs.quality_rank as quality_rank,
+                rhs.technician_id as technician_id,
+                rhs.repair_id as repair_id,
+                rhs.machine_id as machine_id.other
+         from df_machine as lhs
+         cross join df_repair_assignment as rhs)
+      where (machine_id = machine_id.other)) as rhs)
+where (technician_id = technician_id.other
+       and technician_id = technician_id.other)`;
+
+verify q1 q2;

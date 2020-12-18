@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/037.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i037.csv
 output: tests-examples/scythe/top_rated_posts/tables/o037.csv
@@ -10,13 +11,12 @@ solution:
   - summarise
   - natural_join
 sql: |
-  select t1.*
-  from
-  (select c2, min(c1) minc1
-   from c2
-   group by c2) t1
-  join t2
-  on t1.minc1 = t2.c1
+  select t1.*, i037.c3
+  from (select c2, min(c1) minc1
+        from i037
+        group by c2) t1
+           join i037
+                on t1.minc1 = i037.c1
 comment: |
   df1 <- df_i037 %>% group_by(c2) %>% summarise(c1 = min(c1)) %>% ungroup()
   df2 <- inner_join(df_i037, df1)

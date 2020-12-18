@@ -1,0 +1,48 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select count(t2.friend)
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t1.name = 'dan'`;
+
+query q2
+`select n_distinct as count.t2.friend.
+from
+  (select count(distinct name) as n_distinct
+   from
+     (select friend as name,
+             friend,
+             year,
+             age,
+             city,
+             gender,
+             job
+      from
+        (select name,
+                friend,
+                year,
+                age,
+                city,
+                gender,
+                name as job
+         from
+           (select lhs.name as name,
+                   lhs.friend as friend,
+                   lhs.year as year,
+                   rhs.age as age,
+                   rhs.city as city,
+                   rhs.gender as gender
+            from
+              (select *
+               from df_personfriend df_personfriend
+               where (name = 'dan'
+                      or friend != 'dan')) as lhs
+            inner join df_person as rhs on (lhs.name = rhs.job
+                                            and lhs.friend = rhs.name)))))`;
+
+verify q1 q2;

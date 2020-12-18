@@ -1,0 +1,65 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+schema df_budget(school_id:int, year:int, budgeted:int, total_budget_percent_budgeted:str, invested:int, total_budget_percent_invested:str, budget_invested_percent:str);
+schema df_endowment(endowment_id:int, school_id:int, donator_name:str, amount:str);
+
+table df_school(df_school);
+table df_budget(df_budget);
+table df_endowment(df_endowment);
+
+query q1
+`select t2.school_name
+from df_budget as t1
+join df_school as t2 on t1.school_id = t2.school_id
+join df_endowment as t3 on t2.school_id = t3.school_id
+group by t2.school_name
+having sum(t1.budgeted) > 100
+or sum(t3.amount) > 10`;
+
+query q2
+`select distinct school_name
+from
+  (select lhs.school_id as school_id,
+          lhs.school_name as school_name,
+          lhs.location as location,
+          lhs.mascot as mascot,
+          lhs.enrollment as enrollment,
+          lhs.ihsaa_class as ihsaa_class,
+          lhs.ihsaa_football_class as ihsaa_football_class,
+          lhs.county as county,
+          lhs.year as year,
+          lhs.budgeted as budgeted,
+          lhs.total_budget_percent_budgeted as total_budget_percent_budgeted,
+          lhs.invested as invested,
+          lhs.total_budget_percent_invested as total_budget_percent_invested,
+          lhs.budget_invested_percent as budget_invested_percent,
+          rhs.amount as amount,
+          rhs.endowment_id as endowment_id,
+          rhs.sumamount as sumamount
+   from
+     (select lhs.school_id as school_id,
+             lhs.school_name as school_name,
+             lhs.location as location,
+             lhs.mascot as mascot,
+             lhs.enrollment as enrollment,
+             lhs.ihsaa_class as ihsaa_class,
+             lhs.ihsaa_football_class as ihsaa_football_class,
+             lhs.county as county,
+             rhs.year as year,
+             rhs.budgeted as budgeted,
+             rhs.total_budget_percent_budgeted as total_budget_percent_budgeted,
+             rhs.invested as invested,
+             rhs.total_budget_percent_invested as total_budget_percent_invested,
+             rhs.budget_invested_percent as budget_invested_percent
+      from df_school as lhs
+      inner join df_budget as rhs on (lhs.school_id = rhs.school_id)) as lhs
+   cross join
+     (select amount,
+             endowment_id,
+             sum(amount) as sumamount
+      from df_endowment df_endowment
+      group by amount,
+               endowment_id) as rhs)
+where (sumamount = 100.0
+       or amount <= 10.0)`;
+
+verify q1 q2;

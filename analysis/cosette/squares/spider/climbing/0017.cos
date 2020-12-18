@@ -1,0 +1,38 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_climber(climber_id:int, name:str, country:str, time:str, points:str, mountain_id:int);
+
+table df_mountain(df_mountain);
+table df_climber(df_climber);
+
+query q1
+`select name
+from df_mountain df_mountain
+where mountain_id not in
+    (select mountain_id
+     from df_climber df_climber)`;
+
+query q2
+`joining, by = "mountain_id"
+joining, by = "mountain_id"
+select distinct name
+from
+  (select mountain_id,
+          name,
+          height,
+          prominence,
+          range,
+          country
+   from
+     (select *
+      from
+        (select mountain_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select mountain_id
+              from input1) as rhs
+           where (lhs.mountain_id = rhs.mountain_id) )) as lhs
+   inner join input0 as rhs on (lhs.mountain_id = rhs.mountain_id))`;
+
+verify q1 q2;

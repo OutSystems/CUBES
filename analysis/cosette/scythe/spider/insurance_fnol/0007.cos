@@ -1,0 +1,20 @@
+schema df_services(service_id:int, service_name:str);
+schema df_first_notification_of_loss(fnol_id:int, customer_id:int, policy_id:int, service_id:int);
+
+table df_services(df_services);
+table df_first_notification_of_loss(df_first_notification_of_loss);
+
+query q1
+`select t2.service_name
+from df_first_notification_of_loss as t1
+join df_services as t2 on t1.service_id = t2.service_id
+group by t1.service_id
+having count(*) > 2`;
+
+query q2
+`(select
+    first(t1.service_name) as first_service_name
+  from
+    input as t1) as t2`;
+
+verify q1 q2;

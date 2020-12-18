@@ -1,0 +1,24 @@
+schema df_stadium(id:int, name:str, home_games:int, average_attendance:str, total_attendance:str, capacity_percentage:str);
+
+table df_stadium(df_stadium);
+
+query q1
+`select name
+from df_stadium df_stadium
+where name like "%bank%"`;
+
+query q2
+`select t2.name
+ from
+  (select
+          avg(t3.average_attendance) as avg_average_attendance
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.name = 'bank'
+           or input.id < input.home_games) as t4 as t2
+ where t2.avg_average_attendance > t2.average_attendance`;
+
+verify q1 q2;

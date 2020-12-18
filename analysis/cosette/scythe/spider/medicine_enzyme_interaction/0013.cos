@@ -1,0 +1,31 @@
+schema df_medicine_enzyme_interaction(enzyme_id:int, medicine_id:int, interaction_type:str);
+
+table df_medicine_enzyme_interaction(df_medicine_enzyme_interaction);
+
+query q1
+`select interaction_type,
+       count(*)
+from df_medicine_enzyme_interaction df_medicine_enzyme_interaction
+group by interaction_type
+
+limit 1`;
+
+query q2
+`select t3.interaction_type,t3.count_interaction_type
+ from
+  (select t4.interaction_type, t4.count_interaction_type, t1.enzyme_id, t1.medicine_id, t1.interaction_type as interaction_type1
+  from (select *
+       from
+        (select
+            t2.interaction_type, count(t2.interaction_type) as count_interaction_type
+          from
+            input as t2
+          group by
+            t2.interaction_type) as t4
+       where t4.count_interaction_type = 11.0) join 
+      (select *
+         from
+          input
+         where input.enzyme_id = 6.0) as t1) as t3`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_artist(artist_id:int, artist:str, age:int, famous_title:str, famous_release_date:str);
+schema df_volume(volume_id:int, volume_issue:str, issue_date:str, weeks_on_top:str, song:str, artist_id:int);
+
+table df_artist(df_artist);
+table df_volume(df_volume);
+
+query q1
+`select issue_date
+from df_artist as t1
+join df_volume as t2 on t1.artist_id = t2.artist_id
+where t1.age <= 23`;
+
+query q2
+`joining, by = "artist_id"
+select issue_date
+from
+  (select volume_id,
+          volume_issue,
+          issue_date,
+          weeks_on_top,
+          song,
+          artist_id,
+          artist,
+          age,
+          famous_title,
+          famous_release_date
+   from input1 as lhs
+   left join input0 as rhs on (lhs.artist_id = rhs.artist_id))
+where (age < 23.0)`;
+
+verify q1 q2;

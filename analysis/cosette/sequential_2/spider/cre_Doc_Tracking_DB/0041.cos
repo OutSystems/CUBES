@@ -1,0 +1,50 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, gender_mfu:str, date_of_birth:str, other_details:str);
+schema df_documents_to_be_destroyed(document_id:int, destruction_authorised_by_employee_id:int, destroyed_by_employee_id:int, planned_destruction_date:str, actual_destruction_date:str, other_details:str);
+
+table df_employees(df_employees);
+table df_documents_to_be_destroyed(df_documents_to_be_destroyed);
+
+query q1
+`select employee_id
+from df_employees df_employees
+except
+select destruction_authorised_by_employee_id
+from df_documents_to_be_destroyed df_documents_to_be_destroyed`;
+
+query q2
+`select employee_id
+from
+  (select *
+   from df_employees as lhs
+   where not exists
+       (select 1
+        from
+          (select document_id,
+                  destruction_authorised_by_employee_id,
+                  destroyed_by_employee_id,
+                  planned_destruction_date,
+                  actual_destruction_date,
+                  other_details,
+                  role_code,
+                  employee_name,
+                  gender_mfu,
+                  date_of_birth,
+                  destruction_authorised_by_employee_id as employee_id
+           from
+             (select lhs.document_id as document_id,
+                     lhs.destruction_authorised_by_employee_id as destruction_authorised_by_employee_id,
+                     lhs.destroyed_by_employee_id as destroyed_by_employee_id,
+                     lhs.planned_destruction_date as planned_destruction_date,
+                     lhs.actual_destruction_date as actual_destruction_date,
+                     lhs.other_details as other_details,
+                     rhs.role_code as role_code,
+                     rhs.employee_name as employee_name,
+                     rhs.gender_mfu as gender_mfu,
+                     rhs.date_of_birth as date_of_birth
+              from df_documents_to_be_destroyed as lhs
+              inner join df_employees as rhs on (lhs.destruction_authorised_by_employee_id = rhs.employee_id
+                                                 and lhs.other_details = rhs.other_details))) as rhs
+        where (lhs.date_of_birth = rhs.date_of_birth
+               and lhs.gender_mfu = rhs.gender_mfu) ))`;
+
+verify q1 q2;

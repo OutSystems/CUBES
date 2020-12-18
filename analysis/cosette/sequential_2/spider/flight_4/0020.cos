@@ -1,0 +1,33 @@
+schema df_airlines(alid:int, name:str, iata:str, icao:str, callsign:str, country:str, active:str);
+
+table df_airlines(df_airlines);
+
+query q1
+`select country
+from df_airlines df_airlines
+group by country
+
+limit 1`;
+
+query q2
+`select distinct country
+from
+  (select lhs.alid as alid,
+          lhs.name as name,
+          lhs.iata as iata,
+          lhs.icao as icao,
+          lhs.callsign as callsign,
+          lhs.country as country,
+          lhs.active as active,
+          rhs.icao as icao.other
+   from df_airlines as lhs
+   inner join
+     (select iata,
+             icao,
+             count(*) as n
+      from df_airlines df_airlines
+      group by iata,
+               icao) as rhs on (lhs.alid = rhs.n
+                                and lhs.iata = rhs.iata))`;
+
+verify q1 q2;

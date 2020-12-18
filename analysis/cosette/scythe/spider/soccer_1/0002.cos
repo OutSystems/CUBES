@@ -1,0 +1,25 @@
+schema df_league(id:int, country_id:int, name:str);
+schema df_country(id:int, name:str);
+
+table df_league(df_league);
+table df_country(df_country);
+
+query q1
+`select count(*)
+from df_country as t1
+join df_league as t2 on t1.id = t2.country_id
+where t1.name = "england"`;
+
+query q2
+`select t1.min_id
+ from
+  (select
+          min(t4.id) as min_id
+        from
+          input0 as t4) as t3 join 
+      (select *
+         from
+          input0
+         where input0.name = 'england') as t2 as t1`;
+
+verify q1 q2;

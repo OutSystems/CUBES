@@ -1,0 +1,82 @@
+schema df_customer(customerid:int, firstname:str, lastname:str, company:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str, supportrepid:int);
+schema df_invoice(invoiceid:int, customerid:int, invoicedate:str, billingaddress:str, billingcity:str, billingstate:str, billingcountry:str, billingpostalcode:str, total:str);
+
+table df_customer(df_customer);
+table df_invoice(df_invoice);
+
+query q1
+`select t2.invoicedate
+from df_customer as t1
+join df_invoice as t2 on t1.customerid = t2.customerid
+where t1.firstname = "astrid"
+  and lastname = "gruber"`;
+
+query q2
+`joining, by = "customerid"
+joining, by = c("customerid", "firstname", "lastname", "company", "address", "city", "state", "country", "postalcode", "phone", "fax", "email", "supportrepid")
+select distinct invoicedate
+from
+  (select invoiceid,
+          customerid,
+          invoicedate,
+          billingaddress,
+          billingcity,
+          billingstate,
+          billingcountry,
+          billingpostalcode,
+          total,
+          firstname,
+          lastname,
+          company,
+          address,
+          city,
+          state,
+          country,
+          postalcode,
+          phone,
+          fax,
+          email,
+          supportrepid
+   from
+     (select invoiceid,
+             customerid,
+             invoicedate,
+             billingaddress,
+             billingcity,
+             billingstate,
+             billingcountry,
+             billingpostalcode,
+             total,
+             firstname,
+             lastname,
+             company,
+             address,
+             city,
+             state,
+             country,
+             postalcode,
+             phone,
+             fax,
+             email,
+             supportrepid
+      from input1 as lhs
+      inner join input0 as rhs on (lhs.customerid = rhs.customerid)) as lhs
+   inner join
+     (select *
+      from input0
+      where (firstname = 'astrid'
+             or lastname = 'gruber')) as rhs on (lhs.customerid = rhs.customerid
+                                                     and lhs.firstname = rhs.firstname
+                                                     and lhs.lastname = rhs.lastname
+                                                     and lhs.company = rhs.company
+                                                     and lhs.address = rhs.address
+                                                     and lhs.city = rhs.city
+                                                     and lhs.state = rhs.state
+                                                     and lhs.country = rhs.country
+                                                     and lhs.postalcode = rhs.postalcode
+                                                     and lhs.phone = rhs.phone
+                                                     and lhs.fax = rhs.fax
+                                                     and lhs.email = rhs.email
+                                                     and lhs.supportrepid = rhs.supportrepid))`;
+
+verify q1 q2;

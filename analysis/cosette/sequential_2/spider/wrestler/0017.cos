@@ -1,0 +1,24 @@
+schema df_wrestler(wrestler_id:int, name:str, reign:int, days_held:int, location:str, event:str);
+schema df_elimination(elimination_id:int, wrestler_id:int, team:str, eliminated_by:str, elimination_move:str, time:str);
+
+table df_wrestler(df_wrestler);
+table df_elimination(df_elimination);
+
+query q1
+`select name
+from df_wrestler df_wrestler
+where wrestler_id not in
+    (select wrestler_id
+     from df_elimination df_elimination)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_wrestler as lhs
+   where not exists
+       (select 1
+        from df_elimination as rhs
+        where (lhs.wrestler_id = rhs.wrestler_id) ))`;
+
+verify q1 q2;

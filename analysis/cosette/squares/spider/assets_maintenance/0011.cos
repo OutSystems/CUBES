@@ -1,0 +1,29 @@
+schema df_fault_log(fault_log_entry_id:int, asset_id:int, recorded_by_staff_id:int, fault_log_entry_datetime:str, fault_description:str, other_fault_details:str);
+schema df_fault_log_parts(fault_log_entry_id:int, part_fault_id:int, fault_status:str);
+
+table df_fault_log(df_fault_log);
+table df_fault_log_parts(df_fault_log_parts);
+
+query q1
+`select t1.fault_description,
+       t2.fault_status
+from df_fault_log as t1
+join df_fault_log_parts as t2 on t1.fault_log_entry_id = t2.fault_log_entry_id`;
+
+query q2
+`joining, by = "fault_log_entry_id"
+select fault_description,
+       fault_status
+from
+  (select fault_log_entry_id,
+          part_fault_id,
+          fault_status,
+          asset_id,
+          recorded_by_staff_id,
+          fault_log_entry_datetime,
+          fault_description,
+          other_fault_details
+   from input1 as lhs
+   left join input0 as rhs on (lhs.fault_log_entry_id = rhs.fault_log_entry_id))`;
+
+verify q1 q2;

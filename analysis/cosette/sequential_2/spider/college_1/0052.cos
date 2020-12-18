@@ -1,0 +1,80 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_class(df_class);
+table df_department(df_department);
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t1.emp_fname
+from df_employee as t1
+join df_professor as t2 on t1.emp_num = t2.emp_num
+join df_department as t3 on t2.dept_code = t3.dept_code
+where t3.dept_name = 'history'
+except
+select t4.emp_fname
+from df_employee as t4
+join df_class as t5 on t4.emp_num = t5.prof_num`;
+
+query q2
+`select distinct emp_fname
+from
+  (select lhs.class_code as class_code,
+          lhs.crs_code as crs_code,
+          lhs.class_section as class_section,
+          lhs.class_time as class_time,
+          lhs.class_room as class_room,
+          lhs.prof_num as prof_num,
+          lhs.emp_num as emp_num,
+          lhs.emp_lname as emp_lname,
+          lhs.emp_fname as emp_fname,
+          lhs.emp_initial as emp_initial,
+          lhs.emp_jobcode as emp_jobcode,
+          lhs.emp_hiredate as emp_hiredate,
+          lhs.emp_dob as emp_dob,
+          rhs.dept_code as dept_code,
+          rhs.prof_office as prof_office,
+          rhs.prof_extension as prof_extension,
+          rhs.prof_high_degree as prof_high_degree,
+          rhs.dept_name as dept_name,
+          rhs.school_code as school_code,
+          rhs.emp_num.other as emp_num.other,
+          rhs.dept_address as dept_address,
+          rhs.dept_extension as dept_extension
+   from
+     (select lhs.class_code as class_code,
+             lhs.crs_code as crs_code,
+             lhs.class_section as class_section,
+             lhs.class_time as class_time,
+             lhs.class_room as class_room,
+             lhs.prof_num as prof_num,
+             rhs.emp_num as emp_num,
+             rhs.emp_lname as emp_lname,
+             rhs.emp_fname as emp_fname,
+             rhs.emp_initial as emp_initial,
+             rhs.emp_jobcode as emp_jobcode,
+             rhs.emp_hiredate as emp_hiredate,
+             rhs.emp_dob as emp_dob
+      from df_class as lhs
+      cross join df_employee as rhs) as lhs
+   inner join
+     (select lhs.emp_num as emp_num,
+             lhs.dept_code as dept_code,
+             lhs.prof_office as prof_office,
+             lhs.prof_extension as prof_extension,
+             lhs.prof_high_degree as prof_high_degree,
+             rhs.dept_name as dept_name,
+             rhs.school_code as school_code,
+             rhs.emp_num as emp_num.other,
+             rhs.dept_address as dept_address,
+             rhs.dept_extension as dept_extension
+      from df_professor as lhs
+      inner join
+        (select *
+         from df_department df_department
+         where (dept_name = 'history')) as rhs on (lhs.dept_code = rhs.dept_code)) as rhs on (lhs.emp_num = rhs.emp_num))`;
+
+verify q1 q2;

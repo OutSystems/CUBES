@@ -1,0 +1,42 @@
+schema df_parts(part_id:int, part_name:str, chargeable_yn:int, chargeable_amount:int, other_part_details:str);
+schema df_part_faults(part_fault_id:int, part_id:int, fault_short_name:str, fault_description:str, other_fault_details:str);
+
+table df_parts(df_parts);
+table df_part_faults(df_part_faults);
+
+query q1
+`select t1.part_name
+from df_parts as t1
+join df_part_faults as t2 on t1.part_id = t2.part_id
+group by t1.part_name
+
+limit 1`;
+
+query q2
+`select part_name
+from
+  (select part_fault_id,
+          part_id,
+          n,
+          part_name,
+          chargeable_amount,
+          other_part_details,
+          part_id as chargeable_yn
+   from
+     (select lhs.part_fault_id as part_fault_id,
+             lhs.part_id as part_id,
+             lhs.n as n,
+             rhs.part_name as part_name,
+             rhs.chargeable_amount as chargeable_amount,
+             rhs.other_part_details as other_part_details
+      from
+        (select part_fault_id,
+                part_id,
+                count(*) as n
+         from df_part_faults df_part_faults
+         group by part_fault_id,
+                  part_id) as lhs
+      inner join df_parts as rhs on (lhs.part_id = rhs.chargeable_yn
+                                     and lhs.part_fault_id = rhs.part_id)))`;
+
+verify q1 q2;

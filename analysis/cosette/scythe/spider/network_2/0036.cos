@@ -1,0 +1,27 @@
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_personfriend(df_personfriend);
+
+query q1
+`select friend
+from df_personfriend df_personfriend
+where name = 'zach'
+  and year =
+    (select max(year)
+     from df_personfriend df_personfriend
+     where name = 'zach')`;
+
+query q2
+`select t1.first_friend
+ from
+  (select
+      t2.name, first(t2.friend) as first_friend
+    from
+      (select *
+         from
+          input
+         where input.name = 'zach') as t2
+    group by
+      t2.name) as t1`;
+
+verify q1 q2;

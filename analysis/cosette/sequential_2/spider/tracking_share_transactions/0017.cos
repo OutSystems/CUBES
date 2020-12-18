@@ -1,0 +1,22 @@
+schema df_lots(lot_id:int, investor_id:int, lot_details:str);
+
+table df_lots(df_lots);
+
+query q1
+`select lot_details,
+       investor_id
+from df_lots df_lots`;
+
+query q2
+`select lot_details,
+       investor_id
+from
+  (select lhs.lot_id as lot_id,
+          lhs.investor_id as investor_id,
+          lhs.lot_details as lot_details,
+          rhs.lot_id as lot_id.other
+   from df_lots as lhs
+   inner join df_lots as rhs on (lhs.investor_id = rhs.investor_id
+                                 and lhs.lot_details = rhs.lot_details))`;
+
+verify q1 q2;

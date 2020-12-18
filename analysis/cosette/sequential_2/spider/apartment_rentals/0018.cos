@@ -1,0 +1,53 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+schema df_apartment_bookings(apt_booking_id:int, apt_id:int, guest_id:int, booking_status_code:str, booking_start_date:str, booking_end_date:str);
+
+table df_apartments(df_apartments);
+table df_apartment_bookings(df_apartment_bookings);
+
+query q1
+`select distinct t2.apt_number
+from df_apartment_bookings as t1
+join df_apartments as t2 on t1.apt_id = t2.apt_id
+where t1.booking_status_code = "confirmed"`;
+
+query q2
+`select distinct apt_number
+from
+  (select lhs.apt_id as apt_id,
+          lhs.building_id as building_id,
+          lhs.apt_type_code as apt_type_code,
+          lhs.apt_number as apt_number,
+          lhs.bathroom_count as bathroom_count,
+          lhs.bedroom_count as bedroom_count,
+          lhs.room_count as room_count,
+          lhs.apt_booking_id as apt_booking_id,
+          lhs.guest_id as guest_id,
+          lhs.booking_status_code as booking_status_code,
+          lhs.booking_start_date as booking_start_date,
+          lhs.booking_end_date as booking_end_date
+   from
+     (select lhs.apt_id as apt_id,
+             lhs.building_id as building_id,
+             lhs.apt_type_code as apt_type_code,
+             lhs.apt_number as apt_number,
+             lhs.bathroom_count as bathroom_count,
+             lhs.bedroom_count as bedroom_count,
+             lhs.room_count as room_count,
+             rhs.apt_booking_id as apt_booking_id,
+             rhs.guest_id as guest_id,
+             rhs.booking_status_code as booking_status_code,
+             rhs.booking_start_date as booking_start_date,
+             rhs.booking_end_date as booking_end_date
+      from df_apartments as lhs
+      inner join df_apartment_bookings as rhs on (lhs.apt_id = rhs.apt_id)) as lhs
+   inner join
+     (select *
+      from df_apartment_bookings df_apartment_bookings
+      where (booking_status_code = 'confirmed')) as rhs on (lhs.apt_id = rhs.apt_id
+                                                              and lhs.apt_booking_id = rhs.apt_booking_id
+                                                              and lhs.guest_id = rhs.guest_id
+                                                              and lhs.booking_status_code = rhs.booking_status_code
+                                                              and lhs.booking_start_date = rhs.booking_start_date
+                                                              and lhs.booking_end_date = rhs.booking_end_date))`;
+
+verify q1 q2;

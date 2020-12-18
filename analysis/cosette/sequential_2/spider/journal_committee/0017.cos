@@ -1,0 +1,38 @@
+schema df_journal(journal_id:int, date:str, theme:str, sales:int);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_journal(df_journal);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select avg(t1.sales)
+from df_journal as t1
+join df_journal_committee as t2 on t1.journal_id = t2.journal_id
+where t2.work_type = 'photo'`;
+
+query q2
+`select distinct avg(sales) over () as avg.t1.sales.
+from
+  (select lhs.journal_id as journal_id,
+          lhs.date as date,
+          lhs.theme as theme,
+          lhs.sales as sales,
+          lhs.editor_id as editor_id,
+          lhs.work_type as work_type
+   from
+     (select lhs.journal_id as journal_id,
+             lhs.date as date,
+             lhs.theme as theme,
+             lhs.sales as sales,
+             rhs.editor_id as editor_id,
+             rhs.work_type as work_type
+      from df_journal as lhs
+      inner join df_journal_committee as rhs on (lhs.journal_id = rhs.journal_id)) as lhs
+   inner join
+     (select *
+      from df_journal_committee df_journal_committee
+      where (work_type = 'photo')) as rhs on (lhs.journal_id = rhs.journal_id
+                                                and lhs.editor_id = rhs.editor_id
+                                                and lhs.work_type = rhs.work_type))`;
+
+verify q1 q2;

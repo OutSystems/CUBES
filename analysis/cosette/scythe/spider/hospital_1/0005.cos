@@ -1,0 +1,28 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_appointment(appointmentid:int, patient:int, prepnurse:str, physician:int, start:str, end:str, examinationroom:str);
+
+table df_patient(df_patient);
+table df_appointment(df_appointment);
+
+query q1
+`select name,
+       phone
+from df_appointment as t1
+join df_patient as t2 on t1.df_patient = t2.ssn
+group by t1.df_patient
+having count(*) > 1`;
+
+query q2
+`select t4.name,t4.phone
+ from
+  (select t3.pcp, t3.min_insuranceid, t2.ssn, t2.name, t2.address, t2.phone, t2.insuranceid, t2.pcp as pcp1
+  from (select
+          t1.pcp, min(t1.insuranceid) as min_insuranceid
+        from
+          input as t1
+        group by
+          t1.pcp) as t3 join 
+      input as t2) as t4
+ where t4.min_insuranceid = t4.insuranceid`;
+
+verify q1 q2;

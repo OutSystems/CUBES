@@ -1,0 +1,23 @@
+schema df_plays_games(stuid:int, gameid:int, hours_played:int);
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_plays_games(df_plays_games);
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select stuid
+from df_sportsinfo df_sportsinfo intersect
+select stuid
+from df_plays_games df_plays_games`;
+
+query q2
+`select distinct stuid
+from
+  (select *
+   from df_plays_games as lhs
+   where exists
+       (select 1
+        from df_sportsinfo as rhs
+        where (lhs.stuid = rhs.stuid) ))`;
+
+verify q1 q2;

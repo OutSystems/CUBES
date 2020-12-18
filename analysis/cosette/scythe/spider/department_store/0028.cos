@@ -1,0 +1,24 @@
+schema df_addresses(address_id:int, address_details:str);
+schema df_suppliers(supplier_id:int, supplier_name:str, supplier_phone:str);
+schema df_supplier_addresses(supplier_id:int, address_id:int, date_from:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_suppliers(df_suppliers);
+table df_supplier_addresses(df_supplier_addresses);
+
+query q1
+`select t1.supplier_name,
+       t1.supplier_phone
+from df_suppliers as t1
+join df_supplier_addresses as t2 on t1.supplier_id = t2.supplier_id
+join df_addresses as t3 on t2.address_id = t3.address_id`;
+
+query q2
+`select t2.supplier_name,t2.supplier_phone
+ from
+  (select input0.supplier_id, input0.supplier_name, input0.supplier_phone, t3.supplier_id as supplier_id1, t3.address_id, t3.date_from, t3.date_to
+  from input0 join 
+      input1 as t3) as t2
+ where t2.supplier_id = t2.supplier_id1`;
+
+verify q1 q2;

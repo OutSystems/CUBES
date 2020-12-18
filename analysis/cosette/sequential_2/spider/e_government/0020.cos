@@ -1,0 +1,28 @@
+schema df_individuals(individual_id:int, individual_first_name:str, individual_middle_name:str, inidividual_phone:str, individual_email:str, individual_address:str, individual_last_name:str);
+schema df_organization_contact_individuals(individual_id:int, organization_id:int, date_contact_from:str, date_contact_to:str);
+
+table df_individuals(df_individuals);
+table df_organization_contact_individuals(df_organization_contact_individuals);
+
+query q1
+`select distinct t1.individual_last_name
+from df_individuals as t1
+join df_organization_contact_individuals as t2 on t1.individual_id = t2.individual_id`;
+
+query q2
+`select distinct individual_last_name
+from
+  (select lhs.individual_id as individual_id,
+          lhs.individual_first_name as individual_first_name,
+          lhs.individual_middle_name as individual_middle_name,
+          lhs.inidividual_phone as inidividual_phone,
+          lhs.individual_email as individual_email,
+          lhs.individual_address as individual_address,
+          lhs.individual_last_name as individual_last_name,
+          rhs.organization_id as organization_id,
+          rhs.date_contact_from as date_contact_from,
+          rhs.date_contact_to as date_contact_to
+   from df_individuals as lhs
+   inner join df_organization_contact_individuals as rhs on (lhs.individual_id = rhs.individual_id))`;
+
+verify q1 q2;

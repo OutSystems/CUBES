@@ -1,0 +1,27 @@
+schema df_manufacturer(manufacturer_id:int, open_year:str, name:str, num_of_factories:int, num_of_shops:int);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_manufacturer(df_manufacturer);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select count(*),
+       t1.name
+from df_manufacturer as t1
+join df_furniture_manufacte as t2 on t1.manufacturer_id = t2.manufacturer_id
+group by t1.manufacturer_id`;
+
+query q2
+`select t3.count_furniture_id,t3.name
+ from
+  (select t4.manufacturer_id, t4.count_furniture_id, t1.manufacturer_id as manufacturer_id1, t1.open_year, t1.name, t1.num_of_factories, t1.num_of_shops
+  from (select
+          t2.manufacturer_id, count(t2.furniture_id) as count_furniture_id
+        from
+          input0 as t2
+        group by
+          t2.manufacturer_id) as t4 join 
+      input as t1) as t3
+ where t3.manufacturer_id = t3.manufacturer_id1`;
+
+verify q1 q2;

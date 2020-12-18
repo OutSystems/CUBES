@@ -1,0 +1,52 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty(df_faculty);
+
+query q1
+`select building
+from df_faculty df_faculty
+group by building
+
+limit 1`;
+
+query q2
+`select building
+from
+  (select building,
+          count(*) as n
+   from
+     (select facid,
+             fname as lname,
+             fname,
+             rank,
+             sex,
+             phone,
+             room,
+             building,
+             facid.other,
+             fname.other,
+             rank.other,
+             sex.other,
+             phone.other,
+             room.other
+      from
+        (select lhs.facid as facid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.rank as rank,
+                lhs.sex as sex,
+                lhs.phone as phone,
+                lhs.room as room,
+                lhs.building as building,
+                rhs.facid as facid.other,
+                rhs.fname as fname.other,
+                rhs.rank as rank.other,
+                rhs.sex as sex.other,
+                rhs.phone as phone.other,
+                rhs.room as room.other
+         from df_faculty as lhs
+         inner join df_faculty as rhs on (lhs.fname = rhs.lname
+                                          and lhs.building = rhs.building)))
+   group by building)`;
+
+verify q1 q2;

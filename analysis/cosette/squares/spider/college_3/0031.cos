@@ -1,0 +1,32 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_minor_in(stuid:int, dno:int);
+
+table df_student(df_student);
+table df_minor_in(df_minor_in);
+
+query q1
+`select t2.fname,
+       t2.lname
+from df_minor_in as t1
+join df_student as t2 on t1.stuid = t2.stuid
+where t1.dno = 140`;
+
+query q2
+`joining, by = "stuid"
+select fname,
+       lname
+from
+  (select stuid,
+          dno,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code
+   from input1 as lhs
+   left join input0 as rhs on (lhs.stuid = rhs.stuid))
+where (dno = 140.0)`;
+
+verify q1 q2;

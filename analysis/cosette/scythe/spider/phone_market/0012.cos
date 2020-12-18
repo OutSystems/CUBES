@@ -1,0 +1,28 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_market(market_id:int, district:str, num_of_employees:int, num_of_shops:str, ranking:int);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_market(df_market);
+table df_phone_market(df_phone_market);
+
+query q1
+`select t3.name
+from df_phone_market as t1
+join df_market as t2 on t1.market_id = t2.market_id
+join df_phone as t3 on t1.phone_id = t3.phone_id
+where t2.num_of_shops > 50`;
+
+query q2
+`select t4.name
+ from
+  (select
+          t3.market_id, avg(t3.phone_id) as avg_phone_id
+        from
+          input1 as t3
+        group by
+          t3.market_id) as t5 join 
+      input as t2 as t4
+ where t4.avg_phone_id = t4.phone_id`;
+
+verify q1 q2;

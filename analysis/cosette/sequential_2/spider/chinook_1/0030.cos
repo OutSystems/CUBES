@@ -1,0 +1,30 @@
+schema df_mediatype(mediatypeid:int, name:str);
+schema df_track(trackid:int, name:str, albumid:int, mediatypeid:int, genreid:int, composer:str, milliseconds:int, bytes:int, unitprice:str);
+
+table df_mediatype(df_mediatype);
+table df_track(df_track);
+
+query q1
+`select count(*)
+from df_mediatype as t1
+join df_track as t2 on t1.mediatypeid = t2.mediatypeid
+where t1.name = "aac audio file"`;
+
+query q2
+`select n as count...
+from
+  (select *
+   from
+     (select mediatypeid,
+             count(*) as n
+      from df_track df_track
+      group by mediatypeid) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_mediatype df_mediatype
+           where (name != 'aac audio file')) as rhs
+        where (lhs.mediatypeid = rhs.mediatypeid) ))`;
+
+verify q1 q2;

@@ -1,0 +1,43 @@
+schema df_scientists(ssn:int, name:str);
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_scientists(df_scientists);
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select name
+from df_scientists df_scientists
+except
+select t3.name
+from df_assignedto as t1
+join df_projects as t2 on t1.project = t2.code
+join df_scientists as t3 on t1.scientist = t3.ssn
+where t2.hours =
+    (select max(hours)
+     from df_projects df_projects)`;
+
+query q2
+`select distinct name
+from
+  (select lhs.ssn as ssn,
+          lhs.name as name,
+          lhs.scientist as scientist,
+          lhs.project as project,
+          rhs.code as code,
+          rhs.hours as hours
+   from
+     (select lhs.ssn as ssn,
+             lhs.name as name,
+             rhs.scientist as scientist,
+             rhs.project as project
+      from df_scientists as lhs
+      cross join df_assignedto as rhs) as lhs
+   cross join
+     (select code,
+             max(hours) as hours
+      from df_projects df_projects
+      group by code) as rhs)`;
+
+verify q1 q2;

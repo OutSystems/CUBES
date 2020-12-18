@@ -1,0 +1,34 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_business_rates(business_rates_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_business_rates(df_business_rates);
+
+query q1
+`select t2.cmi_cross_ref_id,
+       t2.master_customer_id,
+       count(*)
+from df_business_rates as t1
+join df_cmi_cross_references as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+group by t2.cmi_cross_ref_id`;
+
+query q2
+`select t3.cmi_cross_ref_id,t3.master_customer_id1,t3.count_master_customer_id
+ from
+  (select t2.master_customer_id, t2.source_system_code, t2.count_master_customer_id, t1.cmi_cross_ref_id, t1.master_customer_id as master_customer_id1, t1.source_system_code as source_system_code1
+  from (select *
+       from
+        (select
+            t4.master_customer_id, t4.source_system_code, count(t4.master_customer_id) as count_master_customer_id
+          from
+            (select *
+               from
+                input
+               where input.master_customer_id < 3.0) as t4
+          group by
+            t4.master_customer_id, t4.source_system_code) as t2
+       where t2.count_master_customer_id < t2.master_customer_id) join 
+      input as t1) as t3
+ where t3.source_system_code = t3.source_system_code1`;
+
+verify q1 q2;

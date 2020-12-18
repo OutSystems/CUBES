@@ -1,0 +1,30 @@
+schema df_building(building_id:int, name:str, street_address:str, years_as_tallest:str, height_feet:int, floors:int);
+
+table df_building(df_building);
+
+query q1
+`select name,
+       street_address,
+       floors
+from df_building df_building`;
+
+query q2
+`select name,
+       street_address,
+       floors
+from
+  (select lhs.building_id as building_id,
+          lhs.name as name,
+          lhs.street_address as street_address,
+          lhs.years_as_tallest as years_as_tallest,
+          lhs.height_feet as height_feet,
+          lhs.floors as floors,
+          rhs.building_id as building_id.other,
+          rhs.years_as_tallest as years_as_tallest.other,
+          rhs.height_feet as height_feet.other,
+          rhs.floors as floors.other
+   from df_building as lhs
+   inner join df_building as rhs on (lhs.name = rhs.name
+                                     and lhs.street_address = rhs.street_address))`;
+
+verify q1 q2;

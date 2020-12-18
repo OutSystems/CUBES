@@ -1,0 +1,55 @@
+schema df_investors(investor_id:int, investor_details:str);
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+
+table df_investors(df_investors);
+table df_transactions(df_transactions);
+
+query q1
+`select t2.investor_id,
+       t1.investor_details
+from df_investors as t1
+join df_transactions as t2 on t1.investor_id = t2.investor_id
+where t2.transaction_type_code = "sale"
+group by t2.investor_id
+having count(*) >= 2`;
+
+query q2
+`joining, by = c("investor_id", "transaction_type_code")
+joining, by = "investor_id"
+select distinct investor_id,
+                investor_details
+from
+  (select transaction_id,
+          investor_id,
+          transaction_type_code,
+          date_of_transaction,
+          amount_of_transaction,
+          share_count,
+          other_details,
+          n,
+          investor_details
+   from
+     (select transaction_id,
+             investor_id,
+             transaction_type_code,
+             date_of_transaction,
+             amount_of_transaction,
+             share_count,
+             other_details,
+             n
+      from input1 as lhs
+      inner join
+        (select *
+         from
+           (select investor_id,
+                   transaction_type_code,
+                   count(*) as n
+            from input1
+            group by investor_id,
+                     transaction_type_code)
+         where (transaction_type_code = 'sale'
+                and n >= 2.0)) as rhs on (lhs.investor_id = rhs.investor_id
+                                              and lhs.transaction_type_code = rhs.transaction_type_code)) as lhs
+   inner join input0 as rhs on (lhs.investor_id = rhs.investor_id))`;
+
+verify q1 q2;

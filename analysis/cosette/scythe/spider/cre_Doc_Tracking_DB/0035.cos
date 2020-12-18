@@ -1,0 +1,23 @@
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_document_locations(df_document_locations);
+
+query q1
+`select location_code
+from df_document_locations df_document_locations
+group by location_code
+
+limit 1`;
+
+query q2
+`select t1.location_code
+ from
+  (select
+      t2.location_code, t2.date_in_locaton_to, concat(t2.location_code) as concat_location_code
+    from
+      input as t2
+    group by
+      t2.location_code, t2.date_in_locaton_to) as t1
+ where t1.concat_location_code <> t1.location_code`;
+
+verify q1 q2;

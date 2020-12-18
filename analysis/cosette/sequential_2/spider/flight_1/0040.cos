@@ -1,0 +1,24 @@
+schema df_employee(eid:int, name:str, salary:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_employee(df_employee);
+table df_certificate(df_certificate);
+
+query q1
+`select eid
+from df_employee df_employee
+except
+select eid
+from df_certificate df_certificate`;
+
+query q2
+`select eid
+from
+  (select *
+   from df_employee as lhs
+   where not exists
+       (select 1
+        from df_certificate as rhs
+        where (lhs.eid = rhs.eid) ))`;
+
+verify q1 q2;

@@ -1,0 +1,33 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select count(*)
+from df_ref_colors df_ref_colors
+where color_code not in
+    (select color_code
+     from df_products df_products)`;
+
+query q2
+`select color_code as count...
+from
+  (select lhs.color_code as color_code,
+          lhs.product_category_code as product_category_code,
+          lhs.n as n,
+          rhs.color_code as color_code.other,
+          rhs.color_description as color_description
+   from
+     (select color_code,
+             product_category_code,
+             count(*) as n
+      from df_products df_products
+      group by color_code,
+               product_category_code) as lhs
+   cross join df_ref_colors as rhs)
+where (color_code <= n
+       and n > color_code.other)`;
+
+verify q1 q2;

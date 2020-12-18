@@ -1,0 +1,48 @@
+schema df_project_outcomes(project_id:int, outcome_code:str, outcome_details:str);
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+schema df_research_outcomes(outcome_code:str, outcome_description:str);
+
+table df_project_outcomes(df_project_outcomes);
+table df_projects(df_projects);
+table df_research_outcomes(df_research_outcomes);
+
+query q1
+`select t1.outcome_description
+from df_research_outcomes as t1
+join df_project_outcomes as t2 on t1.outcome_code = t2.outcome_code
+join df_projects as t3 on t2.project_id = t3.project_id
+where t3.project_details = 'sint'`;
+
+query q2
+`select outcome_description
+from
+  (select lhs.project_id as project_id,
+          lhs.outcome_code as outcome_code,
+          lhs.outcome_details as outcome_details,
+          lhs.organisation_id as organisation_id,
+          lhs.project_details as project_details,
+          lhs.outcome_description as outcome_description
+   from
+     (select lhs.project_id as project_id,
+             lhs.outcome_code as outcome_code,
+             lhs.outcome_details as outcome_details,
+             lhs.organisation_id as organisation_id,
+             lhs.project_details as project_details,
+             rhs.outcome_description as outcome_description
+      from
+        (select lhs.project_id as project_id,
+                lhs.outcome_code as outcome_code,
+                lhs.outcome_details as outcome_details,
+                rhs.organisation_id as organisation_id,
+                rhs.project_details as project_details
+         from df_project_outcomes as lhs
+         inner join df_projects as rhs on (lhs.project_id = rhs.project_id)) as lhs
+      inner join df_research_outcomes as rhs on (lhs.outcome_code = rhs.outcome_code)) as lhs
+   inner join
+     (select *
+      from df_projects df_projects
+      where (project_details = 'sint')) as rhs on (lhs.project_id = rhs.project_id
+                                                     and lhs.organisation_id = rhs.organisation_id
+                                                     and lhs.project_details = rhs.project_details))`;
+
+verify q1 q2;

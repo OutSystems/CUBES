@@ -1,0 +1,35 @@
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select t2.title
+from df_authorship as t1
+join df_papers as t2 on t1.paperid = t2.paperid
+where t1.authorder =
+    (select max(authorder)
+     from df_authorship df_authorship)`;
+
+query q2
+`select title
+from
+  (select lhs.paperid as paperid,
+          lhs.title as title,
+          lhs.authid as authid,
+          lhs.instid as instid,
+          lhs.authorder as authorder
+   from
+     (select lhs.paperid as paperid,
+             lhs.title as title,
+             rhs.authid as authid,
+             rhs.instid as instid,
+             rhs.authorder as authorder
+      from df_papers as lhs
+      inner join df_authorship as rhs on (lhs.paperid = rhs.paperid)) as lhs
+   inner join
+     (select max(authorder) as authorder
+      from df_authorship df_authorship) as rhs on (lhs.authorder = rhs.authorder))`;
+
+verify q1 q2;

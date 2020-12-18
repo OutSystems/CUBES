@@ -1,0 +1,28 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+
+table df_artist(df_artist);
+
+query q1
+`select name,
+       age,
+       country
+from df_artist df_artist`;
+
+query q2
+`select name,
+       age,
+       country
+from
+  (select lhs.artist_id as artist_id,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.year_join as year_join,
+          lhs.age as age,
+          rhs.artist_id as artist_id.other,
+          rhs.country as country.other,
+          rhs.year_join as year_join.other,
+          rhs.age as age.other
+   from df_artist as lhs
+   inner join df_artist as rhs on (lhs.name = rhs.name))`;
+
+verify q1 q2;

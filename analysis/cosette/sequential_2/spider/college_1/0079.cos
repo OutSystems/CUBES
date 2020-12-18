@@ -1,0 +1,54 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_employee(df_employee);
+
+query q1
+`select t2.emp_fname
+from df_class as t1
+join df_employee as t2 on t1.prof_num = t2.emp_num
+group by t1.prof_num
+having count(*) > 1`;
+
+query q2
+`select distinct emp_fname
+from
+  (select emp_fname,
+          emp_num,
+          n,
+          class_code,
+          crs_code,
+          class_time,
+          class_room,
+          prof_num,
+          n as class_section
+   from
+     (select emp_fname,
+             emp_num,
+             n,
+             class_code,
+             crs_code,
+             class_time,
+             class_room,
+             emp_num as prof_num
+      from
+        (select lhs.emp_fname as emp_fname,
+                lhs.emp_num as emp_num,
+                lhs.n as n,
+                rhs.class_code as class_code,
+                rhs.crs_code as crs_code,
+                rhs.class_time as class_time,
+                rhs.class_room as class_room
+         from
+           (select emp_fname,
+                   emp_num,
+                   count(*) as n
+            from df_employee df_employee
+            group by emp_fname,
+                     emp_num) as lhs
+         inner join df_class as rhs on (lhs.emp_num = rhs.prof_num
+                                        and lhs.n = rhs.class_section))))
+where (n <= 1.0)`;
+
+verify q1 q2;

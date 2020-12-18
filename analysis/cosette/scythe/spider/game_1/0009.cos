@@ -1,0 +1,28 @@
+schema df_video_games(gameid:int, gname:str, gtype:str);
+
+table df_video_games(df_video_games);
+
+query q1
+`select gtype
+from df_video_games df_video_games
+group by gtype
+
+limit 1`;
+
+query q2
+`select t1.gtype1
+ from
+  (select
+      t2.gameid1, t2.gname1, t2.gtype1, sum(t2.gameid1) as sum_gameid1
+    from
+      (select *
+         from
+          (select input.gameid, input.gname, input.gtype, t4.gameid as gameid1, t4.gname as gname1, t4.gtype as gtype1
+          from input join 
+              input as t4) as t3
+         where t3.gameid < t3.gameid1) as t2
+    group by
+      t2.gameid1, t2.gname1, t2.gtype1) as t1
+ where t1.sum_gameid1 = t1.gameid1`;
+
+verify q1 q2;

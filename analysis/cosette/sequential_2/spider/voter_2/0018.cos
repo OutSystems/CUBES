@@ -1,0 +1,54 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_voting_record(stuid:int, registration_date:str, election_cycle:str, president_vote:int, vice_president_vote:int, secretary_vote:int, treasurer_vote:int, class_president_vote:int, class_senator_vote:int);
+
+table df_student(df_student);
+table df_voting_record(df_voting_record);
+
+query q1
+`select distinct t1.advisor
+from df_student as t1
+join df_voting_record as t2 on t1.stuid = t2.treasurer_vote
+where t2.election_cycle = "spring"`;
+
+query q2
+`select distinct advisor
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          stuid.other,
+          registration_date,
+          election_cycle,
+          president_vote,
+          vice_president_vote,
+          secretary_vote,
+          class_president_vote,
+          class_senator_vote,
+          stuid as treasurer_vote
+   from
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             rhs.stuid as stuid.other,
+             rhs.registration_date as registration_date,
+             rhs.election_cycle as election_cycle,
+             rhs.president_vote as president_vote,
+             rhs.vice_president_vote as vice_president_vote,
+             rhs.secretary_vote as secretary_vote,
+             rhs.class_president_vote as class_president_vote,
+             rhs.class_senator_vote as class_senator_vote
+      from df_student as lhs
+      inner join df_voting_record as rhs on (lhs.stuid = rhs.treasurer_vote)))
+where (election_cycle = 'spring')`;
+
+verify q1 q2;

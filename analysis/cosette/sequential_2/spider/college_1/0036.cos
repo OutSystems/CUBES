@@ -1,0 +1,60 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_class(df_class);
+table df_enroll(df_enroll);
+table df_student(df_student);
+
+query q1
+`select t3.stu_fname
+from df_class as t1
+join df_enroll as t2 on t1.class_code = t2.class_code
+join df_student as t3 on t2.stu_num = t3.stu_num
+where t1.crs_code = 'acct-211'`;
+
+query q2
+`select distinct stu_fname
+from
+  (select lhs.class_code as class_code,
+          lhs.stu_num as stu_num,
+          lhs.enroll_grade as enroll_grade,
+          lhs.stu_lname as stu_lname,
+          lhs.stu_fname as stu_fname,
+          lhs.stu_init as stu_init,
+          lhs.stu_dob as stu_dob,
+          lhs.stu_hrs as stu_hrs,
+          lhs.stu_class as stu_class,
+          lhs.stu_gpa as stu_gpa,
+          lhs.stu_transfer as stu_transfer,
+          lhs.dept_code as dept_code,
+          lhs.stu_phone as stu_phone,
+          lhs.prof_num as prof_num,
+          rhs.crs_code as crs_code,
+          rhs.class_section as class_section,
+          rhs.class_time as class_time,
+          rhs.class_room as class_room
+   from
+     (select lhs.class_code as class_code,
+             lhs.stu_num as stu_num,
+             lhs.enroll_grade as enroll_grade,
+             rhs.stu_lname as stu_lname,
+             rhs.stu_fname as stu_fname,
+             rhs.stu_init as stu_init,
+             rhs.stu_dob as stu_dob,
+             rhs.stu_hrs as stu_hrs,
+             rhs.stu_class as stu_class,
+             rhs.stu_gpa as stu_gpa,
+             rhs.stu_transfer as stu_transfer,
+             rhs.dept_code as dept_code,
+             rhs.stu_phone as stu_phone,
+             rhs.prof_num as prof_num
+      from df_enroll as lhs
+      inner join df_student as rhs on (lhs.stu_num = rhs.stu_num)) as lhs
+   left join
+     (select *
+      from df_class df_class
+      where (crs_code = 'acct-211')) as rhs on (lhs.class_code = rhs.class_code
+                                                  and lhs.prof_num = rhs.prof_num))`;
+
+verify q1 q2;

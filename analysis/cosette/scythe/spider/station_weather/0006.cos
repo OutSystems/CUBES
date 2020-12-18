@@ -1,0 +1,21 @@
+schema df_train(id:int, train_number:int, name:str, origin:str, destination:str, time:str, interval:str);
+
+table df_train(df_train);
+
+query q1
+`select origin,
+       count(*)
+from df_train df_train
+group by origin`;
+
+query q2
+`select t2.origin,t2.count_origin
+ from
+  (select
+      t1.origin, t1.interval, count(t1.origin) as count_origin
+    from
+      input as t1
+    group by
+      t1.origin, t1.interval) as t2`;
+
+verify q1 q2;

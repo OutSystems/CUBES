@@ -1,0 +1,30 @@
+schema df_event(event_id:int, date:str, venue:str, name:str, event_attendance:int);
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+schema df_news_report(journalist_id:int, event_id:int, work_type:str);
+
+table df_event(df_event);
+table df_journalist(df_journalist);
+table df_news_report(df_news_report);
+
+query q1
+`select t3.name,
+       count(*)
+from df_news_report as t1
+join df_event as t2 on t1.event_id = t2.event_id
+join df_journalist as t3 on t1.journalist_id = t3.journalist_id
+group by t3.name`;
+
+query q2
+`select t5.name,t5.count_work_type
+ from
+  (select t4.journalist_id, t4.count_work_type, t2.journalist_id as journalist_id1, t2.name, t2.nationality, t2.age, t2.years_working
+  from (select
+          t3.journalist_id, count(t3.work_type) as count_work_type
+        from
+          input1 as t3
+        group by
+          t3.journalist_id) as t4 join 
+      input0 as t2) as t5
+ where t5.journalist_id = t5.journalist_id1`;
+
+verify q1 q2;

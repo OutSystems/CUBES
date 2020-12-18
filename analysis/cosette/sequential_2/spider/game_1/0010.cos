@@ -1,0 +1,26 @@
+schema df_video_games(gameid:int, gname:str, gtype:str);
+
+table df_video_games(df_video_games);
+
+query q1
+`select gtype
+from df_video_games df_video_games
+group by gtype
+
+limit 1`;
+
+query q2
+`select gtype
+from
+  (select lhs.gname as gname,
+          lhs.n as n,
+          rhs.gtype as gtype
+   from
+     (select gname,
+             count(*) as n
+      from df_video_games df_video_games
+      group by gname) as lhs
+   inner join df_video_games as rhs on (lhs.n = rhs.gameid
+                                        and lhs.gname = rhs.gname))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_019(CustomerID:int, Balance:str, Date:str);
+
+table df_019(df_019);
+
+query q1
+`select *
+from tablename t1
+where not exists (select * from tablename t2
+                  where t2.balance > 0
+                    and t2.date > t1.date)`;
+
+query q2
+`select t3.customerid,t3.balance,t3.date
+ from
+  (select t1.customerid, t1.max_date, t4.customerid as customerid1, t4.balance, t4.date
+  from (select
+          t2.customerid, max(t2.date) as max_date
+        from
+          (select *
+             from
+              input
+             where input.balance > 0.0) as t2
+        group by
+          t2.customerid) as t1 join 
+      input as t4) as t3
+ where t3.max_date < t3.date`;
+
+verify q1 q2;

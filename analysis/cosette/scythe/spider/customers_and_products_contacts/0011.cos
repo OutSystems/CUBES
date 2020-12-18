@@ -1,0 +1,28 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select count(*)
+from df_products df_products
+where product_price >
+    (select avg(product_price)
+     from df_products df_products)`;
+
+query q2
+`select t3.count_product_name
+ from
+  (select t4.product_name, t4.count_product_name, t1.product_id, t1.product_type_code, t1.product_name as product_name1, t1.product_price
+  from (select
+          t2.product_name, count(t2.product_name) as count_product_name
+        from
+          input as t2
+        group by
+          t2.product_name) as t4 join 
+      (select *
+         from
+          input
+         where input.product_id = 8.0) as t1) as t3
+ where t3.product_name = t3.product_name1`;
+
+verify q1 q2;

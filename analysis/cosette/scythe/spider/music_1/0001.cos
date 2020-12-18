@@ -1,0 +1,25 @@
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_song(df_song);
+
+query q1
+`select song_name,
+       releasedate
+from df_song df_song
+
+limit 1`;
+
+query q2
+`select t4.song_name,t4.releasedate
+ from
+  (select t1.languages, t1.avg_rating, t2.song_name, t2.artist_name, t2.country, t2.f_id, t2.genre_is, t2.rating, t2.languages as languages1, t2.releasedate, t2.resolution
+  from (select
+          t3.languages, avg(t3.rating) as avg_rating
+        from
+          input as t3
+        group by
+          t3.languages) as t1 join 
+      input as t2) as t4
+ where t4.avg_rating = t4.rating`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_accounts(account_id:int, statement_id:int, account_details:str);
+
+table df_accounts(df_accounts);
+
+query q1
+`select account_id,
+       account_details
+from df_accounts df_accounts`;
+
+query q2
+`select account_id,
+       account_details
+from
+  (select lhs.account_id as account_id,
+          lhs.statement_id as statement_id,
+          lhs.account_details as account_details,
+          rhs.statement_id as statement_id.other
+   from df_accounts as lhs
+   inner join df_accounts as rhs on (lhs.account_details = rhs.account_details
+                                     and lhs.account_id = rhs.account_id))`;
+
+verify q1 q2;

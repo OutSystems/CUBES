@@ -1,0 +1,36 @@
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+
+table df_head(df_head);
+
+query q1
+`select head_id,
+       name
+from df_head df_head
+where name like '%ha%'`;
+
+query q2
+`select t7.head_id,t7.name
+ from
+  (select t4.age, t4.max_head_id, t4.head_id, t4.name, t4.born_state, t4.age1, t8.born_state as born_state1, t8.count_head_id
+  from (select *
+       from
+        (select t2.age, t2.max_head_id, t3.head_id, t3.name, t3.born_state, t3.age as age1
+        from (select
+                t1.age, max(t1.head_id) as max_head_id
+              from
+                input as t1
+              group by
+                t1.age) as t2 join 
+            input as t3) as t4
+       where t4.age >= t4.age1
+         and t4.max_head_id <= t4.head_id) join 
+      (select
+            t6.born_state, count(t6.head_id) as count_head_id
+          from
+            input as t6
+          group by
+            t6.born_state) as t5 as t8) as t7
+ where t7.max_head_id = t7.count_head_id
+   and t7.born_state = t7.born_state1`;
+
+verify q1 q2;

@@ -1,0 +1,63 @@
+schema df_addresses(address_id:int, address_content:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_address_from:str, address_type:str, date_address_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select city
+from df_addresses df_addresses
+where city not in
+    (select distinct t3.city
+     from df_customers as t1
+     join df_customer_addresses as t2 on t1.customer_id = t2.customer_id
+     join df_addresses as t3 on t2.address_id = t3.address_id)`;
+
+query q2
+`joining, by = "customer_id"
+joining, by = "address_id"
+joining, by = "city"
+select city
+from
+  (select *
+   from
+     (select city
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select city
+           from
+             (select customer_id,
+                     address_id,
+                     date_address_from,
+                     address_type,
+                     date_address_to,
+                     payment_method,
+                     customer_name,
+                     date_became_customer,
+                     other_customer_details,
+                     address_content,
+                     city,
+                     zip_postcode,
+                     state_province_county,
+                     country,
+                     other_address_details
+              from
+                (select customer_id,
+                        address_id,
+                        date_address_from,
+                        address_type,
+                        date_address_to,
+                        payment_method,
+                        customer_name,
+                        date_became_customer,
+                        other_customer_details
+                 from input2 as lhs
+                 inner join input1 as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+              inner join input0 as rhs on (lhs.address_id = rhs.address_id))) as rhs
+        where (lhs.city = rhs.city) ))`;
+
+verify q1 q2;

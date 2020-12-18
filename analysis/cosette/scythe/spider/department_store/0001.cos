@@ -1,0 +1,24 @@
+schema df_product_suppliers(product_id:int, supplier_id:int, date_supplied_from:str, date_supplied_to:str, total_amount_purchased:str, total_value_purchased:str);
+
+table df_product_suppliers(df_product_suppliers);
+
+query q1
+`select product_id
+from df_product_suppliers df_product_suppliers
+
+limit 3`;
+
+query q2
+`select t3.product_id
+ from
+  (select
+          max(t4.total_amount_purchased) as max_total_amount_purchased
+        from
+          (select *
+             from
+              input
+             where input.supplier_id = 4.0) as t4) as t2 join 
+      input as t1 as t3
+ where t3.max_total_amount_purchased < t3.total_amount_purchased`;
+
+verify q1 q2;

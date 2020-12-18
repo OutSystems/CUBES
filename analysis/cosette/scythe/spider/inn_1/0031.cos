@@ -1,0 +1,25 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select roomname
+from df_rooms df_rooms
+where baseprice >
+    (select avg(baseprice)
+     from df_rooms df_rooms)`;
+
+query q2
+`select t1.roomname
+ from
+  (select t3.maxoccupancy, t3.max_baseprice, t2.roomid, t2.roomname, t2.beds, t2.bedtype, t2.maxoccupancy as maxoccupancy1, t2.baseprice, t2.decor
+  from (select
+          t4.maxoccupancy, max(t4.baseprice) as max_baseprice
+        from
+          input as t4
+        group by
+          t4.maxoccupancy) as t3 join 
+      input as t2) as t1
+ where t1.max_baseprice < t1.baseprice`;
+
+verify q1 q2;

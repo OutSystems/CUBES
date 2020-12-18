@@ -1,0 +1,40 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+schema df_endowment(endowment_id:int, school_id:int, donator_name:str, amount:str);
+
+table df_school(df_school);
+table df_endowment(df_endowment);
+
+query q1
+`select count(distinct t1.donator_name)
+from df_endowment as t1
+join df_school as t2 on t1.school_id = t2.school_id
+where t2.school_name = "glenn"`;
+
+query q2
+`select distinct school_id as count.distinct.t1.donator_name.
+from
+  (select lhs.school_id as school_id,
+          lhs.school_name as school_name,
+          lhs.location as location,
+          lhs.mascot as mascot,
+          lhs.enrollment as enrollment,
+          lhs.ihsaa_class as ihsaa_class,
+          lhs.ihsaa_football_class as ihsaa_football_class,
+          lhs.county as county,
+          rhs.endowment_id as endowment_id,
+          rhs.donator_name as donator_name,
+          rhs.amount as amount,
+          rhs.n_distinct as n_distinct
+   from
+     (select *
+      from df_school df_school
+      where (school_name = 'glenn')) as lhs
+   inner join
+     (select endowment_id,
+             school_id,
+             donator_name,
+             amount,
+             count(distinct donator_name) over () as n_distinct
+      from df_endowment df_endowment) as rhs on (lhs.school_id = rhs.school_id))`;
+
+verify q1 q2;

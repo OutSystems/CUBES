@@ -1,0 +1,33 @@
+schema df_customer_master_index(master_customer_id:int, cmi_details:str);
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_rent_arrears(council_tax_id:int, cmi_cross_ref_id:int);
+
+table df_customer_master_index(df_customer_master_index);
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_rent_arrears(df_rent_arrears);
+
+query q1
+`select t1.council_tax_id
+from df_rent_arrears as t1
+join df_cmi_cross_references as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+join df_customer_master_index as t3 on t3.master_customer_id = t2.master_customer_id
+where t3.cmi_details != 'schmidt ,  kertzmann and lubowitz'`;
+
+query q2
+`select council_tax_id
+from
+  (select lhs.master_customer_id as master_customer_id,
+          lhs.cmi_details as cmi_details,
+          lhs.cmi_cross_ref_id as cmi_cross_ref_id,
+          lhs.source_system_code as source_system_code,
+          rhs.council_tax_id as council_tax_id
+   from
+     (select lhs.master_customer_id as master_customer_id,
+             lhs.cmi_details as cmi_details,
+             rhs.cmi_cross_ref_id as cmi_cross_ref_id,
+             rhs.source_system_code as source_system_code
+      from df_customer_master_index as lhs
+      inner join df_cmi_cross_references as rhs on (lhs.master_customer_id = rhs.master_customer_id)) as lhs
+   inner join df_rent_arrears as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id))`;
+
+verify q1 q2;

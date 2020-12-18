@@ -1,0 +1,24 @@
+schema df_assets(asset_id:int, maintenance_contract_id:int, supplier_company_id:int, asset_details:str, asset_make:str, asset_model:str, asset_acquired_date:str, asset_disposed_date:str, other_asset_details:str);
+schema df_fault_log(fault_log_entry_id:int, asset_id:int, recorded_by_staff_id:int, fault_log_entry_datetime:str, fault_description:str, other_fault_details:str);
+
+table df_assets(df_assets);
+table df_fault_log(df_fault_log);
+
+query q1
+`select asset_model
+from df_assets df_assets
+where asset_id not in
+    (select asset_id
+     from df_fault_log df_fault_log)`;
+
+query q2
+`select asset_model
+from
+  (select *
+   from df_assets as lhs
+   where not exists
+       (select 1
+        from df_fault_log as rhs
+        where (lhs.asset_id = rhs.asset_id) ))`;
+
+verify q1 q2;

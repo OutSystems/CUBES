@@ -1,0 +1,22 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select sum(beds)
+from df_rooms df_rooms
+where bedtype = 'king'`;
+
+query q2
+`select sumbeds as sum.beds.
+from
+  (select beds,
+          bedtype,
+          sum(beds) as sumbeds
+   from df_rooms df_rooms
+   group by beds,
+            bedtype)
+where (bedtype != 'king'
+       and sumbeds > beds)`;
+
+verify q1 q2;

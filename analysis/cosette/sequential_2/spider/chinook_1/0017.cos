@@ -1,0 +1,34 @@
+schema df_album(albumid:int, title:str, artistid:int);
+schema df_track(trackid:int, name:str, albumid:int, mediatypeid:int, genreid:int, composer:str, milliseconds:int, bytes:int, unitprice:str);
+
+table df_album(df_album);
+table df_track(df_track);
+
+query q1
+`select t1.title,
+       t2.albumid
+from df_album as t1
+join df_track as t2 on t1.albumid = t2.albumid
+where t2.unitprice > 1
+group by t2.albumid`;
+
+query q2
+`select distinct title,
+                albumid
+from
+  (select lhs.trackid as trackid,
+          lhs.name as name,
+          lhs.albumid as albumid,
+          lhs.mediatypeid as mediatypeid,
+          lhs.genreid as genreid,
+          lhs.composer as composer,
+          lhs.milliseconds as milliseconds,
+          lhs.bytes as bytes,
+          lhs.unitprice as unitprice,
+          rhs.title as title,
+          rhs.artistid as artistid
+   from df_track as lhs
+   inner join df_album as rhs on (lhs.albumid = rhs.albumid))
+where (unitprice > 1.0)`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_ref_document_types(document_type_code:str, document_type_name:str, document_type_description:str);
+
+table df_ref_document_types(df_ref_document_types);
+
+query q1
+`select document_type_code,
+       document_type_name
+from df_ref_document_types df_ref_document_types`;
+
+query q2
+`select document_type_code,
+       document_type_name
+from
+  (select lhs.document_type_code as document_type_code,
+          lhs.document_type_name as document_type_name,
+          lhs.document_type_description as document_type_description,
+          rhs.document_type_name as document_type_name.other
+   from df_ref_document_types as lhs
+   inner join df_ref_document_types as rhs on (lhs.document_type_code = rhs.document_type_code
+                                               and lhs.document_type_description = rhs.document_type_description))`;
+
+verify q1 q2;

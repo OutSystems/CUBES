@@ -1,0 +1,24 @@
+schema df_products(product_id:int, product_details:str);
+
+table df_products(df_products);
+
+query q1
+`select product_details
+from df_products df_products
+where product_details like "%latte%"
+  or product_details like "%americano%"`;
+
+query q2
+`select t3.product_details
+ from
+  (select
+          max(t4.product_id) as max_product_id
+        from
+          input as t4) as t2 join 
+      (select *
+         from
+          input
+         where input.product_details = 'americano'
+           or input.product_details = 'latte') as t1 as t3`;
+
+verify q1 q2;

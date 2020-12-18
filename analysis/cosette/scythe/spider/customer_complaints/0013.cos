@@ -1,0 +1,21 @@
+schema df_products(product_id:int, parent_product_id:int, product_category_code:str, date_product_first_available:str, date_product_discontinued:str, product_name:str, product_description:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select avg(product_price),
+       product_category_code
+from df_products df_products
+group by product_category_code`;
+
+query q2
+`select t2.avg_product_price,t2.product_category_code
+ from
+  (select
+      t1.product_category_code, avg(t1.product_price) as avg_product_price
+    from
+      input as t1
+    group by
+      t1.product_category_code) as t2`;
+
+verify q1 q2;

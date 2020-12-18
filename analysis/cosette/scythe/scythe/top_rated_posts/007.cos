@@ -1,0 +1,29 @@
+schema df_i007(id:int, home:int, datetime:str, player:str, resource:int);
+
+table df_i007(df_i007);
+
+query q1
+`select tt.*
+from topten tt
+inner join
+    (select home, max(datetime) as maxdatetime
+    from topten
+    group by home) groupedtt
+on tt.home = groupedtt.home
+and tt.datetime = groupedtt.maxdatetime`;
+
+query q2
+`select t2.id,t2.home,t2.max_datetime,t2.player,t2.resource
+ from
+  (select t4.home, t4.max_datetime, t3.id, t3.home as home1, t3.datetime, t3.player, t3.resource
+  from (select
+          t1.home, max(t1.datetime) as max_datetime
+        from
+          input as t1
+        group by
+          t1.home) as t4 join 
+      input as t3) as t2
+ where t2.home = t2.home1
+   and t2.max_datetime = t2.datetime`;
+
+verify q1 q2;

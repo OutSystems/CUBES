@@ -1,0 +1,90 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select t1.title
+from df_item as t1
+join df_review as t2 on t1.i_id = t2.i_id
+where t2.rating >
+    (select avg(rating)
+     from df_review df_review)`;
+
+query q2
+`select title
+from
+  (select lhs.i_id as i_id,
+          lhs.title as title,
+          lhs.a_id as a_id,
+          lhs.u_id as u_id,
+          lhs.rating as rating,
+          lhs.rank as rank,
+          lhs.a_id.other as a_id.other,
+          lhs.u_id.other as u_id.other,
+          lhs.rating.other as rating.other,
+          rhs.meanrating as meanrating
+   from
+     (select lhs.i_id as i_id,
+             lhs.title as title,
+             lhs.a_id as a_id,
+             lhs.u_id as u_id,
+             lhs.rating as rating,
+             lhs.rank as rank,
+             rhs.a_id.other as a_id.other,
+             rhs.u_id.other as u_id.other,
+             rhs.rating.other as rating.other
+      from
+        (select lhs.i_id as i_id,
+                lhs.title as title,
+                rhs.a_id as a_id,
+                rhs.u_id as u_id,
+                rhs.rating as rating,
+                rhs.rank as rank
+         from df_item as lhs
+         inner join df_review as rhs on (lhs.i_id = rhs.i_id)) as lhs
+      inner join
+        (select a_id,
+                u_id,
+                rank as i_id,
+                rating,
+                rank,
+                a_id.other,
+                u_id.other,
+                rating.other
+         from
+           (select a_id,
+                   u_id,
+                   i_id,
+                   rating,
+                   i_id as rank,
+                   a_id.other,
+                   u_id.other,
+                   rating.other
+            from
+              (select lhs.a_id as a_id,
+                      lhs.u_id as u_id,
+                      lhs.i_id as i_id,
+                      lhs.rating as rating,
+                      lhs.rank as rank,
+                      rhs.a_id as a_id.other,
+                      rhs.u_id as u_id.other,
+                      rhs.rating as rating.other
+               from df_review as lhs
+               inner join df_review as rhs on (lhs.i_id = rhs.rank
+                                               and lhs.rank = rhs.i_id)))) as rhs on (lhs.i_id = rhs.i_id
+                                                                                      and lhs.a_id = rhs.a_id
+                                                                                      and lhs.u_id = rhs.u_id
+                                                                                      and lhs.rating = rhs.rating
+                                                                                      and lhs.rank = rhs.rank)) as lhs
+   inner join
+     (select a_id,
+             rank,
+             avg(rating) as meanrating
+      from df_review df_review
+      group by a_id,
+               rank) as rhs on (lhs.a_id = rhs.a_id
+                                and lhs.rank = rhs.rank))`;
+
+verify q1 q2;

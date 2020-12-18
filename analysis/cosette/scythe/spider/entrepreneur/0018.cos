@@ -1,0 +1,25 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+
+table df_entrepreneur(df_entrepreneur);
+
+query q1
+`select investor
+from df_entrepreneur df_entrepreneur
+where money_requested > 140000 intersect
+  select investor
+  from df_entrepreneur df_entrepreneur where money_requested < 120000`;
+
+query q2
+`select t1.investor
+ from
+  (select input.entrepreneur_id, input.people_id, input.company, input.money_requested, input.investor, t2.entrepreneur_id as entrepreneur_id1, t2.people_id as people_id1, t2.company as company1, t2.money_requested as money_requested1, t2.investor as investor1
+  from (select *
+       from
+        input
+       where input.money_requested > 140000.0) join 
+      (select *
+         from
+          input
+         where input.money_requested = 120000.0) as t2) as t1`;
+
+verify q1 q2;

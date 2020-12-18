@@ -1,0 +1,25 @@
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_personfriend(df_personfriend);
+
+query q1
+`select name
+from df_personfriend df_personfriend
+where friend = 'alice'
+  and year =
+    (select min(year)
+     from df_personfriend df_personfriend
+     where friend = 'alice')`;
+
+query q2
+`select distinct name
+from
+  (select friend,
+          name,
+          min(year) as minyear
+   from input0
+   group by friend,
+            name)
+where (friend = 'alice')`;
+
+verify q1 q2;

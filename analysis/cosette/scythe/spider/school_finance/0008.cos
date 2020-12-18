@@ -1,0 +1,30 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select county,
+       count(*),
+       sum(enrollment)
+from df_school df_school
+group by county`;
+
+query q2
+`select t3.county,t3.count_school_name,t3.sum_enrollment
+ from
+  (select t1.county, t1.sum_enrollment, t2.county as county1, t2.count_school_name
+  from (select
+          t5.county, sum(t5.enrollment) as sum_enrollment
+        from
+          input as t5
+        group by
+          t5.county) as t1 join 
+      (select
+            t4.county, count(t4.school_name) as count_school_name
+          from
+            input as t4
+          group by
+            t4.county) as t6 as t2) as t3
+ where t3.county = t3.county1`;
+
+verify q1 q2;

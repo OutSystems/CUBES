@@ -1,0 +1,22 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+
+table df_department(df_department);
+
+query q1
+`select count(distinct dept_name),
+       school_code
+from df_department df_department
+group by school_code
+having count(distinct dept_name) < 5`;
+
+query q2
+`select n as count.distinct.dept_name.,
+       school_code
+from
+  (select school_code,
+          count(*) as n
+   from df_department df_department
+   group by school_code)
+where (n < 5.0)`;
+
+verify q1 q2;

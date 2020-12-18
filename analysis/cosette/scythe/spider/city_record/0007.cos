@@ -1,0 +1,23 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+schema df_hosting_city(year:int, match_id:int, host_city:int);
+
+table df_city(df_city);
+table df_hosting_city(df_hosting_city);
+
+query q1
+`select t2.year
+from df_city as t1
+join df_hosting_city as t2 on t1.city_id = t2.host_city
+where t1.df_city = "taizhou ( zhejiang )"`;
+
+query q2
+`select t1.year
+ from
+  (select *
+       from
+        input
+       where input.city = 'taizhou ( zhejiang )') join 
+      input0 as t2 as t1
+ where t1.city_id = t1.host_city`;
+
+verify q1 q2;

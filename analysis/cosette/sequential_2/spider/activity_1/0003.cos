@@ -1,0 +1,30 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty(df_faculty);
+
+query q1
+`select distinct building
+from df_faculty df_faculty`;
+
+query q2
+`select distinct building
+from
+  (select lhs.facid as facid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.rank as rank,
+          lhs.sex as sex,
+          lhs.phone as phone,
+          lhs.room as room,
+          lhs.building as building,
+          rhs.lname as lname.other,
+          rhs.fname as fname.other,
+          rhs.sex as sex.other,
+          rhs.phone as phone.other,
+          rhs.room as room.other,
+          rhs.building as building.other
+   from df_faculty as lhs
+   inner join df_faculty as rhs on (lhs.facid = rhs.facid
+                                    and lhs.rank = rhs.rank))`;
+
+verify q1 q2;

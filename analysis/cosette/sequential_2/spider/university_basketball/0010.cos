@@ -1,0 +1,22 @@
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_university(df_university);
+
+query q1
+`select avg(enrollment)
+from df_university df_university
+where founded < 1850`;
+
+query q2
+`select meanenrollment as avg.enrollment.
+from
+  (select affiliation,
+          avg(enrollment) as meanenrollment
+   from
+     (select *
+      from df_university df_university
+      where (founded <= 1850.0
+             or enrollment <= 1850.0))
+   group by affiliation)`;
+
+verify q1 q2;

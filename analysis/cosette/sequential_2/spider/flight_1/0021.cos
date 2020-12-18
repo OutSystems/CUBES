@@ -1,0 +1,34 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+
+table df_flight(df_flight);
+
+query q1
+`select flno,
+       origin,
+       destination
+from df_flight df_flight`;
+
+query q2
+`select distinct flno,
+                origin,
+                destination
+from
+  (select lhs.flno as flno,
+          lhs.origin as origin,
+          lhs.destination as destination,
+          lhs.distance as distance,
+          lhs.departure_date as departure_date,
+          lhs.arrival_date as arrival_date,
+          lhs.price as price,
+          lhs.aid as aid,
+          rhs.flno as flno.other,
+          rhs.origin as origin.other,
+          rhs.destination as destination.other,
+          rhs.distance as distance.other,
+          rhs.arrival_date as arrival_date.other,
+          rhs.price as price.other
+   from df_flight as lhs
+   inner join df_flight as rhs on (lhs.aid = rhs.aid
+                                   and lhs.arrival_date = rhs.departure_date))`;
+
+verify q1 q2;

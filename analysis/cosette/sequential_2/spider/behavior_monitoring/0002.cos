@@ -1,0 +1,26 @@
+schema df_assessment_notes(notes_id:int, student_id:int, teacher_id:int, date_of_notes:str, text_of_notes:str, other_details:str);
+
+table df_assessment_notes(df_assessment_notes);
+
+query q1
+`select date_of_notes
+from df_assessment_notes df_assessment_notes`;
+
+query q2
+`select date_of_notes.other as date_of_notes
+from
+  (select lhs.notes_id as notes_id,
+          lhs.student_id as student_id,
+          lhs.teacher_id as teacher_id,
+          lhs.date_of_notes as date_of_notes,
+          lhs.text_of_notes as text_of_notes,
+          lhs.other_details as other_details,
+          rhs.notes_id as notes_id.other,
+          rhs.student_id as student_id.other,
+          rhs.date_of_notes as date_of_notes.other,
+          rhs.other_details as other_details.other
+   from df_assessment_notes as lhs
+   inner join df_assessment_notes as rhs on (lhs.notes_id = rhs.teacher_id
+                                             and lhs.text_of_notes = rhs.text_of_notes))`;
+
+verify q1 q2;

@@ -1,0 +1,59 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select artist_name
+from df_artist df_artist
+where country = "uk" intersect
+  select artist_name
+  from df_song df_song where languages = "english"`;
+
+query q2
+`joining, by = c("artist_name", "country")
+joining, by = c("artist_name", "country", "song_name", "f_id", "genre_is", "rating", "languages", "releasedate", "resolution")
+select distinct artist_name
+from
+  (select artist_name,
+          country,
+          gender,
+          preferred_genre,
+          song_name,
+          f_id,
+          genre_is,
+          rating,
+          languages,
+          releasedate,
+          resolution
+   from
+     (select artist_name,
+             country,
+             gender,
+             preferred_genre,
+             song_name,
+             f_id,
+             genre_is,
+             rating,
+             languages,
+             releasedate,
+             resolution
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.artist_name = rhs.artist_name
+                                       and lhs.country = rhs.country)) as lhs
+   inner join
+     (select *
+      from input1
+      where (country = 'uk'
+             and languages = 'english')) as rhs on (lhs.artist_name = rhs.artist_name
+                                                        and lhs.country = rhs.country
+                                                        and lhs.song_name = rhs.song_name
+                                                        and lhs.f_id = rhs.f_id
+                                                        and lhs.genre_is = rhs.genre_is
+                                                        and lhs.rating = rhs.rating
+                                                        and lhs.languages = rhs.languages
+                                                        and lhs.releasedate = rhs.releasedate
+                                                        and lhs.resolution = rhs.resolution))`;
+
+verify q1 q2;

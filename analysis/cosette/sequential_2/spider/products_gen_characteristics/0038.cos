@@ -1,0 +1,37 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select t2.color_description
+from df_products as t1
+join df_ref_colors as t2 on t1.color_code = t2.color_code
+group by t2.color_description
+
+limit 1`;
+
+query q2
+`select color_description
+from
+  (select lhs.product_id as product_id,
+          lhs.color_code as color_code,
+          lhs.product_category_code as product_category_code,
+          lhs.product_name as product_name,
+          lhs.typical_buying_price as typical_buying_price,
+          lhs.typical_selling_price as typical_selling_price,
+          lhs.product_description as product_description,
+          lhs.other_product_details as other_product_details,
+          rhs.color_description as color_description
+   from df_products as lhs
+   inner join
+     (select color_code,
+             color_description,
+             count(*) as n
+      from df_ref_colors df_ref_colors
+      group by color_code,
+               color_description) as rhs on (lhs.color_code = rhs.color_code
+                                             and lhs.product_id = rhs.n))`;
+
+verify q1 q2;

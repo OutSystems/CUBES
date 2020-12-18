@@ -1,0 +1,51 @@
+schema df_city(city_id:int, official_name:str, status:str, area_km_2:str, population:str, census_ranking:str);
+
+table df_city(df_city);
+
+query q1
+`select official_name,
+       status
+from df_city df_city
+
+limit 1`;
+
+query q2
+`select distinct official_name,
+                status
+from
+  (select lhs.city_id as city_id,
+          lhs.official_name as official_name,
+          lhs.status as status,
+          lhs.area_km_2 as area_km_2,
+          lhs.population as population,
+          lhs.census_ranking as census_ranking,
+          lhs.maxpopulation as maxpopulation,
+          rhs.city_id as city_id.other,
+          rhs.official_name as official_name.other,
+          rhs.status as status.other,
+          rhs.area_km_2 as area_km_2.other,
+          rhs.population as population.other,
+          rhs.census_ranking as census_ranking.other,
+          rhs.maxpopulation as maxpopulation.other
+   from
+     (select city_id,
+             official_name,
+             status,
+             area_km_2,
+             population,
+             census_ranking,
+             max(population) over () as maxpopulation
+      from df_city df_city) as lhs
+   cross join
+     (select city_id,
+             official_name,
+             status,
+             area_km_2,
+             population,
+             census_ranking,
+             max(population) over () as maxpopulation
+      from df_city df_city) as rhs)
+where (population > maxpopulation
+       or population >= maxpopulation.other)`;
+
+verify q1 q2;

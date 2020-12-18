@@ -1,0 +1,22 @@
+schema df_product_suppliers(product_id:int, supplier_id:int, date_supplied_from:str, date_supplied_to:str, total_amount_purchased:str, total_value_purchased:str);
+
+table df_product_suppliers(df_product_suppliers);
+
+query q1
+`select supplier_id
+from df_product_suppliers df_product_suppliers
+group by supplier_id
+having avg(total_amount_purchased) > 50000
+or avg(total_amount_purchased) < 30000`;
+
+query q2
+`select supplier_id
+from
+  (select supplier_id,
+          avg(total_amount_purchased) as meantotal_amount_purchased
+   from df_product_suppliers df_product_suppliers
+   group by supplier_id)
+where (meantotal_amount_purchased >= 50000.0
+       or meantotal_amount_purchased <= 30000.0)`;
+
+verify q1 q2;

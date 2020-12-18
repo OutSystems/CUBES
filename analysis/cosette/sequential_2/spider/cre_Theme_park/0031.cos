@@ -1,0 +1,34 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+
+query q1
+`select how_to_get_there
+from df_tourist_attractions df_tourist_attractions
+group by how_to_get_there
+
+limit 1`;
+
+query q2
+`select distinct how_to_get_there
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.attraction_type_code as attraction_type_code.other
+   from df_tourist_attractions as lhs
+   inner join
+     (select attraction_type_code,
+             location_id,
+             count(*) as n
+      from df_tourist_attractions df_tourist_attractions
+      group by attraction_type_code,
+               location_id) as rhs on (lhs.attraction_type_code = rhs.n
+                                       and lhs.location_id = rhs.location_id))`;
+
+verify q1 q2;

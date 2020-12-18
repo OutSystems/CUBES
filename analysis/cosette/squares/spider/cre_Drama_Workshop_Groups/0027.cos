@@ -1,0 +1,30 @@
+schema df_products(product_id:int, product_name:str, product_price:int, product_description:str, other_product_service_details:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, order_quantity:int, other_item_details:str);
+
+table df_products(df_products);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.other_item_details
+from df_order_items as t1
+join df_products as t2 on t1.product_id = t2.product_id
+where t2.product_price > 2000`;
+
+query q2
+`joining, by = "product_id"
+select other_item_details
+from
+  (select order_item_id,
+          order_id,
+          product_id,
+          order_quantity,
+          other_item_details,
+          product_name,
+          product_price,
+          product_description,
+          other_product_service_details
+   from input1 as lhs
+   left join input0 as rhs on (lhs.product_id = rhs.product_id))
+where (product_price = 2000.0)`;
+
+verify q1 q2;

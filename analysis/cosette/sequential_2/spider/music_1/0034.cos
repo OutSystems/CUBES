@@ -1,0 +1,37 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select artist_name
+from df_artist df_artist
+where country = "uk" intersect
+  select t1.artist_name
+  from df_artist as t1
+  join df_song as t2 on t1.artist_name = t2.artist_name where t2.languages = "english"`;
+
+query q2
+`select artist_name
+from
+  (select lhs.artist_name as artist_name,
+          lhs.country as country,
+          lhs.gender as gender,
+          lhs.preferred_genre as preferred_genre,
+          rhs.song_name as song_name,
+          rhs.artist_name as artist_name.other,
+          rhs.country as country.other,
+          rhs.f_id as f_id,
+          rhs.rating as rating,
+          rhs.languages as languages,
+          rhs.releasedate as releasedate,
+          rhs.resolution as resolution
+   from df_artist as lhs
+   inner join
+     (select *
+      from df_song df_song
+      where (country = 'uk'
+             and languages = 'english')) as rhs on (lhs.preferred_genre = rhs.genre_is))`;
+
+verify q1 q2;

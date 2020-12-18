@@ -1,0 +1,29 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+schema df_document_sections(section_id:int, document_code:int, section_sequence:int, section_code:int, section_title:str);
+
+table df_documents(df_documents);
+table df_document_sections(df_document_sections);
+
+query q1
+`select t2.section_title
+from df_documents as t1
+join df_document_sections as t2 on t1.document_code = t2.document_code
+where t1.document_name = "david cv"`;
+
+query q2
+`select section_title
+from
+  (select lhs.document_code as document_code,
+          lhs.document_structure_code as document_structure_code,
+          lhs.document_type_code as document_type_code,
+          lhs.access_count as access_count,
+          lhs.document_name as document_name,
+          rhs.section_id as section_id,
+          rhs.section_sequence as section_sequence,
+          rhs.section_code as section_code,
+          rhs.section_title as section_title
+   from df_documents as lhs
+   inner join df_document_sections as rhs on (lhs.document_code = rhs.document_code))
+where (document_name = 'david cv')`;
+
+verify q1 q2;

@@ -1,0 +1,40 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+schema df_statements(statement_id:int, statement_details:str);
+
+table df_documents(df_documents);
+table df_statements(df_statements);
+
+query q1
+`select t1.statement_details,
+       t2.document_name
+from df_statements as t1
+join df_documents as t2 on t1.statement_id = t2.document_id
+where t1.statement_details = 'private project'`;
+
+query q2
+`select statement_details,
+       document_name
+from
+  (select document_id,
+          document_type_code,
+          project_id,
+          document_date,
+          document_name,
+          document_description,
+          other_details,
+          statement_details,
+          document_id as statement_id
+   from
+     (select lhs.document_id as document_id,
+             lhs.document_type_code as document_type_code,
+             lhs.project_id as project_id,
+             lhs.document_date as document_date,
+             lhs.document_name as document_name,
+             lhs.document_description as document_description,
+             lhs.other_details as other_details,
+             rhs.statement_details as statement_details
+      from df_documents as lhs
+      inner join df_statements as rhs on (lhs.document_id = rhs.statement_id)))
+where (statement_details = 'private project')`;
+
+verify q1 q2;

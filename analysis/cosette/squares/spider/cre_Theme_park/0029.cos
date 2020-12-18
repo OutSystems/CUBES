@@ -1,0 +1,29 @@
+schema df_hotels(hotel_id:int, star_rating_code:int, pets_allowed_yn:str, price_range:str, other_hotel_details:str);
+
+table df_hotels(df_hotels);
+
+query q1
+`select other_hotel_details
+from df_hotels df_hotels
+
+limit 3`;
+
+query q2
+`joining, by = "other_hotel_details"
+select distinct other_hotel_details
+from
+  (select *
+   from
+     (select other_hotel_details
+      from
+        (select other_hotel_details
+         from input0 intersect select other_hotel_details
+         from input0)) as lhs
+   where not exists
+       (select 1
+        from
+          (select other_hotel_details
+           from input0) as rhs
+        where (lhs.other_hotel_details = rhs.other_hotel_details) ))`;
+
+verify q1 q2;

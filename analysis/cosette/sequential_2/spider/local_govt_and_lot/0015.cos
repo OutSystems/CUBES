@@ -1,0 +1,30 @@
+schema df_customer_events(customer_event_id:int, customer_id:int, date_moved_in:str, property_id:int, resident_id:int, thing_id:int);
+
+table df_customer_events(df_customer_events);
+
+query q1
+`select customer_event_id,
+       date_moved_in,
+       property_id
+from df_customer_events df_customer_events`;
+
+query q2
+`select distinct customer_event_id,
+                date_moved_in,
+                property_id
+from
+  (select lhs.customer_event_id as customer_event_id,
+          lhs.customer_id as customer_id,
+          lhs.date_moved_in as date_moved_in,
+          lhs.property_id as property_id,
+          lhs.resident_id as resident_id,
+          lhs.thing_id as thing_id,
+          rhs.customer_event_id as customer_event_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.property_id as property_id.other,
+          rhs.resident_id as resident_id.other
+   from df_customer_events as lhs
+   inner join df_customer_events as rhs on (lhs.date_moved_in = rhs.date_moved_in
+                                            and lhs.thing_id = rhs.thing_id))`;
+
+verify q1 q2;

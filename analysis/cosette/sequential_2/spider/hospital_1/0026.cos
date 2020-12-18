@@ -1,0 +1,98 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_undergoes(patient:int, procedures:int, stay:int, dateundergoes:str, physician:int, assistingnurse:int);
+
+table df_patient(df_patient);
+table df_undergoes(df_undergoes);
+
+query q1
+`select df_patient
+from df_undergoes df_undergoes
+
+limit 1`;
+
+query q2
+`select patient
+from
+  (select lhs.patient as patient,
+          lhs.procedures as procedures,
+          lhs.stay as stay,
+          lhs.dateundergoes as dateundergoes,
+          lhs.physician as physician,
+          lhs.assistingnurse as assistingnurse,
+          lhs.mindateundergoes as mindateundergoes,
+          rhs.ssn as ssn,
+          rhs.name as name,
+          rhs.address as address,
+          rhs.phone as phone,
+          rhs.insuranceid as insuranceid,
+          rhs.pcp as pcp,
+          rhs.patient as patient.other,
+          rhs.stay as stay.other,
+          rhs.dateundergoes as dateundergoes.other,
+          rhs.assistingnurse as assistingnurse.other,
+          rhs.mindateundergoes as mindateundergoes.other,
+          rhs.procedures as procedures.other,
+          rhs.physician as physician.other
+   from
+     (select patient,
+             procedures,
+             stay,
+             dateundergoes,
+             physician,
+             assistingnurse,
+             min(dateundergoes) over () as mindateundergoes
+      from df_undergoes df_undergoes) as lhs
+   cross join
+     (select ssn,
+             name,
+             address,
+             phone,
+             insuranceid,
+             pcp,
+             patient,
+             stay,
+             dateundergoes,
+             assistingnurse,
+             mindateundergoes,
+             procedures,
+             pcp as physician
+      from
+        (select ssn,
+                name,
+                address,
+                phone,
+                insuranceid,
+                pcp,
+                patient,
+                stay,
+                dateundergoes,
+                assistingnurse,
+                mindateundergoes,
+                insuranceid as procedures
+         from
+           (select lhs.ssn as ssn,
+                   lhs.name as name,
+                   lhs.address as address,
+                   lhs.phone as phone,
+                   lhs.insuranceid as insuranceid,
+                   lhs.pcp as pcp,
+                   rhs.patient as patient,
+                   rhs.stay as stay,
+                   rhs.dateundergoes as dateundergoes,
+                   rhs.assistingnurse as assistingnurse,
+                   rhs.mindateundergoes as mindateundergoes
+            from df_patient as lhs
+            inner join
+              (select patient,
+                      procedures,
+                      stay,
+                      dateundergoes,
+                      physician,
+                      assistingnurse,
+                      min(dateundergoes) over () as mindateundergoes
+               from df_undergoes df_undergoes) as rhs on (lhs.insuranceid = rhs.procedures
+                                             and lhs.pcp = rhs.physician)))) as rhs)
+where (dateundergoes = mindateundergoes
+       or dateundergoes != dateundergoes.other)`;
+
+verify q1 q2;

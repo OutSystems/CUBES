@@ -1,0 +1,43 @@
+schema df_journal(journal_id:int, date:str, theme:str, sales:int);
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_journal(df_journal);
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select t2.name,
+       t2.age,
+       t3.theme
+from df_journal_committee as t1
+join df_editor as t2 on t1.editor_id = t2.editor_id
+join df_journal as t3 on t1.journal_id = t3.journal_id`;
+
+query q2
+`select name,
+       age,
+       theme
+from
+  (select lhs.journal_id as journal_id,
+          lhs.date as date,
+          lhs.theme as theme,
+          lhs.sales as sales,
+          lhs.editor_id as editor_id,
+          lhs.name as name,
+          lhs.age as age,
+          rhs.work_type as work_type
+   from
+     (select lhs.journal_id as journal_id,
+             lhs.date as date,
+             lhs.theme as theme,
+             lhs.sales as sales,
+             rhs.editor_id as editor_id,
+             rhs.name as name,
+             rhs.age as age
+      from df_journal as lhs
+      cross join df_editor as rhs) as lhs
+   inner join df_journal_committee as rhs on (lhs.journal_id = rhs.journal_id
+                                              and lhs.editor_id = rhs.editor_id))`;
+
+verify q1 q2;

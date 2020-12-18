@@ -1,0 +1,23 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+
+table df_instructor(df_instructor);
+
+query q1
+`select name
+from df_instructor df_instructor
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.dept_name as dept_name,
+          lhs.salary as salary
+   from df_instructor as lhs
+   inner join
+     (select max(salary) as maxsalary
+      from df_instructor df_instructor) as rhs on (lhs.salary = rhs.maxsalary))`;
+
+verify q1 q2;

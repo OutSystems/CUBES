@@ -1,0 +1,45 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_employees(df_employees);
+
+query q1
+`select employee_id,
+       salary
+from df_employees df_employees
+where manager_id =
+    (select employee_id
+     from df_employees df_employees
+     where first_name = 'payam' )`;
+
+query q2
+`select employee_id.other as employee_id,
+       salary.other as salary
+from
+  (select lhs.employee_id as employee_id,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.email as email,
+          lhs.phone_number as phone_number,
+          lhs.hire_date as hire_date,
+          lhs.job_id as job_id,
+          lhs.salary as salary,
+          lhs.commission_pct as commission_pct,
+          lhs.manager_id as manager_id,
+          lhs.department_id as department_id,
+          rhs.employee_id as employee_id.other,
+          rhs.first_name as first_name.other,
+          rhs.last_name as last_name.other,
+          rhs.email as email.other,
+          rhs.phone_number as phone_number.other,
+          rhs.hire_date as hire_date.other,
+          rhs.job_id as job_id.other,
+          rhs.salary as salary.other,
+          rhs.department_id as department_id.other
+   from
+     (select *
+      from df_employees df_employees
+      where (first_name = 'payam')) as lhs
+   inner join df_employees as rhs on (lhs.employee_id = rhs.manager_id
+                                      and lhs.commission_pct = rhs.commission_pct))`;
+
+verify q1 q2;

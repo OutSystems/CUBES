@@ -1,0 +1,31 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_phone_market(df_phone_market);
+
+query q1
+`select t2.name,
+       sum(t1.num_of_stock)
+from df_phone_market as t1
+join df_phone as t2 on t1.phone_id = t2.phone_id
+group by t2.name`;
+
+query q2
+`select name,
+       sumnum_of_stock as sum.t1.num_of_stock.
+from
+  (select lhs.phone_id as phone_id,
+          lhs.sumnum_of_stock as sumnum_of_stock,
+          rhs.name as name,
+          rhs.memory_in_g as memory_in_g,
+          rhs.carrier as carrier,
+          rhs.price as price
+   from
+     (select phone_id,
+             sum(num_of_stock) as sumnum_of_stock
+      from df_phone_market df_phone_market
+      group by phone_id) as lhs
+   left join df_phone as rhs on (lhs.phone_id = rhs.phone_id))`;
+
+verify q1 q2;

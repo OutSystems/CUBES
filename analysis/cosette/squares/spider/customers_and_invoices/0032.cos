@@ -1,0 +1,45 @@
+schema df_orders(order_id:int, customer_id:int, date_order_placed:str, order_details:str);
+schema df_invoices(invoice_number:int, order_id:int, invoice_date:str);
+
+table df_orders(df_orders);
+table df_invoices(df_invoices);
+
+query q1
+`select t2.order_id,
+       t2.order_details
+from df_invoices as t1
+join df_orders as t2 on t1.order_id = t2.order_id
+group by t2.order_id
+having count(*) > 2`;
+
+query q2
+`joining, by = "order_id"
+joining, by = "order_id"
+select distinct order_id,
+                order_details
+from
+  (select order_id,
+          n,
+          invoice_number,
+          invoice_date,
+          customer_id,
+          date_order_placed,
+          order_details
+   from
+     (select order_id,
+             n,
+             invoice_number,
+             invoice_date
+      from
+        (select *
+         from
+           (select order_id,
+                   count(*) as n
+            from input1
+            group by order_id)
+         where (n >= 2.0
+                and n > 2.0)) as lhs
+      inner join input1 as rhs on (lhs.order_id = rhs.order_id)) as lhs
+   inner join input0 as rhs on (lhs.order_id = rhs.order_id))`;
+
+verify q1 q2;

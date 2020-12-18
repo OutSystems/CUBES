@@ -1,0 +1,35 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_student(df_student);
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select stuid
+from df_student df_student
+where major = 600 intersect
+  select stuid
+  from df_sportsinfo df_sportsinfo where onscholarship = 'y'`;
+
+query q2
+`joining, by = "stuid"
+select distinct stuid
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          sportname,
+          hoursperweek,
+          gamesplayed,
+          onscholarship
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.stuid = rhs.stuid))
+where (onscholarship = 'y'
+       and major = 600.0)`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_manufacturer(manufacturer_id:int, open_year:str, name:str, num_of_factories:int, num_of_shops:int);
+
+table df_manufacturer(df_manufacturer);
+
+query q1
+`select open_year,
+       name
+from df_manufacturer df_manufacturer
+
+limit 1`;
+
+query q2
+`select open_year,
+       name
+from
+  (select lhs.manufacturer_id as manufacturer_id,
+          lhs.open_year as open_year,
+          lhs.name as name,
+          lhs.num_of_factories as num_of_factories,
+          lhs.num_of_shops as num_of_shops
+   from df_manufacturer as lhs
+   inner join
+     (select max(num_of_shops) as num_of_shops
+      from df_manufacturer df_manufacturer) as rhs on (lhs.num_of_shops = rhs.num_of_shops))`;
+
+verify q1 q2;

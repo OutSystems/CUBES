@@ -1,0 +1,41 @@
+schema df_services(service_id:int, service_type_code:str, service_name:str, service_descriptio:str);
+schema df_party_services(booking_id:int, customer_id:int, service_id:int, service_datetime:str, booking_made_date:str);
+
+table df_services(df_services);
+table df_party_services(df_party_services);
+
+query q1
+`select service_name
+from df_services df_services
+except
+select t1.service_name
+from df_services as t1
+join df_party_services as t2 on t1.service_id = t2.service_id`;
+
+query q2
+`joining, by = "service_id"
+joining, by = "service_name"
+select distinct service_name
+from
+  (select *
+   from
+     (select service_name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select service_name
+           from
+             (select booking_id,
+                     customer_id,
+                     service_id,
+                     service_datetime,
+                     booking_made_date,
+                     service_type_code,
+                     service_name,
+                     service_descriptio
+              from input1 as lhs
+              left join input0 as rhs on (lhs.service_id = rhs.service_id))) as rhs
+        where (lhs.service_name = rhs.service_name) ))`;
+
+verify q1 q2;

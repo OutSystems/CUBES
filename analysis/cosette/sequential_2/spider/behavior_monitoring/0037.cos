@@ -1,0 +1,66 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, line_3:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_teachers(teacher_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, gender:int, cell_mobile_number:str, email_address:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_teachers(df_teachers);
+
+query q1
+`select t2.email_address
+from df_addresses as t1
+join df_teachers as t2 on t1.address_id = t2.address_id
+where t1.zip_postcode = "918"`;
+
+query q2
+`select email_address
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.line_3 as line_3,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.other_address_details as other_address_details,
+          lhs.teacher_id as teacher_id,
+          lhs.first_name as first_name,
+          lhs.middle_name as middle_name,
+          lhs.last_name as last_name,
+          lhs.gender as gender,
+          lhs.cell_mobile_number as cell_mobile_number,
+          lhs.email_address as email_address,
+          lhs.other_details as other_details
+   from
+     (select lhs.address_id as address_id,
+             lhs.line_1 as line_1,
+             lhs.line_2 as line_2,
+             lhs.line_3 as line_3,
+             lhs.city as city,
+             lhs.zip_postcode as zip_postcode,
+             lhs.state_province_county as state_province_county,
+             lhs.country as country,
+             lhs.other_address_details as other_address_details,
+             rhs.teacher_id as teacher_id,
+             rhs.first_name as first_name,
+             rhs.middle_name as middle_name,
+             rhs.last_name as last_name,
+             rhs.gender as gender,
+             rhs.cell_mobile_number as cell_mobile_number,
+             rhs.email_address as email_address,
+             rhs.other_details as other_details
+      from df_addresses as lhs
+      inner join df_teachers as rhs on (lhs.address_id = rhs.address_id)) as lhs
+   inner join
+     (select *
+      from df_addresses df_addresses
+      where (zip_postcode = 918.0)) as rhs on (lhs.address_id = rhs.address_id
+                                               and lhs.line_1 = rhs.line_1
+                                               and lhs.line_2 = rhs.line_2
+                                               and lhs.line_3 = rhs.line_3
+                                               and lhs.city = rhs.city
+                                               and lhs.zip_postcode = rhs.zip_postcode
+                                               and lhs.state_province_county = rhs.state_province_county
+                                               and lhs.country = rhs.country
+                                               and lhs.other_address_details = rhs.other_address_details))`;
+
+verify q1 q2;

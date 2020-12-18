@@ -1,0 +1,28 @@
+schema df_actor(actor_id:int, name:str, musical_id:int, character:str, duration:str, age:int);
+
+table df_actor(df_actor);
+
+query q1
+`select character,
+       duration
+from df_actor df_actor`;
+
+query q2
+`select distinct character,
+                duration
+from
+  (select lhs.actor_id as actor_id,
+          lhs.name as name,
+          lhs.musical_id as musical_id,
+          lhs.character as character,
+          lhs.duration as duration,
+          lhs.age as age,
+          rhs.actor_id as actor_id.other,
+          rhs.name as name.other,
+          rhs.musical_id as musical_id.other,
+          rhs.character as character.other,
+          rhs.age as age.other
+   from df_actor as lhs
+   inner join df_actor as rhs on (lhs.duration = rhs.duration))`;
+
+verify q1 q2;

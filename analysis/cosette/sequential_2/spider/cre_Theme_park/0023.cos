@@ -1,0 +1,28 @@
+schema df_visitors(tourist_id:int, tourist_details:str);
+schema df_visits(visit_id:int, tourist_attraction_id:int, tourist_id:int, visit_date:str, visit_details:str);
+
+table df_visitors(df_visitors);
+table df_visits(df_visits);
+
+query q1
+`select t2.visit_date,
+       t2.visit_details
+from df_visitors as t1
+join df_visits as t2 on t1.tourist_id = t2.tourist_id
+where t1.tourist_details = "vincent"`;
+
+query q2
+`select visit_date,
+       visit_details
+from
+  (select *
+   from df_visits as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_visitors df_visitors
+           where (tourist_details != 'vincent')) as rhs
+        where (lhs.tourist_id = rhs.tourist_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_document_locations(df_document_locations);
+
+query q1
+`select distinct location_code
+from df_document_locations df_document_locations`;
+
+query q2
+`select t2.location_code
+ from
+  (select
+      t1.location_code, min(t1.date_in_locaton_to) as min_date_in_locaton_to
+    from
+      input as t1
+    group by
+      t1.location_code) as t2`;
+
+verify q1 q2;

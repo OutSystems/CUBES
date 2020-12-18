@@ -1,0 +1,56 @@
+schema df_staff(staff_id:int, staff_first_name:str, staff_last_name:str, other_staff_details:str);
+schema df_problems(problem_id:int, product_id:int, closure_authorised_by_staff_id:int, reported_by_staff_id:int, date_problem_reported:str, date_problem_closed:str, problem_description:str, other_problem_details:str);
+
+table df_staff(df_staff);
+table df_problems(df_problems);
+
+query q1
+`select product_id
+from df_problems as t1
+join df_staff as t2 on t1.reported_by_staff_id = t2.staff_id
+where t2.staff_first_name = "dameon"
+  and t2.staff_last_name = "frami"
+union
+select product_id
+from df_problems as t1
+join df_staff as t2 on t1.reported_by_staff_id = t2.staff_id
+where t2.staff_first_name = "jolie"
+  and t2.staff_last_name = "weber"`;
+
+query q2
+`select product_id
+from
+  (select staff_id,
+          staff_first_name,
+          staff_last_name,
+          other_staff_details,
+          problem_id,
+          product_id,
+          closure_authorised_by_staff_id,
+          date_problem_reported,
+          date_problem_closed,
+          problem_description,
+          other_problem_details,
+          staff_id as reported_by_staff_id
+   from
+     (select lhs.staff_id as staff_id,
+             lhs.staff_first_name as staff_first_name,
+             lhs.staff_last_name as staff_last_name,
+             lhs.other_staff_details as other_staff_details,
+             rhs.problem_id as problem_id,
+             rhs.product_id as product_id,
+             rhs.closure_authorised_by_staff_id as closure_authorised_by_staff_id,
+             rhs.date_problem_reported as date_problem_reported,
+             rhs.date_problem_closed as date_problem_closed,
+             rhs.problem_description as problem_description,
+             rhs.other_problem_details as other_problem_details
+      from
+        (select *
+         from df_staff df_staff
+         where (staff_last_name = 'frami'
+                or staff_last_name = 'weber')) as lhs
+      inner join df_problems as rhs on (lhs.staff_id = rhs.reported_by_staff_id)))
+where (staff_first_name = 'dameon'
+       or staff_first_name = 'jolie')`;
+
+verify q1 q2;

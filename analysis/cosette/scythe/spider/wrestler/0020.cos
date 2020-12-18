@@ -1,0 +1,24 @@
+schema df_elimination(elimination_id:int, wrestler_id:int, team:str, eliminated_by:str, elimination_move:str, time:str);
+
+table df_elimination(df_elimination);
+
+query q1
+`select time
+from df_elimination df_elimination
+where eliminated_by = "punk"
+  or eliminated_by = "orton"`;
+
+query q2
+`select t2.time
+ from
+  (select
+          max(t1.wrestler_id) as max_wrestler_id
+        from
+          input as t1) as t3 join 
+      (select *
+         from
+          input
+         where input.eliminated_by = 'punk'
+           or input.eliminated_by = 'orton') as t4 as t2`;
+
+verify q1 q2;

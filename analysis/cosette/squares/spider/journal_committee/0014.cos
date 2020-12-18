@@ -1,0 +1,33 @@
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select t1.name
+from df_editor as t1
+join df_journal_committee as t2 on t1.editor_id = t2.editor_id
+group by t1.name
+having count(*) >= 2`;
+
+query q2
+`joining, by = "editor_id"
+select distinct name
+from
+  (select name,
+          editor_id,
+          count(*) as n
+   from
+     (select editor_id,
+             name,
+             age,
+             journal_id,
+             work_type
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.editor_id = rhs.editor_id))
+   group by name,
+            editor_id)
+where (n >= 2.0)`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_management(df_management);
+
+query q1
+`select count(*)
+from df_department df_department
+where department_id not in
+    (select department_id
+     from df_management df_management)`;
+
+query q2
+`select t3.department_id
+ from
+  (select
+          max(t2.head_id) as max_head_id
+        from
+          input0 as t2) as t1 join 
+      input0 as t4 as t3
+ where t3.max_head_id = t3.head_id`;
+
+verify q1 q2;

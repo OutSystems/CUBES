@@ -1,0 +1,37 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t1.name,
+       t1.max_speed
+from df_storm as t1
+join df_affected_region as t2 on t1.storm_id = t2.storm_id
+group by t1.storm_id
+
+limit 1`;
+
+query q2
+`select name,
+       max_speed
+from
+  (select lhs.region_id as region_id,
+          lhs.storm_id as storm_id,
+          lhs.number_city_affected as number_city_affected,
+          lhs.n as n,
+          rhs.storm_id as storm_id.other,
+          rhs.name as name,
+          rhs.dates_active as dates_active,
+          rhs.max_speed as max_speed,
+          rhs.damage_millions_usd as damage_millions_usd
+   from
+     (select region_id,
+             storm_id,
+             number_city_affected,
+             count(*) over () as n
+      from df_affected_region df_affected_region) as lhs
+   inner join df_storm as rhs on (lhs.storm_id = rhs.number_deaths))`;
+
+verify q1 q2;

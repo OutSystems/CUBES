@@ -1,0 +1,31 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_head(df_head);
+table df_management(df_management);
+
+query q1
+`select t3.born_state
+from df_department as t1
+join df_management as t2 on t1.department_id = t2.department_id
+join df_head as t3 on t2.head_id = t3.head_id
+where t1.name = 'treasury' intersect
+  select t3.born_state
+  from df_department as t1
+  join df_management as t2 on t1.department_id = t2.department_id
+  join df_head as t3 on t2.head_id = t3.head_id where t1.name = 'homeland security'`;
+
+query q2
+`select t1.born_state
+ from
+  (select input0.head_id, input0.name, input0.born_state, input0.age, t2.department_id, t2.name as name1, t2.creation, t2.ranking, t2.budget_in_billions, t2.num_employees
+  from input0 join 
+      (select *
+         from
+          input
+         where input.name = 'treasury') as t2) as t1
+ where t1.head_id = t1.department_id`;
+
+verify q1 q2;

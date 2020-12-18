@@ -1,0 +1,24 @@
+schema df_people(people_id:int, name:str, age:str, height:str, hometown:str);
+
+table df_people(df_people);
+
+query q1
+`select age
+from df_people df_people
+
+limit 1`;
+
+query q2
+`select age
+from
+  (select lhs.people_id as people_id,
+          lhs.name as name,
+          lhs.age as age,
+          lhs.height as height,
+          lhs.hometown as hometown
+   from df_people as lhs
+   inner join
+     (select max(height) as height
+      from df_people df_people) as rhs on (lhs.height = rhs.height))`;
+
+verify q1 q2;

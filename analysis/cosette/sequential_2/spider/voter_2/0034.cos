@@ -1,0 +1,35 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_student(df_student);
+
+query q1
+`select major
+from df_student df_student
+where sex = "f"
+group by major
+
+limit 1`;
+
+query q2
+`select distinct major.other as major
+from
+  (select lhs.stuid as stuid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          lhs.age as age,
+          lhs.sex as sex,
+          lhs.major as major,
+          lhs.advisor as advisor,
+          lhs.city_code as city_code,
+          rhs.major as major.other
+   from
+     (select *
+      from df_student df_student
+      where (sex != 'f')) as lhs
+   inner join
+     (select major,
+             count(*) as n
+      from df_student df_student
+      group by major) as rhs on (lhs.age = rhs.n))`;
+
+verify q1 q2;

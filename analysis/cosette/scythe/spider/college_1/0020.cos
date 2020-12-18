@@ -1,0 +1,30 @@
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_employee(df_employee);
+
+query q1
+`select emp_jobcode,
+       count(*)
+from df_employee df_employee
+group by emp_jobcode
+
+limit 1`;
+
+query q2
+`select t6.emp_jobcode,t6.count_emp_fname
+ from
+  (select
+          max(t2.emp_dob) as max_emp_dob
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          (select
+              t3.emp_jobcode, count(t3.emp_fname) as count_emp_fname
+            from
+              input as t3
+            group by
+              t3.emp_jobcode) as t5
+         where t5.count_emp_fname = 22.0) as t4 as t6`;
+
+verify q1 q2;

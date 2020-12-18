@@ -1,0 +1,48 @@
+schema df_19_1(S_key:str, P_id:str);
+schema df_19_2(P_id:str, color:str);
+schema df_19_3(S_key:str, S_name:str);
+
+table df_19_1(df_19_1);
+table df_19_2(df_19_2);
+table df_19_3(df_19_3);
+
+query q1
+`select lhs.s_key as s_key,
+          lhs.p_id as p_id,
+          lhs.color as color,
+          lhs.s_name as s_name
+   from
+     (select lhs.s_key as s_key,
+             lhs.p_id as p_id,
+             lhs.color as color,
+             rhs.s_name as s_name
+      from
+        (select lhs.s_key as s_key,
+                lhs.p_id as p_id,
+                rhs.color as color
+         from df_19_1 as lhs
+         inner join df_19_2 as rhs on (lhs.p_id = rhs.p_id)) as lhs
+      inner join df_19_3 as rhs on (lhs.s_key = rhs.s_key)) as lhs
+   inner join
+     (select *
+      from df_19_2 df_19_2
+      where (color = 'red')) as rhs on (lhs.p_id = rhs.p_id
+                                          and lhs.color = rhs.color)`;
+
+query q2
+`select t4.s_key,t4.p_id,t4.s_name,t4.color
+ from
+  (select t2.s_key, t2.p_id, t2.p_id1, t2.color, t5.s_key as s_key1, t5.s_name
+  from (select *
+       from
+        (select input.s_key, input.p_id, t3.p_id as p_id1, t3.color
+        from input join 
+            (select *
+               from
+                input0
+               where input0.color = 'red') as t3) as t2
+       where t2.p_id = t2.p_id1) join 
+      input1 as t5) as t4
+ where t4.s_key = t4.s_key1`;
+
+verify q1 q2;

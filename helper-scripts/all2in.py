@@ -4,6 +4,7 @@ import argparse
 import glob
 
 import os
+import re
 import shutil
 
 import yaml
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests-examples/**/*.yaml', recursive=True):
+    for file in glob.glob('tests/**/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
@@ -26,9 +27,9 @@ if __name__ == '__main__':
             result = ''
 
             for input in spec['inputs']:
-                os.makedirs(os.path.dirname(input.replace('tests-examples', args.output)), exist_ok=True)
-                shutil.copy(input, input.replace('tests-examples', args.output))
-            shutil.copy(spec['output'], spec['output'].replace('tests-examples', args.output))
+                os.makedirs(os.path.dirname(re.sub('^tests', args.output, input)), exist_ok=True)
+                shutil.copy(input, re.sub('^tests', args.output, input))
+            shutil.copy(spec['output'], re.sub('^tests', args.output, spec['output']))
 
             result += 'inputs: ' + ', '.join(spec['inputs']) + '\n'
             result += 'output: ' + spec['output'] + '\n'
@@ -63,7 +64,7 @@ if __name__ == '__main__':
             else:
                 result += 'loc: 1\n'
 
-            output_file = file.replace('tests-examples', args.output).replace('.yaml', '.in')
+            output_file = re.sub('^tests', args.output, file).replace('.yaml', '.in')
             os.makedirs(os.path.dirname(output_file), exist_ok=True)
             with open(output_file, 'w') as f:
                 f.write(result)

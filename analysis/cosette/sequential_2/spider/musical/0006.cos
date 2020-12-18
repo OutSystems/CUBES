@@ -1,0 +1,49 @@
+schema df_actor(actor_id:int, name:str, musical_id:int, character:str, duration:str, age:int);
+
+table df_actor(df_actor);
+
+query q1
+`select duration
+from df_actor df_actor
+
+limit 1`;
+
+query q2
+`select distinct duration
+from
+  (select lhs.actor_id as actor_id,
+          lhs.name as name,
+          lhs.musical_id as musical_id,
+          lhs.character as character,
+          lhs.duration as duration,
+          lhs.age as age,
+          lhs.maxage as maxage,
+          rhs.actor_id as actor_id.other,
+          rhs.name as name.other,
+          rhs.musical_id as musical_id.other,
+          rhs.character as character.other,
+          rhs.duration as duration.other,
+          rhs.age as age.other,
+          rhs.maxage as maxage.other
+   from
+     (select actor_id,
+             name,
+             musical_id,
+             character,
+             duration,
+             age,
+             max(age) over () as maxage
+      from df_actor df_actor) as lhs
+   cross join
+     (select actor_id,
+             name,
+             musical_id,
+             character,
+             duration,
+             age,
+             max(age) over () as maxage
+      from df_actor df_actor) as rhs)
+where (age = maxage
+       or maxage > maxage.other)`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_building(building_id:int, name:str, street_address:str, years_as_tallest:str, height_feet:int, floors:int);
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+
+table df_building(df_building);
+table df_institution(df_institution);
+
+query q1
+`select name
+from df_building df_building
+except
+select t1.name
+from df_building as t1
+join df_institution as t2 on t1.building_id = t2.building_id
+where t2.founded = 2003`;
+
+query q2
+`select name
+from
+  (select *
+   from df_building as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_institution df_institution
+           where (founded >= 2003.0)) as rhs
+        where (lhs.building_id = rhs.building_id) ))`;
+
+verify q1 q2;

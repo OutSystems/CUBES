@@ -1,0 +1,23 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select count(*)
+from df_tryout df_tryout
+where ppos = 'goalie'`;
+
+query q2
+`select t2.count_cname
+ from
+  (select
+      t1.ppos, count(t1.cname) as count_cname
+    from
+      (select *
+         from
+          input
+         where input.ppos = 'goalie') as t1
+    group by
+      t1.ppos) as t2`;
+
+verify q1 q2;

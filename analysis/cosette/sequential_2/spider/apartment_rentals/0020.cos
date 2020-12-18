@@ -1,0 +1,49 @@
+schema df_guests(guest_id:int, gender_code:str, guest_first_name:str, guest_last_name:str, date_of_birth:str);
+schema df_apartment_bookings(apt_booking_id:int, apt_id:int, guest_id:int, booking_status_code:str, booking_start_date:str, booking_end_date:str);
+
+table df_guests(df_guests);
+table df_apartment_bookings(df_apartment_bookings);
+
+query q1
+`select t2.guest_first_name,
+       t1.booking_start_date,
+       t1.booking_start_date
+from df_apartment_bookings as t1
+join df_guests as t2 on t1.guest_id = t2.guest_id`;
+
+query q2
+`select guest_first_name,
+       booking_start_date as booking_start_date...2,
+                                                 booking_start_date.other as booking_start_date...3
+from
+  (select lhs.apt_booking_id as apt_booking_id,
+          lhs.apt_id as apt_id,
+          lhs.guest_id as guest_id,
+          lhs.booking_status_code as booking_status_code,
+          lhs.booking_start_date as booking_start_date,
+          lhs.booking_end_date as booking_end_date,
+          lhs.gender_code as gender_code,
+          lhs.guest_first_name as guest_first_name,
+          lhs.guest_last_name as guest_last_name,
+          lhs.date_of_birth as date_of_birth,
+          rhs.apt_booking_id as apt_booking_id.other,
+          rhs.apt_id as apt_id.other,
+          rhs.guest_id as guest_id.other,
+          rhs.booking_start_date as booking_start_date.other
+   from
+     (select lhs.apt_booking_id as apt_booking_id,
+             lhs.apt_id as apt_id,
+             lhs.guest_id as guest_id,
+             lhs.booking_status_code as booking_status_code,
+             lhs.booking_start_date as booking_start_date,
+             lhs.booking_end_date as booking_end_date,
+             rhs.gender_code as gender_code,
+             rhs.guest_first_name as guest_first_name,
+             rhs.guest_last_name as guest_last_name,
+             rhs.date_of_birth as date_of_birth
+      from df_apartment_bookings as lhs
+      inner join df_guests as rhs on (lhs.guest_id = rhs.guest_id)) as lhs
+   inner join df_apartment_bookings as rhs on (lhs.booking_end_date = rhs.booking_end_date
+                                               and lhs.booking_status_code = rhs.booking_status_code))`;
+
+verify q1 q2;

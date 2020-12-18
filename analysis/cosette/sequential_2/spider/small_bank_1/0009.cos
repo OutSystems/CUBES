@@ -1,0 +1,47 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+table df_checking(df_checking);
+
+query q1
+`select t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+where t2.balance >
+    (select avg(balance)
+     from df_checking df_checking) intersect
+  select t1.name
+  from df_accounts as t1
+  join df_savings as t2 on t1.custid = t2.custid where t2.balance <
+    (select avg(balance)
+     from df_savings df_savings)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_accounts as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.custid as custid,
+                     lhs.balance as balance,
+                     lhs.meanbalance as meanbalance,
+                     rhs.custid as custid.other,
+                     rhs.balance as balance.other
+              from
+                (select custid,
+                        balance,
+                        avg(balance) over () as meanbalance
+                 from df_checking df_checking) as lhs
+              cross join df_savings as rhs)
+           where (balance <= meanbalance
+                  and meanbalance < balance.other)) as rhs
+        where (lhs.custid = rhs.custid) ))`;
+
+verify q1 q2;

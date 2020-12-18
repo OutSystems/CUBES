@@ -1,0 +1,32 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+schema df_hosting_city(year:int, match_id:int, host_city:int);
+
+table df_city(df_city);
+table df_hosting_city(df_hosting_city);
+
+query q1
+`select t1.gdp,
+       t1.regional_population
+from df_city as t1
+join df_hosting_city as t2 on t1.city_id = t2.host_city
+group by t2.host_city
+having count(*) > 1`;
+
+query q2
+`select t3.gdp,t3.regional_population
+ from
+  (select *
+       from
+        (select
+            t4.host_city, max(t4.match_id) as max_match_id
+          from
+            input0 as t4
+          group by
+            t4.host_city) as t1
+       where t1.max_match_id = 1.0) join 
+      (select *
+         from
+          input
+         where input.city_id = 2.0) as t2 as t3`;
+
+verify q1 q2;

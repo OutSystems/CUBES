@@ -1,0 +1,21 @@
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+
+table df_course(df_course);
+
+query q1
+`select sum(crs_credit),
+       dept_code
+from df_course df_course
+group by dept_code`;
+
+query q2
+`select t2.sum_crs_credit,t2.dept_code
+ from
+  (select
+      t1.dept_code, sum(t1.crs_credit) as sum_crs_credit
+    from
+      input as t1
+    group by
+      t1.dept_code) as t2`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_ship(df_ship);
+
+query q1
+`select type
+from df_ship df_ship
+group by type
+
+limit 1`;
+
+query q2
+`select type
+from
+  (select lhs.type as type,
+          lhs.n as n,
+          rhs.type as type.other,
+          rhs.n as n.other
+   from
+     (select type,
+             count(*) as n
+      from df_ship df_ship
+      group by type) as lhs
+   cross join
+     (select type,
+             count(*) as n
+      from df_ship df_ship
+      group by type) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_campuses(id:int, campus:str, location:str, county:str, year:int);
+schema df_faculty(campus:int, year:int, faculty:str);
+
+table df_campuses(df_campuses);
+table df_faculty(df_faculty);
+
+query q1
+`select t1.campus
+from df_campuses as t1
+join df_faculty as t2 on t1.id = t2.campus
+where t2.year = 2003
+
+limit 1`;
+
+query q2
+`select t2.campus
+ from
+  (select t1.county, t1.count_campus, t4.id, t4.campus, t4.location, t4.county as county1, t4.year
+  from (select *
+       from
+        (select
+            t3.county, count(t3.campus) as count_campus
+          from
+            input as t3
+          group by
+            t3.county) as t1
+       where t1.count_campus = 2.0) join 
+      input as t4) as t2
+ where t2.county = t2.location`;
+
+verify q1 q2;

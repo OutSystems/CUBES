@@ -1,0 +1,24 @@
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_head(df_head);
+table df_management(df_management);
+
+query q1
+`select distinct t1.age
+from df_management as t2
+join df_head as t1 on t1.head_id = t2.head_id
+where t2.temporary_acting = 'yes'`;
+
+query q2
+`select t1.age
+ from
+  (select input.head_id, input.name, input.born_state, input.age, t2.department_id, t2.head_id as head_id1, t2.temporary_acting
+  from input join 
+      (select *
+         from
+          input0
+         where input0.temporary_acting = 'yes') as t2) as t1
+ where t1.head_id = t1.head_id1`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+
+table df_entrepreneur(df_entrepreneur);
+
+query q1
+`select investor
+from df_entrepreneur df_entrepreneur
+group by investor
+
+limit 1`;
+
+query q2
+`select distinct investor
+from
+  (select lhs.entrepreneur_id as entrepreneur_id,
+          lhs.people_id as people_id,
+          lhs.company as company,
+          lhs.money_requested as money_requested,
+          lhs.investor as investor,
+          rhs.money_requested as money_requested.other
+   from df_entrepreneur as lhs
+   inner join
+     (select money_requested,
+             count(*) as n
+      from df_entrepreneur df_entrepreneur
+      group by money_requested) as rhs on (lhs.people_id = rhs.n))`;
+
+verify q1 q2;

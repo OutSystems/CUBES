@@ -1,0 +1,42 @@
+schema df_18_1(S_key:str, P_id:str, cost:int);
+schema df_18_3(S_key:str, S_name:str);
+
+table df_18_1(df_18_1);
+table df_18_3(df_18_3);
+
+query q1
+`select p_id,
+       s_name
+from
+  (select *
+   from
+     (select *
+      from df_18_1 as lhs
+      inner join df_18_3 as rhs on (lhs.s_key = rhs.s_key)) as lhs
+   inner join
+     (select p_id,
+             max(cost) as maxcost
+      from df_18_1 df_18_1
+      group by p_id) as rhs on (lhs.p_id = rhs.p_id))
+where (maxcost = cost)`;
+
+query q2
+`select t6.p_id,t6.s_name
+ from
+  (select t3.p_id, t3.max_cost, t3.s_key, t3.p_id1, t3.cost, t5.s_key as s_key1, t5.s_name
+  from (select *
+       from
+        (select t1.p_id, t1.max_cost, t4.s_key, t4.p_id as p_id1, t4.cost
+        from (select
+                t2.p_id, max(t2.cost) as max_cost
+              from
+                input as t2
+              group by
+                t2.p_id) as t1 join 
+            input as t4) as t3
+       where t3.p_id = t3.p_id1
+         and t3.max_cost = t3.cost) join 
+      input0 as t5) as t6
+ where t6.s_key = t6.s_key1`;
+
+verify q1 q2;

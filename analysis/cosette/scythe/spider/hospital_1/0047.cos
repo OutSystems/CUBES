@@ -1,0 +1,31 @@
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_patient(df_patient);
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+
+query q1
+`select name
+from df_patient df_patient
+except
+select t1.name
+from df_patient as t1
+join df_prescribes as t2 on t2.df_patient = t1.ssn
+join df_medication as t3 on t2.df_medication = t3.code
+where t3.name = 'procrastin-x'`;
+
+query q2
+`select t5.name
+ from
+  (select input.ssn, input.name, input.address, input.phone, input.insuranceid, input.pcp, t3.code, t3.name as name1, t3.brand, t3.description
+      from input join 
+          (select *
+             from
+              input0
+             where input0.name = 'procrastin-x') as t3) as t2 join 
+      input1 as t4 as t5
+ where t5.ssn > t5.patient`;
+
+verify q1 q2;

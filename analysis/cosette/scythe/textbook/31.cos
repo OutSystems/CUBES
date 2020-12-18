@@ -1,0 +1,40 @@
+schema df_aircraft(aid:int, aname:str, crusingrange:int);
+schema df_certified(eid:int, aid:int);
+schema df_employees(eid:int, ename:str, salary:str);
+
+table df_aircraft(df_aircraft);
+table df_certified(df_certified);
+table df_employees(df_employees);
+
+query q1
+`select distinct e.ename
+from df_employees df_employees e
+where e.eid in (select c.eid
+                from df_certified df_certified c
+                where exists(select a.aid
+                             from df_aircraft df_aircraft a
+                             where a.aid = c.aid
+                               and a.crusingrange > 3000)
+                  and not exists(select a1.aid
+                                 from df_aircraft df_aircraft a1
+                                 where a1.aid = c.aid
+                                   and a1.aname like 'boeing%'))`;
+
+query q2
+`select t5.ename
+ from
+  (select t2.eid, t2.max_aid, t3.eid as eid1, t3.ename, t3.salary
+  from (select
+          t4.eid, max(t4.aid) as max_aid
+        from
+          (select *
+             from
+              input0
+             where input0.aid = 3.0
+               or input0.aid = 8.0) as t4
+        group by
+          t4.eid) as t2 join 
+      input1 as t3) as t5
+ where t5.eid = t5.eid1`;
+
+verify q1 q2;

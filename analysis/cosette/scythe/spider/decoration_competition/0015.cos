@@ -1,0 +1,31 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select name
+from df_member df_member
+where member_id not in
+    (select member_id
+     from df_round df_round)`;
+
+query q2
+`select t4.name
+ from
+  (select t2.country, t2.college_id, t2.max_member_id, t3.member_id, t3.name, t3.country as country1, t3.college_id as college_id1
+  from (select
+          t1.country, t1.college_id, max(t1.member_id) as max_member_id
+        from
+          input as t1
+        group by
+          t1.country, t1.college_id) as t2 join 
+      (select *
+         from
+          input
+         where input.member_id <> 6.0) as t3) as t4
+ where t4.max_member_id <> t4.member_id
+   and t4.max_member_id = t4.college_id1`;
+
+verify q1 q2;

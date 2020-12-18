@@ -1,0 +1,71 @@
+schema df_products(product_id:int, product_details:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status:str, order_date:str, order_details:str);
+schema df_order_items(order_id:int, product_id:int, order_quantity:int);
+
+table df_products(df_products);
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+join df_order_items as t3 on t2.order_id = t3.order_id
+join df_products as t4 on t3.product_id = t4.product_id
+where t4.product_details = 'latte' intersect
+  select t1.customer_name
+  from df_customers as t1
+  join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+  join df_order_items as t3 on t2.order_id = t3.order_id
+  join df_products as t4 on t3.product_id = t4.product_id where t4.product_details = 'americano'`;
+
+query q2
+`select distinct customer_name
+from
+  (select lhs.product_id as product_id,
+          lhs.product_details as product_details,
+          lhs.order_id as order_id,
+          lhs.order_quantity as order_quantity,
+          rhs.customer_id as customer_id,
+          rhs.order_status as order_status,
+          rhs.order_date as order_date,
+          rhs.order_details as order_details,
+          rhs.payment_method as payment_method,
+          rhs.customer_name as customer_name,
+          rhs.date_became_customer as date_became_customer,
+          rhs.other_customer_details as other_customer_details
+   from
+     (select lhs.product_id as product_id,
+             lhs.product_details as product_details,
+             rhs.order_id as order_id,
+             rhs.order_quantity as order_quantity
+      from df_products as lhs
+      inner join df_order_items as rhs on (lhs.product_id = rhs.product_id)) as lhs
+   inner join
+     (select order_id,
+             customer_id,
+             order_status,
+             order_date,
+             order_details,
+             payment_method,
+             customer_name,
+             date_became_customer,
+             order_details as other_customer_details
+      from
+        (select lhs.order_id as order_id,
+                lhs.customer_id as customer_id,
+                lhs.order_status as order_status,
+                lhs.order_date as order_date,
+                lhs.order_details as order_details,
+                rhs.payment_method as payment_method,
+                rhs.customer_name as customer_name,
+                rhs.date_became_customer as date_became_customer
+         from df_customer_orders as lhs
+         inner join df_customers as rhs on (lhs.customer_id = rhs.customer_id
+                                                and lhs.order_details = rhs.other_customer_details))) as rhs on (lhs.order_id = rhs.order_id))
+where (product_details = 'latte'
+       and product_details != 'americano')`;
+
+verify q1 q2;

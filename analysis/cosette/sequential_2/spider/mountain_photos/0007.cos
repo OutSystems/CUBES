@@ -1,0 +1,44 @@
+schema df_mountain(id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_mountain(df_mountain);
+table df_photos(df_photos);
+
+query q1
+`select t1.id,
+       t1.name
+from df_mountain as t1
+join df_photos as t2 on t1.id = t2.mountain_id
+where t1.height > 4000`;
+
+query q2
+`select id,
+       name
+from
+  (select id,
+          name,
+          height,
+          prominence,
+          range,
+          country,
+          id.other,
+          camera_lens_id,
+          color,
+          name.other,
+          id as mountain_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.height as height,
+             lhs.prominence as prominence,
+             lhs.range as range,
+             lhs.country as country,
+             rhs.id as id.other,
+             rhs.camera_lens_id as camera_lens_id,
+             rhs.color as color,
+             rhs.name as name.other
+      from df_mountain as lhs
+      inner join df_photos as rhs on (lhs.id = rhs.mountain_id)))
+where (height > 4000.0)`;
+
+verify q1 q2;

@@ -1,0 +1,32 @@
+schema df_ref_shipping_agents(shipping_agent_code:str, shipping_agent_name:str, shipping_agent_description:str);
+schema df_documents(document_id:int, document_status_code:str, document_type_code:str, shipping_agent_code:str, receipt_date:str, receipt_number:int, other_details:str);
+
+table df_ref_shipping_agents(df_ref_shipping_agents);
+table df_documents(df_documents);
+
+query q1
+`select df_ref_shipping_agents.shipping_agent_name,
+       count(df_documents.document_id)
+from df_ref_shipping_agents df_ref_shipping_agents
+join df_documents on df_documents.shipping_agent_code = df_ref_shipping_agents.shipping_agent_code
+group by df_ref_shipping_agents.shipping_agent_code
+
+limit 1`;
+
+query q2
+`select t3.shipping_agent_name,t3.count_document_status_code
+ from
+  (select t1.shipping_agent_code, t1.count_document_status_code, t2.shipping_agent_code as shipping_agent_code1, t2.shipping_agent_name, t2.shipping_agent_description
+  from (select *
+       from
+        (select
+            t4.shipping_agent_code, count(t4.document_status_code) as count_document_status_code
+          from
+            input0 as t4
+          group by
+            t4.shipping_agent_code) as t1
+       where t1.count_document_status_code = 6.0) join 
+      input as t2) as t3
+ where t3.shipping_agent_code = t3.shipping_agent_code1`;
+
+verify q1 q2;

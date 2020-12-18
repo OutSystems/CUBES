@@ -1,0 +1,24 @@
+schema df_products_for_hire(product_id:int, product_type_code:str, daily_hire_cost:str, product_name:str, product_description:str);
+schema df_view_product_availability(product_id:int, booking_id:int, status_date:str, available_yn:int);
+
+table df_products_for_hire(df_products_for_hire);
+table df_view_product_availability(df_view_product_availability);
+
+query q1
+`select t2.product_name
+from df_view_product_availability as t1
+join df_products_for_hire as t2 on t1.product_id = t2.product_id
+where t1.available_yn = 1`;
+
+query q2
+`select t2.product_name
+ from
+  (select input.product_id, input.product_type_code, input.daily_hire_cost, input.product_name, input.product_description, t1.product_id as product_id1, t1.booking_id, t1.status_date, t1.available_yn
+  from input join 
+      (select *
+         from
+          input0
+         where input0.available_yn = 1.0) as t1) as t2
+ where t2.product_id = t2.product_id1`;
+
+verify q1 q2;

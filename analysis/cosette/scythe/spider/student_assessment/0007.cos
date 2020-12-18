@@ -1,0 +1,29 @@
+schema df_students(student_id:int, student_details:str);
+schema df_student_course_registrations(student_id:int, course_id:int, registration_date:str);
+
+table df_students(df_students);
+table df_student_course_registrations(df_student_course_registrations);
+
+query q1
+`select t2.student_details
+from df_student_course_registrations as t1
+join df_students as t2 on t1.student_id = t2.student_id
+
+limit 1`;
+
+query q2
+`select t3.student_details
+ from
+  (select t2.student_id, t2.course_id, t2.registration_date, t2.student_id1, t2.course_id1, t2.registration_date1, t4.student_id as student_id2, t4.student_details
+  from (select *
+       from
+        (select input0.student_id, input0.course_id, input0.registration_date, t1.student_id as student_id1, t1.course_id as course_id1, t1.registration_date as registration_date1
+        from input0 join 
+            input0 as t1) as t2
+       where t2.course_id > t2.course_id1
+         and t2.registration_date >= t2.registration_date1) join 
+      input as t4) as t3
+ where t3.student_id1 = t3.student_id2
+   and t3.student_id = t3.student_id2`;
+
+verify q1 q2;

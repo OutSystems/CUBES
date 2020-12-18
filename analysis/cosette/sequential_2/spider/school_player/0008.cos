@@ -1,0 +1,25 @@
+schema df_player(player_id:int, player:str, team:str, age:int, position:str, school_id:int);
+
+table df_player(df_player);
+
+query q1
+`select team
+from df_player df_player
+
+limit 1`;
+
+query q2
+`select team
+from
+  (select lhs.player_id as player_id,
+          lhs.player as player,
+          lhs.team as team,
+          lhs.age as age,
+          lhs.position as position,
+          lhs.school_id as school_id
+   from df_player as lhs
+   inner join
+     (select max(age) as age
+      from df_player df_player) as rhs on (lhs.player_id = rhs.age))`;
+
+verify q1 q2;

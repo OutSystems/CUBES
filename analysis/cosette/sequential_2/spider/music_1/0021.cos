@@ -1,0 +1,67 @@
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_song(df_song);
+
+query q1
+`select distinct song_name
+from df_song df_song
+where resolution >
+    (select min(resolution)
+     from df_song df_song
+     where languages = "english")`;
+
+query q2
+`select song_name.other as song_name
+from
+  (select *
+   from
+     (select lhs.song_name as song_name,
+             lhs.artist_name as artist_name,
+             lhs.country as country,
+             lhs.f_id as f_id,
+             lhs.genre_is as genre_is,
+             lhs.rating as rating,
+             lhs.languages as languages,
+             lhs.releasedate as releasedate,
+             lhs.resolution as resolution,
+             lhs.minresolution as minresolution,
+             rhs.song_name as song_name.other,
+             rhs.artist_name as artist_name.other,
+             rhs.country as country.other,
+             rhs.f_id as f_id.other,
+             rhs.genre_is as genre_is.other,
+             rhs.rating as rating.other,
+             rhs.languages as languages.other,
+             rhs.releasedate as releasedate.other,
+             rhs.resolution as resolution.other,
+             rhs.minresolution as minresolution.other
+      from
+        (select song_name,
+                artist_name,
+                country,
+                f_id,
+                genre_is,
+                rating,
+                languages,
+                releasedate,
+                resolution,
+                min(resolution) over () as minresolution
+         from df_song df_song) as lhs
+      cross join
+        (select song_name,
+                artist_name,
+                country,
+                f_id,
+                genre_is,
+                rating,
+                languages,
+                releasedate,
+                resolution,
+                min(resolution) over () as minresolution
+         from df_song df_song) as rhs)
+   where (resolution < resolution.other
+          and minresolution = minresolution.other))
+where (languages = 'english'
+       and minresolution < resolution)`;
+
+verify q1 q2;

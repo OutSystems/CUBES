@@ -1,0 +1,34 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select count(distinct t1.title)
+from df_papers as t1
+join df_authorship as t2 on t1.paperid = t2.paperid
+join df_inst as t3 on t2.instid = t3.instid
+where t3.name = "tokohu university"`;
+
+query q2
+`select distinct n_distinct as count.distinct.t1.title.
+from
+  (select lhs.instid as instid,
+          lhs.name as name,
+          lhs.country as country,
+          rhs.n_distinct as n_distinct
+   from df_inst as lhs
+   cross join
+     (select count(distinct title) as n_distinct
+      from
+        (select *
+         from df_papers as lhs
+         where not exists
+             (select 1
+              from df_authorship as rhs
+              where (lhs.paperid = rhs.paperid) ))) as rhs)`;
+
+verify q1 q2;

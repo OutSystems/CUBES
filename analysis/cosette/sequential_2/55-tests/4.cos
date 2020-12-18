@@ -1,0 +1,43 @@
+schema df_4_1(C_name:str, meets_at:str);
+schema df_4_2(S_key:str, C_name:str);
+schema df_4_3(S_key:str, S_name:str);
+
+table df_4_1(df_4_1);
+table df_4_2(df_4_2);
+table df_4_3(df_4_3);
+
+query q1
+`select t.s_name
+from
+  (select i1.s_name,
+          i1.meets_at,
+          count(*) as n
+   from df_4_1 df_4_1 i1
+        natural join df_4_2 i2
+        natural join df_4_3 i3
+   group by s_name, meets_at) t
+where (t.n = 2.0)`;
+
+query q2
+`select s_name
+from
+  (select s_name,
+          meets_at,
+          count(*) as n
+   from
+     (select lhs.c_name as c_name,
+             lhs.meets_at as meets_at,
+             lhs.s_key as s_key,
+             rhs.s_name as s_name
+      from
+        (select lhs.c_name as c_name,
+                lhs.meets_at as meets_at,
+                rhs.s_key as s_key
+         from df_4_1 as lhs
+         inner join df_4_2 as rhs on (lhs.c_name = rhs.c_name)) as lhs
+      inner join df_4_3 as rhs on (lhs.s_key = rhs.s_key))
+   group by s_name,
+            meets_at)
+where (n = 2.0)`;
+
+verify q1 q2;

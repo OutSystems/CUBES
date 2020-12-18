@@ -1,0 +1,22 @@
+schema df_i055(ID:int, User:str, Activity:str, PageURL:str);
+
+table df_i055(df_i055);
+
+query q1
+`select user, activity, concat(pageurl)
+from input
+group by user, activity`;
+
+query q2
+`select user,
+       activity,
+       concatpageurl
+from
+  (select activity,
+          user,
+          string_agg(pageurl, ' ') as concatpageurl
+   from df_i055 df_i055
+   group by activity,
+            user)`;
+
+verify q1 q2;

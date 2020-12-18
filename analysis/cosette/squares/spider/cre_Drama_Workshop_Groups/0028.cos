@@ -1,0 +1,34 @@
+schema df_customer_orders(order_id:int, customer_id:int, store_id:int, order_date:str, planned_delivery_date:str, actual_delivery_date:str, other_order_details:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, order_quantity:int, other_item_details:str);
+
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.actual_delivery_date
+from df_customer_orders as t1
+join df_order_items as t2 on t1.order_id = t2.order_id
+where t2.order_quantity = 1`;
+
+query q2
+`joining, by = "order_id"
+select actual_delivery_date
+from
+  (select order_item_id,
+          order_id,
+          product_id,
+          order_quantity,
+          other_item_details,
+          customer_id,
+          store_id,
+          order_date,
+          planned_delivery_date,
+          actual_delivery_date,
+          other_order_details
+   from
+     (select *
+      from input1
+      where (order_quantity = 1.0)) as lhs
+   inner join input0 as rhs on (lhs.order_id = rhs.order_id))`;
+
+verify q1 q2;

@@ -1,0 +1,48 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_last_name:str, customer_address:str, customer_phone:str, customer_email:str, other_customer_details:str);
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers(df_customers);
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select count(*)
+from df_customers_cards as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.customer_first_name = "blanche"
+  and t2.customer_last_name = "huels"
+  and t1.card_type_code = "credit"`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select customer_id,
+          customer_last_name,
+          count(distinct customer_first_name) as n_distinct
+   from
+     (select *
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.customer_first_name as customer_first_name,
+                lhs.customer_last_name as customer_last_name,
+                lhs.customer_address as customer_address,
+                lhs.customer_phone as customer_phone,
+                lhs.customer_email as customer_email,
+                lhs.other_customer_details as other_customer_details,
+                rhs.card_id as card_id,
+                rhs.card_type_code as card_type_code,
+                rhs.card_number as card_number,
+                rhs.date_valid_from as date_valid_from,
+                rhs.date_valid_to as date_valid_to,
+                rhs.other_card_details as other_card_details
+         from
+           (select *
+            from df_customers df_customers
+            where (customer_first_name = 'blanche'
+                   or customer_last_name != 'huels')) as lhs
+         left join df_customers_cards as rhs on (lhs.customer_id = rhs.customer_id))
+      where (customer_last_name != 'huels'
+             and card_type_code = 'credit'))
+   group by customer_id,
+            customer_last_name)`;
+
+verify q1 q2;

@@ -1,0 +1,33 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+schema df_train(train_id:int, train_num:int, name:str, from:str, arrival:str, railway_id:int);
+
+table df_railway(df_railway);
+table df_train(df_train);
+
+query q1
+`select t2.name,
+       t1.location
+from df_railway as t1
+join df_train as t2 on t1.railway_id = t2.railway_id`;
+
+query q2
+`joining, by = "railway_id"
+select name,
+       location
+from
+  (select railway_id,
+          railway,
+          builder,
+          built,
+          wheels,
+          location,
+          objectnumber,
+          train_id,
+          train_num,
+          name,
+          from,
+          arrival
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.railway_id = rhs.railway_id))`;
+
+verify q1 q2;

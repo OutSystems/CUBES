@@ -1,0 +1,31 @@
+schema df_034(MATERIAL:str, DISCO_DATE:str, DATE_UPDATE:str);
+
+table df_034(df_034);
+
+query q1
+`select * from ( select
+  t1.mfg_part_number
+ ,t2.disco_date
+  , date_update
+
+  from test.dbo.sku  where date_update=   @maxdate)   t1
+  left join test.dbo.tbl_disco_dates t2
+   on t1.mfg_part_number = t2.material
+
+  where t1.mfg_part_number = 't6c25aw#abc'
+
+  group by
+ t1.mfg_part_number
+ ,t2.disco_date`;
+
+query q2
+`select t4.material,t4.disco_date,t4.max_date_update
+ from
+  (select
+          max(t3.date_update) as max_date_update
+        from
+          input as t3) as t2 join 
+      input as t1 as t4
+ where t4.max_date_update = t4.date_update`;
+
+verify q1 q2;

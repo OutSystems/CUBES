@@ -1,0 +1,48 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+
+table df_mountain(df_mountain);
+
+query q1
+`select range
+from df_mountain df_mountain
+group by range
+
+limit 1`;
+
+query q2
+`joining, by = c("country", "n")
+joining, by = c("country", "name", "range")
+select range
+from
+  (select country,
+          name,
+          n,
+          range,
+          mountain_id,
+          height,
+          prominence
+   from
+     (select country,
+             name,
+             n,
+             range
+      from
+        (select country,
+                name,
+                count(*) as n
+         from input0
+         group by country,
+                  name) as lhs
+      inner join
+        (select range,
+                country,
+                count(*) as n
+         from input0
+         group by range,
+                  country) as rhs on (lhs.country = rhs.country
+                                          and lhs.n = rhs.n)) as lhs
+   inner join input0 as rhs on (lhs.country = rhs.country
+                                    and lhs.name = rhs.name
+                                    and lhs.range = rhs.range))`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_room(roomnumber:int, roomtype:str, blockfloor:int, blockcode:int, unavailable:int);
+
+table df_room(df_room);
+
+query q1
+`select count(distinct roomtype)
+from df_room df_room`;
+
+query q2
+`select distinct n_distinct as count.distinct.roomtype.
+from
+  (select blockcode,
+          unavailable,
+          count(distinct roomtype) as n_distinct
+   from df_room df_room
+   group by blockcode,
+            unavailable)`;
+
+verify q1 q2;

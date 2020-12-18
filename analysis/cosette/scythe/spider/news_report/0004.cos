@@ -1,0 +1,24 @@
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+
+table df_journalist(df_journalist);
+
+query q1
+`select name
+from df_journalist df_journalist
+where nationality = "england"
+  or nationality = "wales"`;
+
+query q2
+`select t3.name
+ from
+  (select
+          max(t2.journalist_id) as max_journalist_id
+        from
+          input as t2) as t4 join 
+      (select *
+         from
+          input
+         where input.nationality = 'wales'
+           or input.nationality = 'england') as t1 as t3`;
+
+verify q1 q2;

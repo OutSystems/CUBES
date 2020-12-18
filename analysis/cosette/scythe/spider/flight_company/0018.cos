@@ -1,0 +1,29 @@
+schema df_airport(id:int, city:str, country:str, iata:str, icao:str, name:str);
+
+table df_airport(df_airport);
+
+query q1
+`select country
+from df_airport df_airport
+group by country
+having count(*) > 2`;
+
+query q2
+`select t1.country
+ from
+  (select t2.country, t2.count_iata, t3.id, t3.city, t3.country as country1, t3.iata, t3.icao, t3.name
+  from (select *
+       from
+        (select
+            t4.country, count(t4.iata) as count_iata
+          from
+            input as t4
+          group by
+            t4.country) as t2
+       where t2.count_iata = 3.0) join 
+      (select *
+         from
+          input
+         where input.id = 2.0) as t3) as t1`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_files(df_files);
+table df_song(df_song);
+
+query q1
+`select t1.artist_name
+from df_song as t1
+join df_files as t2 on t1.f_id = t2.f_id
+
+limit 1`;
+
+query q2
+`select t3.artist_name
+ from
+  (select
+          count(t4.genre_is) as count_genre_is
+        from
+          input0 as t4) as t1 join 
+      (select *
+         from
+          input0
+         where input0.f_id = 2.0) as t2 as t3`;
+
+verify q1 q2;

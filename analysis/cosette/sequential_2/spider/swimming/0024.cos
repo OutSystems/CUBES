@@ -1,0 +1,42 @@
+schema df_swimmer(id:int, name:str, nationality:str, meter_100:str, meter_200:str, meter_300:str, meter_400:str, meter_500:str, meter_600:str, meter_700:str, time:str);
+schema df_record(id:int, result:str, swimmer_id:int, event_id:int);
+
+table df_swimmer(df_swimmer);
+table df_record(df_record);
+
+query q1
+`select t1.name,
+       t1.nationality
+from df_swimmer as t1
+join df_record as t2 on t1.id = t2.swimmer_id
+where result = 'win'
+group by t2.swimmer_id
+having count(*) > 1`;
+
+query q2
+`select distinct name,
+                nationality
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.meter_100 as meter_100,
+          lhs.meter_200 as meter_200,
+          lhs.meter_300 as meter_300,
+          lhs.meter_400 as meter_400,
+          lhs.meter_500 as meter_500,
+          lhs.meter_600 as meter_600,
+          lhs.meter_700 as meter_700,
+          lhs.time as time,
+          rhs.swimmer_id as swimmer_id
+   from df_swimmer as lhs
+   inner join
+     (select *
+      from
+        (select swimmer_id,
+                count(*) as n
+         from df_record df_record
+         group by swimmer_id)
+      where (n != 1.0)) as rhs on (lhs.id = rhs.n))`;
+
+verify q1 q2;

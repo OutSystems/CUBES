@@ -1,0 +1,43 @@
+schema df_functional_areas(functional_area_code:int, parent_functional_area_code:int, functional_area_description:str);
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+schema df_document_functional_areas(document_code:int, functional_area_code:int);
+
+table df_functional_areas(df_functional_areas);
+table df_documents(df_documents);
+table df_document_functional_areas(df_document_functional_areas);
+
+query q1
+`select avg(t1.access_count)
+from df_documents as t1
+join df_document_functional_areas as t2 on t1.document_code = t2.document_code
+join df_functional_areas as t3 on t2.functional_area_code = t3.functional_area_code
+where t3.functional_area_description = "acknowledgement"`;
+
+query q2
+`select meanaccess_count as avg.t1.access_count.
+from
+  (select avg(access_count) as meanaccess_count
+   from
+     (select lhs.document_code as document_code,
+             lhs.document_structure_code as document_structure_code,
+             lhs.document_type_code as document_type_code,
+             lhs.access_count as access_count,
+             lhs.document_name as document_name,
+             lhs.functional_area_code as functional_area_code,
+             rhs.parent_functional_area_code as parent_functional_area_code,
+             rhs.functional_area_description as functional_area_description
+      from
+        (select lhs.document_code as document_code,
+                lhs.document_structure_code as document_structure_code,
+                lhs.document_type_code as document_type_code,
+                lhs.access_count as access_count,
+                lhs.document_name as document_name,
+                rhs.functional_area_code as functional_area_code
+         from df_documents as lhs
+         inner join df_document_functional_areas as rhs on (lhs.document_code = rhs.document_code)) as lhs
+      inner join
+        (select *
+         from df_functional_areas df_functional_areas
+         where (functional_area_description = 'acknowledgement')) as rhs on (lhs.functional_area_code = rhs.functional_area_code)))`;
+
+verify q1 q2;

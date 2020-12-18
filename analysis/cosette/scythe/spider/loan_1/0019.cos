@@ -1,0 +1,29 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+where loan_type = 'mortgages' intersect
+  select t1.cust_name
+  from df_customer as t1
+  join df_loan as t2 on t1.cust_id = t2.cust_id where loan_type = 'auto'`;
+
+query q2
+`select t2.cust_name
+ from
+  (select input.cust_id, input.cust_name, input.acc_type, input.acc_bal, input.no_of_loans, input.credit_score, input.branch_id, input.state, t1.loan_id, t1.loan_type, t1.cust_id as cust_id1, t1.branch_id as branch_id1, t1.amount
+  from (select *
+       from
+        input
+       where input.no_of_loans = 2.0) join 
+      (select *
+         from
+          input0
+         where input0.loan_type = 'mortgages') as t1) as t2`;
+
+verify q1 q2;

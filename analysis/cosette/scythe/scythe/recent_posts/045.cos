@@ -1,0 +1,25 @@
+schema df_045_1(Menu_id:int, Name:str);
+schema df_045_2(ID:int, Quantity:int, Menu_id:int);
+
+table df_045_1(df_045_1);
+table df_045_2(df_045_2);
+
+query q1
+`select menu.name, sum(orderregel.quantity)    as quantity
+  from menu
+  left join orderregel
+  on menu.menu_id = orderregel. menu_id
+  group by menu_id`;
+
+query q2
+`select t3.name,t3.sum_quantity
+ from
+  input as t1 left outer join 
+      (select
+            t5.menu_id, sum(t5.quantity) as sum_quantity
+          from
+            input0 as t5
+          group by
+            t5.menu_id) as t4 as t2 on t1.id = t2.menu_id as t3`;
+
+verify q1 q2;

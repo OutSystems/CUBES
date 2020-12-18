@@ -1,0 +1,25 @@
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select sum(gamesplayed)
+from df_sportsinfo df_sportsinfo
+where sportname = "football"
+  and onscholarship = 'y'`;
+
+query q2
+`select sumgamesplayed as sum.gamesplayed.
+from
+  (select onscholarship,
+          sportname,
+          sum(gamesplayed) as sumgamesplayed
+   from
+     (select *
+      from df_sportsinfo df_sportsinfo
+      where (sportname = 'football'
+             and onscholarship = 'y'))
+   group by onscholarship,
+            sportname)`;
+
+verify q1 q2;

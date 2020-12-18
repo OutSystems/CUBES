@@ -1,0 +1,43 @@
+schema df_member(member_id:int, member_name:str, party_id:int, in_office:str);
+schema df_party_events(event_id:int, event_name:str, party_id:int, member_in_charge_id:int);
+
+table df_member(df_member);
+table df_party_events(df_party_events);
+
+query q1
+`select member_name
+from df_member df_member
+except
+select t1.member_name
+from df_member as t1
+join df_party_events as t2 on t1.member_id = t2.member_in_charge_id`;
+
+query q2
+`select member_name
+from
+  (select *
+   from df_member as lhs
+   where not exists
+       (select 1
+        from
+          (select member_id,
+                  member_name,
+                  party_id,
+                  in_office,
+                  event_id,
+                  event_name,
+                  member_id as member_in_charge_id
+           from
+             (select lhs.member_id as member_id,
+                     lhs.member_name as member_name,
+                     lhs.party_id as party_id,
+                     lhs.in_office as in_office,
+                     rhs.event_id as event_id,
+                     rhs.event_name as event_name
+              from df_member as lhs
+              inner join df_party_events as rhs on (lhs.member_id = rhs.member_in_charge_id
+                                                    and lhs.party_id = rhs.party_id))) as rhs
+        where (lhs.member_name = rhs.member_name
+               and lhs.party_id = rhs.party_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+schema df_pilot_record(record_id:int, pilot_id:int, aircraft_id:int, date:str);
+
+table df_pilot(df_pilot);
+table df_pilot_record(df_pilot_record);
+
+query q1
+`select pilot_name
+from df_pilot df_pilot
+where pilot_id not in
+    (select pilot_id
+     from df_pilot_record df_pilot_record)`;
+
+query q2
+`select t4.pilot_name
+ from
+  (select
+          max(t1.join_year) as max_join_year
+        from
+          input as t1) as t3 join 
+      input as t2 as t4
+ where t4.max_join_year = t4.join_year`;
+
+verify q1 q2;

@@ -1,0 +1,38 @@
+schema df_department_stores(dept_store_id:int, dept_store_chain_id:int, store_name:str, store_address:str, store_phone:str, store_email:str);
+schema df_departments(department_id:int, dept_store_id:int, department_name:str);
+
+table df_department_stores(df_department_stores);
+table df_departments(df_departments);
+
+query q1
+`select t2.dept_store_id,
+       t2.store_name
+from df_departments as t1
+join df_department_stores as t2 on t1.dept_store_id = t2.dept_store_id
+where t1.department_name = "marketing" intersect
+  select t2.dept_store_id,
+         t2.store_name
+  from df_departments as t1
+  join df_department_stores as t2 on t1.dept_store_id = t2.dept_store_id where t1.department_name = "managing"`;
+
+query q2
+`joining, by = "dept_store_id"
+select distinct dept_store_id,
+                store_name
+from
+  (select department_id,
+          dept_store_id,
+          department_name,
+          dept_store_chain_id,
+          store_name,
+          store_address,
+          store_phone,
+          store_email
+   from
+     (select *
+      from input1
+      where (department_name = 'managing'
+             or department_name = 'marketing')) as lhs
+   inner join input0 as rhs on (lhs.dept_store_id = rhs.dept_store_id))`;
+
+verify q1 q2;

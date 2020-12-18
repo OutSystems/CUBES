@@ -1,0 +1,30 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_documents(df_documents);
+
+query q1
+`select document_id,
+       document_name
+from df_documents df_documents`;
+
+query q2
+`select distinct document_id,
+                document_name
+from
+  (select lhs.document_id as document_id,
+          lhs.document_type_code as document_type_code,
+          lhs.project_id as project_id,
+          lhs.document_date as document_date,
+          lhs.document_name as document_name,
+          lhs.document_description as document_description,
+          lhs.other_details as other_details,
+          rhs.document_id as document_id.other,
+          rhs.project_id as project_id.other,
+          rhs.document_date as document_date.other,
+          rhs.document_name as document_name.other,
+          rhs.document_description as document_description.other
+   from df_documents as lhs
+   inner join df_documents as rhs on (lhs.document_type_code = rhs.document_type_code
+                                      and lhs.document_description = rhs.other_details))`;
+
+verify q1 q2;

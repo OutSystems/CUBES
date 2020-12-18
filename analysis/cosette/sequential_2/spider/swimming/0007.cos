@@ -1,0 +1,38 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select country
+from df_stadium df_stadium
+group by country
+
+limit 1`;
+
+query q2
+`select distinct country
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.capacity as capacity,
+          lhs.city as city,
+          lhs.country as country,
+          lhs.opening_year as opening_year,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.capacity as capacity.other,
+          rhs.city as city.other,
+          rhs.country as country.other
+   from df_stadium as lhs
+   inner join
+     (select id,
+             name,
+             capacity,
+             city,
+             country,
+             opening_year,
+             count(*) over () as n
+      from df_stadium df_stadium) as rhs on (lhs.id = rhs.n
+                                  and lhs.opening_year = rhs.opening_year))`;
+
+verify q1 q2;

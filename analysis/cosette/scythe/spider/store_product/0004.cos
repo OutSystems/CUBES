@@ -1,0 +1,21 @@
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+
+table df_district(df_district);
+
+query q1
+`select district_name
+from df_district df_district
+where city_area > 10
+  or city_population > 100000`;
+
+query q2
+`select t2.district_name
+ from
+  (select input.district_id, input.district_name, input.headquartered_city, input.city_population, input.city_area, t1.district_id as district_id1, t1.district_name as district_name1, t1.headquartered_city as headquartered_city1, t1.city_population as city_population1, t1.city_area as city_area1
+  from input join 
+      (select *
+         from
+          input
+         where input.district_id = 10.0) as t1) as t2`;
+
+verify q1 q2;

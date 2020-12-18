@@ -1,0 +1,31 @@
+schema df_characteristics(characteristic_id:int, characteristic_type_code:str, characteristic_data_type:str, characteristic_name:str, other_characteristic_details:str);
+schema df_product_characteristics(product_id:int, characteristic_id:int, product_characteristic_value:str);
+
+table df_characteristics(df_characteristics);
+table df_product_characteristics(df_product_characteristics);
+
+query q1
+`select characteristic_name,
+       other_characteristic_details,
+       characteristic_data_type
+from df_characteristics df_characteristics
+except
+select t1.characteristic_name,
+       t1.other_characteristic_details,
+       t1.characteristic_data_type
+from df_characteristics as t1
+join df_product_characteristics as t2 on t1.characteristic_id = t2.characteristic_id`;
+
+query q2
+`select characteristic_name,
+       other_characteristic_details,
+       characteristic_data_type
+from
+  (select *
+   from df_characteristics as lhs
+   where not exists
+       (select 1
+        from df_product_characteristics as rhs
+        where (lhs.characteristic_id = rhs.characteristic_id) ))`;
+
+verify q1 q2;

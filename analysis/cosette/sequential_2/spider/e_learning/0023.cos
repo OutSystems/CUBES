@@ -1,0 +1,39 @@
+schema df_subjects(subject_id:int, subject_name:str);
+schema df_courses(course_id:int, author_id:int, subject_id:int, course_name:str, course_description:str);
+
+table df_subjects(df_subjects);
+table df_courses(df_courses);
+
+query q1
+`select t1.course_name,
+       t1.course_description
+from df_courses as t1
+join df_subjects as t2 on t1.subject_id = t2.subject_id
+where t2.subject_name = "computer science"`;
+
+query q2
+`select course_name,
+       course_description
+from
+  (select lhs.subject_id as subject_id,
+          lhs.subject_name as subject_name,
+          lhs.course_id as course_id,
+          lhs.author_id as author_id,
+          lhs.course_name as course_name,
+          lhs.course_description as course_description
+   from
+     (select lhs.subject_id as subject_id,
+             lhs.subject_name as subject_name,
+             rhs.course_id as course_id,
+             rhs.author_id as author_id,
+             rhs.course_name as course_name,
+             rhs.course_description as course_description
+      from df_subjects as lhs
+      inner join df_courses as rhs on (lhs.subject_id = rhs.subject_id)) as lhs
+   inner join
+     (select *
+      from df_subjects df_subjects
+      where (subject_name = 'computer science')) as rhs on (lhs.subject_id = rhs.subject_id
+                                                              and lhs.subject_name = rhs.subject_name))`;
+
+verify q1 q2;

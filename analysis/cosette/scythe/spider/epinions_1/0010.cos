@@ -1,0 +1,26 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select name
+from df_useracct df_useracct
+where u_id not in
+    (select u_id
+     from df_review df_review)`;
+
+query q2
+`select t2.name
+ from
+  (select
+          count(t3.rating) as count_rating
+        from
+          input as t3) as t4 join 
+      (select *
+         from
+          input0
+         where input0.u_id > 2.0) as t1 as t2`;
+
+verify q1 q2;

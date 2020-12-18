@@ -1,0 +1,28 @@
+schema df_reviewer(rid:int, name:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_reviewer(df_reviewer);
+table df_rating(df_rating);
+
+query q1
+`select t2.name,
+       avg(t1.stars)
+from df_rating as t1
+join df_reviewer as t2 on t1.rid = t2.rid
+group by t2.name`;
+
+query q2
+`select name,
+       meanstars as avg.t1.stars.
+from
+  (select lhs.rid as rid,
+          lhs.meanstars as meanstars,
+          rhs.name as name
+   from
+     (select rid,
+             avg(stars) as meanstars
+      from df_rating df_rating
+      group by rid) as lhs
+   inner join df_reviewer as rhs on (lhs.rid = rhs.rid))`;
+
+verify q1 q2;

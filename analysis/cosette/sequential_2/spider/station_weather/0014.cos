@@ -1,0 +1,49 @@
+schema df_station(id:int, network_name:str, services:str, local_authority:str);
+schema df_weekly_weather(station_id:int, day_of_week:str, high_temperature:int, low_temperature:int, precipitation:str, wind_speed_mph:int);
+
+table df_station(df_station);
+table df_weekly_weather(df_weekly_weather);
+
+query q1
+`select t2.id,
+       t2.local_authority
+from df_weekly_weather as t1
+join df_station as t2 on t1.station_id = t2.id
+group by t1.station_id
+having max(t1.precipitation) > 50`;
+
+query q2
+`select id,
+       local_authority
+from
+  (select id,
+          local_authority,
+          max(precipitation) as maxprecipitation
+   from
+     (select id,
+             network_name,
+             services,
+             local_authority,
+             day_of_week,
+             high_temperature,
+             low_temperature,
+             precipitation,
+             wind_speed_mph,
+             id as station_id
+      from
+        (select lhs.id as id,
+                lhs.network_name as network_name,
+                lhs.services as services,
+                lhs.local_authority as local_authority,
+                rhs.day_of_week as day_of_week,
+                rhs.high_temperature as high_temperature,
+                rhs.low_temperature as low_temperature,
+                rhs.precipitation as precipitation,
+                rhs.wind_speed_mph as wind_speed_mph
+         from df_station as lhs
+         inner join df_weekly_weather as rhs on (lhs.id = rhs.station_id)))
+   group by id,
+            local_authority)
+where (maxprecipitation >= 50.0)`;
+
+verify q1 q2;

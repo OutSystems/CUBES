@@ -1,0 +1,34 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+schema df_employee(eid:int, name:str, salary:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_employee(df_employee);
+table df_certificate(df_certificate);
+
+query q1
+`select t1.name
+from df_employee as t1
+join df_certificate as t2 on t1.eid = t2.eid
+join df_aircraft as t3 on t3.aid = t2.aid
+where t3.distance > 5000
+group by t1.eid
+
+limit 1`;
+
+query q2
+`select t3.name
+ from
+  (select
+          t4.aid, max(t4.eid) as max_eid
+        from
+          (select *
+             from
+              input1
+             where input1.aid = 15.0) as t4
+        group by
+          t4.aid) as t2 join 
+      input0 as t5 as t3
+ where t3.max_eid = t3.eid`;
+
+verify q1 q2;

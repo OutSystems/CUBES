@@ -1,0 +1,40 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+schema df_budget(school_id:int, year:int, budgeted:int, total_budget_percent_budgeted:str, invested:int, total_budget_percent_invested:str, budget_invested_percent:str);
+
+table df_school(df_school);
+table df_budget(df_budget);
+
+query q1
+`select t2.school_name,
+       t1.budgeted,
+       t1.invested
+from df_budget as t1
+join df_school as t2 on t1.school_id = t2.school_id
+where t1.year >= 2002`;
+
+query q2
+`select school_name,
+       budgeted,
+       invested
+from
+  (select lhs.school_id as school_id,
+          lhs.school_name as school_name,
+          lhs.location as location,
+          lhs.mascot as mascot,
+          lhs.enrollment as enrollment,
+          lhs.ihsaa_class as ihsaa_class,
+          lhs.ihsaa_football_class as ihsaa_football_class,
+          lhs.county as county,
+          rhs.year as year,
+          rhs.budgeted as budgeted,
+          rhs.total_budget_percent_budgeted as total_budget_percent_budgeted,
+          rhs.invested as invested,
+          rhs.total_budget_percent_invested as total_budget_percent_invested,
+          rhs.budget_invested_percent as budget_invested_percent
+   from df_school as lhs
+   inner join
+     (select *
+      from df_budget df_budget
+      where (year >= 2002.0)) as rhs on (lhs.school_id = rhs.school_id))`;
+
+verify q1 q2;

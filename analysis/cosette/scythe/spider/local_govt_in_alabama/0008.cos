@@ -1,0 +1,29 @@
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_participants(df_participants);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select count(*)
+from df_participants as t1
+join df_participants_in_events as t2 on t1.participant_id = t2.participant_id
+where t1.participant_details like '%dr.%'`;
+
+query q2
+`select t2.count_event_id
+ from
+  (select t3.event_id, t3.count_event_id, t1.event_id as event_id1, t1.participant_id
+  from (select
+          t4.event_id, count(t4.event_id) as count_event_id
+        from
+          input0 as t4
+        group by
+          t4.event_id) as t3 join 
+      (select *
+         from
+          input0
+         where input0.event_id = 8.0) as t1) as t2
+ where t2.event_id = t2.event_id1`;
+
+verify q1 q2;

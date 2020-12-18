@@ -1,0 +1,30 @@
+schema df_medicine(id:int, name:str, trade_name:str, fda_approved:str);
+schema df_medicine_enzyme_interaction(enzyme_id:int, medicine_id:int, interaction_type:str);
+
+table df_medicine(df_medicine);
+table df_medicine_enzyme_interaction(df_medicine_enzyme_interaction);
+
+query q1
+`select t1.id,
+       t1.name
+from df_medicine as t1
+join df_medicine_enzyme_interaction as t2 on t2.medicine_id = t1.id
+group by t1.id
+having count(*) >= 2`;
+
+query q2
+`select t4.medicine_id,t4.name
+ from
+  (select *
+       from
+        (select
+            t2.medicine_id, count(t2.interaction_type) as count_interaction_type
+          from
+            input0 as t2
+          group by
+            t2.medicine_id) as t1
+       where t1.count_interaction_type >= 2.0) join 
+      input as t3 as t4
+ where t4.medicine_id = t4.id`;
+
+verify q1 q2;

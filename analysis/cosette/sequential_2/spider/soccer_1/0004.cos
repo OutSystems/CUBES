@@ -1,0 +1,24 @@
+schema df_player(id:int, player_api_id:int, player_name:str, player_fifa_api_id:int, birthday:str, height:str, weight:int);
+
+table df_player(df_player);
+
+query q1
+`select max(weight),
+       min(weight)
+from df_player df_player`;
+
+query q2
+`select distinct max(weight) over () as max.weight.,
+                                 minweight as min.weight.
+from
+  (select id,
+          player_api_id,
+          player_name,
+          player_fifa_api_id,
+          birthday,
+          height,
+          weight,
+          min(weight) over () as minweight
+   from df_player df_player)`;
+
+verify q1 q2;

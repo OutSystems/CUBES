@@ -1,0 +1,31 @@
+schema df_i013(orgName:str, id:int);
+
+table df_i013(df_i013);
+
+query q1
+`select o.orgname, oc.dupecount, o.id
+from organizations o
+inner join (
+    select orgname, count(*) as dupecount
+    from organizations
+    group by orgname
+    having count(*) > 1
+) oc on o.orgname = oc.orgname`;
+
+query q2
+`select t1.orgname1,t1.count_orgname,t1.id
+ from
+  (select
+      t2.id, t2.orgname1, count(t2.orgname) as count_orgname
+    from
+      (select *
+         from
+          (select input.orgname, input.id, t4.orgname as orgname1, t4.id as id1
+          from input join 
+              input as t4) as t3
+         where t3.id <= t3.id1
+           and t3.orgname = t3.orgname1) as t2
+    group by
+      t2.id, t2.orgname1) as t1`;
+
+verify q1 q2;

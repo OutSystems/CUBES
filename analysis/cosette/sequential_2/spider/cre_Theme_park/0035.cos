@@ -1,0 +1,39 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_visits(visit_id:int, tourist_attraction_id:int, tourist_id:int, visit_date:str, visit_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_visits(df_visits);
+
+query q1
+`select t1.name,
+       t2.tourist_attraction_id
+from df_tourist_attractions as t1
+join df_visits as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+group by t2.tourist_attraction_id
+having count(*) >= 2`;
+
+query q2
+`select name,
+       tourist_attraction_id
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.visit_details as visit_details,
+          rhs.n as n
+   from df_tourist_attractions as lhs
+   inner join
+     (select tourist_attraction_id,
+             visit_details,
+             count(*) as n
+      from df_visits df_visits
+      group by tourist_attraction_id,
+               visit_details) as rhs on (lhs.tourist_attraction_id = rhs.tourist_attraction_id))
+where (n >= 2.0)`;
+
+verify q1 q2;

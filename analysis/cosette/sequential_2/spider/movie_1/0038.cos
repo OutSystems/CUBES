@@ -1,0 +1,60 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_rating(df_rating);
+
+query q1
+`select t2.title,
+       t1.mid
+from df_rating as t1
+join df_movie as t2 on t1.mid = t2.mid
+group by t1.mid
+
+limit 1`;
+
+query q2
+`select distinct title,
+                mid.other as mid
+from
+  (select lhs.rid as rid,
+          lhs.mid as mid,
+          lhs.stars as stars,
+          lhs.ratingdate as ratingdate,
+          rhs.mid as mid.other,
+          rhs.title as title,
+          rhs.year as year,
+          rhs.director as director,
+          rhs.stars as stars.other,
+          rhs.ratingdate as ratingdate.other
+   from df_rating as lhs
+   inner join
+     (select lhs.mid as mid,
+             lhs.title as title,
+             lhs.year as year,
+             lhs.director as director,
+             lhs.rid as rid,
+             lhs.stars as stars,
+             lhs.ratingdate as ratingdate,
+             rhs.n as n
+      from
+        (select lhs.mid as mid,
+                lhs.title as title,
+                lhs.year as year,
+                lhs.director as director,
+                rhs.rid as rid,
+                rhs.stars as stars,
+                rhs.ratingdate as ratingdate
+         from df_movie as lhs
+         inner join df_rating as rhs on (lhs.mid = rhs.mid)) as lhs
+      inner join
+        (select mid,
+                stars,
+                count(*) as n
+         from df_rating df_rating
+         group by mid,
+                  stars) as rhs on (lhs.mid = rhs.mid
+                                    and lhs.stars = rhs.stars)) as rhs on (lhs.rid = rhs.rid
+                                                                           and lhs.stars = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_county(county_id:int, county_name:str, population:str, zip_code:str);
+
+table df_county(df_county);
+
+query q1
+`select county_name
+from df_county df_county
+
+limit 3`;
+
+query q2
+`select t5.county_name1
+ from
+  (select t1.avg_county_id, t1.county_id, t1.county_name, t1.population, t1.zip_code, t6.county_id as county_id1, t6.county_name as county_name1, t6.population as population1, t6.zip_code as zip_code1
+  from (select *
+       from
+        (select
+                avg(t2.county_id) as avg_county_id
+              from
+                input as t2) as t3 join 
+            input as t4 as t1
+       where t1.avg_county_id = t1.county_id) join 
+      input as t6) as t5
+ where t5.population >= t5.population1`;
+
+verify q1 q2;

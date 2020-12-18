@@ -1,0 +1,36 @@
+schema df_train(id:int, train_number:int, name:str, origin:str, destination:str, time:str, interval:str);
+schema df_route(train_id:int, station_id:int);
+
+table df_train(df_train);
+table df_route(df_route);
+
+query q1
+`select t1.name
+from df_train as t1
+join df_route as t2 on t1.id = t2.train_id
+group by t2.train_id
+
+limit 1`;
+
+query q2
+`select distinct name
+from
+  (select lhs.id as id,
+          lhs.train_number as train_number,
+          lhs.name as name,
+          lhs.origin as origin,
+          lhs.destination as destination,
+          lhs.time as time,
+          lhs.interval as interval,
+          rhs.station_id as station_id,
+          rhs.train_id as train_id
+   from df_train as lhs
+   inner join
+     (select station_id,
+             train_id,
+             count(*) as n
+      from df_route df_route
+      group by station_id,
+               train_id) as rhs on (lhs.id = rhs.n))`;
+
+verify q1 q2;

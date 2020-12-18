@@ -1,0 +1,24 @@
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+
+table df_district(df_district);
+
+query q1
+`select district_name
+from df_district df_district
+
+limit 1`;
+
+query q2
+`select t4.district_name
+ from
+  (select
+          min(t1.city_area) as min_city_area
+        from
+          input as t1) as t2 join 
+      (select *
+         from
+          input
+         where input.district_id < input.city_area) as t3 as t4
+ where t4.min_city_area = t4.city_area`;
+
+verify q1 q2;

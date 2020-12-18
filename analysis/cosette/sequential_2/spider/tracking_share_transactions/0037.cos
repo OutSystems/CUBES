@@ -1,0 +1,35 @@
+schema df_investors(investor_id:int, investor_details:str);
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+
+table df_investors(df_investors);
+table df_transactions(df_transactions);
+
+query q1
+`select t2.investor_id
+from df_investors as t1
+join df_transactions as t2 on t1.investor_id = t2.investor_id
+group by t2.investor_id
+having count(*) >= 2`;
+
+query q2
+`select investor_id
+from
+  (select investor_id,
+          other_details,
+          count(*) as n
+   from
+     (select lhs.investor_id as investor_id,
+             lhs.investor_details as investor_details,
+             rhs.transaction_id as transaction_id,
+             rhs.transaction_type_code as transaction_type_code,
+             rhs.date_of_transaction as date_of_transaction,
+             rhs.amount_of_transaction as amount_of_transaction,
+             rhs.share_count as share_count,
+             rhs.other_details as other_details
+      from df_investors as lhs
+      inner join df_transactions as rhs on (lhs.investor_id = rhs.investor_id))
+   group by investor_id,
+            other_details)
+where (n >= 2.0)`;
+
+verify q1 q2;

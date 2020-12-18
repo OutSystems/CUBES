@@ -1,0 +1,35 @@
+schema df_party(party_id:int, party_theme:str, location:str, first_year:int, last_year:int, number_of_hosts:int);
+
+table df_party(df_party);
+
+query q1
+`select location
+from df_party df_party
+
+limit 1`;
+
+query q2
+`select distinct location
+from
+  (select lhs.party_id as party_id,
+          lhs.party_theme as party_theme,
+          lhs.location as location,
+          lhs.first_year as first_year,
+          lhs.last_year as last_year,
+          lhs.number_of_hosts as number_of_hosts,
+          rhs.party_id as party_id.other,
+          rhs.party_theme as party_theme.other,
+          rhs.location as location.other,
+          rhs.first_year as first_year.other,
+          rhs.last_year as last_year.other
+   from df_party as lhs
+   inner join
+     (select party_id,
+             party_theme,
+             location,
+             first_year,
+             last_year,
+             max(number_of_hosts) over () as number_of_hosts
+      from df_party df_party) as rhs on (lhs.number_of_hosts = rhs.number_of_hosts))`;
+
+verify q1 q2;

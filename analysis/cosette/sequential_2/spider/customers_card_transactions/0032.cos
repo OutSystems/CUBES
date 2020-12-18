@@ -1,0 +1,28 @@
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select distinct card_type_code
+from df_customers_cards df_customers_cards`;
+
+query q2
+`select distinct card_type_code
+from
+  (select lhs.card_id as card_id,
+          lhs.customer_id as customer_id,
+          lhs.card_type_code as card_type_code,
+          lhs.card_number as card_number,
+          lhs.date_valid_from as date_valid_from,
+          lhs.date_valid_to as date_valid_to,
+          lhs.other_card_details as other_card_details,
+          rhs.card_id as card_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.card_number as card_number.other,
+          rhs.date_valid_to as date_valid_to.other,
+          rhs.other_card_details as other_card_details.other
+   from df_customers_cards as lhs
+   inner join df_customers_cards as rhs on (lhs.card_type_code = rhs.card_type_code
+                                            and lhs.date_valid_from = rhs.date_valid_from))`;
+
+verify q1 q2;

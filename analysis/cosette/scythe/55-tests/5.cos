@@ -1,0 +1,46 @@
+schema df_5_1(C_name:str, F_key:str, Room:str);
+schema df_5_2(F_key:str, F_name:str);
+
+table df_5_1(df_5_1);
+table df_5_2(df_5_2);
+
+query q1
+`select f_name
+from
+  (select f_key,
+          f_name,
+          n
+   from
+     (select f_key,
+             f_name,
+             n,
+             max(n) over () as zzz3
+      from
+        (select lhs.f_key as f_key,
+                lhs.f_name as f_name,
+                rhs.n as n
+         from df_5_2 as lhs
+         left join
+           (select f_key,
+                   count(*) as n
+            from df_5_1 df_5_1
+            group by f_key) as rhs on (lhs.f_key = rhs.f_key)))
+   where (n = zzz3))`;
+
+query q2
+`select t1.f_name
+ from
+  (select t3.f_key, t3.count_c_name, t2.f_key as f_key1, t2.f_name
+  from (select *
+       from
+        (select
+            t4.f_key, count(t4.c_name) as count_c_name
+          from
+            input as t4
+          group by
+            t4.f_key) as t3
+       where t3.count_c_name = 3.0) join 
+      input0 as t2) as t1
+ where t1.f_key = t1.f_key1`;
+
+verify q1 q2;

@@ -1,0 +1,35 @@
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_song(df_song);
+
+query q1
+`select f_id
+from df_song df_song
+where resolution >
+    (select avg(resolution)
+     from df_song df_song
+     where genre_is = "modern")`;
+
+query q2
+`select f_id
+from
+  (select lhs.country as country,
+          lhs.meanresolution as meanresolution,
+          rhs.song_name as song_name,
+          rhs.artist_name as artist_name,
+          rhs.f_id as f_id,
+          rhs.genre_is as genre_is,
+          rhs.rating as rating,
+          rhs.languages as languages,
+          rhs.releasedate as releasedate,
+          rhs.resolution as resolution
+   from
+     (select country,
+             avg(resolution) as meanresolution
+      from df_song df_song
+      group by country) as lhs
+   inner join df_song as rhs on (lhs.country = rhs.country))
+where (genre_is != 'modern'
+       and meanresolution <= resolution)`;
+
+verify q1 q2;

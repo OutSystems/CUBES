@@ -1,0 +1,34 @@
+schema df_customers(customer_id:int, customer_type_code:str, address_line_1:str, address_line_2:str, town_city:str, state:str, email_address:str, phone_number:str);
+
+table df_customers(df_customers);
+
+query q1
+`select email_address,
+       phone_number
+from df_customers df_customers
+
+         phone_number`;
+
+query q2
+`select email_address,
+       phone_number
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_type_code as customer_type_code,
+          lhs.address_line_1 as address_line_1,
+          lhs.address_line_2 as address_line_2,
+          lhs.town_city as town_city,
+          lhs.state as state,
+          lhs.email_address as email_address,
+          lhs.phone_number as phone_number,
+          rhs.customer_id as customer_id.other,
+          rhs.customer_type_code as customer_type_code.other,
+          rhs.address_line_1 as address_line_1.other,
+          rhs.town_city as town_city.other,
+          rhs.state as state.other,
+          rhs.email_address as email_address.other
+   from df_customers as lhs
+   inner join df_customers as rhs on (lhs.address_line_2 = rhs.address_line_2
+                                      and lhs.phone_number = rhs.phone_number))`;
+
+verify q1 q2;

@@ -1,0 +1,21 @@
+schema df_book(book_id:int, title:str, issues:str, writer:str);
+
+table df_book(df_book);
+
+query q1
+`select writer
+from df_book df_book
+group by writer
+having count(*) > 1`;
+
+query q2
+`select distinct writer
+from
+  (select writer,
+          count(*) as n
+   from input0
+   group by writer)
+where (n < 1.0
+       or n > 1.0)`;
+
+verify q1 q2;

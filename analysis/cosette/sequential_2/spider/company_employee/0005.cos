@@ -1,0 +1,25 @@
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+
+table df_company(df_company);
+
+query q1
+`select max(market_value_in_billion),
+       min(market_value_in_billion)
+from df_company df_company`;
+
+query q2
+`select distinct maxmarket_value_in_billion as max.market_value_in_billion.,
+                min(market_value_in_billion) over () as min.market_value_in_billion.
+from
+  (select company_id,
+          name,
+          headquarters,
+          industry,
+          sales_in_billion,
+          profits_in_billion,
+          assets_in_billion,
+          market_value_in_billion,
+          max(market_value_in_billion) over () as maxmarket_value_in_billion
+   from df_company df_company)`;
+
+verify q1 q2;

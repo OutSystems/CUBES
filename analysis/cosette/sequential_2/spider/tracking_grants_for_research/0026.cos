@@ -1,0 +1,34 @@
+schema df_organisation_types(organisation_type:str, organisation_type_description:str);
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+
+table df_organisation_types(df_organisation_types);
+table df_organisations(df_organisations);
+
+query q1
+`select t1.organisation_type_description
+from df_organisation_types as t1
+join df_organisations as t2 on t1.organisation_type = t2.organisation_type
+where t2.organisation_details = 'quo'`;
+
+query q2
+`select organisation_type_description
+from
+  (select lhs.organisation_type as organisation_type,
+          lhs.organisation_type_description as organisation_type_description,
+          lhs.organisation_id as organisation_id,
+          lhs.organisation_details as organisation_details
+   from
+     (select lhs.organisation_type as organisation_type,
+             lhs.organisation_type_description as organisation_type_description,
+             rhs.organisation_id as organisation_id,
+             rhs.organisation_details as organisation_details
+      from df_organisation_types as lhs
+      inner join df_organisations as rhs on (lhs.organisation_type = rhs.organisation_type)) as lhs
+   inner join
+     (select *
+      from df_organisations df_organisations
+      where (organisation_details = 'quo')) as rhs on (lhs.organisation_type = rhs.organisation_type
+                                                         and lhs.organisation_id = rhs.organisation_id
+                                                         and lhs.organisation_details = rhs.organisation_details))`;
+
+verify q1 q2;

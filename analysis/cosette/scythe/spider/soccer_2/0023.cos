@@ -1,0 +1,26 @@
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_player(df_player);
+table df_tryout(df_tryout);
+
+query q1
+`select min(t2.hs),
+       t1.ppos
+from df_tryout as t1
+join df_player as t2 on t1.pid = t2.pid
+group by t1.ppos`;
+
+query q2
+`select t2.hs,t2.ppos
+ from
+  (select
+          t3.ppos, min(t3.pid) as min_pid
+        from
+          input0 as t3
+        group by
+          t3.ppos) as t4 join 
+      input as t1 as t2
+ where t2.min_pid = t2.pid`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_products(df_products);
+
+query q1
+`select code,
+       name,
+       min(price)
+from df_products df_products
+group by name`;
+
+query q2
+`select t3.max_code,t3.name,t3.price
+ from
+  (select t4.price, t4.manufacturer, t4.max_code, t2.code, t2.name, t2.price as price1, t2.manufacturer as manufacturer1
+  from (select
+          t1.price, t1.manufacturer, max(t1.code) as max_code
+        from
+          input as t1
+        group by
+          t1.price, t1.manufacturer) as t4 join 
+      input as t2) as t3
+ where t3.max_code = t3.code`;
+
+verify q1 q2;

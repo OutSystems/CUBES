@@ -1,0 +1,30 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select name,
+       address_road,
+       city
+from df_branch df_branch`;
+
+query q2
+`select name,
+       address_road,
+       city
+from
+  (select lhs.branch_id as branch_id,
+          lhs.name as name,
+          lhs.open_year as open_year,
+          lhs.address_road as address_road,
+          lhs.city as city,
+          lhs.membership_amount as membership_amount,
+          rhs.branch_id as branch_id.other,
+          rhs.name as name.other,
+          rhs.open_year as open_year.other,
+          rhs.city as city.other,
+          rhs.membership_amount as membership_amount.other
+   from df_branch as lhs
+   inner join df_branch as rhs on (lhs.address_road = rhs.address_road))`;
+
+verify q1 q2;

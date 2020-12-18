@@ -1,0 +1,20 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+
+table df_product(df_product);
+
+query q1
+`select max_page_size
+from df_product df_product
+group by max_page_size
+having count(*) > 3`;
+
+query q2
+`select max_page_size
+from
+  (select max_page_size,
+          count(*) as n
+   from df_product df_product
+   group by max_page_size)
+where (n > 3.0)`;
+
+verify q1 q2;

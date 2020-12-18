@@ -1,0 +1,46 @@
+schema df_assets(asset_id:int, maintenance_contract_id:int, supplier_company_id:int, asset_details:str, asset_make:str, asset_model:str, asset_acquired_date:str, asset_disposed_date:str, other_asset_details:str);
+schema df_fault_log(fault_log_entry_id:int, asset_id:int, recorded_by_staff_id:int, fault_log_entry_datetime:str, fault_description:str, other_fault_details:str);
+
+table df_assets(df_assets);
+table df_fault_log(df_fault_log);
+
+query q1
+`select asset_model
+from df_assets df_assets
+where asset_id not in
+    (select asset_id
+     from df_fault_log df_fault_log)`;
+
+query q2
+`joining, by = "asset_id"
+joining, by = "asset_model"
+select distinct asset_model
+from
+  (select *
+   from
+     (select asset_model
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select asset_model
+           from
+             (select fault_log_entry_id,
+                     asset_id,
+                     recorded_by_staff_id,
+                     fault_log_entry_datetime,
+                     fault_description,
+                     other_fault_details,
+                     maintenance_contract_id,
+                     supplier_company_id,
+                     asset_details,
+                     asset_make,
+                     asset_model,
+                     asset_acquired_date,
+                     asset_disposed_date,
+                     other_asset_details
+              from input1 as lhs
+              left join input0 as rhs on (lhs.asset_id = rhs.asset_id))) as rhs
+        where (lhs.asset_model = rhs.asset_model) ))`;
+
+verify q1 q2;

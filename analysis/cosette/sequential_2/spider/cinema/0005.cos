@@ -1,0 +1,26 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select name,
+       location
+from df_cinema df_cinema
+where capacity >
+    (select avg(capacity)
+     from df_cinema df_cinema)`;
+
+query q2
+`select name,
+       location
+from
+  (select cinema_id,
+          name,
+          openning_year,
+          capacity,
+          location,
+          avg(capacity) over () as meancapacity
+   from df_cinema df_cinema)
+where (meancapacity <= capacity)`;
+
+verify q1 q2;

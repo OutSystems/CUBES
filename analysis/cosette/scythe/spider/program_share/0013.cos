@@ -1,0 +1,31 @@
+schema df_program(program_id:int, name:str, origin:str, launch:str, owner:str);
+schema df_broadcast(channel_id:int, program_id:int, time_of_day:str);
+
+table df_program(df_program);
+table df_broadcast(df_broadcast);
+
+query q1
+`select name
+from df_program df_program
+except
+select t1.name
+from df_program as t1
+join df_broadcast as t2 on t1.program_id = t2.program_id
+where t2.time_of_day = "morning"`;
+
+query q2
+`select t2.name
+ from
+  (select
+          max(t3.program_id) as max_program_id
+        from
+          (select *
+             from
+              input0
+             where input0.time_of_day = 'morning') as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.program_id = 5.0) as t4 as t2`;
+
+verify q1 q2;

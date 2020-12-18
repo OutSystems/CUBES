@@ -1,0 +1,23 @@
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+
+table df_company(df_company);
+
+query q1
+`select max(market_value_in_billion),
+       min(market_value_in_billion)
+from df_company df_company`;
+
+query q2
+`select t2.max_market_value_in_billion,t2.market_value_in_billion
+ from
+  (select
+          max(t3.market_value_in_billion) as max_market_value_in_billion
+        from
+          input as t3) as t4 join 
+      (select *
+         from
+          input
+         where input.sales_in_billion > input.market_value_in_billion
+           and input.sales_in_billion < input.assets_in_billion) as t1 as t2`;
+
+verify q1 q2;

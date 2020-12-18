@@ -1,0 +1,34 @@
+schema df_i039(c:str);
+
+table df_i039(df_i039);
+
+query q1
+`select t2.c
+from (select max(cnt)
+ from (select c, count(*) cnt
+   from t
+   group by c) t3) t1
+join (select c, count(*) cnt
+      from t
+      group by c) t2
+on t1.maxcnt = t2.cnt`;
+
+query q2
+`select t3.c
+ from
+  (select t1.count_c, t4.c, t4.count_c as count_c1
+  from (select
+          count(t2.c) as count_c
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          (select
+              t6.c, count(t6.c) as count_c
+            from
+              input as t6
+            group by
+              t6.c) as t5
+         where t5.count_c = 2.0) as t4) as t3`;
+
+verify q1 q2;

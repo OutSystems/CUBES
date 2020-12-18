@@ -1,0 +1,88 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, customer_phone:str, customer_email:str, customer_address:str, customer_login:str, customer_password:str);
+schema df_mailshot_customers(mailshot_id:int, customer_id:int, outcome_code:str, mailshot_customer_date:str);
+
+table df_customers(df_customers);
+table df_mailshot_customers(df_mailshot_customers);
+
+query q1
+`select t2.customer_name
+from df_mailshot_customers as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+group by t1.customer_id
+
+limit 1`;
+
+query q2
+`select customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method as payment_method,
+          lhs.customer_name as customer_name,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.customer_address as customer_address,
+          lhs.customer_login as customer_login,
+          lhs.customer_password as customer_password,
+          lhs.mailshot_id as mailshot_id,
+          lhs.outcome_code as outcome_code,
+          lhs.mailshot_customer_date as mailshot_customer_date,
+          lhs.n as n,
+          rhs.customer_id.other as customer_id.other,
+          rhs.mailshot_customer_date.other as mailshot_customer_date.other
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.customer_phone as customer_phone,
+             lhs.customer_email as customer_email,
+             lhs.customer_address as customer_address,
+             lhs.customer_login as customer_login,
+             lhs.customer_password as customer_password,
+             lhs.mailshot_id as mailshot_id,
+             lhs.outcome_code as outcome_code,
+             lhs.mailshot_customer_date as mailshot_customer_date,
+             rhs.n as n
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method as payment_method,
+                lhs.customer_name as customer_name,
+                lhs.customer_phone as customer_phone,
+                lhs.customer_email as customer_email,
+                lhs.customer_address as customer_address,
+                lhs.customer_login as customer_login,
+                lhs.customer_password as customer_password,
+                rhs.mailshot_id as mailshot_id,
+                rhs.outcome_code as outcome_code,
+                rhs.mailshot_customer_date as mailshot_customer_date
+         from df_customers as lhs
+         inner join df_mailshot_customers as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join
+        (select customer_id,
+                mailshot_id,
+                count(*) as n
+         from df_mailshot_customers df_mailshot_customers
+         group by customer_id,
+                  mailshot_id) as rhs on (lhs.customer_id = rhs.customer_id
+                                          and lhs.mailshot_id = rhs.mailshot_id)) as lhs
+   inner join
+     (select customer_id as mailshot_id,
+             customer_id,
+             outcome_code,
+             mailshot_customer_date,
+             customer_id.other,
+             mailshot_customer_date.other
+      from
+        (select lhs.mailshot_id as mailshot_id,
+                lhs.customer_id as customer_id,
+                lhs.outcome_code as outcome_code,
+                lhs.mailshot_customer_date as mailshot_customer_date,
+                rhs.customer_id as customer_id.other,
+                rhs.mailshot_customer_date as mailshot_customer_date.other
+         from df_mailshot_customers as lhs
+         inner join df_mailshot_customers as rhs on (lhs.customer_id = rhs.mailshot_id
+                                                     and lhs.outcome_code = rhs.outcome_code))) as rhs on (lhs.customer_id = rhs.customer_id
+                                                                                                           and lhs.mailshot_id = rhs.mailshot_id
+                                                                                                           and lhs.outcome_code = rhs.outcome_code
+                                                                                                           and lhs.mailshot_customer_date = rhs.mailshot_customer_date))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_financial_transactions(transaction_id:int, account_id:int, invoice_number:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select account_id
+from df_financial_transactions df_financial_transactions
+group by account_id
+
+limit 1`;
+
+query q2
+`select distinct account_id
+from
+  (select lhs.invoice_number as invoice_number,
+          lhs.n as n,
+          rhs.account_id as account_id,
+          rhs.transaction_type as transaction_type,
+          rhs.transaction_date as transaction_date,
+          rhs.transaction_amount as transaction_amount,
+          rhs.transaction_comment as transaction_comment,
+          rhs.other_transaction_details as other_transaction_details
+   from
+     (select invoice_number,
+             count(*) as n
+      from df_financial_transactions df_financial_transactions
+      group by invoice_number) as lhs
+   inner join df_financial_transactions as rhs on (lhs.invoice_number = rhs.invoice_number
+                                                   and lhs.n = rhs.transaction_id))`;
+
+verify q1 q2;

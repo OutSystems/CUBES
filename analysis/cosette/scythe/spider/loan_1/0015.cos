@@ -1,0 +1,26 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+
+table df_customer(df_customer);
+
+query q1
+`select sum(acc_bal)
+from df_customer df_customer
+where state = 'utah'
+  or state = 'texas'`;
+
+query q2
+`select t2.sum_acc_bal
+ from
+  (select
+          sum(t1.acc_bal) as sum_acc_bal
+        from
+          (select *
+             from
+              input
+             where input.no_of_loans = input.branch_id) as t1) as t3 join 
+      (select *
+         from
+          input
+         where input.state = 'utah') as t4 as t2`;
+
+verify q1 q2;

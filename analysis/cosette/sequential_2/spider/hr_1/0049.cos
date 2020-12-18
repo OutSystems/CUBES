@@ -1,0 +1,43 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_employees(df_employees);
+
+query q1
+`select employee_id,
+       job_id
+from df_employees df_employees
+where salary <
+    (select min(salary)
+     from df_employees df_employees
+     where job_id = 'mk_man' )`;
+
+query q2
+`select employee_id,
+       job_id
+from
+  (select lhs.commission_pct as commission_pct,
+          lhs.salary as salary,
+          lhs.minsalary as minsalary,
+          rhs.employee_id as employee_id,
+          rhs.first_name as first_name,
+          rhs.last_name as last_name,
+          rhs.email as email,
+          rhs.phone_number as phone_number,
+          rhs.hire_date as hire_date,
+          rhs.job_id as job_id,
+          rhs.salary as salary.other,
+          rhs.commission_pct as commission_pct.other,
+          rhs.manager_id as manager_id,
+          rhs.department_id as department_id
+   from
+     (select commission_pct,
+             salary,
+             min(salary) as minsalary
+      from df_employees df_employees
+      where (job_id = 'mk_man')
+      group by commission_pct,
+               salary) as lhs
+   cross join df_employees as rhs)
+where (minsalary > salary.other)`;
+
+verify q1 q2;

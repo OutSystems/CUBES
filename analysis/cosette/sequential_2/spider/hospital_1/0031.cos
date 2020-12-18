@@ -1,0 +1,102 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_physician(df_physician);
+table df_prescribes(df_prescribes);
+
+query q1
+`select t1.name
+from df_physician as t1
+join df_prescribes as t2 on t1.employeeid = t2.df_physician
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select name,
+          patient,
+          max(dose) as maxdose
+   from
+     (select employeeid,
+             name,
+             position,
+             ssn,
+             physician,
+             patient, date, appointment,
+                            dose,
+                            physician as medication,
+                            name.other,
+                            position.other,
+                            ssn.other,
+                            physician.other,
+                            patient.other,
+                            date.other,
+                            appointment.other,
+                            dose.other
+      from
+        (select lhs.employeeid as employeeid,
+                lhs.name as name,
+                lhs.position as position,
+                lhs.ssn as ssn,
+                lhs.physician as physician,
+                lhs.patient as patient,
+                lhs.date as date,
+                lhs.appointment as appointment,
+                lhs.dose as dose,
+                lhs.medication as medication,
+                rhs.name as name.other,
+                rhs.position as position.other,
+                rhs.ssn as ssn.other,
+                rhs.physician as physician.other,
+                rhs.patient as patient.other,
+                rhs.date as date.other,
+                rhs.appointment as appointment.other,
+                rhs.dose as dose.other
+         from
+           (select employeeid,
+                   name,
+                   position,
+                   ssn,
+                   physician,
+                   patient, date, appointment,
+                                  dose,
+                                  employeeid as medication
+            from
+              (select lhs.employeeid as employeeid,
+                      lhs.name as name,
+                      lhs.position as position,
+                      lhs.ssn as ssn,
+                      rhs.physician as physician,
+                      rhs.patient as patient,
+                      rhs.date as date,
+                      rhs.appointment as appointment,
+                      rhs.dose as dose
+               from df_physician as lhs
+               inner join df_prescribes as rhs on (lhs.employeeid = rhs.medication))) as lhs
+         inner join
+           (select employeeid,
+                   name,
+                   position,
+                   ssn,
+                   physician,
+                   patient, date, appointment,
+                                  dose,
+                                  employeeid as medication
+            from
+              (select lhs.employeeid as employeeid,
+                      lhs.name as name,
+                      lhs.position as position,
+                      lhs.ssn as ssn,
+                      rhs.physician as physician,
+                      rhs.patient as patient,
+                      rhs.date as date,
+                      rhs.appointment as appointment,
+                      rhs.dose as dose
+               from df_physician as lhs
+               inner join df_prescribes as rhs on (lhs.employeeid = rhs.medication))) as rhs on (lhs.employeeid = rhs.employeeid
+                                                                                                 and lhs.physician = rhs.medication)))
+   group by name,
+            patient)`;
+
+verify q1 q2;

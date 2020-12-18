@@ -1,0 +1,38 @@
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+schema df_party_host(party_id:int, host_id:int, is_main_in_charge:str);
+
+table df_host(df_host);
+table df_party_host(df_party_host);
+
+query q1
+`select name
+from df_host df_host
+where host_id not in
+    (select host_id
+     from df_party_host df_party_host)`;
+
+query q2
+`select * from 
+(select t4.name
+   from
+    (select t2.age, t2.min_host_id, t3.host_id, t3.name, t3.nationality, t3.age as age1
+    from (select
+            t1.age, min(t1.host_id) as min_host_id
+          from
+            input as t1
+          group by
+            t1.age) as t2 join 
+        input as t3) as t4
+   where t4.age = t4.age1
+     and t4.min_host_id < t4.host_id)
+union all 
+ select * from
+  (select t5.name
+   from
+    (select input.host_id, input.name, input.nationality, input.age, t6.party_id, t6.host_id as host_id1, t6.is_main_in_charge
+    from input join 
+        input0 as t6) as t5
+   where t5.host_id = t5.party_id
+     and t5.host_id > t5.host_id1)`;
+
+verify q1 q2;

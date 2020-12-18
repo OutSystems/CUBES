@@ -1,0 +1,30 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select t2.color_description
+from df_products as t1
+join df_ref_colors as t2 on t1.color_code = t2.color_code
+where t1.product_name = "catnip"`;
+
+query q2
+`joining, by = "color_code"
+select distinct color_description
+from
+  (select product_id,
+          color_code,
+          product_category_code,
+          product_name,
+          typical_buying_price,
+          typical_selling_price,
+          product_description,
+          other_product_details,
+          color_description
+   from input1 as lhs
+   left join input0 as rhs on (lhs.color_code = rhs.color_code))
+where (product_name = 'catnip')`;
+
+verify q1 q2;

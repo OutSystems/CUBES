@@ -1,0 +1,26 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+
+table df_physician(df_physician);
+
+query q1
+`select name
+from df_physician df_physician
+where position like '%senior%'`;
+
+query q2
+`select t4.name1
+ from
+  (select
+      t3.employeeid1, t3.name1, t3.ssn1, count_distinct(t3.position) as count_distinct_position
+    from
+      (select *
+         from
+          (select input.employeeid, input.name, input.position, input.ssn, t2.employeeid as employeeid1, t2.name as name1, t2.position as position1, t2.ssn as ssn1
+          from input join 
+              input as t2) as t1
+         where t1.employeeid > t1.employeeid1) as t3
+    group by
+      t3.employeeid1, t3.name1, t3.ssn1) as t4
+ where t4.count_distinct_position = t4.employeeid1`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_images(image_id:int, image_alt_text:str, image_name:str, image_url:str);
+
+table df_images(df_images);
+
+query q1
+`select image_name,
+       image_url
+from df_images df_images`;
+
+query q2
+`select image_name,
+       image_url
+from
+  (select lhs.image_id as image_id,
+          lhs.image_alt_text as image_alt_text,
+          lhs.image_name as image_name,
+          lhs.image_url as image_url,
+          rhs.image_name as image_name.other,
+          rhs.image_url as image_url.other
+   from df_images as lhs
+   inner join df_images as rhs on (lhs.image_alt_text = rhs.image_alt_text
+                                   and lhs.image_id = rhs.image_id))`;
+
+verify q1 q2;

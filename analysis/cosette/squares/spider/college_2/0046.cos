@@ -1,0 +1,52 @@
+schema df_takes(id:int, course_id:int, sec_id:int, semester:str, year:int, grade:str);
+
+table df_takes(df_takes);
+
+query q1
+`select semester,
+       year
+from df_takes df_takes
+group by semester,
+         year
+
+limit 1`;
+
+query q2
+`joining, by = "n"
+joining, by = c("year", "semester", "course_id", "sec_id")
+select distinct semester,
+                year
+from
+  (select year,
+          semester,
+          n,
+          course_id,
+          sec_id,
+          id,
+          grade
+   from
+     (select year,
+             semester,
+             n,
+             course_id,
+             sec_id
+      from
+        (select year,
+                semester,
+                count(*) as n
+         from input0
+         group by year,
+                  semester) as lhs
+      inner join
+        (select course_id,
+                sec_id,
+                count(*) as n
+         from input0
+         group by course_id,
+                  sec_id) as rhs on (lhs.n = rhs.n)) as lhs
+   inner join input0 as rhs on (lhs.year = rhs.year
+                                    and lhs.semester = rhs.semester
+                                    and lhs.course_id = rhs.course_id
+                                    and lhs.sec_id = rhs.sec_id))`;
+
+verify q1 q2;

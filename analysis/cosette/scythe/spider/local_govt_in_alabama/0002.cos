@@ -1,0 +1,31 @@
+schema df_events(event_id:int, service_id:int, event_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_events(df_events);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select t1.event_id,
+       t1.event_details
+from df_events as t1
+join df_participants_in_events as t2 on t1.event_id = t2.event_id
+group by t1.event_id
+having count(*) > 1`;
+
+query q2
+`select t4.event_id,t4.event_details
+ from
+  (select t2.event_id, t2.count_event_id, t3.event_id as event_id1, t3.service_id, t3.event_details
+  from (select *
+       from
+        (select
+            t1.event_id, count(t1.event_id) as count_event_id
+          from
+            input0 as t1
+          group by
+            t1.event_id) as t2
+       where t2.count_event_id > 1.0) join 
+      input as t3) as t4
+ where t4.event_id = t4.event_id1`;
+
+verify q1 q2;

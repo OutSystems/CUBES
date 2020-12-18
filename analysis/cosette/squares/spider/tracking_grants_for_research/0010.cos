@@ -1,0 +1,37 @@
+schema df_project_staff(staff_id:str, project_id:int, role_code:str, date_from:str, date_to:str, other_details:str);
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+
+table df_project_staff(df_project_staff);
+table df_projects(df_projects);
+
+query q1
+`select project_details
+from df_projects df_projects
+where project_id not in
+    (select project_id
+     from df_project_staff df_project_staff
+     where role_code = 'researcher' )`;
+
+query q2
+`joining, by = "project_id"
+joining, by = "project_id"
+select project_details
+from
+  (select project_id,
+          organisation_id,
+          project_details
+   from input1 as lhs
+   inner join
+     (select *
+      from
+        (select project_id
+         from input1) as lhs
+      where not exists
+          (select 1
+           from
+             (select project_id
+              from input0
+              where (role_code = 'researcher')) as rhs
+           where (lhs.project_id = rhs.project_id) )) as rhs on (lhs.project_id = rhs.project_id))`;
+
+verify q1 q2;

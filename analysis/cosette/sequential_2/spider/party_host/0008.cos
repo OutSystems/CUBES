@@ -1,0 +1,39 @@
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+
+table df_host(df_host);
+
+query q1
+`select nationality
+from df_host df_host
+group by nationality
+
+limit 1`;
+
+query q2
+`select nationality
+from
+  (select lhs.host_id as host_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.age as age,
+          lhs.n as n,
+          rhs.host_id as host_id.other,
+          rhs.name as name.other,
+          rhs.nationality as nationality.other
+   from
+     (select host_id,
+             name,
+             nationality,
+             age,
+             count(*) over () as n
+      from df_host df_host) as lhs
+   inner join
+     (select host_id,
+             name,
+             nationality,
+             age,
+             count(*) over () as n
+      from df_host df_host) as rhs on (lhs.host_id = rhs.n
+                               and lhs.age = rhs.age))`;
+
+verify q1 q2;

@@ -1,0 +1,35 @@
+schema df_mountain(id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_mountain(df_mountain);
+table df_photos(df_photos);
+
+query q1
+`select count(distinct t2.camera_lens_id)
+from df_mountain as t1
+join df_photos as t2 on t1.id = t2.mountain_id
+where t1.country = 'ethiopia'`;
+
+query q2
+`select distinct n_distinct as count.distinct.t2.camera_lens_id.
+from
+  (select lhs.country as country,
+          lhs.id as id,
+          lhs.n_distinct as n_distinct,
+          rhs.id as id.other,
+          rhs.camera_lens_id as camera_lens_id,
+          rhs.color as color,
+          rhs.name as name
+   from
+     (select *
+      from
+        (select country,
+                id,
+                count(distinct country) as n_distinct
+         from df_mountain df_mountain
+         group by country,
+                  id)
+      where (country = 'ethiopia')) as lhs
+   inner join df_photos as rhs on (lhs.id = rhs.mountain_id))`;
+
+verify q1 q2;

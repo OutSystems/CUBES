@@ -1,0 +1,22 @@
+schema df_medication(code:int, name:str, brand:str, description:str);
+
+table df_medication(df_medication);
+
+query q1
+`select distinct name
+from df_medication df_medication`;
+
+query q2
+`select name
+from
+  (select lhs.code as code,
+          lhs.name as name,
+          lhs.brand as brand,
+          lhs.description as description,
+          rhs.code as code.other,
+          rhs.name as name.other
+   from df_medication as lhs
+   inner join df_medication as rhs on (lhs.brand = rhs.brand
+                                       and lhs.description = rhs.description))`;
+
+verify q1 q2;

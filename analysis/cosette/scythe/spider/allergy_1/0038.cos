@@ -1,0 +1,29 @@
+schema df_has_allergy(stuid:int, allergy:str);
+
+table df_has_allergy(df_has_allergy);
+
+query q1
+`select allergy
+from df_has_allergy df_has_allergy
+group by allergy
+
+limit 1`;
+
+query q2
+`select t5.allergy
+ from
+  (select
+          count(t2.allergy) as count_allergy
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          (select
+              t4.allergy, count(t4.stuid) as count_stuid
+            from
+              input as t4
+            group by
+              t4.allergy) as t3
+         where t3.count_stuid = 13.0) as t6 as t5`;
+
+verify q1 q2;

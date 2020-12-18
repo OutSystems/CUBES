@@ -1,0 +1,32 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_head(df_head);
+table df_management(df_management);
+
+query q1
+`select distinct t1.creation
+from df_department as t1
+join df_management as t2 on t1.department_id = t2.department_id
+join df_head as t3 on t2.head_id = t3.head_id
+where t3.born_state = 'alabama'`;
+
+query q2
+`select t4.max_creation
+ from
+  (select
+          max(t2.creation) as max_creation
+        from
+          (select *
+             from
+              input
+             where input.budget_in_billions < 15.0) as t2) as t1 join 
+      (select *
+         from
+          input0
+         where input0.head_id = 3.0
+           and input0.born_state = 'alabama') as t3 as t4`;
+
+verify q1 q2;

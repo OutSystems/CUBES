@@ -1,0 +1,19 @@
+schema df_region(region_id:int, region_name:str, date:str, label:str, format:str, catalogue:str);
+
+table df_region(df_region);
+
+query q1
+`select distinct region_name
+from df_region df_region`;
+
+query q2
+`select t2.region_name
+ from
+  (select
+      t1.region_name, t1.date, first(t1.date) as first_date
+    from
+      input as t1
+    group by
+      t1.region_name, t1.date) as t2`;
+
+verify q1 q2;

@@ -1,0 +1,38 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+
+table df_apartments(df_apartments);
+
+query q1
+`select apt_number
+from df_apartments df_apartments
+
+limit 1`;
+
+query q2
+`select distinct apt_number.other as apt_number
+from
+  (select lhs.apt_id as apt_id,
+          lhs.building_id as building_id,
+          lhs.apt_type_code as apt_type_code,
+          lhs.apt_number as apt_number,
+          lhs.bathroom_count as bathroom_count,
+          lhs.bedroom_count as bedroom_count,
+          lhs.room_count as room_count,
+          rhs.building_id as building_id.other,
+          rhs.apt_type_code as apt_type_code.other,
+          rhs.apt_number as apt_number.other,
+          rhs.bathroom_count as bathroom_count.other,
+          rhs.room_count as room_count.other
+   from
+     (select apt_id,
+             building_id,
+             apt_type_code,
+             apt_number,
+             bathroom_count,
+             max(bedroom_count) over () as bedroom_count,
+                                     room_count
+      from df_apartments df_apartments) as lhs
+   inner join df_apartments as rhs on (lhs.bedroom_count = rhs.bedroom_count
+                                       and lhs.room_count = rhs.apt_id))`;
+
+verify q1 q2;

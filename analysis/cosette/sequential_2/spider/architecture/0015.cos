@@ -1,0 +1,35 @@
+schema df_mill(architect_id:int, id:int, location:str, name:str, type:str, built_year:int, notes:str);
+
+table df_mill(df_mill);
+
+query q1
+`select type,
+       count(*)
+from df_mill df_mill
+group by type
+
+limit 1`;
+
+query q2
+`select type,
+       n as count...
+from
+  (select lhs.notes as notes,
+          lhs.type as type,
+          lhs.n as n,
+          rhs.architect_id as architect_id,
+          rhs.location as location,
+          rhs.name as name,
+          rhs.built_year as built_year,
+          rhs.notes as notes.other
+   from
+     (select notes,
+             type,
+             count(*) as n
+      from df_mill df_mill
+      group by notes,
+               type) as lhs
+   inner join df_mill as rhs on (lhs.n = rhs.id
+                                 and lhs.type = rhs.type))`;
+
+verify q1 q2;

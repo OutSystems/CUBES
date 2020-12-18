@@ -1,0 +1,99 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_station(df_station);
+table df_trip(df_trip);
+
+query q1
+`select name
+from df_station df_station
+where city = "palo alto"
+except
+select end_station_name
+from df_trip df_trip
+group by end_station_name
+having count(*) > 100`;
+
+query q2
+`select distinct name
+from
+  (select id,
+          name,
+          lat,
+          long,
+          dock_count,
+          city,
+          installation_date,
+          id.other,
+          duration,
+          start_date,
+          start_station_name,
+          start_station_id,
+          end_station_id,
+          bike_id,
+          subscription_type,
+          zip_code,
+          end_station_name,
+          end_date,
+          count(distinct city) over () as n_distinct
+   from
+     (select id,
+             name,
+             lat,
+             long,
+             dock_count,
+             city,
+             installation_date,
+             id.other,
+             duration,
+             start_date,
+             start_station_name,
+             start_station_id,
+             end_station_id,
+             bike_id,
+             subscription_type,
+             zip_code,
+             end_station_name,
+             installation_date as end_date
+      from
+        (select id,
+                name,
+                lat,
+                long,
+                dock_count,
+                city,
+                installation_date,
+                id.other,
+                duration,
+                start_date,
+                start_station_name,
+                start_station_id,
+                end_station_id,
+                bike_id,
+                subscription_type,
+                zip_code,
+                name as end_station_name
+         from
+           (select lhs.id as id,
+                   lhs.name as name,
+                   lhs.lat as lat,
+                   lhs.long as long,
+                   lhs.dock_count as dock_count,
+                   lhs.city as city,
+                   lhs.installation_date as installation_date,
+                   rhs.id as id.other,
+                   rhs.duration as duration,
+                   rhs.start_date as start_date,
+                   rhs.start_station_name as start_station_name,
+                   rhs.start_station_id as start_station_id,
+                   rhs.end_station_id as end_station_id,
+                   rhs.bike_id as bike_id,
+                   rhs.subscription_type as subscription_type,
+                   rhs.zip_code as zip_code
+            from df_station as lhs
+            inner join df_trip as rhs on (lhs.name = rhs.end_station_name
+                                              and lhs.installation_date = rhs.end_date)))))
+where (city = 'palo alto'
+       or n_distinct = 100.0)`;
+
+verify q1 q2;

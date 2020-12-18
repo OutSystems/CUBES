@@ -1,0 +1,22 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_election(df_election);
+table df_representative(df_representative);
+
+query q1
+`select t2.lifespan
+from df_election as t1
+join df_representative as t2 on t1.representative_id = t2.representative_id`;
+
+query q2
+`select lifespan
+from
+  (select *
+   from df_representative as lhs
+   where exists
+       (select 1
+        from df_election as rhs
+        where (lhs.representative_id = rhs.representative_id) ))`;
+
+verify q1 q2;

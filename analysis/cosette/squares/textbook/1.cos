@@ -1,0 +1,45 @@
+schema df_1_1(C_name:str, F_key:str);
+schema df_1_2(S_key:str, C_name:str);
+schema df_1_3(F_key:str, F_name:str);
+schema df_1_4(S_key:str, S_name:str, level:str);
+
+table df_1_1(df_1_1);
+table df_1_2(df_1_2);
+table df_1_3(df_1_3);
+table df_1_4(df_1_4);
+
+query q1
+`select distinct s.sname
+from student s, class c, enrolled e, faculty f
+where s.snum = e.snum and e.cname = c.name and c.fid = f.fid and
+f.fname = 'i.teach' and s.level = 'jr'`;
+
+query q2
+`joining, by = "f_key"
+joining, by = "c_name"
+joining, by = "s_key"
+select distinct s_name
+from
+  (select f_key,
+          f_name,
+          c_name,
+          s_key,
+          s_name,
+          level
+   from
+     (select f_key,
+             f_name,
+             c_name,
+             s_key
+      from
+        (select f_key,
+                f_name,
+                c_name
+         from input2 as lhs
+         inner join input0 as rhs on (lhs.f_key = rhs.f_key)) as lhs
+      inner join input1 as rhs on (lhs.c_name = rhs.c_name)) as lhs
+   inner join input3 as rhs on (lhs.s_key = rhs.s_key))
+where (level = 'jr'
+       and f_name = 'faculty1')`;
+
+verify q1 q2;

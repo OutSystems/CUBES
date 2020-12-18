@@ -1,0 +1,33 @@
+schema df_item(i_id:int, title:str);
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_item(df_item);
+table df_review(df_review);
+
+query q1
+`select t1.title,
+       t1.i_id
+from df_item as t1
+join df_review as t2 on t1.i_id = t2.i_id
+group by t2.i_id
+
+limit 1`;
+
+query q2
+`select title,
+       i_id
+from
+  (select lhs.i_id as i_id,
+          lhs.title as title
+   from df_item as lhs
+   inner join
+     (select max(rank) as maxrank
+      from
+        (select rank,
+                u_id,
+                avg(rank) as meanrank
+         from df_review df_review
+         group by rank,
+                  u_id)) as rhs on (lhs.i_id = rhs.maxrank))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_employee(df_employee);
+
+query q1
+`select distinct t1.emp_fname,
+                t1.emp_dob
+from df_employee as t1
+join df_class as t2 on t1.emp_num = t2.prof_num
+where crs_code = "acct-211"`;
+
+query q2
+`select t4.emp_fname,t4.emp_dob
+ from
+  (select
+          t1.crs_code, t1.prof_num, from
+          (select *
+             from
+              input
+             where input.crs_code = 'acct-211') as t1
+        group by
+          t1.crs_code, t1.prof_num) as t2 join 
+      input0 as t3 as t4
+ where t4.prof_num = t4.emp_num`;
+
+verify q1 q2;

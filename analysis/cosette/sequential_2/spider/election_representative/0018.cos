@@ -1,0 +1,24 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_election(df_election);
+table df_representative(df_representative);
+
+query q1
+`select name
+from df_representative df_representative
+where representative_id not in
+    (select representative_id
+     from df_election df_election)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_representative as lhs
+   where not exists
+       (select 1
+        from df_election as rhs
+        where (lhs.representative_id = rhs.representative_id) ))`;
+
+verify q1 q2;

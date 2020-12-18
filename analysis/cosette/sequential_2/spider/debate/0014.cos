@@ -1,0 +1,45 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+schema df_debate_people(debate_id:int, affirmative:int, negative:int, if_affirmative_win:str);
+
+table df_people(df_people);
+table df_debate_people(df_debate_people);
+
+query q1
+`select t2.name
+from df_debate_people as t1
+join df_people as t2 on t1.negative = t2.people_id
+group by t2.name
+having count(*) >= 2`;
+
+query q2
+`select name
+from
+  (select name,
+          people_id,
+          count(*) as n
+   from
+     (select people_id,
+             district,
+             name,
+             party,
+             age,
+             debate_id,
+             affirmative,
+             if_affirmative_win,
+             people_id as negative
+      from
+        (select lhs.people_id as people_id,
+                lhs.district as district,
+                lhs.name as name,
+                lhs.party as party,
+                lhs.age as age,
+                rhs.debate_id as debate_id,
+                rhs.affirmative as affirmative,
+                rhs.if_affirmative_win as if_affirmative_win
+         from df_people as lhs
+         inner join df_debate_people as rhs on (lhs.people_id = rhs.negative)))
+   group by name,
+            people_id)
+where (n >= 2.0)`;
+
+verify q1 q2;

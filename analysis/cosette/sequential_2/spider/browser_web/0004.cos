@@ -1,0 +1,28 @@
+schema df_browser(id:int, name:str, market_share:str);
+
+table df_browser(df_browser);
+
+query q1
+`select max(market_share),
+       min(market_share),
+       avg(market_share)
+from df_browser df_browser`;
+
+query q2
+`select distinct max(market_share) over () as max.market_share.,
+                                       minmarket_share as min.market_share.,
+                                       meanmarket_share as avg.market_share.
+from
+  (select id,
+          name,
+          market_share,
+          minmarket_share,
+          avg(market_share) over () as meanmarket_share
+   from
+     (select id,
+             name,
+             market_share,
+             min(market_share) over () as minmarket_share
+      from df_browser df_browser))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_gymnast(gymnast_id:int, floor_exercise_points:str, pommel_horse_points:str, rings_points:str, vault_points:str, parallel_bars_points:str, horizontal_bar_points:str, total_points:str);
+schema df_people(people_id:int, name:str, age:str, height:str, hometown:str);
+
+table df_gymnast(df_gymnast);
+table df_people(df_people);
+
+query q1
+`select t2.hometown
+from df_gymnast as t1
+join df_people as t2 on t1.gymnast_id = t2.people_id
+group by t2.hometown
+
+limit 1`;
+
+query q2
+`select distinct hometown
+from
+  (select lhs.people_id as people_id,
+          lhs.name as name,
+          lhs.age as age,
+          lhs.height as height,
+          lhs.hometown as hometown,
+          rhs.floor_exercise_points as floor_exercise_points,
+          rhs.horizontal_bar_points as horizontal_bar_points
+   from df_people as lhs
+   inner join
+     (select floor_exercise_points,
+             horizontal_bar_points,
+             count(*) as n
+      from df_gymnast df_gymnast
+      group by floor_exercise_points,
+               horizontal_bar_points) as rhs on (lhs.people_id = rhs.n))`;
+
+verify q1 q2;

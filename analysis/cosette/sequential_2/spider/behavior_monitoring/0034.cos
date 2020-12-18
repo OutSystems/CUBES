@@ -1,0 +1,40 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, line_3:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+
+table df_addresses(df_addresses);
+table df_students(df_students);
+
+query q1
+`select t2.first_name,
+       t2.last_name
+from df_addresses as t1
+join df_students as t2 on t1.address_id = t2.address_id
+where t1.state_province_county = "wisconsin"`;
+
+query q2
+`select first_name,
+       last_name
+from
+  (select lhs.address_id as address_id,
+          lhs.line_1 as line_1,
+          lhs.line_2 as line_2,
+          lhs.line_3 as line_3,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.other_address_details as other_address_details,
+          rhs.student_id as student_id,
+          rhs.first_name as first_name,
+          rhs.middle_name as middle_name,
+          rhs.last_name as last_name,
+          rhs.cell_mobile_number as cell_mobile_number,
+          rhs.email_address as email_address,
+          rhs.date_first_rental as date_first_rental,
+          rhs.date_left_university as date_left_university,
+          rhs.other_student_details as other_student_details
+   from df_addresses as lhs
+   inner join df_students as rhs on (lhs.address_id = rhs.address_id))
+where (state_province_county = 'wisconsin')`;
+
+verify q1 q2;

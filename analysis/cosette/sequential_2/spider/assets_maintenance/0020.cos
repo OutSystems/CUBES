@@ -1,0 +1,46 @@
+schema df_maintenance_engineers(engineer_id:int, company_id:int, first_name:str, last_name:str, other_details:str);
+schema df_engineer_visits(engineer_visit_id:int, contact_staff_id:int, engineer_id:int, fault_log_entry_id:int, fault_status:str, visit_start_datetime:str, visit_end_datetime:str, other_visit_details:str);
+
+table df_maintenance_engineers(df_maintenance_engineers);
+table df_engineer_visits(df_engineer_visits);
+
+query q1
+`select t1.engineer_id,
+       t1.first_name,
+       t1.last_name
+from df_maintenance_engineers as t1
+join df_engineer_visits as t2 on t1.engineer_id = t2.engineer_id
+group by t1.engineer_id
+
+limit 1`;
+
+query q2
+`select n as engineer_id,
+       first_name,
+       last_name
+from
+  (select engineer_id,
+          fault_log_entry_id,
+          n,
+          first_name,
+          last_name,
+          other_details,
+          fault_log_entry_id as company_id
+   from
+     (select lhs.engineer_id as engineer_id,
+             lhs.fault_log_entry_id as fault_log_entry_id,
+             lhs.n as n,
+             rhs.first_name as first_name,
+             rhs.last_name as last_name,
+             rhs.other_details as other_details
+      from
+        (select engineer_id,
+                fault_log_entry_id,
+                count(*) as n
+         from df_engineer_visits df_engineer_visits
+         group by engineer_id,
+                  fault_log_entry_id) as lhs
+      inner join df_maintenance_engineers as rhs on (lhs.fault_log_entry_id = rhs.company_id
+                                                     and lhs.n = rhs.engineer_id)))`;
+
+verify q1 q2;

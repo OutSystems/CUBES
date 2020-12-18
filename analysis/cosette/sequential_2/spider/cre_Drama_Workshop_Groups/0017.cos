@@ -1,0 +1,32 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, city_town:str, state_county:str, other_details:str);
+schema df_stores(store_id:int, address_id:int, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_stores(df_stores);
+
+query q1
+`select t1.state_county
+from df_addresses as t1
+join df_stores as t2 on t1.address_id = t2.address_id
+where t2.marketing_region_code = "ca"`;
+
+query q2
+`select state_county
+from
+  (select lhs.store_id as store_id,
+          lhs.address_id as address_id,
+          lhs.marketing_region_code as marketing_region_code,
+          lhs.store_name as store_name,
+          lhs.store_phone as store_phone,
+          lhs.store_email_address as store_email_address,
+          lhs.other_details as other_details,
+          rhs.line_1 as line_1,
+          rhs.line_2 as line_2,
+          rhs.city_town as city_town,
+          rhs.state_county as state_county,
+          rhs.other_details as other_details.other
+   from df_stores as lhs
+   inner join df_addresses as rhs on (lhs.address_id = rhs.address_id))
+where (marketing_region_code = 'ca')`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_all_documents(document_id:int, date_stored:str, document_type_code:str, document_name:str, document_description:str, other_details:str);
+
+table df_all_documents(df_all_documents);
+
+query q1
+`select count(*)
+from df_all_documents df_all_documents
+where document_type_code = "cv"
+  or document_type_code = "bk"`;
+
+query q2
+`select n as count...
+from
+  (select document_description,
+          other_details,
+          count(*) as n
+   from
+     (select *
+      from df_all_documents df_all_documents
+      where (document_type_code = 'cv'
+             or document_type_code = 'bk'))
+   group by document_description,
+            other_details)`;
+
+verify q1 q2;

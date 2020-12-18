@@ -1,0 +1,24 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select count(*)
+from df_branch df_branch
+where membership_amount >
+    (select avg(membership_amount)
+     from df_branch df_branch)`;
+
+query q2
+`select t2.branch_id
+ from
+  (select
+          count(t4.open_year) as count_open_year
+        from
+          input as t4) as t3 join 
+      (select *
+         from
+          input
+         where input.branch_id = 5.0) as t1 as t2`;
+
+verify q1 q2;

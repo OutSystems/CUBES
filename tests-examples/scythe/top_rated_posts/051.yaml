@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/051.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i051.csv
 output: tests-examples/scythe/top_rated_posts/tables/o051.csv
@@ -11,15 +12,16 @@ solution:
   - summarise
   - inner_join
 sql: |
-  SELECT * FROM Table1 t1
-  JOIN
-  (
-     SELECT category, MAX(date) AS MAXDATE
-     FROM Table1
-     GROUP BY category
-  ) t2
-  ON T1.category = t2.category
-  AND t1.date = t2.MAXDATE
+  SELECT t1.*
+  FROM i051 t1
+           JOIN
+       (
+           SELECT category, MAX(date) AS MAXDATE
+           FROM i051
+           GROUP BY category
+       ) t2
+       ON T1.category = t2.category
+           AND t1.date = t2.MAXDATE
 comment: |
   df1 <- input1 %>% group_by(category) %>% summarise(maxdate = max(date)) %>% ungroup()
   df2 <- inner_join(input1, df1, by=c('category' = 'category','date' = 'maxdate'), suffix = c("", ".other"))

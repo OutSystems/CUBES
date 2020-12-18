@@ -1,0 +1,25 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_employees(df_employees);
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select employee_name
+from df_employees df_employees
+except
+select df_employees.employee_name
+from df_employees df_employees
+join df_circulation_history on df_circulation_history.employee_id = df_employees.employee_id`;
+
+query q2
+`select employee_name
+from
+  (select *
+   from df_employees as lhs
+   where not exists
+       (select 1
+        from df_circulation_history as rhs
+        where (lhs.employee_id = rhs.employee_id) ))`;
+
+verify q1 q2;

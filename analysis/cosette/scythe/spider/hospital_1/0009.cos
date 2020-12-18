@@ -1,0 +1,30 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_department(departmentid:int, name:str, head:int);
+schema df_affiliated_with(physician:int, department:int, primaryaffiliation:int);
+
+table df_physician(df_physician);
+table df_department(df_department);
+table df_affiliated_with(df_affiliated_with);
+
+query q1
+`select t1.name,
+       t3.name
+from df_physician as t1
+join df_affiliated_with as t2 on t1.employeeid = t2.df_physician
+join df_department as t3 on t2.df_department = t3.departmentid
+where t2.primaryaffiliation = 1`;
+
+query q2
+`select t5.name,t5.name1
+ from
+  (select input.employeeid, input.name, input.position, input.ssn, t2.departmentid, t2.name as name1, t2.head
+      from input join 
+          input0 as t2) as t3 join 
+      (select *
+         from
+          input1
+         where input1.primaryaffiliation = 1.0) as t4 as t5
+ where t5.departmentid = t5.department
+   and t5.employeeid = t5.physician`;
+
+verify q1 q2;

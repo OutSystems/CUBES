@@ -1,0 +1,45 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+
+table df_files(df_files);
+
+query q1
+`select f_id
+from df_files df_files
+
+limit 1`;
+
+query q2
+`select distinct f_id.other as f_id
+from
+  (select lhs.f_id as f_id,
+          lhs.artist_name as artist_name,
+          lhs.file_size as file_size,
+          lhs.duration as duration,
+          lhs.formats as formats,
+          lhs.maxduration as maxduration,
+          rhs.f_id as f_id.other,
+          rhs.artist_name as artist_name.other,
+          rhs.file_size as file_size.other,
+          rhs.duration as duration.other,
+          rhs.formats as formats.other,
+          rhs.maxduration as maxduration.other
+   from
+     (select f_id,
+             artist_name,
+             file_size,
+             duration,
+             formats,
+             max(duration) over () as maxduration
+      from df_files df_files) as lhs
+   cross join
+     (select f_id,
+             artist_name,
+             file_size,
+             duration,
+             formats,
+             max(duration) over () as maxduration
+      from df_files df_files) as rhs)
+where (maxduration < maxduration.other
+       or duration.other >= maxduration.other)`;
+
+verify q1 q2;

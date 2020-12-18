@@ -1,0 +1,19 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select party,
+       count(*)
+from df_representative df_representative
+group by party`;
+
+query q2
+`(select
+    t2.party, count_distinct(t2.representative_id) as count_distinct_representative_id
+  from
+    input as t2
+  group by
+    t2.party) as t1`;
+
+verify q1 q2;

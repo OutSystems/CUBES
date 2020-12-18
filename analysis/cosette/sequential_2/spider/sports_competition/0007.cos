@@ -1,0 +1,21 @@
+schema df_club_rank(rank:str, club_id:int, gold:str, silver:str, bronze:str, total:str);
+
+table df_club_rank(df_club_rank);
+
+query q1
+`select count(*)
+from df_club_rank df_club_rank
+where total < 10`;
+
+query q2
+`select n_distinct as count...
+from
+  (select bronze,
+          count(distinct total) as n_distinct
+   from
+     (select *
+      from df_club_rank df_club_rank
+      where (total < 10.0))
+   group by bronze)`;
+
+verify q1 q2;

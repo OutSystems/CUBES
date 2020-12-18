@@ -1,0 +1,47 @@
+schema df_operate_company(id:int, name:str, type:str, principal_activities:str, incorporated_in:str, group_equity_shareholding:str);
+schema df_flight(id:int, vehicle_flight_number:str, date:str, pilot:str, velocity:str, altitude:str, airport_id:int, company_id:int);
+
+table df_operate_company(df_operate_company);
+table df_flight(df_flight);
+
+query q1
+`select t1.id,
+       t1.name
+from df_operate_company as t1
+join df_flight as t2 on t1.id = t2.company_id
+group by t1.id
+having count(*) > 1`;
+
+query q2
+`select id,
+       name
+from
+  (select id,
+          name,
+          type,
+          principal_activities,
+          incorporated_in,
+          group_equity_shareholding,
+          altitude,
+          n,
+          id as company_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.type as type,
+             lhs.principal_activities as principal_activities,
+             lhs.incorporated_in as incorporated_in,
+             lhs.group_equity_shareholding as group_equity_shareholding,
+             rhs.altitude as altitude,
+             rhs.n as n
+      from df_operate_company as lhs
+      inner join
+        (select altitude,
+                company_id,
+                count(*) as n
+         from df_flight df_flight
+         group by altitude,
+                  company_id) as rhs on (lhs.id = rhs.company_id)))
+where (n != 1.0)`;
+
+verify q1 q2;

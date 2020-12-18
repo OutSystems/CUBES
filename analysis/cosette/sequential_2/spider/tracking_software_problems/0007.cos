@@ -1,0 +1,25 @@
+schema df_product(product_id:int, product_name:str, product_details:str);
+schema df_problems(problem_id:int, product_id:int, closure_authorised_by_staff_id:int, reported_by_staff_id:int, date_problem_reported:str, date_problem_closed:str, problem_description:str, other_problem_details:str);
+
+table df_product(df_product);
+table df_problems(df_problems);
+
+query q1
+`select count(*)
+from df_product as t1
+join df_problems as t2 on t1.product_id = t2.product_id
+where t1.product_name = "voluptatem"`;
+
+query q2
+`select n as count...
+from
+  (select count(*) as n
+   from
+     (select *
+      from df_problems as lhs
+      where not exists
+          (select 1
+           from df_product as rhs
+           where (lhs.product_id = rhs.product_id) )))`;
+
+verify q1 q2;

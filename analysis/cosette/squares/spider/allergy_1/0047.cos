@@ -1,0 +1,34 @@
+schema df_has_allergy(stuid:int, allergy:str);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_has_allergy(df_has_allergy);
+table df_student(df_student);
+
+query q1
+`select distinct t1.fname,
+                t1.city_code
+from df_student as t1
+join df_has_allergy as t2 on t1.stuid = t2.stuid
+where t2.allergy = "milk"
+  or t2.allergy = "cat"`;
+
+query q2
+`joining, by = "stuid"
+select distinct fname,
+                city_code
+from
+  (select stuid,
+          allergy,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code
+   from input0 as lhs
+   left join input1 as rhs on (lhs.stuid = rhs.stuid))
+where (allergy = 'milk'
+       or allergy = 'cat')`;
+
+verify q1 q2;

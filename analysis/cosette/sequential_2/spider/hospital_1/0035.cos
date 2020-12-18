@@ -1,0 +1,28 @@
+schema df_procedures(code:int, name:str, cost:str);
+
+table df_procedures(df_procedures);
+
+query q1
+`select max(cost),
+       min(cost),
+       avg(cost)
+from df_procedures df_procedures`;
+
+query q2
+`select distinct max(cost) over () as max.cost.,
+                               mincost as min.cost.,
+                               meancost as avg.cost.
+from
+  (select code,
+          name,
+          cost,
+          mincost,
+          avg(cost) over () as meancost
+   from
+     (select code,
+             name,
+             cost,
+             min(cost) over () as mincost
+      from df_procedures df_procedures))`;
+
+verify q1 q2;

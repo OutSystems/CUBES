@@ -1,0 +1,36 @@
+schema df_customers(customer_id:int, customer_address_id:int, customer_status_code:str, date_became_customer:str, date_of_birth:str, first_name:str, last_name:str, amount_outstanding:str, email_address:str, phone_number:str, cell_mobile_phone_number:str);
+schema df_customer_payments(customer_id:int, datetime_payment:str, payment_method_code:str, amount_payment:str);
+
+table df_customers(df_customers);
+table df_customer_payments(df_customer_payments);
+
+query q1
+`select count(*)
+from df_customers df_customers
+where customer_id not in
+    (select customer_id
+     from df_customer_payments df_customer_payments)`;
+
+query q2
+`select customer_id as count...
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_address_id as customer_address_id,
+          lhs.customer_status_code as customer_status_code,
+          lhs.date_became_customer as date_became_customer,
+          lhs.date_of_birth as date_of_birth,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.amount_outstanding as amount_outstanding,
+          lhs.email_address as email_address,
+          lhs.phone_number as phone_number,
+          lhs.cell_mobile_phone_number as cell_mobile_phone_number,
+          rhs.payment_method_code as payment_method_code
+   from df_customers as lhs
+   inner join
+     (select payment_method_code,
+             count(distinct customer_id) as n_distinct
+      from df_customer_payments df_customer_payments
+      group by payment_method_code) as rhs on (lhs.customer_address_id = rhs.n_distinct))`;
+
+verify q1 q2;

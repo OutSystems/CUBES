@@ -1,0 +1,26 @@
+schema df_stadium(id:int, name:str, capacity:int, city:str, country:str, opening_year:int);
+
+table df_stadium(df_stadium);
+
+query q1
+`select country
+from df_stadium df_stadium
+except
+select country
+from df_stadium df_stadium
+where opening_year > 2006`;
+
+query q2
+`select distinct country
+from
+  (select *
+   from df_stadium as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_stadium df_stadium
+           where (opening_year > 2006.0)) as rhs
+        where (lhs.country = rhs.country) ))`;
+
+verify q1 q2;

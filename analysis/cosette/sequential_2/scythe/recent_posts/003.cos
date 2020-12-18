@@ -1,0 +1,23 @@
+schema df_003_1(ID:int, item:str);
+schema df_003_2(f1:str, f2:str);
+
+table df_003_1(df_003_1);
+table df_003_2(df_003_2);
+
+query q1
+`select a.id, b.f1
+from tbla as a inner join
+     tblb as b
+     on b.f2 = a.item`;
+
+query q2
+`select id,
+       f1 as item
+from
+  (select lhs.id as id,
+          lhs.item as item,
+          rhs.f1 as f1
+   from df_003_1 as lhs
+   inner join df_003_2 as rhs on (lhs.item = rhs.f2))`;
+
+verify q1 q2;

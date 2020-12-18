@@ -1,0 +1,30 @@
+schema df_architect(id:int, name:str, nationality:str, gender:str);
+schema df_bridge(architect_id:int, id:int, name:str, location:str, length_meters:str, length_feet:str);
+
+table df_architect(df_architect);
+table df_bridge(df_bridge);
+
+query q1
+`select t1.name
+from df_bridge as t1
+join df_architect as t2 on t1.architect_id = t2.id
+where t2.nationality = 'american'`;
+
+query q2
+`joining, by = c("id", "name")
+select name
+from
+  (select id,
+          name,
+          nationality,
+          gender,
+          architect_id,
+          location,
+          length_meters,
+          length_feet
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.id = rhs.id
+                                    and lhs.name = rhs.name))
+where (nationality != 'american')`;
+
+verify q1 q2;

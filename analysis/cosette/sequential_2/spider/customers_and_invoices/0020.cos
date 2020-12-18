@@ -1,0 +1,58 @@
+schema df_financial_transactions(transaction_id:int, account_id:int, invoice_number:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select transaction_id
+from df_financial_transactions df_financial_transactions
+where transaction_amount >
+    (select avg(transaction_amount)
+     from df_financial_transactions df_financial_transactions)`;
+
+query q2
+`select distinct transaction_id
+from
+  (select lhs.transaction_id as transaction_id,
+          lhs.account_id as account_id,
+          lhs.invoice_number as invoice_number,
+          lhs.transaction_type as transaction_type,
+          lhs.transaction_date as transaction_date,
+          lhs.transaction_amount as transaction_amount,
+          lhs.transaction_comment as transaction_comment,
+          lhs.other_transaction_details as other_transaction_details,
+          lhs.meantransaction_amount as meantransaction_amount,
+          rhs.transaction_id as transaction_id.other,
+          rhs.account_id as account_id.other,
+          rhs.invoice_number as invoice_number.other,
+          rhs.transaction_type as transaction_type.other,
+          rhs.transaction_date as transaction_date.other,
+          rhs.transaction_amount as transaction_amount.other,
+          rhs.transaction_comment as transaction_comment.other,
+          rhs.other_transaction_details as other_transaction_details.other,
+          rhs.meantransaction_amount as meantransaction_amount.other
+   from
+     (select transaction_id,
+             account_id,
+             invoice_number,
+             transaction_type,
+             transaction_date,
+             transaction_amount,
+             transaction_comment,
+             other_transaction_details,
+             avg(transaction_amount) over () as meantransaction_amount
+      from df_financial_transactions df_financial_transactions) as lhs
+   cross join
+     (select transaction_id,
+             account_id,
+             invoice_number,
+             transaction_type,
+             transaction_date,
+             transaction_amount,
+             transaction_comment,
+             other_transaction_details,
+             avg(transaction_amount) over () as meantransaction_amount
+      from df_financial_transactions df_financial_transactions) as rhs)
+where (transaction_amount > meantransaction_amount.other
+       and transaction_amount.other < meantransaction_amount.other)`;
+
+verify q1 q2;

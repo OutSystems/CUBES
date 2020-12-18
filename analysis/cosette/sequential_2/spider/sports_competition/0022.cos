@@ -1,0 +1,27 @@
+schema df_player(player_id:int, name:str, position:str, club_id:int, apps:str, tries:str, goals:str, points:str);
+
+table df_player(df_player);
+
+query q1
+`select name
+from df_player df_player
+where points >
+    (select avg(points)
+     from df_player df_player)`;
+
+query q2
+`select name
+from
+  (select player_id,
+          name,
+          position,
+          club_id,
+          apps,
+          tries,
+          goals,
+          points,
+          avg(points) over () as meanpoints
+   from df_player df_player)
+where (meanpoints < points)`;
+
+verify q1 q2;

@@ -1,0 +1,41 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select avg(credit_score)
+from df_customer df_customer
+where cust_id not in
+    (select cust_id
+     from df_loan df_loan)`;
+
+query q2
+`select meancredit_score as avg.credit_score.
+from
+  (select loan_id,
+          loan_type,
+          cust_id,
+          branch_id,
+          amount,
+          meancredit_score,
+          cust_id as no_of_loans
+   from
+     (select lhs.loan_id as loan_id,
+             lhs.loan_type as loan_type,
+             lhs.cust_id as cust_id,
+             lhs.branch_id as branch_id,
+             lhs.amount as amount,
+             rhs.meancredit_score as meancredit_score
+      from df_loan as lhs
+      inner join
+        (select branch_id,
+                no_of_loans,
+                avg(credit_score) as meancredit_score
+         from df_customer df_customer
+         group by branch_id,
+                  no_of_loans) as rhs on (lhs.cust_id = rhs.no_of_loans
+                                          and lhs.loan_id = rhs.branch_id)))`;
+
+verify q1 q2;

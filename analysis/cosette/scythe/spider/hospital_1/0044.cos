@@ -1,0 +1,31 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_procedures(code:int, name:str, cost:str);
+schema df_trained_in(physician:int, treatment:int, certificationdate:str, certificationexpires:str);
+
+table df_physician(df_physician);
+table df_procedures(df_procedures);
+table df_trained_in(df_trained_in);
+
+query q1
+`select name
+from df_procedures df_procedures
+where cost < 5000 intersect
+  select t3.name
+  from df_physician as t1
+  join df_trained_in as t2 on t1.employeeid = t2.df_physician
+  join df_procedures as t3 on t3.code = t2.treatment where t1.name = "john wen"`;
+
+query q2
+`select t2.name
+ from
+  (select input0.code, input0.name, input0.cost, t1.employeeid, t1.name as name1, t1.position, t1.ssn
+  from (select *
+       from
+        input0
+       where input0.cost < 5000.0) join 
+      (select *
+         from
+          input
+         where input.name = 'john wen') as t1) as t2`;
+
+verify q1 q2;

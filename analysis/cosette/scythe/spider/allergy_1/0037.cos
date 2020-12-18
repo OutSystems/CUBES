@@ -1,0 +1,31 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+schema df_has_allergy(stuid:int, allergy:str);
+
+table df_allergy_type(df_allergy_type);
+table df_has_allergy(df_has_allergy);
+
+query q1
+`select count(*)
+from df_has_allergy as t1
+join df_allergy_type as t2 on t1.allergy = t2.allergy
+where t2.allergytype = "food"`;
+
+query q2
+`select t1.count_stuid
+ from
+  (select
+      t2.allergytype, count(t2.stuid) as count_stuid
+    from
+      (select *
+         from
+          (select input0.stuid, input0.allergy, t4.allergy as allergy1, t4.allergytype
+          from input0 join 
+              (select *
+                 from
+                  input
+                 where input.allergytype = 'food') as t4) as t3
+         where t3.allergy = t3.allergy1) as t2
+    group by
+      t2.allergytype) as t1`;
+
+verify q1 q2;

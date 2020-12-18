@@ -1,0 +1,41 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select sum(t2.killed)
+from df_people as t1
+join df_perpetrator as t2 on t1.people_id = t2.people_id
+where t1.height > 1.84`;
+
+query q2
+`select distinct sumkilled as sum.t2.killed.
+from
+  (select lhs.people_id as people_id,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.weight as weight,
+          lhs.home.town as home.town,
+          rhs.perpetrator_id as perpetrator_id,
+          rhs.date as date,
+          rhs.year as year,
+          rhs.location as location,
+          rhs.country as country,
+          rhs.killed as killed,
+          rhs.injured as injured,
+          rhs.sumkilled as sumkilled
+   from df_people as lhs
+   inner join
+     (select perpetrator_id,
+             people_id, date, year,
+                              location,
+                              country,
+                              killed,
+                              injured,
+                              sum(killed) over () as sumkilled
+      from df_perpetrator df_perpetrator
+      where (killed >= 1.84)) as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

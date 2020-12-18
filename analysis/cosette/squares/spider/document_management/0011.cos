@@ -1,0 +1,41 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+schema df_document_sections(section_id:int, document_code:int, section_sequence:int, section_code:int, section_title:str);
+
+table df_documents(df_documents);
+table df_document_sections(df_document_sections);
+
+query q1
+`select document_name
+from df_documents df_documents
+where document_code not in
+    (select document_code
+     from df_document_sections df_document_sections)`;
+
+query q2
+`joining, by = "document_code"
+joining, by = "document_name"
+select document_name
+from
+  (select *
+   from
+     (select document_name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select document_name
+           from
+             (select section_id,
+                     document_code,
+                     section_sequence,
+                     section_code,
+                     section_title,
+                     document_structure_code,
+                     document_type_code,
+                     access_count,
+                     document_name
+              from input1 as lhs
+              left join input0 as rhs on (lhs.document_code = rhs.document_code))) as rhs
+        where (lhs.document_name = rhs.document_name) ))`;
+
+verify q1 q2;

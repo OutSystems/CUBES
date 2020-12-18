@@ -1,0 +1,29 @@
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+
+table df_head(df_head);
+
+query q1
+`select born_state
+from df_head df_head
+group by born_state
+having count(*) >= 3`;
+
+query q2
+`select t2.born_state
+ from
+  (select t1.born_state, t1.count_born_state, t4.head_id, t4.name, t4.born_state as born_state1, t4.age
+  from (select *
+       from
+        (select
+            t3.born_state, count(t3.born_state) as count_born_state
+          from
+            input as t3
+          group by
+            t3.born_state) as t1
+       where t1.count_born_state = 4.0) join 
+      (select *
+         from
+          input
+         where input.head_id = 3.0) as t4) as t2`;
+
+verify q1 q2;

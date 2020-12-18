@@ -1,0 +1,28 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_physician(df_physician);
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+
+query q1
+`select distinct t1.name,
+                t1.position
+from df_physician as t1
+join df_prescribes as t2 on t1.employeeid = t2.df_physician
+join df_medication as t3 on t3.code = t2.df_medication
+where t3.brand = "x"`;
+
+query q2
+`select t2.name,t2.position
+ from
+  (select input.employeeid, input.name, input.position, input.ssn, t1.code, t1.name as name1, t1.brand, t1.description
+  from input join 
+      (select *
+         from
+          input0
+         where input0.brand = 'x') as t1) as t2
+ where t2.employeeid = t2.code`;
+
+verify q1 q2;

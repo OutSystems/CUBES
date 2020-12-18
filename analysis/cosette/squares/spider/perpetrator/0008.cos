@@ -1,0 +1,35 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select t1.name
+from df_people as t1
+join df_perpetrator as t2 on t1.people_id = t2.people_id
+where t2.country != "china"`;
+
+query q2
+`joining, by = "people_id"
+select name
+from
+  (select perpetrator_id,
+          people_id,
+          date,
+          year,
+          location,
+          country,
+          killed,
+          injured,
+          name,
+          height,
+          weight,
+          home.town
+   from
+     (select *
+      from input0
+      where (country != 'china')) as lhs
+   inner join input1 as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

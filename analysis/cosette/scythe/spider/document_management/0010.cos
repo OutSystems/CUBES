@@ -1,0 +1,30 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+schema df_document_sections(section_id:int, document_code:int, section_sequence:int, section_code:int, section_title:str);
+
+table df_documents(df_documents);
+table df_document_sections(df_document_sections);
+
+query q1
+`select t2.section_title
+from df_documents as t1
+join df_document_sections as t2 on t1.document_code = t2.document_code
+where t1.document_name = "david cv"`;
+
+query q2
+`select t4.section_title
+ from
+  (select *
+       from
+        (select
+            t1.section_title, count(t1.section_id) as count_section_id
+          from
+            input0 as t1
+          group by
+            t1.section_title) as t2
+       where t2.count_section_id = 9.0) join 
+      (select *
+         from
+          input
+         where input.document_name = 'david cv') as t3 as t4`;
+
+verify q1 q2;

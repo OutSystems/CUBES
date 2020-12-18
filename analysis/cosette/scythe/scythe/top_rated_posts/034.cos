@@ -1,0 +1,28 @@
+schema df_i034(Train:int, Dest:str, Time:str);
+
+table df_i034(df_i034);
+
+query q1
+`select t.train, t.dest, r.maxtime
+from (
+      select train, max(time) as maxtime
+      from traintable
+      group by train
+) r
+inner join traintable t
+on t.train = r.train and t.time = r.maxtime`;
+
+query q2
+`select t4.train1,t4.dest,t4.time
+ from
+  (select
+      t5.dest, t5.time, t5.train1, max(t5.time1) as max_time1
+    from
+      (select input.train, input.dest, input.time, t3.train as train1, t3.dest as dest1, t3.time as time1
+        from input join 
+            input as t3) as t2 as t5
+    group by
+      t5.dest, t5.time, t5.train1) as t4
+ where t4.max_time1 = t4.time`;
+
+verify q1 q2;

@@ -1,0 +1,46 @@
+schema df_swimmer(id:int, name:str, nationality:str, meter_100:str, meter_200:str, meter_300:str, meter_400:str, meter_500:str, meter_600:str, meter_700:str, time:str);
+
+table df_swimmer(df_swimmer);
+
+query q1
+`select *
+from df_swimmer df_swimmer`;
+
+query q2
+`select distinct id,
+                name,
+                nationality,
+                meter_100,
+                meter_200,
+                meter_300,
+                meter_400,
+                meter_500,
+                meter_600,
+                meter_700,
+                time
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.meter_100 as meter_100,
+          lhs.meter_200 as meter_200,
+          lhs.meter_300 as meter_300,
+          lhs.meter_400 as meter_400,
+          lhs.meter_500 as meter_500,
+          lhs.meter_600 as meter_600,
+          lhs.meter_700 as meter_700,
+          lhs.time as time,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.nationality as nationality.other,
+          rhs.meter_100 as meter_100.other,
+          rhs.meter_200 as meter_200.other,
+          rhs.meter_300 as meter_300.other,
+          rhs.meter_400 as meter_400.other,
+          rhs.meter_700 as meter_700.other,
+          rhs.time as time.other
+   from df_swimmer as lhs
+   inner join df_swimmer as rhs on (lhs.meter_500 = rhs.meter_500
+                                    and lhs.meter_600 = rhs.meter_600))`;
+
+verify q1 q2;

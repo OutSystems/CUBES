@@ -1,0 +1,36 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_products_in_events(product_in_event_id:int, event_id:int, product_id:int);
+
+table df_products(df_products);
+table df_products_in_events(df_products_in_events);
+
+query q1
+`select product_name
+from df_products df_products
+where product_id not in
+    (select product_id
+     from df_products_in_events df_products_in_events)`;
+
+query q2
+`joining, by = "product_id"
+joining, by = "product_id"
+select product_name
+from
+  (select product_id,
+          product_type_code,
+          product_name,
+          product_price
+   from
+     (select *
+      from
+        (select product_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select product_id
+              from input1) as rhs
+           where (lhs.product_id = rhs.product_id) )) as lhs
+   left join input0 as rhs on (lhs.product_id = rhs.product_id))`;
+
+verify q1 q2;

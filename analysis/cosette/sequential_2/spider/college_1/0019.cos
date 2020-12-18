@@ -1,0 +1,35 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_department(df_department);
+table df_professor(df_professor);
+
+query q1
+`select count(*),
+       t1.school_code
+from df_department as t1
+join df_professor as t2 on t1.dept_code = t2.dept_code
+group by t1.school_code`;
+
+query q2
+`select n as count...,
+       school_code
+from
+  (select school_code,
+          count(*) as n
+   from
+     (select lhs.emp_num as emp_num,
+             lhs.dept_code as dept_code,
+             lhs.prof_office as prof_office,
+             lhs.prof_extension as prof_extension,
+             lhs.prof_high_degree as prof_high_degree,
+             rhs.dept_name as dept_name,
+             rhs.school_code as school_code,
+             rhs.emp_num as emp_num.other,
+             rhs.dept_address as dept_address,
+             rhs.dept_extension as dept_extension
+      from df_professor as lhs
+      inner join df_department as rhs on (lhs.dept_code = rhs.dept_code))
+   group by school_code)`;
+
+verify q1 q2;

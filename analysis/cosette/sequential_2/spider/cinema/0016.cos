@@ -1,0 +1,31 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+schema df_schedule(cinema_id:int, film_id:int, date:str, show_times_per_day:int, price:str);
+
+table df_cinema(df_cinema);
+table df_schedule(df_schedule);
+
+query q1
+`select t2.name,
+       sum(t1.show_times_per_day)
+from df_schedule as t1
+join df_cinema as t2 on t1.cinema_id = t2.cinema_id
+group by t1.cinema_id`;
+
+query q2
+`select name,
+       sumshow_times_per_day as sum.t1.show_times_per_day.
+from
+  (select lhs.cinema_id as cinema_id,
+          lhs.name as name,
+          lhs.openning_year as openning_year,
+          lhs.capacity as capacity,
+          lhs.location as location,
+          rhs.sumshow_times_per_day as sumshow_times_per_day
+   from df_cinema as lhs
+   inner join
+     (select cinema_id,
+             sum(show_times_per_day) as sumshow_times_per_day
+      from df_schedule df_schedule
+      group by cinema_id) as rhs on (lhs.cinema_id = rhs.cinema_id))`;
+
+verify q1 q2;

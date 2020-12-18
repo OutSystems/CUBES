@@ -1,0 +1,24 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+
+table df_driver(df_driver);
+
+query q1
+`select home_city
+from df_driver df_driver
+where age > 40
+group by home_city
+having count(*) >= 2`;
+
+query q2
+`select home_city
+from
+  (select age,
+          home_city,
+          count(distinct age) as n_distinct
+   from df_driver df_driver
+   group by age,
+            home_city)
+where (age = 40.0
+       and n_distinct != 2.0)`;
+
+verify q1 q2;

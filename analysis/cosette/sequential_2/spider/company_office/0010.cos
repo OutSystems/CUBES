@@ -1,0 +1,63 @@
+schema df_buildings(id:int, name:str, city:str, height:int, stories:int, status:str);
+schema df_companies(id:int, name:str, headquarters:str, industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value_billion:str);
+schema df_office_locations(building_id:int, company_id:int, move_in_year:int);
+
+table df_buildings(df_buildings);
+table df_companies(df_companies);
+table df_office_locations(df_office_locations);
+
+query q1
+`select t3.name,
+       t2.name
+from df_office_locations as t1
+join df_buildings as t2 on t1.building_id = t2.id
+join df_companies as t3 on t1.company_id = t3.id`;
+
+query q2
+`select name.other as name...1,
+                           name as name...2
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.city as city,
+          lhs.height as height,
+          lhs.stories as stories,
+          lhs.status as status,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.headquarters as headquarters,
+          rhs.industry as industry,
+          rhs.sales_billion as sales_billion,
+          rhs.profits_billion as profits_billion,
+          rhs.assets_billion as assets_billion,
+          rhs.market_value_billion as market_value_billion,
+          rhs.move_in_year as move_in_year,
+          rhs.company_id as company_id
+   from df_buildings as lhs
+   inner join
+     (select id,
+             name,
+             headquarters,
+             industry,
+             sales_billion,
+             profits_billion,
+             assets_billion,
+             market_value_billion,
+             building_id,
+             move_in_year,
+             id as company_id
+      from
+        (select lhs.id as id,
+                lhs.name as name,
+                lhs.headquarters as headquarters,
+                lhs.industry as industry,
+                lhs.sales_billion as sales_billion,
+                lhs.profits_billion as profits_billion,
+                lhs.assets_billion as assets_billion,
+                lhs.market_value_billion as market_value_billion,
+                rhs.building_id as building_id,
+                rhs.move_in_year as move_in_year
+         from df_companies as lhs
+         inner join df_office_locations as rhs on (lhs.id = rhs.company_id))) as rhs on (lhs.id = rhs.building_id))`;
+
+verify q1 q2;

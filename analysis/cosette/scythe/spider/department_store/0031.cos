@@ -1,0 +1,25 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_id,
+       product_name
+from df_products df_products
+where product_price < 600
+  or product_price > 900`;
+
+query q2
+`select t2.product_id,t2.product_name
+ from
+  (select
+          sum(t3.product_id) as sum_product_id
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.product_price < 600.0
+           or input.product_price > 900.0) as t4 as t2`;
+
+verify q1 q2;

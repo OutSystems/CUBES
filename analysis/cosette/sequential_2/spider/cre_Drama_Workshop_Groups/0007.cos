@@ -1,0 +1,36 @@
+schema df_invoices(invoice_id:int, order_id:int, payment_method_code:str, product_id:int, order_quantity:int, other_item_details:str, order_item_id:int);
+
+table df_invoices(df_invoices);
+
+query q1
+`select min(order_quantity),
+       avg(order_quantity),
+       max(order_quantity)
+from df_invoices df_invoices`;
+
+query q2
+`select distinct minorder_quantity as min.order_quantity.,
+                meanorder_quantity as avg.order_quantity.,
+                max(order_quantity) over () as max.order_quantity.
+from
+  (select invoice_id,
+          order_id,
+          payment_method_code,
+          product_id,
+          order_quantity,
+          other_item_details,
+          order_item_id,
+          minorder_quantity,
+          avg(order_quantity) over () as meanorder_quantity
+   from
+     (select invoice_id,
+             order_id,
+             payment_method_code,
+             product_id,
+             order_quantity,
+             other_item_details,
+             order_item_id,
+             min(order_quantity) over () as minorder_quantity
+      from df_invoices df_invoices))`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_staff(staff_id:int, tourist_attraction_id:int, name:str, other_details:str);
+
+table df_staff(df_staff);
+
+query q1
+`select name,
+       other_details
+from df_staff df_staff`;
+
+query q2
+`select name,
+       other_details
+from
+  (select lhs.staff_id as staff_id,
+          lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.name as name,
+          lhs.other_details as other_details,
+          rhs.name as name.other,
+          rhs.other_details as other_details.other
+   from df_staff as lhs
+   inner join df_staff as rhs on (lhs.staff_id = rhs.staff_id
+                                  and lhs.tourist_attraction_id = rhs.tourist_attraction_id))`;
+
+verify q1 q2;

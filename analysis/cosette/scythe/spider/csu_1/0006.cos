@@ -1,0 +1,34 @@
+schema df_campuses(id:int, campus:str, location:str, county:str, year:int);
+
+table df_campuses(df_campuses);
+
+query q1
+`select campus
+from df_campuses df_campuses
+where location = "northridge"
+  and county = "los angeles"
+union
+select campus
+from df_campuses df_campuses
+where location = "san francisco"
+  and county = "san francisco"`;
+
+query q2
+`select t4.campus
+ from
+  (select t2.county, t3.id, t3.campus, t3.location, t3.county as county1, t3.year
+  from (select
+          t1.county, from
+          (select *
+             from
+              input
+             where input.county = 'los angeles') as t1
+        group by
+          t1.county) as t2 join 
+      (select *
+         from
+          input
+         where input.county = 'san francisco'
+           or input.location = 'northridge') as t3) as t4`;
+
+verify q1 q2;

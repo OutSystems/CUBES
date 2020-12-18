@@ -1,0 +1,24 @@
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+schema df_party_host(party_id:int, host_id:int, is_main_in_charge:str);
+
+table df_host(df_host);
+table df_party_host(df_party_host);
+
+query q1
+`select name
+from df_host df_host
+where host_id not in
+    (select host_id
+     from df_party_host df_party_host)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_host as lhs
+   where not exists
+       (select 1
+        from df_party_host as rhs
+        where (lhs.host_id = rhs.host_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_chip_model(model_name:str, launch_year:str, ram_mib:str, rom_mib:str, slots:str, wifi:str, bluetooth:str);
+
+table df_chip_model(df_chip_model);
+
+query q1
+`select *
+from df_chip_model df_chip_model`;
+
+query q2
+`select model_name,
+       launch_year,
+       ram_mib,
+       rom_mib,
+       slots,
+       wifi,
+       bluetooth
+from
+  (select lhs.model_name as model_name,
+          lhs.launch_year as launch_year,
+          lhs.ram_mib as ram_mib,
+          lhs.rom_mib as rom_mib,
+          lhs.slots as slots,
+          lhs.wifi as wifi,
+          lhs.bluetooth as bluetooth,
+          rhs.launch_year as launch_year.other,
+          rhs.ram_mib as ram_mib.other,
+          rhs.slots as slots.other,
+          rhs.wifi as wifi.other,
+          rhs.bluetooth as bluetooth.other
+   from df_chip_model as lhs
+   inner join df_chip_model as rhs on (lhs.model_name = rhs.model_name
+                                       and lhs.rom_mib = rhs.rom_mib))`;
+
+verify q1 q2;

@@ -1,0 +1,38 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+
+table df_movie(df_movie);
+
+query q1
+`select director
+from df_movie df_movie
+where director != "null"
+group by director
+having count(*) = 1`;
+
+query q2
+`select director
+from
+  (select lhs.director as director,
+          lhs.n as n,
+          rhs.director as director.other,
+          rhs.n as n.other
+   from
+     (select *
+      from
+        (select director,
+                count(*) as n
+         from df_movie df_movie
+         group by director)
+      where (n <= 1.0)) as lhs
+   cross join
+     (select *
+      from
+        (select director,
+                count(*) as n
+         from df_movie df_movie
+         group by director)
+      where (n <= 1.0)) as rhs)
+where (n != n.other
+       or director = director.other)`;
+
+verify q1 q2;

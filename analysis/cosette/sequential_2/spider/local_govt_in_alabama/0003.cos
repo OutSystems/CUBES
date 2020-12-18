@@ -1,0 +1,31 @@
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_participants(df_participants);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select t1.participant_id,
+       t1.participant_type_code,
+       count(*)
+from df_participants as t1
+join df_participants_in_events as t2 on t1.participant_id = t2.participant_id
+group by t1.participant_id`;
+
+query q2
+`select participant_id,
+       participant_type_code,
+       n as count...
+from
+  (select lhs.participant_id as participant_id,
+          lhs.participant_type_code as participant_type_code,
+          lhs.participant_details as participant_details,
+          rhs.n as n
+   from df_participants as lhs
+   inner join
+     (select participant_id,
+             count(*) as n
+      from df_participants_in_events df_participants_in_events
+      group by participant_id) as rhs on (lhs.participant_id = rhs.participant_id))`;
+
+verify q1 q2;

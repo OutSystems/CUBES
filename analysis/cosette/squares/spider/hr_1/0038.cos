@@ -1,0 +1,26 @@
+schema df_departments(department_id:int, department_name:str, manager_id:int, location_id:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_departments(df_departments);
+table df_employees(df_employees);
+
+query q1
+`select distinct t2.department_name
+from df_employees as t1
+join df_departments as t2 on t1.department_id = t2.department_id`;
+
+query q2
+`joining, by = "department_id"
+select department_name
+from
+  (select department_id,
+          department_name,
+          manager_id,
+          location_id
+   from
+     (select department_id
+      from input1 intersect select department_id
+      from input1) as lhs
+   inner join input0 as rhs on (lhs.department_id = rhs.department_id))`;
+
+verify q1 q2;

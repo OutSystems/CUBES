@@ -1,0 +1,41 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_behavior_incident(incident_id:int, incident_type_code:str, student_id:int, date_incident_start:str, date_incident_end:str, incident_summary:str, recommendations:str, other_details:str);
+
+table df_students(df_students);
+table df_behavior_incident(df_behavior_incident);
+
+query q1
+`select t1.date_incident_start,
+       date_incident_end
+from df_behavior_incident as t1
+join df_students as t2 on t1.student_id = t2.student_id
+where t2.last_name = "fahey"`;
+
+query q2
+`select date_incident_start,
+       date_incident_end
+from
+  (select lhs.incident_id as incident_id,
+          lhs.incident_type_code as incident_type_code,
+          lhs.student_id as student_id,
+          lhs.date_incident_start as date_incident_start,
+          lhs.date_incident_end as date_incident_end,
+          lhs.incident_summary as incident_summary,
+          lhs.recommendations as recommendations,
+          lhs.other_details as other_details,
+          rhs.address_id as address_id,
+          rhs.first_name as first_name,
+          rhs.middle_name as middle_name,
+          rhs.last_name as last_name,
+          rhs.cell_mobile_number as cell_mobile_number,
+          rhs.email_address as email_address,
+          rhs.date_first_rental as date_first_rental,
+          rhs.date_left_university as date_left_university,
+          rhs.other_student_details as other_student_details
+   from df_behavior_incident as lhs
+   inner join
+     (select *
+      from df_students df_students
+      where (last_name = 'fahey')) as rhs on (lhs.student_id = rhs.student_id))`;
+
+verify q1 q2;

@@ -1,0 +1,23 @@
+schema df_employee(eid:int, name:str, salary:int);
+
+table df_employee(df_employee);
+
+query q1
+`select eid,
+       name
+from df_employee df_employee
+
+limit 1`;
+
+query q2
+`select eid,
+       name
+from
+  (select eid,
+          name,
+          salary,
+          max(salary) over () as maxsalary
+   from df_employee df_employee)
+where (maxsalary = salary)`;
+
+verify q1 q2;

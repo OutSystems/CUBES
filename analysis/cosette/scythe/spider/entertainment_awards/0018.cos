@@ -1,0 +1,29 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+
+table df_festival_detail(df_festival_detail);
+
+query q1
+`select year
+from df_festival_detail df_festival_detail
+group by year
+having count(*) > 1`;
+
+query q2
+`select t1.year
+ from
+  (select t3.location, t3.year, t3.count_year, t2.festival_id, t2.festival_name, t2.chair_name, t2.location as location1, t2.year as year1, t2.num_of_audience
+  from (select *
+       from
+        (select
+            t4.location, t4.year, count(t4.year) as count_year
+          from
+            input as t4
+          group by
+            t4.location, t4.year) as t3
+       where t3.count_year = 2.0) join 
+      (select *
+         from
+          input
+         where input.festival_id = 1.0) as t2) as t1`;
+
+verify q1 q2;

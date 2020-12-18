@@ -1,0 +1,27 @@
+schema df_useracct(u_id:int, name:str);
+schema df_trust(source_u_id:int, target_u_id:int, trust:int);
+
+table df_useracct(df_useracct);
+table df_trust(df_trust);
+
+query q1
+`select t1.name
+from df_useracct as t1
+join df_trust as t2 on t1.u_id = t2.source_u_id
+group by t2.source_u_id
+
+limit 1`;
+
+query q2
+`select t4.name
+ from
+  (select
+          count(t2.name) as count_name
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          input
+         where input.u_id = 3.0) as t3 as t4`;
+
+verify q1 q2;

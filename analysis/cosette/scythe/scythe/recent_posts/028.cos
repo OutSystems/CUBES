@@ -1,0 +1,48 @@
+schema df_028(Member:int, Element:str);
+
+table df_028(df_028);
+
+query q1
+`select a.member, count(a.member) as total
+from t1 a join t1 b
+where a.element = b.element and b.member=1 and a.member > 1
+group by a.member`;
+
+query q2
+`select * from 
+(select t8.member,t8.min_member
+   from
+    (select t4.element, t4.min_member, t6.member, t6.element as element1
+    from (select *
+         from
+          (select
+              t11.element, min(t11.member) as min_member
+            from
+              input as t11
+            group by
+              t11.element) as t4
+         where t4.min_member > 1.0) join 
+        input as t6) as t8
+   where t8.min_member < t8.member
+     and t8.element = t8.element1)
+union all 
+ select * from
+  (select t9.min_member1,t9.min_member
+   from
+    (select t2.min_member, t10.element, t10.min_member as min_member1
+    from (select
+            min(t3.member) as min_member
+          from
+            input as t3) as t2 join 
+        (select *
+           from
+            (select
+                t5.element, min(t5.member) as min_member
+              from
+                input as t5
+              group by
+                t5.element) as t7
+           where t7.min_member > 1.0) as t10) as t9
+  )`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_i057(ID:int, Name:str, City:str, Birthyear:int);
+
+table df_i057(df_i057);
+
+query q1
+`select name, city, birthyear, count(*) as ct
+from table
+where birthyear in (select min(birthyear)
+               from table
+               group by city)
+group by city`;
+
+query q2
+`select t2.name,t2.city,t2.birthyear
+ from
+  (select t3.city, t3.max_id, t1.id, t1.name, t1.city as city1, t1.birthyear
+  from (select
+          t4.city, max(t4.id) as max_id
+        from
+          input as t4
+        group by
+          t4.city) as t3 join 
+      input as t1) as t2
+ where t2.max_id = t2.id`;
+
+verify q1 q2;

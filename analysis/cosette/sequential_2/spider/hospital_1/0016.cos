@@ -1,0 +1,30 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_patient(ssn:int, name:str, address:str, phone:str, insuranceid:int, pcp:int);
+
+table df_physician(df_physician);
+table df_patient(df_patient);
+
+query q1
+`select t1.name,
+       count(*)
+from df_physician as t1
+join df_patient as t2 on t1.employeeid = t2.pcp
+group by t1.employeeid`;
+
+query q2
+`select name,
+       n as count...
+from
+  (select lhs.employeeid as employeeid,
+          lhs.name as name,
+          lhs.position as position,
+          lhs.ssn as ssn,
+          rhs.n as n
+   from df_physician as lhs
+   inner join
+     (select pcp,
+             count(*) as n
+      from df_patient df_patient
+      group by pcp) as rhs on (lhs.employeeid = rhs.pcp))`;
+
+verify q1 q2;

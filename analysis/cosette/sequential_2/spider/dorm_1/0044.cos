@@ -1,0 +1,48 @@
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select t1.amenity_name
+from df_dorm_amenity as t1
+join df_has_amenity as t2 on t1.amenid = t2.amenid
+group by t2.amenid
+
+limit 1`;
+
+query q2
+`select amenity_name
+from
+  (select lhs.amenid as amenid,
+          lhs.amenity_name as amenity_name,
+          lhs.dormid as dormid,
+          lhs.n as n
+   from
+     (select lhs.amenid as amenid,
+             lhs.amenity_name as amenity_name,
+             lhs.dormid as dormid,
+             rhs.n as n
+      from
+        (select lhs.amenid as amenid,
+                lhs.amenity_name as amenity_name,
+                rhs.dormid as dormid
+         from df_dorm_amenity as lhs
+         inner join df_has_amenity as rhs on (lhs.amenid = rhs.amenid)) as lhs
+      inner join
+        (select dormid,
+                count(*) as n
+         from df_has_amenity df_has_amenity
+         group by dormid) as rhs on (lhs.dormid = rhs.dormid)) as lhs
+   inner join
+     (select amenid,
+             dormid,
+             count(*) as n
+      from df_has_amenity df_has_amenity
+      group by amenid,
+               dormid) as rhs on (lhs.amenid = rhs.amenid
+                                  and lhs.dormid = rhs.dormid
+                                  and lhs.n = rhs.n))`;
+
+verify q1 q2;

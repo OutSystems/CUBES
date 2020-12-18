@@ -1,0 +1,24 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t1.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t2.friend = 'bob'`;
+
+query q2
+`select t2.name
+ from
+  (select
+      t1.name, first(t1.friend) as first_friend
+    from
+      input0 as t1
+    group by
+      t1.name) as t2
+ where t2.first_friend = 'bob'`;
+
+verify q1 q2;

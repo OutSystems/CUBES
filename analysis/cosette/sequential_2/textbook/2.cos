@@ -1,0 +1,49 @@
+schema df_2_1(C_name:str, F_key:str);
+schema df_2_2(S_key:str, C_name:str);
+schema df_2_3(F_key:str, F_name:str);
+schema df_2_4(S_key:str, major:str, age:int);
+
+table df_2_1(df_2_1);
+table df_2_2(df_2_2);
+table df_2_3(df_2_3);
+table df_2_4(df_2_4);
+
+query q1
+`select max(s.age)
+from student s
+where (s.major = 'history')
+or s.snum in (select e.snum
+from class c, enrolled e, faculty f
+where e.cname = c.name and c.fid = f.fid
+and f.fname = 'i.teach' )`;
+
+query q2
+`select distinct age as maxage
+from
+  (select lhs.c_name as c_name,
+          lhs.f_key as f_key,
+          lhs.s_key as s_key,
+          lhs.f_name as f_name,
+          rhs.major as major,
+          rhs.age as age
+   from
+     (select lhs.c_name as c_name,
+             lhs.f_key as f_key,
+             lhs.s_key as s_key,
+             rhs.f_name as f_name
+      from
+        (select lhs.c_name as c_name,
+                lhs.f_key as f_key,
+                rhs.s_key as s_key
+         from df_2_1 as lhs
+         inner join df_2_2 as rhs on (lhs.c_name = rhs.c_name)) as lhs
+      inner join df_2_3 as rhs on (lhs.f_key = rhs.f_key)) as lhs
+   cross join
+     (select major,
+             max(age) as age
+      from df_2_4 df_2_4
+      group by major) as rhs)
+where (f_name = 'faculty1'
+       and major = 'history')`;
+
+verify q1 q2;

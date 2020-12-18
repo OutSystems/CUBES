@@ -1,0 +1,40 @@
+schema df_4_1(C_name:str, meets_at:str);
+schema df_4_2(S_key:str, C_name:str);
+schema df_4_3(S_key:str, S_name:str);
+
+table df_4_1(df_4_1);
+table df_4_2(df_4_2);
+table df_4_3(df_4_3);
+
+query q1
+`select distinct s.sname
+from student s
+where s.snum in (select e1.snum
+from enrolled e1, enrolled e2, class c1, class c2
+where e1.snum = e2.snum and e1.cname <> e2.cname
+and e1.cname = c1.name
+and e2.cname = c2.name and c1.meets at = c2.meets at)`;
+
+query q2
+`select s_name
+from
+  (select s_name,
+          meets_at,
+          count(*) as n
+   from
+     (select lhs.c_name as c_name,
+             lhs.meets_at as meets_at,
+             lhs.s_key as s_key,
+             rhs.s_name as s_name
+      from
+        (select lhs.c_name as c_name,
+                lhs.meets_at as meets_at,
+                rhs.s_key as s_key
+         from df_4_1 as lhs
+         inner join df_4_2 as rhs on (lhs.c_name = rhs.c_name)) as lhs
+      inner join df_4_3 as rhs on (lhs.s_key = rhs.s_key))
+   group by s_name,
+            meets_at)
+where (n = 2.0)`;
+
+verify q1 q2;

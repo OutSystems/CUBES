@@ -1,0 +1,25 @@
+schema df_i032(Section:str, Status:str, Count:int);
+
+table df_i032(df_i032);
+
+query q1
+`select t1.section, t1.cnt, t2.cnt
+from (select * from t where status = "active") t1
+join (select * from t where status = "inactive") t2
+on t1.section = t2.section`;
+
+query q2
+`select t3.section,t3.count,t3.count1
+ from
+  (select input.section, input.status, input.count, t2.section as section1, t2.status as status1, t2.count as count1
+  from (select *
+       from
+        input
+       where input.status = 'active') join 
+      (select *
+         from
+          input
+         where input.status = 'inactive') as t2) as t3
+ where t3.section = t3.section1`;
+
+verify q1 q2;

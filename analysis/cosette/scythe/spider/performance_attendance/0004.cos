@@ -1,0 +1,24 @@
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+
+table df_performance(df_performance);
+
+query q1
+`select attendance
+from df_performance df_performance
+where location = "td garden"
+  or location = "bell centre"`;
+
+query q2
+`select t2.attendance
+ from
+  (select
+          max(t3.performance_id) as max_performance_id
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.location = 'td garden'
+           or input.location = 'bell centre') as t4 as t2`;
+
+verify q1 q2;

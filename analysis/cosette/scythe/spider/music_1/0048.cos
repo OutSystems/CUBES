@@ -1,0 +1,26 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_files(df_files);
+table df_song(df_song);
+
+query q1
+`select t1.duration,
+       t1.file_size,
+       t1.formats
+from df_files as t1
+join df_song as t2 on t1.f_id = t2.f_id
+where t2.genre_is = "pop"`;
+
+query q2
+`select t2.duration,t2.file_size,t2.formats
+ from
+  (select input.f_id, input.artist_name, input.file_size, input.duration, input.formats, t1.song_name, t1.artist_name as artist_name1, t1.country, t1.f_id as f_id1, t1.genre_is, t1.rating, t1.languages, t1.releasedate, t1.resolution
+  from input join 
+      (select *
+         from
+          input0
+         where input0.genre_is = 'pop') as t1) as t2
+ where t2.f_id = t2.f_id1`;
+
+verify q1 q2;

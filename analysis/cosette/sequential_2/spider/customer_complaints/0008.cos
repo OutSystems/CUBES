@@ -1,0 +1,26 @@
+schema df_customers(customer_id:int, customer_type_code:str, address_line_1:str, address_line_2:str, town_city:str, state:str, email_address:str, phone_number:str);
+schema df_complaints(complaint_id:int, product_id:int, customer_id:int, complaint_outcome_code:str, complaint_status_code:str, complaint_type_code:str, date_complaint_raised:str, date_complaint_closed:str, staff_id:int);
+
+table df_customers(df_customers);
+table df_complaints(df_complaints);
+
+query q1
+`select email_address,
+       phone_number
+from df_customers df_customers
+where customer_id not in
+    (select customer_id
+     from df_complaints df_complaints)`;
+
+query q2
+`select email_address,
+       phone_number
+from
+  (select *
+   from df_customers as lhs
+   where not exists
+       (select 1
+        from df_complaints as rhs
+        where (lhs.customer_id = rhs.customer_id) ))`;
+
+verify q1 q2;

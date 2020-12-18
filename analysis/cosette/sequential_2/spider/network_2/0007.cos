@@ -1,0 +1,46 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select name
+from df_person df_person
+where job = 'student'
+  and age =
+    (select max(age)
+     from df_person df_person
+     where job = 'student' )`;
+
+query q2
+`select name
+from
+  (select gender,
+          name,
+          max(age) as age
+   from
+     (select *
+      from
+        (select lhs.name as name,
+                lhs.age as age,
+                lhs.city as city,
+                lhs.gender as gender,
+                lhs.job as job,
+                rhs.name as name.other,
+                rhs.age as age.other,
+                rhs.city as city.other,
+                rhs.gender as gender.other,
+                rhs.job as job.other
+         from
+           (select *
+            from df_person df_person
+            where (job = 'student')) as lhs
+         cross join
+           (select *
+            from df_person df_person
+            where (job = 'student')) as rhs)
+      where (age > age.other
+             or job != job.other))
+   group by gender,
+            name)`;
+
+verify q1 q2;

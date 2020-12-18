@@ -1,0 +1,38 @@
+schema df_course(course_id:int, title:str, dept_name:str, credits:int);
+schema df_section(course_id:int, sec_id:int, semester:str, year:int, building:str, room_number:int, time_slot_id:str);
+
+table df_course(df_course);
+table df_section(df_section);
+
+query q1
+`select t1.title
+from df_course as t1
+join df_section as t2 on t1.course_id = t2.course_id
+where building = 'chandler'
+  and semester = 'fall'
+  and year = 2010`;
+
+query q2
+`joining, by = "course_id"
+select title
+from
+  (select course_id,
+          sec_id,
+          semester,
+          year,
+          building,
+          room_number,
+          time_slot_id,
+          title,
+          dept_name,
+          credits
+   from
+     (select *
+      from input1
+      where (building = 'chandler'
+             and semester = 'fall')) as lhs
+   left join input0 as rhs on (lhs.course_id = rhs.course_id))
+where (building != 'chandler'
+       or year = 2010.0)`;
+
+verify q1 q2;

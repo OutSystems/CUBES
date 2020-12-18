@@ -1,0 +1,25 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+
+table df_publication(df_publication);
+
+query q1
+`select publication_date
+from df_publication df_publication
+
+limit 3`;
+
+query q2
+`select t2.publication_date
+ from
+  (select t4.publication_date, t4.max_price, t3.publication_id, t3.book_id, t3.publisher, t3.publication_date as publication_date1, t3.price
+  from (select
+          t1.publication_date, max(t1.price) as max_price
+        from
+          input as t1
+        group by
+          t1.publication_date) as t4 join 
+      input as t3) as t2
+ where t2.max_price = t2.price
+   and t2.publication_date <> t2.publication_date1`;
+
+verify q1 q2;

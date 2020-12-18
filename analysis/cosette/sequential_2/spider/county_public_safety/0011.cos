@@ -1,0 +1,37 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+schema df_city(city_id:int, county_id:int, name:str, white:str, black:str, amerindian:str, asian:str, multiracial:str, hispanic:str);
+
+table df_county_public_safety(df_county_public_safety);
+table df_city(df_city);
+
+query q1
+`select t1.white,
+       t2.crime_rate
+from df_city as t1
+join df_county_public_safety as t2 on t1.county_id = t2.county_id`;
+
+query q2
+`select white,
+       crime_rate
+from
+  (select lhs.city_id as city_id,
+          lhs.county_id as county_id,
+          lhs.name as name,
+          lhs.white as white,
+          lhs.black as black,
+          lhs.amerindian as amerindian,
+          lhs.asian as asian,
+          lhs.multiracial as multiracial,
+          lhs.hispanic as hispanic,
+          rhs.name as name.other,
+          rhs.population as population,
+          rhs.police_officers as police_officers,
+          rhs.residents_per_officer as residents_per_officer,
+          rhs.case_burden as case_burden,
+          rhs.crime_rate as crime_rate,
+          rhs.police_force as police_force,
+          rhs.location as location
+   from df_city as lhs
+   inner join df_county_public_safety as rhs on (lhs.county_id = rhs.county_id))`;
+
+verify q1 q2;

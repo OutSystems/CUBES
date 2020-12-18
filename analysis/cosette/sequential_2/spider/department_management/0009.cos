@@ -1,0 +1,32 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+
+table df_department(df_department);
+
+query q1
+`select creation
+from df_department df_department
+group by creation
+
+limit 1`;
+
+query q2
+`select distinct creation
+from
+  (select lhs.department_id as department_id,
+          lhs.name as name,
+          lhs.creation as creation,
+          lhs.ranking as ranking,
+          lhs.budget_in_billions as budget_in_billions,
+          lhs.num_employees as num_employees,
+          rhs.department_id as department_id.other,
+          rhs.name as name.other
+   from df_department as lhs
+   inner join
+     (select department_id,
+             name,
+             count(*) as n
+      from df_department df_department
+      group by department_id,
+               name) as rhs on (lhs.ranking = rhs.n))`;
+
+verify q1 q2;

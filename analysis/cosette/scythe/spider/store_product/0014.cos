@@ -1,0 +1,19 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+
+table df_product(df_product);
+
+query q1
+`select avg(pages_per_minute_color)
+from df_product df_product`;
+
+query q2
+`select t2.avg_pages_per_minute_color
+ from
+  (select
+      t1.dpi, t1.interface, avg(t1.pages_per_minute_color) as avg_pages_per_minute_color
+    from
+      input as t1
+    group by
+      t1.dpi, t1.interface) as t2`;
+
+verify q1 q2;

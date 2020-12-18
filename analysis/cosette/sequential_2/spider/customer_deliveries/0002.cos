@@ -1,0 +1,48 @@
+schema df_products(product_id:int, product_name:str, product_price:str, product_description:str);
+schema df_regular_order_products(regular_order_id:int, product_id:int);
+
+table df_products(df_products);
+table df_regular_order_products(df_regular_order_products);
+
+query q1
+`select t1.product_name,
+       t1.product_price
+from df_products as t1
+join df_regular_order_products as t2 on t1.product_id = t2.product_id
+group by t2.product_id
+
+limit 1`;
+
+query q2
+`select product_name,
+       product_price
+from
+  (select *
+   from
+     (select product_id,
+             product_name,
+             product_price,
+             product_description,
+             count(*) over () as n
+      from df_products df_products) as lhs
+   where not exists
+       (select 1
+        from
+          (select product_id,
+                  product_name,
+                  product_price,
+                  product_description,
+                  product_id.other,
+                  product_id as regular_order_id
+           from
+             (select lhs.product_id as product_id,
+                     lhs.product_name as product_name,
+                     lhs.product_price as product_price,
+                     lhs.product_description as product_description,
+                     rhs.product_id as product_id.other
+              from df_products as lhs
+              inner join df_regular_order_products as rhs on (lhs.product_id = rhs.regular_order_id))) as rhs
+        where (lhs.product_id = rhs.product_id
+               and lhs.product_name = rhs.product_name) ))`;
+
+verify q1 q2;

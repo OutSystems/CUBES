@@ -1,0 +1,32 @@
+schema df_student(id:int, name:str, dept_name:str, tot_cred:int);
+schema df_advisor(s_id:int, i_id:int);
+
+table df_student(df_student);
+table df_advisor(df_advisor);
+
+query q1
+`select i_id
+from df_advisor as t1
+join df_student as t2 on t1.s_id = t2.id
+where t2.dept_name = 'history'`;
+
+query q2
+`select i_id
+from
+  (select id,
+          name,
+          dept_name,
+          tot_cred,
+          i_id,
+          id as s_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.dept_name as dept_name,
+             lhs.tot_cred as tot_cred,
+             rhs.i_id as i_id
+      from df_student as lhs
+      inner join df_advisor as rhs on (lhs.id = rhs.s_id)))
+where (dept_name = 'history')`;
+
+verify q1 q2;

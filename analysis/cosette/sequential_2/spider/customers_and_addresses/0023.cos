@@ -1,0 +1,35 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_contact_channels(customer_id:int, channel_code:str, active_from_date:str, active_to_date:str, contact_number:str);
+
+table df_customers(df_customers);
+table df_customer_contact_channels(df_customer_contact_channels);
+
+query q1
+`select max(t2.active_to_date)
+from df_customers as t1
+join df_customer_contact_channels as t2 on t1.customer_id = t2.customer_id
+where t1.customer_name = "tillman ernser"`;
+
+query q2
+`select maxactive_to_date as max.t2.active_to_date.
+from
+  (select customer_name,
+          other_customer_details,
+          max(active_to_date) as maxactive_to_date
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.date_became_customer as date_became_customer,
+             lhs.other_customer_details as other_customer_details,
+             rhs.channel_code as channel_code,
+             rhs.active_from_date as active_from_date,
+             rhs.active_to_date as active_to_date,
+             rhs.contact_number as contact_number
+      from df_customers as lhs
+      left join df_customer_contact_channels as rhs on (lhs.customer_id = rhs.customer_id))
+   group by customer_name,
+            other_customer_details)
+where (customer_name = 'tillman ernser')`;
+
+verify q1 q2;

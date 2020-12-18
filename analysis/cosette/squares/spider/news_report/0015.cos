@@ -1,0 +1,37 @@
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+schema df_news_report(journalist_id:int, event_id:int, work_type:str);
+
+table df_journalist(df_journalist);
+table df_news_report(df_news_report);
+
+query q1
+`select name
+from df_journalist df_journalist
+where journalist_id not in
+    (select journalist_id
+     from df_news_report df_news_report)`;
+
+query q2
+`joining, by = "journalist_id"
+joining, by = "journalist_id"
+select name
+from
+  (select journalist_id,
+          name,
+          nationality,
+          age,
+          years_working
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select journalist_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select journalist_id
+              from input1) as rhs
+           where (lhs.journalist_id = rhs.journalist_id) )) as rhs on (lhs.journalist_id = rhs.journalist_id))`;
+
+verify q1 q2;

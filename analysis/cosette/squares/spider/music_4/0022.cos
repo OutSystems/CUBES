@@ -1,0 +1,23 @@
+schema df_music_festival(id:int, music_festival:str, date_of_ceremony:str, category:str, volume:int, result:str);
+
+table df_music_festival(df_music_festival);
+
+query q1
+`select category
+from df_music_festival df_music_festival
+group by category
+having count(*) > 1`;
+
+query q2
+`select distinct category
+from
+  (select category,
+          date_of_ceremony,
+          count(*) as n
+   from input0
+   group by category,
+            date_of_ceremony)
+where (n >= 1.0
+       and n > 1.0)`;
+
+verify q1 q2;

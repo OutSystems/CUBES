@@ -1,0 +1,42 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_authors(df_authors);
+table df_authorship(df_authorship);
+
+query q1
+`select distinct t1.fname,
+                t1.lname
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_inst as t3 on t2.instid = t3.instid
+where t3.name = "google"`;
+
+query q2
+`select fname,
+       lname
+from
+  (select lhs.instid as instid,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.authid as authid,
+          lhs.lname as lname,
+          lhs.fname as fname,
+          rhs.paperid as paperid,
+          rhs.authorder as authorder
+   from
+     (select lhs.instid as instid,
+             lhs.name as name,
+             lhs.country as country,
+             rhs.authid as authid,
+             rhs.lname as lname,
+             rhs.fname as fname
+      from df_inst as lhs
+      cross join df_authors as rhs) as lhs
+   inner join df_authorship as rhs on (lhs.instid = rhs.instid
+                                           and lhs.authid = rhs.authid))
+where (name = 'google')`;
+
+verify q1 q2;

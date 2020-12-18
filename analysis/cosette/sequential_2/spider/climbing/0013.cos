@@ -1,0 +1,33 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_climber(climber_id:int, name:str, country:str, time:str, points:str, mountain_id:int);
+
+table df_mountain(df_mountain);
+table df_climber(df_climber);
+
+query q1
+`select distinct t2.name
+from df_climber as t1
+join df_mountain as t2 on t1.mountain_id = t2.mountain_id
+where t1.country = "west germany"`;
+
+query q2
+`select distinct name.other as name
+from
+  (select lhs.climber_id as climber_id,
+          lhs.name as name,
+          lhs.country as country,
+          lhs.time as time,
+          lhs.points as points,
+          lhs.mountain_id as mountain_id,
+          rhs.name as name.other,
+          rhs.height as height,
+          rhs.prominence as prominence,
+          rhs.range as range,
+          rhs.country as country.other
+   from
+     (select *
+      from df_climber df_climber
+      where (country = 'west germany')) as lhs
+   inner join df_mountain as rhs on (lhs.mountain_id = rhs.mountain_id))`;
+
+verify q1 q2;

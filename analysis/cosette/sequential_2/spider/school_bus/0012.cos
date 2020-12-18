@@ -1,0 +1,48 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+schema df_school(school_id:int, grade:str, school:str, location:str, type:str);
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_driver(df_driver);
+table df_school(df_school);
+table df_school_bus(df_school_bus);
+
+query q1
+`select t2.df_school,
+       t3.name
+from df_school_bus as t1
+join df_school as t2 on t1.school_id = t2.school_id
+join df_driver as t3 on t1.driver_id = t3.driver_id`;
+
+query q2
+`select school,
+       name
+from
+  (select lhs.driver_id as driver_id,
+          lhs.name as name,
+          lhs.party as party,
+          lhs.home_city as home_city,
+          lhs.age as age,
+          lhs.school_id as school_id,
+          lhs.grade as grade,
+          lhs.school as school,
+          lhs.location as location,
+          lhs.type as type,
+          rhs.years_working as years_working,
+          rhs.if_full_time as if_full_time
+   from
+     (select lhs.driver_id as driver_id,
+             lhs.name as name,
+             lhs.party as party,
+             lhs.home_city as home_city,
+             lhs.age as age,
+             rhs.school_id as school_id,
+             rhs.grade as grade,
+             rhs.school as school,
+             rhs.location as location,
+             rhs.type as type
+      from df_driver as lhs
+      cross join df_school as rhs) as lhs
+   inner join df_school_bus as rhs on (lhs.driver_id = rhs.driver_id
+                                       and lhs.school_id = rhs.school_id))`;
+
+verify q1 q2;

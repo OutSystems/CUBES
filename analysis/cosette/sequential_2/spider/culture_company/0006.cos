@@ -1,0 +1,33 @@
+schema df_book_club(book_club_id:int, year:int, author_or_editor:str, book_title:str, publisher:str, category:str, result:str);
+
+table df_book_club(df_book_club);
+
+query q1
+`select publisher
+from df_book_club df_book_club
+group by publisher
+
+limit 1`;
+
+query q2
+`select distinct publisher
+from
+  (select lhs.author_or_editor as author_or_editor,
+          lhs.year as year,
+          lhs.n as n,
+          rhs.author_or_editor as author_or_editor.other,
+          rhs.book_title as book_title,
+          rhs.publisher as publisher,
+          rhs.category as category,
+          rhs.result as result
+   from
+     (select author_or_editor,
+             year,
+             count(*) as n
+      from df_book_club df_book_club
+      group by author_or_editor,
+               year) as lhs
+   inner join df_book_club as rhs on (lhs.year = rhs.year
+                                      and lhs.n = rhs.book_club_id))`;
+
+verify q1 q2;

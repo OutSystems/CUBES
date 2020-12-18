@@ -1,0 +1,56 @@
+schema df_documents(document_id:int, document_type_code:str, grant_id:int, sent_date:str, response_received_date:str, other_details:str);
+schema df_grants(grant_id:int, organisation_id:int, grant_amount:str, grant_start_date:str, grant_end_date:str, other_details:str);
+schema df_organisation_types(organisation_type:str, organisation_type_description:str);
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+
+table df_documents(df_documents);
+table df_grants(df_grants);
+table df_organisation_types(df_organisation_types);
+table df_organisations(df_organisations);
+
+query q1
+`select t1.sent_date
+from df_documents as t1
+join df_grants as t2 on t1.grant_id = t2.grant_id
+join df_organisations as t3 on t2.organisation_id = t3.organisation_id
+join df_organisation_types as t4 on t3.organisation_type = t4.organisation_type
+where t2.grant_amount > 5000
+  and t4.organisation_type_description = 'research'`;
+
+query q2
+`select sent_date
+from
+  (select *
+   from df_documents as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.grant_id as grant_id,
+                     lhs.organisation_id as organisation_id,
+                     lhs.grant_amount as grant_amount,
+                     lhs.grant_start_date as grant_start_date,
+                     lhs.grant_end_date as grant_end_date,
+                     lhs.other_details as other_details,
+                     lhs.organisation_type as organisation_type,
+                     lhs.organisation_type_description as organisation_type_description,
+                     rhs.organisation_details as organisation_details
+              from
+                (select lhs.grant_id as grant_id,
+                        lhs.organisation_id as organisation_id,
+                        lhs.grant_amount as grant_amount,
+                        lhs.grant_start_date as grant_start_date,
+                        lhs.grant_end_date as grant_end_date,
+                        lhs.other_details as other_details,
+                        rhs.organisation_type as organisation_type,
+                        rhs.organisation_type_description as organisation_type_description
+                 from df_grants as lhs
+                 cross join df_organisation_types as rhs) as lhs
+              inner join df_organisations as rhs on (lhs.organisation_id = rhs.organisation_id
+                                                         and lhs.organisation_type = rhs.organisation_type))
+           where (organisation_type_description != 'research'
+                  or grant_amount <= 5000.0)) as rhs
+        where (lhs.grant_id = rhs.grant_id) ))`;
+
+verify q1 q2;

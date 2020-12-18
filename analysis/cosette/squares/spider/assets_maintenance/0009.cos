@@ -1,0 +1,41 @@
+schema df_skills(skill_id:int, skill_code:str, skill_description:str);
+schema df_part_faults(part_fault_id:int, part_id:int, fault_short_name:str, fault_description:str, other_fault_details:str);
+schema df_skills_required_to_fix(part_fault_id:int, skill_id:int);
+
+table df_skills(df_skills);
+table df_part_faults(df_part_faults);
+table df_skills_required_to_fix(df_skills_required_to_fix);
+
+query q1
+`select t1.fault_short_name,
+       t3.skill_description
+from df_part_faults as t1
+join df_skills_required_to_fix as t2 on t1.part_fault_id = t2.part_fault_id
+join df_skills as t3 on t2.skill_id = t3.skill_id`;
+
+query q2
+`joining, by = "part_fault_id"
+joining, by = "skill_id"
+select fault_short_name,
+       skill_description
+from
+  (select part_fault_id,
+          skill_id,
+          part_id,
+          fault_short_name,
+          fault_description,
+          other_fault_details,
+          skill_code,
+          skill_description
+   from
+     (select part_fault_id,
+             skill_id,
+             part_id,
+             fault_short_name,
+             fault_description,
+             other_fault_details
+      from input2 as lhs
+      inner join input1 as rhs on (lhs.part_fault_id = rhs.part_fault_id)) as lhs
+   inner join input0 as rhs on (lhs.skill_id = rhs.skill_id))`;
+
+verify q1 q2;

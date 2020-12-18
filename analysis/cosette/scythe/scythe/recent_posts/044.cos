@@ -1,0 +1,24 @@
+schema df_044_1(OriginalID:int, Area:str);
+schema df_044_2(Part:str, OriginalID:int);
+
+table df_044_1(df_044_1);
+table df_044_2(df_044_2);
+
+query q1
+`select a.originalid, b.part
+from a
+join b
+on a.area = b.area
+where not exists (select * from t c where c.originalid = a.originalid and c.part = b.part)`;
+
+query q2
+`select t1.max_originalid,t1.area
+ from
+  (select
+      t2.area, max(t2.originalid) as max_originalid
+    from
+      input as t2
+    group by
+      t2.area) as t1`;
+
+verify q1 q2;

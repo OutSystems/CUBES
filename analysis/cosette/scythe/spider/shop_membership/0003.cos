@@ -1,0 +1,31 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select name
+from df_branch df_branch
+
+limit 3`;
+
+query q2
+`select t4.name
+ from
+  (select t2.city, t2.max_membership_amount, t1.branch_id, t1.name, t1.open_year, t1.address_road, t1.city as city1, t1.membership_amount
+  from (select
+          t3.city, max(t3.membership_amount) as max_membership_amount
+        from
+          (select *
+             from
+              input
+             where input.branch_id < 5.0) as t3
+        group by
+          t3.city) as t2 join 
+      (select *
+         from
+          input
+         where input.branch_id >= 3.0) as t1) as t4
+ where t4.max_membership_amount >= t4.membership_amount
+   and t4.city = t4.city1`;
+
+verify q1 q2;

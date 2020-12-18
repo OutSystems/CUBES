@@ -1,0 +1,34 @@
+schema df_candidate(candidate_id:int, people_id:int, poll_source:str, date:str, support_rate:str, consider_rate:str, oppose_rate:str, unsure_rate:str);
+schema df_people(people_id:int, sex:str, name:str, date_of_birth:str, height:str, weight:str);
+
+table df_candidate(df_candidate);
+table df_people(df_people);
+
+query q1
+`select t1.name
+from df_people as t1
+join df_candidate as t2 on t1.people_id = t2.people_id
+where t1.sex = 'f'`;
+
+query q2
+`joining, by = "people_id"
+select distinct name
+from
+  (select people_id,
+          sex,
+          name,
+          date_of_birth,
+          height,
+          weight,
+          candidate_id,
+          poll_source,
+          date,
+          support_rate,
+          consider_rate,
+          oppose_rate,
+          unsure_rate
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.people_id = rhs.people_id))
+where (sex = 'f')`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_people(people_id:int, sex:str, name:str, date_of_birth:str, height:str, weight:str);
+
+table df_people(df_people);
+
+query q1
+`select count(*),
+       sex
+from df_people df_people
+where weight > 85
+group by sex`;
+
+query q2
+`select t2.count_people_id,t2.sex
+ from
+  (select
+      t1.sex, count(t1.people_id) as count_people_id
+    from
+      (select *
+         from
+          input
+         where input.weight > 85.0) as t1
+    group by
+      t1.sex) as t2`;
+
+verify q1 q2;

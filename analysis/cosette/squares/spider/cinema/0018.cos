@@ -1,0 +1,55 @@
+schema df_film(film_id:int, rank_in_series:int, number_in_season:int, title:str, directed_by:str, original_air_date:str, production_code:str);
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+schema df_schedule(cinema_id:int, film_id:int, date:str, show_times_per_day:int, price:str);
+
+table df_film(df_film);
+table df_cinema(df_cinema);
+table df_schedule(df_schedule);
+
+query q1
+`select t3.name,
+       t2.title,
+       t1.date,
+       t1.price
+from df_schedule as t1
+join df_film as t2 on t1.film_id = t2.film_id
+join df_cinema as t3 on t1.cinema_id = t3.cinema_id`;
+
+query q2
+`joining, by = "cinema_id"
+joining, by = "film_id"
+select name,
+       title,
+       date,
+       price
+from
+  (select cinema_id,
+          film_id,
+          date,
+          show_times_per_day,
+          price,
+          name,
+          openning_year,
+          capacity,
+          location,
+          rank_in_series,
+          number_in_season,
+          title,
+          directed_by,
+          original_air_date,
+          production_code
+   from
+     (select cinema_id,
+             film_id,
+             date,
+             show_times_per_day,
+             price,
+             name,
+             openning_year,
+             capacity,
+             location
+      from input2 as lhs
+      inner join input1 as rhs on (lhs.cinema_id = rhs.cinema_id)) as lhs
+   inner join input0 as rhs on (lhs.film_id = rhs.film_id))`;
+
+verify q1 q2;

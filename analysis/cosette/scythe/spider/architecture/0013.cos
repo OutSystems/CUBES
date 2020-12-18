@@ -1,0 +1,25 @@
+schema df_mill(architect_id:int, id:int, location:str, name:str, type:str, built_year:int, notes:str);
+
+table df_mill(df_mill);
+
+query q1
+`select name
+from df_mill df_mill
+where name like '%moulin%'`;
+
+query q2
+`select t1.name
+ from
+  (select t4.notes, t4.count_location, t2.architect_id, t2.id, t2.location, t2.name, t2.type, t2.built_year, t2.notes as notes1
+  from (select
+          t3.notes, count(t3.location) as count_location
+        from
+          input as t3
+        group by
+          t3.notes) as t4 join 
+      (select *
+         from
+          input
+         where input.id >= 2.0) as t2) as t1`;
+
+verify q1 q2;

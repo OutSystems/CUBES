@@ -1,0 +1,22 @@
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select name
+from df_editor df_editor
+where editor_id not in
+    (select editor_id
+     from df_journal_committee df_journal_committee)`;
+
+query q2
+`select t3.name
+ from
+  (select t2.editor_id, t2.name, t2.age, t1.editor_id as editor_id1, t1.journal_id, t1.work_type
+  from input as t2 left outer join 
+      input0 as t1 on t2.editor_id = t1.editor_id) as t3
+ where t3.work_type is null`;
+
+verify q1 q2;

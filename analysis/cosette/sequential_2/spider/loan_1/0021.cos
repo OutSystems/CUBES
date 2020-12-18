@@ -1,0 +1,45 @@
+schema df_bank(branch_id:int, bname:str, no_of_customers:int, city:str, state:str);
+
+table df_bank(df_bank);
+
+query q1
+`select bname
+from df_bank df_bank
+
+limit 1`;
+
+query q2
+`select distinct bname
+from
+  (select lhs.branch_id as branch_id,
+          lhs.bname as bname,
+          lhs.no_of_customers as no_of_customers,
+          lhs.city as city,
+          lhs.state as state,
+          lhs.maxno_of_customers as maxno_of_customers,
+          rhs.branch_id as branch_id.other,
+          rhs.bname as bname.other,
+          rhs.no_of_customers as no_of_customers.other,
+          rhs.city as city.other,
+          rhs.state as state.other,
+          rhs.maxno_of_customers as maxno_of_customers.other
+   from
+     (select branch_id,
+             bname,
+             no_of_customers,
+             city,
+             state,
+             max(no_of_customers) over () as maxno_of_customers
+      from df_bank df_bank) as lhs
+   cross join
+     (select branch_id,
+             bname,
+             no_of_customers,
+             city,
+             state,
+             max(no_of_customers) over () as maxno_of_customers
+      from df_bank df_bank) as rhs)
+where (no_of_customers = maxno_of_customers.other
+       or no_of_customers.other > maxno_of_customers.other)`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_film(film_id:int, rank_in_series:int, number_in_season:int, title:str, directed_by:str, original_air_date:str, production_code:str);
+schema df_schedule(cinema_id:int, film_id:int, date:str, show_times_per_day:int, price:str);
+
+table df_film(df_film);
+table df_schedule(df_schedule);
+
+query q1
+`select t2.title,
+       max(t1.price)
+from df_schedule as t1
+join df_film as t2 on t1.film_id = t2.film_id
+group by t1.film_id`;
+
+query q2
+`select title,
+       price as max.t1.price.
+from
+  (select lhs.film_id as film_id,
+          lhs.rank_in_series as rank_in_series,
+          lhs.number_in_season as number_in_season,
+          lhs.title as title,
+          lhs.directed_by as directed_by,
+          lhs.original_air_date as original_air_date,
+          lhs.production_code as production_code,
+          rhs.show_times_per_day as show_times_per_day,
+          rhs.price as price
+   from df_film as lhs
+   inner join
+     (select film_id,
+             show_times_per_day,
+             max(price) as price
+      from df_schedule df_schedule
+      group by film_id,
+               show_times_per_day) as rhs on (lhs.film_id = rhs.film_id))`;
+
+verify q1 q2;

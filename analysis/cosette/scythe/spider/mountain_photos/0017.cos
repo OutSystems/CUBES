@@ -1,0 +1,26 @@
+schema df_camera_lens(id:int, brand:str, name:str, focal_length_mm:str, max_aperture:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_camera_lens(df_camera_lens);
+table df_photos(df_photos);
+
+query q1
+`select t1.name,
+       count(*)
+from df_camera_lens as t1
+join df_photos as t2 on t1.id = t2.camera_lens_id
+group by t1.id`;
+
+query q2
+`select t1.name,t1.count_mountain_id
+ from
+  (select
+          t3.camera_lens_id, count(t3.mountain_id) as count_mountain_id
+        from
+          input0 as t3
+        group by
+          t3.camera_lens_id) as t2 join 
+      input as t4 as t1
+ where t1.camera_lens_id = t1.id`;
+
+verify q1 q2;

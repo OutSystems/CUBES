@@ -1,0 +1,39 @@
+schema df_county_public_safety(county_id:int, name:str, population:int, police_officers:int, residents_per_officer:int, case_burden:int, crime_rate:str, police_force:str, location:str);
+schema df_city(city_id:int, county_id:int, name:str, white:str, black:str, amerindian:str, asian:str, multiracial:str, hispanic:str);
+
+table df_county_public_safety(df_county_public_safety);
+table df_city(df_city);
+
+query q1
+`select t2.crime_rate
+from df_city as t1
+join df_county_public_safety as t2 on t1.county_id = t2.county_id
+where t1.white > 90`;
+
+query q2
+`select crime_rate
+from
+  (select lhs.county_id as county_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.police_officers as police_officers,
+          lhs.residents_per_officer as residents_per_officer,
+          lhs.case_burden as case_burden,
+          lhs.crime_rate as crime_rate,
+          lhs.police_force as police_force,
+          lhs.location as location,
+          rhs.city_id as city_id,
+          rhs.name as name.other,
+          rhs.white as white,
+          rhs.black as black,
+          rhs.amerindian as amerindian,
+          rhs.asian as asian,
+          rhs.multiracial as multiracial,
+          rhs.hispanic as hispanic
+   from df_county_public_safety as lhs
+   inner join
+     (select *
+      from df_city df_city
+      where (white >= 90.0)) as rhs on (lhs.county_id = rhs.county_id))`;
+
+verify q1 q2;

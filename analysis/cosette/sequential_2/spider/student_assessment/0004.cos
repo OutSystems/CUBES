@@ -1,0 +1,24 @@
+schema df_students(student_id:int, student_details:str);
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_students(df_students);
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select student_id
+from df_students df_students
+where student_id not in
+    (select student_id
+     from df_student_course_attendance df_student_course_attendance)`;
+
+query q2
+`select student_id
+from
+  (select *
+   from df_students as lhs
+   where not exists
+       (select 1
+        from df_student_course_attendance as rhs
+        where (lhs.student_id = rhs.student_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_files(f_id:int, artist_name:str, file_size:str, duration:str, formats:str);
+
+table df_files(df_files);
+
+query q1
+`select count(*)
+from df_files df_files
+where duration like "4:%"`;
+
+query q2
+`select t3.count_f_id
+ from
+  (select
+          count(t2.f_id) as count_f_id
+        from
+          (select *
+             from
+              input
+             where input.f_id >= 4.0) as t2) as t1 join 
+      (select *
+         from
+          input
+         where input.f_id = 4.0) as t4 as t3`;
+
+verify q1 q2;

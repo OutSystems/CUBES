@@ -1,0 +1,29 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, date_of_birth:str);
+
+table df_entrepreneur(df_entrepreneur);
+table df_people(df_people);
+
+query q1
+`select t2.name
+from df_entrepreneur as t1
+join df_people as t2 on t1.people_id = t2.people_id
+where t1.investor != "rachel elnaugh"`;
+
+query q2
+`select name
+from
+  (select lhs.entrepreneur_id as entrepreneur_id,
+          lhs.people_id as people_id,
+          lhs.company as company,
+          lhs.money_requested as money_requested,
+          lhs.investor as investor,
+          rhs.name as name,
+          rhs.height as height,
+          rhs.weight as weight,
+          rhs.date_of_birth as date_of_birth
+   from df_entrepreneur as lhs
+   inner join df_people as rhs on (lhs.people_id = rhs.people_id))
+where (investor != 'rachel elnaugh')`;
+
+verify q1 q2;

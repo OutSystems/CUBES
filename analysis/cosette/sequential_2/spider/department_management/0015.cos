@@ -1,0 +1,48 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_management(df_management);
+
+query q1
+`select t1.department_id,
+       t1.name,
+       count(*)
+from df_management as t2
+join df_department as t1 on t1.department_id = t2.department_id
+group by t1.department_id
+having count(*) > 1`;
+
+query q2
+`select department_id,
+       name,
+       ranking as count...
+from
+  (select department_id,
+          name,
+          creation,
+          ranking,
+          budget_in_billions,
+          num_employees,
+          temporary_acting,
+          ranking as n
+   from
+     (select lhs.department_id as department_id,
+             lhs.name as name,
+             lhs.creation as creation,
+             lhs.ranking as ranking,
+             lhs.budget_in_billions as budget_in_billions,
+             lhs.num_employees as num_employees,
+             rhs.temporary_acting as temporary_acting
+      from df_department as lhs
+      inner join
+        (select department_id,
+                temporary_acting,
+                count(*) as n
+         from df_management df_management
+         group by department_id,
+                  temporary_acting) as rhs on (lhs.department_id = rhs.department_id
+                                               and lhs.ranking = rhs.n)))
+where (n != 1.0)`;
+
+verify q1 q2;

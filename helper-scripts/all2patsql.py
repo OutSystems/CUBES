@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import argparse
+import csv
 
 import glob
 
@@ -90,7 +91,11 @@ if __name__ == '__main__':
                 df = read_table(input_name)
                 result += ','.join(map(lambda t: f'{t[0]}:{map_type(t[1])}', zip(list(df.columns), list(df.dtypes)))) + '\n'
                 with open(input_name) as f:
-                    result += f.read().split('\n', 1)[1].replace(',,', ',"",').replace(',\n', ',""\n')
+                    reader = csv.reader(f)
+                    next(reader)  # skip header
+                    for line in reader:
+                        line2 = ','.join(map(str, line)).replace('\n', '\\n')
+                        result += line2 + '\n'
                 result += '\n'
 
             result += '#output\n\n'

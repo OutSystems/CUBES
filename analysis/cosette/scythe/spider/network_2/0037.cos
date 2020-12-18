@@ -1,0 +1,33 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t1.age
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.friend
+where t2.name = 'zach'
+  and t2.year =
+    (select max(year)
+     from df_personfriend df_personfriend
+     where name = 'zach')`;
+
+query q2
+`select t3.max_age
+ from
+  (select t2.gender, t2.max_age, t4.name, t4.age, t4.city, t4.gender as gender1, t4.job
+  from (select
+          t1.gender, max(t1.age) as max_age
+        from
+          input as t1
+        group by
+          t1.gender) as t2 join 
+      (select *
+         from
+          input
+         where input.name = 'zach') as t4) as t3
+ where t3.max_age < t3.age`;
+
+verify q1 q2;

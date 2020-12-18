@@ -1,0 +1,25 @@
+schema df_classroom(building:str, room_number:int, capacity:int);
+
+table df_classroom(df_classroom);
+
+query q1
+`select count(*),
+       building
+from df_classroom df_classroom
+where capacity > 50
+group by building`;
+
+query q2
+`select t1.count_distinct_room_number,t1.building
+ from
+  (select
+      t2.building, count_distinct(t2.room_number) as count_distinct_room_number
+    from
+      (select *
+         from
+          input
+         where input.capacity > 50.0) as t2
+    group by
+      t2.building) as t1`;
+
+verify q1 q2;

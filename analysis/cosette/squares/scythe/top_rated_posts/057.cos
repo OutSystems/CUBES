@@ -1,0 +1,47 @@
+schema df_i057(ID:int, Name:str, City:str, Birthyear:int);
+
+table df_i057(df_i057);
+
+query q1
+`select name, city, birthyear, count(*) as ct
+from table
+where birthyear in (select min(birthyear)
+               from table
+               group by city)
+group by city`;
+
+query q2
+`joining, by = c("id", "name")
+joining, by = c("minbirthyear", "city")
+select distinct name,
+                city,
+                minbirthyear
+from
+  (select id,
+          name,
+          minbirthyear,
+          city,
+          birthyear
+   from
+     (select id,
+             name,
+             minbirthyear,
+             city,
+             birthyear
+      from
+        (select id,
+                name,
+                min(birthyear) as minbirthyear
+         from input0
+         group by id,
+                  name) as lhs
+      inner join input0 as rhs on (lhs.id = rhs.id
+                                       and lhs.name = rhs.name)) as lhs
+   inner join
+     (select city,
+             min(birthyear) as minbirthyear
+      from input0
+      group by city) as rhs on (lhs.minbirthyear = rhs.minbirthyear
+                                    and lhs.city = rhs.city))`;
+
+verify q1 q2;

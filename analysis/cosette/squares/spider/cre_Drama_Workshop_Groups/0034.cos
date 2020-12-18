@@ -1,0 +1,55 @@
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+
+table df_drama_workshop_groups(df_drama_workshop_groups);
+
+query q1
+`select marketing_region_code
+from df_drama_workshop_groups df_drama_workshop_groups
+group by marketing_region_code
+
+limit 1`;
+
+query q2
+`joining, by = c("currency_code", "other_details")
+joining, by = c("workshop_group_id", "store_phone", "n")
+select marketing_region_code
+from
+  (select workshop_group_id,
+          address_id,
+          currency_code,
+          marketing_region_code,
+          store_name,
+          store_phone,
+          store_email_address,
+          other_details,
+          n
+   from
+     (select workshop_group_id,
+             address_id,
+             currency_code,
+             marketing_region_code,
+             store_name,
+             store_phone,
+             store_email_address,
+             other_details,
+             n
+      from input0 as lhs
+      inner join
+        (select other_details,
+                currency_code,
+                count(*) as n
+         from input0
+         group by other_details,
+                  currency_code) as rhs on (lhs.currency_code = rhs.currency_code
+                                                and lhs.other_details = rhs.other_details)) as lhs
+   inner join
+     (select store_phone,
+             workshop_group_id,
+             count(*) as n
+      from input0
+      group by store_phone,
+               workshop_group_id) as rhs on (lhs.workshop_group_id = rhs.workshop_group_id
+                                                 and lhs.store_phone = rhs.store_phone
+                                                 and lhs.n = rhs.n))`;
+
+verify q1 q2;

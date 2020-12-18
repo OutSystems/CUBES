@@ -1,0 +1,62 @@
+schema df_courses(course_id:int, author_id:int, subject_id:int, course_name:str, course_description:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_courses(df_courses);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select t1.course_description,
+       t1.course_name
+from df_courses as t1
+join df_student_course_enrolment as t2 on t1.course_id = t2.course_id
+group by t1.course_name
+having count(*) > 2`;
+
+query q2
+`select course_name as course_description,
+       course_description as course_name
+from
+  (select course_id,
+          author_id,
+          subject_id,
+          course_name,
+          course_description,
+          student_id,
+          date_of_enrolment,
+          date_of_completion,
+          registration_id,
+          count(*) over () as n
+   from
+     (select course_id,
+             author_id,
+             subject_id,
+             course_name,
+             course_description,
+             student_id,
+             date_of_enrolment,
+             date_of_completion,
+             subject_id as registration_id
+      from
+        (select author_id as course_id,
+                author_id,
+                subject_id,
+                course_name,
+                course_description,
+                student_id,
+                date_of_enrolment,
+                date_of_completion
+         from
+           (select lhs.course_id as course_id,
+                   lhs.author_id as author_id,
+                   lhs.subject_id as subject_id,
+                   lhs.course_name as course_name,
+                   lhs.course_description as course_description,
+                   rhs.student_id as student_id,
+                   rhs.date_of_enrolment as date_of_enrolment,
+                   rhs.date_of_completion as date_of_completion
+            from df_courses as lhs
+            inner join df_student_course_enrolment as rhs on (lhs.author_id = rhs.course_id
+                                                              and lhs.subject_id = rhs.registration_id)))))
+where (n < 2.0)`;
+
+verify q1 q2;

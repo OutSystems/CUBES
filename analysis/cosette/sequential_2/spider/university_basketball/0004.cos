@@ -1,0 +1,23 @@
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_university(df_university);
+
+query q1
+`select founded
+from df_university df_university
+where affiliation != 'public'
+
+limit 1`;
+
+query q2
+`select maxfounded as founded
+from
+  (select affiliation,
+          school_id,
+          max(founded) as maxfounded
+   from df_university df_university
+   group by affiliation,
+            school_id)
+where (affiliation != 'public')`;
+
+verify q1 q2;

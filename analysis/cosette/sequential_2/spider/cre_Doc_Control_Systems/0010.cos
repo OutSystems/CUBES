@@ -1,0 +1,27 @@
+schema df_roles(role_code:str, role_description:str);
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+
+table df_roles(df_roles);
+table df_employees(df_employees);
+
+query q1
+`select t1.role_description
+from df_roles as t1
+join df_employees as t2 on t1.role_code = t2.role_code
+where t2.employee_name = "koby"`;
+
+query q2
+`select role_description
+from
+  (select lhs.role_code as role_code,
+          lhs.role_description as role_description,
+          rhs.employee_id as employee_id,
+          rhs.employee_name as employee_name,
+          rhs.other_details as other_details
+   from df_roles as lhs
+   inner join
+     (select *
+      from df_employees df_employees
+      where (employee_name = 'koby')) as rhs on (lhs.role_code = rhs.role_code))`;
+
+verify q1 q2;

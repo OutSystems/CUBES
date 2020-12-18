@@ -1,0 +1,54 @@
+schema df_parties(party_id:int, payment_method_code:str, party_phone:str, party_email:str);
+schema df_party_forms(party_id:int, form_id:int, date_completion_started:str, form_status_code:str, date_fully_completed:str);
+
+table df_parties(df_parties);
+table df_party_forms(df_party_forms);
+
+query q1
+`select t1.party_email
+from df_parties as t1
+join df_party_forms as t2 on t1.party_id = t2.party_id
+where t2.form_id =
+    (select form_id
+     from df_party_forms df_party_forms
+     group by form_id
+     
+     limit 1)`;
+
+query q2
+`select party_email
+from
+  (select lhs.party_id as party_id,
+          lhs.form_id as form_id,
+          lhs.date_completion_started as date_completion_started,
+          lhs.form_status_code as form_status_code,
+          lhs.date_fully_completed as date_fully_completed,
+          rhs.party_email as party_email,
+          rhs.n as n
+   from
+     (select lhs.party_id as party_id,
+             lhs.form_id as form_id,
+             lhs.date_completion_started as date_completion_started,
+             lhs.form_status_code as form_status_code,
+             lhs.date_fully_completed as date_fully_completed
+      from df_party_forms as lhs
+      inner join
+        (select party_id,
+                max(form_id) over () as form_id,
+                                  date_completion_started,
+                                  form_status_code,
+                                  date_fully_completed
+         from df_party_forms df_party_forms) as rhs on (lhs.party_id = rhs.party_id
+                                         and lhs.form_id = rhs.form_id
+                                         and lhs.date_completion_started = rhs.date_completion_started
+                                         and lhs.form_status_code = rhs.form_status_code
+                                         and lhs.date_fully_completed = rhs.date_fully_completed)) as lhs
+   inner join
+     (select party_email,
+             party_id,
+             count(*) as n
+      from df_parties df_parties
+      group by party_email,
+               party_id) as rhs on (lhs.party_id = rhs.party_id))`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_employees(df_employees);
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select df_employees.employee_name
+from df_employees df_employees
+join df_circulation_history on df_circulation_history.employee_id = df_employees.employee_id
+where df_circulation_history.document_id = 1`;
+
+query q2
+`joining, by = "employee_id"
+select distinct employee_name
+from
+  (select document_id,
+          draft_number,
+          copy_number,
+          employee_id,
+          role_code,
+          employee_name,
+          other_details
+   from input1 as lhs
+   left join input0 as rhs on (lhs.employee_id = rhs.employee_id))
+where (document_id = 1.0)`;
+
+verify q1 q2;

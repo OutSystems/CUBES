@@ -1,0 +1,31 @@
+schema df_gas_station(station_id:int, open_year:int, location:str, manager_name:str, vice_manager_name:str, representative_name:str);
+
+table df_gas_station(df_gas_station);
+
+query q1
+`select manager_name
+from df_gas_station df_gas_station
+where open_year > 2000
+group by manager_name
+
+limit 1`;
+
+query q2
+`select t3.manager_name
+ from
+  (select t4.manager_name, t4.count_manager_name, t1.station_id, t1.open_year, t1.location, t1.manager_name as manager_name1, t1.vice_manager_name, t1.representative_name
+  from (select *
+       from
+        (select
+            t2.manager_name, count(t2.manager_name) as count_manager_name
+          from
+            input as t2
+          group by
+            t2.manager_name) as t4
+       where t4.count_manager_name = 2.0) join 
+      (select *
+         from
+          input
+         where input.open_year = 2000.0) as t1) as t3`;
+
+verify q1 q2;

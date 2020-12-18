@@ -1,0 +1,30 @@
+schema df_staff(staff_id:int, staff_name:str, gender:int, other_staff_details:str);
+
+table df_staff(df_staff);
+
+query q1
+`select gender
+from df_staff df_staff
+group by gender
+
+limit 1`;
+
+query q2
+`select distinct n as gender
+from
+  (select lhs.staff_id as staff_id,
+          lhs.staff_name as staff_name,
+          lhs.gender as gender,
+          lhs.other_staff_details as other_staff_details,
+          rhs.n as n
+   from df_staff as lhs
+   inner join
+     (select gender,
+             staff_id,
+             count(*) as n
+      from df_staff df_staff
+      group by gender,
+               staff_id) as rhs on (lhs.staff_id = rhs.staff_id
+                                    and lhs.gender = rhs.gender))`;
+
+verify q1 q2;

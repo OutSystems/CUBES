@@ -1,0 +1,29 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_council_tax(council_tax_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_council_tax(df_council_tax);
+
+query q1
+`select t1.cmi_cross_ref_id,
+       t1.source_system_code
+from df_cmi_cross_references as t1
+join df_council_tax as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+group by t1.cmi_cross_ref_id
+having count(*) >= 1`;
+
+query q2
+`select t1.cmi_cross_ref_id,t1.source_system_code
+ from
+  (select *
+       from
+        (select
+            t2.source_system_code, count(t2.source_system_code) as count_source_system_code
+          from
+            input as t2
+          group by
+            t2.source_system_code) as t3
+       where t3.count_source_system_code = 6.0) join 
+      input0 as t4 as t1`;
+
+verify q1 q2;

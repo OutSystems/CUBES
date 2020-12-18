@@ -1,0 +1,79 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_club(clubid:int, clubname:str, clubdesc:str, clublocation:str);
+schema df_member_of_club(stuid:int, clubid:int, position:str);
+
+table df_student(df_student);
+table df_club(df_club);
+table df_member_of_club(df_member_of_club);
+
+query q1
+`select count(distinct t1.clubname)
+from df_club as t1
+join df_member_of_club as t2 on t1.clubid = t2.clubid
+join df_student as t3 on t2.stuid = t3.stuid
+where t3.fname = "eric"
+  and t3.lname = "tai"`;
+
+query q2
+`select n_distinct as count.distinct.t1.clubname.
+from
+  (select count(distinct clubname) as n_distinct
+   from
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             lhs.clubid as clubid,
+             lhs.clubname as clubname,
+             lhs.clubdesc as clubdesc,
+             lhs.clublocation as clublocation,
+             lhs.position as position
+      from
+        (select lhs.stuid as stuid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.age as age,
+                lhs.sex as sex,
+                lhs.major as major,
+                lhs.advisor as advisor,
+                lhs.city_code as city_code,
+                lhs.clubid as clubid,
+                lhs.clubname as clubname,
+                lhs.clubdesc as clubdesc,
+                lhs.clublocation as clublocation,
+                rhs.position as position
+         from
+           (select lhs.stuid as stuid,
+                   lhs.lname as lname,
+                   lhs.fname as fname,
+                   lhs.age as age,
+                   lhs.sex as sex,
+                   lhs.major as major,
+                   lhs.advisor as advisor,
+                   lhs.city_code as city_code,
+                   rhs.clubid as clubid,
+                   rhs.clubname as clubname,
+                   rhs.clubdesc as clubdesc,
+                   rhs.clublocation as clublocation
+            from df_student as lhs
+            cross join df_club as rhs) as lhs
+         inner join df_member_of_club as rhs on (lhs.stuid = rhs.stuid
+                                                     and lhs.clubid = rhs.clubid)) as lhs
+      inner join
+        (select *
+         from df_student df_student
+         where (fname = 'eric'
+                and lname = 'tai')) as rhs on (lhs.stuid = rhs.stuid
+                                                 and lhs.lname = rhs.lname
+                                                 and lhs.fname = rhs.fname
+                                                 and lhs.age = rhs.age
+                                                 and lhs.sex = rhs.sex
+                                                 and lhs.major = rhs.major
+                                                 and lhs.advisor = rhs.advisor
+                                                 and lhs.city_code = rhs.city_code)))`;
+
+verify q1 q2;

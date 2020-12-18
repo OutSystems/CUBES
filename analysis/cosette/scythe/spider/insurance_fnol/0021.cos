@@ -1,0 +1,27 @@
+schema df_customers(customer_id:int, customer_name:str);
+schema df_customers_policies(customer_id:int, policy_id:int, date_opened:str, date_closed:str);
+
+table df_customers(df_customers);
+table df_customers_policies(df_customers_policies);
+
+query q1
+`select t2.date_opened,
+       t2.date_closed
+from df_customers as t1
+join df_customers_policies as t2 on t1.customer_id = t2.customer_id
+where t1.customer_name like "%diana%"`;
+
+query q2
+`select t1.date_opened,t1.date_closed
+ from
+  (select
+          min(t4.customer_id) as min_customer_id
+        from
+          (select *
+             from
+              input0
+             where input0.customer_id > input0.policy_id) as t4) as t3 join 
+      input0 as t2 as t1
+ where t1.min_customer_id = t1.customer_id`;
+
+verify q1 q2;

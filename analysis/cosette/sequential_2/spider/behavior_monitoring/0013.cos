@@ -1,0 +1,23 @@
+schema df_student_addresses(student_id:int, address_id:int, date_address_from:str, date_address_to:str, monthly_rental:str, other_details:str);
+
+table df_student_addresses(df_student_addresses);
+
+query q1
+`select max(monthly_rental),
+       min(monthly_rental)
+from df_student_addresses df_student_addresses`;
+
+query q2
+`select distinct max(monthly_rental) over () as max.monthly_rental.,
+                                         minmonthly_rental as min.monthly_rental.
+from
+  (select student_id,
+          address_id,
+          date_address_from,
+          date_address_to,
+          monthly_rental,
+          other_details,
+          min(monthly_rental) over () as minmonthly_rental
+   from df_student_addresses df_student_addresses)`;
+
+verify q1 q2;

@@ -1,0 +1,47 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select name,
+       location
+from df_cinema df_cinema
+
+limit 1`;
+
+query q2
+`select distinct name,
+                location
+from
+  (select lhs.cinema_id as cinema_id,
+          lhs.name as name,
+          lhs.openning_year as openning_year,
+          lhs.capacity as capacity,
+          lhs.location as location,
+          lhs.maxcapacity as maxcapacity,
+          rhs.cinema_id as cinema_id.other,
+          rhs.name as name.other,
+          rhs.openning_year as openning_year.other,
+          rhs.capacity as capacity.other,
+          rhs.location as location.other,
+          rhs.maxcapacity as maxcapacity.other
+   from
+     (select cinema_id,
+             name,
+             openning_year,
+             capacity,
+             location,
+             max(capacity) over () as maxcapacity
+      from df_cinema df_cinema) as lhs
+   cross join
+     (select cinema_id,
+             name,
+             openning_year,
+             capacity,
+             location,
+             max(capacity) over () as maxcapacity
+      from df_cinema df_cinema) as rhs)
+where (capacity = maxcapacity.other
+       and capacity.other <= maxcapacity.other)`;
+
+verify q1 q2;

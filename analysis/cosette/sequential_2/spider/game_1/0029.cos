@@ -1,0 +1,48 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_student(df_student);
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select stuid
+from df_student df_student
+where sex = 'f' intersect
+  select stuid
+  from df_sportsinfo df_sportsinfo where sportname = "football"`;
+
+query q2
+`select distinct stuid.other as stuid
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          stuid.other,
+          sportname,
+          hoursperweek,
+          onscholarship,
+          age as gamesplayed
+   from
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             rhs.stuid as stuid.other,
+             rhs.sportname as sportname,
+             rhs.hoursperweek as hoursperweek,
+             rhs.onscholarship as onscholarship
+      from df_student as lhs
+      inner join df_sportsinfo as rhs on (lhs.age = rhs.gamesplayed)))
+where (sex != 'f'
+       or sportname = 'football')`;
+
+verify q1 q2;

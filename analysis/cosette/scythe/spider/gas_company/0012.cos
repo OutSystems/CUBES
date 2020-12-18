@@ -1,0 +1,25 @@
+schema df_gas_station(station_id:int, open_year:int, location:str, manager_name:str, vice_manager_name:str, representative_name:str);
+
+table df_gas_station(df_gas_station);
+
+query q1
+`select count(*)
+from df_gas_station df_gas_station
+where open_year between 2000 and 2005`;
+
+query q2
+`select t2.count_station_id
+ from
+  (select
+          count(t3.station_id) as count_station_id
+        from
+          (select *
+             from
+              input
+             where input.open_year >= 2005.0) as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.open_year = 2000.0) as t4 as t2`;
+
+verify q1 q2;

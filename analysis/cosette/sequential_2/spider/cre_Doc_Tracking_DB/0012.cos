@@ -1,0 +1,22 @@
+schema df_ref_locations(location_code:str, location_name:str, location_description:str);
+
+table df_ref_locations(df_ref_locations);
+
+query q1
+`select location_code,
+       location_name
+from df_ref_locations df_ref_locations`;
+
+query q2
+`select location_code,
+       location_name
+from
+  (select lhs.location_code as location_code,
+          lhs.location_name as location_name,
+          lhs.location_description as location_description,
+          rhs.location_name as location_name.other
+   from df_ref_locations as lhs
+   inner join df_ref_locations as rhs on (lhs.location_code = rhs.location_code
+                                          and lhs.location_description = rhs.location_description))`;
+
+verify q1 q2;

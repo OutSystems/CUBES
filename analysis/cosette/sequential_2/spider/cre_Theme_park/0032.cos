@@ -1,0 +1,63 @@
+schema df_ref_attraction_types(attraction_type_code:int, attraction_type_description:str);
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+
+table df_ref_attraction_types(df_ref_attraction_types);
+table df_tourist_attractions(df_tourist_attractions);
+
+query q1
+`select t1.attraction_type_description,
+       t2.attraction_type_code
+from df_ref_attraction_types as t1
+join df_tourist_attractions as t2 on t1.attraction_type_code = t2.attraction_type_code
+group by t2.attraction_type_code
+
+limit 1`;
+
+query q2
+`select attraction_type_description,
+       attraction_type_code
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          lhs.other_details.other as other_details.other,
+          lhs.n as n,
+          rhs.attraction_type_description as attraction_type_description
+   from
+     (select tourist_attraction_id,
+             attraction_type_code,
+             location_id,
+             how_to_get_there,
+             name,
+             description,
+             opening_hours,
+             other_details,
+             other_details.other,
+             attraction_type_code as n
+      from
+        (select lhs.tourist_attraction_id as tourist_attraction_id,
+                lhs.attraction_type_code as attraction_type_code,
+                lhs.location_id as location_id,
+                lhs.how_to_get_there as how_to_get_there,
+                lhs.name as name,
+                lhs.description as description,
+                lhs.opening_hours as opening_hours,
+                lhs.other_details as other_details,
+                rhs.other_details as other_details.other
+         from df_tourist_attractions as lhs
+         inner join
+           (select how_to_get_there,
+                   other_details,
+                   count(*) as n
+            from df_tourist_attractions df_tourist_attractions
+            group by how_to_get_there,
+                     other_details) as rhs on (lhs.attraction_type_code = rhs.n
+                                               and lhs.how_to_get_there = rhs.how_to_get_there))) as lhs
+   left join df_ref_attraction_types as rhs on (lhs.attraction_type_code = rhs.attraction_type_code))`;
+
+verify q1 q2;

@@ -1,0 +1,57 @@
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+schema df_injury_accident(game_id:int, id:int, player:str, injury:str, number_of_matches:str, source:str);
+
+table df_game(df_game);
+table df_injury_accident(df_injury_accident);
+
+query q1
+`select count(distinct t1.injury)
+from df_injury_accident as t1
+join df_game as t2 on t1.game_id = t2.id
+where t2.season > 2010`;
+
+query q2
+`select distinct n as count.distinct.t1.injury.
+from
+  (select lhs.stadium_id as stadium_id,
+          lhs.id as id,
+          lhs.season as season,
+          lhs.date as date,
+          lhs.home_team as home_team,
+          lhs.away_team as away_team,
+          lhs.score as score,
+          lhs.competition as competition,
+          lhs.game_id as game_id,
+          lhs.player as player,
+          lhs.injury as injury,
+          lhs.number_of_matches as number_of_matches,
+          lhs.source as source,
+          rhs.n as n
+   from
+     (select lhs.stadium_id as stadium_id,
+             lhs.id as id,
+             lhs.season as season,
+             lhs.date as date,
+             lhs.home_team as home_team,
+             lhs.away_team as away_team,
+             lhs.score as score,
+             lhs.competition as competition,
+             rhs.game_id as game_id,
+             rhs.player as player,
+             rhs.injury as injury,
+             rhs.number_of_matches as number_of_matches,
+             rhs.source as source
+      from df_game as lhs
+      inner join df_injury_accident as rhs on (lhs.id = rhs.id)) as lhs
+   inner join
+     (select player,
+             source,
+             count(*) as n
+      from df_injury_accident df_injury_accident
+      group by player,
+               source) as rhs on (lhs.player = rhs.player
+                                  and lhs.source = rhs.source))
+where (season != 2010.0
+       and n < 2010.0)`;
+
+verify q1 q2;

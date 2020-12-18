@@ -1,0 +1,35 @@
+schema df_flight(flno:int, origin:str, destination:str, distance:int, departure_date:str, arrival_date:str, price:str, aid:int);
+
+table df_flight(df_flight);
+
+query q1
+`select origin
+from df_flight df_flight
+group by origin
+
+limit 1`;
+
+query q2
+`select distinct origin
+from
+  (select lhs.aid as aid,
+          lhs.origin as origin,
+          lhs.n as n,
+          rhs.aid as aid.other
+   from
+     (select aid,
+             origin,
+             count(*) as n
+      from df_flight df_flight
+      group by aid,
+               origin) as lhs
+   inner join
+     (select aid,
+             origin,
+             count(*) as n
+      from df_flight df_flight
+      group by aid,
+               origin) as rhs on (lhs.aid = rhs.n
+                                  and lhs.origin = rhs.origin))`;
+
+verify q1 q2;

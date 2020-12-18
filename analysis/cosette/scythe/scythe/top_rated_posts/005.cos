@@ -1,0 +1,28 @@
+schema df_i005(id:int, customer:str, total:int);
+
+table df_i005(df_i005);
+
+query q1
+`select *
+  from (select p.customer, p.total, min(p.id) as min_id
+        from purchases
+        group by p.customer, p.total) x
+  join (select p.customer, max(total) as max_total
+   from purchases p
+   group by p.customer) y
+  on y.customer = x.customer and y.max_total = x.total`;
+
+query q2
+`select t2.avg_total,t2.customer1,t2.total
+ from
+  (select t4.customer, t4.avg_total, t3.id, t3.customer as customer1, t3.total
+  from (select
+          t1.customer, avg(t1.total) as avg_total
+        from
+          input as t1
+        group by
+          t1.customer) as t4 join 
+      input as t3) as t2
+ where t2.avg_total = t2.id`;
+
+verify q1 q2;

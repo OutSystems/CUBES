@@ -1,0 +1,31 @@
+schema df_student(id:int, name:str, dept_name:str, tot_cred:int);
+schema df_takes(id:int, course_id:int, sec_id:int, semester:str, year:int, grade:str);
+
+table df_student(df_student);
+table df_takes(df_takes);
+
+query q1
+`select distinct t1.name
+from df_student as t1
+join df_takes as t2 on t1.id = t2.id
+where year = 2009
+  or year = 2010`;
+
+query q2
+`select distinct name
+from
+  (select lhs.id as id,
+          lhs.course_id as course_id,
+          lhs.sec_id as sec_id,
+          lhs.semester as semester,
+          lhs.year as year,
+          lhs.grade as grade,
+          rhs.name as name,
+          rhs.dept_name as dept_name,
+          rhs.tot_cred as tot_cred
+   from df_takes as lhs
+   left join df_student as rhs on (lhs.id = rhs.id))
+where (year = 2009.0
+       or year = 2010.0)`;
+
+verify q1 q2;

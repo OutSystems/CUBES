@@ -1,0 +1,25 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+
+table df_dorm(df_dorm);
+
+query q1
+`select avg(student_capacity),
+       sum(student_capacity)
+from df_dorm df_dorm
+where gender = 'x'`;
+
+query q2
+`select distinct avg(student_capacity) over () as avg.student_capacity.,
+                                             sumstudent_capacity as sum.student_capacity.
+from
+  (select dormid,
+          dorm_name,
+          student_capacity,
+          gender,
+          sum(student_capacity) over () as sumstudent_capacity
+   from
+     (select *
+      from df_dorm df_dorm
+      where (gender = 'x')))`;
+
+verify q1 q2;

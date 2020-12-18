@@ -1,0 +1,32 @@
+schema df_i012(ID:int, DocumentID:int, Status:str, DateCreated:str);
+
+table df_i012(df_i012);
+
+query q1
+`select * from documentstatuslogs d1 join
+    (
+      select
+        documentid,max(datecreated) as maxdate
+      from
+        documentstatuslogs
+      group by
+        documentid
+    ) d2
+    on
+      d2.documentid=d1.documentid
+    and
+      d2.maxdate=d1.datecreated`;
+
+query q2
+`select t3.documentid,t3.status,t3.datecreated
+ from
+  (select
+          count(t2.status) as count_status
+        from
+          input as t2) as t4 join 
+      (select *
+         from
+          input
+         where input.id > 4.0) as t1 as t3`;
+
+verify q1 q2;

@@ -1,0 +1,19 @@
+schema df_ref_document_status(document_status_code:str, document_status_description:str);
+schema df_documents(document_id:int, document_status_code:str, document_type_code:str, shipping_agent_code:str, receipt_date:str, receipt_number:int, other_details:str);
+
+table df_ref_document_status(df_ref_document_status);
+table df_documents(df_documents);
+
+query q1
+`select df_ref_document_status.document_status_description
+from df_ref_document_status df_ref_document_status
+join df_documents on df_documents.document_status_code = df_ref_document_status.document_status_code
+where df_documents.document_id = 1`;
+
+query q2
+`(select
+    first(t1.document_status_description) as first_document_status_description
+  from
+    input as t1) as t2`;
+
+verify q1 q2;

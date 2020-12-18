@@ -1,0 +1,34 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+table df_checking(df_checking);
+
+query q1
+`select t2.balance,
+       t3.balance,
+       t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+join df_savings as t3 on t1.custid = t3.custid`;
+
+query q2
+`select balance as balance...1,
+                           balance.other as balance...2,
+                                                     name
+from
+  (select lhs.custid as custid,
+          lhs.name as name,
+          rhs.balance as balance,
+          rhs.balance.other as balance.other
+   from df_accounts as lhs
+   inner join
+     (select lhs.custid as custid,
+             lhs.balance as balance,
+             rhs.balance as balance.other
+      from df_checking as lhs
+      inner join df_savings as rhs on (lhs.custid = rhs.custid)) as rhs on (lhs.custid = rhs.custid))`;
+
+verify q1 q2;

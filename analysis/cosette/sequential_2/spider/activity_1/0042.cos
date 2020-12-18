@@ -1,0 +1,48 @@
+schema df_activity(actid:int, activity_name:str);
+schema df_faculty_participates_in(facid:int, actid:int);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_activity(df_activity);
+table df_faculty_participates_in(df_faculty_participates_in);
+table df_faculty(df_faculty);
+
+query q1
+`select lname
+from df_faculty df_faculty
+where rank = 'professor'
+except
+select distinct t1.lname
+from df_faculty as t1
+join df_faculty_participates_in as t2 on t1.facid = t2.facid
+join df_activity as t3 on t2.actid = t2.actid
+where t3.activity_name = 'canoeing'
+  or t3.activity_name = 'kayaking'`;
+
+query q2
+`select lname
+from
+  (select *
+   from
+     (select *
+      from
+        (select lhs.actid as actid,
+                lhs.activity_name as activity_name,
+                rhs.facid as facid,
+                rhs.lname as lname,
+                rhs.fname as fname,
+                rhs.rank as rank,
+                rhs.sex as sex,
+                rhs.phone as phone,
+                rhs.room as room,
+                rhs.building as building
+         from df_activity as lhs
+         cross join df_faculty as rhs)
+      where (rank = 'professor'
+             and activity_name = 'canoeing')) as lhs
+   where not exists
+       (select 1
+        from df_faculty_participates_in as rhs
+        where (lhs.facid = rhs.facid) ))
+where (activity_name != 'kayaking')`;
+
+verify q1 q2;

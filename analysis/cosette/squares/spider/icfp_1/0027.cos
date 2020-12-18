@@ -1,0 +1,20 @@
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_authors(df_authors);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select t1.lname
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_papers as t3 on t2.paperid = t3.paperid
+where t3.title like "%monadic%"`;
+
+query q2
+`joining, by = "paperid"
+joining, by = "authid"`;
+
+verify q1 q2;

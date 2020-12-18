@@ -1,0 +1,55 @@
+schema df_characteristics(characteristic_id:int, characteristic_type_code:str, characteristic_data_type:str, characteristic_name:str, other_characteristic_details:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+schema df_product_characteristics(product_id:int, characteristic_id:int, product_characteristic_value:str);
+
+table df_characteristics(df_characteristics);
+table df_products(df_products);
+table df_product_characteristics(df_product_characteristics);
+
+query q1
+`select t3.characteristic_name
+from df_products as t1
+join df_product_characteristics as t2 on t1.product_id = t2.product_id
+join df_characteristics as t3 on t2.characteristic_id = t3.characteristic_id
+group by t3.characteristic_name
+having count(*) >= 2`;
+
+query q2
+`select distinct characteristic_name
+from
+  (select lhs.product_id as product_id,
+          lhs.color_code as color_code,
+          lhs.product_category_code as product_category_code,
+          lhs.product_name as product_name,
+          lhs.typical_buying_price as typical_buying_price,
+          lhs.typical_selling_price as typical_selling_price,
+          lhs.product_description as product_description,
+          lhs.other_product_details as other_product_details,
+          lhs.characteristic_id as characteristic_id,
+          lhs.product_characteristic_value as product_characteristic_value,
+          rhs.characteristic_name as characteristic_name,
+          rhs.characteristic_type_code as characteristic_type_code,
+          rhs.n as n
+   from
+     (select lhs.product_id as product_id,
+             lhs.color_code as color_code,
+             lhs.product_category_code as product_category_code,
+             lhs.product_name as product_name,
+             lhs.typical_buying_price as typical_buying_price,
+             lhs.typical_selling_price as typical_selling_price,
+             lhs.product_description as product_description,
+             lhs.other_product_details as other_product_details,
+             rhs.characteristic_id as characteristic_id,
+             rhs.product_characteristic_value as product_characteristic_value
+      from df_products as lhs
+      inner join df_product_characteristics as rhs on (lhs.product_id = rhs.product_id)) as lhs
+   cross join
+     (select characteristic_name,
+             characteristic_type_code,
+             count(*) as n
+      from df_characteristics df_characteristics
+      group by characteristic_name,
+               characteristic_type_code) as rhs)
+where (n = 2.0)`;
+
+verify q1 q2;

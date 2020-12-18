@@ -1,0 +1,58 @@
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_department(df_department);
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t1.emp_fname,
+       t2.prof_office
+from df_employee as t1
+join df_professor as t2 on t1.emp_num = t2.emp_num
+join df_department as t3 on t3.dept_code = t2.dept_code
+where t3.dept_name = 'history'
+  and t2.prof_high_degree = 'ph.d.'`;
+
+query q2
+`joining, by = "emp_num"
+joining, by = c("emp_num", "dept_code")
+select distinct emp_fname,
+                prof_office
+from
+  (select emp_num,
+          dept_code,
+          prof_office,
+          prof_extension,
+          prof_high_degree,
+          emp_lname,
+          emp_fname,
+          emp_initial,
+          emp_jobcode,
+          emp_hiredate,
+          emp_dob,
+          dept_name,
+          school_code,
+          dept_address,
+          dept_extension
+   from
+     (select emp_num,
+             dept_code,
+             prof_office,
+             prof_extension,
+             prof_high_degree,
+             emp_lname,
+             emp_fname,
+             emp_initial,
+             emp_jobcode,
+             emp_hiredate,
+             emp_dob
+      from input2 as lhs
+      inner join input1 as rhs on (lhs.emp_num = rhs.emp_num)) as lhs
+   inner join input0 as rhs on (lhs.emp_num = rhs.emp_num
+                                    and lhs.dept_code = rhs.dept_code))
+where (dept_name = 'history'
+       and prof_high_degree = 'ph.d.')`;
+
+verify q1 q2;

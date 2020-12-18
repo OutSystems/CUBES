@@ -1,0 +1,32 @@
+schema df_001(id_invitation:int, id_demand:int, partner_company:str, concurrent_company:str);
+
+table df_001(df_001);
+
+query q1
+`select partner_company , id_demand
+from invitation
+where partner_company is not null
+union all
+select concurrent_company , id_demand
+from invitation
+where concurrent_company is not null`;
+
+query q2
+`select * from 
+(select *
+   from
+    (select
+        t2.concurrent_company, max(t2.id_demand) as max_id_demand
+      from
+        input as t2
+      group by
+        t2.concurrent_company) as t1
+   where t1.concurrent_company is not null)
+union all 
+ select * from
+  (select input.partner_company,input.id_demand
+   from
+    input
+   where input.partner_company is not null)`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+schema df_train(train_id:int, train_num:int, name:str, from:str, arrival:str, railway_id:int);
+
+table df_railway(df_railway);
+table df_train(df_train);
+
+query q1
+`select objectnumber
+from df_railway df_railway
+where railway_id not in
+    (select railway_id
+     from df_train df_train)`;
+
+query q2
+`select t4.objectnumber
+ from
+  (select t1.railway_id, t1.max_train_id, t2.railway_id as railway_id1, t2.railway, t2.builder, t2.built, t2.wheels, t2.location, t2.objectnumber
+  from (select *
+       from
+        (select
+            t3.railway_id, max(t3.train_id) as max_train_id
+          from
+            (select *
+               from
+                input0
+               where input0.railway_id < 10.0
+                 and input0.train_id > 3.0) as t3
+          group by
+            t3.railway_id) as t1
+       where t1.max_train_id <> t1.railway_id) join 
+      input as t2) as t4
+ where t4.max_train_id = t4.railway_id1`;
+
+verify q1 q2;

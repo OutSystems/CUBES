@@ -1,0 +1,47 @@
+schema df_addresses(address_id:int, address_details:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_employees(employee_id:int, employee_address_id:int, employee_name:str, employee_phone:str);
+
+table df_addresses(df_addresses);
+table df_employees(df_employees);
+
+query q1
+`select state_province_county
+from df_addresses df_addresses
+where address_id not in
+    (select employee_address_id
+     from df_employees df_employees)`;
+
+query q2
+`select state_province_county
+from
+  (select *
+   from df_addresses as lhs
+   where not exists
+       (select 1
+        from
+          (select address_id,
+                  address_details,
+                  city,
+                  zip_postcode,
+                  state_province_county,
+                  country,
+                  employee_id,
+                  employee_name,
+                  employee_phone,
+                  address_id as employee_address_id
+           from
+             (select lhs.address_id as address_id,
+                     lhs.address_details as address_details,
+                     lhs.city as city,
+                     lhs.zip_postcode as zip_postcode,
+                     lhs.state_province_county as state_province_county,
+                     lhs.country as country,
+                     rhs.employee_id as employee_id,
+                     rhs.employee_name as employee_name,
+                     rhs.employee_phone as employee_phone
+              from df_addresses as lhs
+              inner join df_employees as rhs on (lhs.address_id = rhs.employee_address_id))) as rhs
+        where (lhs.address_id = rhs.address_id
+               and lhs.state_province_county = rhs.state_province_county) ))`;
+
+verify q1 q2;

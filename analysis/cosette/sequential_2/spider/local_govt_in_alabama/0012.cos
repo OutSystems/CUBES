@@ -1,0 +1,37 @@
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+schema df_events(event_id:int, service_id:int, event_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_participants(df_participants);
+table df_events(df_events);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select event_id
+from df_events df_events
+except
+select t1.event_id
+from df_participants_in_events as t1
+join df_participants as t2 on t1.participant_id = t2.participant_id
+where participant_details = 'kenyatta kuhn'`;
+
+query q2
+`select event_id
+from
+  (select *
+   from df_events as lhs
+   where not exists
+       (select 1
+        from
+          (select lhs.participant_id as participant_id,
+                  lhs.participant_type_code as participant_type_code,
+                  lhs.participant_details as participant_details,
+                  rhs.event_id as event_id
+           from
+             (select *
+              from df_participants df_participants
+              where (participant_details = 'kenyatta kuhn')) as lhs
+           inner join df_participants_in_events as rhs on (lhs.participant_id = rhs.participant_id)) as rhs
+        where (lhs.event_id = rhs.event_id) ))`;
+
+verify q1 q2;

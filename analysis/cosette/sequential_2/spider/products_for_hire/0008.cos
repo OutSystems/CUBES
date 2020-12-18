@@ -1,0 +1,43 @@
+schema df_products_for_hire(product_id:int, product_type_code:str, daily_hire_cost:str, product_name:str, product_description:str);
+schema df_view_product_availability(product_id:int, booking_id:int, status_date:str, available_yn:int);
+
+table df_products_for_hire(df_products_for_hire);
+table df_view_product_availability(df_view_product_availability);
+
+query q1
+`select t2.product_name
+from df_view_product_availability as t1
+join df_products_for_hire as t2 on t1.product_id = t2.product_id
+where t1.available_yn = 1`;
+
+query q2
+`select product_name
+from
+  (select lhs.product_id as product_id,
+          lhs.product_type_code as product_type_code,
+          lhs.daily_hire_cost as daily_hire_cost,
+          lhs.product_name as product_name,
+          lhs.product_description as product_description,
+          lhs.booking_id as booking_id,
+          lhs.status_date as status_date,
+          lhs.available_yn as available_yn
+   from
+     (select lhs.product_id as product_id,
+             lhs.product_type_code as product_type_code,
+             lhs.daily_hire_cost as daily_hire_cost,
+             lhs.product_name as product_name,
+             lhs.product_description as product_description,
+             rhs.booking_id as booking_id,
+             rhs.status_date as status_date,
+             rhs.available_yn as available_yn
+      from df_products_for_hire as lhs
+      inner join df_view_product_availability as rhs on (lhs.product_id = rhs.product_id)) as lhs
+   inner join
+     (select *
+      from df_view_product_availability df_view_product_availability
+      where (available_yn = 1.0)) as rhs on (lhs.product_id = rhs.product_id
+                                             and lhs.booking_id = rhs.booking_id
+                                             and lhs.status_date = rhs.status_date
+                                             and lhs.available_yn = rhs.available_yn))`;
+
+verify q1 q2;

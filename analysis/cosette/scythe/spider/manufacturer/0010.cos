@@ -1,0 +1,25 @@
+schema df_manufacturer(manufacturer_id:int, open_year:str, name:str, num_of_factories:int, num_of_shops:int);
+
+table df_manufacturer(df_manufacturer);
+
+query q1
+`select name,
+       open_year
+from df_manufacturer df_manufacturer
+where num_of_shops > 10
+  or num_of_factories < 10`;
+
+query q2
+`select t2.name,t2.open_year
+ from
+  (select
+          sum(t3.num_of_shops) as sum_num_of_shops
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.num_of_shops > 10.0
+           or input.num_of_factories < 10.0) as t4 as t2`;
+
+verify q1 q2;

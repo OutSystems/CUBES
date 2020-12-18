@@ -1,0 +1,38 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_behavior_incident(incident_id:int, incident_type_code:str, student_id:int, date_incident_start:str, date_incident_end:str, incident_summary:str, recommendations:str, other_details:str);
+
+table df_students(df_students);
+table df_behavior_incident(df_behavior_incident);
+
+query q1
+`select count(*)
+from df_students df_students
+where student_id not in
+    (select student_id
+     from df_behavior_incident df_behavior_incident)`;
+
+query q2
+`select n as count...
+from
+  (select lhs.student_id as student_id,
+          lhs.n as n,
+          rhs.student_id as student_id.other,
+          rhs.address_id as address_id,
+          rhs.first_name as first_name,
+          rhs.middle_name as middle_name,
+          rhs.last_name as last_name,
+          rhs.cell_mobile_number as cell_mobile_number,
+          rhs.email_address as email_address,
+          rhs.date_first_rental as date_first_rental,
+          rhs.date_left_university as date_left_university,
+          rhs.other_student_details as other_student_details
+   from
+     (select student_id,
+             count(*) as n
+      from df_behavior_incident df_behavior_incident
+      group by student_id) as lhs
+   cross join df_students as rhs)
+where (student_id < n
+       and n = student_id.other)`;
+
+verify q1 q2;

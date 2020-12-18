@@ -1,0 +1,42 @@
+schema df_17_1(S_key:str, P_id:str, cost:int);
+schema df_17_3(S_key:str, S_name:str);
+
+table df_17_1(df_17_1);
+table df_17_3(df_17_3);
+
+query q1
+`select p_id,
+       s_name
+from
+  (select *
+   from
+     (select *
+      from df_17_1 as lhs
+      inner join df_17_3 as rhs on (lhs.s_key = rhs.s_key)) as lhs
+   inner join
+     (select p_id,
+             avg(cost) as meancost
+      from df_17_1 df_17_1
+      group by p_id) as rhs on (lhs.p_id = rhs.p_id))
+where (meancost < cost)`;
+
+query q2
+`select t3.p_id,t3.s_name
+ from
+  (select t2.p_id, t2.avg_cost, t2.s_key, t2.p_id1, t2.cost, t1.s_key as s_key1, t1.s_name
+  from (select *
+       from
+        (select t5.p_id, t5.avg_cost, t4.s_key, t4.p_id as p_id1, t4.cost
+        from (select
+                t6.p_id, avg(t6.cost) as avg_cost
+              from
+                input as t6
+              group by
+                t6.p_id) as t5 join 
+            input as t4) as t2
+       where t2.p_id = t2.p_id1
+         and t2.avg_cost < t2.cost) join 
+      input0 as t1) as t3
+ where t3.s_key = t3.s_key1`;
+
+verify q1 q2;

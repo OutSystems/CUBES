@@ -1,0 +1,22 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+
+table df_review(df_review);
+
+query q1
+`select avg(rating),
+       max(rating)
+from df_review df_review`;
+
+query q2
+`select t2.avg_rating,t2.rating
+ from
+  (select
+          avg(t1.rating) as avg_rating
+        from
+          input as t1) as t3 join 
+      (select *
+         from
+          input
+         where input.u_id = input.i_id) as t4 as t2`;
+
+verify q1 q2;

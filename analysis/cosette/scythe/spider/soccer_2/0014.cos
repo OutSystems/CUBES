@@ -1,0 +1,23 @@
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+
+table df_player(df_player);
+
+query q1
+`select pname
+from df_player df_player
+where hs between 500 and 1500`;
+
+query q2
+`select t2.first_pname
+ from
+  (select
+      t1.ycard, first(t1.pname) as first_pname
+    from
+      (select *
+         from
+          input
+         where input.hs < 1500.0) as t1
+    group by
+      t1.ycard) as t2`;
+
+verify q1 q2;

@@ -1,0 +1,21 @@
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select name
+from df_projects df_projects
+where code not in
+    (select project
+     from df_assignedto df_assignedto)`;
+
+query q2
+`select t2.name
+ from
+  input as t1 left outer join 
+      input0 as t3 on t1.code = t3.project as t2
+ where t2.scientist is null`;
+
+verify q1 q2;

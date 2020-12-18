@@ -1,0 +1,30 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+schema df_order_items(order_item_id:int, product_id:int, order_id:int, order_item_status:str, order_item_details:str);
+
+table df_orders(df_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.order_id
+from df_orders as t1
+join df_order_items as t2 on t1.order_id = t2.order_id
+group by t1.order_id
+
+limit 1`;
+
+query q2
+`select distinct count(*) over () as order_id
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status as order_status,
+          lhs.date_order_placed as date_order_placed,
+          lhs.order_details as order_details,
+          rhs.order_item_id as order_item_id,
+          rhs.product_id as product_id,
+          rhs.order_item_status as order_item_status,
+          rhs.order_item_details as order_item_details
+   from df_orders as lhs
+   inner join df_order_items as rhs on (lhs.order_id = rhs.order_id))`;
+
+verify q1 q2;

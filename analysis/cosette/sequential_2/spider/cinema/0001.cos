@@ -1,0 +1,26 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select location
+from df_cinema df_cinema
+except
+select location
+from df_cinema df_cinema
+where capacity > 800`;
+
+query q2
+`select distinct location
+from
+  (select *
+   from df_cinema as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_cinema df_cinema
+           where (capacity > 800.0)) as rhs
+        where (lhs.location = rhs.location) ))`;
+
+verify q1 q2;

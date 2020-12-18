@@ -1,0 +1,36 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+schema df_acceptance(submission_id:int, workshop_id:int, result:str);
+
+table df_submission(df_submission);
+table df_acceptance(df_acceptance);
+
+query q1
+`select author
+from df_submission df_submission
+where submission_id not in
+    (select submission_id
+     from df_acceptance df_acceptance)`;
+
+query q2
+`joining, by = "submission_id"
+joining, by = "submission_id"
+select author
+from
+  (select submission_id,
+          scores,
+          author,
+          college
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select submission_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select submission_id
+              from input1) as rhs
+           where (lhs.submission_id = rhs.submission_id) )) as rhs on (lhs.submission_id = rhs.submission_id))`;
+
+verify q1 q2;

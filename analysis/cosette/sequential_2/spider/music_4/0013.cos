@@ -1,0 +1,33 @@
+schema df_volume(volume_id:int, volume_issue:str, issue_date:str, weeks_on_top:str, song:str, artist_id:int);
+schema df_music_festival(id:int, music_festival:str, date_of_ceremony:str, category:str, volume:int, result:str);
+
+table df_volume(df_volume);
+table df_music_festival(df_music_festival);
+
+query q1
+`select t2.song
+from df_music_festival as t1
+join df_volume as t2 on t1.df_volume = t2.volume_id
+where t1.result = "nominated"`;
+
+query q2
+`select song
+from
+  (select lhs.volume_id as volume_id,
+          lhs.volume_issue as volume_issue,
+          lhs.issue_date as issue_date,
+          lhs.weeks_on_top as weeks_on_top,
+          lhs.song as song,
+          lhs.artist_id as artist_id,
+          rhs.music_festival as music_festival,
+          rhs.date_of_ceremony as date_of_ceremony,
+          rhs.category as category,
+          rhs.volume as volume,
+          rhs.result as result
+   from df_volume as lhs
+   inner join
+     (select *
+      from df_music_festival df_music_festival
+      where (result = 'nominated')) as rhs on (lhs.volume_id = rhs.id))`;
+
+verify q1 q2;

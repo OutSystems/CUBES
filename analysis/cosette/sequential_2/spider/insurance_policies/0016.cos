@@ -1,0 +1,41 @@
+schema df_payments(payment_id:int, settlement_id:int, payment_method_code:str, date_payment_made:str, amount_payment:int);
+
+table df_payments(df_payments);
+
+query q1
+`select payment_method_code
+from df_payments df_payments
+group by payment_method_code
+
+limit 1`;
+
+query q2
+`select payment_method_code
+from
+  (select payment_method_code,
+          count(*) as n
+   from
+     (select payment_id,
+             payment_id as settlement_id,
+             payment_method_code,
+             date_payment_made,
+             amount_payment,
+             payment_id.other,
+             payment_method_code.other,
+             date_payment_made.other,
+             amount_payment.other
+      from
+        (select lhs.payment_id as payment_id,
+                lhs.settlement_id as settlement_id,
+                lhs.payment_method_code as payment_method_code,
+                lhs.date_payment_made as date_payment_made,
+                lhs.amount_payment as amount_payment,
+                rhs.payment_id as payment_id.other,
+                rhs.payment_method_code as payment_method_code.other,
+                rhs.date_payment_made as date_payment_made.other,
+                rhs.amount_payment as amount_payment.other
+         from df_payments as lhs
+         inner join df_payments as rhs on (lhs.payment_id = rhs.settlement_id)))
+   group by payment_method_code)`;
+
+verify q1 q2;

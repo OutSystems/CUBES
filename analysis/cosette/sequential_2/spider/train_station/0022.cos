@@ -1,0 +1,49 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train(train_id:int, name:str, time:str, service:str);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train(df_train);
+table df_train_station(df_train_station);
+
+query q1
+`select t2.name
+from df_train_station as t1
+join df_train as t2 on t1.train_id = t2.train_id
+where t1.station_id not in
+    (select t4.station_id
+     from df_train_station as t3
+     join df_station as t4 on t3.station_id = t4.station_id
+     where t4.location = "london")`;
+
+query q2
+`select name.other as name
+from
+  (select lhs.station_id as station_id,
+          lhs.name as name,
+          lhs.annual_entry_exit as annual_entry_exit,
+          lhs.annual_interchanges as annual_interchanges,
+          lhs.total_passengers as total_passengers,
+          lhs.location as location,
+          lhs.main_services as main_services,
+          lhs.number_of_platforms as number_of_platforms,
+          rhs.train_id as train_id,
+          rhs.name as name.other,
+          rhs.time as time,
+          rhs.service as service,
+          rhs.station_id as station_id.other
+   from
+     (select *
+      from df_station df_station
+      where (location != 'london')) as lhs
+   cross join
+     (select lhs.train_id as train_id,
+             lhs.name as name,
+             lhs.time as time,
+             lhs.service as service,
+             rhs.station_id as station_id
+      from df_train as lhs
+      left join df_train_station as rhs on (lhs.train_id = rhs.train_id)) as rhs)
+where (station_id = station_id.other)`;
+
+verify q1 q2;

@@ -1,0 +1,41 @@
+schema df_web_client_accelerator(id:int, name:str, operating_system:str, client:str, connection:str);
+schema df_accelerator_compatible_browser(accelerator_id:int, browser_id:int, compatible_since_year:int);
+
+table df_web_client_accelerator(df_web_client_accelerator);
+table df_accelerator_compatible_browser(df_accelerator_compatible_browser);
+
+query q1
+`select t1.id,
+       t1.name
+from df_web_client_accelerator as t1
+join df_accelerator_compatible_browser as t2 on t2.accelerator_id = t1.id
+group by t1.id
+having count(*) >= 2`;
+
+query q2
+`select id,
+       name
+from
+  (select id,
+          name,
+          operating_system,
+          client,
+          connection,
+          n,
+          id as accelerator_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.operating_system as operating_system,
+             lhs.client as client,
+             lhs.connection as connection,
+             rhs.n as n
+      from df_web_client_accelerator as lhs
+      inner join
+        (select accelerator_id,
+                count(*) as n
+         from df_accelerator_compatible_browser df_accelerator_compatible_browser
+         group by accelerator_id) as rhs on (lhs.id = rhs.accelerator_id)))
+where (n >= 2.0)`;
+
+verify q1 q2;

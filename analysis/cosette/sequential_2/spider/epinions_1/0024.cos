@@ -1,0 +1,58 @@
+schema df_useracct(u_id:int, name:str);
+schema df_trust(source_u_id:int, target_u_id:int, trust:int);
+
+table df_useracct(df_useracct);
+table df_trust(df_trust);
+
+query q1
+`select t1.name
+from df_useracct as t1
+join df_trust as t2 on t1.u_id = t2.source_u_id
+group by t2.source_u_id
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select u_id,
+          name,
+          trust,
+          meantrust,
+          target_u_id,
+          trust.other,
+          u_id as source_u_id
+   from
+     (select lhs.u_id as u_id,
+             lhs.name as name,
+             lhs.trust as trust,
+             lhs.meantrust as meantrust,
+             lhs.target_u_id as target_u_id,
+             rhs.trust as trust.other
+      from
+        (select u_id,
+                name,
+                trust,
+                meantrust,
+                u_id as target_u_id
+         from
+           (select lhs.u_id as u_id,
+                   lhs.name as name,
+                   rhs.trust as trust,
+                   rhs.meantrust as meantrust
+            from df_useracct as lhs
+            inner join
+              (select target_u_id,
+                      trust,
+                      avg(trust) as meantrust
+               from df_trust df_trust
+               group by target_u_id,
+                        trust) as rhs on (lhs.u_id = rhs.target_u_id))) as lhs
+      inner join
+        (select source_u_id,
+                target_u_id,
+                max(trust) over () as trust
+         from df_trust df_trust) as rhs on (lhs.u_id = rhs.source_u_id
+                                   and lhs.trust = rhs.target_u_id)))`;
+
+verify q1 q2;

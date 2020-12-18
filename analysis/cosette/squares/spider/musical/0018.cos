@@ -1,0 +1,39 @@
+schema df_musical(musical_id:int, name:str, year:int, award:str, category:str, nominee:str, result:str);
+schema df_actor(actor_id:int, name:str, musical_id:int, character:str, duration:str, age:int);
+
+table df_musical(df_musical);
+table df_actor(df_actor);
+
+query q1
+`select name
+from df_musical df_musical
+where musical_id not in
+    (select musical_id
+     from df_actor df_actor)`;
+
+query q2
+`joining, by = "musical_id"
+joining, by = "musical_id"
+select distinct name
+from
+  (select musical_id,
+          name,
+          year,
+          award,
+          category,
+          nominee,
+          result
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select musical_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select musical_id
+              from input1) as rhs
+           where (lhs.musical_id = rhs.musical_id) )) as rhs on (lhs.musical_id = rhs.musical_id))`;
+
+verify q1 q2;

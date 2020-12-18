@@ -1,0 +1,40 @@
+schema df_journal(journal_id:int, date:str, theme:str, sales:int);
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_journal(df_journal);
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select t2.name
+from df_journal_committee as t1
+join df_editor as t2 on t1.editor_id = t2.editor_id
+join df_journal as t3 on t1.journal_id = t3.journal_id
+where t3.sales > 3000`;
+
+query q2
+`select name
+from
+  (select lhs.editor_id as editor_id,
+          lhs.name as name,
+          lhs.age as age,
+          lhs.journal_id as journal_id,
+          lhs.work_type as work_type,
+          rhs.date as date,
+          rhs.theme as theme,
+          rhs.sales as sales
+   from
+     (select lhs.editor_id as editor_id,
+             lhs.name as name,
+             lhs.age as age,
+             rhs.journal_id as journal_id,
+             rhs.work_type as work_type
+      from df_editor as lhs
+      inner join df_journal_committee as rhs on (lhs.editor_id = rhs.editor_id)) as lhs
+   inner join
+     (select *
+      from df_journal df_journal
+      where (sales >= 3000.0)) as rhs on (lhs.journal_id = rhs.journal_id))`;
+
+verify q1 q2;

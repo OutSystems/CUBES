@@ -1,0 +1,34 @@
+schema df_025(id:int, gallery_id:str, path:str);
+
+table df_025(df_025);
+
+query q1
+`select i.*
+from images i
+where i.gallery_id is null or
+      i.id in (select min(i2.id) from images i2 group by i2.gallery_id)`;
+
+query q2
+`select * from 
+(select *
+   from
+    input
+   where input.gallery_id is null)
+union all 
+ select * from
+  (select t4.min_id,t4.gallery_id,t4.path
+   from
+    (select t3.gallery_id, t3.min_id, t2.id, t2.gallery_id as gallery_id1, t2.path
+    from (select
+            t1.gallery_id, min(t1.id) as min_id
+          from
+            (select *
+               from
+                input
+               where input.gallery_id is not null) as t1
+          group by
+            t1.gallery_id) as t3 join 
+        input as t2) as t4
+   where t4.min_id = t4.id)`;
+
+verify q1 q2;

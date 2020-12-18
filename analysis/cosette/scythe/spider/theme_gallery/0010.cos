@@ -1,0 +1,27 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+
+table df_artist(df_artist);
+table df_exhibition(df_exhibition);
+
+query q1
+`select t2.name,
+       count(*)
+from df_exhibition as t1
+join df_artist as t2 on t1.artist_id = t2.artist_id
+group by t1.artist_id`;
+
+query q2
+`select t4.name,t4.count_year
+ from
+  (select t1.artist_id, t1.count_year, t2.artist_id as artist_id1, t2.name, t2.country, t2.year_join, t2.age
+  from (select
+          t3.artist_id, count(t3.year) as count_year
+        from
+          input0 as t3
+        group by
+          t3.artist_id) as t1 join 
+      input as t2) as t4
+ where t4.artist_id = t4.artist_id1`;
+
+verify q1 q2;

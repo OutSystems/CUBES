@@ -1,0 +1,23 @@
+schema df_machine(machine_id:int, making_year:int, class:str, team:str, machine_series:str, value_points:str, quality_rank:int);
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+schema df_repair_assignment(technician_id:int, repair_id:int, machine_id:int);
+
+table df_machine(df_machine);
+table df_technician(df_technician);
+table df_repair_assignment(df_repair_assignment);
+
+query q1
+`select t3.name
+from df_repair_assignment as t1
+join df_machine as t2 on t1.machine_id = t2.machine_id
+join df_technician as t3 on t1.technician_id = t3.technician_id`;
+
+query q2
+`select t2.name
+ from
+  (select input0.technician_id, input0.name, input0.team, input0.starting_year, input0.age, t3.technician_id as technician_id1, t3.repair_id, t3.machine_id
+  from input0 join 
+      input1 as t3) as t2
+ where t2.technician_id = t2.technician_id1`;
+
+verify q1 q2;

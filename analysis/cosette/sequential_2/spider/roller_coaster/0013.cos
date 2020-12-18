@@ -1,0 +1,36 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+schema df_country(country_id:int, name:str, population:int, area:int, languages:str);
+
+table df_roller_coaster(df_roller_coaster);
+table df_country(df_country);
+
+query q1
+`select t1.name
+from df_country as t1
+join df_roller_coaster as t2 on t1.country_id = t2.country_id
+group by t1.name
+having count(*) > 1`;
+
+query q2
+`select name
+from
+  (select lhs.country_id as country_id,
+          lhs.name as name,
+          lhs.population as population,
+          lhs.area as area,
+          lhs.languages as languages,
+          rhs.opened as opened,
+          rhs.n as n
+   from df_country as lhs
+   inner join
+     (select *
+      from
+        (select country_id,
+                opened,
+                count(*) as n
+         from df_roller_coaster df_roller_coaster
+         group by country_id,
+                  opened)
+      where (n != 1.0)) as rhs on (lhs.country_id = rhs.country_id))`;
+
+verify q1 q2;

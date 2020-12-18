@@ -1,0 +1,22 @@
+schema df_parties(party_id:int, payment_method_code:str, party_phone:str, party_email:str);
+
+table df_parties(df_parties);
+
+query q1
+`select payment_method_code
+from df_parties df_parties
+group by payment_method_code
+having count(*) > 3`;
+
+query q2
+`select t1.payment_method_code
+ from
+  (select
+      t2.payment_method_code, count_distinct(t2.party_phone) as count_distinct_party_phone
+    from
+      input as t2
+    group by
+      t2.payment_method_code) as t1
+ where t1.count_distinct_party_phone > 3.0`;
+
+verify q1 q2;

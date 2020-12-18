@@ -1,0 +1,32 @@
+schema df_station(id:int, network_name:str, services:str, local_authority:str);
+schema df_route(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_route(df_route);
+
+query q1
+`select count(*),
+       t1.network_name,
+       t1.services
+from df_station as t1
+join df_route as t2 on t1.id = t2.station_id
+group by t2.station_id`;
+
+query q2
+`select n as count...,
+       network_name,
+       services
+from
+  (select lhs.id as id,
+          lhs.network_name as network_name,
+          lhs.services as services,
+          lhs.local_authority as local_authority,
+          rhs.n as n
+   from df_station as lhs
+   inner join
+     (select station_id,
+             count(*) as n
+      from df_route df_route
+      group by station_id) as rhs on (lhs.id = rhs.station_id))`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_wrestler(wrestler_id:int, name:str, reign:int, days_held:int, location:str, event:str);
+
+table df_wrestler(df_wrestler);
+
+query q1
+`select reign
+from df_wrestler df_wrestler
+group by reign
+
+limit 1`;
+
+query q2
+`joining, by = "n"
+joining, by = c("event", "location", "name")
+select reign
+from
+  (select event,
+          n,
+          location,
+          name,
+          wrestler_id,
+          reign,
+          days_held
+   from
+     (select event,
+             n,
+             location,
+             name
+      from
+        (select event,
+                count(*) as n
+         from input0
+         group by event) as lhs
+      inner join
+        (select location,
+                name,
+                count(*) as n
+         from input0
+         group by location,
+                  name) as rhs on (lhs.n = rhs.n)) as lhs
+   inner join input0 as rhs on (lhs.event = rhs.event
+                                    and lhs.location = rhs.location
+                                    and lhs.name = rhs.name))`;
+
+verify q1 q2;

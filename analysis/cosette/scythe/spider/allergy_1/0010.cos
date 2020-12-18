@@ -1,0 +1,33 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+
+table df_allergy_type(df_allergy_type);
+
+query q1
+`select allergytype
+from df_allergy_type df_allergy_type
+group by allergytype
+
+limit 1`;
+
+query q2
+`select t2.allergytype
+ from
+  (select t1.allergytype, t1.count_allergytype, t3.allergytype as allergytype1, t3.count_allergytype as count_allergytype1
+  from (select
+          t6.allergytype, count(t6.allergytype) as count_allergytype
+        from
+          input as t6
+        group by
+          t6.allergytype) as t1 join 
+      (select *
+         from
+          (select
+              t5.allergytype, count(t5.allergytype) as count_allergytype
+            from
+              input as t5
+            group by
+              t5.allergytype) as t4
+         where t4.count_allergytype < 7.0) as t3) as t2
+ where t2.count_allergytype < t2.count_allergytype1`;
+
+verify q1 q2;

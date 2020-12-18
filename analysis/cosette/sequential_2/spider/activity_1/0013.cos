@@ -1,0 +1,24 @@
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty(df_faculty);
+
+query q1
+`select building
+from df_faculty df_faculty
+where rank = "professor"
+group by building
+having count(*) >= 10`;
+
+query q2
+`select building
+from
+  (select building,
+          rank,
+          count(*) as n
+   from df_faculty df_faculty
+   group by building,
+            rank)
+where (rank = 'professor'
+       and n >= 10.0)`;
+
+verify q1 q2;

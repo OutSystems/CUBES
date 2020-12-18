@@ -1,0 +1,30 @@
+schema df_participates_in(stuid:int, actid:int);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_participates_in(df_participates_in);
+table df_student(df_student);
+
+query q1
+`select stuid
+from df_participates_in df_participates_in intersect
+select stuid
+from df_student df_student
+where age < 20`;
+
+query q2
+`select distinct stuid
+from
+  (select lhs.stuid as stuid,
+          lhs.actid as actid,
+          rhs.lname as lname,
+          rhs.fname as fname,
+          rhs.age as age,
+          rhs.sex as sex,
+          rhs.major as major,
+          rhs.advisor as advisor,
+          rhs.city_code as city_code
+   from df_participates_in as lhs
+   inner join df_student as rhs on (lhs.stuid = rhs.stuid))
+where (age < 20.0)`;
+
+verify q1 q2;

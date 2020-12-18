@@ -1,0 +1,35 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, city_town:str, state_county:str, other_details:str);
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+
+table df_addresses(df_addresses);
+table df_drama_workshop_groups(df_drama_workshop_groups);
+
+query q1
+`select t2.store_email_address
+from df_addresses as t1
+join df_drama_workshop_groups as t2 on t1.address_id = t2.address_id
+where t1.state_county = "alaska"`;
+
+query q2
+`select store_email_address
+from
+  (select lhs.workshop_group_id as workshop_group_id,
+          lhs.address_id as address_id,
+          lhs.currency_code as currency_code,
+          lhs.marketing_region_code as marketing_region_code,
+          lhs.store_name as store_name,
+          lhs.store_phone as store_phone,
+          lhs.store_email_address as store_email_address,
+          lhs.other_details as other_details,
+          rhs.line_1 as line_1,
+          rhs.line_2 as line_2,
+          rhs.city_town as city_town,
+          rhs.state_county as state_county,
+          rhs.other_details as other_details.other
+   from df_drama_workshop_groups as lhs
+   inner join
+     (select *
+      from df_addresses df_addresses
+      where (state_county = 'alaska')) as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

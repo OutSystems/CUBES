@@ -1,0 +1,51 @@
+schema df_grapes(id:int, grape:str, color:str);
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_grapes(df_grapes);
+table df_wine(df_wine);
+
+query q1
+`select t1.color
+from df_grapes as t1
+join df_wine as t2 on t1.grape = t2.grape
+group by t2.grape
+
+limit 1`;
+
+query q2
+`select color
+from
+  (select id,
+          grape,
+          color,
+          price,
+          id as no
+   from
+     (select lhs.id as id,
+             lhs.grape as grape,
+             lhs.color as color,
+             rhs.price as price
+      from df_grapes as lhs
+      inner join
+        (select name,
+                no,
+                max(price) as price
+         from
+           (select no,
+                   grape,
+                   winery,
+                   appelation,
+                   state,
+                   name,
+                   year,
+                   price,
+                   score,
+                   cases,
+                   drink,
+                   avg(price) over () as meanprice
+            from df_wine df_wine)
+         group by name,
+                  no) as rhs on (lhs.id = rhs.no
+                                 and lhs.grape = rhs.name)))`;
+
+verify q1 q2;

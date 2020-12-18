@@ -1,0 +1,36 @@
+schema df_048(c1:int, c2:int, c3:int);
+
+table df_048(df_048);
+
+query q1
+`select basetable.letter as test_letter,
+       basetable.d1, basetable.d2,
+       overlaptable.letter as overlap_letter,
+       overlaptable.d1 as overlap_d1,
+       overlaptable.d2 as overlap_d2
+from test basetable join
+     test overlaptable
+     on basetable.d1 <= overlaptable.d2 and
+        basetable.d2 >= overlaptable.d1
+where basetable.letter < overlaptable.letter  -- this is the change`;
+
+query q2
+`select * from 
+(select t4.c1,t4.c2,t4.c3,t4.c11,t4.c21,t4.c3
+   from
+    (select input.c1, input.c2, input.c3, t3.c1 as c11, t3.c2 as c21, t3.c3 as c31
+    from input join 
+        input as t3) as t4
+   where t4.c3 = t4.c31
+     and t4.c1 < t4.c11)
+union all 
+ select * from
+  (select t2.c11,t2.c21,t2.c31,t2.c1,t2.c2,t2.c3
+   from
+    (select input.c1, input.c2, input.c3, t1.c1 as c11, t1.c2 as c21, t1.c3 as c31
+    from input join 
+        input as t1) as t2
+   where t2.c3 > t2.c21
+     and t2.c3 < t2.c31)`;
+
+verify q1 q2;

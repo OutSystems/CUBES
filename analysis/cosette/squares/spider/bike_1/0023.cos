@@ -1,0 +1,54 @@
+schema df_weather(date:str, max_temperature_f:str, mean_temperature_f:str, min_temperature_f:str, max_dew_point_f:str, mean_dew_point_f:str, min_dew_point_f:str, max_humidity:str, mean_humidity:str, min_humidity:str, max_sea_level_pressure_inches:str, mean_sea_level_pressure_inches:str, min_sea_level_pressure_inches:str, max_visibility_miles:str, mean_visibility_miles:str, min_visibility_miles:str, max_wind_speed_mph:str, mean_wind_speed_mph:str, max_gust_speed_mph:str, precipitation_inches:str, cloud_cover:str, events:str, wind_dir_degrees:str, zip_code:int);
+
+table df_weather(df_weather);
+
+query q1
+`select date , zip_code
+from df_weather df_weather
+where max_temperature_f >= 80`;
+
+query q2
+`joining, by = "max_temperature_f"
+joining, by = "max_temperature_f"
+select distinct date,
+                zip_code
+from
+  (select date,
+          max_temperature_f,
+          mean_temperature_f,
+          min_temperature_f,
+          max_dew_point_f,
+          mean_dew_point_f,
+          min_dew_point_f,
+          max_humidity,
+          mean_humidity,
+          min_humidity,
+          max_sea_level_pressure_inches,
+          mean_sea_level_pressure_inches,
+          min_sea_level_pressure_inches,
+          max_visibility_miles,
+          mean_visibility_miles,
+          min_visibility_miles,
+          max_wind_speed_mph,
+          mean_wind_speed_mph,
+          max_gust_speed_mph,
+          precipitation_inches,
+          cloud_cover,
+          events,
+          wind_dir_degrees,
+          zip_code
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select max_temperature_f
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select max_temperature_f
+              from input0
+              where (max_temperature_f < 80.0)) as rhs
+           where (lhs.max_temperature_f = rhs.max_temperature_f) )) as rhs on (lhs.max_temperature_f = rhs.max_temperature_f))`;
+
+verify q1 q2;

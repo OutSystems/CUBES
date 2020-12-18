@@ -1,0 +1,19 @@
+schema df_documents_with_expenses(document_id:int, budget_type_code:str, document_details:str);
+
+table df_documents_with_expenses(df_documents_with_expenses);
+
+query q1
+`select budget_type_code,
+       count(*)
+from df_documents_with_expenses df_documents_with_expenses
+group by budget_type_code`;
+
+query q2
+`(select
+    t1.budget_type_code, count_distinct(t1.document_id) as count_distinct_document_id
+  from
+    input as t1
+  group by
+    t1.budget_type_code) as t2`;
+
+verify q1 q2;

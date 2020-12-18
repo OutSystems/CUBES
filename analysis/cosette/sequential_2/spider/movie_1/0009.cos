@@ -1,0 +1,21 @@
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_rating(df_rating);
+
+query q1
+`select max(stars),
+       min(stars)
+from df_rating df_rating`;
+
+query q2
+`select distinct max(stars) over () as max.stars.,
+                                minstars as min.stars.
+from
+  (select rid,
+          mid,
+          stars,
+          ratingdate,
+          min(stars) over () as minstars
+   from df_rating df_rating)`;
+
+verify q1 q2;

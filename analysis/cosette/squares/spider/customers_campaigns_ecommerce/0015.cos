@@ -1,0 +1,55 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, customer_phone:str, customer_email:str, customer_address:str, customer_login:str, customer_password:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, shipping_method_code:str, order_placed_datetime:str, order_delivered_datetime:str, order_shipping_charges:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+where shipping_method_code = 'fedex'
+  and order_status_code = 'paid'`;
+
+query q2
+`joining, by = c("order_id", "customer_id", "order_status_code", "shipping_method_code", "order_placed_datetime", "order_delivered_datetime", "order_shipping_charges")
+joining, by = "customer_id"
+select customer_name
+from
+  (select order_id,
+          customer_id,
+          order_status_code,
+          shipping_method_code,
+          order_placed_datetime,
+          order_delivered_datetime,
+          order_shipping_charges,
+          payment_method,
+          customer_name,
+          customer_phone,
+          customer_email,
+          customer_address,
+          customer_login,
+          customer_password
+   from
+     (select order_id,
+             customer_id,
+             order_status_code,
+             shipping_method_code,
+             order_placed_datetime,
+             order_delivered_datetime,
+             order_shipping_charges
+      from
+        (select *
+         from input1
+         where (shipping_method_code = 'fedex'
+                and order_status_code = 'paid')) as lhs
+      inner join input1 as rhs on (lhs.order_id = rhs.order_id
+                                       and lhs.customer_id = rhs.customer_id
+                                       and lhs.order_status_code = rhs.order_status_code
+                                       and lhs.shipping_method_code = rhs.shipping_method_code
+                                       and lhs.order_placed_datetime = rhs.order_placed_datetime
+                                       and lhs.order_delivered_datetime = rhs.order_delivered_datetime
+                                       and lhs.order_shipping_charges = rhs.order_shipping_charges)) as lhs
+   inner join input0 as rhs on (lhs.customer_id = rhs.customer_id))`;
+
+verify q1 q2;

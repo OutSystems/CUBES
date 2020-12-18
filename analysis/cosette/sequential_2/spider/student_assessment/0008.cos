@@ -1,0 +1,30 @@
+schema df_courses(course_id:int, course_name:str, course_description:str, other_details:str);
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_courses(df_courses);
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select count(*)
+from df_courses as t1
+join df_student_course_attendance as t2 on t1.course_id = t2.course_id
+where t1.course_name = "english"`;
+
+query q2
+`select n as count...
+from
+  (select *
+   from
+     (select course_id,
+             count(*) as n
+      from df_student_course_attendance df_student_course_attendance
+      group by course_id) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_courses df_courses
+           where (course_name != 'english')) as rhs
+        where (lhs.course_id = rhs.course_id) ))`;
+
+verify q1 q2;

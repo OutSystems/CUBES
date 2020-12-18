@@ -1,0 +1,67 @@
+schema df_architect(id:int, name:str, nationality:str, gender:str);
+schema df_bridge(architect_id:int, id:int, name:str, location:str, length_meters:str, length_feet:str);
+
+table df_architect(df_architect);
+table df_bridge(df_bridge);
+
+query q1
+`select max(t1.length_meters),
+       t2.name
+from df_bridge as t1
+join df_architect as t2 on t1.architect_id = t2.id`;
+
+query q2
+`select length_meters as max.t1.length_meters.,
+       name.other.other as name
+from
+  (select lhs.architect_id as architect_id,
+          lhs.id as id,
+          lhs.name as name,
+          lhs.location as location,
+          lhs.length_meters as length_meters,
+          lhs.length_feet as length_feet,
+          lhs.maxlength_meters as maxlength_meters,
+          rhs.architect_id as architect_id.other,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.location as location.other,
+          rhs.length_meters as length_meters.other,
+          rhs.length_feet as length_feet.other,
+          rhs.maxlength_meters as maxlength_meters.other,
+          rhs.name.other as name.other.other,
+          rhs.nationality as nationality,
+          rhs.gender as gender
+   from
+     (select architect_id,
+             id,
+             name,
+             location,
+             length_meters,
+             length_feet,
+             max(length_meters) over () as maxlength_meters
+      from df_bridge df_bridge) as lhs
+   cross join
+     (select lhs.architect_id as architect_id,
+             lhs.id as id,
+             lhs.name as name,
+             lhs.location as location,
+             lhs.length_meters as length_meters,
+             lhs.length_feet as length_feet,
+             lhs.maxlength_meters as maxlength_meters,
+             rhs.name as name.other,
+             rhs.nationality as nationality,
+             rhs.gender as gender
+      from
+        (select architect_id,
+                id,
+                name,
+                location,
+                length_meters,
+                length_feet,
+                max(length_meters) over () as maxlength_meters
+         from df_bridge df_bridge) as lhs
+      inner join df_architect as rhs on (lhs.id = rhs.id)) as rhs)
+where (length_meters = maxlength_meters.other
+       and length_meters.other = maxlength_meters.other)`;
+
+verify q1 q2;

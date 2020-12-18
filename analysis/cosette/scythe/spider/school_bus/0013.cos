@@ -1,0 +1,26 @@
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_school_bus(df_school_bus);
+
+query q1
+`select max(years_working),
+       min(years_working),
+       avg(years_working)
+from df_school_bus df_school_bus`;
+
+query q2
+`select t6.driver_id,t6.years_working1,t6.avg_years_working
+ from
+  (select t2.avg_years_working, t2.school_id, t2.driver_id, t2.years_working, t2.if_full_time, t5.school_id as school_id1, t5.driver_id as driver_id1, t5.years_working as years_working1, t5.if_full_time as if_full_time1
+  from (select
+              avg(t3.years_working) as avg_years_working
+            from
+              input as t3) as t1 join 
+          input as t4 as t2 join 
+      (select *
+         from
+          input
+         where input.driver_id > input.years_working) as t5) as t6
+ where t6.driver_id > t6.driver_id1`;
+
+verify q1 q2;

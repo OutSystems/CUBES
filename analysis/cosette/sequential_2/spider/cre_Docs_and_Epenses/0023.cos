@@ -1,0 +1,31 @@
+schema df_ref_document_types(document_type_code:str, document_type_name:str, document_type_description:str);
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_ref_document_types(df_ref_document_types);
+table df_documents(df_documents);
+
+query q1
+`select t1.document_type_name,
+       t1.document_type_description,
+       t2.document_date
+from df_ref_document_types as t1
+join df_documents as t2 on t1.document_type_code = t2.document_type_code`;
+
+query q2
+`select document_type_name,
+       document_type_description,
+       document_date
+from
+  (select lhs.document_id as document_id,
+          lhs.document_type_code as document_type_code,
+          lhs.project_id as project_id,
+          lhs.document_date as document_date,
+          lhs.document_name as document_name,
+          lhs.document_description as document_description,
+          lhs.other_details as other_details,
+          rhs.document_type_name as document_type_name,
+          rhs.document_type_description as document_type_description
+   from df_documents as lhs
+   inner join df_ref_document_types as rhs on (lhs.document_type_code = rhs.document_type_code))`;
+
+verify q1 q2;

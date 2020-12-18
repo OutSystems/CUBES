@@ -1,0 +1,51 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, gender_mfu:str, date_of_birth:str, other_details:str);
+schema df_documents_to_be_destroyed(document_id:int, destruction_authorised_by_employee_id:int, destroyed_by_employee_id:int, planned_destruction_date:str, actual_destruction_date:str, other_details:str);
+
+table df_employees(df_employees);
+table df_documents_to_be_destroyed(df_documents_to_be_destroyed);
+
+query q1
+`select employee_id
+from df_employees df_employees
+except
+select destroyed_by_employee_id
+from df_documents_to_be_destroyed df_documents_to_be_destroyed`;
+
+query q2
+`select employee_id
+from
+  (select *
+   from df_employees as lhs
+   where not exists
+       (select 1
+        from
+          (select employee_id,
+                  role_code,
+                  employee_name,
+                  gender_mfu,
+                  date_of_birth,
+                  other_details,
+                  document_id,
+                  destruction_authorised_by_employee_id,
+                  planned_destruction_date,
+                  actual_destruction_date,
+                  other_details.other,
+                  employee_id as destroyed_by_employee_id
+           from
+             (select lhs.employee_id as employee_id,
+                     lhs.role_code as role_code,
+                     lhs.employee_name as employee_name,
+                     lhs.gender_mfu as gender_mfu,
+                     lhs.date_of_birth as date_of_birth,
+                     lhs.other_details as other_details,
+                     rhs.document_id as document_id,
+                     rhs.destruction_authorised_by_employee_id as destruction_authorised_by_employee_id,
+                     rhs.planned_destruction_date as planned_destruction_date,
+                     rhs.actual_destruction_date as actual_destruction_date,
+                     rhs.other_details as other_details.other
+              from df_employees as lhs
+              inner join df_documents_to_be_destroyed as rhs on (lhs.employee_id = rhs.destroyed_by_employee_id))) as rhs
+        where (lhs.date_of_birth = rhs.date_of_birth
+               and lhs.other_details = rhs.other_details) ))`;
+
+verify q1 q2;

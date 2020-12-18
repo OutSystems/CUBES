@@ -1,0 +1,25 @@
+schema df_invoices(invoice_number:int, invoice_date:str, invoice_details:str);
+
+table df_invoices(df_invoices);
+
+query q1
+`select distinct invoice_details
+from df_invoices df_invoices
+where invoice_date < "1989-09-03"
+  or invoice_date > "2007-12-25"`;
+
+query q2
+`select t2.invoice_details
+ from
+  (select
+      t1.invoice_details, avg(t1.invoice_number) as avg_invoice_number
+    from
+      (select *
+         from
+          input
+         where input.invoice_date < sun sep 03 00:00:00 west 1989
+           or input.invoice_date > tue dec 25 00:00:00 wet 2007) as t1
+    group by
+      t1.invoice_details) as t2`;
+
+verify q1 q2;

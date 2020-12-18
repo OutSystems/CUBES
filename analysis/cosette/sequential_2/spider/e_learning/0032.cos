@@ -1,0 +1,29 @@
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+schema df_student_tests_taken(registration_id:int, date_test_taken:str, test_result:str);
+
+table df_student_course_enrolment(df_student_course_enrolment);
+table df_student_tests_taken(df_student_tests_taken);
+
+query q1
+`select t1.date_of_completion
+from df_student_course_enrolment as t1
+join df_student_tests_taken as t2 on t1.registration_id = t2.registration_id
+where t2.test_result = "fail"`;
+
+query q2
+`select date_of_completion
+from
+  (select lhs.registration_id as registration_id,
+          lhs.date_test_taken as date_test_taken,
+          lhs.test_result as test_result,
+          rhs.student_id as student_id,
+          rhs.course_id as course_id,
+          rhs.date_of_enrolment as date_of_enrolment,
+          rhs.date_of_completion as date_of_completion
+   from
+     (select *
+      from df_student_tests_taken df_student_tests_taken
+      where (test_result = 'fail')) as lhs
+   inner join df_student_course_enrolment as rhs on (lhs.registration_id = rhs.registration_id))`;
+
+verify q1 q2;

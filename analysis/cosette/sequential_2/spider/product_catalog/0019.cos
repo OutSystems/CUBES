@@ -1,0 +1,23 @@
+schema df_catalogs(catalog_id:int, catalog_name:str, catalog_publisher:str, date_of_publication:str, date_of_latest_revision:str);
+
+table df_catalogs(df_catalogs);
+
+query q1
+`select date_of_latest_revision
+from df_catalogs df_catalogs
+group by date_of_latest_revision
+having count(*) > 1`;
+
+query q2
+`select distinct date_of_latest_revision
+from
+  (select catalog_id,
+          catalog_name,
+          catalog_publisher,
+          date_of_publication,
+          date_of_latest_revision,
+          count(*) over () as n
+   from df_catalogs df_catalogs)
+where (n >= 1.0)`;
+
+verify q1 q2;

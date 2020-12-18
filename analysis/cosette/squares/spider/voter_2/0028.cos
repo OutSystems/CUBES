@@ -1,0 +1,41 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_voting_record(stuid:int, registration_date:str, election_cycle:str, president_vote:int, vice_president_vote:int, secretary_vote:int, treasurer_vote:int, class_president_vote:int, class_senator_vote:int);
+
+table df_student(df_student);
+table df_voting_record(df_voting_record);
+
+query q1
+`select distinct t1.lname
+from df_student as t1
+join df_voting_record as t2 on t1.stuid = president_vote intersect
+select distinct lname
+from df_student df_student
+where advisor = "8741"`;
+
+query q2
+`joining, by = "stuid"
+select distinct lname
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          registration_date,
+          election_cycle,
+          president_vote,
+          vice_president_vote,
+          secretary_vote,
+          treasurer_vote,
+          class_president_vote,
+          class_senator_vote
+   from
+     (select *
+      from input0
+      where (advisor = 8741.0)) as lhs
+   left join input1 as rhs on (lhs.stuid = rhs.stuid))`;
+
+verify q1 q2;

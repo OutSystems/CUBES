@@ -1,0 +1,28 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+
+table df_festival_detail(df_festival_detail);
+
+query q1
+`select festival_name,
+       location
+from df_festival_detail df_festival_detail`;
+
+query q2
+`select distinct festival_name,
+                location
+from
+  (select lhs.festival_id as festival_id,
+          lhs.festival_name as festival_name,
+          lhs.chair_name as chair_name,
+          lhs.location as location,
+          lhs.year as year,
+          lhs.num_of_audience as num_of_audience,
+          rhs.festival_id as festival_id.other,
+          rhs.festival_name as festival_name.other,
+          rhs.chair_name as chair_name.other,
+          rhs.location as location.other,
+          rhs.num_of_audience as num_of_audience.other
+   from df_festival_detail as lhs
+   inner join df_festival_detail as rhs on (lhs.year = rhs.year))`;
+
+verify q1 q2;

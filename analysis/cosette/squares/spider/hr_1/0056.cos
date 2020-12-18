@@ -1,0 +1,32 @@
+schema df_departments(department_id:int, department_name:str, manager_id:int, location_id:int);
+schema df_locations(location_id:int, street_address:str, postal_code:str, city:str, state_province:str, country_id:str);
+
+table df_departments(df_departments);
+table df_locations(df_locations);
+
+query q1
+`select t1.department_name,
+       t2.city,
+       t2.state_province
+from df_departments as t1
+join df_locations as t2 on t2.location_id = t1.location_id`;
+
+query q2
+`joining, by = "location_id"
+select department_name,
+       city,
+       state_province
+from
+  (select department_id,
+          department_name,
+          manager_id,
+          location_id,
+          street_address,
+          postal_code,
+          city,
+          state_province,
+          country_id
+   from input0 as lhs
+   left join input1 as rhs on (lhs.location_id = rhs.location_id))`;
+
+verify q1 q2;

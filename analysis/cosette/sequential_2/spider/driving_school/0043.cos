@@ -1,0 +1,46 @@
+schema df_staff(staff_id:int, staff_address_id:int, nickname:str, first_name:str, middle_name:str, last_name:str, date_of_birth:str, date_joined_staff:str, date_left_staff:str);
+schema df_lessons(lesson_id:int, customer_id:int, lesson_status_code:str, staff_id:int, vehicle_id:int, lesson_date:str, lesson_time:int, price:str);
+
+table df_staff(df_staff);
+table df_lessons(df_lessons);
+
+query q1
+`select avg(price)
+from df_lessons as t1
+join df_staff as t2 on t1.staff_id = t2.staff_id
+where t2.first_name = "janessa"
+  and t2.last_name = "sawayn"`;
+
+query q2
+`select meanprice as avg.price.
+from
+  (select lesson_time,
+          nickname,
+          avg(price) as meanprice
+   from
+     (select *
+      from
+        (select lhs.staff_id as staff_id,
+                lhs.staff_address_id as staff_address_id,
+                lhs.nickname as nickname,
+                lhs.first_name as first_name,
+                lhs.middle_name as middle_name,
+                lhs.last_name as last_name,
+                lhs.date_of_birth as date_of_birth,
+                lhs.date_joined_staff as date_joined_staff,
+                lhs.date_left_staff as date_left_staff,
+                rhs.lesson_id as lesson_id,
+                rhs.customer_id as customer_id,
+                rhs.lesson_status_code as lesson_status_code,
+                rhs.vehicle_id as vehicle_id,
+                rhs.lesson_date as lesson_date,
+                rhs.lesson_time as lesson_time,
+                rhs.price as price
+         from df_staff as lhs
+         left join df_lessons as rhs on (lhs.staff_id = rhs.staff_id))
+      where (first_name = 'janessa'
+             or last_name = 'sawayn'))
+   group by lesson_time,
+            nickname)`;
+
+verify q1 q2;

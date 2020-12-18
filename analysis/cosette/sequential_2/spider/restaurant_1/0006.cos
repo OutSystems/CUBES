@@ -1,0 +1,34 @@
+schema df_restaurant(resid:int, resname:str, address:str, rating:int);
+
+table df_restaurant(df_restaurant);
+
+query q1
+`select resname,
+       rating
+from df_restaurant df_restaurant
+
+limit 1`;
+
+query q2
+`select resname.other as resname,
+       rating.other as rating
+from
+  (select lhs.rating as rating,
+          lhs.resname as resname,
+          lhs.maxrating as maxrating,
+          rhs.resid as resid,
+          rhs.resname as resname.other,
+          rhs.address as address,
+          rhs.rating as rating.other
+   from
+     (select rating,
+             resname,
+             max(rating) as maxrating
+      from df_restaurant df_restaurant
+      group by rating,
+               resname) as lhs
+   cross join df_restaurant as rhs)
+where (rating < rating.other
+       or maxrating < rating.other)`;
+
+verify q1 q2;

@@ -1,0 +1,29 @@
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t1.region_name
+from df_region as t1
+join df_affected_region as t2 on t1.region_id = t2.region_id
+group by t1.region_id
+having count(*) >= 2`;
+
+query q2
+`select region_name
+from
+  (select lhs.region_id as region_id,
+          lhs.region_code as region_code,
+          lhs.region_name as region_name,
+          rhs.n as n
+   from df_region as lhs
+   inner join
+     (select region_id,
+             count(*) as n
+      from df_affected_region df_affected_region
+      group by region_id) as rhs on (lhs.region_id = rhs.region_id))
+where (n = 2.0)`;
+
+verify q1 q2;

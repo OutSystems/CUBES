@@ -1,0 +1,40 @@
+schema df_department(dept_name:str, building:str, budget:str);
+
+table df_department(df_department);
+
+query q1
+`select dept_name,
+       budget
+from df_department df_department
+where budget >
+    (select avg(budget)
+     from df_department df_department)`;
+
+query q2
+`select distinct dept_name,
+                budget
+from
+  (select lhs.dept_name as dept_name,
+          lhs.building as building,
+          lhs.budget as budget,
+          lhs.meanbudget as meanbudget,
+          rhs.dept_name as dept_name.other,
+          rhs.building as building.other,
+          rhs.budget as budget.other,
+          rhs.meanbudget as meanbudget.other
+   from
+     (select dept_name,
+             building,
+             budget,
+             avg(budget) over () as meanbudget
+      from df_department df_department) as lhs
+   cross join
+     (select dept_name,
+             building,
+             budget,
+             avg(budget) over () as meanbudget
+      from df_department df_department) as rhs)
+where (budget > meanbudget
+       and budget.other <= meanbudget.other)`;
+
+verify q1 q2;

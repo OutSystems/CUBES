@@ -1,0 +1,35 @@
+schema df_ship(ship_id:int, name:str, type:str, built_year:str, class:str, flag:str);
+
+table df_ship(df_ship);
+
+query q1
+`select built_year
+from df_ship df_ship
+group by built_year
+
+limit 1`;
+
+query q2
+`select distinct built_year
+from
+  (select lhs.built_year as built_year,
+          lhs.ship_id as ship_id,
+          lhs.n as n,
+          rhs.n as n.other
+   from
+     (select built_year,
+             ship_id,
+             count(*) as n
+      from df_ship df_ship
+      group by built_year,
+               ship_id) as lhs
+   inner join
+     (select built_year,
+             ship_id,
+             count(*) as n
+      from df_ship df_ship
+      group by built_year,
+               ship_id) as rhs on (lhs.n = rhs.ship_id
+                                   and lhs.built_year = rhs.built_year))`;
+
+verify q1 q2;

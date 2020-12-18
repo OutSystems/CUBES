@@ -1,0 +1,46 @@
+schema df_team(team_id:int, name:str);
+schema df_match_season(season:str, player:str, position:str, country:int, team:int, draft_pick_number:int, draft_class:str, college:str);
+
+table df_team(df_team);
+table df_match_season(df_match_season);
+
+query q1
+`select name
+from df_team df_team
+where team_id not in
+    (select df_team
+     from df_match_season df_match_season)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_team as lhs
+   where not exists
+       (select 1
+        from
+          (select team_id,
+                  name,
+                  season,
+                  player,
+                  position,
+                  country,
+                  draft_pick_number,
+                  draft_class,
+                  college,
+                  team_id as team
+           from
+             (select lhs.team_id as team_id,
+                     lhs.name as name,
+                     rhs.season as season,
+                     rhs.player as player,
+                     rhs.position as position,
+                     rhs.country as country,
+                     rhs.draft_pick_number as draft_pick_number,
+                     rhs.draft_class as draft_class,
+                     rhs.college as college
+              from df_team as lhs
+              inner join df_match_season as rhs on (lhs.team_id = rhs.team))) as rhs
+        where (lhs.team_id = rhs.team_id) ))`;
+
+verify q1 q2;

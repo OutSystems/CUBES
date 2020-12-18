@@ -1,0 +1,23 @@
+schema df_park(park_id:str, park_name:str, park_alias:str, city:str, state:str, country:str);
+
+table df_park(df_park);
+
+query q1
+`select city
+from df_park df_park
+group by city
+having count(*) between 2 and 4`;
+
+query q2
+`select city
+from
+  (select city,
+          state,
+          count(*) as n
+   from df_park df_park
+   group by city,
+            state)
+where (n >= 2.0
+       and n <= 4.0)`;
+
+verify q1 q2;

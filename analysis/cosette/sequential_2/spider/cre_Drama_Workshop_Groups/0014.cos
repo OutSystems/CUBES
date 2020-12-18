@@ -1,0 +1,22 @@
+schema df_invoices(invoice_id:int, order_id:int, payment_method_code:str, product_id:int, order_quantity:int, other_item_details:str, order_item_id:int);
+
+table df_invoices(df_invoices);
+
+query q1
+`select payment_method_code,
+       count(*)
+from df_invoices df_invoices
+group by payment_method_code`;
+
+query q2
+`select payment_method_code,
+       n as count...
+from
+  (select other_item_details,
+          payment_method_code,
+          count(*) as n
+   from df_invoices df_invoices
+   group by other_item_details,
+            payment_method_code)`;
+
+verify q1 q2;

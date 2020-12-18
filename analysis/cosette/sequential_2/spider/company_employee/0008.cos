@@ -1,0 +1,34 @@
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+
+table df_company(df_company);
+
+query q1
+`select headquarters
+from df_company df_company
+group by headquarters
+
+limit 1`;
+
+query q2
+`select headquarters
+from
+  (select lhs.company_id as company_id,
+          lhs.market_value_in_billion as market_value_in_billion,
+          lhs.n as n,
+          rhs.company_id as company_id.other,
+          rhs.name as name,
+          rhs.headquarters as headquarters,
+          rhs.industry as industry,
+          rhs.sales_in_billion as sales_in_billion,
+          rhs.assets_in_billion as assets_in_billion,
+          rhs.market_value_in_billion as market_value_in_billion.other
+   from
+     (select company_id,
+             market_value_in_billion,
+             count(*) as n
+      from df_company df_company
+      group by company_id,
+               market_value_in_billion) as lhs
+   inner join df_company as rhs on (lhs.company_id = rhs.profits_in_billion))`;
+
+verify q1 q2;

@@ -1,0 +1,21 @@
+schema df_furniture(furniture_id:int, name:str, num_of_component:int, market_rate:str);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_furniture(df_furniture);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select market_rate,
+       name
+from df_furniture df_furniture
+where furniture_id not in
+    (select furniture_id
+     from df_furniture_manufacte df_furniture_manufacte)`;
+
+query q2
+`select input.market_rate,input.name
+ from
+  input
+ where input.furniture_id >= input.num_of_component`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+where amount > 3000`;
+
+query q2
+`select cust_name
+from
+  (select cust_id,
+          cust_name,
+          acc_type,
+          acc_bal,
+          no_of_loans,
+          credit_score,
+          branch_id,
+          state,
+          loan_type,
+          cust_id.other,
+          amount,
+          cust_id as loan_id
+   from
+     (select lhs.cust_id as cust_id,
+             lhs.cust_name as cust_name,
+             lhs.acc_type as acc_type,
+             lhs.acc_bal as acc_bal,
+             lhs.no_of_loans as no_of_loans,
+             lhs.credit_score as credit_score,
+             lhs.branch_id as branch_id,
+             lhs.state as state,
+             rhs.loan_type as loan_type,
+             rhs.cust_id as cust_id.other,
+             rhs.amount as amount
+      from df_customer as lhs
+      inner join df_loan as rhs on (lhs.cust_id = rhs.loan_id
+                                    and lhs.branch_id = rhs.branch_id)))
+where (amount > 3000.0)`;
+
+verify q1 q2;

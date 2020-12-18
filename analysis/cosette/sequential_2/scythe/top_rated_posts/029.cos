@@ -1,0 +1,19 @@
+schema df_i029(TicketID:str, Person:str);
+
+table df_i029(df_i029);
+
+query q1
+`select ticketid, listagg(person, ', ') as people
+from table
+group by ticketid`;
+
+query q2
+`select ticketid,
+       concatperson
+from
+  (select ticketid,
+          string_agg(person, ' ') as concatperson
+   from df_i029 df_i029
+   group by ticketid)`;
+
+verify q1 q2;

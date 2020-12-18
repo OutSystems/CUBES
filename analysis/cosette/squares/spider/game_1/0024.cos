@@ -1,0 +1,22 @@
+schema df_sportsinfo(stuid:int, sportname:str, hoursperweek:int, gamesplayed:int, onscholarship:str);
+
+table df_sportsinfo(df_sportsinfo);
+
+query q1
+`select stuid
+from df_sportsinfo df_sportsinfo
+group by stuid
+having sum(hoursperweek) > 10`;
+
+query q2
+`select stuid
+from
+  (select stuid,
+          hoursperweek,
+          sum(hoursperweek) as sumhoursperweek
+   from input0
+   group by stuid,
+            hoursperweek)
+where (hoursperweek > 10.0)`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+
+table df_station(df_station);
+
+query q1
+`select city,
+       count(*)
+from df_station df_station
+group by city
+having count(*) >= 15`;
+
+query q2
+`select city,
+       n as count...
+from
+  (select city,
+          count(*) as n
+   from df_station df_station
+   group by city)
+where (n > 15.0)`;
+
+verify q1 q2;

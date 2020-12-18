@@ -1,0 +1,25 @@
+schema df_i028_1(PID:str);
+schema df_i028_2(PID:str, SEQ:int, Desc:str);
+
+table df_i028_1(df_i028_1);
+table df_i028_2(df_i028_2);
+
+query q1
+`select pid, listagg(desc, ' ') within group (
+from   b
+group by pid`;
+
+query q2
+`select pid,
+       concatdesc
+from
+  (select lhs.pid as pid,
+          lhs.concatdesc as concatdesc
+   from
+     (select pid,
+             string_agg(desc, ' ') as concatdesc
+      from df_i028_2 df_i028_2
+      group by pid) as lhs
+   left join df_i028_1 as rhs on (lhs.pid = rhs.pid))`;
+
+verify q1 q2;

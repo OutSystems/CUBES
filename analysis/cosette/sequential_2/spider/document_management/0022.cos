@@ -1,0 +1,23 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+
+table df_documents(df_documents);
+
+query q1
+`select document_type_code
+from df_documents df_documents
+group by document_type_code
+having count(*) > 2`;
+
+query q2
+`select distinct document_type_code
+from
+  (select document_code,
+          document_structure_code,
+          document_type_code,
+          access_count,
+          document_name,
+          count(*) over () as n
+   from df_documents df_documents)
+where (n >= 2.0)`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+schema df_endowment(endowment_id:int, school_id:int, donator_name:str, amount:str);
+
+table df_school(df_school);
+table df_endowment(df_endowment);
+
+query q1
+`select t2.school_name
+from df_endowment as t1
+join df_school as t2 on t1.school_id = t2.school_id
+group by t1.school_id
+having sum(t1.amount) <= 10`;
+
+query q2
+`select t1.school_name
+ from
+  (select input0.endowment_id, input0.school_id, input0.donator_name, input0.amount, t2.school_id as school_id1, t2.school_name, t2.location, t2.mascot, t2.enrollment, t2.ihsaa_class, t2.ihsaa_football_class, t2.county
+  from (select *
+       from
+        input0
+       where input0.endowment_id = 10.0) join 
+      (select *
+         from
+          input
+         where input.school_id <= 2.0
+           or input.school_id > 4.0) as t2) as t1`;
+
+verify q1 q2;

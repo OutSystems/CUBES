@@ -1,0 +1,40 @@
+schema df_5_1(C_name:str, F_key:str, Room:str);
+schema df_5_2(F_key:str, F_name:str);
+
+table df_5_1(df_5_1);
+table df_5_2(df_5_2);
+
+query q1
+`select distinct f.fname
+from faculty f
+where not exists (( select *
+from class c )
+except
+(selectc1.room
+from class c1
+where c1.fid = f.fid ))`;
+
+query q2
+`joining, by = "f_key"
+select f_name
+from
+  (select f_name,
+          n
+   from
+     (select f_name,
+             n,
+             max(n) over () as zzz3
+      from
+        (select f_name,
+                count(*) as n
+         from
+           (select c_name,
+                   f_key,
+                   room,
+                   f_name
+            from input0 as lhs
+            inner join input1 as rhs on (lhs.f_key = rhs.f_key))
+         group by f_name))
+   where (n = zzz3))`;
+
+verify q1 q2;

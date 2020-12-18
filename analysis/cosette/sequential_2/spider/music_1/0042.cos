@@ -1,0 +1,32 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select t1.country
+from df_artist as t1
+join df_song as t2 on t1.artist_name = t2.artist_name
+group by t2.artist_name
+
+limit 1`;
+
+query q2
+`select country
+from
+  (select lhs.song_name as song_name,
+          lhs.artist_name as artist_name,
+          lhs.country as country,
+          lhs.f_id as f_id,
+          lhs.genre_is as genre_is,
+          lhs.rating as rating,
+          lhs.languages as languages,
+          lhs.releasedate as releasedate,
+          lhs.resolution as resolution
+   from df_song as lhs
+   inner join
+     (select count(*) as n
+      from df_artist df_artist) as rhs on (lhs.rating = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,69 @@
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_wine(df_wine);
+
+query q1
+`select winery
+from df_wine df_wine
+
+limit 1`;
+
+query q2
+`select distinct winery
+from
+  (select lhs.no as no,
+          lhs.grape as grape,
+          lhs.winery as winery,
+          lhs.appelation as appelation,
+          lhs.state as state,
+          lhs.name as name,
+          lhs.year as year,
+          lhs.price as price,
+          lhs.score as score,
+          lhs.cases as cases,
+          lhs.drink as drink,
+          lhs.minscore as minscore,
+          rhs.no as no.other,
+          rhs.grape as grape.other,
+          rhs.winery as winery.other,
+          rhs.appelation as appelation.other,
+          rhs.state as state.other,
+          rhs.name as name.other,
+          rhs.year as year.other,
+          rhs.price as price.other,
+          rhs.score as score.other,
+          rhs.cases as cases.other,
+          rhs.drink as drink.other,
+          rhs.minscore as minscore.other
+   from
+     (select no,
+             grape,
+             winery,
+             appelation,
+             state,
+             name,
+             year,
+             price,
+             score,
+             cases,
+             drink,
+             min(score) over () as minscore
+      from df_wine df_wine) as lhs
+   cross join
+     (select no,
+             grape,
+             winery,
+             appelation,
+             state,
+             name,
+             year,
+             price,
+             score,
+             cases,
+             drink,
+             min(score) over () as minscore
+      from df_wine df_wine) as rhs)
+where (score = minscore
+       or minscore != minscore.other)`;
+
+verify q1 q2;

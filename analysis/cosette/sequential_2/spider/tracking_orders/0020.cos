@@ -1,0 +1,50 @@
+schema df_shipments(shipment_id:int, order_id:int, invoice_number:int, shipment_tracking_number:int, shipment_date:str, other_shipment_details:str);
+
+table df_shipments(df_shipments);
+
+query q1
+`select order_id
+from df_shipments df_shipments
+where shipment_date =
+    (select max(shipment_date)
+     from df_shipments df_shipments)`;
+
+query q2
+`select distinct order_id.other as order_id
+from
+  (select lhs.shipment_id as shipment_id,
+          lhs.order_id as order_id,
+          lhs.invoice_number as invoice_number,
+          lhs.shipment_tracking_number as shipment_tracking_number,
+          lhs.shipment_date as shipment_date,
+          lhs.other_shipment_details as other_shipment_details,
+          lhs.maxshipment_date as maxshipment_date,
+          rhs.shipment_id as shipment_id.other,
+          rhs.order_id as order_id.other,
+          rhs.invoice_number as invoice_number.other,
+          rhs.shipment_tracking_number as shipment_tracking_number.other,
+          rhs.shipment_date as shipment_date.other,
+          rhs.other_shipment_details as other_shipment_details.other,
+          rhs.maxshipment_date as maxshipment_date.other
+   from
+     (select shipment_id,
+             order_id,
+             invoice_number,
+             shipment_tracking_number,
+             shipment_date,
+             other_shipment_details,
+             max(shipment_date) over () as maxshipment_date
+      from df_shipments df_shipments) as lhs
+   cross join
+     (select shipment_id,
+             order_id,
+             invoice_number,
+             shipment_tracking_number,
+             shipment_date,
+             other_shipment_details,
+             max(shipment_date) over () as maxshipment_date
+      from df_shipments df_shipments) as rhs)
+where (shipment_date <= maxshipment_date.other
+       and shipment_date.other >= maxshipment_date.other)`;
+
+verify q1 q2;

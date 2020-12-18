@@ -1,0 +1,36 @@
+schema df_problem_log(problem_log_id:int, assigned_to_staff_id:int, problem_id:int, problem_category_code:str, problem_status_code:str, log_entry_date:str, log_entry_description:str, log_entry_fix:str, other_log_details:str);
+
+table df_problem_log(df_problem_log);
+
+query q1
+`select problem_log_id,
+       problem_id
+from df_problem_log df_problem_log
+
+limit 1`;
+
+query q2
+`select assigned_to_staff_id as problem_log_id,
+       problem_id
+from
+  (select lhs.problem_log_id as problem_log_id,
+          lhs.assigned_to_staff_id as assigned_to_staff_id,
+          lhs.problem_id as problem_id,
+          lhs.problem_category_code as problem_category_code,
+          lhs.problem_status_code as problem_status_code,
+          lhs.log_entry_date as log_entry_date,
+          lhs.log_entry_description as log_entry_description,
+          lhs.log_entry_fix as log_entry_fix,
+          lhs.other_log_details as other_log_details,
+          rhs.minlog_entry_date as minlog_entry_date
+   from df_problem_log as lhs
+   inner join
+     (select problem_id,
+             problem_log_id,
+             min(log_entry_date) as minlog_entry_date
+      from df_problem_log df_problem_log
+      group by problem_id,
+               problem_log_id) as rhs on (lhs.assigned_to_staff_id = rhs.problem_log_id
+                                          and lhs.problem_id = rhs.problem_id))`;
+
+verify q1 q2;

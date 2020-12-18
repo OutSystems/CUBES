@@ -1,0 +1,39 @@
+schema df_operate_company(id:int, name:str, type:str, principal_activities:str, incorporated_in:str, group_equity_shareholding:str);
+schema df_flight(id:int, vehicle_flight_number:str, date:str, pilot:str, velocity:str, altitude:str, airport_id:int, company_id:int);
+
+table df_operate_company(df_operate_company);
+table df_flight(df_flight);
+
+query q1
+`select t2.pilot
+from df_operate_company as t1
+join df_flight as t2 on t1.id = t2.company_id
+where t1.principal_activities = 'cargo' intersect
+  select t2.pilot
+  from df_operate_company as t1
+  join df_flight as t2 on t1.id = t2.company_id where t1.principal_activities = 'catering services'`;
+
+query q2
+`select distinct pilot
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.type as type,
+          lhs.principal_activities as principal_activities,
+          lhs.incorporated_in as incorporated_in,
+          lhs.group_equity_shareholding as group_equity_shareholding,
+          rhs.id as id.other,
+          rhs.vehicle_flight_number as vehicle_flight_number,
+          rhs.date as date,
+          rhs.pilot as pilot,
+          rhs.velocity as velocity,
+          rhs.altitude as altitude,
+          rhs.company_id as company_id
+   from
+     (select *
+      from df_operate_company df_operate_company
+      where (principal_activities = 'cargo'
+             or principal_activities = 'catering services')) as lhs
+   inner join df_flight as rhs on (lhs.id = rhs.airport_id))`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_market(market_id:int, district:str, num_of_employees:int, num_of_shops:str, ranking:int);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_market(df_market);
+table df_phone_market(df_phone_market);
+
+query q1
+`select t3.name,
+       t2.district
+from df_phone_market as t1
+join df_market as t2 on t1.market_id = t2.market_id
+join df_phone as t3 on t1.phone_id = t3.phone_id`;
+
+query q2
+`select t3.name,t3.district
+ from
+  (select t2.name, t2.phone_id, t2.memory_in_g, t2.carrier, t2.price, t2.market_id, t2.district, t2.num_of_employees, t2.num_of_shops, t2.ranking, t4.market_id as market_id1, t4.phone_id as phone_id1, t4.num_of_stock
+  from input join 
+          input0 as t5 as t2 join 
+      input1 as t4) as t3
+ where t3.phone_id = t3.phone_id1
+   and t3.market_id = t3.market_id1`;
+
+verify q1 q2;

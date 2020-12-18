@@ -1,0 +1,26 @@
+schema df_users(user_id:int, role_code:str, user_name:str, user_login:int, password:str);
+
+table df_users(df_users);
+
+query q1
+`select user_name,
+       password
+from df_users df_users
+group by role_code
+
+limit 1`;
+
+query q2
+`select t2.user_name,t2.password
+ from
+  (select
+          count(t3.password) as count_password
+        from
+          input as t3) as t4 join 
+      (select *
+         from
+          input
+         where input.user_id < 4.0
+           and input.user_login = 1.0) as t1 as t2`;
+
+verify q1 q2;

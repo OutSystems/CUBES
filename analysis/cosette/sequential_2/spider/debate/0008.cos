@@ -1,0 +1,31 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+
+table df_people(df_people);
+
+query q1
+`select party
+from df_people df_people
+group by party
+
+limit 1`;
+
+query q2
+`select distinct party
+from
+  (select lhs.people_id as people_id,
+          lhs.district as district,
+          lhs.name as name,
+          lhs.party as party,
+          lhs.age as age,
+          rhs.age as age.other
+   from df_people as lhs
+   inner join
+     (select age,
+             party,
+             count(*) as n
+      from df_people df_people
+      group by age,
+               party) as rhs on (lhs.people_id = rhs.n
+                                 and lhs.party = rhs.party))`;
+
+verify q1 q2;

@@ -1,0 +1,27 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+table df_checking(df_checking);
+
+query q1
+`select t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+join df_savings as t3 on t1.custid = t3.custid
+
+limit 1`;
+
+query q2
+`select t4.name
+ from
+  (select
+          max(t1.custid) as max_custid
+        from
+          input0 as t1) as t2 join 
+      input as t3 as t4
+ where t4.max_custid = t4.custid`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+
+table df_mountain(df_mountain);
+
+query q1
+`select range
+from df_mountain df_mountain
+group by range
+
+limit 1`;
+
+query q2
+`select t1.range
+ from
+  (select t3.range, t3.count_range, t4.mountain_id, t4.name, t4.height, t4.prominence, t4.range as range1, t4.country
+  from (select *
+       from
+        (select
+            t2.range, count(t2.range) as count_range
+          from
+            input as t2
+          group by
+            t2.range) as t3
+       where t3.count_range = 3.0) join 
+      (select *
+         from
+          input
+         where input.mountain_id = 3.0) as t4) as t1`;
+
+verify q1 q2;

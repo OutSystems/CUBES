@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/032.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i032.csv
 output: tests-examples/scythe/top_rated_posts/tables/o032.csv
@@ -11,10 +12,10 @@ solution:
   - inner_join
   - filter
 sql: |
-  select t1.section, t1.cnt, t2.cnt
-  from (select * from t where status = "Active") t1
-  join (select * from t where status = "Inactive") t2
-  on t1.section = t2.section
+  select t1.section, t1.count, t2.count as count_other
+  from (select * from i032 where status = 'Active') t1
+           join (select * from i032 where status = 'Inactive') t2
+                on t1.section = t2.section
 comment: |
   df1 <- df_i032 %>% filter(Status == 'Inactive')
   df2 <- inner_join(df_i032, df1, by=c('Section'), suffix = c('', '.other'))

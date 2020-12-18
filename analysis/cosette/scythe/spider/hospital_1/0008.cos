@@ -1,0 +1,31 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_appointment(appointmentid:int, patient:int, prepnurse:str, physician:int, start:str, end:str, examinationroom:str);
+
+table df_physician(df_physician);
+table df_appointment(df_appointment);
+
+query q1
+`select name
+from df_physician df_physician
+except
+select t2.name
+from df_appointment as t1
+join df_physician as t2 on t1.df_physician = t2.employeeid`;
+
+query q2
+`select t2.name
+ from
+  (select
+          max(t3.physician) as max_physician
+        from
+          (select *
+             from
+              input0
+             where input0.start = input0.end) as t3) as t4 join 
+      (select *
+         from
+          input
+         where input.employeeid < 9.0) as t1 as t2
+ where t2.max_physician < t2.employeeid`;
+
+verify q1 q2;

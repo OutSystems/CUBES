@@ -1,0 +1,42 @@
+schema df_body_builder(body_builder_id:int, people_id:int, snatch:str, clean_jerk:str, total:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, birth_date:str, birth_place:str);
+
+table df_body_builder(df_body_builder);
+table df_people(df_people);
+
+query q1
+`select name,
+       birth_place
+from df_people df_people
+except
+select t1.name,
+       t1.birth_place
+from df_people as t1
+join df_body_builder as t2 on t1.people_id = t2.people_id`;
+
+query q2
+`joining, by = "people_id"
+joining, by = "people_id"
+select distinct name,
+                birth_place
+from
+  (select people_id,
+          name,
+          height,
+          weight,
+          birth_date,
+          birth_place
+   from
+     (select *
+      from
+        (select people_id
+         from input1) as lhs
+      where not exists
+          (select 1
+           from
+             (select people_id
+              from input0) as rhs
+           where (lhs.people_id = rhs.people_id) )) as lhs
+   inner join input1 as rhs on (lhs.people_id = rhs.people_id))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+
+table df_player(df_player);
+
+query q1
+`select occupation
+from df_player df_player
+group by occupation
+
+limit 1`;
+
+query q2
+`select distinct rank as occupation
+from
+  (select lhs.occupation as occupation,
+          lhs.residence as residence,
+          lhs.n as n,
+          rhs.sponsor_name as sponsor_name,
+          rhs.player_name as player_name,
+          rhs.gender as gender,
+          rhs.occupation as occupation.other,
+          rhs.votes as votes,
+          rhs.rank as rank
+   from
+     (select occupation,
+             residence,
+             count(*) as n
+      from df_player df_player
+      group by occupation,
+               residence) as lhs
+   inner join df_player as rhs on (lhs.n = rhs.player_id
+                                   and lhs.residence = rhs.residence))`;
+
+verify q1 q2;

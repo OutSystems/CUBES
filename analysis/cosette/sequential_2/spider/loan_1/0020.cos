@@ -1,0 +1,55 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+
+table df_customer(df_customer);
+
+query q1
+`select cust_name
+from df_customer df_customer
+where credit_score <
+    (select avg(credit_score)
+     from df_customer df_customer)`;
+
+query q2
+`select cust_name
+from
+  (select cust_name,
+          state,
+          avg(credit_score) as meancredit_score
+   from
+     (select cust_id,
+             cust_name,
+             acc_type,
+             acc_bal,
+             cust_id as no_of_loans,
+             credit_score,
+             branch_id,
+             state,
+             cust_id.other,
+             cust_name.other,
+             acc_type.other,
+             acc_bal.other,
+             credit_score.other,
+             branch_id.other,
+             state.other
+      from
+        (select lhs.cust_id as cust_id,
+                lhs.cust_name as cust_name,
+                lhs.acc_type as acc_type,
+                lhs.acc_bal as acc_bal,
+                lhs.no_of_loans as no_of_loans,
+                lhs.credit_score as credit_score,
+                lhs.branch_id as branch_id,
+                lhs.state as state,
+                rhs.cust_id as cust_id.other,
+                rhs.cust_name as cust_name.other,
+                rhs.acc_type as acc_type.other,
+                rhs.acc_bal as acc_bal.other,
+                rhs.credit_score as credit_score.other,
+                rhs.branch_id as branch_id.other,
+                rhs.state as state.other
+         from df_customer as lhs
+         inner join df_customer as rhs on (lhs.cust_id = rhs.no_of_loans)))
+   group by cust_name,
+            state)`;
+
+verify q1 q2;

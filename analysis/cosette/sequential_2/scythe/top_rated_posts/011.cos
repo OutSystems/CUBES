@@ -1,0 +1,30 @@
+schema df_i011_1(VehicleID:int, Name:str);
+schema df_i011_2(LocationID:int, VehicleID:int, City:str);
+
+table df_i011_1(df_i011_1);
+table df_i011_2(df_i011_2);
+
+query q1
+`select t1.vehicleid, t1.name, t2.concatlocations
+from (select vehicleid, concat(city) as concatlocations
+      from  t2
+      group by vehicleid) t
+join t1
+on t1.vehicleid = t2.vehicleid`;
+
+query q2
+`select vehicleid,
+       name,
+       concatcity
+from
+  (select lhs.vehicleid as vehicleid,
+          lhs.concatcity as concatcity,
+          rhs.name as name
+   from
+     (select vehicleid,
+             string_agg(city, ', ') as concatcity
+      from df_i011_2 df_i011_2
+      group by vehicleid) as lhs
+   inner join df_i011_1 as rhs on (lhs.vehicleid = rhs.vehicleid))`;
+
+verify q1 q2;

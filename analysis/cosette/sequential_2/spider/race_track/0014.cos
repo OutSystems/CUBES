@@ -1,0 +1,29 @@
+schema df_race(race_id:int, name:str, class:str, date:str, track_id:int);
+schema df_track(track_id:int, name:str, location:str, seating:str, year_opened:str);
+
+table df_race(df_race);
+table df_track(df_track);
+
+query q1
+`select name
+from df_track df_track
+except
+select t2.name
+from df_race as t1
+join df_track as t2 on t1.track_id = t2.track_id
+where t1.class = 'gt'`;
+
+query q2
+`select name
+from
+  (select *
+   from df_track as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_race df_race
+           where (class = 'gt')) as rhs
+        where (lhs.track_id = rhs.track_id) ))`;
+
+verify q1 q2;

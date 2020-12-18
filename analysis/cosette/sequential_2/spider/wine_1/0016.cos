@@ -1,0 +1,35 @@
+schema df_grapes(id:int, grape:str, color:str);
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_grapes(df_grapes);
+table df_wine(df_wine);
+
+query q1
+`select distinct t1.grape
+from df_grapes as t1
+join df_wine as t2 on t1.grape = t2.grape
+where t1.color = "white"
+  and t2.score > 90`;
+
+query q2
+`select distinct grape
+from
+  (select lhs.id as id,
+          lhs.grape as grape,
+          lhs.color as color,
+          rhs.no as no,
+          rhs.winery as winery,
+          rhs.appelation as appelation,
+          rhs.state as state,
+          rhs.name as name,
+          rhs.year as year,
+          rhs.price as price,
+          rhs.score as score,
+          rhs.cases as cases,
+          rhs.drink as drink
+   from df_grapes as lhs
+   inner join df_wine as rhs on (lhs.grape = rhs.grape))
+where (color = 'white'
+       and score > 90.0)`;
+
+verify q1 q2;

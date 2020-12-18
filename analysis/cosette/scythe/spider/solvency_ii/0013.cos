@@ -1,0 +1,26 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_products_in_events(product_in_event_id:int, event_id:int, product_id:int);
+
+table df_products(df_products);
+table df_products_in_events(df_products_in_events);
+
+query q1
+`select t1.product_name
+from df_products as t1
+join df_products_in_events as t2 on t1.product_id = t2.product_id
+group by t1.product_name
+having count(*) >= 2`;
+
+query q2
+`select t2.product_name
+ from
+  (select
+          t3.product_type_code, t3.product_name, sum(t3.product_id) as sum_product_id
+        from
+          input as t3
+        group by
+          t3.product_type_code, t3.product_name) as t4 join 
+      input0 as t1 as t2
+ where t2.sum_product_id = t2.product_in_event_id`;
+
+verify q1 q2;

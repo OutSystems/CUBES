@@ -1,0 +1,31 @@
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_personfriend(df_personfriend);
+
+query q1
+`select friend
+from df_personfriend df_personfriend
+where name = 'zach'
+  and year =
+    (select max(year)
+     from df_personfriend df_personfriend
+     where name = 'zach')`;
+
+query q2
+`joining, by = "name"
+select friend
+from
+  (select name,
+          maxyear,
+          friend,
+          year
+   from
+     (select name,
+             max(year) as maxyear
+      from input0
+      group by name) as lhs
+   inner join input0 as rhs on (lhs.name = rhs.name))
+where (name = 'zach'
+       and year >= maxyear)`;
+
+verify q1 q2;

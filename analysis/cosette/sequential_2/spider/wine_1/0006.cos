@@ -1,0 +1,28 @@
+schema df_appellations(no:int, appelation:str, county:str, state:str, area:str, isava:str);
+
+table df_appellations(df_appellations);
+
+query q1
+`select area,
+       county
+from df_appellations df_appellations`;
+
+query q2
+`select area,
+       county
+from
+  (select lhs.no as no,
+          lhs.appelation as appelation,
+          lhs.county as county,
+          lhs.state as state,
+          lhs.area as area,
+          lhs.isava as isava,
+          rhs.no as no.other,
+          rhs.county as county.other,
+          rhs.state as state.other,
+          rhs.area as area.other,
+          rhs.isava as isava.other
+   from df_appellations as lhs
+   inner join df_appellations as rhs on (lhs.appelation = rhs.appelation))`;
+
+verify q1 q2;

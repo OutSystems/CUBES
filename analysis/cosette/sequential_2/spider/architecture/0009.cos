@@ -1,0 +1,39 @@
+schema df_architect(id:int, name:str, nationality:str, gender:str);
+schema df_bridge(architect_id:int, id:int, name:str, location:str, length_meters:str, length_feet:str);
+
+table df_architect(df_architect);
+table df_bridge(df_bridge);
+
+query q1
+`select t1.id,
+       t1.name
+from df_architect as t1
+join df_bridge as t2 on t1.id = t2.architect_id
+group by t1.id
+having count(*) >= 3`;
+
+query q2
+`select id,
+       name
+from
+  (select id,
+          name,
+          nationality,
+          gender,
+          n,
+          id as architect_id
+   from
+     (select lhs.id as id,
+             lhs.name as name,
+             lhs.nationality as nationality,
+             lhs.gender as gender,
+             rhs.n as n
+      from df_architect as lhs
+      inner join
+        (select architect_id,
+                count(*) as n
+         from df_bridge df_bridge
+         group by architect_id) as rhs on (lhs.id = rhs.architect_id)))
+where (n >= 3.0)`;
+
+verify q1 q2;

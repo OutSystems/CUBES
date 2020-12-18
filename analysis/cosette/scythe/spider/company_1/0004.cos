@@ -1,0 +1,24 @@
+schema df_department(dname:str, dnumber:int, mgr_ssn:int, mgr_start_date:str);
+schema df_dept_locations(dnumber:int, dlocation:str);
+
+table df_department(df_department);
+table df_dept_locations(df_dept_locations);
+
+query q1
+`select t1.dname
+from df_department as t1
+join df_dept_locations as t2 on t1.dnumber = t2.dnumber
+where t2.dlocation = 'houston'`;
+
+query q2
+`select t2.dname
+ from
+  (select input.dname, input.dnumber, input.mgr_ssn, input.mgr_start_date, t1.dnumber as dnumber1, t1.dlocation
+  from input join 
+      (select *
+         from
+          input0
+         where input0.dlocation = 'houston') as t1) as t2
+ where t2.dnumber = t2.dnumber1`;
+
+verify q1 q2;

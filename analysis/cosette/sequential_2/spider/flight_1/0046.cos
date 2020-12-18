@@ -1,0 +1,32 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_certificate(df_certificate);
+
+query q1
+`select t2.name
+from df_certificate as t1
+join df_aircraft as t2 on t2.aid = t1.aid
+where t2.distance > 5000
+group by t1.aid`;
+
+query q2
+`select distinct name
+from
+  (select lhs.eid as eid,
+          lhs.aid as aid,
+          rhs.name as name,
+          rhs.distance as distance,
+          rhs.n_distinct as n_distinct
+   from df_certificate as lhs
+   inner join
+     (select aid,
+             name,
+             distance,
+             count(distinct distance) over () as n_distinct
+      from df_aircraft df_aircraft) as rhs on (lhs.aid = rhs.aid))
+where (distance >= 5000.0
+       and n_distinct >= 5.0)`;
+
+verify q1 q2;

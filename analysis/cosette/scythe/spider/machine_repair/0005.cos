@@ -1,0 +1,22 @@
+schema df_technician(technician_id:str, name:str, team:str, starting_year:str, age:int);
+
+table df_technician(df_technician);
+
+query q1
+`select name
+from df_technician df_technician
+where age = 36
+  or age = 37`;
+
+query q2
+`select t1.name1
+ from
+  (select input.technician_id, input.name, input.team, input.starting_year, input.age, t2.technician_id as technician_id1, t2.name as name1, t2.team as team1, t2.starting_year as starting_year1, t2.age as age1
+  from (select *
+       from
+        input
+       where input.age = 37.0) join 
+      input as t2) as t1
+ where t1.team = t1.team1`;
+
+verify q1 q2;

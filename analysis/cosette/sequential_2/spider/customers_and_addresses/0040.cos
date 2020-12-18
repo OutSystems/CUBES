@@ -1,0 +1,26 @@
+schema df_addresses(address_id:int, address_content:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+
+table df_addresses(df_addresses);
+
+query q1
+`select address_content
+from df_addresses df_addresses
+where city = "east julianaside"
+  and state_province_county = "texas"
+union
+select address_content
+from df_addresses df_addresses
+where city = "gleasonmouth"
+  and state_province_county = "arizona"`;
+
+query q2
+`select address_content
+from
+  (select *
+   from df_addresses df_addresses
+   where (city = 'east julianaside'
+          or city = 'gleasonmouth'))
+where (state_province_county = 'texas'
+       or state_province_county = 'arizona')`;
+
+verify q1 q2;

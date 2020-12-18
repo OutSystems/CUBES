@@ -1,0 +1,23 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+
+table df_mountain(df_mountain);
+
+query q1
+`select country
+from df_mountain df_mountain
+group by country
+having count(*) > 1`;
+
+query q2
+`select distinct country
+from
+  (select country,
+          range,
+          count(*) as n
+   from input0
+   group by country,
+            range)
+where (n >= 1.0
+       and n > 1.0)`;
+
+verify q1 q2;

@@ -1,0 +1,41 @@
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+schema df_tasks(task_id:int, project_id:int, task_details:str, eg.agree.objectives:str);
+
+table df_projects(df_projects);
+table df_tasks(df_tasks);
+
+query q1
+`select count(*),
+       t1.project_details
+from df_projects as t1
+join df_tasks as t2 on t1.project_id = t2.project_id
+group by t1.project_id`;
+
+query q2
+`select n as count...,
+       project_details
+from
+  (select project_details,
+          task_details,
+          count(*) as n
+   from
+     (select task_id,
+             project_id,
+             task_details,
+             eg.agree.objectives,
+             project_id.other,
+             project_details,
+             project_id as organisation_id
+      from
+        (select lhs.task_id as task_id,
+                lhs.project_id as project_id,
+                lhs.task_details as task_details,
+                lhs.eg.agree.objectives as eg.agree.objectives,
+                rhs.project_id as project_id.other,
+                rhs.project_details as project_details
+         from df_tasks as lhs
+         inner join df_projects as rhs on (lhs.project_id = rhs.organisation_id)))
+   group by project_details,
+            task_details)`;
+
+verify q1 q2;

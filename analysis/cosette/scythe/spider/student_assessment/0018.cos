@@ -1,0 +1,25 @@
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select student_id
+from df_student_course_attendance df_student_course_attendance
+where course_id = 301
+
+limit 1`;
+
+query q2
+`select t1.max_student_id
+ from
+  (select
+      t2.course_id, max(t2.student_id) as max_student_id
+    from
+      (select *
+         from
+          input
+         where input.course_id = 301.0) as t2
+    group by
+      t2.course_id) as t1`;
+
+verify q1 q2;

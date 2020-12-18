@@ -1,0 +1,29 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+
+table df_artist(df_artist);
+table df_exhibition(df_exhibition);
+
+query q1
+`select name
+from df_artist df_artist
+except
+select t2.name
+from df_exhibition as t1
+join df_artist as t2 on t1.artist_id = t2.artist_id
+where t1.year = 2004`;
+
+query q2
+`select t2.name
+ from
+  (select input0.exhibition_id, input0.year, input0.theme, input0.artist_id, input0.ticket_price, t1.artist_id as artist_id1, t1.name, t1.country, t1.year_join, t1.age
+  from (select *
+       from
+        input0
+       where input0.year = 2004.0) join 
+      (select *
+         from
+          input
+         where input.artist_id >= 2.0) as t1) as t2`;
+
+verify q1 q2;

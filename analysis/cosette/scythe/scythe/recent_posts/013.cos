@@ -1,0 +1,39 @@
+schema df_013_1(ID:int, Name:str);
+schema df_013_2(ID:int, Company_group:str);
+
+table df_013_1(df_013_1);
+table df_013_2(df_013_2);
+
+query q1
+`select t1.id,
+       t1.name,
+       t2.company_group as rootname,
+       t1_b.id as rootid
+from tbl_1 t1
+join tbl_2 t2
+  on t2.id = t1.id
+join tbl_1 t1_b
+  on t1_b.name = t2.company_group
+where t1.id <> t1_b.id`;
+
+query q2
+`select t4.id,t4.name,t4.name1,t4.id2
+ from
+  (select t6.id, t6.name, t7.id1, t7.name as name1, t7.id as id2
+  from (select t5.id,t5.name
+         from
+          (select input.id, input.name, t2.id as id1, t2.company_group
+          from input join 
+              input0 as t2) as t5
+         where t5.id = t5.id1
+           and t5.name <> t5.company_group) as t6 join 
+      (select t3.id1,t3.name,t3.id
+         from
+          (select input.id, input.name, t1.id as id1, t1.company_group
+          from input join 
+              input0 as t1) as t3
+         where t3.id <> t3.id1
+           and t3.name = t3.company_group) as t7) as t4
+ where t4.id = t4.id1`;
+
+verify q1 q2;

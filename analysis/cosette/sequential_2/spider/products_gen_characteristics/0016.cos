@@ -1,0 +1,33 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select t1.color_code,
+       t2.color_description
+from df_products as t1
+join df_ref_colors as t2 on t1.color_code = t2.color_code
+where t1.product_name = "chervil"`;
+
+query q2
+`select color_code,
+       color_description
+from
+  (select lhs.color_code as color_code,
+          lhs.color_description as color_description,
+          rhs.product_id as product_id,
+          rhs.product_category_code as product_category_code,
+          rhs.product_name as product_name,
+          rhs.typical_buying_price as typical_buying_price,
+          rhs.typical_selling_price as typical_selling_price,
+          rhs.product_description as product_description,
+          rhs.other_product_details as other_product_details
+   from df_ref_colors as lhs
+   inner join
+     (select *
+      from df_products df_products
+      where (product_name = 'chervil')) as rhs on (lhs.color_code = rhs.color_code))`;
+
+verify q1 q2;

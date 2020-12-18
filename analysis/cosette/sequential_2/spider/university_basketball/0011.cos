@@ -1,0 +1,48 @@
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_university(df_university);
+
+query q1
+`select enrollment,
+       primary_conference
+from df_university df_university
+
+limit 1`;
+
+query q2
+`select distinct enrollment,
+                primary_conference
+from
+  (select lhs.school_id as school_id,
+          lhs.school as school,
+          lhs.location as location,
+          lhs.founded as founded,
+          lhs.affiliation as affiliation,
+          lhs.enrollment as enrollment,
+          lhs.nickname as nickname,
+          lhs.primary_conference as primary_conference,
+          lhs.minfounded as minfounded,
+          rhs.school_id as school_id.other,
+          rhs.school as school.other,
+          rhs.location as location.other,
+          rhs.founded as founded.other,
+          rhs.affiliation as affiliation.other,
+          rhs.enrollment as enrollment.other,
+          rhs.nickname as nickname.other,
+          rhs.primary_conference as primary_conference.other
+   from
+     (select school_id,
+             school,
+             location,
+             founded,
+             affiliation,
+             enrollment,
+             nickname,
+             primary_conference,
+             min(founded) over () as minfounded
+      from df_university df_university) as lhs
+   cross join df_university as rhs)
+where (founded = minfounded
+       and founded != founded.other)`;
+
+verify q1 q2;

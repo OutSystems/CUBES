@@ -1,0 +1,40 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select distinct artist_name
+from df_artist df_artist
+where country = "bangladesh"
+except
+select distinct artist_name
+from df_song df_song
+where rating > 7`;
+
+query q2
+`select distinct artist_name
+from
+  (select *
+   from
+     (select lhs.song_name as song_name,
+             lhs.artist_name as artist_name,
+             lhs.country as country,
+             lhs.f_id as f_id,
+             lhs.genre_is as genre_is,
+             lhs.rating as rating,
+             lhs.languages as languages,
+             lhs.releasedate as releasedate,
+             lhs.resolution as resolution,
+             rhs.artist_name as artist_name.other,
+             rhs.country as country.other,
+             rhs.gender as gender,
+             rhs.preferred_genre as preferred_genre
+      from df_song as lhs
+      cross join df_artist as rhs)
+   where (country != country.other))
+where (country = 'bangladesh'
+       or rating = 7.0)`;
+
+verify q1 q2;

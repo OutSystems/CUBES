@@ -1,0 +1,27 @@
+schema df_organizations(organization_id:int, date_formed:str, organization_name:str, uk_vat_number:int);
+schema df_organization_contact_individuals(individual_id:int, organization_id:int, date_contact_from:str, date_contact_to:str);
+
+table df_organizations(df_organizations);
+table df_organization_contact_individuals(df_organization_contact_individuals);
+
+query q1
+`select t1.organization_name
+from df_organizations as t1
+join df_organization_contact_individuals as t2 on t1.organization_id = t2.organization_id
+group by t1.organization_name
+
+limit 1`;
+
+query q2
+`select t3.organization_name
+ from
+  (select
+          max(t4.date_contact_from) as max_date_contact_from
+        from
+          input0 as t4) as t2 join 
+      (select *
+         from
+          input
+         where input.organization_id = 3.0) as t1 as t3`;
+
+verify q1 q2;

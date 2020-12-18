@@ -1,0 +1,22 @@
+schema df_film(film_id:int, title:str, studio:str, director:str, gross_in_dollar:int);
+
+table df_film(df_film);
+
+query q1
+`select studio
+from df_film df_film
+group by studio
+having count(*) >= 2`;
+
+query q2
+`select t1.studio
+ from
+  (select
+      t2.studio, count_distinct(t2.film_id) as count_distinct_film_id
+    from
+      input as t2
+    group by
+      t2.studio) as t1
+ where t1.count_distinct_film_id = 2.0`;
+
+verify q1 q2;

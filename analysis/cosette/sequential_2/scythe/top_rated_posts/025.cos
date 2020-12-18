@@ -1,0 +1,26 @@
+schema df_i025(Id:int, Value:str);
+
+table df_i025(df_i025);
+
+query q1
+`with numberedmytable as
+(
+    select id, value, row_number() over (
+    from mytable
+)
+select id, value
+from numberedmytable
+where rownumber between 3 and 5`;
+
+query q2
+`select id,
+       value
+from
+  (select id,
+          value,
+          row_number() over () as row_number_
+   from df_i025 df_i025)
+where (row_number_ >= 3.0
+       and row_number_ < 5.0)`;
+
+verify q1 q2;

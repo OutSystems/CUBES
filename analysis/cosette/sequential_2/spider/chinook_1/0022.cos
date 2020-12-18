@@ -1,0 +1,51 @@
+schema df_customer(customerid:int, firstname:str, lastname:str, company:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str, supportrepid:int);
+schema df_employee(employeeid:int, lastname:str, firstname:str, title:str, reportsto:str, birthdate:str, hiredate:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str);
+
+table df_customer(df_customer);
+table df_employee(df_employee);
+
+query q1
+`select t2.firstname,
+       t2.lastname
+from df_customer as t1
+join df_employee as t2 on t1.supportrepid = t2.employeeid
+where t1.firstname = "leonie"`;
+
+query q2
+`select firstname.other as firstname,
+       lastname.other as lastname
+from
+  (select lhs.customerid as customerid,
+          lhs.firstname as firstname,
+          lhs.lastname as lastname,
+          lhs.company as company,
+          lhs.address as address,
+          lhs.city as city,
+          lhs.state as state,
+          lhs.country as country,
+          lhs.postalcode as postalcode,
+          lhs.phone as phone,
+          lhs.fax as fax,
+          lhs.email as email,
+          lhs.supportrepid as supportrepid,
+          rhs.lastname as lastname.other,
+          rhs.firstname as firstname.other,
+          rhs.title as title,
+          rhs.reportsto as reportsto,
+          rhs.birthdate as birthdate,
+          rhs.hiredate as hiredate,
+          rhs.address as address.other,
+          rhs.city as city.other,
+          rhs.country as country.other,
+          rhs.postalcode as postalcode.other,
+          rhs.phone as phone.other,
+          rhs.fax as fax.other,
+          rhs.email as email.other
+   from df_customer as lhs
+   inner join
+     (select *
+      from df_employee df_employee
+      where (firstname != 'leonie')) as rhs on (lhs.supportrepid = rhs.employeeid
+                                                  and lhs.state = rhs.state))`;
+
+verify q1 q2;

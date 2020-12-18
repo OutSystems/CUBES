@@ -1,0 +1,30 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select cname
+from df_college df_college
+where enr < 13000
+  and state = "az"
+union
+select cname
+from df_college df_college
+where enr > 15000
+  and state = "la"`;
+
+query q2
+`select t1.cname1
+ from
+  (select input.cname, input.state, input.enr, t2.cname as cname1, t2.state as state1, t2.enr as enr1
+  from (select *
+       from
+        input
+       where input.state = 'az') join 
+      (select *
+         from
+          input
+         where input.state = 'la'
+           or input.enr < 13000.0) as t2) as t1`;
+
+verify q1 q2;

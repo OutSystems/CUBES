@@ -1,0 +1,31 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+
+table df_submission(df_submission);
+
+query q1
+`select author
+from df_submission df_submission
+
+limit 1`;
+
+query q2
+`select author
+from
+  (select lhs.submission_id as submission_id,
+          lhs.scores as scores,
+          lhs.author as author,
+          lhs.college as college,
+          rhs.submission_id as submission_id.other,
+          rhs.scores as scores.other,
+          rhs.author as author.other
+   from df_submission as lhs
+   inner join
+     (select submission_id,
+             scores,
+             author,
+             college,
+             max(scores) over () as maxscores
+      from df_submission df_submission) as rhs on (lhs.college = rhs.college
+                                     and lhs.scores = rhs.maxscores))`;
+
+verify q1 q2;

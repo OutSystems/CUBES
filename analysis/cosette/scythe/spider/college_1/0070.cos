@@ -1,0 +1,28 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_course(df_course);
+table df_employee(df_employee);
+
+query q1
+`select t2.emp_fname,
+       t3.crs_description
+from df_class as t1
+join df_employee as t2 on t1.prof_num = t2.emp_num
+join df_course as t3 on t1.crs_code = t3.crs_code`;
+
+query q2
+`select t5.emp_fname,t5.crs_description
+ from
+  (select *
+       from
+        (select input.class_code, input.crs_code, input.class_section, input.class_time, input.class_room, input.prof_num, t3.crs_code as crs_code1, t3.dept_code, t3.crs_description, t3.crs_credit
+        from input join 
+            input0 as t3) as t2
+       where t2.crs_code = t2.crs_code1) join 
+      input1 as t4 as t5
+ where t5.prof_num = t5.emp_num`;
+
+verify q1 q2;

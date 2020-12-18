@@ -1,0 +1,23 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+
+table df_allergy_type(df_allergy_type);
+
+query q1
+`select count(*)
+from df_allergy_type df_allergy_type
+where allergytype = "animal"`;
+
+query q2
+`select t1.count_allergytype
+ from
+  (select
+      t2.allergytype, count(t2.allergytype) as count_allergytype
+    from
+      (select *
+         from
+          input
+         where input.allergytype = 'animal') as t2
+    group by
+      t2.allergytype) as t1`;
+
+verify q1 q2;

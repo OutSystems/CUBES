@@ -1,0 +1,30 @@
+schema df_jobs(job_id:str, job_title:str, min_salary:int, max_salary:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_jobs(df_jobs);
+table df_employees(df_employees);
+
+query q1
+`select job_title,
+       avg(salary)
+from df_employees as t1
+join df_jobs as t2 on t1.job_id = t2.job_id
+group by t2.job_title`;
+
+query q2
+`select job_title,
+       meansalary as avg.salary.
+from
+  (select lhs.job_id as job_id,
+          lhs.meansalary as meansalary,
+          rhs.job_title as job_title,
+          rhs.min_salary as min_salary,
+          rhs.max_salary as max_salary
+   from
+     (select job_id,
+             avg(salary) as meansalary
+      from df_employees df_employees
+      group by job_id) as lhs
+   inner join df_jobs as rhs on (lhs.job_id = rhs.job_id))`;
+
+verify q1 q2;

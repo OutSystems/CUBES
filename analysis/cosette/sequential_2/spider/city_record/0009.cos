@@ -1,0 +1,27 @@
+schema df_city(city_id:int, city:str, hanzi:str, hanyu_pinyin:str, regional_population:int, gdp:str);
+
+table df_city(df_city);
+
+query q1
+`select df_city,
+       gdp
+from df_city df_city
+
+limit 1`;
+
+query q2
+`select city,
+       gdp
+from
+  (select lhs.city_id as city_id,
+          lhs.city as city,
+          lhs.hanzi as hanzi,
+          lhs.hanyu_pinyin as hanyu_pinyin,
+          lhs.regional_population as regional_population,
+          lhs.gdp as gdp
+   from df_city as lhs
+   inner join
+     (select min(gdp) as mingdp
+      from df_city df_city) as rhs on (lhs.gdp = rhs.mingdp))`;
+
+verify q1 q2;

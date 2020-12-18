@@ -1,0 +1,23 @@
+schema df_claims(claim_id:int, fnol_id:int, effective_date:str);
+schema df_settlements(settlement_id:int, claim_id:int, effective_date:str, settlement_amount:str);
+
+table df_claims(df_claims);
+table df_settlements(df_settlements);
+
+query q1
+`select t1.effective_date
+from df_claims as t1
+join df_settlements as t2 on t1.claim_id = t2.claim_id
+group by t1.claim_id
+
+limit 1`;
+
+query q2
+`select t1.effective_date
+ from
+  (select input.claim_id, input.fnol_id, input.effective_date, t2.settlement_id, t2.claim_id as claim_id1, t2.effective_date as effective_date1, t2.settlement_amount
+  from input join 
+      input0 as t2) as t1
+ where t1.claim_id = t1.settlement_id`;
+
+verify q1 q2;

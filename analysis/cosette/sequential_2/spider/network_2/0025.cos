@@ -1,0 +1,41 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t1.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t2.friend in
+    (select name
+     from df_person df_person
+     where age > 40)
+except
+select t1.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t2.friend in
+    (select name
+     from df_person df_person
+     where age < 30)`;
+
+query q2
+`select name.other as name
+from
+  (select lhs.name as name,
+          lhs.age as age,
+          lhs.city as city,
+          lhs.gender as gender,
+          lhs.job as job,
+          rhs.name as name.other,
+          rhs.year as year
+   from
+     (select *
+      from df_person df_person
+      where (age > 40.0
+             or age = 30.0)) as lhs
+   inner join df_personfriend as rhs on (lhs.name = rhs.friend))`;
+
+verify q1 q2;

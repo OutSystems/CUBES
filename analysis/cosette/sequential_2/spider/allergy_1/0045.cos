@@ -1,0 +1,38 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+schema df_has_allergy(stuid:int, allergy:str);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_allergy_type(df_allergy_type);
+table df_has_allergy(df_has_allergy);
+table df_student(df_student);
+
+query q1
+`select fname,
+       lname
+from df_student df_student
+where stuid not in
+    (select t1.stuid
+     from df_has_allergy as t1
+     join df_allergy_type as t2 on t1.allergy = t2.allergy
+     where t2.allergytype = "food")`;
+
+query q2
+`select fname,
+       lname
+from
+  (select *
+   from df_student as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from
+             (select lhs.stuid as stuid,
+                     lhs.allergy as allergy,
+                     rhs.allergytype as allergytype
+              from df_has_allergy as lhs
+              inner join df_allergy_type as rhs on (lhs.allergy = rhs.allergy))
+           where (allergytype = 'food')) as rhs
+        where (lhs.stuid = rhs.stuid) ))`;
+
+verify q1 q2;

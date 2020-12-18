@@ -1,0 +1,30 @@
+schema df_discount_coupons(coupon_id:int, date_issued:str, coupon_amount:str);
+schema df_customers(customer_id:int, coupon_id:int, good_or_bad_customer:str, first_name:str, last_name:str, gender_mf:int, date_became_customer:str, date_last_hire:str);
+
+table df_discount_coupons(df_discount_coupons);
+table df_customers(df_customers);
+
+query q1
+`select t1.good_or_bad_customer
+from df_customers as t1
+join df_discount_coupons as t2 on t1.coupon_id = t2.coupon_id
+where t2.coupon_amount = 500`;
+
+query q2
+`select good_or_bad_customer
+from
+  (select lhs.coupon_id as coupon_id,
+          lhs.date_issued as date_issued,
+          lhs.coupon_amount as coupon_amount,
+          rhs.customer_id as customer_id,
+          rhs.good_or_bad_customer as good_or_bad_customer,
+          rhs.first_name as first_name,
+          rhs.last_name as last_name,
+          rhs.gender_mf as gender_mf,
+          rhs.date_became_customer as date_became_customer,
+          rhs.date_last_hire as date_last_hire
+   from df_discount_coupons as lhs
+   inner join df_customers as rhs on (lhs.coupon_id = rhs.coupon_id))
+where (coupon_amount = 500.0)`;
+
+verify q1 q2;

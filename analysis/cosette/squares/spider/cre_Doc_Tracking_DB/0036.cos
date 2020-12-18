@@ -1,0 +1,21 @@
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_document_locations(df_document_locations);
+
+query q1
+`select location_code
+from df_document_locations df_document_locations
+group by location_code
+having count(*) >= 3`;
+
+query q2
+`select distinct location_code
+from
+  (select location_code,
+          count(*) as n
+   from input0
+   group by location_code)
+where (n >= 3.0
+       or n > 3.0)`;
+
+verify q1 q2;

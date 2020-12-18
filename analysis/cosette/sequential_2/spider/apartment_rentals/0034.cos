@@ -1,0 +1,40 @@
+schema df_apartments(apt_id:int, building_id:int, apt_type_code:str, apt_number:str, bathroom_count:int, bedroom_count:int, room_count:int);
+
+table df_apartments(df_apartments);
+
+query q1
+`select apt_type_code
+from df_apartments df_apartments
+group by apt_type_code
+
+limit 1`;
+
+query q2
+`select apt_type_code
+from
+  (select apt_id,
+          apt_type_code,
+          apt_id as n,
+          apt_type_code.other
+   from
+     (select lhs.apt_id as apt_id,
+             lhs.apt_type_code as apt_type_code,
+             lhs.n as n,
+             rhs.apt_type_code as apt_type_code.other
+      from
+        (select apt_id,
+                apt_type_code,
+                count(*) as n
+         from df_apartments df_apartments
+         group by apt_id,
+                  apt_type_code) as lhs
+      inner join
+        (select apt_id,
+                apt_type_code,
+                count(*) as n
+         from df_apartments df_apartments
+         group by apt_id,
+                  apt_type_code) as rhs on (lhs.apt_id = rhs.n
+                                            and lhs.n = rhs.apt_id)))`;
+
+verify q1 q2;

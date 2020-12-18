@@ -1,0 +1,31 @@
+schema df_race(race_id:int, name:str, class:str, date:str, track_id:int);
+
+table df_race(df_race);
+
+query q1
+`select class
+from df_race df_race
+group by class
+
+limit 1`;
+
+query q2
+`select class
+from
+  (select lhs.class as class,
+          lhs.n as n,
+          rhs.class as class.other,
+          rhs.n as n.other
+   from
+     (select class,
+             count(*) as n
+      from df_race df_race
+      group by class) as lhs
+   cross join
+     (select class,
+             count(*) as n
+      from df_race df_race
+      group by class) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

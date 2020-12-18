@@ -1,0 +1,27 @@
+schema df_i008_1(OrderID:int, OrderGUID:str, OrderNumber:str);
+schema df_i008_2(LineItemGUID:str, OrderID:int, Quantity:int, Description:str);
+
+table df_i008_1(df_i008_1);
+table df_i008_2(df_i008_2);
+
+query q1
+`select orders.ordernumber, lineitems.quantity, lineitems.description
+from orders
+    left join lineitems
+    on orders.orderid = lineitems.orderid
+group by orders.ordernumber`;
+
+query q2
+`select t3.ordernumber,t3.quantity,t3.first_description
+ from
+  (select t1.orderid, t1.quantity, t1.first_description, t4.orderid as orderid1, t4.orderguid, t4.ordernumber
+  from (select
+          t2.orderid, t2.quantity, first(t2.description) as first_description
+        from
+          input0 as t2
+        group by
+          t2.orderid, t2.quantity) as t1 join 
+      input as t4) as t3
+ where t3.orderid = t3.orderid1`;
+
+verify q1 q2;

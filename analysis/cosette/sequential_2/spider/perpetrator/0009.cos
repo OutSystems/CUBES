@@ -1,0 +1,50 @@
+schema df_perpetrator(perpetrator_id:int, people_id:int, date:str, year:str, location:str, country:str, killed:int, injured:int);
+schema df_people(people_id:int, name:str, height:str, weight:str, home.town:str);
+
+table df_perpetrator(df_perpetrator);
+table df_people(df_people);
+
+query q1
+`select t1.name
+from df_people as t1
+join df_perpetrator as t2 on t1.people_id = t2.people_id
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select name,
+          people_id,
+          max(weight) as maxweight
+   from
+     (select people_id,
+             name,
+             height,
+             weight,
+             home.town,
+             perpetrator_id,
+             people_id.other, date, year,
+                                    location,
+                                    country,
+                                    killed,
+                                    people_id as injured
+      from
+        (select lhs.people_id as people_id,
+                lhs.name as name,
+                lhs.height as height,
+                lhs.weight as weight,
+                lhs.home.town as home.town,
+                rhs.perpetrator_id as perpetrator_id,
+                rhs.people_id as people_id.other,
+                rhs.date as date,
+                rhs.year as year,
+                rhs.location as location,
+                rhs.country as country,
+                rhs.killed as killed
+         from df_people as lhs
+         inner join df_perpetrator as rhs on (lhs.people_id = rhs.injured)))
+   group by name,
+            people_id)`;
+
+verify q1 q2;

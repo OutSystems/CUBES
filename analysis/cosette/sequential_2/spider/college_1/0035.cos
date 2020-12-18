@@ -1,0 +1,30 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+
+table df_class(df_class);
+table df_enroll(df_enroll);
+
+query q1
+`select count(*)
+from df_class as t1
+join df_enroll as t2 on t1.class_code = t2.class_code
+where t1.crs_code = 'acct-211'`;
+
+query q2
+`select n as count...
+from
+  (select *
+   from
+     (select class_code,
+             count(*) as n
+      from df_enroll df_enroll
+      group by class_code) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_class df_class
+           where (crs_code != 'acct-211')) as rhs
+        where (lhs.class_code = rhs.class_code) ))`;
+
+verify q1 q2;

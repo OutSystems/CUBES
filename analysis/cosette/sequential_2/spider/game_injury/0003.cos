@@ -1,0 +1,34 @@
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+
+table df_game(df_game);
+
+query q1
+`select season,
+       home_team,
+       away_team
+from df_game df_game`;
+
+query q2
+`select season,
+       home_team,
+       away_team
+from
+  (select lhs.stadium_id as stadium_id,
+          lhs.id as id,
+          lhs.season as season,
+          lhs.date as date,
+          lhs.home_team as home_team,
+          lhs.away_team as away_team,
+          lhs.score as score,
+          lhs.competition as competition,
+          rhs.season as season.other,
+          rhs.date as date.other,
+          rhs.home_team as home_team.other,
+          rhs.away_team as away_team.other,
+          rhs.score as score.other,
+          rhs.competition as competition.other
+   from df_game as lhs
+   inner join df_game as rhs on (lhs.id = rhs.id
+                                 and lhs.stadium_id = rhs.stadium_id))`;
+
+verify q1 q2;

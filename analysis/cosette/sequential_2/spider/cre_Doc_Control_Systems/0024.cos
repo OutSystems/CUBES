@@ -1,0 +1,70 @@
+schema df_ref_shipping_agents(shipping_agent_code:str, shipping_agent_name:str, shipping_agent_description:str);
+schema df_documents(document_id:int, document_status_code:str, document_type_code:str, shipping_agent_code:str, receipt_date:str, receipt_number:int, other_details:str);
+
+table df_ref_shipping_agents(df_ref_shipping_agents);
+table df_documents(df_documents);
+
+query q1
+`select document_id
+from df_documents df_documents
+where document_status_code = "done"
+  and document_type_code = "paper"
+except
+select document_id
+from df_documents df_documents
+join df_ref_shipping_agents on df_documents.shipping_agent_code = df_ref_shipping_agents.shipping_agent_code
+where df_ref_shipping_agents.shipping_agent_name = "usps"`;
+
+query q2
+`select document_id
+from
+  (select lhs.shipping_agent_code as shipping_agent_code,
+          lhs.shipping_agent_name as shipping_agent_name,
+          lhs.shipping_agent_description as shipping_agent_description,
+          lhs.document_id as document_id,
+          lhs.document_status_code as document_status_code,
+          lhs.document_type_code as document_type_code,
+          lhs.receipt_date as receipt_date,
+          lhs.receipt_number as receipt_number,
+          lhs.other_details as other_details
+   from
+     (select lhs.shipping_agent_code as shipping_agent_code,
+             lhs.shipping_agent_name as shipping_agent_name,
+             lhs.shipping_agent_description as shipping_agent_description,
+             lhs.document_id as document_id,
+             lhs.document_status_code as document_status_code,
+             lhs.document_type_code as document_type_code,
+             lhs.receipt_date as receipt_date,
+             lhs.receipt_number as receipt_number,
+             lhs.other_details as other_details
+      from
+        (select lhs.shipping_agent_code as shipping_agent_code,
+                lhs.shipping_agent_name as shipping_agent_name,
+                lhs.shipping_agent_description as shipping_agent_description,
+                rhs.document_id as document_id,
+                rhs.document_status_code as document_status_code,
+                rhs.document_type_code as document_type_code,
+                rhs.receipt_date as receipt_date,
+                rhs.receipt_number as receipt_number,
+                rhs.other_details as other_details
+         from df_ref_shipping_agents as lhs
+         inner join df_documents as rhs on (lhs.shipping_agent_code = rhs.shipping_agent_code)) as lhs
+      inner join
+        (select *
+         from df_documents df_documents
+         where (document_status_code = 'done'
+                and document_type_code = 'paper')) as rhs on (lhs.shipping_agent_code = rhs.shipping_agent_code
+                                                                  and lhs.document_id = rhs.document_id
+                                                                  and lhs.document_status_code = rhs.document_status_code
+                                                                  and lhs.document_type_code = rhs.document_type_code
+                                                                  and lhs.receipt_date = rhs.receipt_date
+                                                                  and lhs.receipt_number = rhs.receipt_number
+                                                                  and lhs.other_details = rhs.other_details)) as lhs
+   inner join
+     (select *
+      from df_ref_shipping_agents df_ref_shipping_agents
+      where (shipping_agent_name != 'usps')) as rhs on (lhs.shipping_agent_code = rhs.shipping_agent_code
+                                                          and lhs.shipping_agent_name = rhs.shipping_agent_name
+                                                          and lhs.shipping_agent_description = rhs.shipping_agent_description))`;
+
+verify q1 q2;

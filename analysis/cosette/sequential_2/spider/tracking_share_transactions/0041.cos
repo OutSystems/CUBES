@@ -1,0 +1,31 @@
+schema df_lots(lot_id:int, investor_id:int, lot_details:str);
+schema df_transactions_lots(transaction_id:int, lot_id:int);
+
+table df_lots(df_lots);
+table df_transactions_lots(df_transactions_lots);
+
+query q1
+`select lot_details
+from df_lots df_lots
+except
+select t1.lot_details
+from df_lots as t1
+join df_transactions_lots as t2 on t1.lot_id = t2.lot_id`;
+
+query q2
+`select distinct lot_details
+from
+  (select *
+   from df_lots as lhs
+   where not exists
+       (select 1
+        from
+          (select lhs.transaction_id as transaction_id,
+                  lhs.lot_id as lot_id,
+                  rhs.investor_id as investor_id,
+                  rhs.lot_details as lot_details
+           from df_transactions_lots as lhs
+           left join df_lots as rhs on (lhs.lot_id = rhs.lot_id)) as rhs
+        where (lhs.lot_details = rhs.lot_details) ))`;
+
+verify q1 q2;

@@ -1,0 +1,73 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_middle_initial:str, customer_last_name:str, gender:int, email_address:str, login_name:str, login_password:str, phone_number:str, town_city:str, state_county_province:str, country:str);
+schema df_accounts(account_id:int, customer_id:int, date_account_opened:str, account_name:int, other_account_details:str);
+
+table df_customers(df_customers);
+table df_accounts(df_accounts);
+
+query q1
+`select t1.account_name,
+       t1.other_account_details
+from df_accounts as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.customer_first_name = "meaghan"
+  and t2.customer_last_name = "keeling"`;
+
+query q2
+`joining, by = "customer_id"
+joining, by = c("customer_id", "customer_first_name", "customer_middle_initial", "customer_last_name", "gender", "email_address", "login_name", "login_password", "phone_number", "town_city", "state_county_province", "country")
+select distinct account_name,
+                other_account_details
+from
+  (select customer_id,
+          customer_first_name,
+          customer_middle_initial,
+          customer_last_name,
+          gender,
+          email_address,
+          login_name,
+          login_password,
+          phone_number,
+          town_city,
+          state_county_province,
+          country,
+          account_id,
+          date_account_opened,
+          account_name,
+          other_account_details
+   from
+     (select customer_id,
+             customer_first_name,
+             customer_middle_initial,
+             customer_last_name,
+             gender,
+             email_address,
+             login_name,
+             login_password,
+             phone_number,
+             town_city,
+             state_county_province,
+             country,
+             account_id,
+             date_account_opened,
+             account_name,
+             other_account_details
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join
+     (select *
+      from input0
+      where (customer_first_name = 'meaghan'
+             or customer_last_name = 'keeling')) as rhs on (lhs.customer_id = rhs.customer_id
+                                                                and lhs.customer_first_name = rhs.customer_first_name
+                                                                and lhs.customer_middle_initial = rhs.customer_middle_initial
+                                                                and lhs.customer_last_name = rhs.customer_last_name
+                                                                and lhs.gender = rhs.gender
+                                                                and lhs.email_address = rhs.email_address
+                                                                and lhs.login_name = rhs.login_name
+                                                                and lhs.login_password = rhs.login_password
+                                                                and lhs.phone_number = rhs.phone_number
+                                                                and lhs.town_city = rhs.town_city
+                                                                and lhs.state_county_province = rhs.state_county_province
+                                                                and lhs.country = rhs.country))`;
+
+verify q1 q2;

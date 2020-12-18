@@ -1,0 +1,28 @@
+schema df_nurse(employeeid:int, name:str, position:str, registered:int, ssn:int);
+schema df_on_call(nurse:int, blockfloor:int, blockcode:int, oncallstart:str, oncallend:str);
+
+table df_nurse(df_nurse);
+table df_on_call(df_on_call);
+
+query q1
+`select distinct t1.name
+from df_nurse as t1
+join df_on_call as t2 on t1.employeeid = t2.df_nurse`;
+
+query q2
+`select distinct name
+from
+  (select lhs.employeeid as employeeid,
+          lhs.name as name,
+          lhs.position as position,
+          lhs.registered as registered,
+          lhs.ssn as ssn,
+          rhs.nurse as nurse,
+          rhs.blockfloor as blockfloor,
+          rhs.blockcode as blockcode,
+          rhs.oncallstart as oncallstart,
+          rhs.oncallend as oncallend
+   from df_nurse as lhs
+   cross join df_on_call as rhs)`;
+
+verify q1 q2;

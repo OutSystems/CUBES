@@ -1,0 +1,29 @@
+schema df_customers(customer_id:int, customer_type_code:str, address_line_1:str, address_line_2:str, town_city:str, state:str, email_address:str, phone_number:str);
+
+table df_customers(df_customers);
+
+query q1
+`select count(*)
+from df_customers df_customers
+group by customer_type_code
+
+limit 1`;
+
+query q2
+`select t3.count_state
+ from
+  (select *
+       from
+        (select
+            t6.customer_type_code, count(t6.state) as count_state
+          from
+            input as t6
+          group by
+            t6.customer_type_code) as t4
+       where t4.count_state = 6.0) join 
+      (select
+            count(t5.email_address) as count_email_address
+          from
+            input as t5) as t1 as t2 as t3`;
+
+verify q1 q2;

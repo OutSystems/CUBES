@@ -1,0 +1,35 @@
+schema df_department(departmentid:int, name:str, head:int);
+
+table df_department(df_department);
+
+query q1
+`select head
+from df_department df_department
+group by departmentid
+
+limit 1`;
+
+query q2
+`select head
+from
+  (select mindepartmentid as departmentid,
+          name,
+          head,
+          mindepartmentid,
+          name.other
+   from
+     (select lhs.departmentid as departmentid,
+             lhs.name as name,
+             lhs.head as head,
+             lhs.mindepartmentid as mindepartmentid,
+             rhs.name as name.other
+      from
+        (select departmentid,
+                name,
+                head,
+                min(departmentid) over () as mindepartmentid
+         from df_department df_department) as lhs
+      inner join df_department as rhs on (lhs.head = rhs.head
+                                          and lhs.mindepartmentid = rhs.departmentid)))`;
+
+verify q1 q2;

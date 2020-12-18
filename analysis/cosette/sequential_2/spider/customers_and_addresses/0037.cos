@@ -1,0 +1,96 @@
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_orders(order_id:int, customer_id:int, order_status:str, order_date:str, order_details:str);
+
+table df_customers(df_customers);
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_customer_orders as t2 on t1.customer_id = t2.customer_id
+
+limit 1`;
+
+query q2
+`select distinct customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.payment_method as payment_method,
+          lhs.customer_name as customer_name,
+          lhs.date_became_customer as date_became_customer,
+          lhs.other_customer_details as other_customer_details,
+          lhs.order_id as order_id,
+          lhs.order_status as order_status,
+          lhs.order_date as order_date,
+          lhs.order_details as order_details,
+          lhs.maxorder_date as maxorder_date,
+          rhs.customer_id as customer_id.other,
+          rhs.payment_method as payment_method.other,
+          rhs.customer_name as customer_name.other,
+          rhs.date_became_customer as date_became_customer.other,
+          rhs.other_customer_details as other_customer_details.other,
+          rhs.order_id as order_id.other,
+          rhs.order_status as order_status.other,
+          rhs.order_date as order_date.other,
+          rhs.order_details as order_details.other,
+          rhs.maxorder_date as maxorder_date.other
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.date_became_customer as date_became_customer,
+             lhs.other_customer_details as other_customer_details,
+             lhs.order_id as order_id,
+             lhs.order_status as order_status,
+             lhs.order_date as order_date,
+             lhs.order_details as order_details,
+             rhs.maxorder_date as maxorder_date
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method as payment_method,
+                lhs.customer_name as customer_name,
+                lhs.date_became_customer as date_became_customer,
+                lhs.other_customer_details as other_customer_details,
+                rhs.order_id as order_id,
+                rhs.order_status as order_status,
+                rhs.order_date as order_date,
+                rhs.order_details as order_details
+         from df_customers as lhs
+         inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join
+        (select order_details,
+                max(order_date) as maxorder_date
+         from df_customer_orders df_customer_orders
+         group by order_details) as rhs on (lhs.order_details = rhs.order_details)) as lhs
+   cross join
+     (select lhs.customer_id as customer_id,
+             lhs.payment_method as payment_method,
+             lhs.customer_name as customer_name,
+             lhs.date_became_customer as date_became_customer,
+             lhs.other_customer_details as other_customer_details,
+             lhs.order_id as order_id,
+             lhs.order_status as order_status,
+             lhs.order_date as order_date,
+             lhs.order_details as order_details,
+             rhs.maxorder_date as maxorder_date
+      from
+        (select lhs.customer_id as customer_id,
+                lhs.payment_method as payment_method,
+                lhs.customer_name as customer_name,
+                lhs.date_became_customer as date_became_customer,
+                lhs.other_customer_details as other_customer_details,
+                rhs.order_id as order_id,
+                rhs.order_status as order_status,
+                rhs.order_date as order_date,
+                rhs.order_details as order_details
+         from df_customers as lhs
+         inner join df_customer_orders as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+      inner join
+        (select order_details,
+                max(order_date) as maxorder_date
+         from df_customer_orders df_customer_orders
+         group by order_details) as rhs on (lhs.order_details = rhs.order_details)) as rhs)
+where (order_date >= maxorder_date
+       and order_date > maxorder_date.other)`;
+
+verify q1 q2;

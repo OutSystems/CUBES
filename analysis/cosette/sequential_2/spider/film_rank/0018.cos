@@ -1,0 +1,24 @@
+schema df_film(film_id:int, title:str, studio:str, director:str, gross_in_dollar:int);
+schema df_film_market_estimation(estimation_id:int, low_estimate:str, high_estimate:str, film_id:int, type:str, market_id:int, year:int);
+
+table df_film(df_film);
+table df_film_market_estimation(df_film_market_estimation);
+
+query q1
+`select title
+from df_film df_film
+where film_id not in
+    (select film_id
+     from df_film_market_estimation df_film_market_estimation)`;
+
+query q2
+`select title
+from
+  (select *
+   from df_film as lhs
+   where not exists
+       (select 1
+        from df_film_market_estimation as rhs
+        where (lhs.film_id = rhs.film_id) ))`;
+
+verify q1 q2;

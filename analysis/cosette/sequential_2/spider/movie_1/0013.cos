@@ -1,0 +1,24 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_rating(df_rating);
+
+query q1
+`select title
+from df_movie df_movie
+where mid not in
+    (select mid
+     from df_rating df_rating)`;
+
+query q2
+`select title
+from
+  (select *
+   from df_movie as lhs
+   where not exists
+       (select 1
+        from df_rating as rhs
+        where (lhs.mid = rhs.mid) ))`;
+
+verify q1 q2;

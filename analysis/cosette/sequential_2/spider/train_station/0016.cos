@@ -1,0 +1,38 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train(train_id:int, name:str, time:str, service:str);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train(df_train);
+table df_train_station(df_train_station);
+
+query q1
+`select t3.name,
+       t3.time
+from df_train_station as t1
+join df_station as t2 on t1.station_id = t2.station_id
+join df_train as t3 on t3.train_id = t1.train_id
+where t2.location = 'london'`;
+
+query q2
+`select name,
+       time
+from
+  (select lhs.train_id as train_id,
+          lhs.station_id as station_id,
+          rhs.name as name,
+          rhs.time as time,
+          rhs.service as service
+   from
+     (select *
+      from df_train_station as lhs
+      where not exists
+          (select 1
+           from
+             (select *
+              from df_station df_station
+              where (location != 'london')) as rhs
+           where (lhs.station_id = rhs.station_id) )) as lhs
+   inner join df_train as rhs on (lhs.train_id = rhs.train_id))`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+
+table df_claims(df_claims);
+
+query q1
+`select amount_settled,
+       amount_claimed
+from df_claims df_claims
+
+limit 1`;
+
+query q2
+`select t2.amount_settled,t2.amount_claimed
+ from
+  (select
+          max(t3.policy_id) as max_policy_id
+        from
+          input as t3) as t1 join 
+      input as t4 as t2
+ where t2.max_policy_id = t2.policy_id`;
+
+verify q1 q2;

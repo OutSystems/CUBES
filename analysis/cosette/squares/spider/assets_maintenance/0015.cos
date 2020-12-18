@@ -1,0 +1,39 @@
+schema df_maintenance_engineers(engineer_id:int, company_id:int, first_name:str, last_name:str, other_details:str);
+schema df_engineer_visits(engineer_visit_id:int, contact_staff_id:int, engineer_id:int, fault_log_entry_id:int, fault_status:str, visit_start_datetime:str, visit_end_datetime:str, other_visit_details:str);
+
+table df_maintenance_engineers(df_maintenance_engineers);
+table df_engineer_visits(df_engineer_visits);
+
+query q1
+`select first_name,
+       last_name
+from df_maintenance_engineers df_maintenance_engineers
+where engineer_id not in
+    (select engineer_id
+     from df_engineer_visits df_engineer_visits)`;
+
+query q2
+`joining, by = "engineer_id"
+joining, by = "engineer_id"
+select first_name,
+       last_name
+from
+  (select engineer_id,
+          company_id,
+          first_name,
+          last_name,
+          other_details
+   from
+     (select *
+      from
+        (select engineer_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select engineer_id
+              from input1) as rhs
+           where (lhs.engineer_id = rhs.engineer_id) )) as lhs
+   left join input0 as rhs on (lhs.engineer_id = rhs.engineer_id))`;
+
+verify q1 q2;

@@ -1,0 +1,34 @@
+schema df_shop(shop_id:int, address:str, num_of_staff:int, score:str, open_year:int);
+schema df_happy_hour(hh_id:int, shop_id:int, month:str, num_of_shaff_in_charge:int);
+
+table df_shop(df_shop);
+table df_happy_hour(df_happy_hour);
+
+query q1
+`select address,
+       num_of_staff
+from df_shop df_shop
+where shop_id not in
+    (select shop_id
+     from df_happy_hour df_happy_hour)`;
+
+query q2
+`select t1.address,t1.max_num_of_staff
+ from
+  (select t4.score, t4.open_year, t4.max_num_of_staff, t2.shop_id, t2.address, t2.num_of_staff, t2.score as score1, t2.open_year as open_year1
+  from (select
+          t3.score, t3.open_year, max(t3.num_of_staff) as max_num_of_staff
+        from
+          (select *
+             from
+              input
+             where input.shop_id < 10.0) as t3
+        group by
+          t3.score, t3.open_year) as t4 join 
+      (select *
+         from
+          input
+         where input.shop_id >= 4.0) as t2) as t1
+ where t1.max_num_of_staff = t1.num_of_staff`;
+
+verify q1 q2;

@@ -1,0 +1,23 @@
+schema df_addresses(address_id:int, line_1_number_building:str, town_city:str, zip_postcode:int, state_province_county:str, country:str);
+
+table df_addresses(df_addresses);
+
+query q1
+`select state_province_county
+from df_addresses df_addresses
+where line_1_number_building like "%6862 kaitlyn knolls%"`;
+
+query q2
+`select t1.state_province_county1
+ from
+  (select t4.state_province_county, t4.country, t4.sum_address_id, t3.address_id, t3.line_1_number_building, t3.town_city, t3.zip_postcode, t3.state_province_county as state_province_county1, t3.country as country1
+  from (select
+          t2.state_province_county, t2.country, sum(t2.address_id) as sum_address_id
+        from
+          input as t2
+        group by
+          t2.state_province_county, t2.country) as t4 join 
+      input as t3) as t1
+ where t1.sum_address_id = t1.zip_postcode`;
+
+verify q1 q2;

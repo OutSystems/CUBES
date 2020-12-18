@@ -1,0 +1,42 @@
+schema df_program(program_id:int, name:str, origin:str, launch:str, owner:str);
+schema df_broadcast(channel_id:int, program_id:int, time_of_day:str);
+
+table df_program(df_program);
+table df_broadcast(df_broadcast);
+
+query q1
+`select name
+from df_program df_program
+except
+select t1.name
+from df_program as t1
+join df_broadcast as t2 on t1.program_id = t2.program_id
+where t2.time_of_day = "morning"`;
+
+query q2
+`joining, by = "program_id"
+joining, by = "name"
+select distinct name
+from
+  (select *
+   from
+     (select name
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select name
+           from
+             (select channel_id,
+                     program_id,
+                     time_of_day,
+                     name,
+                     origin,
+                     launch,
+                     owner
+              from input1 as lhs
+              inner join input0 as rhs on (lhs.program_id = rhs.program_id))
+           where (time_of_day = 'morning')) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

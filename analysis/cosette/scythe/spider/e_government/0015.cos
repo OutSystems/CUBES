@@ -1,0 +1,31 @@
+schema df_organizations(organization_id:int, date_formed:str, organization_name:str, uk_vat_number:int);
+
+table df_organizations(df_organizations);
+
+query q1
+`select organization_name
+from df_organizations df_organizations
+where organization_name like "%party%"`;
+
+query q2
+`select * from 
+(select t1.organization_name
+   from
+    (select
+            min(t6.organization_id) as min_organization_id
+          from
+            input as t6) as t4 join 
+        input as t5 as t1
+   where t1.min_organization_id = t1.organization_id)
+union all 
+ select * from
+  (select t2.organization_name
+   from
+    (select
+            min(t8.date_formed) as min_date_formed
+          from
+            input as t8) as t7 join 
+        input as t3 as t2
+   where t2.min_date_formed = t2.date_formed)`;
+
+verify q1 q2;

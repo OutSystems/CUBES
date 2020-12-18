@@ -1,0 +1,27 @@
+schema df_047(ID:str, Payment_type:str, Time:str);
+
+table df_047(df_047);
+
+query q1
+`select id, payment_type, time
+from (select id, payment_type, time, count(*) as cnt,
+             row_number() over (partition by id 
+      from t
+      group by id, payment_type, time
+     ) ipt
+where seqnum = 1`;
+
+query q2
+`select t1.id1,t1.payment_type
+ from
+  (select t3.id, t3.payment_type, t3.time, t2.id as id1, t2.payment_type as payment_type1, t2.time as time1
+  from (select
+          t4.id, t4.payment_type, t4.time, from
+          input as t4
+        group by
+          t4.id, t4.payment_type, t4.time) as t3 join 
+      input as t2) as t1
+ where t1.time > t1.time1
+   and t1.payment_type = t1.payment_type1`;
+
+verify q1 q2;

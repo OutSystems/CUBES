@@ -1,0 +1,30 @@
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select count(*),
+       t1.name
+from df_projects as t1
+join df_assignedto as t2 on t1.code = t2.project
+where t1.hours > 300
+group by t1.name`;
+
+query q2
+`select t2.count_scientist,t2.name
+ from
+  (select
+          t3.project, count(t3.scientist) as count_scientist
+        from
+          input0 as t3
+        group by
+          t3.project) as t4 join 
+      (select *
+         from
+          input
+         where input.hours > 300.0) as t1 as t2
+ where t2.project = t2.code`;
+
+verify q1 q2;

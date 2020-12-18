@@ -1,0 +1,26 @@
+schema df_grants(grant_id:int, organisation_id:int, grant_amount:str, grant_start_date:str, grant_end_date:str, other_details:str);
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+
+table df_grants(df_grants);
+table df_organisations(df_organisations);
+
+query q1
+`select t2.organisation_id,
+       t2.organisation_details
+from df_grants as t1
+join df_organisations as t2 on t1.organisation_id = t2.organisation_id
+group by t2.organisation_id
+having sum(t1.grant_amount) > 6000`;
+
+query q2
+`select t2.organisation_id,t2.organisation_details
+ from
+  (select input.grant_id, input.organisation_id, input.grant_amount, input.grant_start_date, input.grant_end_date, input.other_details, t1.organisation_id as organisation_id1, t1.organisation_type, t1.organisation_details
+  from (select *
+       from
+        input
+       where input.grant_amount > 6000.0) join 
+      input0 as t1) as t2
+ where t2.organisation_id = t2.organisation_id1`;
+
+verify q1 q2;

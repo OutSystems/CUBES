@@ -1,0 +1,41 @@
+schema df_products(product_id:int, parent_product_id:int, production_type_code:str, unit_price:str, product_name:str, product_color:str, product_size:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, product_quantity:int, other_order_item_details:str);
+
+table df_products(df_products);
+table df_order_items(df_order_items);
+
+query q1
+`select count(*)
+from df_products df_products
+where product_id not in
+    (select product_id
+     from df_order_items df_order_items)`;
+
+query q2
+`select parent_product_id as count...
+from
+  (select parent_product_id,
+          unit_price,
+          n_distinct,
+          order_item_id,
+          order_id,
+          other_order_item_details,
+          parent_product_id as product_id
+   from
+     (select lhs.parent_product_id as parent_product_id,
+             lhs.unit_price as unit_price,
+             lhs.n_distinct as n_distinct,
+             rhs.order_item_id as order_item_id,
+             rhs.order_id as order_id,
+             rhs.other_order_item_details as other_order_item_details
+      from
+        (select parent_product_id,
+                unit_price,
+                count(distinct product_id) as n_distinct
+         from df_products df_products
+         group by parent_product_id,
+                  unit_price) as lhs
+      inner join df_order_items as rhs on (lhs.parent_product_id = rhs.product_id
+                                           and lhs.n_distinct = rhs.product_quantity)))`;
+
+verify q1 q2;

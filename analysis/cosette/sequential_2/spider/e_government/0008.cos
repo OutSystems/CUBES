@@ -1,0 +1,60 @@
+schema df_individuals(individual_id:int, individual_first_name:str, individual_middle_name:str, inidividual_phone:str, individual_email:str, individual_address:str, individual_last_name:str);
+schema df_organizations(organization_id:int, date_formed:str, organization_name:str, uk_vat_number:int);
+schema df_organization_contact_individuals(individual_id:int, organization_id:int, date_contact_from:str, date_contact_to:str);
+
+table df_individuals(df_individuals);
+table df_organizations(df_organizations);
+table df_organization_contact_individuals(df_organization_contact_individuals);
+
+query q1
+`select t3.individual_last_name
+from df_organizations as t1
+join df_organization_contact_individuals as t2 on t1.organization_id = t2.organization_id
+join df_individuals as t3 on t2.individual_id = t3.individual_id
+where t1.organization_name = "labour party"
+
+limit 1`;
+
+query q2
+`select individual_last_name
+from
+  (select lhs.individual_id as individual_id,
+          lhs.individual_first_name as individual_first_name,
+          lhs.individual_middle_name as individual_middle_name,
+          lhs.inidividual_phone as inidividual_phone,
+          lhs.individual_email as individual_email,
+          lhs.individual_address as individual_address,
+          lhs.individual_last_name as individual_last_name,
+          lhs.organization_id as organization_id,
+          lhs.date_formed as date_formed,
+          lhs.organization_name as organization_name,
+          lhs.uk_vat_number as uk_vat_number,
+          rhs.date_contact_from as date_contact_from,
+          rhs.date_contact_to as date_contact_to,
+          rhs.maxdate_contact_to as maxdate_contact_to
+   from
+     (select lhs.individual_id as individual_id,
+             lhs.individual_first_name as individual_first_name,
+             lhs.individual_middle_name as individual_middle_name,
+             lhs.inidividual_phone as inidividual_phone,
+             lhs.individual_email as individual_email,
+             lhs.individual_address as individual_address,
+             lhs.individual_last_name as individual_last_name,
+             rhs.organization_id as organization_id,
+             rhs.date_formed as date_formed,
+             rhs.organization_name as organization_name,
+             rhs.uk_vat_number as uk_vat_number
+      from df_individuals as lhs
+      cross join df_organizations as rhs) as lhs
+   inner join
+     (select individual_id,
+             organization_id,
+             date_contact_from,
+             date_contact_to,
+             max(date_contact_to) over () as maxdate_contact_to
+      from df_organization_contact_individuals df_organization_contact_individuals) as rhs on (lhs.individual_id = rhs.individual_id
+                                                               and lhs.organization_id = rhs.organization_id))
+where (organization_name = 'labour party'
+       and maxdate_contact_to <= date_contact_to)`;
+
+verify q1 q2;

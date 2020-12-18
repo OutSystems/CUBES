@@ -1,0 +1,57 @@
+schema df_16_1(S_key:str, P_id:str);
+schema df_16_2(P_id:str, P_name:str);
+schema df_16_3(S_key:str, S_name:str);
+
+table df_16_1(df_16_1);
+table df_16_2(df_16_2);
+table df_16_3(df_16_3);
+
+query q1
+`select p_name
+   from df_16_2 as lhs
+   where not exists
+       (select 1
+        from
+          (select p_id,
+                  s_key,
+                  count(*) as n
+           from
+             (select lhs.s_key as s_key,
+                     lhs.p_id as p_id,
+                     lhs.s_name as s_name
+              from
+                (select lhs.s_key as s_key,
+                        lhs.p_id as p_id,
+                        rhs.s_name as s_name
+                 from df_16_1 as lhs
+                 inner join df_16_3 as rhs on (lhs.s_key = rhs.s_key)) as lhs
+              inner join
+                (select *
+                 from df_16_3 df_16_3
+                 where (s_name != 'aws')) as rhs on (lhs.s_key = rhs.s_key
+                                                       and lhs.s_name = rhs.s_name))
+           group by p_id,
+                    s_key) as rhs
+        where (lhs.p_id = rhs.p_id) )`;
+
+query q2
+`select t3.p_name
+ from
+  (select t5.p_id, t5.first_s_key, t5.s_key, t5.s_name, t4.p_id as p_id1, t4.p_name
+  from (select *
+       from
+        (select
+                t2.p_id, first(t2.s_key) as first_s_key
+              from
+                input as t2
+              group by
+                t2.p_id) as t7 join 
+            (select *
+               from
+                input1
+               where input1.s_name = 'aws') as t6 as t5
+       where t5.first_s_key = t5.s_key) join 
+      input0 as t4) as t3
+ where t3.p_id = t3.p_id1`;
+
+verify q1 q2;

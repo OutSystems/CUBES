@@ -1,0 +1,50 @@
+schema df_genre(genreid:int, name:str);
+schema df_track(trackid:int, name:str, albumid:int, mediatypeid:int, genreid:int, composer:str, milliseconds:int, bytes:int, unitprice:str);
+
+table df_genre(df_genre);
+table df_track(df_track);
+
+query q1
+`select t1.name
+from df_genre as t1
+join df_track as t2 on t1.genreid = t2.genreid
+group by t2.genreid
+
+limit 1`;
+
+query q2
+`select distinct name.other as name
+from
+  (select trackid,
+          name,
+          albumid,
+          mediatypeid,
+          genreid,
+          composer,
+          milliseconds,
+          bytes,
+          unitprice,
+          name.other,
+          albumid as n
+   from
+     (select lhs.trackid as trackid,
+             lhs.name as name,
+             lhs.albumid as albumid,
+             lhs.mediatypeid as mediatypeid,
+             lhs.genreid as genreid,
+             lhs.composer as composer,
+             lhs.milliseconds as milliseconds,
+             lhs.bytes as bytes,
+             lhs.unitprice as unitprice,
+             rhs.name as name.other
+      from df_track as lhs
+      inner join
+        (select genreid,
+                name,
+                count(*) as n
+         from df_genre df_genre
+         group by genreid,
+                  name) as rhs on (lhs.albumid = rhs.n
+                                   and lhs.mediatypeid = rhs.genreid)))`;
+
+verify q1 q2;

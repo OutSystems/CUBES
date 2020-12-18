@@ -1,0 +1,41 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_rating(df_rating);
+
+query q1
+`select t2.title
+from df_rating as t1
+join df_movie as t2 on t1.mid = t2.mid
+where t1.stars between 3 and 5`;
+
+query q2
+`joining, by = c("rid", "mid", "stars", "ratingdate")
+joining, by = "mid"
+select title
+from
+  (select rid,
+          mid,
+          stars,
+          ratingdate,
+          title,
+          year,
+          director
+   from
+     (select rid,
+             mid,
+             stars,
+             ratingdate
+      from
+        (select *
+         from input1
+         where (stars = 5.0
+                or stars >= 3.0)) as lhs
+      inner join input1 as rhs on (lhs.rid = rhs.rid
+                                       and lhs.mid = rhs.mid
+                                       and lhs.stars = rhs.stars
+                                       and lhs.ratingdate = rhs.ratingdate)) as lhs
+   inner join input0 as rhs on (lhs.mid = rhs.mid))`;
+
+verify q1 q2;

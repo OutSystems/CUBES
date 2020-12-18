@@ -1,0 +1,41 @@
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_document_locations(df_document_locations);
+
+query q1
+`select location_code
+from df_document_locations df_document_locations
+group by location_code
+
+limit 1`;
+
+query q2
+`joining, by = "date_in_location_from"
+joining, by = c("location_code", "n")
+select distinct location_code
+from
+  (select document_id,
+          location_code,
+          date_in_location_from,
+          date_in_locaton_to,
+          n
+   from
+     (select document_id,
+             location_code,
+             date_in_location_from,
+             date_in_locaton_to,
+             n
+      from input0 as lhs
+      inner join
+        (select date_in_location_from,
+                count(*) as n
+         from input0
+         group by date_in_location_from) as rhs on (lhs.date_in_location_from = rhs.date_in_location_from)) as lhs
+   inner join
+     (select location_code,
+             count(*) as n
+      from input0
+      group by location_code) as rhs on (lhs.location_code = rhs.location_code
+                                             and lhs.n = rhs.n))`;
+
+verify q1 q2;

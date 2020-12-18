@@ -1,0 +1,28 @@
+schema df_list(lastname:str, firstname:str, grade:int, classroom:int);
+schema df_teachers(lastname:str, firstname:str, classroom:int);
+
+table df_list(df_list);
+table df_teachers(df_teachers);
+
+query q1
+`select distinct t2.firstname
+from df_list as t1
+join df_teachers as t2 on t1.classroom = t2.classroom
+where grade = 1`;
+
+query q2
+`select t3.firstname
+ from
+  (select t2.classroom, t4.lastname, t4.firstname, t4.classroom as classroom1
+  from (select
+          t1.classroom, from
+          (select *
+             from
+              input
+             where input.grade = 1.0) as t1
+        group by
+          t1.classroom) as t2 join 
+      input0 as t4) as t3
+ where t3.classroom = t3.classroom1`;
+
+verify q1 q2;

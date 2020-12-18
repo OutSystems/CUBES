@@ -1,0 +1,20 @@
+schema df_project_outcomes(project_id:int, outcome_code:str, outcome_details:str);
+schema df_projects(project_id:int, organisation_id:int, project_details:str);
+schema df_research_outcomes(outcome_code:str, outcome_description:str);
+
+table df_project_outcomes(df_project_outcomes);
+table df_projects(df_projects);
+table df_research_outcomes(df_research_outcomes);
+
+query q1
+`select t1.project_details
+from df_projects as t1
+join df_project_outcomes as t2 on t1.project_id = t2.project_id
+join df_research_outcomes as t3 on t2.outcome_code = t3.outcome_code
+where t3.outcome_description like '%published%'`;
+
+query q2
+`joining, by = "outcome_code"
+joining, by = "project_id"`;
+
+verify q1 q2;

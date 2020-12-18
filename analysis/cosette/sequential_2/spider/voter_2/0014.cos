@@ -1,0 +1,34 @@
+schema df_voting_record(stuid:int, registration_date:str, election_cycle:str, president_vote:int, vice_president_vote:int, secretary_vote:int, treasurer_vote:int, class_president_vote:int, class_senator_vote:int);
+
+table df_voting_record(df_voting_record);
+
+query q1
+`select distinct president_vote,
+                vice_president_vote
+from df_voting_record df_voting_record`;
+
+query q2
+`select distinct president_vote,
+                vice_president_vote
+from
+  (select lhs.stuid as stuid,
+          lhs.registration_date as registration_date,
+          lhs.election_cycle as election_cycle,
+          lhs.president_vote as president_vote,
+          lhs.vice_president_vote as vice_president_vote,
+          lhs.secretary_vote as secretary_vote,
+          lhs.treasurer_vote as treasurer_vote,
+          lhs.class_president_vote as class_president_vote,
+          lhs.class_senator_vote as class_senator_vote,
+          rhs.stuid as stuid.other,
+          rhs.registration_date as registration_date.other,
+          rhs.president_vote as president_vote.other,
+          rhs.vice_president_vote as vice_president_vote.other,
+          rhs.secretary_vote as secretary_vote.other,
+          rhs.class_president_vote as class_president_vote.other,
+          rhs.class_senator_vote as class_senator_vote.other
+   from df_voting_record as lhs
+   inner join df_voting_record as rhs on (lhs.election_cycle = rhs.election_cycle
+                                          and lhs.treasurer_vote = rhs.treasurer_vote))`;
+
+verify q1 q2;

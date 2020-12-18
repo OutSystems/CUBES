@@ -1,0 +1,54 @@
+schema df_addresses(address_id:int, address_details:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, customer_phone:str, customer_email:str, date_became_customer:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_from:str, address_type:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t1.customer_name,
+       t1.customer_phone
+from df_customers as t1
+join df_customer_addresses as t2 on t1.customer_id = t2.customer_id
+join df_addresses as t3 on t2.address_id = t3.address_id
+where t3.state_province_county = 'california'`;
+
+query q2
+`joining, by = "address_id"
+joining, by = "customer_id"
+select customer_name,
+       customer_phone
+from
+  (select customer_id,
+          address_id,
+          date_from,
+          address_type,
+          date_to,
+          address_details,
+          city,
+          zip_postcode,
+          state_province_county,
+          country,
+          payment_method,
+          customer_name,
+          customer_phone,
+          customer_email,
+          date_became_customer
+   from
+     (select customer_id,
+             address_id,
+             date_from,
+             address_type,
+             date_to,
+             address_details,
+             city,
+             zip_postcode,
+             state_province_county,
+             country
+      from input2 as lhs
+      inner join input0 as rhs on (lhs.address_id = rhs.address_id)) as lhs
+   inner join input1 as rhs on (lhs.customer_id = rhs.customer_id))
+where (state_province_county = 'california')`;
+
+verify q1 q2;

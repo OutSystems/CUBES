@@ -1,0 +1,30 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+
+table df_station(df_station);
+
+query q1
+`select location,
+       sum(number_of_platforms),
+       sum(total_passengers)
+from df_station df_station
+group by location`;
+
+query q2
+`select t4.location,t4.sum_number_of_platforms,t4.sum_total_passengers
+ from
+  (select t3.location, t3.sum_total_passengers, t5.location as location1, t5.sum_number_of_platforms
+  from (select
+          t1.location, sum(t1.total_passengers) as sum_total_passengers
+        from
+          input as t1
+        group by
+          t1.location) as t3 join 
+      (select
+            t6.location, sum(t6.number_of_platforms) as sum_number_of_platforms
+          from
+            input as t6
+          group by
+            t6.location) as t2 as t5) as t4
+ where t4.location = t4.location1`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+
+table df_railway(df_railway);
+
+query q1
+`select builder
+from df_railway df_railway
+group by builder
+
+limit 1`;
+
+query q2
+`select distinct builder
+from
+  (select lhs.builder as builder,
+          lhs.n as n,
+          rhs.builder as builder.other,
+          rhs.n as n.other
+   from
+     (select builder,
+             count(*) as n
+      from df_railway df_railway
+      group by builder) as lhs
+   cross join
+     (select builder,
+             count(*) as n
+      from df_railway df_railway
+      group by builder) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

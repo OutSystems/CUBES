@@ -1,0 +1,34 @@
+schema df_school(school_id:int, school_name:str, location:str, mascot:str, enrollment:int, ihsaa_class:str, ihsaa_football_class:str, county:str);
+
+table df_school(df_school);
+
+query q1
+`select school_name,
+       location,
+       mascot
+from df_school df_school`;
+
+query q2
+`select distinct school_name,
+                location,
+                mascot
+from
+  (select lhs.school_id as school_id,
+          lhs.school_name as school_name,
+          lhs.location as location,
+          lhs.mascot as mascot,
+          lhs.enrollment as enrollment,
+          lhs.ihsaa_class as ihsaa_class,
+          lhs.ihsaa_football_class as ihsaa_football_class,
+          lhs.county as county,
+          rhs.school_id as school_id.other,
+          rhs.school_name as school_name.other,
+          rhs.location as location.other,
+          rhs.mascot as mascot.other,
+          rhs.enrollment as enrollment.other,
+          rhs.ihsaa_class as ihsaa_class.other,
+          rhs.county as county.other
+   from df_school as lhs
+   inner join df_school as rhs on (lhs.ihsaa_class = rhs.ihsaa_football_class))`;
+
+verify q1 q2;

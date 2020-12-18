@@ -1,0 +1,34 @@
+schema df_roller_coaster(roller_coaster_id:int, name:str, park:str, country_id:int, length:str, height:str, speed:str, opened:str, status:str);
+
+table df_roller_coaster(df_roller_coaster);
+
+query q1
+`select park
+from df_roller_coaster df_roller_coaster
+
+limit 1`;
+
+query q2
+`select park
+from
+  (select lhs.roller_coaster_id as roller_coaster_id,
+          lhs.name as name,
+          lhs.park as park,
+          lhs.country_id as country_id,
+          lhs.length as length,
+          lhs.height as height,
+          lhs.speed as speed,
+          lhs.opened as opened,
+          lhs.status as status,
+          rhs.opened as opened.other
+   from df_roller_coaster as lhs
+   inner join
+     (select opened,
+             status,
+             max(speed) as maxspeed
+      from df_roller_coaster df_roller_coaster
+      group by opened,
+               status) as rhs on (lhs.status = rhs.status
+                                  and lhs.speed = rhs.maxspeed))`;
+
+verify q1 q2;

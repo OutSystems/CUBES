@@ -1,0 +1,45 @@
+schema df_ref_detention_type(detention_type_code:str, detention_type_description:str);
+schema df_detention(detention_id:int, detention_type_code:str, teacher_id:int, datetime_detention_start:str, datetime_detention_end:str, detention_summary:str, other_details:str);
+
+table df_ref_detention_type(df_ref_detention_type);
+table df_detention(df_detention);
+
+query q1
+`select t1.detention_type_code,
+       t2.detention_type_description
+from df_detention as t1
+join df_ref_detention_type as t2 on t1.detention_type_code = t2.detention_type_code
+group by t1.detention_type_code
+
+limit 1`;
+
+query q2
+`select detention_type_code,
+       detention_type_description
+from
+  (select lhs.detention_summary as detention_summary,
+          lhs.detention_type_code as detention_type_code,
+          lhs.n as n,
+          lhs.detention_type_description as detention_type_description,
+          rhs.detention_id as detention_id,
+          rhs.datetime_detention_start as datetime_detention_start,
+          rhs.datetime_detention_end as datetime_detention_end,
+          rhs.detention_summary as detention_summary.other,
+          rhs.other_details as other_details
+   from
+     (select lhs.detention_summary as detention_summary,
+             lhs.detention_type_code as detention_type_code,
+             lhs.n as n,
+             rhs.detention_type_description as detention_type_description
+      from
+        (select detention_summary,
+                detention_type_code,
+                count(*) as n
+         from df_detention df_detention
+         group by detention_summary,
+                  detention_type_code) as lhs
+      left join df_ref_detention_type as rhs on (lhs.detention_type_code = rhs.detention_type_code)) as lhs
+   inner join df_detention as rhs on (lhs.n = rhs.teacher_id
+                                      and lhs.detention_type_code = rhs.detention_type_code))`;
+
+verify q1 q2;

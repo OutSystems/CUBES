@@ -1,0 +1,34 @@
+schema df_candidate(candidate_id:int, people_id:int, poll_source:str, date:str, support_rate:str, consider_rate:str, oppose_rate:str, unsure_rate:str);
+
+table df_candidate(df_candidate);
+
+query q1
+`select support_rate,
+       consider_rate,
+       oppose_rate
+from df_candidate df_candidate`;
+
+query q2
+`select support_rate,
+       consider_rate,
+       oppose_rate
+from
+  (select lhs.candidate_id as candidate_id,
+          lhs.people_id as people_id,
+          lhs.poll_source as poll_source,
+          lhs.date as date,
+          lhs.support_rate as support_rate,
+          lhs.consider_rate as consider_rate,
+          lhs.oppose_rate as oppose_rate,
+          lhs.unsure_rate as unsure_rate,
+          rhs.people_id as people_id.other,
+          rhs.poll_source as poll_source.other,
+          rhs.support_rate as support_rate.other,
+          rhs.consider_rate as consider_rate.other,
+          rhs.oppose_rate as oppose_rate.other,
+          rhs.unsure_rate as unsure_rate.other
+   from df_candidate as lhs
+   inner join df_candidate as rhs on (lhs.candidate_id = rhs.candidate_id
+                                      and lhs.date = rhs.date))`;
+
+verify q1 q2;

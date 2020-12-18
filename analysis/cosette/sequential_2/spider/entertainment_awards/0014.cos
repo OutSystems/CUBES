@@ -1,0 +1,54 @@
+schema df_festival_detail(festival_id:int, festival_name:str, chair_name:str, location:str, year:int, num_of_audience:int);
+schema df_artwork(artwork_id:int, type:str, name:str);
+schema df_nomination(artwork_id:int, festival_id:int, result:str);
+
+table df_festival_detail(df_festival_detail);
+table df_artwork(df_artwork);
+table df_nomination(df_nomination);
+
+query q1
+`select t1.festival_id,
+       t3.festival_name
+from df_nomination as t1
+join df_artwork as t2 on t1.artwork_id = t2.artwork_id
+join df_festival_detail as t3 on t1.festival_id = t3.festival_id
+group by t1.festival_id
+having count(*) >= 2`;
+
+query q2
+`select festival_id,
+       festival_name
+from
+  (select festival_id,
+          festival_name,
+          count(*) as n
+   from
+     (select lhs.festival_id as festival_id,
+             lhs.festival_name as festival_name,
+             lhs.chair_name as chair_name,
+             lhs.location as location,
+             lhs.year as year,
+             lhs.num_of_audience as num_of_audience,
+             lhs.artwork_id as artwork_id,
+             lhs.type as type,
+             lhs.name as name,
+             rhs.result as result
+      from
+        (select lhs.festival_id as festival_id,
+                lhs.festival_name as festival_name,
+                lhs.chair_name as chair_name,
+                lhs.location as location,
+                lhs.year as year,
+                lhs.num_of_audience as num_of_audience,
+                rhs.artwork_id as artwork_id,
+                rhs.type as type,
+                rhs.name as name
+         from df_festival_detail as lhs
+         cross join df_artwork as rhs) as lhs
+      inner join df_nomination as rhs on (lhs.festival_id = rhs.festival_id
+                                          and lhs.artwork_id = rhs.artwork_id))
+   group by festival_id,
+            festival_name)
+where (n = 2.0)`;
+
+verify q1 q2;

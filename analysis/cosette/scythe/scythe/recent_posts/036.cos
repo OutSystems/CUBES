@@ -1,0 +1,26 @@
+schema df_036_1(Account:int, Sen1:int, Sen2:int);
+schema df_036_2(ID:int, Name:str);
+
+table df_036_1(df_036_1);
+table df_036_2(df_036_2);
+
+query q1
+`select m.account, k.name from table_1 m
+inner join table_2 k on k.id = m.sen1 or k.id = m.sen2`;
+
+query q2
+`select * from 
+(select t1.account,t1.name
+   from
+    input join 
+        input0 as t3 as t1
+   where t1.sen1 = t1.id)
+union all 
+ select * from
+  (select t4.account,t4.name
+   from
+    input join 
+        input0 as t2 as t4
+   where t4.sen2 = t4.id)`;
+
+verify q1 q2;

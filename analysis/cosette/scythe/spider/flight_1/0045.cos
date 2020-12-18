@@ -1,0 +1,28 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+schema df_certificate(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_certificate(df_certificate);
+
+query q1
+`select t2.name
+from df_certificate as t1
+join df_aircraft as t2 on t2.aid = t1.aid
+group by t1.aid
+
+limit 1`;
+
+query q2
+`select t1.name
+ from
+  (select
+          count(t3.eid) as count_eid
+        from
+          (select *
+             from
+              input0
+             where input0.aid = 15.0) as t3) as t4 join 
+      input as t2 as t1
+ where t1.count_eid = t1.aid`;
+
+verify q1 q2;

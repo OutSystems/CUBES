@@ -1,0 +1,40 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm(df_dorm);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select t1.dorm_name
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+join df_dorm_amenity as t3 on t2.amenid = t3.amenid
+where t3.amenity_name = 'tv lounge'
+except
+select t1.dorm_name
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+join df_dorm_amenity as t3 on t2.amenid = t3.amenid
+where t3.amenity_name = 'study room'`;
+
+query q2
+`select t6.first_dorm_name
+ from
+  (select
+          t1.gender, first(t1.dorm_name) as first_dorm_name
+        from
+          (select *
+             from
+              input
+             where input.dormid < input.student_capacity) as t1
+        group by
+          t1.gender) as t3 join 
+      (select
+            first(t5.gender) as first_gender
+          from
+            input as t5) as t4 as t2 as t6
+ where t6.gender = t6.first_gender`;
+
+verify q1 q2;

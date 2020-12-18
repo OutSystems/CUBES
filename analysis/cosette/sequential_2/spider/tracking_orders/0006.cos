@@ -1,0 +1,27 @@
+schema df_customers(customer_id:int, customer_name:str, customer_details:str);
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_customers(df_customers);
+table df_orders(df_orders);
+
+query q1
+`select distinct t1.customer_details
+from df_customers as t1
+join df_orders as t2 on t1.customer_id = t2.customer_id
+where t2.order_status = "on road"`;
+
+query q2
+`select distinct customer_details
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_name as customer_name,
+          lhs.customer_details as customer_details,
+          rhs.order_id as order_id,
+          rhs.order_status as order_status,
+          rhs.date_order_placed as date_order_placed,
+          rhs.order_details as order_details
+   from df_customers as lhs
+   left join df_orders as rhs on (lhs.customer_id = rhs.customer_id))
+where (order_status = 'on road')`;
+
+verify q1 q2;

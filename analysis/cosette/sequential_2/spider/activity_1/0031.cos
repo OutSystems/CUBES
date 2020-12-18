@@ -1,0 +1,39 @@
+schema df_faculty_participates_in(facid:int, actid:int);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_faculty_participates_in(df_faculty_participates_in);
+table df_faculty(df_faculty);
+
+query q1
+`select count(*)
+from df_faculty as t1
+join df_faculty_participates_in as t2 on t1.facid = t2.facid
+where t1.fname = "mark"
+  and t1.lname = "giuliano"`;
+
+query q2
+`select n as count...
+from
+  (select building,
+          lname,
+          count(*) as n
+   from
+     (select lhs.facid as facid,
+             lhs.actid as actid,
+             rhs.lname as lname,
+             rhs.fname as fname,
+             rhs.rank as rank,
+             rhs.sex as sex,
+             rhs.phone as phone,
+             rhs.room as room,
+             rhs.building as building
+      from df_faculty_participates_in as lhs
+      inner join
+        (select *
+         from df_faculty df_faculty
+         where (fname = 'mark'
+                and lname = 'giuliano')) as rhs on (lhs.facid = rhs.facid))
+   group by building,
+            lname)`;
+
+verify q1 q2;

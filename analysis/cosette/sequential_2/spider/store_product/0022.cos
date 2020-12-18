@@ -1,0 +1,60 @@
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+schema df_store_district(store_id:int, district_id:int);
+
+table df_store(df_store);
+table df_district(df_district);
+table df_store_district(df_store_district);
+
+query q1
+`select t3.district_name
+from df_store as t1
+join df_store_district as t2 on t1.store_id = t2.store_id
+join df_district as t3 on t2.district_id = t3.district_id
+where t1.type = "city mall" intersect
+  select t3.district_name
+  from df_store as t1
+  join df_store_district as t2 on t1.store_id = t2.store_id
+  join df_district as t3 on t2.district_id = t3.district_id where t1.type = "village df_store"`;
+
+query q2
+`select district_name
+from
+  (select district_id,
+          district_name,
+          headquartered_city,
+          city_population,
+          city_area,
+          store_id,
+          store_id.other,
+          store_name,
+          type,
+          area_size,
+          number_of_product_category,
+          store_id as ranking
+   from
+     (select lhs.district_id as district_id,
+             lhs.district_name as district_name,
+             lhs.headquartered_city as headquartered_city,
+             lhs.city_population as city_population,
+             lhs.city_area as city_area,
+             lhs.store_id as store_id,
+             rhs.store_id as store_id.other,
+             rhs.store_name as store_name,
+             rhs.type as type,
+             rhs.area_size as area_size,
+             rhs.number_of_product_category as number_of_product_category
+      from
+        (select lhs.district_id as district_id,
+                lhs.district_name as district_name,
+                lhs.headquartered_city as headquartered_city,
+                lhs.city_population as city_population,
+                lhs.city_area as city_area,
+                rhs.store_id as store_id
+         from df_district as lhs
+         inner join df_store_district as rhs on (lhs.district_id = rhs.district_id)) as lhs
+      inner join df_store as rhs on (lhs.store_id = rhs.ranking)))
+where (type = 'city mall'
+       or type != 'village store')`;
+
+verify q1 q2;

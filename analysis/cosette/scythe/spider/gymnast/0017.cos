@@ -1,0 +1,33 @@
+schema df_gymnast(gymnast_id:int, floor_exercise_points:str, pommel_horse_points:str, rings_points:str, vault_points:str, parallel_bars_points:str, horizontal_bar_points:str, total_points:str);
+schema df_people(people_id:int, name:str, age:str, height:str, hometown:str);
+
+table df_gymnast(df_gymnast);
+table df_people(df_people);
+
+query q1
+`select distinct hometown
+from df_people df_people
+except
+select distinct t2.hometown
+from df_gymnast as t1
+join df_people as t2 on t1.gymnast_id = t2.people_id`;
+
+query q2
+`select t4.hometown
+ from
+  (select t5.height, t5.avg_people_id, t6.hometown, t6.avg_people_id as avg_people_id1
+  from (select
+          t2.height, avg(t2.people_id) as avg_people_id
+        from
+          input0 as t2
+        group by
+          t2.height) as t5 join 
+      (select
+            t3.hometown, avg(t3.people_id) as avg_people_id
+          from
+            input0 as t3
+          group by
+            t3.hometown) as t1 as t6) as t4
+ where t4.avg_people_id = t4.avg_people_id1`;
+
+verify q1 q2;

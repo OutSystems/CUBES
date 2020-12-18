@@ -1,0 +1,23 @@
+schema df_teaches(id:int, course_id:int, sec_id:int, semester:str, year:int);
+
+table df_teaches(df_teaches);
+
+query q1
+`select count (distinct id)
+from df_teaches df_teaches
+where semester = 'spring'
+  and year = 2010`;
+
+query q2
+`select n_distinct as count..distinct.id.
+from
+  (select year,
+          count(distinct id) as n_distinct
+   from
+     (select *
+      from df_teaches df_teaches
+      where (semester = 'spring'
+             and year = 2010.0))
+   group by year)`;
+
+verify q1 q2;

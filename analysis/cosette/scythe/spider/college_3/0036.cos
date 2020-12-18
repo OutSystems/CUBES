@@ -1,0 +1,33 @@
+schema df_department(dno:int, division:str, dname:str, room:str, building:str, dphone:int);
+
+table df_department(df_department);
+
+query q1
+`select dname
+from df_department df_department
+where division = "as"
+union
+select dname
+from df_department df_department
+where division = "en"
+  and building = "neb"`;
+
+query q2
+`select t1.dname
+ from
+  (select t3.division, t4.dno, t4.division as division1, t4.dname, t4.room, t4.building, t4.dphone
+  from (select
+          t2.division, from
+          (select *
+             from
+              input
+             where input.division = 'en') as t2
+        group by
+          t2.division) as t3 join 
+      (select *
+         from
+          input
+         where input.division = 'as'
+           or input.building = 'neb') as t4) as t1`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_match(match_id:int, date:str, venue:str, score:str, result:str, competition:str);
+
+table df_match(df_match);
+
+query q1
+`select venue
+from df_match df_match`;
+
+query q2
+`select venue
+from
+  (select lhs.match_id as match_id,
+          lhs.date as date,
+          lhs.venue as venue,
+          lhs.score as score,
+          lhs.result as result,
+          lhs.competition as competition,
+          rhs.date as date.other,
+          rhs.score as score.other,
+          rhs.result as result.other,
+          rhs.competition as competition.other
+   from df_match as lhs
+   inner join df_match as rhs on (lhs.match_id = rhs.match_id
+                                  and lhs.venue = rhs.venue))`;
+
+verify q1 q2;

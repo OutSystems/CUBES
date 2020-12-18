@@ -1,0 +1,43 @@
+schema df_manufacturer(manufacturer_id:int, open_year:str, name:str, num_of_factories:int, num_of_shops:int);
+schema df_furniture_manufacte(manufacturer_id:int, furniture_id:int, price_in_dollar:str);
+
+table df_manufacturer(df_manufacturer);
+table df_furniture_manufacte(df_furniture_manufacte);
+
+query q1
+`select t1.manufacturer_id,
+       t1.num_of_shops
+from df_manufacturer as t1
+join df_furniture_manufacte as t2 on t1.manufacturer_id = t2.manufacturer_id
+
+limit 1`;
+
+query q2
+`select manufacturer_id,
+       furniture_id as num_of_shops
+from
+  (select furniture_id,
+          manufacturer_id,
+          max(price_in_dollar) as maxprice_in_dollar
+   from
+     (select manufacturer_id,
+             open_year,
+             name,
+             num_of_factories,
+             num_of_shops,
+             price_in_dollar,
+             num_of_shops as furniture_id
+      from
+        (select lhs.manufacturer_id as manufacturer_id,
+                lhs.open_year as open_year,
+                lhs.name as name,
+                lhs.num_of_factories as num_of_factories,
+                lhs.num_of_shops as num_of_shops,
+                rhs.price_in_dollar as price_in_dollar
+         from df_manufacturer as lhs
+         inner join df_furniture_manufacte as rhs on (lhs.manufacturer_id = rhs.manufacturer_id
+                                                      and lhs.num_of_shops = rhs.furniture_id)))
+   group by furniture_id,
+            manufacturer_id)`;
+
+verify q1 q2;

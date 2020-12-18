@@ -1,0 +1,31 @@
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select t1.name,
+       t1.hours
+from df_projects as t1
+join df_assignedto as t2 on t1.code = t2.project
+group by t2.project
+
+limit 1`;
+
+query q2
+`select t4.name,t4.hours
+ from
+  (select *
+       from
+        (select
+            t1.project, count(t1.project) as count_project
+          from
+            input0 as t1
+          group by
+            t1.project) as t2
+       where t2.count_project = 3.0) join 
+      input as t3 as t4
+ where t4.project = t4.code`;
+
+verify q1 q2;

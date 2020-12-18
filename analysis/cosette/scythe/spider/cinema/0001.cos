@@ -1,0 +1,24 @@
+schema df_cinema(cinema_id:int, name:str, openning_year:int, capacity:int, location:str);
+
+table df_cinema(df_cinema);
+
+query q1
+`select location
+from df_cinema df_cinema
+except
+select location
+from df_cinema df_cinema
+where capacity > 800`;
+
+query q2
+`select t1.location
+ from
+  (select
+      t2.location, sum(t2.capacity) as sum_capacity
+    from
+      input as t2
+    group by
+      t2.location) as t1
+ where t1.sum_capacity < 800.0`;
+
+verify q1 q2;

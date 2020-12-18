@@ -1,0 +1,47 @@
+schema df_product(product_id:int, product:str, dimensions:str, dpi:str, pages_per_minute_color:str, max_page_size:str, interface:str);
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_store_product(store_id:int, product_id:int);
+
+table df_product(df_product);
+table df_store(df_store);
+table df_store_product(df_store_product);
+
+query q1
+`select t1.df_product
+from df_product as t1
+join df_store_product as t2 on t1.product_id = t2.product_id
+join df_store as t3 on t2.store_id = t3.store_id
+where t3.store_name = "miramichi"`;
+
+query q2
+`joining, by = "store_id"
+joining, by = "product_id"
+select distinct product
+from
+  (select store_id,
+          product_id,
+          store_name,
+          type,
+          area_size,
+          number_of_product_category,
+          ranking,
+          product,
+          dimensions,
+          dpi,
+          pages_per_minute_color,
+          max_page_size,
+          interface
+   from
+     (select store_id,
+             product_id,
+             store_name,
+             type,
+             area_size,
+             number_of_product_category,
+             ranking
+      from input2 as lhs
+      inner join input1 as rhs on (lhs.store_id = rhs.store_id)) as lhs
+   inner join input0 as rhs on (lhs.product_id = rhs.product_id))
+where (store_name != 'miramichi')`;
+
+verify q1 q2;

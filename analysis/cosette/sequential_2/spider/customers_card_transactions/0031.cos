@@ -1,0 +1,32 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_last_name:str, customer_address:str, customer_phone:str, customer_email:str, other_customer_details:str);
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers(df_customers);
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select customer_id,
+       customer_first_name
+from df_customers df_customers
+except
+select t1.customer_id,
+       t2.customer_first_name
+from df_customers_cards as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where card_type_code = "credit"`;
+
+query q2
+`select customer_id,
+       customer_first_name
+from
+  (select *
+   from df_customers as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_customers_cards df_customers_cards
+           where (card_type_code = 'credit')) as rhs
+        where (lhs.customer_id = rhs.customer_id) ))`;
+
+verify q1 q2;

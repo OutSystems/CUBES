@@ -1,0 +1,29 @@
+schema df_project_staff(staff_id:str, project_id:int, role_code:str, date_from:str, date_to:str, other_details:str);
+
+table df_project_staff(df_project_staff);
+
+query q1
+`select role_code
+from df_project_staff df_project_staff
+group by role_code
+
+limit 1`;
+
+query q2
+`select role_code
+from
+  (select lhs.staff_id as staff_id,
+          lhs.project_id as project_id,
+          lhs.role_code as role_code,
+          lhs.date_from as date_from,
+          lhs.date_to as date_to,
+          lhs.other_details as other_details
+   from df_project_staff as lhs
+   inner join
+     (select role_code,
+             count(*) as n
+      from df_project_staff df_project_staff
+      group by role_code) as rhs on (lhs.project_id = rhs.n
+                                     and lhs.role_code = rhs.role_code))`;
+
+verify q1 q2;

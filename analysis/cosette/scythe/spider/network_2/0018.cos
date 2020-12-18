@@ -1,0 +1,29 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select count(*)
+from df_person df_person
+where age >
+    (select max(age)
+     from df_person df_person
+     where job = 'engineer')`;
+
+query q2
+`select t3.count_distinct_city
+ from
+  (select t1.gender, t1.job, t1.count_distinct_city, t4.name, t4.age, t4.city, t4.gender as gender1, t4.job as job1
+  from (select
+          t2.gender, t2.job, count_distinct(t2.city) as count_distinct_city
+        from
+          input as t2
+        group by
+          t2.gender, t2.job) as t1 join 
+      (select *
+         from
+          input
+         where input.job = 'engineer') as t4) as t3
+ where t3.job = t3.job1`;
+
+verify q1 q2;

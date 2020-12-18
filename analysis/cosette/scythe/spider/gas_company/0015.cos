@@ -1,0 +1,26 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+
+table df_company(df_company);
+
+query q1
+`select headquarters
+from df_company df_company
+except
+select headquarters
+from df_company df_company
+where main_industry = 'banking'`;
+
+query q2
+`select t1.headquarters
+ from
+  (select t2.headquarters, t2.avg_sales_billion, t3.company_id, t3.rank, t3.company, t3.headquarters as headquarters1, t3.main_industry, t3.sales_billion, t3.profits_billion, t3.assets_billion, t3.market_value
+  from (select
+          t4.headquarters, avg(t4.sales_billion) as avg_sales_billion
+        from
+          input as t4
+        group by
+          t4.headquarters) as t2 join 
+      input as t3) as t1
+ where t1.avg_sales_billion = t1.sales_billion`;
+
+verify q1 q2;

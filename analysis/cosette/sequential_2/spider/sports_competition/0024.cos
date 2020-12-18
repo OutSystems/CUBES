@@ -1,0 +1,34 @@
+schema df_competition(competition_id:int, year:str, competition_type:str, country:str);
+
+table df_competition(df_competition);
+
+query q1
+`select country
+from df_competition df_competition
+where competition_type = 'tournament'
+group by country
+
+limit 1`;
+
+query q2
+`select distinct country.other as country
+from
+  (select lhs.competition_id as competition_id,
+          lhs.year as year,
+          lhs.competition_type as competition_type,
+          lhs.country as country,
+          lhs.n as n,
+          rhs.competition_type as competition_type.other,
+          rhs.country as country.other
+   from
+     (select competition_id,
+             year,
+             competition_type,
+             country,
+             count(*) over () as n
+      from df_competition df_competition
+      where (competition_type != 'tournament')) as lhs
+   inner join df_competition as rhs on (lhs.n = rhs.competition_id
+                                        and lhs.year = rhs.year))`;
+
+verify q1 q2;

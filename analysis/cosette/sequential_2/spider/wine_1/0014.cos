@@ -1,0 +1,28 @@
+schema df_grapes(id:int, grape:str, color:str);
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_grapes(df_grapes);
+table df_wine(df_wine);
+
+query q1
+`select t2.name,
+       t2.score
+from df_grapes as t1
+join df_wine as t2 on t1.grape = t2.grape
+where t1.color = "white"`;
+
+query q2
+`select name,
+       score
+from
+  (select *
+   from df_wine as lhs
+   where exists
+       (select 1
+        from
+          (select *
+           from df_grapes df_grapes
+           where (color = 'white')) as rhs
+        where (lhs.grape = rhs.grape) ))`;
+
+verify q1 q2;

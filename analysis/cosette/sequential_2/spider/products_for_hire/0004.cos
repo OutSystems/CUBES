@@ -1,0 +1,56 @@
+schema df_bookings(booking_id:int, customer_id:int, booking_status_code:str, returned_damaged_yn:int, booking_start_date:str, booking_end_date:str, count_hired:int, amount_payable:str, amount_of_discount:str, amount_outstanding:str, amount_of_refund:str);
+schema df_payments(payment_id:int, booking_id:int, customer_id:int, payment_type_code:str, amount_paid_in_full_yn:int, payment_date:str, amount_due:str, amount_paid:str);
+
+table df_bookings(df_bookings);
+table df_payments(df_payments);
+
+query q1
+`select t1.booking_id,
+       t1.amount_of_refund
+from df_bookings as t1
+join df_payments as t2 on t1.booking_id = t2.booking_id
+group by t1.booking_id
+
+limit 1`;
+
+query q2
+`select customer_id as booking_id,
+       amount_of_refund
+from
+  (select customer_id,
+          payment_id,
+          n,
+          customer_id.other,
+          booking_status_code,
+          booking_start_date,
+          booking_end_date,
+          count_hired,
+          amount_payable,
+          amount_of_discount,
+          amount_outstanding,
+          amount_of_refund,
+          customer_id as booking_id
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.payment_id as payment_id,
+             lhs.n as n,
+             rhs.customer_id as customer_id.other,
+             rhs.booking_status_code as booking_status_code,
+             rhs.booking_start_date as booking_start_date,
+             rhs.booking_end_date as booking_end_date,
+             rhs.count_hired as count_hired,
+             rhs.amount_payable as amount_payable,
+             rhs.amount_of_discount as amount_of_discount,
+             rhs.amount_outstanding as amount_outstanding,
+             rhs.amount_of_refund as amount_of_refund
+      from
+        (select customer_id,
+                payment_id,
+                count(*) as n
+         from df_payments df_payments
+         group by customer_id,
+                  payment_id) as lhs
+      inner join df_bookings as rhs on (lhs.customer_id = rhs.booking_id
+                                        and lhs.payment_id = rhs.returned_damaged_yn)))`;
+
+verify q1 q2;

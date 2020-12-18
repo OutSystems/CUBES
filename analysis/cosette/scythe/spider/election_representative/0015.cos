@@ -1,0 +1,31 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select party,
+       count(*)
+from df_representative df_representative
+group by party
+
+limit 1`;
+
+query q2
+`select t1.party,t1.count_representative_id
+ from
+  (select t3.party, t3.count_representative_id, t4.representative_id, t4.name, t4.state, t4.party as party1, t4.lifespan
+  from (select *
+       from
+        (select
+            t2.party, count(t2.representative_id) as count_representative_id
+          from
+            input as t2
+          group by
+            t2.party) as t3
+       where t3.count_representative_id = 4.0) join 
+      (select *
+         from
+          input
+         where input.representative_id = 2.0) as t4) as t1`;
+
+verify q1 q2;

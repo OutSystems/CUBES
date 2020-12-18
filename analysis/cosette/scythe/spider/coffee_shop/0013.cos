@@ -1,0 +1,23 @@
+schema df_shop(shop_id:int, address:str, num_of_staff:int, score:str, open_year:int);
+
+table df_shop(df_shop);
+
+query q1
+`select shop_id,
+       address
+from df_shop df_shop
+where score <
+    (select avg(score)
+     from df_shop df_shop)`;
+
+query q2
+`select t3.shop_id,t3.address
+ from
+  (select
+          avg(t2.score) as avg_score
+        from
+          input as t2) as t1 join 
+      input as t4 as t3
+ where t3.avg_score > t3.score`;
+
+verify q1 q2;

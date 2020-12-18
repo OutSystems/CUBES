@@ -1,0 +1,23 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select count(*)
+from df_person df_person
+where age > 30
+  and job = 'engineer'`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select age,
+          count(distinct job) as n_distinct
+   from
+     (select *
+      from df_person df_person
+      where (job = 'engineer'
+             or age <= 30.0))
+   group by age)`;
+
+verify q1 q2;

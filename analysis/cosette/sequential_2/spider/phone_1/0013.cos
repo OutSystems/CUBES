@@ -1,0 +1,36 @@
+schema df_screen_mode(graphics_mode:str, char_cells:str, pixels:str, hardware_colours:str, used_kb:str, map:str, type:str);
+
+table df_screen_mode(df_screen_mode);
+
+query q1
+`select max(used_kb),
+       min(used_kb),
+       avg(used_kb)
+from df_screen_mode df_screen_mode`;
+
+query q2
+`select distinct max(used_kb) over () as max.used_kb.,
+                                  minused_kb as min.used_kb.,
+                                  meanused_kb as avg.used_kb.
+from
+  (select graphics_mode,
+          char_cells,
+          pixels,
+          hardware_colours,
+          used_kb,
+          map,
+          type,
+          minused_kb,
+          avg(used_kb) over () as meanused_kb
+   from
+     (select graphics_mode,
+             char_cells,
+             pixels,
+             hardware_colours,
+             used_kb,
+             map,
+             type,
+             min(used_kb) over () as minused_kb
+      from df_screen_mode df_screen_mode))`;
+
+verify q1 q2;

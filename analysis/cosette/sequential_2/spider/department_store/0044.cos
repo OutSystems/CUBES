@@ -1,0 +1,24 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_name
+from df_products df_products
+where product_type_code = 'hardware'
+
+limit 1`;
+
+query q2
+`select product_name
+from
+  (select product_id,
+          product_type_code,
+          product_name,
+          product_price,
+          max(product_price) over () as maxproduct_price
+   from df_products df_products)
+where (product_type_code = 'hardware'
+       and maxproduct_price <= product_price)`;
+
+verify q1 q2;

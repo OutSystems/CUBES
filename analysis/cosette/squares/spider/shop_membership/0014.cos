@@ -1,0 +1,40 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+schema df_membership_register_branch(member_id:int, branch_id:int, register_year:int);
+
+table df_branch(df_branch);
+table df_membership_register_branch(df_membership_register_branch);
+
+query q1
+`select name,
+       city
+from df_branch df_branch
+where branch_id not in
+    (select branch_id
+     from df_membership_register_branch df_membership_register_branch)`;
+
+query q2
+`joining, by = "branch_id"
+joining, by = "branch_id"
+select distinct name,
+                city
+from
+  (select branch_id,
+          name,
+          open_year,
+          address_road,
+          city,
+          membership_amount
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select branch_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select branch_id
+              from input1) as rhs
+           where (lhs.branch_id = rhs.branch_id) )) as rhs on (lhs.branch_id = rhs.branch_id))`;
+
+verify q1 q2;

@@ -1,0 +1,68 @@
+schema df_customers(customer_id:int, customer_first_name:str, customer_last_name:str, customer_address:str, customer_phone:str, customer_email:str, other_customer_details:str);
+schema df_customers_cards(card_id:int, customer_id:int, card_type_code:str, card_number:str, date_valid_from:str, date_valid_to:str, other_card_details:str);
+
+table df_customers(df_customers);
+table df_customers_cards(df_customers_cards);
+
+query q1
+`select count(*)
+from df_customers_cards as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.customer_first_name = "art"
+  and t2.customer_last_name = "turcotte"`;
+
+query q2
+`select n as count...
+from
+  (select count(*) as n
+   from
+     (select card_id,
+             customer_id,
+             card_type_code,
+             card_number,
+             date_valid_from,
+             date_valid_to,
+             other_card_details,
+             customer_id.other,
+             customer_first_name,
+             customer_last_name,
+             customer_address,
+             other_customer_details,
+             customer_email,
+             other_card_details as customer_phone
+      from
+        (select card_id,
+                customer_id,
+                card_type_code,
+                card_number,
+                date_valid_from,
+                date_valid_to,
+                other_card_details,
+                customer_id.other,
+                customer_first_name,
+                customer_last_name,
+                customer_address,
+                other_customer_details,
+                card_type_code as customer_email
+         from
+           (select lhs.card_id as card_id,
+                   lhs.customer_id as customer_id,
+                   lhs.card_type_code as card_type_code,
+                   lhs.card_number as card_number,
+                   lhs.date_valid_from as date_valid_from,
+                   lhs.date_valid_to as date_valid_to,
+                   lhs.other_card_details as other_card_details,
+                   rhs.customer_id as customer_id.other,
+                   rhs.customer_first_name as customer_first_name,
+                   rhs.customer_last_name as customer_last_name,
+                   rhs.customer_address as customer_address,
+                   rhs.other_customer_details as other_customer_details
+            from df_customers_cards as lhs
+            inner join
+              (select *
+               from df_customers df_customers
+               where (customer_first_name = 'art'
+                      or customer_last_name = 'turcotte')) as rhs on (lhs.card_type_code = rhs.customer_email
+                                                                        and lhs.other_card_details = rhs.customer_phone)))))`;
+
+verify q1 q2;

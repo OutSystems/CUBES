@@ -1,0 +1,24 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select cname
+from df_college df_college
+where enr >
+    (select max(enr)
+     from df_college df_college
+     where state = 'fl')`;
+
+query q2
+`select cname
+from
+  (select cname,
+          state,
+          enr,
+          max(enr) over () as maxenr
+   from df_college df_college)
+where (state != 'fl'
+       and maxenr <= enr)`;
+
+verify q1 q2;

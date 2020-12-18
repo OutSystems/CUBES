@@ -1,0 +1,41 @@
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_orders(df_orders);
+
+query q1
+`select order_id
+from df_orders df_orders
+
+limit 1`;
+
+query q2
+`select customer_id as order_id
+from
+  (select customer_id,
+          order_id,
+          max(date_order_placed) as maxdate_order_placed
+   from
+     (select customer_id as order_id,
+             customer_id,
+             order_status,
+             date_order_placed,
+             order_details,
+             customer_id.other,
+             order_status.other,
+             order_details.other
+      from
+        (select lhs.order_id as order_id,
+                lhs.customer_id as customer_id,
+                lhs.order_status as order_status,
+                lhs.date_order_placed as date_order_placed,
+                lhs.order_details as order_details,
+                rhs.customer_id as customer_id.other,
+                rhs.order_status as order_status.other,
+                rhs.order_details as order_details.other
+         from df_orders as lhs
+         inner join df_orders as rhs on (lhs.customer_id = rhs.order_id
+                                         and lhs.date_order_placed = rhs.date_order_placed)))
+   group by customer_id,
+            order_id)`;
+
+verify q1 q2;

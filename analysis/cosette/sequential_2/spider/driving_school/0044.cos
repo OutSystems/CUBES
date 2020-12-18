@@ -1,0 +1,41 @@
+schema df_customers(customer_id:int, customer_address_id:int, customer_status_code:str, date_became_customer:str, date_of_birth:str, first_name:str, last_name:str, amount_outstanding:str, email_address:str, phone_number:str, cell_mobile_phone_number:str);
+schema df_lessons(lesson_id:int, customer_id:int, lesson_status_code:str, staff_id:int, vehicle_id:int, lesson_date:str, lesson_time:int, price:str);
+
+table df_customers(df_customers);
+table df_lessons(df_lessons);
+
+query q1
+`select count(*)
+from df_lessons as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.first_name = "ray"`;
+
+query q2
+`select customer_id as count...
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_address_id as customer_address_id,
+          lhs.customer_status_code as customer_status_code,
+          lhs.date_became_customer as date_became_customer,
+          lhs.date_of_birth as date_of_birth,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.amount_outstanding as amount_outstanding,
+          lhs.email_address as email_address,
+          lhs.phone_number as phone_number,
+          lhs.cell_mobile_phone_number as cell_mobile_phone_number,
+          rhs.n as n
+   from
+     (select *
+      from df_customers df_customers
+      where (first_name != 'ray')) as lhs
+   inner join
+     (select customer_id,
+             lesson_id,
+             count(*) as n
+      from df_lessons df_lessons
+      group by customer_id,
+               lesson_id) as rhs on (lhs.customer_id = rhs.customer_id
+                                     and lhs.customer_address_id = rhs.lesson_id))`;
+
+verify q1 q2;

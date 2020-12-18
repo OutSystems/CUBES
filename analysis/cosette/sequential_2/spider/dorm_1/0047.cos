@@ -1,0 +1,37 @@
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_dorm_amenity(amenid:int, amenity_name:str);
+schema df_has_amenity(dormid:int, amenid:int);
+
+table df_dorm(df_dorm);
+table df_dorm_amenity(df_dorm_amenity);
+table df_has_amenity(df_has_amenity);
+
+query q1
+`select dorm_name
+from df_dorm df_dorm
+except
+select t1.dorm_name
+from df_dorm as t1
+join df_has_amenity as t2 on t1.dormid = t2.dormid
+join df_dorm_amenity as t3 on t2.amenid = t3.amenid
+where t3.amenity_name = 'tv lounge'`;
+
+query q2
+`select dorm_name
+from
+  (select *
+   from df_dorm as lhs
+   where not exists
+       (select 1
+        from
+          (select lhs.amenid as amenid,
+                  lhs.amenity_name as amenity_name,
+                  rhs.dormid as dormid
+           from
+             (select *
+              from df_dorm_amenity df_dorm_amenity
+              where (amenity_name = 'tv lounge')) as lhs
+           inner join df_has_amenity as rhs on (lhs.amenid = rhs.amenid)) as rhs
+        where (lhs.dormid = rhs.dormid) ))`;
+
+verify q1 q2;

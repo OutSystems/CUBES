@@ -1,0 +1,30 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_museums(museum_id:int, museum_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_museums(df_museums);
+
+query q1
+`select t1.museum_details,
+       t2.opening_hours
+from df_museums as t1
+join df_tourist_attractions as t2 on t1.museum_id = t2.tourist_attraction_id`;
+
+query q2
+`select distinct museum_details,
+                description as opening_hours
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.museum_id as museum_id,
+          rhs.museum_details as museum_details
+   from df_tourist_attractions as lhs
+   cross join df_museums as rhs)`;
+
+verify q1 q2;

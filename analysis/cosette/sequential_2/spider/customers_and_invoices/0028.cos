@@ -1,0 +1,39 @@
+schema df_invoices(invoice_number:int, order_id:int, invoice_date:str);
+schema df_financial_transactions(transaction_id:int, account_id:int, invoice_number:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_invoices(df_invoices);
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select t2.invoice_number,
+       t2.invoice_date
+from df_financial_transactions as t1
+join df_invoices as t2 on t1.invoice_number = t2.invoice_number
+group by t1.invoice_number
+
+limit 1`;
+
+query q2
+`select invoice_number,
+       invoice_date
+from
+  (select lhs.transaction_id as transaction_id,
+          lhs.account_id as account_id,
+          lhs.invoice_number as invoice_number,
+          lhs.transaction_type as transaction_type,
+          lhs.transaction_date as transaction_date,
+          lhs.transaction_amount as transaction_amount,
+          lhs.transaction_comment as transaction_comment,
+          lhs.other_transaction_details as other_transaction_details,
+          rhs.invoice_date as invoice_date
+   from df_financial_transactions as lhs
+   inner join
+     (select invoice_date,
+             invoice_number,
+             count(*) as n
+      from df_invoices df_invoices
+      group by invoice_date,
+               invoice_number) as rhs on (lhs.invoice_number = rhs.invoice_number
+                                          and lhs.transaction_id = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,44 @@
+schema df_party(party_id:int, party_theme:str, location:str, first_year:int, last_year:int, number_of_hosts:int);
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+schema df_party_host(party_id:int, host_id:int, is_main_in_charge:str);
+
+table df_party(df_party);
+table df_host(df_host);
+table df_party_host(df_party_host);
+
+query q1
+`select t3.party_theme,
+       t2.name
+from df_party_host as t1
+join df_host as t2 on t1.host_id = t2.host_id
+join df_party as t3 on t1.party_id = t3.party_id`;
+
+query q2
+`joining, by = "host_id"
+joining, by = "party_id"
+select party_theme,
+       name
+from
+  (select party_id,
+          party_theme,
+          location,
+          first_year,
+          last_year,
+          number_of_hosts,
+          host_id,
+          name,
+          nationality,
+          age,
+          is_main_in_charge
+   from input0 as lhs
+   inner join
+     (select host_id,
+             name,
+             nationality,
+             age,
+             party_id,
+             is_main_in_charge
+      from input1 as lhs
+      left join input2 as rhs on (lhs.host_id = rhs.host_id)) as rhs on (lhs.party_id = rhs.party_id))`;
+
+verify q1 q2;

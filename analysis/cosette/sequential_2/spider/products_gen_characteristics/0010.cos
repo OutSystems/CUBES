@@ -1,0 +1,23 @@
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_products(df_products);
+
+query q1
+`select count(*)
+from df_products df_products
+where product_category_code = "spices"
+  and typical_buying_price > 1000`;
+
+query q2
+`select distinct n_distinct as count...
+from
+  (select color_code,
+          count(distinct typical_buying_price) as n_distinct
+   from
+     (select *
+      from df_products df_products
+      where (product_category_code = 'spices'
+             or typical_buying_price >= 1000.0))
+   group by color_code)`;
+
+verify q1 q2;

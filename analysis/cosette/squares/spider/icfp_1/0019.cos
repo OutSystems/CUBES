@@ -1,0 +1,62 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_authors(authid:int, lname:str, fname:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_authors(df_authors);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select t3.title
+from df_authors as t1
+join df_authorship as t2 on t1.authid = t2.authid
+join df_papers as t3 on t2.paperid = t3.paperid
+join df_inst as t4 on t2.instid = t4.instid
+where t4.country = "usa"
+  and t2.authorder = 2
+  and t1.lname = "turon"`;
+
+query q2
+`joining, by = "instid"
+joining, by = "paperid"
+joining, by = "authid"
+select title
+from
+  (select authid,
+          instid,
+          paperid,
+          authorder,
+          name,
+          country,
+          title,
+          lname,
+          fname
+   from
+     (select authid,
+             instid,
+             paperid,
+             authorder,
+             name,
+             country,
+             title
+      from
+        (select authid,
+                instid,
+                paperid,
+                authorder,
+                name,
+                country
+         from input3 as lhs
+         inner join
+           (select *
+            from input0
+            where (country != 'usa'
+                   or country = 'usa')) as rhs on (lhs.instid = rhs.instid)) as lhs
+      inner join input2 as rhs on (lhs.paperid = rhs.paperid)) as lhs
+   inner join input1 as rhs on (lhs.authid = rhs.authid))
+where (authorder >= 2.0
+       and lname = 'turon')`;
+
+verify q1 q2;

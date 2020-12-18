@@ -1,0 +1,26 @@
+schema df_projects(code:str, name:str, hours:int);
+
+table df_projects(df_projects);
+
+query q1
+`select name
+from df_projects df_projects
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.code as code,
+          lhs.name as name,
+          lhs.hours as hours,
+          rhs.code as code.other
+   from
+     (select code,
+             name,
+             max(hours) over () as hours
+      from df_projects df_projects) as lhs
+   inner join df_projects as rhs on (lhs.hours = rhs.hours
+                                     and lhs.name = rhs.name))`;
+
+verify q1 q2;

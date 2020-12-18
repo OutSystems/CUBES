@@ -1,0 +1,23 @@
+schema df_11_1(S_key:str, S_name:str);
+schema df_11_2(S_key:str, C_name:str);
+
+table df_11_1(df_11_1);
+table df_11_2(df_11_2);
+
+query q1
+`select distinct s.sname
+from student s
+where s.snum not in (select e.snum
+from enrolled e )`;
+
+query q2
+`select s_name
+from
+  (select *
+   from df_11_1 as lhs
+   where not exists
+       (select 1
+        from df_11_2 as rhs
+        where (lhs.s_key = rhs.s_key) ))`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_3_1(ID_key:str, Room:str);
+schema df_3_2(ID_key_student:str, ID_key:str);
+
+table df_3_1(df_3_1);
+table df_3_2(df_3_2);
+
+query q1
+`select distinct id_key
+from df_3_1 df_3_1 i1
+     natural join df_3_2 i2
+     natural join
+       (select id_key,
+               count(*) as n
+        from df_3_2 df_3_2
+        group by id_key) t
+where i1.room = 'r128'or t.n > 4.0`;
+
+query q2
+`joining, by = "id_key"
+select id_key
+from
+  (select id_key,
+          room,
+          count(*) as n
+   from
+     (select id_key_student,
+             id_key,
+             room
+      from input1 as lhs
+      inner join input0 as rhs on (lhs.id_key = rhs.id_key))
+   group by id_key,
+            room)
+where (n > 4.0
+       or room = 'r128')`;
+
+verify q1 q2;

@@ -1,0 +1,25 @@
+schema df_department(dno:int, division:str, dname:str, room:str, building:str, dphone:int);
+schema df_member_of(facid:int, dno:int, appt_type:str);
+
+table df_department(df_department);
+table df_member_of(df_member_of);
+
+query q1
+`select t1.dname
+from df_department as t1
+join df_member_of as t2 on t1.dno = t2.dno
+group by t2.dno
+
+limit 1`;
+
+query q2
+`select t1.dname
+ from
+  (select
+          min(t4.dno) as min_dno
+        from
+          input0 as t4) as t3 join 
+      input as t2 as t1
+ where t1.min_dno = t1.dno`;
+
+verify q1 q2;

@@ -1,0 +1,42 @@
+schema df_wine(no:int, grape:str, winery:str, appelation:str, state:str, name:str, year:int, price:int, score:int, cases:str, drink:str);
+
+table df_wine(df_wine);
+
+query q1
+`select name
+from df_wine df_wine
+where year <
+    (select min(year)
+     from df_wine df_wine
+     where winery = "brander")`;
+
+query q2
+`select name
+from
+  (select lhs.winery as winery,
+          lhs.year as year,
+          lhs.minyear as minyear,
+          rhs.no as no,
+          rhs.grape as grape,
+          rhs.winery as winery.other,
+          rhs.appelation as appelation,
+          rhs.state as state,
+          rhs.name as name,
+          rhs.year as year.other,
+          rhs.price as price,
+          rhs.score as score,
+          rhs.cases as cases,
+          rhs.drink as drink
+   from
+     (select winery,
+             year,
+             min(year) as minyear
+      from df_wine df_wine
+      where (winery = 'brander')
+      group by winery,
+               year) as lhs
+   cross join df_wine as rhs)
+where (year <= minyear
+       and minyear > year.other)`;
+
+verify q1 q2;

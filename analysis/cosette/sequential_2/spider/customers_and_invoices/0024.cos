@@ -1,0 +1,35 @@
+schema df_accounts(account_id:int, customer_id:int, date_account_opened:str, account_name:int, other_account_details:str);
+schema df_financial_transactions(transaction_id:int, account_id:int, invoice_number:int, transaction_type:str, transaction_date:str, transaction_amount:str, transaction_comment:str, other_transaction_details:str);
+
+table df_accounts(df_accounts);
+table df_financial_transactions(df_financial_transactions);
+
+query q1
+`select t1.account_id,
+       t2.account_name
+from df_financial_transactions as t1
+join df_accounts as t2 on t1.account_id = t2.account_id
+group by t1.account_id
+having count(*) >= 4`;
+
+query q2
+`select account_id,
+       account_name
+from
+  (select lhs.account_id as account_id,
+          lhs.customer_id as customer_id,
+          lhs.date_account_opened as date_account_opened,
+          lhs.account_name as account_name,
+          lhs.other_account_details as other_account_details,
+          rhs.n as n
+   from df_accounts as lhs
+   inner join
+     (select *
+      from
+        (select account_id,
+                count(*) as n
+         from df_financial_transactions df_financial_transactions
+         group by account_id)
+      where (n >= 4.0)) as rhs on (lhs.account_id = rhs.account_id))`;
+
+verify q1 q2;

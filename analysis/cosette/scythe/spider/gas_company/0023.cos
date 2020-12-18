@@ -1,0 +1,29 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+schema df_gas_station(station_id:int, open_year:int, location:str, manager_name:str, vice_manager_name:str, representative_name:str);
+schema df_station_company(station_id:int, company_id:int, rank_of_the_year:int);
+
+table df_company(df_company);
+table df_gas_station(df_gas_station);
+table df_station_company(df_station_company);
+
+query q1
+`select t3.location,
+       t3.representative_name
+from df_station_company as t1
+join df_company as t2 on t1.company_id = t2.company_id
+join df_gas_station as t3 on t1.station_id = t3.station_id
+
+limit 3`;
+
+query q2
+`select t2.location,t2.representative_name
+ from
+  (select input1.station_id, input1.company_id, input1.rank_of_the_year, t3.station_id as station_id1, t3.open_year, t3.location, t3.manager_name, t3.vice_manager_name, t3.representative_name
+  from (select *
+       from
+        input1
+       where input1.company_id < 4.0) join 
+      input0 as t3) as t2
+ where t2.station_id = t2.station_id1`;
+
+verify q1 q2;

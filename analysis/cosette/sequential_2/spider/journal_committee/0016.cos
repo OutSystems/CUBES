@@ -1,0 +1,29 @@
+schema df_journal(journal_id:int, date:str, theme:str, sales:int);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_journal(df_journal);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select date , theme,
+              sales
+from df_journal df_journal
+except
+select t1.date,
+       t1.theme,
+       t1.sales
+from df_journal as t1
+join df_journal_committee as t2 on t1.journal_id = t2.journal_id`;
+
+query q2
+`select date, theme,
+             sales
+from
+  (select *
+   from df_journal as lhs
+   where not exists
+       (select 1
+        from df_journal_committee as rhs
+        where (lhs.journal_id = rhs.journal_id) ))`;
+
+verify q1 q2;

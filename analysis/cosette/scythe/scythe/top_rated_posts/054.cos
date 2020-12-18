@@ -1,0 +1,28 @@
+schema df_i054(created_at:str, count:int);
+
+table df_i054(df_i054);
+
+query q1
+`select
+  s1.created_at,
+  count(s2.email) as cumul_count
+from subscriptions s1
+  inner join subscriptions s2 on s1.created_at >= s2.created_at
+group by s1.created_at`;
+
+query q2
+`select t2.created_at,t2.sum_count1
+ from
+  (select
+      t4.created_at, t4.count, sum(t4.count1) as sum_count1
+    from
+      (select *
+         from
+          (select input.created_at, input.count, t3.created_at as created_at1, t3.count as count1
+          from input join 
+              input as t3) as t5
+         where t5.created_at >= t5.created_at1) as t4
+    group by
+      t4.created_at, t4.count) as t2`;
+
+verify q1 q2;

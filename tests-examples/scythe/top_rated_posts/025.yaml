@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/025.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i025.csv
 output: tests-examples/scythe/top_rated_posts/tables/o025.csv
@@ -12,13 +13,13 @@ solution:
   - filter
 sql: |
   WITH NumberedMyTable AS
-  (
-      SELECT Id, Value, ROW_NUMBER() OVER (ORDER BY Id) AS RowNumber
-      FROM MyTable
-  )
+           (
+               SELECT Id, Value, ROW_NUMBER() OVER (ORDER BY Id) AS RowNumber
+               FROM i025
+           )
   SELECT Id, Value
   FROM NumberedMyTable
-  WHERE RowNumber BETWEEN 3 AND 5
+  WHERE RowNumber BETWEEN 3 AND 4
 comment: |
   df1 <- df_i025 %>% mutate(row_number_ = row_number())
   df2 <- df1 %>% filter(row_number_ >= 3 & row_number_ < 5)

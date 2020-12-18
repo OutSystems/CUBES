@@ -1,0 +1,26 @@
+schema df_people(people_id:int, name:str, country:str, is_male:str, age:int);
+
+table df_people(df_people);
+
+query q1
+`select name,
+       country
+from df_people df_people
+where age <
+    (select avg(age)
+     from df_people df_people)`;
+
+query q2
+`select name,
+       country
+from
+  (select people_id,
+          name,
+          country,
+          is_male,
+          age,
+          avg(age) over () as meanage
+   from df_people df_people)
+where (meanage >= age)`;
+
+verify q1 q2;

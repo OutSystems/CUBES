@@ -1,0 +1,47 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+
+table df_documents(df_documents);
+
+query q1
+`select document_name,
+       access_count
+from df_documents df_documents
+
+limit 1`;
+
+query q2
+`select distinct document_name.other as document_name,
+                maxaccess_count as access_count
+from
+  (select lhs.document_code as document_code,
+          lhs.document_structure_code as document_structure_code,
+          lhs.document_type_code as document_type_code,
+          lhs.access_count as access_count,
+          lhs.document_name as document_name,
+          lhs.maxaccess_count as maxaccess_count,
+          rhs.document_code as document_code.other,
+          rhs.document_structure_code as document_structure_code.other,
+          rhs.document_type_code as document_type_code.other,
+          rhs.access_count as access_count.other,
+          rhs.document_name as document_name.other,
+          rhs.maxaccess_count as maxaccess_count.other
+   from
+     (select document_code,
+             document_structure_code,
+             document_type_code,
+             access_count,
+             document_name,
+             max(access_count) over () as maxaccess_count
+      from df_documents df_documents) as lhs
+   cross join
+     (select document_code,
+             document_structure_code,
+             document_type_code,
+             access_count,
+             document_name,
+             max(access_count) over () as maxaccess_count
+      from df_documents df_documents) as rhs)
+where (maxaccess_count <= access_count.other
+       or access_count.other = maxaccess_count.other)`;
+
+verify q1 q2;

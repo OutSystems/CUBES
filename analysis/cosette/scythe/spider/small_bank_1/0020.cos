@@ -1,0 +1,32 @@
+schema df_accounts(custid:int, name:str);
+schema df_savings(custid:int, balance:str);
+schema df_checking(custid:int, balance:str);
+
+table df_accounts(df_accounts);
+table df_savings(df_savings);
+table df_checking(df_checking);
+
+query q1
+`select t2.balance,
+       t1.name
+from df_accounts as t1
+join df_checking as t2 on t1.custid = t2.custid
+join df_savings as t3 on t1.custid = t3.custid
+
+limit 1`;
+
+query q2
+`select t3.balance1,t3.name
+ from
+  (select t5.custid, t5.name, t5.custid1, t5.balance, t4.custid as custid2, t4.balance as balance1
+  from (select *
+       from
+        (select input.custid, input.name, t2.custid as custid1, t2.balance
+        from input join 
+            input0 as t2) as t5
+       where t5.custid = t5.custid1) join 
+      input1 as t4) as t3
+ where t3.balance < t3.balance1
+   and t3.custid1 = t3.custid2`;
+
+verify q1 q2;

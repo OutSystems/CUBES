@@ -1,0 +1,23 @@
+schema df_budget(school_id:int, year:int, budgeted:int, total_budget_percent_budgeted:str, invested:int, total_budget_percent_invested:str, budget_invested_percent:str);
+
+table df_budget(df_budget);
+
+query q1
+`select count(*)
+from df_budget df_budget
+where budgeted > 3000
+  and year <= 2001`;
+
+query q2
+`select n_distinct as count...
+from
+  (select school_id,
+          count(distinct year) as n_distinct
+   from
+     (select *
+      from df_budget df_budget
+      where (budgeted != 3000.0
+             and year <= 2001.0))
+   group by school_id)`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_accounts(account_id:int, customer_id:int, account_name:int, other_account_details:str);
+
+table df_accounts(df_accounts);
+
+query q1
+`select account_id,
+       customer_id,
+       account_name
+from df_accounts df_accounts`;
+
+query q2
+`select account_id,
+       customer_id,
+       account_name
+from
+  (select lhs.account_id as account_id,
+          lhs.customer_id as customer_id,
+          lhs.account_name as account_name,
+          lhs.other_account_details as other_account_details,
+          rhs.account_id as account_id.other,
+          rhs.customer_id as customer_id.other
+   from df_accounts as lhs
+   inner join df_accounts as rhs on (lhs.account_name = rhs.account_name
+                                     and lhs.other_account_details = rhs.other_account_details))`;
+
+verify q1 q2;

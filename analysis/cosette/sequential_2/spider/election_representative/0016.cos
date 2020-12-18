@@ -1,0 +1,23 @@
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_representative(df_representative);
+
+query q1
+`select party
+from df_representative df_representative
+group by party
+having count(*) >= 3`;
+
+query q2
+`select distinct party
+from
+  (select representative_id,
+          name,
+          state,
+          party,
+          lifespan,
+          count(*) over () as n
+   from df_representative df_representative)
+where (n != 3.0)`;
+
+verify q1 q2;

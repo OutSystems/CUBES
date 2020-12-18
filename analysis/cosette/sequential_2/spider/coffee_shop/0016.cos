@@ -1,0 +1,39 @@
+schema df_happy_hour(hh_id:int, shop_id:int, month:str, num_of_shaff_in_charge:int);
+
+table df_happy_hour(df_happy_hour);
+
+query q1
+`select shop_id,
+       count(*)
+from df_happy_hour df_happy_hour
+group by shop_id
+
+limit 1`;
+
+query q2
+`select distinct shop_id,
+                num_of_shaff_in_charge.other as count...
+from
+  (select hh_id,
+          shop_id,
+          month,
+          num_of_shaff_in_charge,
+          num_of_shaff_in_charge.other,
+          shop_id as n
+   from
+     (select lhs.hh_id as hh_id,
+             lhs.shop_id as shop_id,
+             lhs.month as month,
+             lhs.num_of_shaff_in_charge as num_of_shaff_in_charge,
+             rhs.num_of_shaff_in_charge as num_of_shaff_in_charge.other
+      from df_happy_hour as lhs
+      inner join
+        (select hh_id,
+                num_of_shaff_in_charge,
+                count(*) as n
+         from df_happy_hour df_happy_hour
+         group by hh_id,
+                  num_of_shaff_in_charge) as rhs on (lhs.shop_id = rhs.n
+                                                     and lhs.num_of_shaff_in_charge = rhs.hh_id)))`;
+
+verify q1 q2;

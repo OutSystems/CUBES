@@ -1,0 +1,25 @@
+schema df_claim_headers(claim_header_id:int, claim_status_code:str, claim_type_code:str, policy_id:int, date_of_claim:str, date_of_settlement:str, amount_claimed:str, amount_piad:str);
+
+table df_claim_headers(df_claim_headers);
+
+query q1
+`select sum(amount_piad),
+       avg(amount_piad)
+from df_claim_headers df_claim_headers`;
+
+query q2
+`select distinct sum(amount_piad) over () as sum.amount_piad.,
+                                      meanamount_piad as avg.amount_piad.
+from
+  (select claim_header_id,
+          claim_status_code,
+          claim_type_code,
+          policy_id,
+          date_of_claim,
+          date_of_settlement,
+          amount_claimed,
+          amount_piad,
+          avg(amount_piad) over () as meanamount_piad
+   from df_claim_headers df_claim_headers)`;
+
+verify q1 q2;

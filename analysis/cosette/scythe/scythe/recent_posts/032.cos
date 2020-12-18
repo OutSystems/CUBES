@@ -1,0 +1,23 @@
+schema df_032(Id:int, crit1:int, crit2:int, value:str);
+
+table df_032(df_032);
+
+query q1
+`select e.crit1, e.crit2, e.value
+from myentity e
+where e.id in (select max(sub.id) from myentity sub group by sub.crit1, sub.crit2)`;
+
+query q2
+`select t4.crit1,t4.crit2,t4.value
+ from
+  (select t3.crit1, t3.crit2, t3.max_id, t6.id, t6.crit1 as crit11, t6.crit2 as crit21, t6.value
+  from (select
+          t5.crit1, t5.crit2, max(t5.id) as max_id
+        from
+          input as t5
+        group by
+          t5.crit1, t5.crit2) as t3 join 
+      input as t6) as t4
+ where t4.max_id = t4.id`;
+
+verify q1 q2;

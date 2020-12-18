@@ -1,0 +1,46 @@
+schema df_fault_log(fault_log_entry_id:int, asset_id:int, recorded_by_staff_id:int, fault_log_entry_datetime:str, fault_description:str, other_fault_details:str);
+schema df_engineer_visits(engineer_visit_id:int, contact_staff_id:int, engineer_id:int, fault_log_entry_id:int, fault_status:str, visit_start_datetime:str, visit_end_datetime:str, other_visit_details:str);
+
+table df_fault_log(df_fault_log);
+table df_engineer_visits(df_engineer_visits);
+
+query q1
+`select count(*),
+       t1.fault_log_entry_id
+from df_fault_log as t1
+join df_engineer_visits as t2 on t1.fault_log_entry_id = t2.fault_log_entry_id
+group by t1.fault_log_entry_id
+
+limit 1`;
+
+query q2
+`select recorded_by_staff_id as count...,
+       fault_log_entry_id.other as fault_log_entry_id
+from
+  (select fault_log_entry_id,
+          asset_id,
+          recorded_by_staff_id,
+          fault_log_entry_datetime,
+          fault_description,
+          other_fault_details,
+          fault_log_entry_id.other,
+          recorded_by_staff_id as n
+   from
+     (select lhs.fault_log_entry_id as fault_log_entry_id,
+             lhs.asset_id as asset_id,
+             lhs.recorded_by_staff_id as recorded_by_staff_id,
+             lhs.fault_log_entry_datetime as fault_log_entry_datetime,
+             lhs.fault_description as fault_description,
+             lhs.other_fault_details as other_fault_details,
+             rhs.fault_log_entry_id as fault_log_entry_id.other
+      from df_fault_log as lhs
+      inner join
+        (select fault_log_entry_id,
+                other_visit_details,
+                count(*) as n
+         from df_engineer_visits df_engineer_visits
+         group by fault_log_entry_id,
+                  other_visit_details) as rhs on (lhs.recorded_by_staff_id = rhs.n
+                                                  and lhs.other_fault_details = rhs.other_visit_details)))`;
+
+verify q1 q2;

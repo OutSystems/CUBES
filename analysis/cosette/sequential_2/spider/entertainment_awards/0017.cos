@@ -1,0 +1,29 @@
+schema df_artwork(artwork_id:int, type:str, name:str);
+
+table df_artwork(df_artwork);
+
+query q1
+`select type
+from df_artwork df_artwork
+group by type
+
+limit 1`;
+
+query q2
+`select type
+from
+  (select lhs.artwork_id as artwork_id,
+          lhs.type as type,
+          lhs.name as name,
+          rhs.type as type.other
+   from df_artwork as lhs
+   inner join
+     (select name,
+             type,
+             count(*) as n
+      from df_artwork df_artwork
+      group by name,
+               type) as rhs on (lhs.artwork_id = rhs.n
+                                and lhs.name = rhs.name))`;
+
+verify q1 q2;

@@ -1,0 +1,76 @@
+schema df_station(id:int, name:str, lat:str, long:str, dock_count:int, city:str, installation_date:str);
+schema df_trip(id:int, duration:int, start_date:str, start_station_name:str, start_station_id:int, end_date:str, end_station_name:str, end_station_id:int, bike_id:int, subscription_type:str, zip_code:str);
+
+table df_station(df_station);
+table df_trip(df_trip);
+
+query q1
+`select count(*)
+from df_trip as t1
+join df_station as t2 on t1.end_station_id = t2.id
+where t2.city != "san francisco"`;
+
+query q2
+`select n as count...
+from
+  (select count(*) as n
+   from
+     (select id,
+             duration,
+             start_date,
+             start_station_name,
+             start_station_id,
+             end_date,
+             end_station_name,
+             end_station_id,
+             bike_id,
+             subscription_type,
+             zip_code,
+             lat,
+             long,
+             dock_count,
+             city,
+             installation_date,
+             start_station_name as name
+      from
+        (select start_station_id as id,
+                duration,
+                start_date,
+                start_station_name,
+                start_station_id,
+                end_date,
+                end_station_name,
+                end_station_id,
+                bike_id,
+                subscription_type,
+                zip_code,
+                lat,
+                long,
+                dock_count,
+                city,
+                installation_date
+         from
+           (select lhs.id as id,
+                   lhs.duration as duration,
+                   lhs.start_date as start_date,
+                   lhs.start_station_name as start_station_name,
+                   lhs.start_station_id as start_station_id,
+                   lhs.end_date as end_date,
+                   lhs.end_station_name as end_station_name,
+                   lhs.end_station_id as end_station_id,
+                   lhs.bike_id as bike_id,
+                   lhs.subscription_type as subscription_type,
+                   lhs.zip_code as zip_code,
+                   rhs.lat as lat,
+                   rhs.long as long,
+                   rhs.dock_count as dock_count,
+                   rhs.city as city,
+                   rhs.installation_date as installation_date
+            from df_trip as lhs
+            inner join
+              (select *
+               from df_station df_station
+               where (city != 'san francisco')) as rhs on (lhs.start_station_id = rhs.id
+                                                             and lhs.start_station_name = rhs.name)))))`;
+
+verify q1 q2;

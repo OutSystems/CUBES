@@ -1,0 +1,31 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t2.name
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.friend
+where t1.city = 'new york city'`;
+
+query q2
+`select t4.name
+ from
+  (select t2.name, t2.count_name, t3.name as name1, t3.age, t3.city, t3.gender, t3.job
+  from (select *
+       from
+        (select
+            t1.name, count(t1.name) as count_name
+          from
+            input0 as t1
+          group by
+            t1.name) as t2
+       where t2.count_name = 2.0) join 
+      (select *
+         from
+          input
+         where input.city = 'new york city') as t3) as t4`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_instructor(id:int, name:str, dept_name:str, salary:str);
+schema df_teaches(id:int, course_id:int, sec_id:int, semester:str, year:int);
+
+table df_instructor(df_instructor);
+table df_teaches(df_teaches);
+
+query q1
+`select id
+from df_instructor df_instructor
+except
+select id
+from df_teaches df_teaches`;
+
+query q2
+`select id
+from
+  (select *
+   from df_instructor as lhs
+   where not exists
+       (select 1
+        from df_teaches as rhs
+        where (lhs.id = rhs.id) ))`;
+
+verify q1 q2;

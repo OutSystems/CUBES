@@ -1,0 +1,44 @@
+schema df_country(country_id:int, country_name:str, capital:str, official_native_language:str);
+schema df_match_season(season:str, player:str, position:str, country:int, team:int, draft_pick_number:int, draft_class:str, college:str);
+
+table df_country(df_country);
+table df_match_season(df_match_season);
+
+query q1
+`select distinct t2.position
+from df_country as t1
+join df_match_season as t2 on t1.country_id = t2.df_country
+where t1.capital = "dublin"`;
+
+query q2
+`select distinct position
+from
+  (select country_id,
+          country_name,
+          capital,
+          official_native_language,
+          season,
+          player,
+          position,
+          team,
+          draft_pick_number,
+          draft_class,
+          college,
+          country_id as country
+   from
+     (select lhs.country_id as country_id,
+             lhs.country_name as country_name,
+             lhs.capital as capital,
+             lhs.official_native_language as official_native_language,
+             rhs.season as season,
+             rhs.player as player,
+             rhs.position as position,
+             rhs.team as team,
+             rhs.draft_pick_number as draft_pick_number,
+             rhs.draft_class as draft_class,
+             rhs.college as college
+      from df_country as lhs
+      inner join df_match_season as rhs on (lhs.country_id = rhs.country)))
+where (capital = 'dublin')`;
+
+verify q1 q2;

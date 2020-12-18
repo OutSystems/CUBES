@@ -1,0 +1,37 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_phone_market(df_phone_market);
+
+query q1
+`select name
+from df_phone df_phone
+where phone_id not in
+    (select phone_id
+     from df_phone_market df_phone_market)`;
+
+query q2
+`joining, by = "phone_id"
+joining, by = "phone_id"
+select distinct name
+from
+  (select phone_id,
+          name,
+          memory_in_g,
+          carrier,
+          price
+   from
+     (select *
+      from
+        (select phone_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select phone_id
+              from input1) as rhs
+           where (lhs.phone_id = rhs.phone_id) )) as lhs
+   inner join input0 as rhs on (lhs.phone_id = rhs.phone_id))`;
+
+verify q1 q2;

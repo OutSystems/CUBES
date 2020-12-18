@@ -1,0 +1,30 @@
+schema df_services(service_id:int, service_type_code:str);
+schema df_events(event_id:int, service_id:int, event_details:str);
+
+table df_services(df_services);
+table df_events(df_events);
+
+query q1
+`select t1.service_type_code
+from df_services as t1
+join df_events as t2 on t1.service_id = t2.service_id
+where t2.event_details = 'success' intersect
+  select t1.service_type_code
+  from df_services as t1
+  join df_events as t2 on t1.service_id = t2.service_id where t2.event_details = 'fail'`;
+
+query q2
+`select distinct service_type_code
+from
+  (select lhs.service_id as service_id,
+          lhs.service_type_code as service_type_code,
+          rhs.event_id as event_id,
+          rhs.event_details as event_details
+   from df_services as lhs
+   inner join
+     (select *
+      from df_events df_events
+      where (event_details = 'success'
+             or event_details != 'fail')) as rhs on (lhs.service_id = rhs.service_id))`;
+
+verify q1 q2;

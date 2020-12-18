@@ -1,0 +1,40 @@
+schema df_member(member_id:int, member_name:str, party_id:int, in_office:str);
+schema df_party_events(event_id:int, event_name:str, party_id:int, member_in_charge_id:int);
+
+table df_member(df_member);
+table df_party_events(df_party_events);
+
+query q1
+`select t1.member_name
+from df_member as t1
+join df_party_events as t2 on t1.member_id = t2.member_in_charge_id
+group by t2.member_in_charge_id
+
+limit 1`;
+
+query q2
+`select member_name
+from
+  (select event_id,
+          event_name,
+          party_id,
+          member_in_charge_id,
+          member_name,
+          event_id as n
+   from
+     (select lhs.event_id as event_id,
+             lhs.event_name as event_name,
+             lhs.party_id as party_id,
+             lhs.member_in_charge_id as member_in_charge_id,
+             rhs.member_name as member_name
+      from df_party_events as lhs
+      inner join
+        (select member_id,
+                member_name,
+                count(*) as n
+         from df_member df_member
+         group by member_id,
+                  member_name) as rhs on (lhs.event_id = rhs.n
+                                          and lhs.member_in_charge_id = rhs.member_id)))`;
+
+verify q1 q2;

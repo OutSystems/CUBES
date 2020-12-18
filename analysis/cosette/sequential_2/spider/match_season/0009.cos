@@ -1,0 +1,30 @@
+schema df_player(player_id:int, player:str, years_played:str, total_wl:str, singles_wl:str, doubles_wl:str, team:int);
+
+table df_player(df_player);
+
+query q1
+`select df_player,
+       years_played
+from df_player df_player`;
+
+query q2
+`select distinct player,
+                years_played
+from
+  (select lhs.player_id as player_id,
+          lhs.player as player,
+          lhs.years_played as years_played,
+          lhs.total_wl as total_wl,
+          lhs.singles_wl as singles_wl,
+          lhs.doubles_wl as doubles_wl,
+          lhs.team as team,
+          rhs.player_id as player_id.other,
+          rhs.player as player.other,
+          rhs.years_played as years_played.other,
+          rhs.total_wl as total_wl.other,
+          rhs.singles_wl as singles_wl.other,
+          rhs.team as team.other
+   from df_player as lhs
+   inner join df_player as rhs on (lhs.doubles_wl = rhs.doubles_wl))`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_product_suppliers(product_id:int, supplier_id:int, date_supplied_from:str, date_supplied_to:str, total_amount_purchased:str, total_value_purchased:str);
+
+table df_products(df_products);
+table df_product_suppliers(df_product_suppliers);
+
+query q1
+`select t2.product_type_code,
+       t2.product_name,
+       t2.product_price
+from df_product_suppliers as t1
+join df_products as t2 on t1.product_id = t2.product_id
+where t1.supplier_id = 3`;
+
+query q2
+`select t2.product_type_code,t2.product_name,t2.product_price
+ from
+  (select input.product_id, input.product_type_code, input.product_name, input.product_price, t1.product_id as product_id1, t1.supplier_id, t1.date_supplied_from, t1.date_supplied_to, t1.total_amount_purchased, t1.total_value_purchased
+  from input join 
+      (select *
+         from
+          input0
+         where input0.supplier_id = 3.0) as t1) as t2
+ where t2.product_id = t2.product_id1`;
+
+verify q1 q2;

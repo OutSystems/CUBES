@@ -1,0 +1,33 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train(train_id:int, name:str, time:str, service:str);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train(df_train);
+table df_train_station(df_train_station);
+
+query q1
+`select t2.name
+from df_train_station as t1
+join df_train as t2 on t1.train_id = t2.train_id
+where t1.station_id not in
+    (select t4.station_id
+     from df_train_station as t3
+     join df_station as t4 on t3.station_id = t4.station_id
+     where t4.location = "london")`;
+
+query q2
+`select t3.name1
+ from
+  (select t4.station_id, t4.name, t4.annual_entry_exit, t4.annual_interchanges, t4.total_passengers, t4.location, t4.main_services, t4.number_of_platforms, t4.train_id, t4.name1, t4.time, t4.service, t2.train_id as train_id1, t2.station_id as station_id1
+  from (select input.station_id, input.name, input.annual_entry_exit, input.annual_interchanges, input.total_passengers, input.location, input.main_services, input.number_of_platforms, t5.train_id, t5.name as name1, t5.time, t5.service
+      from (select *
+           from
+            input
+           where input.location <> 'london') join 
+          input0 as t5) as t4 join 
+      input1 as t2) as t3
+ where t3.station_id = t3.station_id1
+   and t3.train_id = t3.train_id1`;
+
+verify q1 q2;

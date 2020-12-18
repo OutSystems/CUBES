@@ -1,0 +1,46 @@
+schema df_allergy_type(allergy:str, allergytype:str);
+
+table df_allergy_type(df_allergy_type);
+
+query q1
+`select allergytype
+from df_allergy_type df_allergy_type
+group by allergytype
+
+limit 1`;
+
+query q2
+`select allergytype
+from
+  (select lhs.allergytype as allergytype,
+          lhs.n as n,
+          rhs.allergytype as allergytype.other,
+          rhs.n as n.other,
+          rhs.allergytype.other as allergytype.other.other,
+          rhs.n.other as n.other.other
+   from
+     (select allergytype,
+             count(*) as n
+      from df_allergy_type df_allergy_type
+      group by allergytype) as lhs
+   cross join
+     (select *
+      from
+        (select lhs.allergytype as allergytype,
+                lhs.n as n,
+                rhs.allergytype as allergytype.other,
+                rhs.n as n.other
+         from
+           (select allergytype,
+                   count(*) as n
+            from df_allergy_type df_allergy_type
+            group by allergytype) as lhs
+         cross join
+           (select allergytype,
+                   count(*) as n
+            from df_allergy_type df_allergy_type
+            group by allergytype) as rhs)
+      where (n < n.other)) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

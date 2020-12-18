@@ -1,0 +1,26 @@
+schema df_invoices(id:int, customer_id:int, invoice_date:str, billing_address:str, billing_city:str, billing_state:str, billing_country:str, billing_postal_code:str, total:str);
+
+table df_invoices(df_invoices);
+
+query q1
+`select billing_state,
+       count(*)
+from df_invoices df_invoices
+where billing_country = "usa"
+group by billing_state`;
+
+query q2
+`select billing_state,
+       n as count...
+from
+  (select billing_country,
+          billing_state,
+          count(*) as n
+   from
+     (select *
+      from df_invoices df_invoices
+      where (billing_country = 'usa'))
+   group by billing_country,
+            billing_state)`;
+
+verify q1 q2;

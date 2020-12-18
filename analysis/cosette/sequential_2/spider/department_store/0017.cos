@@ -1,0 +1,41 @@
+schema df_department_stores(dept_store_id:int, dept_store_chain_id:int, store_name:str, store_address:str, store_phone:str, store_email:str);
+
+table df_department_stores(df_department_stores);
+
+query q1
+`select dept_store_chain_id
+from df_department_stores df_department_stores
+group by dept_store_chain_id
+
+limit 2`;
+
+query q2
+`select n as dept_store_chain_id
+from
+  (select dept_store_chain_id,
+          store_name,
+          n,
+          store_name.other,
+          store_address,
+          store_phone,
+          store_email,
+          dept_store_chain_id as dept_store_id
+   from
+     (select lhs.dept_store_chain_id as dept_store_chain_id,
+             lhs.store_name as store_name,
+             lhs.n as n,
+             rhs.store_name as store_name.other,
+             rhs.store_address as store_address,
+             rhs.store_phone as store_phone,
+             rhs.store_email as store_email
+      from
+        (select dept_store_chain_id,
+                store_name,
+                count(*) as n
+         from df_department_stores df_department_stores
+         group by dept_store_chain_id,
+                  store_name) as lhs
+      inner join df_department_stores as rhs on (lhs.dept_store_chain_id = rhs.dept_store_id
+                                                 and lhs.n = rhs.dept_store_chain_id)))`;
+
+verify q1 q2;

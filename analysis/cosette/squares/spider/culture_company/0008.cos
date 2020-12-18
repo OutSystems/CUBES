@@ -1,0 +1,26 @@
+schema df_book_club(book_club_id:int, year:int, author_or_editor:str, book_title:str, publisher:str, category:str, result:str);
+
+table df_book_club(df_book_club);
+
+query q1
+`select category
+from df_book_club df_book_club
+where year > 1989
+group by category
+having count(*) >= 2`;
+
+query q2
+`select distinct category
+from
+  (select category,
+          book_title,
+          count(*) as n
+   from
+     (select *
+      from input0
+      where (year < 2.0
+             or year > 1989.0))
+   group by category,
+            book_title)`;
+
+verify q1 q2;

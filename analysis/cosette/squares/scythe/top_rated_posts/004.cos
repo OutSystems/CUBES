@@ -1,0 +1,43 @@
+schema df_i004(id:int, rev:int, content:str);
+
+table df_i004(df_i004);
+
+query q1
+`select a.id, a.rev, a.content
+from yourtable a
+inner join (
+    select id, max(rev) as maxrev
+    from yourtable
+    group by id
+) b on a.id = b.id and a.rev = b.maxrev`;
+
+query q2
+`joining, by = "id"
+joining, by = c("maxrev", "rev")
+select distinct id,
+                rev,
+                content
+from
+  (select id,
+          maxrev,
+          rev,
+          content
+   from
+     (select id,
+             maxrev,
+             rev,
+             content
+      from
+        (select id,
+                max(rev) as maxrev
+         from input0
+         group by id) as lhs
+      inner join input0 as rhs on (lhs.id = rhs.id)) as lhs
+   inner join
+     (select rev,
+             max(rev) as maxrev
+      from input0
+      group by rev) as rhs on (lhs.maxrev = rhs.maxrev
+                                   and lhs.rev = rhs.rev))`;
+
+verify q1 q2;

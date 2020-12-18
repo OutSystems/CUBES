@@ -1,0 +1,25 @@
+schema df_department(dno:int, division:str, dname:str, room:str, building:str, dphone:int);
+schema df_minor_in(stuid:int, dno:int);
+
+table df_department(df_department);
+table df_minor_in(df_minor_in);
+
+query q1
+`select t1.dname
+from df_department as t1
+join df_minor_in as t2 on t1.dno = t2.dno
+group by t2.dno
+
+limit 1`;
+
+query q2
+`select t3.dname
+ from
+  (select
+          max(t4.dno) as max_dno
+        from
+          input0 as t4) as t1 join 
+      input as t2 as t3
+ where t3.max_dno = t3.dno`;
+
+verify q1 q2;

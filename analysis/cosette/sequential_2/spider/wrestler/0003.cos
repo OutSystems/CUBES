@@ -1,0 +1,39 @@
+schema df_wrestler(wrestler_id:int, name:str, reign:int, days_held:int, location:str, event:str);
+
+table df_wrestler(df_wrestler);
+
+query q1
+`select name
+from df_wrestler df_wrestler
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select days_held as wrestler_id,
+          name,
+          reign,
+          days_held,
+          location,
+          event,
+          name.other,
+          reign.other,
+          days_held.other,
+          location.other
+   from
+     (select lhs.wrestler_id as wrestler_id,
+             lhs.name as name,
+             lhs.reign as reign,
+             lhs.days_held as days_held,
+             lhs.location as location,
+             lhs.event as event,
+             rhs.name as name.other,
+             rhs.reign as reign.other,
+             rhs.days_held as days_held.other,
+             rhs.location as location.other
+      from df_wrestler as lhs
+      inner join df_wrestler as rhs on (lhs.days_held = rhs.wrestler_id
+                                        and lhs.event = rhs.event)))`;
+
+verify q1 q2;

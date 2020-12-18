@@ -1,0 +1,33 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_business_rates(business_rates_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_business_rates(df_business_rates);
+
+query q1
+`select t2.cmi_cross_ref_id,
+       t2.master_customer_id,
+       count(*)
+from df_business_rates as t1
+join df_cmi_cross_references as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id
+group by t2.cmi_cross_ref_id`;
+
+query q2
+`select cmi_cross_ref_id,
+       master_customer_id,
+       n as count...
+from
+  (select lhs.business_rates_id as business_rates_id,
+          lhs.cmi_cross_ref_id as cmi_cross_ref_id,
+          rhs.master_customer_id as master_customer_id,
+          rhs.n as n
+   from df_business_rates as lhs
+   inner join
+     (select cmi_cross_ref_id,
+             master_customer_id,
+             count(*) as n
+      from df_cmi_cross_references df_cmi_cross_references
+      group by cmi_cross_ref_id,
+               master_customer_id) as rhs on (lhs.cmi_cross_ref_id = rhs.cmi_cross_ref_id))`;
+
+verify q1 q2;

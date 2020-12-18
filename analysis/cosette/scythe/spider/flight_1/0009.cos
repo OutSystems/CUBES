@@ -1,0 +1,22 @@
+schema df_aircraft(aid:int, name:str, distance:int);
+
+table df_aircraft(df_aircraft);
+
+query q1
+`select name
+from df_aircraft df_aircraft
+where distance >
+    (select avg(distance)
+     from df_aircraft df_aircraft)`;
+
+query q2
+`select t1.name
+ from
+  (select
+          avg(t4.distance) as avg_distance
+        from
+          input as t4) as t3 join 
+      input as t2 as t1
+ where t1.avg_distance < t1.distance`;
+
+verify q1 q2;

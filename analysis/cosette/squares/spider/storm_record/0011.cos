@@ -1,0 +1,35 @@
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select region_name
+from df_region df_region
+where region_id not in
+    (select region_id
+     from df_affected_region df_affected_region)`;
+
+query q2
+`joining, by = "region_id"
+joining, by = "region_id"
+select region_name
+from
+  (select region_id,
+          region_code,
+          region_name
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select region_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select region_id
+              from input1) as rhs
+           where (lhs.region_id = rhs.region_id) )) as rhs on (lhs.region_id = rhs.region_id))`;
+
+verify q1 q2;

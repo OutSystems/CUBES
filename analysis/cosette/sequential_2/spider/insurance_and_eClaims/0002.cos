@@ -1,0 +1,28 @@
+schema df_customers(customer_id:int, customer_details:str);
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+
+table df_customers(df_customers);
+table df_policies(df_policies);
+
+query q1
+`select policy_type_code
+from df_policies as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.customer_details = "dayana robel"`;
+
+query q2
+`select policy_type_code
+from
+  (select lhs.policy_id as policy_id,
+          lhs.customer_id as customer_id,
+          lhs.policy_type_code as policy_type_code,
+          lhs.start_date as start_date,
+          lhs.end_date as end_date,
+          rhs.customer_details as customer_details
+   from df_policies as lhs
+   inner join
+     (select *
+      from df_customers df_customers
+      where (customer_details = 'dayana robel')) as rhs on (lhs.customer_id = rhs.customer_id))`;
+
+verify q1 q2;

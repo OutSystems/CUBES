@@ -1,0 +1,34 @@
+schema df_editor(editor_id:int, name:str, age:str);
+
+table df_editor(df_editor);
+
+query q1
+`select name
+from df_editor df_editor
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.editor_id as editor_id,
+          lhs.name as name,
+          lhs.age as age,
+          lhs.minage as minage,
+          rhs.name as name.other,
+          rhs.age as age.other
+   from
+     (select editor_id,
+             name,
+             age,
+             min(age) over () as minage
+      from df_editor df_editor) as lhs
+   inner join
+     (select editor_id,
+             name,
+             age,
+             min(age) over () as minage
+      from df_editor df_editor) as rhs on (lhs.editor_id = rhs.editor_id
+                                 and lhs.age = rhs.minage))`;
+
+verify q1 q2;

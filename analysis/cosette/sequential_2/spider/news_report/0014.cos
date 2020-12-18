@@ -1,0 +1,60 @@
+schema df_event(event_id:int, date:str, venue:str, name:str, event_attendance:int);
+schema df_journalist(journalist_id:int, name:str, nationality:str, age:int, years_working:int);
+schema df_news_report(journalist_id:int, event_id:int, work_type:str);
+
+table df_event(df_event);
+table df_journalist(df_journalist);
+table df_news_report(df_news_report);
+
+query q1
+`select t3.name
+from df_news_report as t1
+join df_event as t2 on t1.event_id = t2.event_id
+join df_journalist as t3 on t1.journalist_id = t3.journalist_id
+group by t3.name
+having count(*) > 1`;
+
+query q2
+`select name
+from
+  (select journalist_id,
+          name,
+          nationality,
+          age,
+          years_working,
+          event_id,
+          work_type,
+          venue,
+          event_id as n
+   from
+     (select lhs.journalist_id as journalist_id,
+             lhs.name as name,
+             lhs.nationality as nationality,
+             lhs.age as age,
+             lhs.years_working as years_working,
+             lhs.event_id as event_id,
+             lhs.work_type as work_type,
+             rhs.venue as venue
+      from
+        (select lhs.journalist_id as journalist_id,
+                lhs.name as name,
+                lhs.nationality as nationality,
+                lhs.age as age,
+                lhs.years_working as years_working,
+                rhs.event_id as event_id,
+                rhs.work_type as work_type
+         from df_journalist as lhs
+         left join df_news_report as rhs on (lhs.journalist_id = rhs.journalist_id)) as lhs
+      inner join
+        (select *
+         from
+           (select event_id,
+                   venue,
+                   count(*) as n
+            from df_event df_event
+            group by event_id,
+                     venue)
+         where (n = 1.0)) as rhs on (lhs.event_id = rhs.n
+                                     and lhs.journalist_id = rhs.event_id)))`;
+
+verify q1 q2;

@@ -1,0 +1,21 @@
+schema df_channel(channel_id:int, name:str, owner:str, share_in_percent:str, rating_in_percent:str);
+
+table df_channel(df_channel);
+
+query q1
+`select sum(rating_in_percent),
+       owner
+from df_channel df_channel
+group by owner`;
+
+query q2
+`select t1.sum_rating_in_percent,t1.owner
+ from
+  (select
+      t2.owner, sum(t2.rating_in_percent) as sum_rating_in_percent
+    from
+      input as t2
+    group by
+      t2.owner) as t1`;
+
+verify q1 q2;

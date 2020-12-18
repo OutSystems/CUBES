@@ -1,0 +1,55 @@
+schema df_airlines(alid:int, name:str, iata:str, icao:str, callsign:str, country:str, active:str);
+
+table df_airlines(df_airlines);
+
+query q1
+`select country
+from df_airlines df_airlines
+where active = 'y'
+group by country
+
+limit 1`;
+
+query q2
+`select country.other as country
+from
+  (select country,
+          country as iata,
+          n_distinct,
+          name,
+          icao,
+          callsign,
+          country.other,
+          active,
+          alid
+   from
+     (select country,
+             iata,
+             n_distinct,
+             name,
+             icao,
+             callsign,
+             country.other,
+             active,
+             n_distinct as alid
+      from
+        (select lhs.country as country,
+                lhs.iata as iata,
+                lhs.n_distinct as n_distinct,
+                rhs.name as name,
+                rhs.icao as icao,
+                rhs.callsign as callsign,
+                rhs.country as country.other,
+                rhs.active as active
+         from
+           (select country,
+                   iata,
+                   count(distinct active) as n_distinct
+            from df_airlines df_airlines
+            group by country,
+                     iata) as lhs
+         inner join df_airlines as rhs on (lhs.n_distinct = rhs.alid
+                                               and lhs.country = rhs.iata))))
+where (active != 'y')`;
+
+verify q1 q2;

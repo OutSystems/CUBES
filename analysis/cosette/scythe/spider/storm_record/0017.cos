@@ -1,0 +1,34 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_affected_region(df_affected_region);
+
+query q1
+`select name
+from df_storm df_storm
+except
+select t1.name
+from df_storm as t1
+join df_affected_region as t2 on t1.storm_id = t2.storm_id
+group by t1.storm_id
+having count(*) >= 2`;
+
+query q2
+`select t3.name
+ from
+  (select
+          t4.region_id, from
+          (select *
+             from
+              input0
+             where input0.region_id = 2.0) as t4
+        group by
+          t4.region_id) as t1 join 
+      (select *
+         from
+          input
+         where input.number_deaths > 4.0
+           or input.storm_id > 5.0) as t2 as t3`;
+
+verify q1 q2;

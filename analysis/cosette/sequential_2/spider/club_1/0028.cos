@@ -1,0 +1,46 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_club(clubid:int, clubname:str, clubdesc:str, clublocation:str);
+schema df_member_of_club(stuid:int, clubid:int, position:str);
+
+table df_student(df_student);
+table df_club(df_club);
+table df_member_of_club(df_member_of_club);
+
+query q1
+`select distinct t1.clubname
+from df_club as t1
+join df_member_of_club as t2 on t1.clubid = t2.clubid
+join df_student as t3 on t2.stuid = t3.stuid
+where t3.city_code = "bal"`;
+
+query q2
+`select clubname
+from
+  (select lhs.clubid as clubid,
+          lhs.clubname as clubname,
+          lhs.clubdesc as clubdesc,
+          lhs.clublocation as clublocation,
+          lhs.stuid as stuid,
+          lhs.position as position,
+          rhs.lname as lname,
+          rhs.fname as fname,
+          rhs.age as age,
+          rhs.sex as sex,
+          rhs.major as major,
+          rhs.advisor as advisor,
+          rhs.city_code as city_code
+   from
+     (select lhs.clubid as clubid,
+             lhs.clubname as clubname,
+             lhs.clubdesc as clubdesc,
+             lhs.clublocation as clublocation,
+             rhs.stuid as stuid,
+             rhs.position as position
+      from df_club as lhs
+      inner join df_member_of_club as rhs on (lhs.clubid = rhs.clubid)) as lhs
+   inner join
+     (select *
+      from df_student df_student
+      where (city_code = 'bal')) as rhs on (lhs.stuid = rhs.stuid))`;
+
+verify q1 q2;

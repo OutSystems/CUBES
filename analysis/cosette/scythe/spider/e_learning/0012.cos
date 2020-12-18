@@ -1,0 +1,24 @@
+schema df_students(student_id:int, date_of_registration:str, date_of_latest_logon:str, login_name:str, password:str, personal_name:str, middle_name:str, family_name:str);
+
+table df_students(df_students);
+
+query q1
+`select date_of_latest_logon
+from df_students df_students
+where family_name = "jaskolski"
+  or family_name = "langosh"`;
+
+query q2
+`select t2.date_of_latest_logon
+ from
+  (select
+          max(t3.date_of_latest_logon) as max_date_of_latest_logon
+        from
+          input as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.family_name = 'jaskolski'
+           or input.family_name = 'langosh') as t4 as t2`;
+
+verify q1 q2;

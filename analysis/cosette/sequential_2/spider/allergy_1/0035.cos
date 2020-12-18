@@ -1,0 +1,24 @@
+schema df_has_allergy(stuid:int, allergy:str);
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+
+table df_has_allergy(df_has_allergy);
+table df_student(df_student);
+
+query q1
+`select stuid
+from df_student df_student
+except
+select stuid
+from df_has_allergy df_has_allergy`;
+
+query q2
+`select stuid
+from
+  (select *
+   from df_student as lhs
+   where not exists
+       (select 1
+        from df_has_allergy as rhs
+        where (lhs.stuid = rhs.stuid) ))`;
+
+verify q1 q2;

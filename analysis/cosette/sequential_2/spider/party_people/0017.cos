@@ -1,0 +1,32 @@
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+schema df_party_events(event_id:int, event_name:str, party_id:int, member_in_charge_id:int);
+
+table df_party(df_party);
+table df_party_events(df_party_events);
+
+query q1
+`select t2.party_name,
+       count(*)
+from df_party_events as t1
+join df_party as t2 on t1.party_id = t2.party_id
+group by t1.party_id`;
+
+query q2
+`select party_name,
+       n as count...
+from
+  (select lhs.party_id as party_id,
+          lhs.n as n,
+          rhs.minister as minister,
+          rhs.took_office as took_office,
+          rhs.left_office as left_office,
+          rhs.region_id as region_id,
+          rhs.party_name as party_name
+   from
+     (select party_id,
+             count(*) as n
+      from df_party_events df_party_events
+      group by party_id) as lhs
+   inner join df_party as rhs on (lhs.party_id = rhs.party_id))`;
+
+verify q1 q2;

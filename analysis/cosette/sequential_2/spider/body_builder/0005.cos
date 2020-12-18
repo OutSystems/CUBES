@@ -1,0 +1,45 @@
+schema df_body_builder(body_builder_id:int, people_id:int, snatch:str, clean_jerk:str, total:str);
+
+table df_body_builder(df_body_builder);
+
+query q1
+`select clean_jerk
+from df_body_builder df_body_builder
+
+limit 1`;
+
+query q2
+`select clean_jerk
+from
+  (select lhs.body_builder_id as body_builder_id,
+          lhs.people_id as people_id,
+          lhs.snatch as snatch,
+          lhs.clean_jerk as clean_jerk,
+          lhs.total as total,
+          lhs.maxtotal as maxtotal,
+          rhs.body_builder_id as body_builder_id.other,
+          rhs.people_id as people_id.other,
+          rhs.snatch as snatch.other,
+          rhs.clean_jerk as clean_jerk.other,
+          rhs.total as total.other,
+          rhs.maxtotal as maxtotal.other
+   from
+     (select body_builder_id,
+             people_id,
+             snatch,
+             clean_jerk,
+             total,
+             max(total) over () as maxtotal
+      from df_body_builder df_body_builder) as lhs
+   cross join
+     (select body_builder_id,
+             people_id,
+             snatch,
+             clean_jerk,
+             total,
+             max(total) over () as maxtotal
+      from df_body_builder df_body_builder) as rhs)
+where (total >= maxtotal
+       and total <= total.other)`;
+
+verify q1 q2;

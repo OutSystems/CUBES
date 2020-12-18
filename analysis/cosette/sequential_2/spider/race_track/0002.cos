@@ -1,0 +1,26 @@
+schema df_track(track_id:int, name:str, location:str, seating:str, year_opened:str);
+
+table df_track(df_track);
+
+query q1
+`select name,
+       location
+from df_track df_track`;
+
+query q2
+`select name,
+       location
+from
+  (select lhs.track_id as track_id,
+          lhs.name as name,
+          lhs.location as location,
+          lhs.seating as seating,
+          lhs.year_opened as year_opened,
+          rhs.name as name.other,
+          rhs.location as location.other,
+          rhs.seating as seating.other
+   from df_track as lhs
+   inner join df_track as rhs on (lhs.track_id = rhs.track_id
+                                  and lhs.year_opened = rhs.year_opened))`;
+
+verify q1 q2;

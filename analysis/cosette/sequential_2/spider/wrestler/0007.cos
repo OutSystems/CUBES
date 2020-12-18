@@ -1,0 +1,31 @@
+schema df_wrestler(wrestler_id:int, name:str, reign:int, days_held:int, location:str, event:str);
+schema df_elimination(elimination_id:int, wrestler_id:int, team:str, eliminated_by:str, elimination_move:str, time:str);
+
+table df_wrestler(df_wrestler);
+table df_elimination(df_elimination);
+
+query q1
+`select t2.name,
+       t1.elimination_move
+from df_elimination as t1
+join df_wrestler as t2 on t1.wrestler_id = t2.wrestler_id`;
+
+query q2
+`select name,
+       elimination_move
+from
+  (select lhs.elimination_id as elimination_id,
+          lhs.wrestler_id as wrestler_id,
+          lhs.team as team,
+          lhs.eliminated_by as eliminated_by,
+          lhs.elimination_move as elimination_move,
+          lhs.time as time,
+          rhs.name as name,
+          rhs.reign as reign,
+          rhs.days_held as days_held,
+          rhs.location as location,
+          rhs.event as event
+   from df_elimination as lhs
+   left join df_wrestler as rhs on (lhs.wrestler_id = rhs.wrestler_id))`;
+
+verify q1 q2;

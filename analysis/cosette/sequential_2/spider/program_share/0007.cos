@@ -1,0 +1,45 @@
+schema df_program(program_id:int, name:str, origin:str, launch:str, owner:str);
+
+table df_program(df_program);
+
+query q1
+`select name
+from df_program df_program
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.program_id as program_id,
+          lhs.name as name,
+          lhs.origin as origin,
+          lhs.launch as launch,
+          lhs.owner as owner,
+          lhs.maxlaunch as maxlaunch,
+          rhs.program_id as program_id.other,
+          rhs.name as name.other,
+          rhs.origin as origin.other,
+          rhs.launch as launch.other,
+          rhs.owner as owner.other,
+          rhs.maxlaunch as maxlaunch.other
+   from
+     (select program_id,
+             name,
+             origin,
+             launch,
+             owner,
+             max(launch) over () as maxlaunch
+      from df_program df_program) as lhs
+   cross join
+     (select program_id,
+             name,
+             origin,
+             launch,
+             owner,
+             max(launch) over () as maxlaunch
+      from df_program df_program) as rhs)
+where (launch >= maxlaunch
+       and launch.other >= maxlaunch.other)`;
+
+verify q1 q2;

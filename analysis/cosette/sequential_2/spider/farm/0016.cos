@@ -1,0 +1,31 @@
+schema df_city(city_id:int, official_name:str, status:str, area_km_2:str, population:str, census_ranking:str);
+
+table df_city(df_city);
+
+query q1
+`select status
+from df_city df_city
+group by status
+
+limit 1`;
+
+query q2
+`select status
+from
+  (select lhs.status as status,
+          lhs.n as n,
+          rhs.status as status.other,
+          rhs.n as n.other
+   from
+     (select status,
+             count(*) as n
+      from df_city df_city
+      group by status) as lhs
+   cross join
+     (select status,
+             count(*) as n
+      from df_city df_city
+      group by status) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

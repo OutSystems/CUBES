@@ -1,0 +1,24 @@
+schema df_services(service_id:int, service_type_code:str);
+schema df_events(event_id:int, service_id:int, event_details:str);
+
+table df_services(df_services);
+table df_events(df_events);
+
+query q1
+`select t1.event_details
+from df_events as t1
+join df_services as t2 on t1.service_id = t2.service_id
+where t2.service_type_code = 'marriage'`;
+
+query q2
+`select event_details
+from
+  (select lhs.event_id as event_id,
+          lhs.service_id as service_id,
+          lhs.event_details as event_details,
+          rhs.service_type_code as service_type_code
+   from df_events as lhs
+   inner join df_services as rhs on (lhs.service_id = rhs.service_id))
+where (service_type_code = 'marriage')`;
+
+verify q1 q2;

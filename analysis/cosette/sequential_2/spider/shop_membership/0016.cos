@@ -1,0 +1,31 @@
+schema df_member(member_id:int, card_number:str, name:str, hometown:str, level:int);
+schema df_membership_register_branch(member_id:int, branch_id:int, register_year:int);
+
+table df_member(df_member);
+table df_membership_register_branch(df_membership_register_branch);
+
+query q1
+`select t2.name,
+       t2.hometown
+from df_membership_register_branch as t1
+join df_member as t2 on t1.member_id = t2.member_id
+where t1.register_year = 2016`;
+
+query q2
+`select name,
+       hometown
+from
+  (select lhs.member_id as member_id,
+          lhs.branch_id as branch_id,
+          lhs.register_year as register_year,
+          rhs.card_number as card_number,
+          rhs.name as name,
+          rhs.hometown as hometown,
+          rhs.level as level
+   from
+     (select *
+      from df_membership_register_branch df_membership_register_branch
+      where (register_year = 2016.0)) as lhs
+   left join df_member as rhs on (lhs.member_id = rhs.member_id))`;
+
+verify q1 q2;

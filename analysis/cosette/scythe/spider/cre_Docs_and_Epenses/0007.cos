@@ -1,0 +1,26 @@
+schema df_statements(statement_id:int, statement_details:str);
+schema df_accounts(account_id:int, statement_id:int, account_details:str);
+
+table df_statements(df_statements);
+table df_accounts(df_accounts);
+
+query q1
+`select t1.statement_id,
+       t2.statement_details
+from df_accounts as t1
+join df_statements as t2 on t1.statement_id = t2.statement_id
+group by t1.statement_id
+
+limit 1`;
+
+query q2
+`select t1.min_statement_id,t1.statement_details
+ from
+  (select
+          min(t4.statement_id) as min_statement_id
+        from
+          input as t4) as t3 join 
+      input as t2 as t1
+ where t1.min_statement_id = t1.statement_id`;
+
+verify q1 q2;

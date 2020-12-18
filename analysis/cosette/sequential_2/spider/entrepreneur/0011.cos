@@ -1,0 +1,48 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, date_of_birth:str);
+
+table df_entrepreneur(df_entrepreneur);
+table df_people(df_people);
+
+query q1
+`select t2.date_of_birth
+from df_entrepreneur as t1
+join df_people as t2 on t1.people_id = t2.people_id
+where t1.investor = "simon woodroffe"
+  or t1.investor = "peter jones"`;
+
+query q2
+`select date_of_birth
+from
+  (select lhs.entrepreneur_id as entrepreneur_id,
+          lhs.people_id as people_id,
+          lhs.company as company,
+          lhs.money_requested as money_requested,
+          lhs.investor as investor,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.weight as weight,
+          lhs.date_of_birth as date_of_birth
+   from
+     (select lhs.entrepreneur_id as entrepreneur_id,
+             lhs.people_id as people_id,
+             lhs.company as company,
+             lhs.money_requested as money_requested,
+             lhs.investor as investor,
+             rhs.name as name,
+             rhs.height as height,
+             rhs.weight as weight,
+             rhs.date_of_birth as date_of_birth
+      from df_entrepreneur as lhs
+      inner join df_people as rhs on (lhs.people_id = rhs.people_id)) as lhs
+   inner join
+     (select *
+      from df_entrepreneur df_entrepreneur
+      where (investor = 'simon woodroffe'
+             or investor = 'peter jones')) as rhs on (lhs.entrepreneur_id = rhs.entrepreneur_id
+                                                        and lhs.people_id = rhs.people_id
+                                                        and lhs.company = rhs.company
+                                                        and lhs.money_requested = rhs.money_requested
+                                                        and lhs.investor = rhs.investor))`;
+
+verify q1 q2;

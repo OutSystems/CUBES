@@ -1,0 +1,51 @@
+schema df_grants(grant_id:int, organisation_id:int, grant_amount:str, grant_start_date:str, grant_end_date:str, other_details:str);
+schema df_organisations(organisation_id:int, organisation_type:str, organisation_details:str);
+
+table df_grants(df_grants);
+table df_organisations(df_organisations);
+
+query q1
+`select t2.organisation_id,
+       t2.organisation_details
+from df_grants as t1
+join df_organisations as t2 on t1.organisation_id = t2.organisation_id
+group by t2.organisation_id
+having sum(t1.grant_amount) > 6000`;
+
+query q2
+`select organisation_id,
+       organisation_details
+from
+  (select lhs.organisation_id as organisation_id,
+          lhs.organisation_type as organisation_type,
+          lhs.organisation_details as organisation_details,
+          lhs.grant_id as grant_id,
+          lhs.grant_amount as grant_amount,
+          lhs.grant_start_date as grant_start_date,
+          lhs.grant_end_date as grant_end_date,
+          lhs.other_details as other_details,
+          rhs.sumgrant_amount as sumgrant_amount
+   from
+     (select lhs.organisation_id as organisation_id,
+             lhs.organisation_type as organisation_type,
+             lhs.organisation_details as organisation_details,
+             rhs.grant_id as grant_id,
+             rhs.grant_amount as grant_amount,
+             rhs.grant_start_date as grant_start_date,
+             rhs.grant_end_date as grant_end_date,
+             rhs.other_details as other_details
+      from df_organisations as lhs
+      inner join
+        (select *
+         from df_grants df_grants
+         where (grant_amount >= 6000.0)) as rhs on (lhs.organisation_id = rhs.organisation_id)) as lhs
+   inner join
+     (select grant_start_date,
+             organisation_id,
+             sum(grant_amount) as sumgrant_amount
+      from df_grants df_grants
+      group by grant_start_date,
+               organisation_id) as rhs on (lhs.organisation_id = rhs.organisation_id
+                                           and lhs.grant_start_date = rhs.grant_start_date))`;
+
+verify q1 q2;

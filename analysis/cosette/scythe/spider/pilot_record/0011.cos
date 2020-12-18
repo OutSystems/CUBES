@@ -1,0 +1,26 @@
+schema df_aircraft(aircraft_id:int, order_year:int, manufacturer:str, model:str, fleet_series:str, powertrain:str, fuel_propulsion:str);
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+schema df_pilot_record(record_id:int, pilot_id:int, aircraft_id:int, date:str);
+
+table df_aircraft(df_aircraft);
+table df_pilot(df_pilot);
+table df_pilot_record(df_pilot_record);
+
+query q1
+`select t3.pilot_name,
+       t2.fleet_series
+from df_pilot_record as t1
+join df_aircraft as t2 on t1.aircraft_id = t2.aircraft_id
+join df_pilot as t3 on t1.pilot_id = t3.pilot_id`;
+
+query q2
+`select t5.pilot_name,t5.fleet_series
+ from
+  (select t3.aircraft_id, t3.order_year, t3.manufacturer, t3.model, t3.fleet_series, t3.powertrain, t3.fuel_propulsion, t3.pilot_id, t3.pilot_name, t3.rank, t3.age, t3.nationality, t3.position, t3.join_year, t3.team, t4.record_id, t4.pilot_id as pilot_id1, t4.aircraft_id as aircraft_id1, t4.date
+  from input join 
+          input0 as t2 as t3 join 
+      input1 as t4) as t5
+ where t5.aircraft_id = t5.aircraft_id1
+   and t5.pilot_id = t5.pilot_id1`;
+
+verify q1 q2;

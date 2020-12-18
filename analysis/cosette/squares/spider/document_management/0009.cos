@@ -1,0 +1,22 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+
+table df_documents(df_documents);
+
+query q1
+`select document_type_code
+from df_documents df_documents
+group by document_type_code
+having sum(access_count) > 10000`;
+
+query q2
+`select document_type_code
+from
+  (select document_type_code,
+          sum(access_count) as sumaccess_count
+   from
+     (select *
+      from input0
+      where (access_count < 10000.0))
+   group by document_type_code)`;
+
+verify q1 q2;

@@ -1,0 +1,20 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select t1.name
+from df_member as t1
+join df_round as t2 on t1.member_id = t2.member_id`;
+
+query q2
+`select t2.name
+ from
+  (select input.member_id, input.name, input.country, input.college_id, t1.round_id, t1.member_id as member_id1, t1.decoration_theme, t1.rank_in_round
+  from input join 
+      input0 as t1) as t2
+ where t2.member_id = t2.member_id1`;
+
+verify q1 q2;

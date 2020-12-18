@@ -1,0 +1,20 @@
+schema df_park(park_id:str, park_name:str, park_alias:str, city:str, state:str, country:str);
+
+table df_park(df_park);
+
+query q1
+`select state
+from df_park df_park
+group by state
+having count(*) > 2`;
+
+query q2
+`select state
+from
+  (select state,
+          count(*) as n
+   from df_park df_park
+   group by state)
+where (n > 2.0)`;
+
+verify q1 q2;

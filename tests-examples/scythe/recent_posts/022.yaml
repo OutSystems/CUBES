@@ -16,17 +16,17 @@ solution:
   - filter
   - mutate
 sql: |
-  SELECT t3.FolloweeId
+  SELECT t3.c1
   FROM (
-      SELECT TOP (1) t2.FolloweeId
-      FROM (
-          SELECT COUNT(*) AS value, t1.FolloweeId
-          FROM Followers AS t1
-          GROUP BY t1.FolloweeId
-          ) AS t2
-      ORDER BY t2.value DESC
-      ) AS t3
-  ) AS MostPopularFolloweeId
+           SELECT t2.c1
+           FROM (
+                    SELECT COUNT(*) AS value, t1.c1
+                    FROM `022_2` AS t1
+                    GROUP BY t1.c1
+                ) AS t2
+           ORDER BY t2.value DESC, c1 DESC
+           LIMIT 1
+       ) AS t3
 comment: |
   df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
   df3 <- df2 %>% filter(n == 3 | n > c1)

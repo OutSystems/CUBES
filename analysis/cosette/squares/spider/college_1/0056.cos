@@ -1,0 +1,56 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_class(df_class);
+table df_enroll(df_enroll);
+table df_student(df_student);
+
+query q1
+`select t1.crs_code
+from df_class as t1
+join df_enroll as t2 on t1.class_code = t2.class_code
+join df_student as t3 on t3.stu_num = t2.stu_num
+where t3.stu_lname = 'smithson'`;
+
+query q2
+`joining, by = "class_code"
+joining, by = c("prof_num", "stu_num")
+select distinct crs_code
+from
+  (select class_code,
+          crs_code,
+          class_section,
+          class_time,
+          class_room,
+          prof_num,
+          stu_num,
+          enroll_grade,
+          stu_lname,
+          stu_fname,
+          stu_init,
+          stu_dob,
+          stu_hrs,
+          stu_class,
+          stu_gpa,
+          stu_transfer,
+          dept_code,
+          stu_phone
+   from
+     (select class_code,
+             crs_code,
+             class_section,
+             class_time,
+             class_room,
+             prof_num,
+             stu_num,
+             enroll_grade
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.class_code = rhs.class_code)) as lhs
+   left join
+     (select *
+      from input2
+      where (stu_lname != 'smithson')) as rhs on (lhs.prof_num = rhs.prof_num
+                                                      and lhs.stu_num = rhs.stu_num))`;
+
+verify q1 q2;

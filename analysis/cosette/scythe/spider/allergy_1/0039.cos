@@ -1,0 +1,19 @@
+schema df_has_allergy(stuid:int, allergy:str);
+
+table df_has_allergy(df_has_allergy);
+
+query q1
+`select allergy,
+       count(*)
+from df_has_allergy df_has_allergy
+group by allergy`;
+
+query q2
+`(select
+    t1.allergy, count_distinct(t1.stuid) as count_distinct_stuid
+  from
+    input as t1
+  group by
+    t1.allergy) as t2`;
+
+verify q1 q2;

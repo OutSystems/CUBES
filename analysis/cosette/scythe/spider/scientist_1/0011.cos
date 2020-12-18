@@ -1,0 +1,24 @@
+schema df_projects(code:str, name:str, hours:int);
+
+table df_projects(df_projects);
+
+query q1
+`select name
+from df_projects df_projects
+where hours between 100 and 300`;
+
+query q2
+`select t1.name
+ from
+  (select input.code, input.name, input.hours, t2.code as code1, t2.name as name1, t2.hours as hours1
+  from (select *
+       from
+        input
+       where input.hours > 100.0) join 
+      (select *
+         from
+          input
+         where input.hours < 300.0) as t2) as t1
+ where t1.code = t1.code1`;
+
+verify q1 q2;

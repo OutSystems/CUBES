@@ -1,0 +1,31 @@
+schema df_race(race_id:int, name:str, class:str, date:str, track_id:int);
+schema df_track(track_id:int, name:str, location:str, seating:str, year_opened:str);
+
+table df_race(df_race);
+table df_track(df_track);
+
+query q1
+`select t2.name,
+       count(*)
+from df_race as t1
+join df_track as t2 on t1.track_id = t2.track_id
+group by t1.track_id`;
+
+query q2
+`select name,
+       n as count...
+from
+  (select lhs.track_id as track_id,
+          lhs.n as n,
+          rhs.name as name,
+          rhs.location as location,
+          rhs.seating as seating,
+          rhs.year_opened as year_opened
+   from
+     (select track_id,
+             count(*) as n
+      from df_race df_race
+      group by track_id) as lhs
+   inner join df_track as rhs on (lhs.track_id = rhs.track_id))`;
+
+verify q1 q2;

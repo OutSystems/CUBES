@@ -1,0 +1,56 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select roomname
+from df_rooms df_rooms
+where baseprice < 160
+  and beds = 2
+  and decor = 'modern'`;
+
+query q2
+`joining, by = c("roomid", "roomname", "beds", "bedtype", "maxoccupancy", "baseprice", "decor")
+joining, by = c("roomid", "roomname", "beds", "bedtype", "maxoccupancy", "baseprice", "decor")
+select roomname
+from
+  (select roomid,
+          roomname,
+          beds,
+          bedtype,
+          maxoccupancy,
+          baseprice,
+          decor
+   from
+     (select roomid,
+             roomname,
+             beds,
+             bedtype,
+             maxoccupancy,
+             baseprice,
+             decor
+      from input0 as lhs
+      inner join
+        (select *
+         from input0
+         where (beds >= 2.0
+                or beds >= 160.0)) as rhs on (lhs.roomid = rhs.roomid
+                                                  and lhs.roomname = rhs.roomname
+                                                  and lhs.beds = rhs.beds
+                                                  and lhs.bedtype = rhs.bedtype
+                                                  and lhs.maxoccupancy = rhs.maxoccupancy
+                                                  and lhs.baseprice = rhs.baseprice
+                                                  and lhs.decor = rhs.decor)) as lhs
+   inner join
+     (select *
+      from input0
+      where (decor = 'modern'
+             or beds < 2.0)) as rhs on (lhs.roomid = rhs.roomid
+                                            and lhs.roomname = rhs.roomname
+                                            and lhs.beds = rhs.beds
+                                            and lhs.bedtype = rhs.bedtype
+                                            and lhs.maxoccupancy = rhs.maxoccupancy
+                                            and lhs.baseprice = rhs.baseprice
+                                            and lhs.decor = rhs.decor))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_submission(submission_id:int, scores:str, author:str, college:str);
+schema df_acceptance(submission_id:int, workshop_id:int, result:str);
+
+table df_submission(df_submission);
+table df_acceptance(df_acceptance);
+
+query q1
+`select t2.author
+from df_acceptance as t1
+join df_submission as t2 on t1.submission_id = t2.submission_id
+group by t2.author
+having count(distinct t1.workshop_id) > 1`;
+
+query q2
+`select t2.author
+ from
+  (select *
+       from
+        (select
+            t3.workshop_id, t3.result, max(t3.workshop_id) as max_workshop_id
+          from
+            input0 as t3
+          group by
+            t3.workshop_id, t3.result) as t1
+       where t1.max_workshop_id = 1.0) join 
+      (select *
+         from
+          input
+         where input.submission_id = 2.0) as t4 as t2`;
+
+verify q1 q2;

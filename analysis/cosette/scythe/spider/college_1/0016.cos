@@ -1,0 +1,33 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+
+table df_class(df_class);
+
+query q1
+`select count(*),
+       class_room
+from df_class df_class
+group by class_room
+having count(*) >= 2`;
+
+query q2
+`select t2.count_distinct_class_code,t2.class_room
+ from
+  (select t5.class_room, t5.count_distinct_class_code, t1.class_room as class_room1, t1.count_distinct_prof_num
+  from (select
+          t6.class_room, count_distinct(t6.class_code) as count_distinct_class_code
+        from
+          input as t6
+        group by
+          t6.class_room) as t5 join 
+      (select *
+         from
+          (select
+              t3.class_room, count_distinct(t3.prof_num) as count_distinct_prof_num
+            from
+              input as t3
+            group by
+              t3.class_room) as t4
+         where t4.count_distinct_prof_num = 2.0) as t1) as t2
+ where t2.class_room = t2.class_room1`;
+
+verify q1 q2;

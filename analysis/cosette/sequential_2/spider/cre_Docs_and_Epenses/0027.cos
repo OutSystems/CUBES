@@ -1,0 +1,46 @@
+schema df_projects(project_id:int, project_details:str);
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+
+table df_projects(df_projects);
+table df_documents(df_documents);
+
+query q1
+`select t1.project_details
+from df_projects as t1
+join df_documents as t2 on t1.project_id = t2.project_id
+where t2.document_name = "king book"`;
+
+query q2
+`select project_details
+from
+  (select lhs.project_id as project_id,
+          lhs.project_details as project_details,
+          lhs.document_id as document_id,
+          lhs.document_type_code as document_type_code,
+          lhs.document_date as document_date,
+          lhs.document_name as document_name,
+          lhs.document_description as document_description,
+          lhs.other_details as other_details
+   from
+     (select lhs.project_id as project_id,
+             lhs.project_details as project_details,
+             rhs.document_id as document_id,
+             rhs.document_type_code as document_type_code,
+             rhs.document_date as document_date,
+             rhs.document_name as document_name,
+             rhs.document_description as document_description,
+             rhs.other_details as other_details
+      from df_projects as lhs
+      inner join df_documents as rhs on (lhs.project_id = rhs.project_id)) as lhs
+   inner join
+     (select *
+      from df_documents df_documents
+      where (document_name = 'king book')) as rhs on (lhs.project_id = rhs.project_id
+                                                        and lhs.document_id = rhs.document_id
+                                                        and lhs.document_type_code = rhs.document_type_code
+                                                        and lhs.document_date = rhs.document_date
+                                                        and lhs.document_name = rhs.document_name
+                                                        and lhs.document_description = rhs.document_description
+                                                        and lhs.other_details = rhs.other_details))`;
+
+verify q1 q2;

@@ -1,0 +1,22 @@
+schema df_phone(company_name:str, hardware_model_name:str, accreditation_type:str, accreditation_level:str, date:str, chip_model:str, screen_mode:int);
+
+table df_phone(df_phone);
+
+query q1
+`select accreditation_level
+from df_phone df_phone
+group by accreditation_level
+having count(*) > 3`;
+
+query q2
+`select distinct accreditation_level
+from
+  (select accreditation_level,
+          accreditation_type,
+          count(*) as n
+   from df_phone df_phone
+   group by accreditation_level,
+            accreditation_type)
+where (n != 3.0)`;
+
+verify q1 q2;

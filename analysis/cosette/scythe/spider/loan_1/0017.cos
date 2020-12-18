@@ -1,0 +1,31 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+
+table df_customer(df_customer);
+
+query q1
+`select cust_name
+from df_customer df_customer
+except
+select cust_name
+from df_customer df_customer
+where acc_type = 'saving'`;
+
+query q2
+`select t3.cust_name
+ from
+  (select t1.acc_type, t1.count_cust_name, t4.cust_id, t4.cust_name, t4.acc_type as acc_type1, t4.acc_bal, t4.no_of_loans, t4.credit_score, t4.branch_id, t4.state
+  from (select
+          t2.acc_type, count(t2.cust_name) as count_cust_name
+        from
+          (select *
+             from
+              input
+             where input.acc_type = 'saving') as t2
+        group by
+          t2.acc_type) as t1 join 
+      (select *
+         from
+          input
+         where input.cust_id = 2.0) as t4) as t3`;
+
+verify q1 q2;

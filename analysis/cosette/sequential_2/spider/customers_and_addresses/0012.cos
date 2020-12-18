@@ -1,0 +1,53 @@
+schema df_addresses(address_id:int, address_content:str, city:str, zip_postcode:int, state_province_county:str, country:str, other_address_details:str);
+schema df_customers(customer_id:int, payment_method:str, customer_name:str, date_became_customer:str, other_customer_details:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_address_from:str, address_type:str, date_address_to:str);
+
+table df_addresses(df_addresses);
+table df_customers(df_customers);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t3.address_content
+from df_customers as t1
+join df_customer_addresses as t2 on t1.customer_id = t2.customer_id
+join df_addresses as t3 on t2.address_id = t3.address_id
+where t1.customer_name = "maudie kertzmann"`;
+
+query q2
+`select address_content
+from
+  (select lhs.address_id as address_id,
+          lhs.address_content as address_content,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          lhs.other_address_details as other_address_details,
+          lhs.customer_id as customer_id,
+          lhs.date_address_from as date_address_from,
+          lhs.address_type as address_type,
+          lhs.date_address_to as date_address_to,
+          rhs.payment_method as payment_method,
+          rhs.customer_name as customer_name,
+          rhs.date_became_customer as date_became_customer,
+          rhs.other_customer_details as other_customer_details
+   from
+     (select lhs.address_id as address_id,
+             lhs.address_content as address_content,
+             lhs.city as city,
+             lhs.zip_postcode as zip_postcode,
+             lhs.state_province_county as state_province_county,
+             lhs.country as country,
+             lhs.other_address_details as other_address_details,
+             rhs.customer_id as customer_id,
+             rhs.date_address_from as date_address_from,
+             rhs.address_type as address_type,
+             rhs.date_address_to as date_address_to
+      from df_addresses as lhs
+      inner join df_customer_addresses as rhs on (lhs.address_id = rhs.address_id)) as lhs
+   inner join
+     (select *
+      from df_customers df_customers
+      where (customer_name = 'maudie kertzmann')) as rhs on (lhs.customer_id = rhs.customer_id))`;
+
+verify q1 q2;

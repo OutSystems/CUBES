@@ -1,0 +1,28 @@
+schema df_activity(actid:int, activity_name:str);
+schema df_faculty_participates_in(facid:int, actid:int);
+
+table df_activity(df_activity);
+table df_faculty_participates_in(df_faculty_participates_in);
+
+query q1
+`select t1.activity_name,
+       count(*)
+from df_activity as t1
+join df_faculty_participates_in as t2 on t1.actid = t2.actid
+group by t1.actid`;
+
+query q2
+`select activity_name,
+       n as count...
+from
+  (select activity_name,
+          count(*) as n
+   from
+     (select lhs.facid as facid,
+             lhs.actid as actid,
+             rhs.activity_name as activity_name
+      from df_faculty_participates_in as lhs
+      left join df_activity as rhs on (lhs.actid = rhs.actid))
+   group by activity_name)`;
+
+verify q1 q2;

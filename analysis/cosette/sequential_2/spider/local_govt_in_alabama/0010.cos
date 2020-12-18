@@ -1,0 +1,117 @@
+schema df_services(service_id:int, service_type_code:str);
+schema df_participants(participant_id:int, participant_type_code:str, participant_details:str);
+schema df_events(event_id:int, service_id:int, event_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_services(df_services);
+table df_participants(df_participants);
+table df_events(df_events);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select t3.service_id,
+       t4.service_type_code
+from df_participants as t1
+join df_participants_in_events as t2 on t1.participant_id = t2.participant_id
+join df_events as t3 on t2.event_id = t3.event_id
+join df_services as t4 on t3.service_id = t4.service_id
+group by t3.service_id
+
+limit 1`;
+
+query q2
+`select distinct service_id,
+                service_type_code
+from
+  (select service_id,
+          service_type_code,
+          participant_id,
+          participant_type_code,
+          participant_details,
+          event_id,
+          event_details,
+          service_id as n,
+          service_id.other,
+          service_type_code.other,
+          participant_type_code.other,
+          participant_details.other,
+          event_id.other,
+          event_details.other
+   from
+     (select lhs.service_id as service_id,
+             lhs.service_type_code as service_type_code,
+             lhs.participant_id as participant_id,
+             lhs.participant_type_code as participant_type_code,
+             lhs.participant_details as participant_details,
+             lhs.event_id as event_id,
+             lhs.event_details as event_details,
+             lhs.n as n,
+             rhs.service_id as service_id.other,
+             rhs.service_type_code as service_type_code.other,
+             rhs.participant_type_code as participant_type_code.other,
+             rhs.participant_details as participant_details.other,
+             rhs.event_id as event_id.other,
+             rhs.event_details as event_details.other
+      from
+        (select lhs.service_id as service_id,
+                lhs.service_type_code as service_type_code,
+                lhs.participant_id as participant_id,
+                lhs.participant_type_code as participant_type_code,
+                lhs.participant_details as participant_details,
+                lhs.event_id as event_id,
+                rhs.event_details as event_details,
+                rhs.n as n
+         from
+           (select lhs.service_id as service_id,
+                   lhs.service_type_code as service_type_code,
+                   lhs.participant_id as participant_id,
+                   lhs.participant_type_code as participant_type_code,
+                   lhs.participant_details as participant_details,
+                   rhs.event_id as event_id
+            from
+              (select lhs.service_id as service_id,
+                      lhs.service_type_code as service_type_code,
+                      rhs.participant_id as participant_id,
+                      rhs.participant_type_code as participant_type_code,
+                      rhs.participant_details as participant_details
+               from df_services as lhs
+               cross join df_participants as rhs) as lhs
+            inner join df_participants_in_events as rhs on (lhs.participant_id = rhs.participant_id)) as lhs
+         cross join
+           (select event_details,
+                   count(*) as n
+            from df_events df_events
+            group by event_details) as rhs) as lhs
+      inner join
+        (select lhs.service_id as service_id,
+                lhs.service_type_code as service_type_code,
+                lhs.participant_id as participant_id,
+                lhs.participant_type_code as participant_type_code,
+                lhs.participant_details as participant_details,
+                lhs.event_id as event_id,
+                rhs.event_details as event_details,
+                rhs.n as n
+         from
+           (select lhs.service_id as service_id,
+                   lhs.service_type_code as service_type_code,
+                   lhs.participant_id as participant_id,
+                   lhs.participant_type_code as participant_type_code,
+                   lhs.participant_details as participant_details,
+                   rhs.event_id as event_id
+            from
+              (select lhs.service_id as service_id,
+                      lhs.service_type_code as service_type_code,
+                      rhs.participant_id as participant_id,
+                      rhs.participant_type_code as participant_type_code,
+                      rhs.participant_details as participant_details
+               from df_services as lhs
+               cross join df_participants as rhs) as lhs
+            inner join df_participants_in_events as rhs on (lhs.participant_id = rhs.participant_id)) as lhs
+         cross join
+           (select event_details,
+                   count(*) as n
+            from df_events df_events
+            group by event_details) as rhs) as rhs on (lhs.service_id = rhs.n
+                                                       and lhs.event_id = rhs.participant_id)))`;
+
+verify q1 q2;

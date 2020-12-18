@@ -1,0 +1,26 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+
+table df_company(df_company);
+
+query q1
+`select headquarters
+from df_company df_company
+except
+select headquarters
+from df_company df_company
+where main_industry = 'banking'`;
+
+query q2
+`select headquarters
+from
+  (select *
+   from df_company as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_company df_company
+           where (main_industry = 'banking')) as rhs
+        where (lhs.headquarters = rhs.headquarters) ))`;
+
+verify q1 q2;

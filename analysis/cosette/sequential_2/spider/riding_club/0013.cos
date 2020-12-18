@@ -1,0 +1,41 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+schema df_coach(coach_id:int, coach_name:str, gender:str, club_id:int, rank:int);
+schema df_player_coach(player_id:int, coach_id:int, starting_year:int);
+
+table df_player(df_player);
+table df_coach(df_coach);
+table df_player_coach(df_player_coach);
+
+query q1
+`select t3.player_name,
+       t2.coach_name
+from df_player_coach as t1
+join df_coach as t2 on t1.coach_id = t2.coach_id
+join df_player as t3 on t1.player_id = t3.player_id`;
+
+query q2
+`select distinct player_name,
+                rank.other as coach_name
+from
+  (select lhs.coach_id as coach_id,
+          lhs.coach_name as coach_name,
+          lhs.gender as gender,
+          lhs.club_id as club_id,
+          lhs.rank as rank,
+          rhs.player_id as player_id,
+          rhs.sponsor_name as sponsor_name,
+          rhs.player_name as player_name,
+          rhs.residence as residence,
+          rhs.occupation as occupation,
+          rhs.votes as votes,
+          rhs.rank as rank.other
+   from df_coach as lhs
+   inner join
+     (select *
+      from df_player as lhs
+      where exists
+          (select 1
+           from df_player_coach as rhs
+           where (lhs.player_id = rhs.player_id) )) as rhs on (lhs.gender = rhs.gender))`;
+
+verify q1 q2;

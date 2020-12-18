@@ -1,0 +1,40 @@
+schema df_inst(instid:int, name:str, country:str);
+schema df_papers(paperid:int, title:str);
+schema df_authorship(authid:int, instid:int, paperid:int, authorder:int);
+
+table df_inst(df_inst);
+table df_papers(df_papers);
+table df_authorship(df_authorship);
+
+query q1
+`select distinct t1.title
+from df_papers as t1
+join df_authorship as t2 on t1.paperid = t2.paperid
+join df_inst as t3 on t2.instid = t3.instid
+where t3.name = "google"`;
+
+query q2
+`joining, by = "instid"
+joining, by = "paperid"
+select distinct title
+from
+  (select instid,
+          name,
+          country,
+          authid,
+          paperid,
+          authorder,
+          title
+   from
+     (select instid,
+             name,
+             country,
+             authid,
+             paperid,
+             authorder
+      from input0 as lhs
+      inner join input2 as rhs on (lhs.instid = rhs.instid)) as lhs
+   inner join input1 as rhs on (lhs.paperid = rhs.paperid))
+where (name = 'google')`;
+
+verify q1 q2;

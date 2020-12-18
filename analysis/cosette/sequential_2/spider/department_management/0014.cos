@@ -1,0 +1,56 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_head(head_id:int, name:str, born_state:str, age:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_head(df_head);
+table df_management(df_management);
+
+query q1
+`select t3.born_state
+from df_department as t1
+join df_management as t2 on t1.department_id = t2.department_id
+join df_head as t3 on t2.head_id = t3.head_id
+where t1.name = 'treasury' intersect
+  select t3.born_state
+  from df_department as t1
+  join df_management as t2 on t1.department_id = t2.department_id
+  join df_head as t3 on t2.head_id = t3.head_id where t1.name = 'homeland security'`;
+
+query q2
+`select distinct born_state
+from
+  (select lhs.department_id as department_id,
+          lhs.head_id as head_id,
+          lhs.temporary_acting as temporary_acting,
+          lhs.name as name,
+          lhs.born_state as born_state,
+          lhs.age as age,
+          rhs.department_id as department_id.other,
+          rhs.name as name.other,
+          rhs.creation as creation,
+          rhs.budget_in_billions as budget_in_billions,
+          rhs.num_employees as num_employees
+   from
+     (select department_id,
+             department_id as head_id,
+             temporary_acting,
+             name,
+             born_state,
+             age
+      from
+        (select lhs.department_id as department_id,
+                lhs.head_id as head_id,
+                lhs.temporary_acting as temporary_acting,
+                rhs.name as name,
+                rhs.born_state as born_state,
+                rhs.age as age
+         from df_management as lhs
+         inner join df_head as rhs on (lhs.department_id = rhs.head_id))) as lhs
+   inner join
+     (select *
+      from df_department df_department
+      where (name = 'treasury'
+             or name = 'homeland security')) as rhs on (lhs.department_id = rhs.ranking))`;
+
+verify q1 q2;

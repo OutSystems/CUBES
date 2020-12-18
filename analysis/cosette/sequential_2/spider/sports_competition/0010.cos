@@ -1,0 +1,31 @@
+schema df_club(club_id:int, name:str, region:str, start_year:int);
+schema df_player(player_id:int, name:str, position:str, club_id:int, apps:str, tries:str, goals:str, points:str);
+
+table df_club(df_club);
+table df_player(df_player);
+
+query q1
+`select t1.name,
+       t2.player_id
+from df_club as t1
+join df_player as t2 on t1.club_id = t2.club_id`;
+
+query q2
+`select name,
+       player_id
+from
+  (select lhs.club_id as club_id,
+          lhs.name as name,
+          lhs.region as region,
+          lhs.start_year as start_year,
+          rhs.player_id as player_id,
+          rhs.name as name.other,
+          rhs.position as position,
+          rhs.apps as apps,
+          rhs.tries as tries,
+          rhs.goals as goals,
+          rhs.points as points
+   from df_club as lhs
+   inner join df_player as rhs on (lhs.club_id = rhs.club_id))`;
+
+verify q1 q2;

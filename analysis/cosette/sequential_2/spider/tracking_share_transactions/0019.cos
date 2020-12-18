@@ -1,0 +1,30 @@
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+schema df_purchases(purchase_transaction_id:int, purchase_details:str);
+
+table df_transactions(df_transactions);
+table df_purchases(df_purchases);
+
+query q1
+`select t1.purchase_details
+from df_purchases as t1
+join df_transactions as t2 on t1.purchase_transaction_id = t2.transaction_id
+where t2.amount_of_transaction > 10000`;
+
+query q2
+`select purchase_details
+from
+  (select lhs.transaction_id as transaction_id,
+          lhs.investor_id as investor_id,
+          lhs.transaction_type_code as transaction_type_code,
+          lhs.date_of_transaction as date_of_transaction,
+          lhs.amount_of_transaction as amount_of_transaction,
+          lhs.share_count as share_count,
+          lhs.other_details as other_details,
+          rhs.purchase_details as purchase_details
+   from
+     (select *
+      from df_transactions df_transactions
+      where (amount_of_transaction > 10000.0)) as lhs
+   inner join df_purchases as rhs on (lhs.transaction_id = rhs.purchase_transaction_id))`;
+
+verify q1 q2;

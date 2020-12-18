@@ -1,0 +1,30 @@
+schema df_captain(captain_id:int, name:str, ship_id:int, age:int, class:str, rank:str);
+
+table df_captain(df_captain);
+
+query q1
+`select name,
+       class,
+       rank
+from df_captain df_captain`;
+
+query q2
+`select distinct name,
+                class,
+                rank
+from
+  (select lhs.captain_id as captain_id,
+          lhs.name as name,
+          lhs.ship_id as ship_id,
+          lhs.age as age,
+          lhs.class as class,
+          lhs.rank as rank,
+          rhs.captain_id as captain_id.other,
+          rhs.name as name.other,
+          rhs.age as age.other,
+          rhs.rank as rank.other
+   from df_captain as lhs
+   inner join df_captain as rhs on (lhs.class = rhs.class
+                                    and lhs.ship_id = rhs.ship_id))`;
+
+verify q1 q2;

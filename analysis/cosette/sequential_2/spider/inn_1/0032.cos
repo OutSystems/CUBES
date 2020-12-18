@@ -1,0 +1,34 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+schema df_reservations(code:int, room:str, checkin:str, checkout:str, rate:str, lastname:str, firstname:str, adults:int, kids:int);
+
+table df_rooms(df_rooms);
+table df_reservations(df_reservations);
+
+query q1
+`select count(*)
+from df_rooms df_rooms
+where roomid not in
+    (select distinct room
+     from df_reservations df_reservations)`;
+
+query q2
+`select distinct kids as count...
+from
+  (select lhs.code as code,
+          lhs.room as room,
+          lhs.checkin as checkin,
+          lhs.checkout as checkout,
+          lhs.rate as rate,
+          lhs.lastname as lastname,
+          lhs.firstname as firstname,
+          lhs.adults as adults,
+          lhs.kids as kids,
+          rhs.maxoccupancy as maxoccupancy
+   from df_reservations as lhs
+   inner join
+     (select maxoccupancy,
+             count(distinct roomid) as n_distinct
+      from df_rooms df_rooms
+      group by maxoccupancy) as rhs on (lhs.adults = rhs.n_distinct))`;
+
+verify q1 q2;

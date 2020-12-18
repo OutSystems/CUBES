@@ -1,0 +1,22 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+
+table df_department(df_department);
+
+query q1
+`select max(budget_in_billions),
+       min(budget_in_billions)
+from df_department df_department`;
+
+query q2
+`select t4.max_budget_in_billions,t4.budget_in_billions
+ from
+  (select
+          max(t1.budget_in_billions) as max_budget_in_billions
+        from
+          input as t1) as t2 join 
+      (select *
+         from
+          input
+         where input.department_id > input.budget_in_billions) as t3 as t4`;
+
+verify q1 q2;

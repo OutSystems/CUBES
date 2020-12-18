@@ -1,0 +1,44 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+
+table df_person(df_person);
+
+query q1
+`select name
+from df_person df_person
+where gender = 'male'
+  and age =
+    (select min(age)
+     from df_person df_person
+     where gender = 'male' )`;
+
+query q2
+`select name
+from
+  (select *
+   from
+     (select lhs.name as name,
+             lhs.age as age,
+             lhs.city as city,
+             lhs.gender as gender,
+             lhs.job as job,
+             lhs.minage as minage,
+             rhs.name as name.other,
+             rhs.age as age.other,
+             rhs.city as city.other,
+             rhs.gender as gender.other,
+             rhs.job as job.other
+      from
+        (select name,
+                age,
+                city,
+                gender,
+                job,
+                min(age) over () as minage
+         from df_person df_person) as lhs
+      cross join df_person as rhs)
+   where (age != minage
+          and age < age.other))
+where (gender = 'male'
+       and minage != age)`;
+
+verify q1 q2;

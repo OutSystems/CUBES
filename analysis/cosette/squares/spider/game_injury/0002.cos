@@ -1,0 +1,45 @@
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+
+table df_game(df_game);
+
+query q1
+`select date
+from df_game df_game`;
+
+query q2
+`joining, by = c("stadium_id", "id", "season", "date", "home_team", "away_team", "score", "competition")
+joining, by = "home_team"
+select distinct date
+from
+  (select home_team,
+          stadium_id,
+          id,
+          season,
+          date,
+          away_team,
+          score,
+          competition
+   from
+     (select home_team
+      from
+        (select stadium_id,
+                id,
+                season,
+                date,
+                home_team,
+                away_team,
+                score,
+                competition
+         from input0 as lhs
+         left join input0 as rhs on (lhs.stadium_id = rhs.stadium_id
+                                         and lhs.id = rhs.id
+                                         and lhs.season = rhs.season
+                                         and lhs.date = rhs.date
+                                         and lhs.home_team = rhs.home_team
+                                         and lhs.away_team = rhs.away_team
+                                         and lhs.score = rhs.score
+                                         and lhs.competition = rhs.competition)) intersect select home_team
+      from input0) as lhs
+   inner join input0 as rhs on (lhs.home_team = rhs.home_team))`;
+
+verify q1 q2;

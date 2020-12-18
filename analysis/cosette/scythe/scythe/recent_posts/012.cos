@@ -1,0 +1,28 @@
+schema df_012(ID:int, code:int, product_variants_id:int, product_name:str, variants:str, variants_value:str);
+
+table df_012(df_012);
+
+query q1
+`select xx.code, group_concat(concat(xx.variants,':',xx.variants_value)) as variants_and_values, xx.product_name, xx.product_variants_id
+from products_table xx
+group by xx.product_variants_id, xx.product_name, xx.code`;
+
+query q2
+`select t4.code,t4.product_variants_id,t4.product_name,t4.concat_variants,t4.concat_variants_value
+ from
+  (select t5.code, t5.product_variants_id, t5.product_name, t5.concat_variants, t6.product_name as product_name1, t6.concat_variants_value
+  from (select
+          t2.code, t2.product_variants_id, t2.product_name, concat(t2.variants) as concat_variants
+        from
+          input as t2
+        group by
+          t2.code, t2.product_variants_id, t2.product_name) as t5 join 
+      (select
+            t3.product_name, concat(t3.variants_value) as concat_variants_value
+          from
+            input as t3
+          group by
+            t3.product_name) as t1 as t6) as t4
+ where t4.product_name = t4.product_name1`;
+
+verify q1 q2;

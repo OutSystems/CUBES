@@ -1,0 +1,35 @@
+schema df_007(Employee:str, FromDate:str, ToDate:str, Code:int);
+
+table df_007(df_007);
+
+query q1
+`select t1.employee, t1.mindt, t2.maxdt, t1.code
+from
+(select min(fromdate), code, employee
+from t
+group by employee, code) t1
+join
+(select max(todate), code, employee
+from t
+group by employee, code) t2
+on t1.code = t2.code`;
+
+query q2
+`select t6.employee,t6.min_fromdate,t6.max_todate,t6.code
+ from
+  (select t4.code, t4.max_todate, t3.employee, t3.code as code1, t3.min_fromdate
+  from (select
+          t5.code, max(t5.todate) as max_todate
+        from
+          input as t5
+        group by
+          t5.code) as t4 join 
+      (select
+            t1.employee, t1.code, min(t1.fromdate) as min_fromdate
+          from
+            input as t1
+          group by
+            t1.employee, t1.code) as t2 as t3) as t6
+ where t6.code = t6.code1`;
+
+verify q1 q2;

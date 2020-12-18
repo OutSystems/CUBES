@@ -1,0 +1,37 @@
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+schema df_store_district(store_id:int, district_id:int);
+
+table df_store(df_store);
+table df_district(df_district);
+table df_store_district(df_store_district);
+
+query q1
+`select t3.district_name
+from df_store as t1
+join df_store_district as t2 on t1.store_id = t2.store_id
+join df_district as t3 on t2.district_id = t3.district_id
+where t1.type = "city mall" intersect
+  select t3.district_name
+  from df_store as t1
+  join df_store_district as t2 on t1.store_id = t2.store_id
+  join df_district as t3 on t2.district_id = t3.district_id where t1.type = "village df_store"`;
+
+query q2
+`select t1.district_name
+ from
+  (select
+          t4.type, max(t4.store_id) as max_store_id
+        from
+          (select *
+             from
+              input
+             where input.type = 'city mall') as t4
+        group by
+          t4.type) as t3 join 
+      (select *
+         from
+          input0
+         where input0.district_id = 15.0) as t2 as t1`;
+
+verify q1 q2;

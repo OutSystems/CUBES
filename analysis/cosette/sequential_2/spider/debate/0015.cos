@@ -1,0 +1,44 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+schema df_debate_people(debate_id:int, affirmative:int, negative:int, if_affirmative_win:str);
+
+table df_people(df_people);
+table df_debate_people(df_debate_people);
+
+query q1
+`select name
+from df_people df_people
+where people_id not in
+    (select affirmative
+     from df_debate_people df_debate_people)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_people as lhs
+   where not exists
+       (select 1
+        from
+          (select people_id,
+                  district,
+                  name,
+                  party,
+                  age,
+                  debate_id,
+                  negative,
+                  if_affirmative_win,
+                  people_id as affirmative
+           from
+             (select lhs.people_id as people_id,
+                     lhs.district as district,
+                     lhs.name as name,
+                     lhs.party as party,
+                     lhs.age as age,
+                     rhs.debate_id as debate_id,
+                     rhs.negative as negative,
+                     rhs.if_affirmative_win as if_affirmative_win
+              from df_people as lhs
+              inner join df_debate_people as rhs on (lhs.people_id = rhs.affirmative))) as rhs
+        where (lhs.people_id = rhs.people_id) ))`;
+
+verify q1 q2;

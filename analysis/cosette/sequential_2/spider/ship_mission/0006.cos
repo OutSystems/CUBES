@@ -1,0 +1,24 @@
+schema df_ship(ship_id:int, name:str, type:str, nationality:str, tonnage:int);
+
+table df_ship(df_ship);
+
+query q1
+`select name
+from df_ship df_ship
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.ship_id as ship_id,
+          lhs.name as name,
+          lhs.type as type,
+          lhs.nationality as nationality,
+          lhs.tonnage as tonnage
+   from df_ship as lhs
+   inner join
+     (select max(tonnage) as maxtonnage
+      from df_ship df_ship) as rhs on (lhs.tonnage = rhs.maxtonnage))`;
+
+verify q1 q2;

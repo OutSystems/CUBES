@@ -1,0 +1,49 @@
+schema df_i047(id:int, user:int, time:int, io:str);
+
+table df_i047(df_i047);
+
+query q1
+`select t1.*
+from lms_attendance t1
+join (select user, max(time) maxtime
+      from lms_attendance
+      group by user) t2
+where t1.time = t2.maxtime
+  and t1.user = t2.user`;
+
+query q2
+`joining, by = c("time", "id")
+joining, by = c("maxtime", "user")
+select id,
+       user,
+       time,
+       io
+from
+  (select time,
+          id,
+          maxtime,
+          user,
+          io
+   from
+     (select time,
+             id,
+             maxtime,
+             user,
+             io
+      from
+        (select time,
+                id,
+                max(time) as maxtime
+         from input0
+         group by time,
+                  id) as lhs
+      inner join input0 as rhs on (lhs.time = rhs.time
+                                       and lhs.id = rhs.id)) as lhs
+   inner join
+     (select user,
+             max(time) as maxtime
+      from input0
+      group by user) as rhs on (lhs.maxtime = rhs.maxtime
+                                    and lhs.user = rhs.user))`;
+
+verify q1 q2;

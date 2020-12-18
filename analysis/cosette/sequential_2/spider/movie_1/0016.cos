@@ -1,0 +1,42 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+
+table df_movie(df_movie);
+
+query q1
+`select title
+from df_movie df_movie
+where year =
+    (select max(year)
+     from df_movie df_movie)`;
+
+query q2
+`select distinct title.other as title
+from
+  (select lhs.mid as mid,
+          lhs.title as title,
+          lhs.year as year,
+          lhs.director as director,
+          lhs.maxyear as maxyear,
+          rhs.mid as mid.other,
+          rhs.title as title.other,
+          rhs.year as year.other,
+          rhs.director as director.other,
+          rhs.maxyear as maxyear.other
+   from
+     (select mid,
+             title,
+             year,
+             director,
+             max(year) over () as maxyear
+      from df_movie df_movie) as lhs
+   cross join
+     (select mid,
+             title,
+             year,
+             director,
+             max(year) over () as maxyear
+      from df_movie df_movie) as rhs)
+where (maxyear <= year.other
+       or maxyear < maxyear.other)`;
+
+verify q1 q2;

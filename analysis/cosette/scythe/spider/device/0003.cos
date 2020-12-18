@@ -1,0 +1,25 @@
+schema df_device(device_id:int, device:str, carrier:str, package_version:str, applications:str, software_platform:str);
+
+table df_device(df_device);
+
+query q1
+`select carrier
+from df_device df_device
+where software_platform != 'android'`;
+
+query q2
+`select t2.carrier
+ from
+  (select
+          count(t3.applications) as count_applications
+        from
+          (select *
+             from
+              input
+             where input.software_platform = 'android') as t3) as t1 join 
+      (select *
+         from
+          input
+         where input.device_id = 2.0) as t4 as t2`;
+
+verify q1 q2;

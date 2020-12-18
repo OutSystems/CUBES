@@ -1,0 +1,25 @@
+schema df_i019(id:int, age:int);
+
+table df_i019(df_i019);
+
+query q1
+`select s.id, s.age, c.cnt
+  from students  s
+       inner join (select age, count(age) as cnt
+                     from students
+                    group by age) c on s.age = c.age`;
+
+query q2
+`select t3.id,t3.age,t3.count_id
+ from
+  (select t1.age, t1.count_id, t4.id, t4.age as age1
+  from (select
+          t2.age, count(t2.id) as count_id
+        from
+          input as t2
+        group by
+          t2.age) as t1 join 
+      input as t4) as t3
+ where t3.age = t3.age1`;
+
+verify q1 q2;

@@ -1,0 +1,78 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+
+table df_class(df_class);
+table df_course(df_course);
+table df_department(df_department);
+
+query q1
+`select t3.dept_name
+from df_course as t1
+join df_class as t2 on t1.crs_code = t2.crs_code
+join df_department as t3 on t1.dept_code = t3.dept_code
+group by t1.dept_code
+
+limit 1`;
+
+query q2
+`select distinct dept_name
+from
+  (select lhs.class_code as class_code,
+          lhs.crs_code as crs_code,
+          lhs.class_section as class_section,
+          lhs.class_time as class_time,
+          lhs.class_room as class_room,
+          lhs.prof_num as prof_num,
+          lhs.dept_code as dept_code,
+          lhs.crs_description as crs_description,
+          lhs.crs_credit as crs_credit,
+          lhs.dept_name as dept_name,
+          lhs.school_code as school_code,
+          lhs.emp_num as emp_num,
+          lhs.dept_address as dept_address,
+          lhs.dept_extension as dept_extension,
+          rhs.sumcrs_credit as sumcrs_credit
+   from
+     (select lhs.class_code as class_code,
+             lhs.crs_code as crs_code,
+             lhs.class_section as class_section,
+             lhs.class_time as class_time,
+             lhs.class_room as class_room,
+             lhs.prof_num as prof_num,
+             lhs.dept_code as dept_code,
+             lhs.crs_description as crs_description,
+             lhs.crs_credit as crs_credit,
+             rhs.dept_name as dept_name,
+             rhs.school_code as school_code,
+             rhs.emp_num as emp_num,
+             rhs.dept_address as dept_address,
+             rhs.dept_extension as dept_extension
+      from
+        (select lhs.class_code as class_code,
+                lhs.crs_code as crs_code,
+                lhs.class_section as class_section,
+                lhs.class_time as class_time,
+                lhs.class_room as class_room,
+                lhs.prof_num as prof_num,
+                rhs.dept_code as dept_code,
+                rhs.crs_description as crs_description,
+                rhs.crs_credit as crs_credit
+         from df_class as lhs
+         inner join df_course as rhs on (lhs.crs_code = rhs.crs_code)) as lhs
+      inner join df_department as rhs on (lhs.dept_code = rhs.dept_code)) as lhs
+   inner join
+     (select crs_credit,
+             crs_description,
+             sum(crs_credit) as sumcrs_credit
+      from
+        (select crs_code,
+                dept_code,
+                crs_description,
+                max(crs_credit) over () as crs_credit
+         from df_course df_course)
+      group by crs_credit,
+               crs_description) as rhs on (lhs.crs_description = rhs.crs_description
+                                           and lhs.crs_credit = rhs.crs_credit))`;
+
+verify q1 q2;

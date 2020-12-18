@@ -1,0 +1,35 @@
+schema df_drama_workshop_groups(workshop_group_id:int, address_id:int, currency_code:str, marketing_region_code:str, store_name:str, store_phone:str, store_email_address:str, other_details:str);
+schema df_services(service_id:int, service_type_code:int, workshop_group_id:int, product_description:str, product_name:str, product_price:str, other_product_service_details:str);
+
+table df_drama_workshop_groups(df_drama_workshop_groups);
+table df_services(df_services);
+
+query q1
+`select t1.store_phone,
+       t1.store_email_address
+from df_drama_workshop_groups as t1
+join df_services as t2 on t1.workshop_group_id = t2.workshop_group_id`;
+
+query q2
+`joining, by = "workshop_group_id"
+select store_phone,
+       store_email_address
+from
+  (select service_id,
+          service_type_code,
+          workshop_group_id,
+          product_description,
+          product_name,
+          product_price,
+          other_product_service_details,
+          address_id,
+          currency_code,
+          marketing_region_code,
+          store_name,
+          store_phone,
+          store_email_address,
+          other_details
+   from input1 as lhs
+   inner join input0 as rhs on (lhs.workshop_group_id = rhs.workshop_group_id))`;
+
+verify q1 q2;

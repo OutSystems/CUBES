@@ -1,0 +1,32 @@
+schema df_university(school_id:int, school:str, location:str, founded:str, affiliation:str, enrollment:str, nickname:str, primary_conference:str);
+
+table df_university(df_university);
+
+query q1
+`select school,
+       nickname
+from df_university df_university`;
+
+query q2
+`select school,
+       nickname
+from
+  (select lhs.school_id as school_id,
+          lhs.school as school,
+          lhs.location as location,
+          lhs.founded as founded,
+          lhs.affiliation as affiliation,
+          lhs.enrollment as enrollment,
+          lhs.nickname as nickname,
+          lhs.primary_conference as primary_conference,
+          rhs.school as school.other,
+          rhs.location as location.other,
+          rhs.founded as founded.other,
+          rhs.affiliation as affiliation.other,
+          rhs.enrollment as enrollment.other,
+          rhs.nickname as nickname.other,
+          rhs.primary_conference as primary_conference.other
+   from df_university as lhs
+   inner join df_university as rhs on (lhs.school_id = rhs.school_id))`;
+
+verify q1 q2;

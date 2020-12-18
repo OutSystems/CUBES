@@ -1,0 +1,33 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_staff(staff_id:int, tourist_attraction_id:int, name:str, other_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_staff(df_staff);
+
+query q1
+`select t1.name
+from df_staff as t1
+join df_tourist_attractions as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+where t2.name = "us museum"`;
+
+query q2
+`select name
+from
+  (select lhs.staff_id as staff_id,
+          lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.name as name,
+          lhs.other_details as other_details,
+          rhs.attraction_type_code as attraction_type_code,
+          rhs.location_id as location_id,
+          rhs.how_to_get_there as how_to_get_there,
+          rhs.name as name.other,
+          rhs.opening_hours as opening_hours,
+          rhs.other_details as other_details.other
+   from df_staff as lhs
+   inner join
+     (select *
+      from df_tourist_attractions df_tourist_attractions
+      where (name = 'us museum')) as rhs on (lhs.tourist_attraction_id = rhs.tourist_attraction_id
+                                               and lhs.other_details = rhs.description))`;
+
+verify q1 q2;

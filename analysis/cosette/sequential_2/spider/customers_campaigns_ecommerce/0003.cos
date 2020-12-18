@@ -1,0 +1,22 @@
+schema df_premises(premise_id:int, premises_type:str, premise_details:str);
+
+table df_premises(df_premises);
+
+query q1
+`select premises_type,
+       premise_details
+from df_premises df_premises`;
+
+query q2
+`select premises_type,
+       premise_details
+from
+  (select lhs.premise_id as premise_id,
+          lhs.premises_type as premises_type,
+          lhs.premise_details as premise_details,
+          rhs.premises_type as premises_type.other
+   from df_premises as lhs
+   inner join df_premises as rhs on (lhs.premise_details = rhs.premise_details
+                                     and lhs.premise_id = rhs.premise_id))`;
+
+verify q1 q2;

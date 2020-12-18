@@ -1,0 +1,31 @@
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select t1.editor_id,
+       t1.name,
+       count(*)
+from df_editor as t1
+join df_journal_committee as t2 on t1.editor_id = t2.editor_id
+group by t1.editor_id`;
+
+query q2
+`select editor_id,
+       name,
+       n as count...
+from
+  (select lhs.editor_id as editor_id,
+          lhs.name as name,
+          lhs.age as age,
+          rhs.n as n
+   from df_editor as lhs
+   inner join
+     (select editor_id,
+             count(*) as n
+      from df_journal_committee df_journal_committee
+      group by editor_id) as rhs on (lhs.editor_id = rhs.editor_id))`;
+
+verify q1 q2;

@@ -1,0 +1,20 @@
+schema df_publication(publication_id:int, book_id:int, publisher:str, publication_date:str, price:str);
+
+table df_publication(df_publication);
+
+query q1
+`select publisher
+from df_publication df_publication
+group by publisher
+having count(*) > 1`;
+
+query q2
+`select publisher
+from
+  (select publisher,
+          count(*) as n
+   from df_publication df_publication
+   group by publisher)
+where (n != 1.0)`;
+
+verify q1 q2;

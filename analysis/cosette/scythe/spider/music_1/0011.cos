@@ -1,0 +1,29 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select avg(t2.rating)
+from df_artist as t1
+join df_song as t2 on t1.artist_name = t2.artist_name
+where t1.gender = "female"`;
+
+query q2
+`select t1.avg_rating
+ from
+  (select
+          avg(t4.rating) as avg_rating
+        from
+          input0 as t4) as t3 join 
+      (select
+            t5.gender, from
+            (select *
+               from
+                input
+               where input.gender = 'female') as t5
+          group by
+            t5.gender) as t6 as t2 as t1`;
+
+verify q1 q2;

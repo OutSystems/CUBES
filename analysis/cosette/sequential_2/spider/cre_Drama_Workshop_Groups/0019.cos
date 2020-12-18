@@ -1,0 +1,31 @@
+schema df_ref_service_types(service_type_code:int, parent_service_type_code:int, service_type_description:str);
+schema df_services(service_id:int, service_type_code:int, workshop_group_id:int, product_description:str, product_name:str, product_price:str, other_product_service_details:str);
+
+table df_ref_service_types(df_ref_service_types);
+table df_services(df_services);
+
+query q1
+`select t1.service_type_description
+from df_ref_service_types as t1
+join df_services as t2 on t1.service_type_code = t2.service_type_code
+where t2.product_price > 100`;
+
+query q2
+`select service_type_description
+from
+  (select lhs.service_type_code as service_type_code,
+          lhs.parent_service_type_code as parent_service_type_code,
+          lhs.service_type_description as service_type_description,
+          rhs.service_id as service_id,
+          rhs.workshop_group_id as workshop_group_id,
+          rhs.product_description as product_description,
+          rhs.product_name as product_name,
+          rhs.product_price as product_price,
+          rhs.other_product_service_details as other_product_service_details
+   from df_ref_service_types as lhs
+   inner join
+     (select *
+      from df_services df_services
+      where (product_price != 100.0)) as rhs on (lhs.service_type_code = rhs.service_type_code))`;
+
+verify q1 q2;

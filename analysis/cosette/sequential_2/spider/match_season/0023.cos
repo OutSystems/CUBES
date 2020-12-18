@@ -1,0 +1,55 @@
+schema df_match_season(season:str, player:str, position:str, country:int, team:int, draft_pick_number:int, draft_class:str, college:str);
+
+table df_match_season(df_match_season);
+
+query q1
+`select position
+from df_match_season df_match_season
+group by position
+
+limit 1`;
+
+query q2
+`select position
+from
+  (select lhs.season as season,
+          lhs.player as player,
+          lhs.position as position,
+          lhs.country as country,
+          lhs.team as team,
+          lhs.draft_pick_number as draft_pick_number,
+          lhs.draft_class as draft_class,
+          lhs.college as college,
+          lhs.n as n,
+          rhs.player as player.other,
+          rhs.position as position.other,
+          rhs.country as country.other,
+          rhs.draft_pick_number as draft_pick_number.other,
+          rhs.draft_class as draft_class.other,
+          rhs.college as college.other,
+          rhs.n as n.other
+   from
+     (select season,
+             player,
+             position,
+             country,
+             team,
+             draft_pick_number,
+             draft_class,
+             college,
+             count(*) over () as n
+      from df_match_season df_match_season) as lhs
+   inner join
+     (select season,
+             player,
+             position,
+             country,
+             team,
+             draft_pick_number,
+             draft_class,
+             college,
+             count(*) over () as n
+      from df_match_season df_match_season) as rhs on (lhs.country = rhs.team
+                                       and lhs.season = rhs.season))`;
+
+verify q1 q2;

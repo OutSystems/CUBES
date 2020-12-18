@@ -1,0 +1,30 @@
+schema df_departments(department_id:int, department_name:str, manager_id:int, location_id:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_departments(df_departments);
+table df_employees(df_employees);
+
+query q1
+`select department_name,
+       count(*)
+from df_employees as t1
+join df_departments as t2 on t1.department_id = t2.department_id
+group by department_name`;
+
+query q2
+`select department_name,
+       n as count...
+from
+  (select lhs.department_id as department_id,
+          lhs.n as n,
+          rhs.department_name as department_name,
+          rhs.manager_id as manager_id,
+          rhs.location_id as location_id
+   from
+     (select department_id,
+             count(*) as n
+      from df_employees df_employees
+      group by department_id) as lhs
+   inner join df_departments as rhs on (lhs.department_id = rhs.department_id))`;
+
+verify q1 q2;

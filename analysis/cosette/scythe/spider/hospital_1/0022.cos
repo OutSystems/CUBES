@@ -1,0 +1,30 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_medication(code:int, name:str, brand:str, description:str);
+schema df_prescribes(physician:int, patient:int, medication:int, date:str, appointment:str, dose:int);
+
+table df_physician(df_physician);
+table df_medication(df_medication);
+table df_prescribes(df_prescribes);
+
+query q1
+`select distinct t1.name
+from df_physician as t1
+join df_prescribes as t2 on t1.employeeid = t2.df_physician
+join df_medication as t3 on t3.code = t2.df_medication
+where t3.name = "thesisin"`;
+
+query q2
+`select t1.name
+ from
+  (select
+          t2.description, count(t2.brand) as count_brand
+        from
+          input0 as t2
+        group by
+          t2.description) as t4 join 
+      (select *
+         from
+          input
+         where input.employeeid = 9.0) as t3 as t1`;
+
+verify q1 q2;

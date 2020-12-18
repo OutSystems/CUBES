@@ -1,0 +1,30 @@
+schema df_store(store_id:int, store_name:str, type:str, area_size:str, number_of_product_category:str, ranking:int);
+schema df_district(district_id:int, district_name:str, headquartered_city:str, city_population:str, city_area:str);
+schema df_store_district(store_id:int, district_id:int);
+
+table df_store(df_store);
+table df_district(df_district);
+table df_store_district(df_store_district);
+
+query q1
+`select t3.headquartered_city,
+       count(*)
+from df_store as t1
+join df_store_district as t2 on t1.store_id = t2.store_id
+join df_district as t3 on t2.district_id = t3.district_id
+group by t3.headquartered_city`;
+
+query q2
+`select t3.headquartered_city,t3.count_store_id
+ from
+  (select t2.district_id, t2.count_store_id, t5.district_id as district_id1, t5.district_name, t5.headquartered_city, t5.city_population, t5.city_area
+  from (select
+          t4.district_id, count(t4.store_id) as count_store_id
+        from
+          input1 as t4
+        group by
+          t4.district_id) as t2 join 
+      input0 as t5) as t3
+ where t3.district_id = t3.district_id1`;
+
+verify q1 q2;

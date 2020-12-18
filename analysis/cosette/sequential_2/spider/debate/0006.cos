@@ -1,0 +1,45 @@
+schema df_people(people_id:int, district:str, name:str, party:str, age:int);
+
+table df_people(df_people);
+
+query q1
+`select party
+from df_people df_people
+
+limit 1`;
+
+query q2
+`select distinct party.other as party
+from
+  (select lhs.people_id as people_id,
+          lhs.district as district,
+          lhs.name as name,
+          lhs.party as party,
+          lhs.age as age,
+          lhs.minage as minage,
+          rhs.people_id as people_id.other,
+          rhs.district as district.other,
+          rhs.name as name.other,
+          rhs.party as party.other,
+          rhs.age as age.other,
+          rhs.minage as minage.other
+   from
+     (select people_id,
+             district,
+             name,
+             party,
+             age,
+             min(age) over () as minage
+      from df_people df_people) as lhs
+   cross join
+     (select people_id,
+             district,
+             name,
+             party,
+             age,
+             min(age) over () as minage
+      from df_people df_people) as rhs)
+where (minage = age.other
+       and minage >= minage.other)`;
+
+verify q1 q2;

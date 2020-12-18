@@ -1,0 +1,49 @@
+schema df_mountain(mountain_id:int, name:str, height:str, prominence:str, range:str, country:str);
+
+table df_mountain(df_mountain);
+
+query q1
+`select name
+from df_mountain df_mountain
+
+limit 1`;
+
+query q2
+`select distinct name
+from
+  (select lhs.mountain_id as mountain_id,
+          lhs.name as name,
+          lhs.height as height,
+          lhs.prominence as prominence,
+          lhs.range as range,
+          lhs.country as country,
+          lhs.maxheight as maxheight,
+          rhs.mountain_id as mountain_id.other,
+          rhs.name as name.other,
+          rhs.height as height.other,
+          rhs.prominence as prominence.other,
+          rhs.range as range.other,
+          rhs.country as country.other,
+          rhs.maxheight as maxheight.other
+   from
+     (select mountain_id,
+             name,
+             height,
+             prominence,
+             range,
+             country,
+             max(height) over () as maxheight
+      from df_mountain df_mountain) as lhs
+   cross join
+     (select mountain_id,
+             name,
+             height,
+             prominence,
+             range,
+             country,
+             max(height) over () as maxheight
+      from df_mountain df_mountain) as rhs)
+where (height <= maxheight
+       and height = maxheight.other)`;
+
+verify q1 q2;

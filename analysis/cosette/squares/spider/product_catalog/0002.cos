@@ -1,0 +1,22 @@
+schema df_attribute_definitions(attribute_id:int, attribute_name:str, attribute_data_type:str);
+
+table df_attribute_definitions(df_attribute_definitions);
+
+query q1
+`select attribute_data_type
+from df_attribute_definitions df_attribute_definitions
+group by attribute_data_type
+having count(*) > 3`;
+
+query q2
+`select distinct attribute_data_type
+from
+  (select attribute_data_type,
+          attribute_name,
+          count(*) as n
+   from input0
+   group by attribute_data_type,
+            attribute_name)
+where (n <= 3.0)`;
+
+verify q1 q2;

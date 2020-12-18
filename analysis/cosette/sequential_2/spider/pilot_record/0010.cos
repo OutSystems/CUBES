@@ -1,0 +1,58 @@
+schema df_aircraft(aircraft_id:int, order_year:int, manufacturer:str, model:str, fleet_series:str, powertrain:str, fuel_propulsion:str);
+schema df_pilot(pilot_id:int, pilot_name:str, rank:int, age:int, nationality:str, position:str, join_year:int, team:str);
+schema df_pilot_record(record_id:int, pilot_id:int, aircraft_id:int, date:str);
+
+table df_aircraft(df_aircraft);
+table df_pilot(df_pilot);
+table df_pilot_record(df_pilot_record);
+
+query q1
+`select t3.pilot_name,
+       t2.model
+from df_pilot_record as t1
+join df_aircraft as t2 on t1.aircraft_id = t2.aircraft_id
+join df_pilot as t3 on t1.pilot_id = t3.pilot_id`;
+
+query q2
+`select pilot_name,
+       model
+from
+  (select lhs.aircraft_id as aircraft_id,
+          lhs.order_year as order_year,
+          lhs.manufacturer as manufacturer,
+          lhs.model as model,
+          lhs.fleet_series as fleet_series,
+          lhs.powertrain as powertrain,
+          lhs.fuel_propulsion as fuel_propulsion,
+          lhs.pilot_id as pilot_id,
+          lhs.pilot_name as pilot_name,
+          lhs.rank as rank,
+          lhs.age as age,
+          lhs.nationality as nationality,
+          lhs.position as position,
+          lhs.join_year as join_year,
+          lhs.team as team,
+          rhs.record_id as record_id,
+          rhs.date as date
+   from
+     (select lhs.aircraft_id as aircraft_id,
+             lhs.order_year as order_year,
+             lhs.manufacturer as manufacturer,
+             lhs.model as model,
+             lhs.fleet_series as fleet_series,
+             lhs.powertrain as powertrain,
+             lhs.fuel_propulsion as fuel_propulsion,
+             rhs.pilot_id as pilot_id,
+             rhs.pilot_name as pilot_name,
+             rhs.rank as rank,
+             rhs.age as age,
+             rhs.nationality as nationality,
+             rhs.position as position,
+             rhs.join_year as join_year,
+             rhs.team as team
+      from df_aircraft as lhs
+      cross join df_pilot as rhs) as lhs
+   inner join df_pilot_record as rhs on (lhs.aircraft_id = rhs.aircraft_id
+                                         and lhs.pilot_id = rhs.pilot_id))`;
+
+verify q1 q2;

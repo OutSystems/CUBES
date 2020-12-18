@@ -1,0 +1,22 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+
+table df_election(df_election);
+
+query q1
+`select min(vote_percent),
+       max(vote_percent)
+from df_election df_election`;
+
+query q2
+`select distinct min(vote_percent) over () as min.vote_percent.,
+                                       maxvote_percent as max.vote_percent.
+from
+  (select election_id,
+          representative_id, date, votes,
+                                   vote_percent,
+                                   seats,
+                                   place,
+                                   max(vote_percent) over () as maxvote_percent
+   from df_election df_election)`;
+
+verify q1 q2;

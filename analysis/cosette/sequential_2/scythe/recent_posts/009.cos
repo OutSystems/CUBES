@@ -1,0 +1,22 @@
+schema df_009(c1:int, c2:int, c3:str, c4:str, c5:int);
+
+table df_009(df_009);
+
+query q1
+`select user_id, count(*) as dup_count
+from t_documents
+group by user_id, text`;
+
+query q2
+`select c2 as c1,
+       c4 as c2,
+       n as c3
+from
+  (select c2,
+          c4,
+          count(*) as n
+   from df_009 df_009
+   group by c2,
+            c4)`;
+
+verify q1 q2;

@@ -1,0 +1,75 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_employees(df_employees);
+
+query q1
+`select *
+from df_employees df_employees
+where salary between
+    (select min(salary)
+     from df_employees df_employees) and 2500`;
+
+query q2
+`joining, by = c("employee_id", "first_name", "last_name", "email", "phone_number", "hire_date", "job_id", "salary", "commission_pct", "manager_id", "department_id")
+joining, by = c("email", "commission_pct")
+select distinct employee_id,
+                first_name,
+                last_name,
+                email,
+                phone_number,
+                hire_date,
+                job_id,
+                salary,
+                commission_pct,
+                manager_id,
+                department_id
+from
+  (select employee_id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          hire_date,
+          job_id,
+          salary,
+          commission_pct,
+          manager_id,
+          department_id,
+          minsalary
+   from
+     (select employee_id,
+             first_name,
+             last_name,
+             email,
+             phone_number,
+             hire_date,
+             job_id,
+             salary,
+             commission_pct,
+             manager_id,
+             department_id
+      from
+        (select *
+         from input0
+         where (salary <= 2500.0)) as lhs
+      inner join input0 as rhs on (lhs.employee_id = rhs.employee_id
+                                       and lhs.first_name = rhs.first_name
+                                       and lhs.last_name = rhs.last_name
+                                       and lhs.email = rhs.email
+                                       and lhs.phone_number = rhs.phone_number
+                                       and lhs.hire_date = rhs.hire_date
+                                       and lhs.job_id = rhs.job_id
+                                       and lhs.salary = rhs.salary
+                                       and lhs.commission_pct = rhs.commission_pct
+                                       and lhs.manager_id = rhs.manager_id
+                                       and lhs.department_id = rhs.department_id)) as lhs
+   inner join
+     (select email,
+             commission_pct,
+             min(salary) as minsalary
+      from input0
+      group by email,
+               commission_pct) as rhs on (lhs.email = rhs.email
+                                              and lhs.commission_pct = rhs.commission_pct))`;
+
+verify q1 q2;

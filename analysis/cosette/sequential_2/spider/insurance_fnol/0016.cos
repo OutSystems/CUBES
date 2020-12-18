@@ -1,0 +1,38 @@
+schema df_customers(customer_id:int, customer_name:str);
+schema df_services(service_id:int, service_name:str);
+schema df_first_notification_of_loss(fnol_id:int, customer_id:int, policy_id:int, service_id:int);
+
+table df_customers(df_customers);
+table df_services(df_services);
+table df_first_notification_of_loss(df_first_notification_of_loss);
+
+query q1
+`select t1.customer_name
+from df_customers as t1
+join df_first_notification_of_loss as t2 on t1.customer_id = t2.customer_id
+join df_services as t3 on t2.service_id = t3.service_id
+where t3.service_name = "close a policy"
+  or t3.service_name = "upgrade a policy"`;
+
+query q2
+`select customer_name
+from
+  (select lhs.customer_id as customer_id,
+          lhs.customer_name as customer_name,
+          lhs.service_id as service_id,
+          lhs.service_name as service_name,
+          rhs.fnol_id as fnol_id,
+          rhs.policy_id as policy_id
+   from
+     (select lhs.customer_id as customer_id,
+             lhs.customer_name as customer_name,
+             rhs.service_id as service_id,
+             rhs.service_name as service_name
+      from df_customers as lhs
+      cross join df_services as rhs) as lhs
+   inner join df_first_notification_of_loss as rhs on (lhs.customer_id = rhs.customer_id
+                                                           and lhs.service_id = rhs.service_id))
+where (service_name = 'close a policy'
+       or service_name = 'upgrade a policy')`;
+
+verify q1 q2;

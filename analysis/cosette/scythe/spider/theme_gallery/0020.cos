@@ -1,0 +1,33 @@
+schema df_artist(artist_id:int, name:str, country:str, year_join:int, age:int);
+schema df_exhibition(exhibition_id:int, year:int, theme:str, artist_id:int, ticket_price:str);
+schema df_exhibition_record(exhibition_id:int, date:str, attendance:int);
+
+table df_artist(df_artist);
+table df_exhibition(df_exhibition);
+table df_exhibition_record(df_exhibition_record);
+
+query q1
+`select t3.name
+from df_exhibition_record as t1
+join df_exhibition as t2 on t1.exhibition_id = t2.exhibition_id
+join df_artist as t3 on t3.artist_id = t2.artist_id
+group by t3.artist_id
+having avg(t1.attendance) > 200`;
+
+query q2
+`select t2.name
+ from
+  (select t4.artist_id, t4.max_exhibition_id, t1.artist_id as artist_id1, t1.name, t1.country, t1.year_join, t1.age
+  from (select *
+       from
+        (select
+            t3.artist_id, max(t3.exhibition_id) as max_exhibition_id
+          from
+            input0 as t3
+          group by
+            t3.artist_id) as t4
+       where t4.max_exhibition_id <= 5.0) join 
+      input as t1) as t2
+ where t2.artist_id = t2.artist_id1`;
+
+verify q1 q2;

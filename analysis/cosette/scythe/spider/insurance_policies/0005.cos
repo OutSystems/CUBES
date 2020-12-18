@@ -1,0 +1,22 @@
+schema df_claims(claim_id:int, policy_id:int, date_claim_made:str, date_claim_settled:str, amount_claimed:int, amount_settled:int);
+
+table df_claims(df_claims);
+
+query q1
+`select amount_settled,
+       amount_claimed
+from df_claims df_claims
+
+limit 1`;
+
+query q2
+`select t1.min_amount_settled,t1.amount_claimed
+ from
+  (select
+          min(t2.amount_settled) as min_amount_settled
+        from
+          input as t2) as t3 join 
+      input as t4 as t1
+ where t1.min_amount_settled = t1.amount_settled`;
+
+verify q1 q2;

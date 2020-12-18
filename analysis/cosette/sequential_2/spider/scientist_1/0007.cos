@@ -1,0 +1,22 @@
+schema df_projects(code:str, name:str, hours:int);
+
+table df_projects(df_projects);
+
+query q1
+`select name
+from df_projects df_projects
+where hours >
+    (select avg(hours)
+     from df_projects df_projects)`;
+
+query q2
+`select name
+from
+  (select code,
+          name,
+          hours,
+          avg(hours) over () as meanhours
+   from df_projects df_projects)
+where (meanhours <= hours)`;
+
+verify q1 q2;

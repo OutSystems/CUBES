@@ -1,0 +1,37 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+schema df_representative(representative_id:int, name:str, state:str, party:str, lifespan:str);
+
+table df_election(df_election);
+table df_representative(df_representative);
+
+query q1
+`select avg(t1.votes)
+from df_election as t1
+join df_representative as t2 on t1.representative_id = t2.representative_id
+where t2.party = "republican"`;
+
+query q2
+`select meanvotes as avg.t1.votes.
+from
+  (select date,
+          party,
+          avg(votes) as meanvotes
+   from
+     (select lhs.election_id as election_id,
+             lhs.representative_id as representative_id,
+             lhs.date as date,
+             lhs.votes as votes,
+             lhs.vote_percent as vote_percent,
+             lhs.seats as seats,
+             lhs.place as place,
+             rhs.name as name,
+             rhs.state as state,
+             rhs.party as party,
+             rhs.lifespan as lifespan
+      from df_election as lhs
+      left join df_representative as rhs on (lhs.representative_id = rhs.representative_id))
+   group by date,
+            party)
+where (party = 'republican')`;
+
+verify q1 q2;

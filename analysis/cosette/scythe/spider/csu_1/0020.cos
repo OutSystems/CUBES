@@ -1,0 +1,23 @@
+schema df_campuses(id:int, campus:str, location:str, county:str, year:int);
+
+table df_campuses(df_campuses);
+
+query q1
+`select count(*)
+from df_campuses df_campuses
+where county = "los angeles"`;
+
+query q2
+`select t1.count_distinct_year
+ from
+  (select
+      t2.county, count_distinct(t2.year) as count_distinct_year
+    from
+      (select *
+         from
+          input
+         where input.county = 'los angeles') as t2
+    group by
+      t2.county) as t1`;
+
+verify q1 q2;

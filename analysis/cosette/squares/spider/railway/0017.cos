@@ -1,0 +1,39 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+schema df_train(train_id:int, train_num:int, name:str, from:str, arrival:str, railway_id:int);
+
+table df_railway(df_railway);
+table df_train(df_train);
+
+query q1
+`select objectnumber
+from df_railway df_railway
+where railway_id not in
+    (select railway_id
+     from df_train df_train)`;
+
+query q2
+`joining, by = "railway_id"
+joining, by = "railway_id"
+select distinct objectnumber
+from
+  (select railway_id,
+          railway,
+          builder,
+          built,
+          wheels,
+          location,
+          objectnumber
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select railway_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select railway_id
+              from input1) as rhs
+           where (lhs.railway_id = rhs.railway_id) )) as rhs on (lhs.railway_id = rhs.railway_id))`;
+
+verify q1 q2;

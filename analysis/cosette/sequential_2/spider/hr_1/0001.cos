@@ -1,0 +1,34 @@
+schema df_departments(department_id:int, department_name:str, manager_id:int, location_id:int);
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_departments(df_departments);
+table df_employees(df_employees);
+
+query q1
+`select t1.first_name,
+       t2.department_name
+from df_employees as t1
+join df_departments as t2 on t1.department_id = t2.department_id`;
+
+query q2
+`select first_name,
+       department_name
+from
+  (select lhs.department_id as department_id,
+          lhs.department_name as department_name,
+          lhs.manager_id as manager_id,
+          lhs.location_id as location_id,
+          rhs.employee_id as employee_id,
+          rhs.first_name as first_name,
+          rhs.last_name as last_name,
+          rhs.email as email,
+          rhs.phone_number as phone_number,
+          rhs.hire_date as hire_date,
+          rhs.job_id as job_id,
+          rhs.salary as salary,
+          rhs.commission_pct as commission_pct,
+          rhs.manager_id as manager_id.other
+   from df_departments as lhs
+   inner join df_employees as rhs on (lhs.department_id = rhs.department_id))`;
+
+verify q1 q2;

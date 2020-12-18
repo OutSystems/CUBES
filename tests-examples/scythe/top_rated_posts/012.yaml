@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/012.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i012.csv
 output: tests-examples/scythe/top_rated_posts/tables/o012.csv
@@ -11,19 +12,19 @@ solution:
   - summarise
   - inner_join
 sql: |
-  SELECT * FROM DocumentStatusLogs D1 JOIN
-      (
-        SELECT
-          DocumentID,MAX(DateCreated) AS MaxDate
-        FROM
-          DocumentStatusLogs
-        GROUP BY
-          DocumentID
-      ) D2
-      ON
-        D2.DocumentID=D1.DocumentID
-      AND
-        D2.MaxDate=D1.DateCreated
+  SELECT D1.DocumentID, D1.Status, D1.DateCreated
+  FROM i012 D1
+           JOIN
+       (
+           SELECT DocumentID,
+                  MAX(DateCreated) AS MaxDate
+           FROM i012
+           GROUP BY DocumentID
+       ) D2
+       ON
+               D2.DocumentID = D1.DocumentID
+               AND
+               D2.MaxDate = D1.DateCreated
 comment: |
   df1 <- input1 %>% group_by(DocumentID) %>% summarise(maxDateCreated = max(DateCreated))
   df2 <- inner_join(input1, df1, by=c('DocumentID' = 'DocumentID','DateCreated' = 'maxDateCreated'), suffix = c("", ".other"))

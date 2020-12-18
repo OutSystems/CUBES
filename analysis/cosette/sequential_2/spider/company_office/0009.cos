@@ -1,0 +1,49 @@
+schema df_buildings(id:int, name:str, city:str, height:int, stories:int, status:str);
+
+table df_buildings(df_buildings);
+
+query q1
+`select stories
+from df_buildings df_buildings
+
+limit 1`;
+
+query q2
+`select distinct stories
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.city as city,
+          lhs.height as height,
+          lhs.stories as stories,
+          lhs.status as status,
+          lhs.maxheight as maxheight,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.city as city.other,
+          rhs.height as height.other,
+          rhs.stories as stories.other,
+          rhs.status as status.other,
+          rhs.maxheight as maxheight.other
+   from
+     (select id,
+             name,
+             city,
+             height,
+             stories,
+             status,
+             max(height) over () as maxheight
+      from df_buildings df_buildings) as lhs
+   cross join
+     (select id,
+             name,
+             city,
+             height,
+             stories,
+             status,
+             max(height) over () as maxheight
+      from df_buildings df_buildings) as rhs)
+where (height >= maxheight
+       or maxheight > maxheight.other)`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_driver(df_driver);
+table df_school_bus(df_school_bus);
+
+query q1
+`select t1.name
+from df_driver as t1
+join df_school_bus as t2 on t1.driver_id = t2.driver_id
+
+limit 1`;
+
+query q2
+`select t4.name
+ from
+  (select
+          count(t2.home_city) as count_home_city
+        from
+          input as t2) as t1 join 
+      (select *
+         from
+          input
+         where input.driver_id = 10.0) as t3 as t4`;
+
+verify q1 q2;

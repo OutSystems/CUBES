@@ -1,0 +1,26 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+schema df_train(train_id:int, train_num:int, name:str, from:str, arrival:str, railway_id:int);
+
+table df_railway(df_railway);
+table df_train(df_train);
+
+query q1
+`select t2.railway_id,
+       t1.builder
+from df_railway as t1
+join df_train as t2 on t1.railway_id = t2.railway_id
+group by t2.railway_id
+
+limit 1`;
+
+query q2
+`select t2.avg_train_id,t2.builder
+ from
+  (select
+          avg(t3.train_id) as avg_train_id
+        from
+          input0 as t3) as t1 join 
+      input as t4 as t2
+ where t2.avg_train_id = t2.railway_id`;
+
+verify q1 q2;

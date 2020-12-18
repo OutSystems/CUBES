@@ -1,0 +1,31 @@
+schema df_skills(skill_id:int, skill_code:str, skill_description:str);
+schema df_skills_required_to_fix(part_fault_id:int, skill_id:int);
+
+table df_skills(df_skills);
+table df_skills_required_to_fix(df_skills_required_to_fix);
+
+query q1
+`select t1.skill_id,
+       t1.skill_description
+from df_skills as t1
+join df_skills_required_to_fix as t2 on t1.skill_id = t2.skill_id
+group by t1.skill_id
+
+limit 1`;
+
+query q2
+`select skill_id,
+       skill_description
+from
+  (select lhs.skill_id as skill_id,
+          lhs.skill_code as skill_code,
+          lhs.skill_description as skill_description,
+          rhs.skill_id as skill_id.other
+   from df_skills as lhs
+   inner join
+     (select skill_id,
+             count(*) as n
+      from df_skills_required_to_fix df_skills_required_to_fix
+      group by skill_id) as rhs on (lhs.skill_id = rhs.n))`;
+
+verify q1 q2;

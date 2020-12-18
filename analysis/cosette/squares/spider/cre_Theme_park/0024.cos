@@ -1,0 +1,46 @@
+schema df_visitors(tourist_id:int, tourist_details:str);
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_visits(visit_id:int, tourist_attraction_id:int, tourist_id:int, visit_date:str, visit_details:str);
+
+table df_visitors(df_visitors);
+table df_tourist_attractions(df_tourist_attractions);
+table df_visits(df_visits);
+
+query q1
+`select t1.name
+from df_tourist_attractions as t1
+join df_visits as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+join df_visitors as t3 on t2.tourist_id = t3.tourist_id
+where t3.tourist_details = "vincent"`;
+
+query q2
+`joining, by = "tourist_id"
+joining, by = "tourist_attraction_id"
+select name
+from
+  (select visit_id,
+          tourist_attraction_id,
+          tourist_id,
+          visit_date,
+          visit_details,
+          tourist_details,
+          attraction_type_code,
+          location_id,
+          how_to_get_there,
+          name,
+          description,
+          opening_hours,
+          other_details
+   from
+     (select visit_id,
+             tourist_attraction_id,
+             tourist_id,
+             visit_date,
+             visit_details,
+             tourist_details
+      from input2 as lhs
+      inner join input0 as rhs on (lhs.tourist_id = rhs.tourist_id)) as lhs
+   inner join input1 as rhs on (lhs.tourist_attraction_id = rhs.tourist_attraction_id))
+where (tourist_details = 'vincent')`;
+
+verify q1 q2;

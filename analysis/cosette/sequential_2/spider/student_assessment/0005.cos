@@ -1,0 +1,20 @@
+schema df_student_course_attendance(student_id:int, course_id:int, date_of_attendance:str);
+
+table df_student_course_attendance(df_student_course_attendance);
+
+query q1
+`select student_id
+from df_student_course_attendance df_student_course_attendance`;
+
+query q2
+`select student_id
+from
+  (select lhs.student_id as student_id,
+          lhs.course_id as course_id,
+          lhs.date_of_attendance as date_of_attendance,
+          rhs.student_id as student_id.other
+   from df_student_course_attendance as lhs
+   inner join df_student_course_attendance as rhs on (lhs.course_id = rhs.course_id
+                                                      and lhs.date_of_attendance = rhs.date_of_attendance))`;
+
+verify q1 q2;

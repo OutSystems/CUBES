@@ -1,0 +1,29 @@
+schema df_activity(actid:int, activity_name:str);
+schema df_participates_in(stuid:int, actid:int);
+
+table df_activity(df_activity);
+table df_participates_in(df_participates_in);
+
+query q1
+`select t1.stuid
+from df_participates_in as t1
+join df_activity as t2 on t2.actid = t2.actid
+where t2.activity_name = 'canoeing' intersect
+  select t1.stuid
+  from df_participates_in as t1
+  join df_activity as t2 on t2.actid = t2.actid where t2.activity_name = 'kayaking'`;
+
+query q2
+`select distinct stuid
+from
+  (select lhs.stuid as stuid,
+          lhs.actid as actid,
+          rhs.activity_name as activity_name
+   from df_participates_in as lhs
+   inner join
+     (select *
+      from df_activity df_activity
+      where (activity_name != 'canoeing'
+             or activity_name = 'kayaking')) as rhs on (lhs.actid = rhs.actid))`;
+
+verify q1 q2;

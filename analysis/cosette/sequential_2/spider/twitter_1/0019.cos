@@ -1,0 +1,26 @@
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select name,
+       followers
+from df_user_profiles df_user_profiles`;
+
+query q2
+`select name,
+       followers
+from
+  (select lhs.uid as uid,
+          lhs.name as name,
+          lhs.email as email,
+          lhs.partitionid as partitionid,
+          lhs.followers as followers,
+          rhs.name as name.other,
+          rhs.email as email.other,
+          rhs.partitionid as partitionid.other,
+          rhs.followers as followers.other
+   from df_user_profiles as lhs
+   inner join df_user_profiles as rhs on (lhs.uid = rhs.uid))`;
+
+verify q1 q2;

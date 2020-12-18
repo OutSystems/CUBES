@@ -1,0 +1,24 @@
+schema df_documents(document_id:int, document_type_code:str, project_id:int, document_date:str, document_name:str, document_description:str, other_details:str);
+schema df_documents_with_expenses(document_id:int, budget_type_code:str, document_details:str);
+
+table df_documents(df_documents);
+table df_documents_with_expenses(df_documents_with_expenses);
+
+query q1
+`select document_id
+from df_documents df_documents
+except
+select document_id
+from df_documents_with_expenses df_documents_with_expenses`;
+
+query q2
+`select document_id
+from
+  (select *
+   from df_documents as lhs
+   where not exists
+       (select 1
+        from df_documents_with_expenses as rhs
+        where (lhs.document_id = rhs.document_id) ))`;
+
+verify q1 q2;

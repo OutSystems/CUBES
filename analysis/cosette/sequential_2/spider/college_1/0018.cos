@@ -1,0 +1,47 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+
+table df_class(df_class);
+table df_course(df_course);
+table df_department(df_department);
+
+query q1
+`select count(*),
+       t3.school_code
+from df_class as t1
+join df_course as t2 on t1.crs_code = t2.crs_code
+join df_department as t3 on t2.dept_code = t3.dept_code
+group by t3.school_code`;
+
+query q2
+`select distinct n as count...,
+                school_code
+from
+  (select lhs.crs_code as crs_code,
+          lhs.dept_code as dept_code,
+          lhs.crs_description as crs_description,
+          lhs.crs_credit as crs_credit,
+          lhs.dept_name as dept_name,
+          lhs.school_code as school_code,
+          lhs.emp_num as emp_num,
+          lhs.dept_address as dept_address,
+          lhs.dept_extension as dept_extension,
+          rhs.n as n
+   from
+     (select lhs.crs_code as crs_code,
+             lhs.dept_code as dept_code,
+             lhs.crs_description as crs_description,
+             lhs.crs_credit as crs_credit,
+             rhs.dept_name as dept_name,
+             rhs.school_code as school_code,
+             rhs.emp_num as emp_num,
+             rhs.dept_address as dept_address,
+             rhs.dept_extension as dept_extension
+      from df_course as lhs
+      inner join df_department as rhs on (lhs.dept_code = rhs.dept_code)) as lhs
+   cross join
+     (select count(*) as n
+      from df_class df_class) as rhs)`;
+
+verify q1 q2;

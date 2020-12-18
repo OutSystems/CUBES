@@ -1,0 +1,22 @@
+schema df_cmi_cross_references(cmi_cross_ref_id:int, master_customer_id:int, source_system_code:str);
+schema df_parking_fines(council_tax_id:int, cmi_cross_ref_id:int);
+
+table df_cmi_cross_references(df_cmi_cross_references);
+table df_parking_fines(df_parking_fines);
+
+query q1
+`select t1.source_system_code,
+       t1.master_customer_id,
+       t2.council_tax_id
+from df_cmi_cross_references as t1
+join df_parking_fines as t2 on t1.cmi_cross_ref_id = t2.cmi_cross_ref_id`;
+
+query q2
+`select t1.source_system_code,t1.master_customer_id,t1.council_tax_id
+ from
+  (select input.cmi_cross_ref_id, input.master_customer_id, input.source_system_code, t2.council_tax_id, t2.cmi_cross_ref_id as cmi_cross_ref_id1
+  from input join 
+      input0 as t2) as t1
+ where t1.cmi_cross_ref_id = t1.cmi_cross_ref_id1`;
+
+verify q1 q2;

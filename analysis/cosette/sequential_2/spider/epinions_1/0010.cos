@@ -1,0 +1,24 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select name
+from df_useracct df_useracct
+where u_id not in
+    (select u_id
+     from df_review df_review)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_useracct as lhs
+   where not exists
+       (select 1
+        from df_review as rhs
+        where (lhs.u_id = rhs.u_id) ))`;
+
+verify q1 q2;

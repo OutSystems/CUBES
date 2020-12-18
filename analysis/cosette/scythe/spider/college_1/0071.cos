@@ -1,0 +1,37 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_class(df_class);
+table df_course(df_course);
+table df_employee(df_employee);
+table df_professor(df_professor);
+
+query q1
+`select t2.emp_fname,
+       t4.prof_office,
+       t3.crs_description
+from df_class as t1
+join df_employee as t2 on t1.prof_num = t2.emp_num
+join df_course as t3 on t1.crs_code = t3.crs_code
+join df_professor as t4 on t2.emp_num = t4.emp_num`;
+
+query q2
+`select t4.emp_fname,t4.prof_office,t4.crs_description
+ from
+  (select t8.class_code, t8.crs_code, t8.class_section, t8.class_time, t8.class_room, t8.prof_num, t8.crs_code1, t8.dept_code, t8.crs_description, t8.crs_credit, t8.emp_num, t8.emp_lname, t8.emp_fname, t8.emp_initial, t8.emp_jobcode, t8.emp_hiredate, t8.emp_dob, t3.emp_num as emp_num1, t3.dept_code as dept_code1, t3.prof_office, t3.prof_extension, t3.prof_high_degree
+  from (select *
+       from
+        (select *
+             from
+              (select input.class_code, input.crs_code, input.class_section, input.class_time, input.class_room, input.prof_num, t5.crs_code as crs_code1, t5.dept_code, t5.crs_description, t5.crs_credit
+              from input join 
+                  input0 as t5) as t6
+             where t6.crs_code = t6.crs_code1) join 
+            input1 as t7 as t8
+       where t8.prof_num = t8.emp_num) join 
+      input2 as t3) as t4
+ where t4.emp_num = t4.emp_num1`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_projects(code:str, name:str, hours:int);
+schema df_assignedto(scientist:int, project:str);
+
+table df_projects(df_projects);
+table df_assignedto(df_assignedto);
+
+query q1
+`select name
+from df_projects df_projects
+where code not in
+    (select project
+     from df_assignedto df_assignedto)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_projects as lhs
+   where not exists
+       (select 1
+        from
+          (select code,
+                  name,
+                  hours,
+                  scientist,
+                  code as project
+           from
+             (select lhs.code as code,
+                     lhs.name as name,
+                     lhs.hours as hours,
+                     rhs.scientist as scientist
+              from df_projects as lhs
+              inner join df_assignedto as rhs on (lhs.code = rhs.project))) as rhs
+        where (lhs.name = rhs.name) ))`;
+
+verify q1 q2;

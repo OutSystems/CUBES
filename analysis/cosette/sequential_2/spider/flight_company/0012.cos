@@ -1,0 +1,39 @@
+schema df_operate_company(id:int, name:str, type:str, principal_activities:str, incorporated_in:str, group_equity_shareholding:str);
+
+table df_operate_company(df_operate_company);
+
+query q1
+`select type,
+       count(*)
+from df_operate_company df_operate_company
+group by type
+
+limit 1`;
+
+query q2
+`select distinct type,
+                n as count...
+from
+  (select lhs.group_equity_shareholding as group_equity_shareholding,
+          lhs.type as type,
+          lhs.n as n,
+          rhs.group_equity_shareholding as group_equity_shareholding.other,
+          rhs.type as type.other,
+          rhs.n as n.other
+   from
+     (select group_equity_shareholding,
+             type,
+             count(*) as n
+      from df_operate_company df_operate_company
+      group by group_equity_shareholding,
+               type) as lhs
+   cross join
+     (select group_equity_shareholding,
+             type,
+             count(*) as n
+      from df_operate_company df_operate_company
+      group by group_equity_shareholding,
+               type) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

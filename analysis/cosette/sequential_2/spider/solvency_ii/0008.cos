@@ -1,0 +1,27 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+
+table df_products(df_products);
+
+query q1
+`select product_type_code
+from df_products df_products
+group by product_type_code
+
+limit 1`;
+
+query q2
+`select product_type_code.other as product_type_code
+from
+  (select lhs.product_id as product_id,
+          lhs.product_type_code as product_type_code,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          rhs.product_type_code as product_type_code.other
+   from df_products as lhs
+   inner join
+     (select product_type_code,
+             count(*) as n
+      from df_products df_products
+      group by product_type_code) as rhs on (lhs.product_id = rhs.n))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_customers(customer_id:int, customer_type_code:str, address_line_1:str, address_line_2:str, town_city:str, state:str, email_address:str, phone_number:str);
+
+table df_customers(df_customers);
+
+query q1
+`select count(*)
+from df_customers df_customers
+group by customer_type_code
+
+limit 1`;
+
+query q2
+`select n as count...
+from
+  (select lhs.customer_type_code as customer_type_code,
+          lhs.n as n,
+          rhs.customer_type_code as customer_type_code.other,
+          rhs.n as n.other
+   from
+     (select customer_type_code,
+             count(*) as n
+      from df_customers df_customers
+      group by customer_type_code) as lhs
+   cross join
+     (select customer_type_code,
+             count(*) as n
+      from df_customers df_customers
+      group by customer_type_code) as rhs)
+where (n > n.other)`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_student_addresses(student_id:int, address_id:int, date_address_from:str, date_address_to:str, monthly_rental:str, other_details:str);
+
+table df_student_addresses(df_student_addresses);
+
+query q1
+`select *
+from df_student_addresses df_student_addresses`;
+
+query q2
+`select student_id,
+       address_id,
+       date_address_from,
+       date_address_to,
+       monthly_rental,
+       other_details
+from
+  (select lhs.student_id as student_id,
+          lhs.address_id as address_id,
+          lhs.date_address_from as date_address_from,
+          lhs.date_address_to as date_address_to,
+          lhs.monthly_rental as monthly_rental,
+          lhs.other_details as other_details,
+          rhs.student_id as student_id.other,
+          rhs.address_id as address_id.other,
+          rhs.date_address_to as date_address_to.other,
+          rhs.monthly_rental as monthly_rental.other,
+          rhs.other_details as other_details.other
+   from df_student_addresses as lhs
+   inner join df_student_addresses as rhs on (lhs.date_address_from = rhs.date_address_from))`;
+
+verify q1 q2;

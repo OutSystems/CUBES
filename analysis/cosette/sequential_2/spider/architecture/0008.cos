@@ -1,0 +1,34 @@
+schema df_architect(id:int, name:str, nationality:str, gender:str);
+schema df_mill(architect_id:int, id:int, location:str, name:str, type:str, built_year:int, notes:str);
+
+table df_architect(df_architect);
+table df_mill(df_mill);
+
+query q1
+`select distinct t1.type
+from df_mill as t1
+join df_architect as t2 on t1.architect_id = t2.id
+where t2.nationality = 'american'
+  or t2.nationality = 'canadian'`;
+
+query q2
+`select type
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.gender as gender,
+          rhs.id as id.other,
+          rhs.location as location,
+          rhs.name as name.other,
+          rhs.type as type,
+          rhs.built_year as built_year,
+          rhs.notes as notes
+   from
+     (select *
+      from df_architect df_architect
+      where (nationality != 'american'
+             and nationality = 'canadian')) as lhs
+   inner join df_mill as rhs on (lhs.id = rhs.architect_id))`;
+
+verify q1 q2;

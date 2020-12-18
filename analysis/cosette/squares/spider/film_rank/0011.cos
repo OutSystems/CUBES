@@ -1,0 +1,34 @@
+schema df_film(film_id:int, title:str, studio:str, director:str, gross_in_dollar:int);
+schema df_film_market_estimation(estimation_id:int, low_estimate:str, high_estimate:str, film_id:int, type:str, market_id:int, year:int);
+
+table df_film(df_film);
+table df_film_market_estimation(df_film_market_estimation);
+
+query q1
+`select distinct t1.director
+from df_film as t1
+join df_film_market_estimation as t2 on t1.film_id = t2.film_id
+where t2.year = 1995`;
+
+query q2
+`joining, by = "film_id"
+select distinct director
+from
+  (select film_id,
+          title,
+          studio,
+          director,
+          gross_in_dollar,
+          estimation_id,
+          low_estimate,
+          high_estimate,
+          type,
+          market_id,
+          year
+   from input0 as lhs
+   inner join
+     (select *
+      from input1
+      where (year = 1995.0)) as rhs on (lhs.film_id = rhs.film_id))`;
+
+verify q1 q2;

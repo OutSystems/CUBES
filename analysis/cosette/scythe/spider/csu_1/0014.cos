@@ -1,0 +1,23 @@
+schema df_csu_fees(campus:int, year:int, campusfee:int);
+
+table df_csu_fees(df_csu_fees);
+
+query q1
+`select avg(campusfee)
+from df_csu_fees df_csu_fees
+where year = 1996`;
+
+query q2
+`select t1.avg_campusfee
+ from
+  (select
+      t2.year, avg(t2.campusfee) as avg_campusfee
+    from
+      (select *
+         from
+          input
+         where input.year = 1996.0) as t2
+    group by
+      t2.year) as t1`;
+
+verify q1 q2;

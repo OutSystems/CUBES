@@ -1,0 +1,24 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+
+table df_class(df_class);
+
+query q1
+`select count(distinct class_section)
+from df_class df_class
+where crs_code = 'acct-211'`;
+
+query q2
+`select distinct n_distinct as count.distinct.class_section.
+from
+  (select class_code,
+          crs_code,
+          class_section,
+          class_time,
+          class_room,
+          prof_num,
+          count(distinct class_section) over () as n_distinct
+   from df_class df_class)
+where (crs_code = 'acct-211'
+       or n_distinct <= class_section)`;
+
+verify q1 q2;

@@ -1,0 +1,35 @@
+schema df_products(product_id:int, product_type_code:str, product_name:str, product_price:str);
+schema df_products_in_events(product_in_event_id:int, event_id:int, product_id:int);
+
+table df_products(df_products);
+table df_products_in_events(df_products_in_events);
+
+query q1
+`select t1.product_name
+from df_products as t1
+join df_products_in_events as t2 on t1.product_id = t2.product_id
+group by t1.product_name
+having count(*) >= 2`;
+
+query q2
+`select product_name
+from
+  (select lhs.product_id as product_id,
+          lhs.product_type_code as product_type_code,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          rhs.product_id as product_id.other,
+          rhs.n as n
+   from df_products as lhs
+   cross join
+     (select *
+      from
+        (select product_id,
+                count(*) as n
+         from df_products_in_events df_products_in_events
+         group by product_id)
+      where (product_id > 2.0
+             and n >= 2.0)) as rhs)
+where (product_id = product_id.other)`;
+
+verify q1 q2;

@@ -1,0 +1,50 @@
+schema df_storm(storm_id:int, name:str, dates_active:str, max_speed:int, damage_millions_usd:str, number_deaths:int);
+schema df_region(region_id:int, region_code:str, region_name:str);
+schema df_affected_region(region_id:int, storm_id:int, number_city_affected:str);
+
+table df_storm(df_storm);
+table df_region(df_region);
+table df_affected_region(df_affected_region);
+
+query q1
+`select t3.name
+from df_affected_region as t1
+join df_region as t2 on t1.region_id = t2.region_id
+join df_storm as t3 on t1.storm_id = t3.storm_id
+where t2.region_name = 'afghanistan' intersect
+  select t3.name
+  from df_affected_region as t1
+  join df_region as t2 on t1.region_id = t2.region_id
+  join df_storm as t3 on t1.storm_id = t3.storm_id where t2.region_name = 'albania'`;
+
+query q2
+`select distinct name
+from
+  (select lhs.region_id as region_id,
+          lhs.storm_id as storm_id,
+          lhs.number_city_affected as number_city_affected,
+          lhs.name as name,
+          lhs.dates_active as dates_active,
+          lhs.max_speed as max_speed,
+          lhs.damage_millions_usd as damage_millions_usd,
+          lhs.number_deaths as number_deaths,
+          rhs.region_code as region_code,
+          rhs.region_name as region_name
+   from
+     (select lhs.region_id as region_id,
+             lhs.storm_id as storm_id,
+             lhs.number_city_affected as number_city_affected,
+             rhs.name as name,
+             rhs.dates_active as dates_active,
+             rhs.max_speed as max_speed,
+             rhs.damage_millions_usd as damage_millions_usd,
+             rhs.number_deaths as number_deaths
+      from df_affected_region as lhs
+      left join df_storm as rhs on (lhs.storm_id = rhs.storm_id)) as lhs
+   inner join
+     (select *
+      from df_region df_region
+      where (region_name = 'afghanistan'
+             or region_name = 'albania')) as rhs on (lhs.storm_id = rhs.region_id))`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_shops(shop_id:int, shop_details:str);
+
+table df_tourist_attractions(df_tourist_attractions);
+table df_shops(df_shops);
+
+query q1
+`select t1.shop_details
+from df_shops as t1
+join df_tourist_attractions as t2 on t1.shop_id = t2.tourist_attraction_id
+where t2.how_to_get_there = "walk"`;
+
+query q2
+`select shop_details
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          rhs.shop_details as shop_details
+   from
+     (select *
+      from df_tourist_attractions df_tourist_attractions
+      where (how_to_get_there = 'walk')) as lhs
+   inner join df_shops as rhs on (lhs.tourist_attraction_id = rhs.shop_id))`;
+
+verify q1 q2;

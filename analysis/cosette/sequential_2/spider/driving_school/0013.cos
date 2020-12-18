@@ -1,0 +1,32 @@
+schema df_customers(customer_id:int, customer_address_id:int, customer_status_code:str, date_became_customer:str, date_of_birth:str, first_name:str, last_name:str, amount_outstanding:str, email_address:str, phone_number:str, cell_mobile_phone_number:str);
+schema df_lessons(lesson_id:int, customer_id:int, lesson_status_code:str, staff_id:int, vehicle_id:int, lesson_date:str, lesson_time:int, price:str);
+
+table df_customers(df_customers);
+table df_lessons(df_lessons);
+
+query q1
+`select sum(t1.lesson_time)
+from df_lessons as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t2.first_name = "rylan"
+  and t2.last_name = "goodwin"`;
+
+query q2
+`select sumlesson_time as sum.t1.lesson_time.
+from
+  (select *
+   from
+     (select customer_id,
+             sum(lesson_time) as sumlesson_time
+      from df_lessons df_lessons
+      group by customer_id) as lhs
+   where not exists
+       (select 1
+        from
+          (select *
+           from df_customers df_customers
+           where (first_name != 'rylan'
+                  or last_name != 'goodwin')) as rhs
+        where (lhs.customer_id = rhs.customer_id) ))`;
+
+verify q1 q2;

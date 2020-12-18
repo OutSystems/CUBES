@@ -1,0 +1,25 @@
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_tryout(df_tryout);
+
+query q1
+`select cname
+from df_tryout df_tryout
+where ppos = 'goalie' intersect
+  select cname
+  from df_tryout df_tryout where ppos = 'mid'`;
+
+query q2
+`select t1.first_cname
+ from
+  (select
+      t2.ppos, first(t2.cname) as first_cname
+    from
+      (select *
+         from
+          input
+         where input.ppos = 'goalie') as t2
+    group by
+      t2.ppos) as t1`;
+
+verify q1 q2;

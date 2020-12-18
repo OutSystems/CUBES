@@ -1,0 +1,29 @@
+schema df_products(product_id:int, product_name:str, product_price:int, product_description:str, other_product_service_details:str);
+
+table df_products(df_products);
+
+query q1
+`select product_name
+from df_products df_products
+
+limit 1`;
+
+query q2
+`select product_name
+from
+  (select lhs.product_id as product_id,
+          lhs.product_name as product_name,
+          lhs.product_price as product_price,
+          lhs.product_description as product_description,
+          lhs.other_product_service_details as other_product_service_details,
+          rhs.other_product_service_details as other_product_service_details.other,
+          rhs.product_price as product_price.other
+   from df_products as lhs
+   cross join
+     (select other_product_service_details,
+             max(product_price) as product_price
+      from df_products df_products
+      group by other_product_service_details) as rhs)
+where (product_price >= product_price.other)`;
+
+verify q1 q2;

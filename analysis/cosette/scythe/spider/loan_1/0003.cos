@@ -1,0 +1,23 @@
+schema df_bank(branch_id:int, bname:str, no_of_customers:int, city:str, state:str);
+
+table df_bank(df_bank);
+
+query q1
+`select sum(no_of_customers)
+from df_bank df_bank
+where city = 'new york city'`;
+
+query q2
+`select t2.sum_no_of_customers
+ from
+  (select
+      t1.city, sum(t1.no_of_customers) as sum_no_of_customers
+    from
+      (select *
+         from
+          input
+         where input.city = 'new york city') as t1
+    group by
+      t1.city) as t2`;
+
+verify q1 q2;

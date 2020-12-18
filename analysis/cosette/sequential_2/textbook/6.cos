@@ -1,0 +1,37 @@
+schema df_6_1(S_key:str, C_name:str);
+schema df_6_2(C_name:str, F_key:str);
+schema df_6_3(F_key:str, F_name:str);
+
+table df_6_1(df_6_1);
+table df_6_2(df_6_2);
+table df_6_3(df_6_3);
+
+query q1
+`select distinct f.fname
+from faculty f
+where 5 > (select count (e.snum)
+from class c, enrolled e
+where c.name = e.cname
+and c.fid = f.fid)`;
+
+query q2
+`select f_name
+from
+  (select f_name,
+          count(*) as n
+   from
+     (select lhs.s_key as s_key,
+             lhs.c_name as c_name,
+             lhs.f_key as f_key,
+             rhs.f_name as f_name
+      from
+        (select lhs.s_key as s_key,
+                lhs.c_name as c_name,
+                rhs.f_key as f_key
+         from df_6_1 as lhs
+         inner join df_6_2 as rhs on (lhs.c_name = rhs.c_name)) as lhs
+      inner join df_6_3 as rhs on (lhs.f_key = rhs.f_key))
+   group by f_name)
+where (n <= 5.0)`;
+
+verify q1 q2;

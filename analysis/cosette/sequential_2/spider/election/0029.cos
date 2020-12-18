@@ -1,0 +1,37 @@
+schema df_party(party_id:int, year:str, party:str, governor:str, lieutenant_governor:str, comptroller:str, attorney_general:str, us_senate:str);
+schema df_election(election_id:int, counties_represented:str, district:int, delegate:str, party:int, first_elected:str, committee:str);
+
+table df_party(df_party);
+table df_election(df_election);
+
+query q1
+`select t2.df_party
+from df_election as t1
+join df_party as t2 on t1.df_party = t2.party_id
+group by t1.df_party
+
+limit 1`;
+
+query q2
+`select distinct party
+from
+  (select lhs.party_id as party_id,
+          lhs.year as year,
+          lhs.party as party,
+          lhs.governor as governor,
+          lhs.lieutenant_governor as lieutenant_governor,
+          lhs.comptroller as comptroller,
+          lhs.attorney_general as attorney_general,
+          lhs.us_senate as us_senate,
+          rhs.counties_represented as counties_represented,
+          rhs.election_id as election_id
+   from df_party as lhs
+   inner join
+     (select counties_represented,
+             election_id,
+             count(*) as n
+      from df_election df_election
+      group by counties_represented,
+               election_id) as rhs on (lhs.party_id = rhs.n))`;
+
+verify q1 q2;

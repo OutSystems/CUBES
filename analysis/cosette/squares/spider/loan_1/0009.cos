@@ -1,0 +1,38 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+schema df_loan(loan_id:int, loan_type:str, cust_id:int, branch_id:int, amount:int);
+
+table df_customer(df_customer);
+table df_loan(df_loan);
+
+query q1
+`select t1.cust_name
+from df_customer as t1
+join df_loan as t2 on t1.cust_id = t2.cust_id
+group by t1.cust_name`;
+
+query q2
+`joining, by = c("cust_id", "branch_id")
+select distinct cust_name
+from
+  (select state,
+          cust_name,
+          sum(amount) as sumamount
+   from
+     (select cust_id,
+             cust_name,
+             acc_type,
+             acc_bal,
+             no_of_loans,
+             credit_score,
+             branch_id,
+             state,
+             loan_id,
+             loan_type,
+             amount
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.cust_id = rhs.cust_id
+                                       and lhs.branch_id = rhs.branch_id))
+   group by state,
+            cust_name)`;
+
+verify q1 q2;

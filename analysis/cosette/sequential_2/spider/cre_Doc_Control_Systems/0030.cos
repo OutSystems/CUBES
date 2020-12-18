@@ -1,0 +1,29 @@
+schema df_employees(employee_id:int, role_code:str, employee_name:str, other_details:str);
+schema df_circulation_history(document_id:int, draft_number:int, copy_number:int, employee_id:int);
+
+table df_employees(df_employees);
+table df_circulation_history(df_circulation_history);
+
+query q1
+`select df_employees.employee_name
+from df_employees df_employees
+join df_circulation_history on df_circulation_history.employee_id = df_employees.employee_id
+where df_circulation_history.document_id = 1`;
+
+query q2
+`select employee_name
+from
+  (select lhs.employee_id as employee_id,
+          lhs.role_code as role_code,
+          lhs.employee_name as employee_name,
+          lhs.other_details as other_details,
+          rhs.document_id as document_id,
+          rhs.copy_number as copy_number,
+          rhs.employee_id as employee_id.other
+   from df_employees as lhs
+   inner join
+     (select *
+      from df_circulation_history df_circulation_history
+      where (document_id > 1.0)) as rhs on (lhs.employee_id = rhs.draft_number))`;
+
+verify q1 q2;

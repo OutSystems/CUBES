@@ -1,0 +1,38 @@
+schema df_assets(asset_id:int, maintenance_contract_id:int, supplier_company_id:int, asset_details:str, asset_make:str, asset_model:str, asset_acquired_date:str, asset_disposed_date:str, other_asset_details:str);
+
+table df_assets(df_assets);
+
+query q1
+`select asset_id,
+       asset_details,
+       asset_make,
+       asset_model
+from df_assets df_assets`;
+
+query q2
+`select asset_id,
+       asset_details,
+       asset_make,
+       asset_model
+from
+  (select lhs.asset_id as asset_id,
+          lhs.maintenance_contract_id as maintenance_contract_id,
+          lhs.supplier_company_id as supplier_company_id,
+          lhs.asset_details as asset_details,
+          lhs.asset_make as asset_make,
+          lhs.asset_model as asset_model,
+          lhs.asset_acquired_date as asset_acquired_date,
+          lhs.asset_disposed_date as asset_disposed_date,
+          lhs.other_asset_details as other_asset_details,
+          rhs.maintenance_contract_id as maintenance_contract_id.other,
+          rhs.supplier_company_id as supplier_company_id.other,
+          rhs.asset_details as asset_details.other,
+          rhs.asset_make as asset_make.other,
+          rhs.asset_model as asset_model.other,
+          rhs.asset_disposed_date as asset_disposed_date.other,
+          rhs.other_asset_details as other_asset_details.other
+   from df_assets as lhs
+   inner join df_assets as rhs on (lhs.asset_acquired_date = rhs.asset_acquired_date
+                                   and lhs.asset_id = rhs.asset_id))`;
+
+verify q1 q2;

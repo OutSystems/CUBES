@@ -1,0 +1,34 @@
+schema df_organizations(organization_id:int, parent_organization_id:int, organization_details:str);
+
+table df_organizations(df_organizations);
+
+query q1
+`select organization_id
+from df_organizations df_organizations
+except
+select parent_organization_id
+from df_organizations df_organizations`;
+
+query q2
+`select organization_id
+from
+  (select *
+   from df_organizations as lhs
+   where not exists
+       (select 1
+        from
+          (select parent_organization_id as organization_id,
+                  parent_organization_id,
+                  organization_details,
+                  parent_organization_id.other
+           from
+             (select lhs.organization_id as organization_id,
+                     lhs.parent_organization_id as parent_organization_id,
+                     lhs.organization_details as organization_details,
+                     rhs.parent_organization_id as parent_organization_id.other
+              from df_organizations as lhs
+              inner join df_organizations as rhs on (lhs.parent_organization_id = rhs.organization_id
+                                                     and lhs.organization_details = rhs.organization_details))) as rhs
+        where (lhs.parent_organization_id = rhs.parent_organization_id) ))`;
+
+verify q1 q2;

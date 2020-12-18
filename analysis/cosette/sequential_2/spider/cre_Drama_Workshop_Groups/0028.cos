@@ -1,0 +1,50 @@
+schema df_customer_orders(order_id:int, customer_id:int, store_id:int, order_date:str, planned_delivery_date:str, actual_delivery_date:str, other_order_details:str);
+schema df_order_items(order_item_id:int, order_id:int, product_id:int, order_quantity:int, other_item_details:str);
+
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select t1.actual_delivery_date
+from df_customer_orders as t1
+join df_order_items as t2 on t1.order_id = t2.order_id
+where t2.order_quantity = 1`;
+
+query q2
+`select actual_delivery_date
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.store_id as store_id,
+          lhs.order_date as order_date,
+          lhs.planned_delivery_date as planned_delivery_date,
+          lhs.actual_delivery_date as actual_delivery_date,
+          lhs.other_order_details as other_order_details,
+          lhs.order_item_id as order_item_id,
+          lhs.product_id as product_id,
+          lhs.order_quantity as order_quantity,
+          lhs.other_item_details as other_item_details
+   from
+     (select lhs.order_id as order_id,
+             lhs.customer_id as customer_id,
+             lhs.store_id as store_id,
+             lhs.order_date as order_date,
+             lhs.planned_delivery_date as planned_delivery_date,
+             lhs.actual_delivery_date as actual_delivery_date,
+             lhs.other_order_details as other_order_details,
+             rhs.order_item_id as order_item_id,
+             rhs.product_id as product_id,
+             rhs.order_quantity as order_quantity,
+             rhs.other_item_details as other_item_details
+      from df_customer_orders as lhs
+      inner join df_order_items as rhs on (lhs.order_id = rhs.order_id)) as lhs
+   inner join
+     (select *
+      from df_order_items df_order_items
+      where (order_quantity = 1.0)) as rhs on (lhs.order_id = rhs.order_id
+                                               and lhs.order_item_id = rhs.order_item_id
+                                               and lhs.product_id = rhs.product_id
+                                               and lhs.order_quantity = rhs.order_quantity
+                                               and lhs.other_item_details = rhs.other_item_details))`;
+
+verify q1 q2;

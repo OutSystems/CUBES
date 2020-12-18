@@ -1,0 +1,59 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_dorm(dormid:int, dorm_name:str, student_capacity:int, gender:str);
+schema df_lives_in(stuid:int, dormid:int, room_number:int);
+
+table df_student(df_student);
+table df_dorm(df_dorm);
+table df_lives_in(df_lives_in);
+
+query q1
+`select count(*)
+from df_student as t1
+join df_lives_in as t2 on t1.stuid = t2.stuid
+join df_dorm as t3 on t3.dormid = t2.dormid
+where t3.dorm_name = 'smith hall'
+  and t1.sex = 'f'`;
+
+query q2
+`select n as count...
+from
+  (select dormid,
+          count(*) as n
+   from
+     (select *
+      from
+        (select lhs.stuid as stuid,
+                lhs.lname as lname,
+                lhs.fname as fname,
+                lhs.age as age,
+                lhs.sex as sex,
+                lhs.major as major,
+                lhs.advisor as advisor,
+                lhs.city_code as city_code,
+                lhs.dormid as dormid,
+                lhs.dorm_name as dorm_name,
+                lhs.student_capacity as student_capacity,
+                lhs.gender as gender,
+                rhs.room_number as room_number
+         from
+           (select lhs.stuid as stuid,
+                   lhs.lname as lname,
+                   lhs.fname as fname,
+                   lhs.age as age,
+                   lhs.sex as sex,
+                   lhs.major as major,
+                   lhs.advisor as advisor,
+                   lhs.city_code as city_code,
+                   rhs.dormid as dormid,
+                   rhs.dorm_name as dorm_name,
+                   rhs.student_capacity as student_capacity,
+                   rhs.gender as gender
+            from df_student as lhs
+            cross join df_dorm as rhs) as lhs
+         inner join df_lives_in as rhs on (lhs.stuid = rhs.stuid
+                                               and lhs.dormid = rhs.dormid))
+      where (dorm_name = 'smith hall'
+             and sex = 'f'))
+   group by dormid)`;
+
+verify q1 q2;

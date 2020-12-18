@@ -1,0 +1,67 @@
+schema df_party(party_id:int, party_theme:str, location:str, first_year:int, last_year:int, number_of_hosts:int);
+schema df_host(host_id:int, name:str, nationality:str, age:int);
+schema df_party_host(party_id:int, host_id:int, is_main_in_charge:str);
+
+table df_party(df_party);
+table df_host(df_host);
+table df_party_host(df_party_host);
+
+query q1
+`select t2.name
+from df_party_host as t1
+join df_host as t2 on t1.host_id = t2.host_id
+join df_party as t3 on t1.party_id = t3.party_id
+where t3.number_of_hosts > 20`;
+
+query q2
+`select name
+from
+  (select lhs.party_id as party_id,
+          lhs.party_theme as party_theme,
+          lhs.location as location,
+          lhs.first_year as first_year,
+          lhs.last_year as last_year,
+          lhs.number_of_hosts as number_of_hosts,
+          lhs.host_id as host_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.age as age,
+          lhs.is_main_in_charge as is_main_in_charge
+   from
+     (select lhs.party_id as party_id,
+             lhs.party_theme as party_theme,
+             lhs.location as location,
+             lhs.first_year as first_year,
+             lhs.last_year as last_year,
+             lhs.number_of_hosts as number_of_hosts,
+             lhs.host_id as host_id,
+             lhs.name as name,
+             lhs.nationality as nationality,
+             lhs.age as age,
+             rhs.is_main_in_charge as is_main_in_charge
+      from
+        (select lhs.party_id as party_id,
+                lhs.party_theme as party_theme,
+                lhs.location as location,
+                lhs.first_year as first_year,
+                lhs.last_year as last_year,
+                lhs.number_of_hosts as number_of_hosts,
+                rhs.host_id as host_id,
+                rhs.name as name,
+                rhs.nationality as nationality,
+                rhs.age as age
+         from df_party as lhs
+         cross join df_host as rhs) as lhs
+      inner join df_party_host as rhs on (lhs.party_id = rhs.party_id
+                                          and lhs.host_id = rhs.host_id)) as lhs
+   inner join
+     (select *
+      from df_party df_party
+      where (number_of_hosts >= 20.0)) as rhs on (lhs.party_id = rhs.party_id
+                                                  and lhs.party_theme = rhs.party_theme
+                                                  and lhs.location = rhs.location
+                                                  and lhs.first_year = rhs.first_year
+                                                  and lhs.last_year = rhs.last_year
+                                                  and lhs.number_of_hosts = rhs.number_of_hosts))`;
+
+verify q1 q2;

@@ -1,0 +1,36 @@
+schema df_students(student_id:int, date_of_registration:str, date_of_latest_logon:str, login_name:str, password:str, personal_name:str, middle_name:str, family_name:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_students(df_students);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select t1.student_id,
+       t2.personal_name
+from df_student_course_enrolment as t1
+join df_students as t2 on t1.student_id = t2.student_id
+group by t1.student_id
+having count(*) >= 2`;
+
+query q2
+`select student_id,
+       personal_name
+from
+  (select lhs.student_id as student_id,
+          lhs.n as n,
+          rhs.date_of_registration as date_of_registration,
+          rhs.date_of_latest_logon as date_of_latest_logon,
+          rhs.login_name as login_name,
+          rhs.password as password,
+          rhs.personal_name as personal_name,
+          rhs.middle_name as middle_name,
+          rhs.family_name as family_name
+   from
+     (select student_id,
+             count(*) as n
+      from df_student_course_enrolment df_student_course_enrolment
+      group by student_id) as lhs
+   inner join df_students as rhs on (lhs.student_id = rhs.student_id))
+where (n >= 2.0)`;
+
+verify q1 q2;

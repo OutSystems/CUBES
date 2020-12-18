@@ -1,0 +1,41 @@
+schema df_036_1(Account:int, Sen1:int, Sen2:int);
+schema df_036_2(ID:int, Name:str);
+
+table df_036_1(df_036_1);
+table df_036_2(df_036_2);
+
+query q1
+`select m.account, k.name from table_1 m
+inner join table_2 k on k.id = m.sen1 or k.id = m.sen2`;
+
+query q2
+`select account.other as account,
+       name
+from
+  (select lhs.account as account,
+          lhs.sen1 as sen1,
+          lhs.sen2 as sen2,
+          lhs.id as id,
+          lhs.name as name,
+          rhs.account as account.other,
+          rhs.sen1 as sen1.other,
+          rhs.sen2 as sen2.other
+   from
+     (select lhs.account as account,
+             lhs.sen1 as sen1,
+             lhs.sen2 as sen2,
+             rhs.id as id,
+             rhs.name as name
+      from df_036_1 as lhs
+      cross join df_036_2 as rhs) as lhs
+   inner join
+     (select lhs.account as account,
+             lhs.sen1 as sen1,
+             lhs.sen2 as sen2,
+             rhs.id as id,
+             rhs.name as name
+      from df_036_1 as lhs
+      cross join df_036_2 as rhs) as rhs on (lhs.sen1 = rhs.id
+                                             and lhs.name = rhs.name))`;
+
+verify q1 q2;

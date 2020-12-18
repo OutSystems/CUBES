@@ -1,0 +1,47 @@
+schema df_customer_orders(order_id:int, customer_id:int, order_status_code:str, order_date:str);
+
+table df_customer_orders(df_customer_orders);
+
+query q1
+`select distinct customer_id
+from df_customer_orders df_customer_orders
+where order_date >
+    (select min(order_date)
+     from df_customer_orders df_customer_orders
+     where order_status_code = "cancelled")`;
+
+query q2
+`select distinct customer_id.other as customer_id
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status_code as order_status_code,
+          lhs.order_date as order_date,
+          lhs.minorder_date as minorder_date,
+          rhs.order_id as order_id.other,
+          rhs.customer_id as customer_id.other,
+          rhs.order_status_code as order_status_code.other,
+          rhs.order_date as order_date.other,
+          rhs.minorder_date as minorder_date.other
+   from
+     (select *
+      from
+        (select order_id,
+                customer_id,
+                order_status_code,
+                order_date,
+                min(order_date) over () as minorder_date
+         from df_customer_orders df_customer_orders)
+      where (order_status_code = 'cancelled'
+             and minorder_date <= order_date)) as lhs
+   cross join
+     (select order_id,
+             customer_id,
+             order_status_code,
+             order_date,
+             min(order_date) over () as minorder_date
+      from df_customer_orders df_customer_orders) as rhs)
+where (order_date < order_date.other
+       or order_date.other <= minorder_date.other)`;
+
+verify q1 q2;

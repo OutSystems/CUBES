@@ -1,0 +1,22 @@
+schema df_entrepreneur(entrepreneur_id:int, people_id:int, company:str, money_requested:str, investor:str);
+schema df_people(people_id:int, name:str, height:str, weight:str, date_of_birth:str);
+
+table df_entrepreneur(df_entrepreneur);
+table df_people(df_people);
+
+query q1
+`select t2.weight
+from df_entrepreneur as t1
+join df_people as t2 on t1.people_id = t2.people_id`;
+
+query q2
+`select weight
+from
+  (select *
+   from df_people as lhs
+   where exists
+       (select 1
+        from df_entrepreneur as rhs
+        where (lhs.people_id = rhs.people_id) ))`;
+
+verify q1 q2;

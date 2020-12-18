@@ -1,0 +1,31 @@
+schema df_player(pid:int, pname:str, ycard:str, hs:int);
+schema df_tryout(pid:int, cname:str, ppos:str, decision:str);
+
+table df_player(df_player);
+table df_tryout(df_tryout);
+
+query q1
+`select avg(t1.hs)
+from df_player as t1
+join df_tryout as t2 on t1.pid = t2.pid
+where t2.decision = 'no'`;
+
+query q2
+`select meanhs as avg.t1.hs.
+from
+  (select avg(hs) as meanhs
+   from
+     (select *
+      from
+        (select lhs.pid as pid,
+                lhs.pname as pname,
+                lhs.ycard as ycard,
+                lhs.hs as hs,
+                rhs.cname as cname,
+                rhs.ppos as ppos,
+                rhs.decision as decision
+         from df_player as lhs
+         inner join df_tryout as rhs on (lhs.pid = rhs.pid))
+      where (decision = 'no')))`;
+
+verify q1 q2;

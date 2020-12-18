@@ -1,0 +1,40 @@
+schema df_person(name:str, age:int, city:str, gender:str, job:str);
+schema df_personfriend(name:str, friend:str, year:int);
+
+table df_person(df_person);
+table df_personfriend(df_personfriend);
+
+query q1
+`select t2.friend
+from df_person as t1
+join df_personfriend as t2 on t1.name = t2.name
+where t1.name = 'bob'`;
+
+query q2
+`select friend
+from
+  (select lhs.name as name,
+          lhs.age as age,
+          lhs.city as city,
+          lhs.gender as gender,
+          lhs.job as job,
+          lhs.friend as friend,
+          lhs.year as year
+   from
+     (select lhs.name as name,
+             lhs.age as age,
+             lhs.city as city,
+             lhs.gender as gender,
+             lhs.job as job,
+             rhs.friend as friend,
+             rhs.year as year
+      from df_person as lhs
+      inner join df_personfriend as rhs on (lhs.name = rhs.name)) as lhs
+   inner join
+     (select *
+      from df_personfriend df_personfriend
+      where (name = 'bob')) as rhs on (lhs.name = rhs.name
+                                         and lhs.friend = rhs.friend
+                                         and lhs.year = rhs.year))`;
+
+verify q1 q2;

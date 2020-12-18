@@ -1,0 +1,74 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_enroll(class_code:int, stu_num:int, enroll_grade:str);
+schema df_student(stu_num:int, stu_lname:str, stu_fname:str, stu_init:str, stu_dob:str, stu_hrs:int, stu_class:str, stu_gpa:str, stu_transfer:int, dept_code:str, stu_phone:int, prof_num:int);
+
+table df_class(df_class);
+table df_course(df_course);
+table df_enroll(df_enroll);
+table df_student(df_student);
+
+query q1
+`select t4.crs_description,
+       t4.crs_credit
+from df_class as t1
+join df_enroll as t2 on t1.class_code = t2.class_code
+join df_student as t3 on t3.stu_num = t2.stu_num
+join df_course as t4 on t4.crs_code = t1.crs_code
+where t3.stu_lname = 'smithson'`;
+
+query q2
+`select crs_description,
+       crs_credit
+from
+  (select lhs.stu_num as stu_num,
+          lhs.stu_lname as stu_lname,
+          lhs.stu_fname as stu_fname,
+          lhs.stu_init as stu_init,
+          lhs.stu_dob as stu_dob,
+          lhs.stu_hrs as stu_hrs,
+          lhs.stu_class as stu_class,
+          lhs.stu_gpa as stu_gpa,
+          lhs.stu_transfer as stu_transfer,
+          lhs.dept_code as dept_code,
+          lhs.stu_phone as stu_phone,
+          lhs.prof_num as prof_num,
+          rhs.class_code as class_code,
+          rhs.crs_code as crs_code,
+          rhs.class_section as class_section,
+          rhs.class_time as class_time,
+          rhs.class_room as class_room,
+          rhs.prof_num as prof_num.other,
+          rhs.dept_code as dept_code.other,
+          rhs.crs_description as crs_description,
+          rhs.crs_credit as crs_credit,
+          rhs.enroll_grade as enroll_grade
+   from df_student as lhs
+   inner join
+     (select lhs.class_code as class_code,
+             lhs.crs_code as crs_code,
+             lhs.class_section as class_section,
+             lhs.class_time as class_time,
+             lhs.class_room as class_room,
+             lhs.prof_num as prof_num,
+             lhs.dept_code as dept_code,
+             lhs.crs_description as crs_description,
+             lhs.crs_credit as crs_credit,
+             rhs.stu_num as stu_num,
+             rhs.enroll_grade as enroll_grade
+      from
+        (select lhs.class_code as class_code,
+                lhs.crs_code as crs_code,
+                lhs.class_section as class_section,
+                lhs.class_time as class_time,
+                lhs.class_room as class_room,
+                lhs.prof_num as prof_num,
+                rhs.dept_code as dept_code,
+                rhs.crs_description as crs_description,
+                rhs.crs_credit as crs_credit
+         from df_class as lhs
+         inner join df_course as rhs on (lhs.crs_code = rhs.crs_code)) as lhs
+      inner join df_enroll as rhs on (lhs.class_code = rhs.class_code)) as rhs on (lhs.stu_num = rhs.stu_num))
+where (stu_lname != 'smithson')`;
+
+verify q1 q2;

@@ -1,0 +1,24 @@
+schema df_course(course_id:int, title:str, dept_name:str, credits:int);
+schema df_prereq(course_id:int, prereq_id:int);
+
+table df_course(df_course);
+table df_prereq(df_prereq);
+
+query q1
+`select title
+from df_course df_course
+where course_id not in
+    (select course_id
+     from df_prereq df_prereq)`;
+
+query q2
+`select title
+from
+  (select *
+   from df_course as lhs
+   where not exists
+       (select 1
+        from df_prereq as rhs
+        where (lhs.course_id = rhs.course_id) ))`;
+
+verify q1 q2;

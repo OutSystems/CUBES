@@ -1,0 +1,32 @@
+schema df_book_club(book_club_id:int, year:int, author_or_editor:str, book_title:str, publisher:str, category:str, result:str);
+schema df_culture_company(company_name:str, type:str, incorporated_in:str, group_equity_shareholding:str, book_club_id:int, movie_id:int);
+
+table df_book_club(df_book_club);
+table df_culture_company(df_culture_company);
+
+query q1
+`select t1.company_name
+from df_culture_company as t1
+join df_book_club as t2 on t1.book_club_id = t2.book_club_id
+where t2.publisher = 'alyson'`;
+
+query q2
+`select company_name
+from
+  (select lhs.company_name as company_name,
+          lhs.type as type,
+          lhs.incorporated_in as incorporated_in,
+          lhs.group_equity_shareholding as group_equity_shareholding,
+          lhs.book_club_id as book_club_id,
+          lhs.movie_id as movie_id,
+          rhs.year as year,
+          rhs.author_or_editor as author_or_editor,
+          rhs.book_title as book_title,
+          rhs.publisher as publisher,
+          rhs.category as category,
+          rhs.result as result
+   from df_culture_company as lhs
+   inner join df_book_club as rhs on (lhs.book_club_id = rhs.book_club_id))
+where (publisher = 'alyson')`;
+
+verify q1 q2;

@@ -1,0 +1,28 @@
+schema df_department(department_id:int, name:str, creation:int, ranking:int, budget_in_billions:str, num_employees:str);
+schema df_management(department_id:int, head_id:int, temporary_acting:str);
+
+table df_department(df_department);
+table df_management(df_management);
+
+query q1
+`select t1.department_id,
+       t1.name,
+       count(*)
+from df_management as t2
+join df_department as t1 on t1.department_id = t2.department_id
+group by t1.department_id
+having count(*) > 1`;
+
+query q2
+`select t3.department_id,t3.name,t3.department_id
+ from
+  (select
+          count(t1.department_id) as count_department_id
+        from
+          input0 as t1) as t4 join 
+      (select *
+         from
+          input
+         where input.department_id = 2.0) as t2 as t3`;
+
+verify q1 q2;

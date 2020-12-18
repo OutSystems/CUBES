@@ -1,0 +1,39 @@
+schema df_airport(id:int, city:str, country:str, iata:str, icao:str, name:str);
+schema df_flight(id:int, vehicle_flight_number:str, date:str, pilot:str, velocity:str, altitude:str, airport_id:int, company_id:int);
+
+table df_airport(df_airport);
+table df_flight(df_flight);
+
+query q1
+`select t1.id,
+       t1.name,
+       t1.iata
+from df_airport as t1
+join df_flight as t2 on t1.id = t2.airport_id
+group by t2.id
+
+limit 1`;
+
+query q2
+`select distinct id,
+                name,
+                iata
+from
+  (select lhs.id as id,
+          lhs.city as city,
+          lhs.country as country,
+          lhs.iata as iata,
+          lhs.icao as icao,
+          lhs.name as name,
+          rhs.company_id as company_id,
+          rhs.vehicle_flight_number as vehicle_flight_number
+   from df_airport as lhs
+   inner join
+     (select company_id,
+             vehicle_flight_number,
+             count(*) as n
+      from df_flight df_flight
+      group by company_id,
+               vehicle_flight_number) as rhs on (lhs.id = rhs.n))`;
+
+verify q1 q2;

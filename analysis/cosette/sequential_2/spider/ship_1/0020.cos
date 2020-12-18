@@ -1,0 +1,38 @@
+schema df_captain(captain_id:int, name:str, ship_id:int, age:int, class:str, rank:str);
+schema df_ship(ship_id:int, name:str, type:str, built_year:str, class:str, flag:str);
+
+table df_captain(df_captain);
+table df_ship(df_ship);
+
+query q1
+`select t1.name
+from df_ship as t1
+join df_captain as t2 on t1.ship_id = t2.ship_id
+group by t2.ship_id
+having count(*) > 1`;
+
+query q2
+`select name
+from
+  (select built_year,
+          name,
+          count(*) as n
+   from
+     (select lhs.ship_id as ship_id,
+             lhs.name as name,
+             lhs.type as type,
+             lhs.built_year as built_year,
+             lhs.class as class,
+             lhs.flag as flag,
+             rhs.captain_id as captain_id,
+             rhs.name as name.other,
+             rhs.age as age,
+             rhs.class as class.other,
+             rhs.rank as rank
+      from df_ship as lhs
+      inner join df_captain as rhs on (lhs.ship_id = rhs.ship_id))
+   group by built_year,
+            name)
+where (n > 1.0)`;
+
+verify q1 q2;

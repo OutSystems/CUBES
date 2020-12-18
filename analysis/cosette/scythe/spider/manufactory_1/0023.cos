@@ -1,0 +1,31 @@
+schema df_manufacturers(code:int, name:str, headquarter:str, founder:str, revenue:str);
+schema df_products(code:int, name:str, price:int, manufacturer:int);
+
+table df_manufacturers(df_manufacturers);
+table df_products(df_products);
+
+query q1
+`select count(distinct name)
+from df_products df_products
+where name not in
+    (select t1.name
+     from df_products as t1
+     join df_manufacturers as t2 on t1.manufacturer = t2.code
+     where t2.name = 'sony')`;
+
+query q2
+`select t3.count_code
+ from
+  (select
+          count(t1.code) as count_code
+        from
+          (select *
+             from
+              input0
+             where input0.manufacturer < 6.0) as t1) as t4 join 
+      (select *
+         from
+          input
+         where input.name = 'sony') as t2 as t3`;
+
+verify q1 q2;

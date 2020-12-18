@@ -1,0 +1,39 @@
+schema df_school(school_id:int, grade:str, school:str, location:str, type:str);
+schema df_school_bus(school_id:int, driver_id:int, years_working:int, if_full_time:str);
+
+table df_school(df_school);
+table df_school_bus(df_school_bus);
+
+query q1
+`select df_school,
+       type
+from df_school df_school
+where school_id not in
+    (select school_id
+     from df_school_bus df_school_bus)`;
+
+query q2
+`joining, by = "school_id"
+joining, by = "school_id"
+select school,
+       type
+from
+  (select school_id,
+          grade,
+          school,
+          location,
+          type
+   from
+     (select *
+      from
+        (select school_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select school_id
+              from input1) as rhs
+           where (lhs.school_id = rhs.school_id) )) as lhs
+   inner join input0 as rhs on (lhs.school_id = rhs.school_id))`;
+
+verify q1 q2;

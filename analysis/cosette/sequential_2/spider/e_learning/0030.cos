@@ -1,0 +1,36 @@
+schema df_courses(course_id:int, author_id:int, subject_id:int, course_name:str, course_description:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_courses(df_courses);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select t1.course_name,
+       count(*)
+from df_courses as t1
+join df_student_course_enrolment as t2 on t1.course_id = t2.course_id
+group by t1.course_name`;
+
+query q2
+`select course_name,
+       n as count...
+from
+  (select course_id,
+          course_name,
+          count(*) as n
+   from
+     (select lhs.registration_id as registration_id,
+             lhs.student_id as student_id,
+             lhs.course_id as course_id,
+             lhs.date_of_enrolment as date_of_enrolment,
+             lhs.date_of_completion as date_of_completion,
+             rhs.author_id as author_id,
+             rhs.subject_id as subject_id,
+             rhs.course_name as course_name,
+             rhs.course_description as course_description
+      from df_student_course_enrolment as lhs
+      inner join df_courses as rhs on (lhs.course_id = rhs.course_id))
+   group by course_id,
+            course_name)`;
+
+verify q1 q2;

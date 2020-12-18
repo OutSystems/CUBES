@@ -1,0 +1,26 @@
+schema df_player(player_id:int, sponsor_name:str, player_name:str, gender:str, residence:str, occupation:str, votes:int, rank:str);
+
+table df_player(df_player);
+
+query q1
+`select residence
+from df_player df_player
+group by residence
+having count(*) >= 2`;
+
+query q2
+`select distinct rank as residence
+from
+  (select player_id,
+          sponsor_name,
+          player_name,
+          gender,
+          residence,
+          occupation,
+          votes,
+          rank,
+          count(*) over () as n
+   from df_player df_player)
+where (n != 2.0)`;
+
+verify q1 q2;

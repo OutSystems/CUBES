@@ -1,0 +1,51 @@
+schema df_accounts(account_id:int, customer_id:int, account_name:int, other_account_details:str);
+schema df_customers(customer_id:int, customer_first_name:str, customer_last_name:str, customer_address:str, customer_phone:str, customer_email:str, other_customer_details:str);
+
+table df_accounts(df_accounts);
+table df_customers(df_customers);
+
+query q1
+`select t2.customer_first_name,
+       t2.customer_last_name,
+       t2.customer_phone
+from df_accounts as t1
+join df_customers as t2 on t1.customer_id = t2.customer_id
+where t1.account_name = "162"`;
+
+query q2
+`select customer_first_name,
+       customer_last_name,
+       customer_phone
+from
+  (select lhs.account_id as account_id,
+          lhs.customer_id as customer_id,
+          lhs.account_name as account_name,
+          lhs.other_account_details as other_account_details,
+          lhs.customer_first_name as customer_first_name,
+          lhs.customer_last_name as customer_last_name,
+          lhs.customer_address as customer_address,
+          lhs.customer_phone as customer_phone,
+          lhs.customer_email as customer_email,
+          lhs.other_customer_details as other_customer_details
+   from
+     (select lhs.account_id as account_id,
+             lhs.customer_id as customer_id,
+             lhs.account_name as account_name,
+             lhs.other_account_details as other_account_details,
+             rhs.customer_first_name as customer_first_name,
+             rhs.customer_last_name as customer_last_name,
+             rhs.customer_address as customer_address,
+             rhs.customer_phone as customer_phone,
+             rhs.customer_email as customer_email,
+             rhs.other_customer_details as other_customer_details
+      from df_accounts as lhs
+      inner join df_customers as rhs on (lhs.customer_id = rhs.customer_id)) as lhs
+   inner join
+     (select *
+      from df_accounts df_accounts
+      where (account_name = 162.0)) as rhs on (lhs.account_id = rhs.account_id
+                                               and lhs.customer_id = rhs.customer_id
+                                               and lhs.account_name = rhs.account_name
+                                               and lhs.other_account_details = rhs.other_account_details))`;
+
+verify q1 q2;

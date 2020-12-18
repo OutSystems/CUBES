@@ -1,0 +1,31 @@
+schema df_residents(resident_id:int, property_id:int, date_moved_in:str, date_moved_out:str, other_details:str);
+
+table df_residents(df_residents);
+
+query q1
+`select other_details
+from df_residents df_residents
+where other_details like '%miss%'`;
+
+query q2
+`select * from 
+(select t1.other_details
+   from
+    (select
+            max(t3.date_moved_out) as max_date_moved_out
+          from
+            input as t3) as t4 join 
+        input as t5 as t1
+   where t1.max_date_moved_out = t1.date_moved_out)
+union all 
+ select * from
+  (select t6.other_details
+   from
+    (select
+            min(t2.date_moved_out) as min_date_moved_out
+          from
+            input as t2) as t8 join 
+        input as t7 as t6
+   where t6.min_date_moved_out = t6.date_moved_out)`;
+
+verify q1 q2;

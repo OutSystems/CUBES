@@ -1,0 +1,68 @@
+schema df_journal(journal_id:int, date:str, theme:str, sales:int);
+schema df_editor(editor_id:int, name:str, age:str);
+schema df_journal_committee(editor_id:int, journal_id:int, work_type:str);
+
+table df_journal(df_journal);
+table df_editor(df_editor);
+table df_journal_committee(df_journal_committee);
+
+query q1
+`select t2.name,
+       t3.theme
+from df_journal_committee as t1
+join df_editor as t2 on t1.editor_id = t2.editor_id
+join df_journal as t3 on t1.journal_id = t3.journal_id`;
+
+query q2
+`joining, by = "journal_id"
+joining, by = "editor_id"
+joining, by = c("journal_id", "date", "theme", "sales")
+joining, by = c("editor_id", "journal_id", "work_type")
+select name,
+       theme
+from
+  (select editor_id,
+          name,
+          age,
+          journal_id,
+          date,
+          theme,
+          sales,
+          work_type
+   from
+     (select editor_id,
+             name,
+             age,
+             journal_id,
+             date,
+             theme,
+             sales,
+             work_type
+      from
+        (select editor_id,
+                name,
+                age,
+                journal_id,
+                date,
+                theme,
+                sales,
+                work_type
+         from input1 as lhs
+         inner join
+           (select journal_id,
+                   date,
+                   theme,
+                   sales,
+                   editor_id,
+                   work_type
+            from input0 as lhs
+            left join input2 as rhs on (lhs.journal_id = rhs.journal_id)) as rhs on (lhs.editor_id = rhs.editor_id)) as lhs
+      inner join input0 as rhs on (lhs.journal_id = rhs.journal_id
+                                       and lhs.date = rhs.date
+                                       and lhs.theme = rhs.theme
+                                       and lhs.sales = rhs.sales)) as lhs
+   inner join input2 as rhs on (lhs.editor_id = rhs.editor_id
+                                    and lhs.journal_id = rhs.journal_id
+                                    and lhs.work_type = rhs.work_type))`;
+
+verify q1 q2;

@@ -1,0 +1,43 @@
+schema df_i006(Id:int, Name:str, Other_Columns:str);
+
+table df_i006(df_i006);
+
+query q1
+`select
+    a.*
+from messages a
+inner join (select name, max(id) as maxid
+            from messages
+            group by name) as b
+on a.id = b.maxid`;
+
+query q2
+`joining, by = "name"
+joining, by = c("maxid", "id")
+select id,
+       name,
+       other_columns
+from
+  (select name,
+          maxid,
+          id,
+          other_columns
+   from
+     (select name,
+             maxid,
+             id,
+             other_columns
+      from
+        (select name,
+                max(id) as maxid
+         from input0
+         group by name) as lhs
+      inner join input0 as rhs on (lhs.name = rhs.name)) as lhs
+   inner join
+     (select id,
+             max(id) as maxid
+      from input0
+      group by id) as rhs on (lhs.maxid = rhs.maxid
+                                  and lhs.id = rhs.id))`;
+
+verify q1 q2;

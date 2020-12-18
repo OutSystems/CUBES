@@ -1,0 +1,39 @@
+schema df_video_games(gameid:int, gname:str, gtype:str);
+schema df_plays_games(stuid:int, gameid:int, hours_played:int);
+
+table df_video_games(df_video_games);
+table df_plays_games(df_plays_games);
+
+query q1
+`select gname
+from df_plays_games as t1
+join df_video_games as t2 on t1.gameid = t2.gameid
+group by t1.gameid
+
+limit 1`;
+
+query q2
+`select gname
+from
+  (select lhs.gameid as gameid,
+          lhs.gname as gname,
+          lhs.gtype as gtype,
+          lhs.stuid as stuid,
+          lhs.hours_played as hours_played
+   from
+     (select lhs.gameid as gameid,
+             lhs.gname as gname,
+             lhs.gtype as gtype,
+             rhs.stuid as stuid,
+             rhs.hours_played as hours_played
+      from df_video_games as lhs
+      inner join df_plays_games as rhs on (lhs.gameid = rhs.gameid)) as lhs
+   inner join
+     (select stuid,
+             gameid,
+             max(hours_played) over () as hours_played
+      from df_plays_games df_plays_games) as rhs on (lhs.gameid = rhs.gameid
+                                      and lhs.stuid = rhs.stuid
+                                      and lhs.hours_played = rhs.hours_played))`;
+
+verify q1 q2;

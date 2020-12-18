@@ -1,0 +1,55 @@
+schema df_student(stuid:int, lname:str, fname:str, age:int, sex:str, major:int, advisor:int, city_code:str);
+schema df_faculty(facid:int, lname:str, fname:str, rank:str, sex:str, phone:int, room:str, building:str);
+
+table df_student(df_student);
+table df_faculty(df_faculty);
+
+query q1
+`select t1.fname,
+       t1.lname
+from df_faculty as t1
+join df_student as t2 on t1.facid = t2.advisor
+where t2.fname = "linda"
+  and t2.lname = "smith"`;
+
+query q2
+`select fname,
+       lname.other as lname
+from
+  (select stuid,
+          lname,
+          fname,
+          age,
+          sex,
+          major,
+          advisor,
+          city_code,
+          lname.other,
+          rank,
+          sex.other,
+          phone,
+          room,
+          building,
+          advisor as facid
+   from
+     (select lhs.stuid as stuid,
+             lhs.lname as lname,
+             lhs.fname as fname,
+             lhs.age as age,
+             lhs.sex as sex,
+             lhs.major as major,
+             lhs.advisor as advisor,
+             lhs.city_code as city_code,
+             rhs.lname as lname.other,
+             rhs.rank as rank,
+             rhs.sex as sex.other,
+             rhs.phone as phone,
+             rhs.room as room,
+             rhs.building as building
+      from df_student as lhs
+      inner join df_faculty as rhs on (lhs.advisor = rhs.facid
+                                           and lhs.fname = rhs.fname)))
+where (fname != 'linda'
+       or lname != 'smith')`;
+
+verify q1 q2;

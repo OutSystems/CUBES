@@ -1,0 +1,19 @@
+schema df_mailshot_customers(mailshot_id:int, customer_id:int, outcome_code:str, mailshot_customer_date:str);
+
+table df_mailshot_customers(df_mailshot_customers);
+
+query q1
+`select outcome_code,
+       count(*)
+from df_mailshot_customers df_mailshot_customers
+group by outcome_code`;
+
+query q2
+`(select
+    t1.outcome_code, count(t1.customer_id) as count_customer_id
+  from
+    input as t1
+  group by
+    t1.outcome_code) as t2`;
+
+verify q1 q2;

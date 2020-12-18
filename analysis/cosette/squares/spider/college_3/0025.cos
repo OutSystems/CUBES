@@ -1,0 +1,38 @@
+schema df_course(cid:str, cname:str, credits:int, instructor:int, days:str, hours:str, dno:int);
+schema df_enrolled_in(stuid:int, cid:str, grade:str);
+
+table df_course(df_course);
+table df_enrolled_in(df_enrolled_in);
+
+query q1
+`select t1.cname
+from df_course as t1
+join df_enrolled_in as t2 on t1.cid = t2.cid
+group by t2.cid
+having count(*) >= 5`;
+
+query q2
+`joining, by = "cid"
+select cname
+from
+  (select cid,
+          cname,
+          count(*) as n
+   from
+     (select cid,
+             cname,
+             credits,
+             instructor,
+             days,
+             hours,
+             dno,
+             stuid,
+             grade
+      from input0 as lhs
+      inner join input1 as rhs on (lhs.cid = rhs.cid))
+   group by cid,
+            cname)
+where (n > 5.0
+       or n >= 5.0)`;
+
+verify q1 q2;

@@ -1,0 +1,31 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+schema df_train(train_id:int, train_num:int, name:str, from:str, arrival:str, railway_id:int);
+
+table df_railway(df_railway);
+table df_train(df_train);
+
+query q1
+`select t2.railway_id,
+       t1.location
+from df_railway as t1
+join df_train as t2 on t1.railway_id = t2.railway_id
+group by t2.railway_id
+having count(*) > 1`;
+
+query q2
+`select t2.railway_id,t2.location
+ from
+  (select t1.railway_id, t1.count_name, t3.railway_id as railway_id1, t3.railway, t3.builder, t3.built, t3.wheels, t3.location, t3.objectnumber
+  from (select *
+       from
+        (select
+            t4.railway_id, count(t4.name) as count_name
+          from
+            input0 as t4
+          group by
+            t4.railway_id) as t1
+       where t1.count_name = 2.0) join 
+      input as t3) as t2
+ where t2.railway_id = t2.railway_id1`;
+
+verify q1 q2;

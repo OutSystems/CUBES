@@ -1,0 +1,24 @@
+schema df_train(train_id:int, name:str, time:str, service:str);
+
+table df_train(df_train);
+
+query q1
+`select name,
+       service
+from df_train df_train`;
+
+query q2
+`select name,
+       service
+from
+  (select lhs.train_id as train_id,
+          lhs.name as name,
+          lhs.time as time,
+          lhs.service as service,
+          rhs.train_id as train_id.other,
+          rhs.name as name.other,
+          rhs.service as service.other
+   from df_train as lhs
+   inner join df_train as rhs on (lhs.time = rhs.time))`;
+
+verify q1 q2;

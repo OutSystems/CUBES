@@ -1,0 +1,31 @@
+schema df_customers(customer_id:int, customer_name:str, customer_details:str);
+schema df_orders(order_id:int, customer_id:int, order_status:str, date_order_placed:str, order_details:str);
+
+table df_customers(df_customers);
+table df_orders(df_orders);
+
+query q1
+`select t2.order_id,
+       t2.order_status
+from df_customers as t1
+join df_orders as t2 on t1.customer_id = t2.customer_id
+where t1.customer_name = "jeramie"`;
+
+query q2
+`select order_id,
+       order_status
+from
+  (select lhs.order_id as order_id,
+          lhs.customer_id as customer_id,
+          lhs.order_status as order_status,
+          lhs.date_order_placed as date_order_placed,
+          lhs.order_details as order_details,
+          rhs.customer_name as customer_name,
+          rhs.customer_details as customer_details
+   from df_orders as lhs
+   inner join
+     (select *
+      from df_customers df_customers
+      where (customer_name = 'jeramie')) as rhs on (lhs.customer_id = rhs.customer_id))`;
+
+verify q1 q2;

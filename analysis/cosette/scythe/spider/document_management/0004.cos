@@ -1,0 +1,27 @@
+schema df_documents(document_code:int, document_structure_code:int, document_type_code:str, access_count:int, document_name:str);
+
+table df_documents(df_documents);
+
+query q1
+`select sum(access_count)
+from df_documents df_documents
+group by document_type_code
+
+limit 1`;
+
+query q2
+`select t6.sum_access_count
+ from
+  (select
+          first(t2.document_type_code) as first_document_type_code
+        from
+          input as t2) as t1 join 
+      (select
+            t5.document_type_code, sum(t5.access_count) as sum_access_count
+          from
+            input as t5
+          group by
+            t5.document_type_code) as t3 as t4 as t6
+ where t6.first_document_type_code = t6.document_type_code`;
+
+verify q1 q2;

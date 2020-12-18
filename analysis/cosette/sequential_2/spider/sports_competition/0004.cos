@@ -1,0 +1,24 @@
+schema df_competition(competition_id:int, year:str, competition_type:str, country:str);
+
+table df_competition(df_competition);
+
+query q1
+`select competition_type,
+       country
+from df_competition df_competition`;
+
+query q2
+`select competition_type,
+       country
+from
+  (select lhs.competition_id as competition_id,
+          lhs.year as year,
+          lhs.competition_type as competition_type,
+          lhs.country as country,
+          rhs.year as year.other,
+          rhs.competition_type as competition_type.other,
+          rhs.country as country.other
+   from df_competition as lhs
+   inner join df_competition as rhs on (lhs.competition_id = rhs.competition_id))`;
+
+verify q1 q2;

@@ -1,0 +1,33 @@
+schema df_all_documents(document_id:int, date_stored:str, document_type_code:str, document_name:str, document_description:str, other_details:str);
+schema df_document_locations(document_id:int, location_code:str, date_in_location_from:str, date_in_locaton_to:str);
+
+table df_all_documents(df_all_documents);
+table df_document_locations(df_document_locations);
+
+query q1
+`select t1.date_in_location_from,
+       t1.date_in_locaton_to
+from df_document_locations as t1
+join df_all_documents as t2 on t1.document_id = t2.document_id
+where t2.document_name = "robin cv"`;
+
+query q2
+`select date_in_location_from,
+       date_in_locaton_to
+from
+  (select lhs.document_id as document_id,
+          lhs.location_code as location_code,
+          lhs.date_in_location_from as date_in_location_from,
+          lhs.date_in_locaton_to as date_in_locaton_to,
+          rhs.date_stored as date_stored,
+          rhs.document_type_code as document_type_code,
+          rhs.document_name as document_name,
+          rhs.document_description as document_description,
+          rhs.other_details as other_details
+   from df_document_locations as lhs
+   inner join
+     (select *
+      from df_all_documents df_all_documents
+      where (document_name = 'robin cv')) as rhs on (lhs.document_id = rhs.document_id))`;
+
+verify q1 q2;

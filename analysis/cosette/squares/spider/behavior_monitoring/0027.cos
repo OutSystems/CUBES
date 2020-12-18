@@ -1,0 +1,36 @@
+schema df_students(student_id:int, address_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, date_first_rental:str, date_left_university:str, other_student_details:str);
+schema df_assessment_notes(notes_id:int, student_id:int, teacher_id:int, date_of_notes:str, text_of_notes:str, other_details:str);
+
+table df_students(df_students);
+table df_assessment_notes(df_assessment_notes);
+
+query q1
+`select t1.date_of_notes
+from df_assessment_notes as t1
+join df_students as t2 on t1.student_id = t2.student_id
+where t2.first_name = "fanny"`;
+
+query q2
+`joining, by = "student_id"
+select date_of_notes
+from
+  (select student_id,
+          address_id,
+          first_name,
+          middle_name,
+          last_name,
+          cell_mobile_number,
+          email_address,
+          date_first_rental,
+          date_left_university,
+          other_student_details,
+          notes_id,
+          teacher_id,
+          date_of_notes,
+          text_of_notes,
+          other_details
+   from input0 as lhs
+   inner join input1 as rhs on (lhs.student_id = rhs.student_id))
+where (first_name = 'fanny')`;
+
+verify q1 q2;

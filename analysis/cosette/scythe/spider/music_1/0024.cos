@@ -1,0 +1,25 @@
+schema df_artist(artist_name:str, country:str, gender:str, preferred_genre:str);
+schema df_song(song_name:str, artist_name:str, country:str, f_id:int, genre_is:str, rating:int, languages:str, releasedate:str, resolution:int);
+
+table df_artist(df_artist);
+table df_song(df_song);
+
+query q1
+`select t1.artist_name,
+       t1.gender
+from df_artist as t1
+join df_song as t2 on t1.artist_name = t2.artist_name
+where t2.releasedate like "%mar%"`;
+
+query q2
+`select t2.artist_name,t2.gender
+ from
+  (select input0.song_name, input0.artist_name, input0.country, input0.f_id, input0.genre_is, input0.rating, input0.languages, input0.releasedate, input0.resolution, t1.artist_name as artist_name1, t1.country as country1, t1.gender, t1.preferred_genre
+  from (select *
+       from
+        input0
+       where input0.f_id > 4.0) join 
+      input as t1) as t2
+ where t2.artist_name = t2.artist_name1`;
+
+verify q1 q2;

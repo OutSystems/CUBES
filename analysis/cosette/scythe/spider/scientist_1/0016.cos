@@ -1,0 +1,25 @@
+schema df_scientists(ssn:int, name:str);
+schema df_assignedto(scientist:int, project:str);
+
+table df_scientists(df_scientists);
+table df_assignedto(df_assignedto);
+
+query q1
+`select count(*),
+       t1.name
+from df_scientists as t1
+join df_assignedto as t2 on t1.ssn = t2.scientist
+group by t1.name`;
+
+query q2
+`select t3.count_distinct_ssn,t3.name
+ from
+  (select
+      t4.name, count_distinct(t4.ssn) as count_distinct_ssn
+    from
+      input join 
+            input0 as t1 as t2 as t4
+    group by
+      t4.name) as t3`;
+
+verify q1 q2;

@@ -1,0 +1,45 @@
+schema df_member(member_id:int, name:str, nationality:str, role:str);
+schema df_performance(performance_id:str, date:str, host:str, location:str, attendance:int);
+schema df_member_attendance(member_id:int, performance_id:int, num_of_pieces:int);
+
+table df_member(df_member);
+table df_performance(df_performance);
+table df_member_attendance(df_member_attendance);
+
+query q1
+`select t2.name,
+       t3.location
+from df_member_attendance as t1
+join df_member as t2 on t1.member_id = t2.member_id
+join df_performance as t3 on t1.performance_id = t3.performance_id`;
+
+query q2
+`select name,
+       location
+from
+  (select lhs.member_id as member_id,
+          lhs.name as name,
+          lhs.nationality as nationality,
+          lhs.role as role,
+          lhs.performance_id as performance_id,
+          lhs.date as date,
+          lhs.host as host,
+          lhs.location as location,
+          lhs.attendance as attendance,
+          rhs.num_of_pieces as num_of_pieces
+   from
+     (select lhs.member_id as member_id,
+             lhs.name as name,
+             lhs.nationality as nationality,
+             lhs.role as role,
+             rhs.performance_id as performance_id,
+             rhs.date as date,
+             rhs.host as host,
+             rhs.location as location,
+             rhs.attendance as attendance
+      from df_member as lhs
+      cross join df_performance as rhs) as lhs
+   inner join df_member_attendance as rhs on (lhs.member_id = rhs.member_id
+                                              and lhs.performance_id = rhs.performance_id))`;
+
+verify q1 q2;

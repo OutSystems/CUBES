@@ -1,0 +1,21 @@
+schema df_region(region_id:int, region_name:str, date:str, label:str, format:str, catalogue:str);
+schema df_party(party_id:int, minister:str, took_office:int, left_office:int, region_id:int, party_name:str);
+
+table df_region(df_region);
+table df_party(df_party);
+
+query q1
+`select t1.party_name,
+       t2.region_name
+from df_party as t1
+join df_region as t2 on t1.region_id = t2.region_id`;
+
+query q2
+`select t1.party_name,t1.region_name
+ from
+  (select input.region_id, input.region_name, input.date, input.label, input.format, input.catalogue, t2.party_id, t2.minister, t2.took_office, t2.left_office, t2.region_id as region_id1, t2.party_name
+  from input join 
+      input0 as t2) as t1
+ where t1.region_id = t1.party_id`;
+
+verify q1 q2;

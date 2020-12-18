@@ -1,0 +1,33 @@
+schema df_list(lastname:str, firstname:str, grade:int, classroom:int);
+schema df_teachers(lastname:str, firstname:str, classroom:int);
+
+table df_list(df_list);
+table df_teachers(df_teachers);
+
+query q1
+`select t2.firstname,
+       t2.lastname
+from df_list as t1
+join df_teachers as t2 on t1.classroom = t2.classroom
+group by t2.firstname,
+         t2.lastname
+
+limit 1`;
+
+query q2
+`select t3.firstname,t3.lastname
+ from
+  (select t2.classroom, t2.count_classroom, t1.lastname, t1.firstname, t1.classroom as classroom1
+  from (select *
+       from
+        (select
+            t4.classroom, count(t4.classroom) as count_classroom
+          from
+            input as t4
+          group by
+            t4.classroom) as t2
+       where t2.count_classroom = 8.0) join 
+      input0 as t1) as t3
+ where t3.classroom = t3.classroom1`;
+
+verify q1 q2;

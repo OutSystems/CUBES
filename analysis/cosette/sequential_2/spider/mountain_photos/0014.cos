@@ -1,0 +1,69 @@
+schema df_mountain(id:int, name:str, height:str, prominence:str, range:str, country:str);
+schema df_camera_lens(id:int, brand:str, name:str, focal_length_mm:str, max_aperture:str);
+schema df_photos(id:int, camera_lens_id:int, mountain_id:int, color:str, name:str);
+
+table df_mountain(df_mountain);
+table df_camera_lens(df_camera_lens);
+table df_photos(df_photos);
+
+query q1
+`select t3.brand
+from df_mountain as t1
+join df_photos as t2 on t1.id = t2.mountain_id
+join df_camera_lens as t3 on t2.camera_lens_id = t3.id
+where t1.range = 'toubkal atlas' intersect
+  select t3.brand
+  from df_mountain as t1
+  join df_photos as t2 on t1.id = t2.mountain_id
+  join df_camera_lens as t3 on t2.camera_lens_id = t3.id where t1.range = 'lasta massif'`;
+
+query q2
+`select brand
+from
+  (select lhs.id as id,
+          lhs.brand as brand,
+          lhs.name as name,
+          lhs.focal_length_mm as focal_length_mm,
+          lhs.max_aperture as max_aperture,
+          rhs.id as id.other,
+          rhs.name as name.other,
+          rhs.height as height,
+          rhs.prominence as prominence,
+          rhs.range as range,
+          rhs.country as country,
+          rhs.id.other as id.other.other,
+          rhs.color as color,
+          rhs.name.other as name.other.other,
+          rhs.camera_lens_id as camera_lens_id
+   from df_camera_lens as lhs
+   inner join
+     (select *
+      from
+        (select id,
+                name,
+                height,
+                prominence,
+                range,
+                country,
+                id.other,
+                mountain_id,
+                color,
+                name.other,
+                id as camera_lens_id
+         from
+           (select lhs.id as id,
+                   lhs.name as name,
+                   lhs.height as height,
+                   lhs.prominence as prominence,
+                   lhs.range as range,
+                   lhs.country as country,
+                   rhs.id as id.other,
+                   rhs.mountain_id as mountain_id,
+                   rhs.color as color,
+                   rhs.name as name.other
+            from df_mountain as lhs
+            inner join df_photos as rhs on (lhs.id = rhs.camera_lens_id)))
+      where (range != 'toubkal atlas'
+             or range = 'lasta massif')) as rhs on (lhs.id = rhs.mountain_id))`;
+
+verify q1 q2;

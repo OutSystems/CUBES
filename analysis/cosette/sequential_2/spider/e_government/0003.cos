@@ -1,0 +1,52 @@
+schema df_forms(form_id:int, form_type_code:str, service_id:int, form_number:int, form_name:str, form_description:str);
+schema df_party_forms(party_id:int, form_id:int, date_completion_started:str, form_status_code:str, date_fully_completed:str);
+
+table df_forms(df_forms);
+table df_party_forms(df_party_forms);
+
+query q1
+`select t1.form_name
+from df_forms as t1
+join df_party_forms as t2 on t1.form_id = t2.form_id
+group by t2.form_id
+
+limit 1`;
+
+query q2
+`select form_name
+from
+  (select party_id,
+          form_id,
+          date_completion_started,
+          form_status_code,
+          date_fully_completed,
+          form_id.other,
+          form_type_code,
+          form_number,
+          form_name,
+          form_description,
+          form_id as n
+   from
+     (select lhs.party_id as party_id,
+             lhs.form_id as form_id,
+             lhs.date_completion_started as date_completion_started,
+             lhs.form_status_code as form_status_code,
+             lhs.date_fully_completed as date_fully_completed,
+             rhs.form_id as form_id.other,
+             rhs.form_type_code as form_type_code,
+             rhs.form_number as form_number,
+             rhs.form_name as form_name,
+             rhs.form_description as form_description
+      from df_party_forms as lhs
+      inner join
+        (select form_id,
+                form_type_code,
+                service_id,
+                form_number,
+                form_name,
+                form_description,
+                count(*) over () as n
+         from df_forms df_forms) as rhs on (lhs.form_id = rhs.n
+                                   and lhs.party_id = rhs.service_id)))`;
+
+verify q1 q2;

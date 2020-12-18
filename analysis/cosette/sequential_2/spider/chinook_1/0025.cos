@@ -1,0 +1,43 @@
+schema df_customer(customerid:int, firstname:str, lastname:str, company:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str, supportrepid:int);
+schema df_invoice(invoiceid:int, customerid:int, invoicedate:str, billingaddress:str, billingcity:str, billingstate:str, billingcountry:str, billingpostalcode:str, total:str);
+
+table df_customer(df_customer);
+table df_invoice(df_invoice);
+
+query q1
+`select t2.invoicedate
+from df_customer as t1
+join df_invoice as t2 on t1.customerid = t2.customerid
+where t1.firstname = "astrid"
+  and lastname = "gruber"`;
+
+query q2
+`select invoicedate
+from
+  (select lhs.customerid as customerid,
+          lhs.firstname as firstname,
+          lhs.lastname as lastname,
+          lhs.company as company,
+          lhs.address as address,
+          lhs.city as city,
+          lhs.state as state,
+          lhs.country as country,
+          lhs.postalcode as postalcode,
+          lhs.phone as phone,
+          lhs.fax as fax,
+          lhs.email as email,
+          lhs.supportrepid as supportrepid,
+          rhs.invoiceid as invoiceid,
+          rhs.invoicedate as invoicedate,
+          rhs.billingaddress as billingaddress,
+          rhs.billingcity as billingcity,
+          rhs.billingstate as billingstate,
+          rhs.billingcountry as billingcountry,
+          rhs.billingpostalcode as billingpostalcode,
+          rhs.total as total
+   from df_customer as lhs
+   left join df_invoice as rhs on (lhs.customerid = rhs.customerid))
+where (firstname = 'astrid'
+       and lastname = 'gruber')`;
+
+verify q1 q2;

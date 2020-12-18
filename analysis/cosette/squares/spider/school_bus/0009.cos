@@ -1,0 +1,29 @@
+schema df_driver(driver_id:int, name:str, party:str, home_city:str, age:int);
+
+table df_driver(df_driver);
+
+query q1
+`select home_city
+from df_driver df_driver
+except
+select home_city
+from df_driver df_driver
+where age > 40`;
+
+query q2
+`joining, by = "home_city"
+select distinct home_city
+from
+  (select *
+   from
+     (select home_city
+      from input0) as lhs
+   where not exists
+       (select 1
+        from
+          (select home_city
+           from input0
+           where (age >= 40.0)) as rhs
+        where (lhs.home_city = rhs.home_city) ))`;
+
+verify q1 q2;

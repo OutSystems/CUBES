@@ -1,0 +1,18 @@
+schema df_i050(ID:int, Col1:int, Col2:int, Col3:int);
+
+table df_i050(df_i050);
+
+query q1
+`select id, col1, col2, col3, minvalue
+from yourtable
+cross apply (select min(d) minvalue from (values (col1), (col2), (col3)) as a(d)) a`;
+
+query q2
+`select id,
+       col1,
+       col2,
+       col3,
+       min(col1, col2, col3) as themin
+from df_i050 df_i050`;
+
+verify q1 q2;

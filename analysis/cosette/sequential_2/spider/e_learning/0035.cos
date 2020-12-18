@@ -1,0 +1,46 @@
+schema df_students(student_id:int, date_of_registration:str, date_of_latest_logon:str, login_name:str, password:str, personal_name:str, middle_name:str, family_name:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_students(df_students);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select t1.student_id,
+       t2.login_name
+from df_student_course_enrolment as t1
+join df_students as t2 on t1.student_id = t2.student_id
+group by t1.student_id
+
+limit 1`;
+
+query q2
+`select student_id,
+       login_name
+from
+  (select lhs.registration_id as registration_id,
+          lhs.student_id as student_id,
+          lhs.course_id as course_id,
+          lhs.date_of_enrolment as date_of_enrolment,
+          lhs.date_of_completion as date_of_completion,
+          rhs.date_of_registration as date_of_registration,
+          rhs.date_of_latest_logon as date_of_latest_logon,
+          rhs.login_name as login_name,
+          rhs.password as password,
+          rhs.personal_name as personal_name,
+          rhs.middle_name as middle_name,
+          rhs.family_name as family_name
+   from df_student_course_enrolment as lhs
+   inner join
+     (select student_id,
+             date_of_registration,
+             date_of_latest_logon,
+             login_name,
+             password,
+             personal_name,
+             middle_name,
+             family_name,
+             count(*) over () as n
+      from df_students df_students) as rhs on (lhs.student_id = rhs.student_id
+                                   and lhs.course_id = rhs.n))`;
+
+verify q1 q2;

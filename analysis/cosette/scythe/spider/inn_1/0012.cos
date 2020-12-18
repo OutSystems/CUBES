@@ -1,0 +1,21 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+
+table df_rooms(df_rooms);
+
+query q1
+`select decor
+from df_rooms df_rooms
+where roomname = "recluse and defiance"`;
+
+query q2
+`select t2.decor
+ from
+  (select
+      t1.beds, t1.decor, first(t1.roomname) as first_roomname
+    from
+      input as t1
+    group by
+      t1.beds, t1.decor) as t2
+ where t2.first_roomname = 'recluse and defiance'`;
+
+verify q1 q2;

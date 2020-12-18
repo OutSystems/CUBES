@@ -1,0 +1,21 @@
+schema df_dependent(essn:int, dependent_name:str, sex:str, bdate:str, relationship:str);
+
+table df_dependent(df_dependent);
+
+query q1
+`select dependent_name
+from df_dependent df_dependent
+where relationship = 'spouse'`;
+
+query q2
+`select t1.dependent_name
+ from
+  (select
+      t2.dependent_name, first(t2.relationship) as first_relationship
+    from
+      input as t2
+    group by
+      t2.dependent_name) as t1
+ where t1.first_relationship = 'spouse'`;
+
+verify q1 q2;

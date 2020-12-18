@@ -1,0 +1,39 @@
+schema df_shop(shop_id:int, address:str, num_of_staff:int, score:str, open_year:int);
+schema df_happy_hour(hh_id:int, shop_id:int, month:str, num_of_shaff_in_charge:int);
+
+table df_shop(df_shop);
+table df_happy_hour(df_happy_hour);
+
+query q1
+`select address,
+       num_of_staff
+from df_shop df_shop
+where shop_id not in
+    (select shop_id
+     from df_happy_hour df_happy_hour)`;
+
+query q2
+`joining, by = "shop_id"
+joining, by = "shop_id"
+select address,
+       num_of_staff
+from
+  (select shop_id,
+          address,
+          num_of_staff,
+          score,
+          open_year
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select shop_id
+         from input0) as lhs
+      where not exists
+          (select 1
+           from
+             (select shop_id
+              from input1) as rhs
+           where (lhs.shop_id = rhs.shop_id) )) as rhs on (lhs.shop_id = rhs.shop_id))`;
+
+verify q1 q2;

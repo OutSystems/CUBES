@@ -1,0 +1,23 @@
+schema df_college(cname:str, state:str, enr:int);
+
+table df_college(df_college);
+
+query q1
+`select count(distinct state)
+from df_college df_college
+where enr >
+    (select avg(enr)
+     from df_college df_college)`;
+
+query q2
+`(select
+    count_distinct(t3.enr) as count_distinct_enr
+  from
+    (select *
+       from
+        (select input.cname, input.state, input.enr, t1.cname as cname1, t1.state as state1, t1.enr as enr1
+        from input join 
+            input as t1) as t4
+       where t4.enr < t4.enr1) as t3) as t2`;
+
+verify q1 q2;

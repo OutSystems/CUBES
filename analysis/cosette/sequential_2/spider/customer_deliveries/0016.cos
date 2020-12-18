@@ -1,0 +1,32 @@
+schema df_addresses(address_id:int, address_details:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_customer_addresses(customer_id:int, address_id:int, date_from:str, address_type:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_customer_addresses(df_customer_addresses);
+
+query q1
+`select t2.state_province_county,
+       count(*)
+from df_customer_addresses as t1
+join df_addresses as t2 on t1.address_id = t2.address_id
+group by t2.state_province_county`;
+
+query q2
+`select state_province_county,
+       n as count...
+from
+  (select lhs.address_id as address_id,
+          lhs.address_details as address_details,
+          lhs.city as city,
+          lhs.zip_postcode as zip_postcode,
+          lhs.state_province_county as state_province_county,
+          lhs.country as country,
+          rhs.n as n
+   from df_addresses as lhs
+   inner join
+     (select address_id,
+             count(*) as n
+      from df_customer_addresses df_customer_addresses
+      group by address_id) as rhs on (lhs.address_id = rhs.address_id))`;
+
+verify q1 q2;

@@ -1,0 +1,32 @@
+schema df_people(people_id:int, name:str, height:str, weight:str, birth_date:str, birth_place:str);
+
+table df_people(df_people);
+
+query q1
+`select birth_place
+from df_people df_people
+group by birth_place
+
+limit 1`;
+
+query q2
+`select birth_place
+from
+  (select lhs.height as height,
+          lhs.name as name,
+          lhs.n as n,
+          rhs.name as name.other,
+          rhs.weight as weight,
+          rhs.birth_date as birth_date,
+          rhs.birth_place as birth_place
+   from
+     (select height,
+             name,
+             count(*) as n
+      from df_people df_people
+      group by height,
+               name) as lhs
+   inner join df_people as rhs on (lhs.n = rhs.people_id
+                                   and lhs.height = rhs.height))`;
+
+verify q1 q2;

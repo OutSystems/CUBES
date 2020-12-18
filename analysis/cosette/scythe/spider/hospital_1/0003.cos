@@ -1,0 +1,26 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_department(departmentid:int, name:str, head:int);
+
+table df_physician(df_physician);
+table df_department(df_department);
+
+query q1
+`select t2.name,
+       t2.position
+from df_department as t1
+join df_physician as t2 on t1.head = t2.employeeid
+group by departmentid
+
+limit 1`;
+
+query q2
+`select t1.name,t1.position
+ from
+  (select
+          min(t2.head) as min_head
+        from
+          input0 as t2) as t3 join 
+      input as t4 as t1
+ where t1.min_head = t1.employeeid`;
+
+verify q1 q2;

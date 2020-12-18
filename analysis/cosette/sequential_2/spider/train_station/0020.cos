@@ -1,0 +1,24 @@
+schema df_station(station_id:int, name:str, annual_entry_exit:str, annual_interchanges:str, total_passengers:str, location:str, main_services:str, number_of_platforms:int);
+schema df_train_station(train_id:int, station_id:int);
+
+table df_station(df_station);
+table df_train_station(df_train_station);
+
+query q1
+`select name
+from df_station df_station
+where station_id not in
+    (select station_id
+     from df_train_station df_train_station)`;
+
+query q2
+`select name
+from
+  (select *
+   from df_station as lhs
+   where not exists
+       (select 1
+        from df_train_station as rhs
+        where (lhs.station_id = rhs.station_id) ))`;
+
+verify q1 q2;

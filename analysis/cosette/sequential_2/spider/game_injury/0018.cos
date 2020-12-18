@@ -1,0 +1,32 @@
+schema df_game(stadium_id:int, id:int, season:int, date:str, home_team:str, away_team:str, score:str, competition:str);
+schema df_injury_accident(game_id:int, id:int, player:str, injury:str, number_of_matches:str, source:str);
+
+table df_game(df_game);
+table df_injury_accident(df_injury_accident);
+
+query q1
+`select t1.date,
+       t2.player
+from df_game as t1
+join df_injury_accident as t2 on t1.id = t2.game_id`;
+
+query q2
+`select date, player
+from
+  (select lhs.stadium_id as stadium_id,
+          lhs.id as id,
+          lhs.season as season,
+          lhs.date as date,
+          lhs.home_team as home_team,
+          lhs.away_team as away_team,
+          lhs.score as score,
+          lhs.competition as competition,
+          rhs.game_id as game_id,
+          rhs.player as player,
+          rhs.injury as injury,
+          rhs.number_of_matches as number_of_matches,
+          rhs.source as source
+   from df_game as lhs
+   inner join df_injury_accident as rhs on (lhs.id = rhs.id))`;
+
+verify q1 q2;

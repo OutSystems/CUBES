@@ -1,0 +1,35 @@
+schema df_employees(employee_id:int, first_name:str, last_name:str, email:str, phone_number:str, hire_date:str, job_id:str, salary:int, commission_pct:str, manager_id:int, department_id:int);
+
+table df_employees(df_employees);
+
+query q1
+`select department_id,
+       avg(salary)
+from df_employees df_employees
+where commission_pct != "null"
+group by department_id`;
+
+query q2
+`select distinct department_id,
+                meansalary as avg.salary.
+from
+  (select lhs.employee_id as employee_id,
+          lhs.first_name as first_name,
+          lhs.last_name as last_name,
+          lhs.email as email,
+          lhs.phone_number as phone_number,
+          lhs.hire_date as hire_date,
+          lhs.job_id as job_id,
+          lhs.salary as salary,
+          lhs.commission_pct as commission_pct,
+          lhs.manager_id as manager_id,
+          lhs.department_id as department_id,
+          rhs.meansalary as meansalary
+   from df_employees as lhs
+   inner join
+     (select department_id,
+             avg(salary) as meansalary
+      from df_employees df_employees
+      group by department_id) as rhs on (lhs.department_id = rhs.department_id))`;
+
+verify q1 q2;

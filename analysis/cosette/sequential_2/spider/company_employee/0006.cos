@@ -1,0 +1,57 @@
+schema df_company(company_id:str, name:str, headquarters:str, industry:str, sales_in_billion:str, profits_in_billion:str, assets_in_billion:str, market_value_in_billion:str);
+
+table df_company(df_company);
+
+query q1
+`select headquarters
+from df_company df_company
+
+limit 1`;
+
+query q2
+`select distinct headquarters
+from
+  (select lhs.company_id as company_id,
+          lhs.name as name,
+          lhs.headquarters as headquarters,
+          lhs.industry as industry,
+          lhs.sales_in_billion as sales_in_billion,
+          lhs.profits_in_billion as profits_in_billion,
+          lhs.assets_in_billion as assets_in_billion,
+          lhs.market_value_in_billion as market_value_in_billion,
+          lhs.maxsales_in_billion as maxsales_in_billion,
+          rhs.company_id as company_id.other,
+          rhs.name as name.other,
+          rhs.headquarters as headquarters.other,
+          rhs.industry as industry.other,
+          rhs.sales_in_billion as sales_in_billion.other,
+          rhs.profits_in_billion as profits_in_billion.other,
+          rhs.assets_in_billion as assets_in_billion.other,
+          rhs.market_value_in_billion as market_value_in_billion.other,
+          rhs.maxsales_in_billion as maxsales_in_billion.other
+   from
+     (select company_id,
+             name,
+             headquarters,
+             industry,
+             sales_in_billion,
+             profits_in_billion,
+             assets_in_billion,
+             market_value_in_billion,
+             max(sales_in_billion) over () as maxsales_in_billion
+      from df_company df_company) as lhs
+   cross join
+     (select company_id,
+             name,
+             headquarters,
+             industry,
+             sales_in_billion,
+             profits_in_billion,
+             assets_in_billion,
+             market_value_in_billion,
+             max(sales_in_billion) over () as maxsales_in_billion
+      from df_company df_company) as rhs)
+where (sales_in_billion = maxsales_in_billion.other
+       or maxsales_in_billion != maxsales_in_billion.other)`;
+
+verify q1 q2;

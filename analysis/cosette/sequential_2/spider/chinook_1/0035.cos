@@ -1,0 +1,42 @@
+schema df_album(albumid:int, title:str, artistid:int);
+schema df_artist(artistid:int, name:str);
+
+table df_album(df_album);
+table df_artist(df_artist);
+
+query q1
+`select t2.name,
+       t1.artistid
+from df_album as t1
+join df_artist as t2 on t1.artistid = t2.artistid
+group by t1.artistid
+having count(*) >= 3`;
+
+query q2
+`select name,
+       artistid
+from
+  (select lhs.artistid as artistid,
+          lhs.name as name,
+          lhs.n as n
+   from
+     (select lhs.artistid as artistid,
+             lhs.name as name,
+             rhs.n as n
+      from df_artist as lhs
+      inner join
+        (select artistid,
+                count(*) as n
+         from df_album df_album
+         group by artistid) as rhs on (lhs.artistid = rhs.artistid)) as lhs
+   inner join
+     (select *
+      from
+        (select artistid,
+                count(*) as n
+         from df_album df_album
+         group by artistid)
+      where (n >= 3.0)) as rhs on (lhs.artistid = rhs.artistid
+                                   and lhs.n = rhs.n))`;
+
+verify q1 q2;

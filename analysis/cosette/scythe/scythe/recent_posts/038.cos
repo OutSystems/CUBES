@@ -1,0 +1,20 @@
+schema df_038_1(Date:str, Sold:int);
+schema df_038_2(Date:str, Tapped:int);
+
+table df_038_1(df_038_1);
+table df_038_2(df_038_2);
+
+query q1
+`select t2.date,t2.tapped,t1.sold sold,t2.tapped
+from table1 t1
+ right join table2  t2
+   on t1.date=t2.date`;
+
+query q2
+`select t3.date,t3.tapped,t3.sold
+ from
+  (select t1.date, t1.tapped, t2.date as date1, t2.sold
+  from input0 as t1 left outer join 
+      input as t2 on t1.date = t2.date) as t3`;
+
+verify q1 q2;

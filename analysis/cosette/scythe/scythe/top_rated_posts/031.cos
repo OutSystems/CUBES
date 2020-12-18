@@ -1,0 +1,32 @@
+schema df_i031(id:int, name:str, name_ascii:int);
+
+table df_i031(df_i031);
+
+query q1
+`select t.id,
+       (select count(*)
+          from table x
+         where x.name <= t.name) as position,
+       t.name
+  from table t
+ where t.name = 'beta'`;
+
+query q2
+`select t2.id,t2.count_distinct_id1,t2.name
+ from
+  (select
+      t1.id, t1.name, t1.name_ascii, count_distinct(t1.id1) as count_distinct_id1
+    from
+      (select *
+         from
+          (select input.id, input.name, input.name_ascii, t3.id as id1, t3.name as name1, t3.name_ascii as name_ascii1
+          from (select *
+               from
+                input
+               where input.name = 'beta') join 
+              input as t3) as t4
+         where t4.name_ascii < t4.name_ascii1) as t1
+    group by
+      t1.id, t1.name, t1.name_ascii) as t2`;
+
+verify q1 q2;

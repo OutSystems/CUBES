@@ -1,0 +1,28 @@
+schema df_events(event_id:int, service_id:int, event_details:str);
+schema df_participants_in_events(event_id:int, participant_id:int);
+
+table df_events(df_events);
+table df_participants_in_events(df_participants_in_events);
+
+query q1
+`select count(*)
+from df_events df_events
+where event_id not in
+    (select event_id
+     from df_participants_in_events df_participants_in_events)`;
+
+query q2
+`select event_id as count...
+from
+  (select lhs.event_id as event_id,
+          lhs.service_id as service_id,
+          lhs.event_details as event_details,
+          rhs.participant_id as participant_id
+   from df_events as lhs
+   inner join
+     (select participant_id,
+             count(distinct event_id) as n_distinct
+      from df_participants_in_events df_participants_in_events
+      group by participant_id) as rhs on (lhs.event_id = rhs.n_distinct))`;
+
+verify q1 q2;

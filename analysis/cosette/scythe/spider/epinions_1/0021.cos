@@ -1,0 +1,27 @@
+schema df_review(a_id:int, u_id:int, i_id:int, rating:int, rank:int);
+schema df_useracct(u_id:int, name:str);
+
+table df_review(df_review);
+table df_useracct(df_useracct);
+
+query q1
+`select t1.name,
+       avg(t2.rating)
+from df_useracct as t1
+join df_review as t2 on t1.u_id = t2.u_id
+group by t2.u_id`;
+
+query q2
+`select t3.name,t3.avg_rating
+ from
+  (select t2.u_id, t2.avg_rating, t1.u_id as u_id1, t1.name
+  from (select
+          t4.u_id, avg(t4.rating) as avg_rating
+        from
+          input as t4
+        group by
+          t4.u_id) as t2 join 
+      input0 as t1) as t3
+ where t3.u_id = t3.u_id1`;
+
+verify q1 q2;

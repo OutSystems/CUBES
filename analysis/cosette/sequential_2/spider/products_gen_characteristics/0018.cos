@@ -1,0 +1,31 @@
+schema df_ref_colors(color_code:int, color_description:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_colors(df_ref_colors);
+table df_products(df_products);
+
+query q1
+`select t1.product_name
+from df_products as t1
+join df_ref_colors as t2 on t1.color_code = t2.color_code
+where t2.color_description = "white"`;
+
+query q2
+`select product_name
+from
+  (select lhs.product_id as product_id,
+          lhs.color_code as color_code,
+          lhs.product_category_code as product_category_code,
+          lhs.product_name as product_name,
+          lhs.typical_buying_price as typical_buying_price,
+          lhs.typical_selling_price as typical_selling_price,
+          lhs.product_description as product_description,
+          lhs.other_product_details as other_product_details,
+          rhs.color_description as color_description
+   from df_products as lhs
+   inner join
+     (select *
+      from df_ref_colors df_ref_colors
+      where (color_description = 'white')) as rhs on (lhs.color_code = rhs.color_code))`;
+
+verify q1 q2;

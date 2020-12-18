@@ -1,0 +1,28 @@
+schema df_catalogs(catalog_id:int, catalog_name:str, catalog_publisher:str, date_of_publication:str, date_of_latest_revision:str);
+
+table df_catalogs(df_catalogs);
+
+query q1
+`select catalog_publisher
+from df_catalogs df_catalogs
+group by catalog_publisher
+
+limit 1`;
+
+query q2
+`select t1.catalog_publisher
+ from
+  (select t3.catalog_publisher, t3.date_of_latest_revision, t3.max_date_of_latest_revision, t4.catalog_id, t4.catalog_name, t4.catalog_publisher as catalog_publisher1, t4.date_of_publication, t4.date_of_latest_revision as date_of_latest_revision1
+  from (select
+          t2.catalog_publisher, t2.date_of_latest_revision, max(t2.date_of_latest_revision) as max_date_of_latest_revision
+        from
+          input as t2
+        group by
+          t2.catalog_publisher, t2.date_of_latest_revision) as t3 join 
+      (select *
+         from
+          input
+         where input.catalog_id = 2.0) as t4) as t1
+ where t1.date_of_latest_revision > t1.date_of_latest_revision1`;
+
+verify q1 q2;

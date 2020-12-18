@@ -1,0 +1,57 @@
+schema df_company(company_id:int, rank:int, company:str, headquarters:str, main_industry:str, sales_billion:str, profits_billion:str, assets_billion:str, market_value:str);
+schema df_gas_station(station_id:int, open_year:int, location:str, manager_name:str, vice_manager_name:str, representative_name:str);
+schema df_station_company(station_id:int, company_id:int, rank_of_the_year:int);
+
+table df_company(df_company);
+table df_gas_station(df_gas_station);
+table df_station_company(df_station_company);
+
+query q1
+`select t3.manager_name
+from df_station_company as t1
+join df_company as t2 on t1.company_id = t2.company_id
+join df_gas_station as t3 on t1.station_id = t3.station_id
+where t2.df_company = 'exxonmobil'`;
+
+query q2
+`select manager_name
+from
+  (select lhs.company_id as company_id,
+          lhs.rank as rank,
+          lhs.company as company,
+          lhs.headquarters as headquarters,
+          lhs.main_industry as main_industry,
+          lhs.sales_billion as sales_billion,
+          lhs.profits_billion as profits_billion,
+          lhs.assets_billion as assets_billion,
+          lhs.market_value as market_value,
+          lhs.station_id as station_id,
+          lhs.open_year as open_year,
+          lhs.location as location,
+          lhs.manager_name as manager_name,
+          lhs.vice_manager_name as vice_manager_name,
+          lhs.representative_name as representative_name,
+          rhs.rank_of_the_year as rank_of_the_year
+   from
+     (select lhs.company_id as company_id,
+             lhs.rank as rank,
+             lhs.company as company,
+             lhs.headquarters as headquarters,
+             lhs.main_industry as main_industry,
+             lhs.sales_billion as sales_billion,
+             lhs.profits_billion as profits_billion,
+             lhs.assets_billion as assets_billion,
+             lhs.market_value as market_value,
+             rhs.station_id as station_id,
+             rhs.open_year as open_year,
+             rhs.location as location,
+             rhs.manager_name as manager_name,
+             rhs.vice_manager_name as vice_manager_name,
+             rhs.representative_name as representative_name
+      from df_company as lhs
+      cross join df_gas_station as rhs) as lhs
+   inner join df_station_company as rhs on (lhs.company_id = rhs.company_id
+                                                and lhs.station_id = rhs.station_id))
+where (company = 'exxonmobil')`;
+
+verify q1 q2;

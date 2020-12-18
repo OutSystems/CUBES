@@ -1,0 +1,37 @@
+schema df_ref_incident_type(incident_type_code:str, incident_type_description:str);
+schema df_behavior_incident(incident_id:int, incident_type_code:str, student_id:int, date_incident_start:str, date_incident_end:str, incident_summary:str, recommendations:str, other_details:str);
+
+table df_ref_incident_type(df_ref_incident_type);
+table df_behavior_incident(df_behavior_incident);
+
+query q1
+`select t1.incident_type_code,
+       t2.incident_type_description
+from df_behavior_incident as t1
+join df_ref_incident_type as t2 on t1.incident_type_code = t2.incident_type_code
+group by t1.incident_type_code
+
+limit 1`;
+
+query q2
+`select incident_type_code,
+       incident_type_description
+from
+  (select lhs.incident_type_code as incident_type_code,
+          lhs.incident_type_description as incident_type_description,
+          lhs.n as n,
+          rhs.student_id as student_id,
+          rhs.date_incident_start as date_incident_start,
+          rhs.date_incident_end as date_incident_end,
+          rhs.incident_summary as incident_summary,
+          rhs.recommendations as recommendations,
+          rhs.other_details as other_details
+   from
+     (select incident_type_code,
+             incident_type_description,
+             count(*) over () as n
+      from df_ref_incident_type df_ref_incident_type) as lhs
+   inner join df_behavior_incident as rhs on (lhs.n = rhs.incident_id
+                                              and lhs.incident_type_code = rhs.incident_type_code))`;
+
+verify q1 q2;

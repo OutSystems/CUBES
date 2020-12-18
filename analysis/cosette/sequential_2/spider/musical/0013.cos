@@ -1,0 +1,33 @@
+schema df_musical(musical_id:int, name:str, year:int, award:str, category:str, nominee:str, result:str);
+schema df_actor(actor_id:int, name:str, musical_id:int, character:str, duration:str, age:int);
+
+table df_musical(df_musical);
+table df_actor(df_actor);
+
+query q1
+`select t2.name
+from df_actor as t1
+join df_musical as t2 on t1.musical_id = t2.musical_id
+group by t1.musical_id
+having count(*) >= 3`;
+
+query q2
+`select name
+from
+  (select lhs.musical_id as musical_id,
+          lhs.name as name,
+          lhs.year as year,
+          lhs.award as award,
+          lhs.category as category,
+          lhs.nominee as nominee,
+          lhs.result as result,
+          rhs.n as n
+   from df_musical as lhs
+   inner join
+     (select musical_id,
+             count(*) as n
+      from df_actor df_actor
+      group by musical_id) as rhs on (lhs.musical_id = rhs.musical_id))
+where (n > 3.0)`;
+
+verify q1 q2;

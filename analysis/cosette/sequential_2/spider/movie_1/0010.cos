@@ -1,0 +1,33 @@
+schema df_movie(mid:int, title:str, year:int, director:str);
+schema df_rating(rid:int, mid:int, stars:int, ratingdate:str);
+
+table df_movie(df_movie);
+table df_rating(df_rating);
+
+query q1
+`select distinct year
+from df_movie as t1
+join df_rating as t2 on t1.mid = t2.mid
+where t2.stars >= 4`;
+
+query q2
+`select distinct year
+from
+  (select lhs.rid as rid,
+          lhs.mid as mid,
+          lhs.stars as stars,
+          lhs.ratingdate as ratingdate,
+          rhs.mid as mid.other,
+          rhs.title as title,
+          rhs.year as year,
+          rhs.director as director
+   from
+     (select *
+      from df_rating df_rating
+      where (stars >= 4.0
+             or stars = mid)) as lhs
+   cross join df_movie as rhs)
+where (mid = stars
+       or mid = mid.other)`;
+
+verify q1 q2;

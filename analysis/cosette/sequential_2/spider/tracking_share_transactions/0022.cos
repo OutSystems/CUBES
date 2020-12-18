@@ -1,0 +1,47 @@
+schema df_lots(lot_id:int, investor_id:int, lot_details:str);
+schema df_transactions(transaction_id:int, investor_id:int, transaction_type_code:str, date_of_transaction:str, amount_of_transaction:str, share_count:str, other_details:str);
+schema df_transactions_lots(transaction_id:int, lot_id:int);
+
+table df_lots(df_lots);
+table df_transactions(df_transactions);
+table df_transactions_lots(df_transactions_lots);
+
+query q1
+`select t1.lot_details
+from df_lots as t1
+join df_transactions_lots as t2 on t1.lot_id = t2.transaction_id
+join df_transactions as t3 on t2.transaction_id = t3.transaction_id
+where t3.share_count > 100
+  and t3.transaction_type_code = "pur"`;
+
+query q2
+`select lot_details
+from
+  (select lhs.lot_id as lot_id,
+          lhs.investor_id as investor_id,
+          lhs.lot_details as lot_details,
+          rhs.investor_id as investor_id.other,
+          rhs.transaction_type_code as transaction_type_code,
+          rhs.date_of_transaction as date_of_transaction,
+          rhs.amount_of_transaction as amount_of_transaction,
+          rhs.share_count as share_count,
+          rhs.other_details as other_details,
+          rhs.lot_id as lot_id.other
+   from df_lots as lhs
+   inner join
+     (select lhs.transaction_id as transaction_id,
+             lhs.investor_id as investor_id,
+             lhs.transaction_type_code as transaction_type_code,
+             lhs.date_of_transaction as date_of_transaction,
+             lhs.amount_of_transaction as amount_of_transaction,
+             lhs.share_count as share_count,
+             lhs.other_details as other_details,
+             rhs.lot_id as lot_id
+      from
+        (select *
+         from df_transactions df_transactions
+         where (transaction_type_code = 'pur'
+                or share_count < 100.0)) as lhs
+      inner join df_transactions_lots as rhs on (lhs.transaction_id = rhs.transaction_id)) as rhs on (lhs.lot_id = rhs.transaction_id))`;
+
+verify q1 q2;

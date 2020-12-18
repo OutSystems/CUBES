@@ -1,0 +1,50 @@
+schema df_physician(employeeid:int, name:str, position:str, ssn:int);
+schema df_department(departmentid:int, name:str, head:int);
+schema df_affiliated_with(physician:int, department:int, primaryaffiliation:int);
+
+table df_physician(df_physician);
+table df_department(df_department);
+table df_affiliated_with(df_affiliated_with);
+
+query q1
+`select t1.name,
+       t3.name
+from df_physician as t1
+join df_affiliated_with as t2 on t1.employeeid = t2.df_physician
+join df_department as t3 on t2.df_department = t3.departmentid
+where t2.primaryaffiliation = 1`;
+
+query q2
+`select name as name...1,
+                     name.other as name...2
+from
+  (select lhs.employeeid as employeeid,
+          lhs.name as name,
+          lhs.position as position,
+          lhs.ssn as ssn,
+          rhs.departmentid as departmentid,
+          rhs.name as name.other,
+          rhs.head as head,
+          rhs.primaryaffiliation as primaryaffiliation,
+          rhs.department as department
+   from df_physician as lhs
+   inner join
+     (select departmentid,
+             name,
+             head,
+             physician,
+             primaryaffiliation,
+             departmentid as department
+      from
+        (select lhs.departmentid as departmentid,
+                lhs.name as name,
+                lhs.head as head,
+                rhs.physician as physician,
+                rhs.primaryaffiliation as primaryaffiliation
+         from df_department as lhs
+         inner join
+           (select *
+            from df_affiliated_with df_affiliated_with
+            where (primaryaffiliation = 1.0)) as rhs on (lhs.departmentid = rhs.department))) as rhs on (lhs.employeeid = rhs.physician))`;
+
+verify q1 q2;

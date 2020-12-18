@@ -1,0 +1,25 @@
+schema df_invoices(id:int, customer_id:int, invoice_date:str, billing_address:str, billing_city:str, billing_state:str, billing_country:str, billing_postal_code:str, total:str);
+
+table df_invoices(df_invoices);
+
+query q1
+`select sum(total)
+from df_invoices df_invoices
+where billing_city = "chicago"
+  and billing_state = "il"`;
+
+query q2
+`select sumtotal as sum.total.
+from
+  (select billing_address,
+          billing_postal_code,
+          sum(total) as sumtotal
+   from
+     (select *
+      from df_invoices df_invoices
+      where (billing_city = 'chicago'
+             and billing_state = 'il'))
+   group by billing_address,
+            billing_postal_code)`;
+
+verify q1 q2;

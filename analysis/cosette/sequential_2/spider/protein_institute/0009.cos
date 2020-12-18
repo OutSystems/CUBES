@@ -1,0 +1,32 @@
+schema df_institution(institution_id:int, institution:str, location:str, founded:str, type:str, enrollment:int, team:str, primary_conference:str, building_id:int);
+
+table df_institution(df_institution);
+
+query q1
+`select type
+from df_institution df_institution
+group by type
+
+limit 1`;
+
+query q2
+`select type
+from
+  (select lhs.institution_id as institution_id,
+          lhs.institution as institution,
+          lhs.location as location,
+          lhs.founded as founded,
+          lhs.type as type,
+          lhs.enrollment as enrollment,
+          lhs.team as team,
+          lhs.primary_conference as primary_conference,
+          lhs.building_id as building_id
+   from df_institution as lhs
+   inner join
+     (select type,
+             count(*) as n
+      from df_institution df_institution
+      group by type) as rhs on (lhs.institution_id = rhs.n
+                                and lhs.type = rhs.type))`;
+
+verify q1 q2;

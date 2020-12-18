@@ -1,0 +1,24 @@
+schema df_student(id:int, name:str, dept_name:str, tot_cred:int);
+
+table df_student(df_student);
+
+query q1
+`select name,
+       dept_name
+from df_student df_student`;
+
+query q2
+`select name,
+       dept_name
+from
+  (select lhs.id as id,
+          lhs.name as name,
+          lhs.dept_name as dept_name,
+          lhs.tot_cred as tot_cred,
+          rhs.name as name.other,
+          rhs.tot_cred as tot_cred.other
+   from df_student as lhs
+   inner join df_student as rhs on (lhs.dept_name = rhs.dept_name
+                                    and lhs.id = rhs.id))`;
+
+verify q1 q2;

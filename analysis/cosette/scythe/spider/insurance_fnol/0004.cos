@@ -1,0 +1,30 @@
+schema df_available_policies(policy_id:int, policy_type_code:str, customer_phone:str);
+
+table df_available_policies(df_available_policies);
+
+query q1
+`select customer_phone
+from df_available_policies df_available_policies
+where policy_type_code =
+    (select policy_type_code
+     from df_available_policies df_available_policies
+     group by policy_type_code
+     
+     limit 1)`;
+
+query q2
+`select t4.customer_phone1
+ from
+  (select t3.max_policy_id, t3.policy_id, t3.policy_type_code, t3.customer_phone, t5.policy_id as policy_id1, t5.policy_type_code as policy_type_code1, t5.customer_phone as customer_phone1
+  from (select *
+       from
+        (select
+                max(t6.policy_id) as max_policy_id
+              from
+                input as t6) as t2 join 
+            input as t1 as t3
+       where t3.max_policy_id = t3.policy_id) join 
+      input as t5) as t4
+ where t4.policy_type_code = t4.policy_type_code1`;
+
+verify q1 q2;

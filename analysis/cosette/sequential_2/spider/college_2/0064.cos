@@ -1,0 +1,64 @@
+schema df_classroom(building:str, room_number:int, capacity:int);
+schema df_course(course_id:int, title:str, dept_name:str, credits:int);
+schema df_section(course_id:int, sec_id:int, semester:str, year:int, building:str, room_number:int, time_slot_id:str);
+
+table df_classroom(df_classroom);
+table df_course(df_course);
+table df_section(df_section);
+
+query q1
+`select t3.title,
+       t3.credits
+from df_classroom as t1
+join df_section as t2 on t1.building = t2.building
+and t1.room_number = t2.room_number
+join df_course as t3 on t2.course_id = t3.course_id
+where t1.capacity =
+    (select max(capacity)
+     from df_classroom df_classroom)`;
+
+query q2
+`select title,
+       credits
+from
+  (select lhs.building as building,
+          lhs.room_number as room_number,
+          lhs.capacity as capacity,
+          lhs.course_id as course_id,
+          lhs.title as title,
+          lhs.dept_name as dept_name,
+          lhs.credits as credits,
+          lhs.sec_id as sec_id,
+          lhs.semester as semester,
+          lhs.year as year,
+          lhs.time_slot_id as time_slot_id
+   from
+     (select lhs.building as building,
+             lhs.room_number as room_number,
+             lhs.capacity as capacity,
+             lhs.course_id as course_id,
+             lhs.title as title,
+             lhs.dept_name as dept_name,
+             lhs.credits as credits,
+             rhs.sec_id as sec_id,
+             rhs.semester as semester,
+             rhs.year as year,
+             rhs.time_slot_id as time_slot_id
+      from
+        (select lhs.building as building,
+                lhs.room_number as room_number,
+                lhs.capacity as capacity,
+                rhs.course_id as course_id,
+                rhs.title as title,
+                rhs.dept_name as dept_name,
+                rhs.credits as credits
+         from df_classroom as lhs
+         cross join df_course as rhs) as lhs
+      inner join df_section as rhs on (lhs.building = rhs.building
+                                       and lhs.room_number = rhs.room_number
+                                       and lhs.course_id = rhs.course_id)) as lhs
+   inner join
+     (select max(capacity) as capacity
+      from df_classroom df_classroom) as rhs on (lhs.capacity = rhs.capacity))`;
+
+verify q1 q2;

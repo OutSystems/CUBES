@@ -1,0 +1,25 @@
+schema df_i030(Person:str, Group:int, Age:int);
+
+table df_i030(df_i030);
+
+query q1
+`select a.* from mytable as a
+  left join mytable as a2
+    on a.groupname = a2.groupname and a.age <= a2.age
+group by a.person
+having count(*) >= 2`;
+
+query q2
+`select t1.person,t1.group,t1.age
+ from
+  (select
+          avg(t2.age) as avg_age
+        from
+          (select *
+             from
+              input
+             where input.group = 2.0) as t2) as t4 join 
+      input as t3 as t1
+ where t1.avg_age < t1.age`;
+
+verify q1 q2;

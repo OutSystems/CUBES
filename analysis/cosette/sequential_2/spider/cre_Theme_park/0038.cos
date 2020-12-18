@@ -1,0 +1,53 @@
+schema df_features(feature_id:int, feature_details:str);
+schema df_tourist_attractions(tourist_attraction_id:int, attraction_type_code:int, location_id:int, how_to_get_there:str, name:str, description:str, opening_hours:str, other_details:str);
+schema df_tourist_attraction_features(tourist_attraction_id:int, feature_id:int);
+
+table df_features(df_features);
+table df_tourist_attractions(df_tourist_attractions);
+table df_tourist_attraction_features(df_tourist_attraction_features);
+
+query q1
+`select t1.name
+from df_tourist_attractions as t1
+join df_tourist_attraction_features as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+join df_features as t3 on t2.feature_id = t3.feature_id
+where t3.feature_details = 'park'
+union
+select t1.name
+from df_tourist_attractions as t1
+join df_tourist_attraction_features as t2 on t1.tourist_attraction_id = t2.tourist_attraction_id
+join df_features as t3 on t2.feature_id = t3.feature_id
+where t3.feature_details = 'shopping'`;
+
+query q2
+`select distinct name
+from
+  (select lhs.tourist_attraction_id as tourist_attraction_id,
+          lhs.attraction_type_code as attraction_type_code,
+          lhs.location_id as location_id,
+          lhs.how_to_get_there as how_to_get_there,
+          lhs.name as name,
+          lhs.description as description,
+          lhs.opening_hours as opening_hours,
+          lhs.other_details as other_details,
+          lhs.feature_id as feature_id,
+          rhs.feature_details as feature_details
+   from
+     (select lhs.tourist_attraction_id as tourist_attraction_id,
+             lhs.attraction_type_code as attraction_type_code,
+             lhs.location_id as location_id,
+             lhs.how_to_get_there as how_to_get_there,
+             lhs.name as name,
+             lhs.description as description,
+             lhs.opening_hours as opening_hours,
+             lhs.other_details as other_details,
+             rhs.feature_id as feature_id
+      from df_tourist_attractions as lhs
+      inner join df_tourist_attraction_features as rhs on (lhs.tourist_attraction_id = rhs.tourist_attraction_id)) as lhs
+   inner join
+     (select *
+      from df_features df_features
+      where (feature_details = 'park'
+             or feature_details = 'shopping')) as rhs on (lhs.feature_id = rhs.feature_id))`;
+
+verify q1 q2;

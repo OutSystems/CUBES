@@ -1,0 +1,30 @@
+schema df_i043(CustomerName:str, EmailAddress:str);
+
+table df_i043(df_i043);
+
+query q1
+`select emailaddress, customername
+from customers
+where emailaddress in
+(select emailaddress
+ from customers
+ group by emailaddress
+ having count(*) > 1)`;
+
+query q2
+`select t3.customername,t3.emailaddress
+ from
+  (select t2.emailaddress, t2.count_distinct_customername, t4.customername, t4.emailaddress as emailaddress1
+  from (select *
+       from
+        (select
+            t1.emailaddress, count_distinct(t1.customername) as count_distinct_customername
+          from
+            input as t1
+          group by
+            t1.emailaddress) as t2
+       where t2.count_distinct_customername > 1.0) join 
+      input as t4) as t3
+ where t3.emailaddress = t3.emailaddress1`;
+
+verify q1 q2;

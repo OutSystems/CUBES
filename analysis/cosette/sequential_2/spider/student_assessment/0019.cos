@@ -1,0 +1,22 @@
+schema df_addresses(address_id:int, line_1:str, line_2:str, city:str, zip_postcode:int, state_province_county:str, country:str);
+schema df_people_addresses(person_address_id:int, person_id:int, address_id:int, date_from:str, date_to:str);
+
+table df_addresses(df_addresses);
+table df_people_addresses(df_people_addresses);
+
+query q1
+`select distinct t1.city
+from df_addresses as t1
+join df_people_addresses as t2 on t1.address_id = t2.address_id`;
+
+query q2
+`select city
+from
+  (select *
+   from df_addresses as lhs
+   where exists
+       (select 1
+        from df_people_addresses as rhs
+        where (lhs.address_id = rhs.address_id) ))`;
+
+verify q1 q2;

@@ -1,0 +1,35 @@
+schema df_2_1(C_name:str, F_key:str);
+schema df_2_2(S_key:str, C_name:str);
+schema df_2_3(F_key:str, F_name:str);
+schema df_2_4(S_key:str, major:str, age:int);
+
+table df_2_1(df_2_1);
+table df_2_2(df_2_2);
+table df_2_3(df_2_3);
+table df_2_4(df_2_4);
+
+query q1
+`select distinct max(i1.age) over () as maxage
+from
+  df_2_1 as i1
+  natural join df_2_2 as i2
+  natural join df_2_3 as i3
+  natural join df_2_4 as i4
+where i1.f_name = 'faculty1' or i1.major = 'history'`;
+
+query q2
+`select t6.max_age
+ from
+  (select
+          max(t5.age) as max_age
+        from
+          (select *
+             from
+              input2
+             where input2.major = 'history') as t5) as t3 join 
+      (select *
+         from
+          input1
+         where input1.f_name = 'faculty1') as t4 as t6`;
+
+verify q1 q2;

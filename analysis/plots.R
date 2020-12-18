@@ -452,9 +452,9 @@ time_part_dist <- function(filter = NULL, col=NULL, wrap=F, ...) {
 
 plot_cells_time <- function(...) {
   tries <- list(...)
-  data <- bind_rows(tries, .id = 'try') %>% mutate(real = ifelse(status ==-2, 600, real))
+  data <- bind_rows(tries, .id = 'try') %>% mutate(real = ifelse(status ==-2, 600, real), try = factor(try, levels=names(tries)))
   data %>% ggplot(aes(x=total_cells, y=real, color=factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_point(alpha=0.4, size=1) +
+    geom_point(alpha=0.3, size=0.9) +
     scale_x_log10(breaks = log_breaks()) +
     scale_y_log10(breaks = c(.1, 1, 10, 60, 600)) +
     # annotation_logticks(sides='lb') +
@@ -462,7 +462,7 @@ plot_cells_time <- function(...) {
     scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
       keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
       map(function(x) { x[2] })) +
-    labs(y = 'Time (s)', x = '# Total Cells') +
+    labs(y = 'Time (s)', x = '\\# Total Cells') +
     guides(colour = guide_legend(override.aes = list(alpha=1))) +
     my_theme
 }
@@ -530,11 +530,14 @@ plot_sql_size <- function(...) {
   data %>% filter(solved) %>% ggplot(aes(x=sql_size)) + geom_histogram() + facet_wrap(~try)
 }
 
-plot_fuzzy <- function(drop_error = F, fill_bars = F, ...) {
+plot_fuzzy <- function(drop_error = F, fill_bars = F, filter_all=F, facet=F, ...) {
   tries <- list(...)
-  data <- bind_rows(tries, .id = 'try') %>% filter(solved)
+  data <- bind_rows(tries, .id = 'try') %>% filter(status == 0 & benchmark != '55-tests') %>% mutate(try = factor(try, levels=names(tries)))
+  if (filter_all) {
+    data <- data %>% group_by(name) %>% filter(all(fuzzy != 'Error')) %>% ungroup()
+  }
   if (drop_error) {
-    data <- data %>% filter(fuzzy != 'Exec. Error')
+    data <- data %>% filter(fuzzy != 'Error')
   }
   tmp <- data %>% ggplot(aes(x = try, fill = fuzzy))
   if (fill_bars) {
@@ -542,7 +545,13 @@ plot_fuzzy <- function(drop_error = F, fill_bars = F, ...) {
   } else {
     tmp <- tmp + geom_bar(position = 'stack')
   }
+  if (facet) {
+    tmp <- tmp + facet_wrap(~benchmark, scales = 'free_y')
+  }
   tmp +
     scale_fill_manual(values = map2(fuzzy_levels, fuzzy_colors, c) %>%
-      map(function(x) { x[2] }))
+      map(function(x) { x[2] }), drop=F) +
+    labs(y = 'Number of Instances', x=NULL, fill='Execution Status') +
+    my_theme +
+    theme(legend.position = "right", , legend.title = element_text())
 }

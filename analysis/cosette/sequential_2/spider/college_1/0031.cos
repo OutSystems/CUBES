@@ -1,0 +1,47 @@
+schema df_course(crs_code:str, dept_code:str, crs_description:str, crs_credit:str);
+schema df_department(dept_code:str, dept_name:str, school_code:str, emp_num:int, dept_address:str, dept_extension:int);
+
+table df_course(df_course);
+table df_department(df_department);
+
+query q1
+`select count(*)
+from df_department as t1
+join df_course as t2 on t1.dept_code = t2.dept_code
+where dept_name = "computer info. systems"`;
+
+query q2
+`select distinct count(*) over () as count...
+from
+  (select lhs.crs_code as crs_code,
+          lhs.dept_code as dept_code,
+          lhs.crs_description as crs_description,
+          lhs.crs_credit as crs_credit,
+          lhs.dept_name as dept_name,
+          lhs.school_code as school_code,
+          lhs.emp_num as emp_num,
+          lhs.dept_address as dept_address,
+          lhs.dept_extension as dept_extension
+   from
+     (select lhs.crs_code as crs_code,
+             lhs.dept_code as dept_code,
+             lhs.crs_description as crs_description,
+             lhs.crs_credit as crs_credit,
+             rhs.dept_name as dept_name,
+             rhs.school_code as school_code,
+             rhs.emp_num as emp_num,
+             rhs.dept_address as dept_address,
+             rhs.dept_extension as dept_extension
+      from df_course as lhs
+      inner join df_department as rhs on (lhs.dept_code = rhs.dept_code)) as lhs
+   inner join
+     (select *
+      from df_department df_department
+      where (dept_name = 'computer info. systems')) as rhs on (lhs.dept_code = rhs.dept_code
+                                                                 and lhs.dept_name = rhs.dept_name
+                                                                 and lhs.school_code = rhs.school_code
+                                                                 and lhs.emp_num = rhs.emp_num
+                                                                 and lhs.dept_address = rhs.dept_address
+                                                                 and lhs.dept_extension = rhs.dept_extension))`;
+
+verify q1 q2;

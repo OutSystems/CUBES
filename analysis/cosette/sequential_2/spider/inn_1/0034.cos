@@ -1,0 +1,47 @@
+schema df_rooms(roomid:str, roomname:str, beds:int, bedtype:str, maxoccupancy:int, baseprice:int, decor:str);
+schema df_reservations(code:int, room:str, checkin:str, checkout:str, rate:str, lastname:str, firstname:str, adults:int, kids:int);
+
+table df_rooms(df_rooms);
+table df_reservations(df_reservations);
+
+query q1
+`select t2.roomname
+from df_reservations as t1
+join df_rooms as t2 on t1.room = t2.roomid
+group by t1.room
+having count(*) > 60`;
+
+query q2
+`select roomname
+from
+  (select roomid,
+          roomname,
+          beds,
+          bedtype,
+          maxoccupancy,
+          baseprice,
+          decor,
+          checkout,
+          n,
+          roomid as room
+   from
+     (select lhs.roomid as roomid,
+             lhs.roomname as roomname,
+             lhs.beds as beds,
+             lhs.bedtype as bedtype,
+             lhs.maxoccupancy as maxoccupancy,
+             lhs.baseprice as baseprice,
+             lhs.decor as decor,
+             rhs.checkout as checkout,
+             rhs.n as n
+      from df_rooms as lhs
+      inner join
+        (select checkout,
+                room,
+                count(*) as n
+         from df_reservations df_reservations
+         group by checkout,
+                  room) as rhs on (lhs.roomid = rhs.room)))
+where (n > 60.0)`;
+
+verify q1 q2;

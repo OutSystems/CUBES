@@ -1,0 +1,29 @@
+schema df_member(member_id:int, name:str, country:str, college_id:int);
+schema df_round(round_id:int, member_id:int, decoration_theme:str, rank_in_round:int);
+
+table df_member(df_member);
+table df_round(df_round);
+
+query q1
+`select t1.name
+from df_member as t1
+join df_round as t2 on t1.member_id = t2.member_id
+where t2.rank_in_round > 3`;
+
+query q2
+`select t3.name
+ from
+  (select t4.college_id, t4.max_member_id, t2.member_id, t2.name, t2.country, t2.college_id as college_id1
+  from (select
+          t1.college_id, max(t1.member_id) as max_member_id
+        from
+          input as t1
+        group by
+          t1.college_id) as t4 join 
+      (select *
+         from
+          input
+         where input.college_id = 3.0) as t2) as t3
+ where t3.max_member_id = t3.member_id`;
+
+verify q1 q2;

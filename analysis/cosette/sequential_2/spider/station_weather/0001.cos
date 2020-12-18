@@ -1,0 +1,24 @@
+schema df_station(id:int, network_name:str, services:str, local_authority:str);
+
+table df_station(df_station);
+
+query q1
+`select local_authority,
+       services
+from df_station df_station`;
+
+query q2
+`select local_authority,
+       services
+from
+  (select lhs.id as id,
+          lhs.network_name as network_name,
+          lhs.services as services,
+          lhs.local_authority as local_authority,
+          rhs.network_name as network_name.other,
+          rhs.local_authority as local_authority.other
+   from df_station as lhs
+   inner join df_station as rhs on (lhs.id = rhs.id
+                                    and lhs.services = rhs.services))`;
+
+verify q1 q2;

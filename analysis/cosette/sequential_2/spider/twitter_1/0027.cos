@@ -1,0 +1,22 @@
+schema df_user_profiles(uid:int, name:str, email:str, partitionid:int, followers:int);
+
+table df_user_profiles(df_user_profiles);
+
+query q1
+`select max(followers),
+       sum(followers)
+from df_user_profiles df_user_profiles`;
+
+query q2
+`select distinct maxfollowers as max.followers.,
+                sum(followers) over () as sum.followers.
+from
+  (select uid,
+          name,
+          email,
+          partitionid,
+          followers,
+          max(followers) over () as maxfollowers
+   from df_user_profiles df_user_profiles)`;
+
+verify q1 q2;

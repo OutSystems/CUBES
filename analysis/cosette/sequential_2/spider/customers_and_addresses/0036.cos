@@ -1,0 +1,31 @@
+schema df_customer_orders(order_id:int, customer_id:int, order_status:str, order_date:str, order_details:str);
+schema df_order_items(order_id:int, product_id:int, order_quantity:int);
+
+table df_customer_orders(df_customer_orders);
+table df_order_items(df_order_items);
+
+query q1
+`select sum(t2.order_quantity)
+from df_customer_orders as t1
+join df_order_items as t2 on t1.order_id = t2.order_id
+where t1.order_date < "2018-03-17 07:13:53"`;
+
+query q2
+`select sumorder_quantity as sum.t2.order_quantity.
+from
+  (select sum(order_quantity) as sumorder_quantity
+   from
+     (select lhs.order_id as order_id,
+             lhs.customer_id as customer_id,
+             lhs.order_status as order_status,
+             lhs.order_date as order_date,
+             lhs.order_details as order_details,
+             rhs.product_id as product_id,
+             rhs.order_quantity as order_quantity
+      from
+        (select *
+         from df_customer_orders df_customer_orders
+         where (order_date < parse_datetime('2018-03-17 07:13:53'))) as lhs
+      inner join df_order_items as rhs on (lhs.order_id = rhs.order_id)))`;
+
+verify q1 q2;

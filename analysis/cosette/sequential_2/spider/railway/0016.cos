@@ -1,0 +1,20 @@
+schema df_railway(railway_id:int, railway:str, builder:str, built:str, wheels:str, location:str, objectnumber:str);
+
+table df_railway(df_railway);
+
+query q1
+`select location
+from df_railway df_railway
+group by location
+having count(*) > 1`;
+
+query q2
+`select location
+from
+  (select location,
+          count(*) as n
+   from df_railway df_railway
+   group by location)
+where (n != 1.0)`;
+
+verify q1 q2;

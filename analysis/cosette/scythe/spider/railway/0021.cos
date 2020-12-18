@@ -1,0 +1,24 @@
+schema df_manager(manager_id:int, name:str, country:str, working_year_starts:int, age:int, level:int);
+
+table df_manager(df_manager);
+
+query q1
+`select country
+from df_manager df_manager
+where age > 50
+  or age < 46`;
+
+query q2
+`select t3.country
+ from
+  (select
+          sum(t1.working_year_starts) as sum_working_year_starts
+        from
+          input as t1) as t4 join 
+      (select *
+         from
+          input
+         where input.age = 46.0
+           or input.age > 50.0) as t2 as t3`;
+
+verify q1 q2;

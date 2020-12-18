@@ -1,0 +1,25 @@
+schema df_building(building_id:int, name:str, street_address:str, years_as_tallest:str, height_feet:int, floors:int);
+
+table df_building(df_building);
+
+query q1
+`select name
+from df_building df_building
+
+limit 1`;
+
+query q2
+`select name
+from
+  (select lhs.building_id as building_id,
+          lhs.name as name,
+          lhs.street_address as street_address,
+          lhs.years_as_tallest as years_as_tallest,
+          lhs.height_feet as height_feet,
+          lhs.floors as floors
+   from df_building as lhs
+   inner join
+     (select max(height_feet) as maxheight_feet
+      from df_building df_building) as rhs on (lhs.height_feet = rhs.maxheight_feet))`;
+
+verify q1 q2;

@@ -1,0 +1,26 @@
+schema df_people(person_id:int, first_name:str, middle_name:str, last_name:str, cell_mobile_number:str, email_address:str, login_name:str, password:str);
+schema df_candidates(candidate_id:int, candidate_details:str);
+schema df_candidate_assessments(candidate_id:int, qualification:str, assessment_date:str, asessment_outcome_code:str);
+
+table df_people(df_people);
+table df_candidates(df_candidates);
+table df_candidate_assessments(df_candidate_assessments);
+
+query q1
+`select t3.cell_mobile_number
+from df_candidates as t1
+join df_candidate_assessments as t2 on t1.candidate_id = t2.candidate_id
+join df_people as t3 on t1.candidate_id = t3.person_id
+where t2.asessment_outcome_code = "fail"`;
+
+query q2
+`select t3.cell_mobile_number
+ from
+  (select *
+       from
+        input1
+       where input1.asessment_outcome_code = 'fail') join 
+      input as t2 as t3
+ where t3.candidate_id = t3.person_id`;
+
+verify q1 q2;

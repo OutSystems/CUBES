@@ -1,0 +1,48 @@
+schema df_courses(course_id:int, author_id:int, subject_id:int, course_name:str, course_description:str);
+schema df_student_course_enrolment(registration_id:int, student_id:int, course_id:int, date_of_enrolment:str, date_of_completion:str);
+
+table df_courses(df_courses);
+table df_student_course_enrolment(df_student_course_enrolment);
+
+query q1
+`select t1.course_name
+from df_courses as t1
+join df_student_course_enrolment as t2 on t1.course_id = t2.course_id
+group by t1.course_name
+having count(*) = 1`;
+
+query q2
+`joining, by = "course_id"
+joining, by = "course_id"
+select distinct course_name
+from
+  (select course_id,
+          n,
+          registration_id,
+          student_id,
+          date_of_enrolment,
+          date_of_completion,
+          author_id,
+          subject_id,
+          course_name,
+          course_description
+   from
+     (select course_id,
+             n,
+             registration_id,
+             student_id,
+             date_of_enrolment,
+             date_of_completion
+      from
+        (select *
+         from
+           (select course_id,
+                   count(*) as n
+            from input1
+            group by course_id)
+         where (n <= 1.0
+                and n = 1.0)) as lhs
+      inner join input1 as rhs on (lhs.course_id = rhs.course_id)) as lhs
+   inner join input0 as rhs on (lhs.course_id = rhs.course_id))`;
+
+verify q1 q2;

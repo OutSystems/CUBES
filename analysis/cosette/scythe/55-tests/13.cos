@@ -1,0 +1,25 @@
+schema df_13_1(S_key:str, P_id:str);
+schema df_13_2(P_id:str, P_name:str);
+
+table df_13_1(df_13_1);
+table df_13_2(df_13_2);
+
+query q1
+`select p_name
+from
+  (select *
+   from df_13_2 as lhs
+   where exists
+       (select 1
+        from df_13_1 as rhs
+        where (lhs.p_id = rhs.p_id) ))`;
+
+query q2
+`select t2.p_name
+ from
+  (select input.s_key, input.p_id, t1.p_id as p_id1, t1.p_name
+  from input join 
+      input0 as t1) as t2
+ where t2.p_id = t2.p_id1`;
+
+verify q1 q2;

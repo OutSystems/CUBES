@@ -1,0 +1,35 @@
+schema df_i038(id:int, name:str, city:str);
+
+table df_i038(df_i038);
+
+query q1
+`select s.id, t.*
+from stuff s
+join (
+    select name, city, count(*) as qty
+    from stuff
+    group by name, city
+    having count(*) > 1
+) t on s.name = t.name and s.city = t.city`;
+
+query q2
+`joining, by = "name"
+select distinct id,
+                name,
+                city
+from
+  (select id,
+          name,
+          city,
+          n
+   from input0 as lhs
+   inner join
+     (select *
+      from
+        (select name,
+                count(*) as n
+         from input0
+         group by name)
+      where (n > 1.0)) as rhs on (lhs.name = rhs.name))`;
+
+verify q1 q2;

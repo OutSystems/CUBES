@@ -1,0 +1,44 @@
+schema df_employee(employeeid:int, lastname:str, firstname:str, title:str, reportsto:str, birthdate:str, hiredate:str, address:str, city:str, state:str, country:str, postalcode:str, phone:str, fax:str, email:str);
+
+table df_employee(df_employee);
+
+query q1
+`select phone
+from df_employee df_employee`;
+
+query q2
+`select phone
+from
+  (select lhs.employeeid as employeeid,
+          lhs.lastname as lastname,
+          lhs.firstname as firstname,
+          lhs.title as title,
+          lhs.reportsto as reportsto,
+          lhs.birthdate as birthdate,
+          lhs.hiredate as hiredate,
+          lhs.address as address,
+          lhs.city as city,
+          lhs.state as state,
+          lhs.country as country,
+          lhs.postalcode as postalcode,
+          lhs.phone as phone,
+          lhs.fax as fax,
+          lhs.email as email,
+          rhs.employeeid as employeeid.other,
+          rhs.lastname as lastname.other,
+          rhs.firstname as firstname.other,
+          rhs.title as title.other,
+          rhs.reportsto as reportsto.other,
+          rhs.hiredate as hiredate.other,
+          rhs.city as city.other,
+          rhs.state as state.other,
+          rhs.country as country.other,
+          rhs.postalcode as postalcode.other,
+          rhs.phone as phone.other,
+          rhs.fax as fax.other,
+          rhs.email as email.other
+   from df_employee as lhs
+   inner join df_employee as rhs on (lhs.address = rhs.address
+                                     and lhs.birthdate = rhs.birthdate))`;
+
+verify q1 q2;

@@ -1,0 +1,30 @@
+schema df_phone(name:str, phone_id:int, memory_in_g:int, carrier:str, price:str);
+schema df_phone_market(market_id:int, phone_id:int, num_of_stock:int);
+
+table df_phone(df_phone);
+table df_phone_market(df_phone_market);
+
+query q1
+`select t2.name
+from df_phone_market as t1
+join df_phone as t2 on t1.phone_id = t2.phone_id
+group by t2.name
+having sum(t1.num_of_stock) >= 2000`;
+
+query q2
+`select t1.name
+ from
+  (select t4.phone_id, t4.sum_num_of_stock, t3.name, t3.phone_id as phone_id1, t3.memory_in_g, t3.carrier, t3.price
+  from (select *
+       from
+        (select
+            t2.phone_id, sum(t2.num_of_stock) as sum_num_of_stock
+          from
+            input0 as t2
+          group by
+            t2.phone_id) as t4
+       where t4.sum_num_of_stock > 2000.0) join 
+      input as t3) as t1
+ where t1.phone_id = t1.phone_id1`;
+
+verify q1 q2;

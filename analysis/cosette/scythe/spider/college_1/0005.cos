@@ -1,0 +1,25 @@
+schema df_class(class_code:int, crs_code:str, class_section:int, class_time:str, class_room:str, prof_num:int);
+schema df_employee(emp_num:int, emp_lname:str, emp_fname:str, emp_initial:str, emp_jobcode:str, emp_hiredate:str, emp_dob:str);
+
+table df_class(df_class);
+table df_employee(df_employee);
+
+query q1
+`select count(*)
+from df_employee as t1
+join df_class as t2 on t1.emp_num = t2.prof_num
+where t1.emp_lname = 'graztevski'`;
+
+query q2
+`select t4.max_class_section
+ from
+  (select
+          max(t1.class_section) as max_class_section
+        from
+          input as t1) as t2 join 
+      (select *
+         from
+          input0
+         where input0.emp_lname = 'graztevski') as t3 as t4`;
+
+verify q1 q2;

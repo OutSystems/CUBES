@@ -1,0 +1,23 @@
+schema df_mountain(id:int, name:str, height:str, prominence:str, range:str, country:str);
+
+table df_mountain(df_mountain);
+
+query q1
+`select max(height),
+       avg(height)
+from df_mountain df_mountain`;
+
+query q2
+`select distinct max(height) over () as max.height.,
+                                 meanheight as avg.height.
+from
+  (select id,
+          name,
+          height,
+          prominence,
+          range,
+          country,
+          avg(height) over () as meanheight
+   from df_mountain df_mountain)`;
+
+verify q1 q2;

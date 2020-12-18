@@ -1,0 +1,53 @@
+schema df_ref_product_categories(product_category_code:str, product_category_description:str, unit_of_measure:str);
+schema df_products(product_id:int, color_code:int, product_category_code:str, product_name:str, typical_buying_price:str, typical_selling_price:str, product_description:str, other_product_details:str);
+
+table df_ref_product_categories(df_ref_product_categories);
+table df_products(df_products);
+
+query q1
+`select t2.unit_of_measure,
+       t2.product_category_code
+from df_products as t1
+join df_ref_product_categories as t2 on t1.product_category_code = t2.product_category_code
+where t1.product_name = "chervil"`;
+
+query q2
+`select unit_of_measure,
+       product_category_code
+from
+  (select lhs.product_category_code as product_category_code,
+          lhs.product_category_description as product_category_description,
+          lhs.unit_of_measure as unit_of_measure,
+          lhs.product_id as product_id,
+          lhs.color_code as color_code,
+          lhs.product_name as product_name,
+          lhs.typical_buying_price as typical_buying_price,
+          lhs.typical_selling_price as typical_selling_price,
+          lhs.product_description as product_description,
+          lhs.other_product_details as other_product_details
+   from
+     (select lhs.product_category_code as product_category_code,
+             lhs.product_category_description as product_category_description,
+             lhs.unit_of_measure as unit_of_measure,
+             rhs.product_id as product_id,
+             rhs.color_code as color_code,
+             rhs.product_name as product_name,
+             rhs.typical_buying_price as typical_buying_price,
+             rhs.typical_selling_price as typical_selling_price,
+             rhs.product_description as product_description,
+             rhs.other_product_details as other_product_details
+      from df_ref_product_categories as lhs
+      inner join df_products as rhs on (lhs.product_category_code = rhs.product_category_code)) as lhs
+   inner join
+     (select *
+      from df_products df_products
+      where (product_name = 'chervil')) as rhs on (lhs.product_category_code = rhs.product_category_code
+                                                     and lhs.product_id = rhs.product_id
+                                                     and lhs.color_code = rhs.color_code
+                                                     and lhs.product_name = rhs.product_name
+                                                     and lhs.typical_buying_price = rhs.typical_buying_price
+                                                     and lhs.typical_selling_price = rhs.typical_selling_price
+                                                     and lhs.product_description = rhs.product_description
+                                                     and lhs.other_product_details = rhs.other_product_details))`;
+
+verify q1 q2;

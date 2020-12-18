@@ -1,0 +1,27 @@
+schema df_branch(branch_id:int, name:str, open_year:int, address_road:str, city:str, membership_amount:int);
+
+table df_branch(df_branch);
+
+query q1
+`select city,
+       count(*)
+from df_branch df_branch
+where open_year < 2010
+group by city`;
+
+query q2
+`select t3.city,t3.branch_id
+ from
+  (select t1.city, t1.count_branch_id, t2.branch_id, t2.name, t2.open_year, t2.address_road, t2.city as city1, t2.membership_amount
+  from (select
+          t4.city, count(t4.branch_id) as count_branch_id
+        from
+          input as t4
+        group by
+          t4.city) as t1 join 
+      (select *
+         from
+          input
+         where input.branch_id = 2.0) as t2) as t3`;
+
+verify q1 q2;

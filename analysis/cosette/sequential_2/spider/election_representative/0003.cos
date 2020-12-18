@@ -1,0 +1,28 @@
+schema df_election(election_id:int, representative_id:int, date:str, votes:str, vote_percent:str, seats:str, place:str);
+
+table df_election(df_election);
+
+query q1
+`select date , vote_percent
+from df_election df_election`;
+
+query q2
+`select date, vote_percent
+from
+  (select lhs.election_id as election_id,
+          lhs.representative_id as representative_id,
+          lhs.date as date,
+          lhs.votes as votes,
+          lhs.vote_percent as vote_percent,
+          lhs.seats as seats,
+          lhs.place as place,
+          rhs.representative_id as representative_id.other,
+          rhs.date as date.other,
+          rhs.votes as votes.other,
+          rhs.vote_percent as vote_percent.other,
+          rhs.place as place.other
+   from df_election as lhs
+   inner join df_election as rhs on (lhs.election_id = rhs.election_id
+                                     and lhs.seats = rhs.seats))`;
+
+verify q1 q2;

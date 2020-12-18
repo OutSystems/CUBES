@@ -1,3 +1,4 @@
+db: tests-examples/scythe/top_rated_posts/tables/005.sqlite
 inputs:
   - tests-examples/scythe/top_rated_posts/tables/i005.csv
 output: tests-examples/scythe/top_rated_posts/tables/o005.csv
@@ -13,14 +14,14 @@ solution:
   - summarise
   - left_join
 sql: |
-  SELECT *
-    FROM (SELECT p.customer, p.total, MIN(p.id) AS min_id
-          FROM PURCHASES
-          GROUP BY p.customer, p.total) x
-    JOIN (SELECT p.customer, MAX(total) AS max_total
-     FROM PURCHASES p
-     GROUP BY p.customer) y
-    ON y.customer = x.customer AND y.max_total = x.total
+  SELECT x.min_id, y.*
+  FROM (SELECT p.customer, p.total, MIN(p.id) AS min_id
+        FROM i005 p
+        GROUP BY p.customer, p.total) x
+           JOIN (SELECT p.customer, MAX(total) AS max_total
+                 FROM i005 p
+                 GROUP BY p.customer) y
+                ON y.customer = x.customer AND y.max_total = x.total
 comment: |
   df2 <- input1 %>% group_by(customer) %>% summarise(total = max(total)) %>% ungroup()
   df3 <- input1 %>% group_by(total) %>% summarise(id = min(id)) %>% ungroup()

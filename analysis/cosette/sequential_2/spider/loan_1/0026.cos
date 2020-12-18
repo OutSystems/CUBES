@@ -1,0 +1,25 @@
+schema df_customer(cust_id:int, cust_name:str, acc_type:str, acc_bal:int, no_of_loans:int, credit_score:int, branch_id:int, state:str);
+
+table df_customer(df_customer);
+
+query q1
+`select avg(acc_bal),
+       acc_type
+from df_customer df_customer
+where credit_score < 50
+group by acc_type`;
+
+query q2
+`select meanacc_bal as avg.acc_bal.,
+       acc_type
+from
+  (select acc_type,
+          credit_score,
+          avg(acc_bal) as meanacc_bal
+   from df_customer df_customer
+   group by acc_type,
+            credit_score)
+where (credit_score < 50.0
+       or meanacc_bal < 50.0)`;
+
+verify q1 q2;

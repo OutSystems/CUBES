@@ -1,0 +1,29 @@
+schema df_train(id:int, train_number:int, name:str, origin:str, destination:str, time:str, interval:str);
+
+table df_train(df_train);
+
+query q1
+`select origin
+from df_train df_train
+group by origin
+having count(*) > 1`;
+
+query q2
+`select t3.origin
+ from
+  (select t1.origin, t1.interval, t1.count_interval, t2.id, t2.train_number, t2.name, t2.origin as origin1, t2.destination, t2.time, t2.interval as interval1
+  from (select *
+       from
+        (select
+            t4.origin, t4.interval, count(t4.interval) as count_interval
+          from
+            input as t4
+          group by
+            t4.origin, t4.interval) as t1
+       where t1.count_interval = 2.0) join 
+      (select *
+         from
+          input
+         where input.id = 1.0) as t2) as t3`;
+
+verify q1 q2;

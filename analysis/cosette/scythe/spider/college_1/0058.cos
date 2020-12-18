@@ -1,0 +1,32 @@
+schema df_professor(emp_num:int, dept_code:str, prof_office:str, prof_extension:int, prof_high_degree:str);
+
+table df_professor(df_professor);
+
+query q1
+`select count(*)
+from df_professor df_professor
+where prof_high_degree = 'ph.d.'
+  or prof_high_degree = 'ma'`;
+
+query q2
+`select t1.count_emp_num
+ from
+  (select t6.count_emp_num, t2.prof_high_degree, t2.count_emp_num as count_emp_num1
+  from (select
+          count(t3.emp_num) as count_emp_num
+        from
+          (select *
+             from
+              input
+             where input.prof_high_degree <> 'ma') as t3) as t6 join 
+      (select
+            t4.prof_high_degree, count(t4.emp_num) as count_emp_num
+          from
+            (select *
+               from
+                input
+               where input.prof_high_degree = 'ph.d.') as t4
+          group by
+            t4.prof_high_degree) as t5 as t2) as t1`;
+
+verify q1 q2;

@@ -1,0 +1,37 @@
+schema df_policies(policy_id:int, customer_id:int, policy_type_code:str, start_date:str, end_date:str);
+
+table df_policies(df_policies);
+
+query q1
+`select policy_type_code
+from df_policies df_policies
+group by policy_type_code
+
+limit 1`;
+
+query q2
+`select distinct policy_type_code.other as policy_type_code
+from
+  (select lhs.customer_id as customer_id,
+          lhs.policy_type_code as policy_type_code,
+          lhs.n as n,
+          rhs.customer_id as customer_id.other,
+          rhs.policy_type_code as policy_type_code.other,
+          rhs.n as n.other
+   from
+     (select customer_id,
+             policy_type_code,
+             count(*) as n
+      from df_policies df_policies
+      group by customer_id,
+               policy_type_code) as lhs
+   cross join
+     (select customer_id,
+             policy_type_code,
+             count(*) as n
+      from df_policies df_policies
+      group by customer_id,
+               policy_type_code) as rhs)
+where (n < n.other)`;
+
+verify q1 q2;

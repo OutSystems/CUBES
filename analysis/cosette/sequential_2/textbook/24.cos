@@ -1,0 +1,42 @@
+schema df_aircraft(aid:int, aname:str, crusingrange:int);
+schema df_employees(eid:int, ename:str, salary:str);
+schema df_certified(eid:int, aid:int);
+
+table df_aircraft(df_aircraft);
+table df_employees(df_employees);
+table df_certified(df_certified);
+
+query q1
+`select distinct a.aname
+from df_aircraft df_aircraft a
+where a.aid in (select c.aid
+                from df_certified df_certified c,
+                     df_employees e
+                where c.eid = e.eid
+                  and not exists (select *
+                                  from df_employees df_employees e1
+                                  where e1.eid = e.eid
+                                    and e1.salary < 80000))`;
+
+query q2
+`select distinct aname
+from
+  (select lhs.aid as aid,
+          lhs.aname as aname,
+          lhs.crusingrange as crusingrange,
+          lhs.eid as eid,
+          rhs.ename as ename,
+          rhs.salary as salary
+   from
+     (select lhs.aid as aid,
+             lhs.aname as aname,
+             lhs.crusingrange as crusingrange,
+             rhs.eid as eid
+      from df_aircraft as lhs
+      inner join df_certified as rhs on (lhs.aid = rhs.aid)) as lhs
+   inner join
+     (select *
+      from df_employees df_employees
+      where (salary > 80000.0)) as rhs on (lhs.eid = rhs.eid))`;
+
+verify q1 q2;

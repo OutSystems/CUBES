@@ -1,0 +1,28 @@
+schema df_people(people_id:int, name:str, country:str, is_male:str, age:int);
+schema df_wedding(church_id:int, male_id:int, female_id:int, year:int);
+
+table df_people(df_people);
+table df_wedding(df_wedding);
+
+query q1
+`select t2.name,
+       t3.name
+from df_wedding as t1
+join df_people as t2 on t1.male_id = t2.people_id
+join df_people as t3 on t1.female_id = t3.people_id
+where t1.year > 2014`;
+
+query q2
+`select t1.name1,t1.name
+ from
+  (select *
+       from
+        (select input.people_id, input.name, input.country, input.is_male, input.age, t3.people_id as people_id1, t3.name as name1, t3.country as country1, t3.is_male as is_male1, t3.age as age1
+        from input join 
+            input as t3) as t4
+       where t4.country = t4.country1) join 
+      input0 as t2 as t1
+ where t1.people_id = t1.female_id
+   and t1.people_id1 = t1.male_id`;
+
+verify q1 q2;
