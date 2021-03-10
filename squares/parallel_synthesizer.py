@@ -62,6 +62,8 @@ class ChildSynthesizer(Process, Synthesizer):
                 self.init(*msg[1:])
             elif msg[0] == Message.SOLVE:
                 self.solve(*msg[1:])
+            elif msg[0] == Message.RESUME_SOLVE:
+                self.resume_solve(*msg[1:])
             else:
                 logger.error('Unrecognized action %s', msg[0])
 
@@ -112,7 +114,32 @@ class ChildSynthesizer(Process, Synthesizer):
 
         finally:
             self._enumerator.blocked_models = {}
-            self._enumerator.z3_solver.pop()
+            if not ret:
+                self._enumerator.z3_solver.pop()
+
+    def resume_solve(self):
+        logger.debug('Resuming solving previous cube')
+
+        try:
+            ret, attempts = self.synthesize()
+
+            core = None
+            if attempts == 0:
+                # logger.warning('Cube generated 0 programs')
+                unsat_core = [str(clause) for clause in self._enumerator.unsat_core]
+
+            if ret:
+                logger.debug('Found solution with cube')
+            pipe_write(self.pipe, (ret, core, attempts))
+
+        except:
+            logger.error('Exception while enumerating cube')
+            print(traceback.format_exc())
+
+        finally:
+            self._enumerator.blocked_models = {}
+            if not ret:
+                self._enumerator.z3_solver.pop()
 
 
 class ParallelSynthesizer(AbstractSynthesizer):
@@ -124,7 +151,7 @@ class ParallelSynthesizer(AbstractSynthesizer):
         # dont alternate so many processes such that there are no longer any processes searching the previous loc
         self.alternate_j = min(round(self.j * util.get_config().advance_percentage), j - 1 - util.get_config().probing_threads)
 
-    def synthesize(self):
+    def synthesize(self, top_n: int = 1):
         pipes = {}
         stopped = 0
 
@@ -151,7 +178,7 @@ class ParallelSynthesizer(AbstractSynthesizer):
 
         if util.get_config().static_search:
             generator_f = (generator_b := StaticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
-                                                                 self.specification.min_loc - util.get_config().cube_freedom))
+                                                              self.specification.min_loc - util.get_config().cube_freedom))
 
         else:
             if util.get_config().split_complex_joins:
@@ -162,8 +189,9 @@ class ParallelSynthesizer(AbstractSynthesizer):
                                                           self.specification.min_loc - util.get_config().cube_freedom, statistics,
                                                           ['cross_join', 'inner_join'])
             else:
-                generator_f = (generator_b := StatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
-                                                                     self.specification.min_loc - util.get_config().cube_freedom, statistics))
+                generator_f = (
+                    generator_b := StatisticCubeGenerator(self.specification, self.tyrell_specification, self.specification.min_loc,
+                                                          self.specification.min_loc - util.get_config().cube_freedom, statistics))
 
         probers_f = ProcessSet((True,), generator_f)
         probers_b = ProcessSet((True,), generator_b)
@@ -190,12 +218,18 @@ class ParallelSynthesizer(AbstractSynthesizer):
 
         solution_loc = None
         solution = None
+        solution_n = 0
+        found_solutions = set()
 
         while True and stopped < self.j:
+            if solution_n >= top_n:
+                process_manager.kill_above(0)
+                return
+
             if solution_loc and solution_loc <= process_manager.min_loc():
                 results.store_solution(solution, solution_loc, optimal=True)
-                process_manager.kill_above(0)
-                return solution
+                yield solution, solution_loc, True
+                solution_n += 1
 
             events = poll.poll()
 
@@ -213,16 +247,19 @@ class ParallelSynthesizer(AbstractSynthesizer):
 
                     if program:
                         if loc <= process_manager.min_loc() or not util.get_config().optimal:
-                            results.store_solution(program, loc, optimal=True)
-                            stopped += process_manager.kill_above(0)
-                            return program
-
-                        logger.info('Waiting for loc %d to finish before returning solution of loc %d', process_manager.min_loc(), loc)
-                        if solution_loc is None or loc < solution_loc:
-                            solution = program
-                            results.store_solution(solution, loc, optimal=False)
-                            solution_loc = loc
-                            stopped += process_manager.kill_above(solution_loc)
+                            stopped += process_manager.kill_above(loc+1)
+                            process_manager.stop_incrementing = True
+                            found_solutions.add(pipe)
+                            yield program, loc, True
+                            solution_n += 1
+                            logger.info('Found program of loc %d. %d programs to go.', loc, top_n - solution_n)
+                        else:
+                            logger.info('Waiting for loc %d to finish before returning solution of loc %d', process_manager.min_loc(), loc)
+                            if solution_loc is None or loc < solution_loc:
+                                solution = program
+                                results.store_solution(solution, loc, optimal=False)
+                                solution_loc = loc
+                                stopped += process_manager.kill_above(solution_loc)
 
                 if event & select.EPOLLOUT:
                     if solution is not None:
@@ -231,7 +268,11 @@ class ParallelSynthesizer(AbstractSynthesizer):
                         continue
 
                     try:
-                        process_manager.send(pipe)
+                        if pipe not in found_solutions:
+                            process_manager.send(pipe)
+                        else:
+                            found_solutions.remove(pipe)
+                            process_manager.send(pipe, True)
                     except MaximumLinesOfCodeReached:
                         stopped += 1
 

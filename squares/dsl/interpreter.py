@@ -93,7 +93,7 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_inner_join(self, name, args):
-        _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}), suffix = c('', '.other'))"
+        _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}), suffix = c('', '.other'), na_matches='{util.get_config().na_matches}')"
         for pair in args[2].split(','):
             if '=' in pair:
                 A, B = pair.split('=')
@@ -106,47 +106,47 @@ class SquaresInterpreter(LineInterpreter):
     @eval_decorator
     def eval_natural_join(self, name, args):
         if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
-            return f'{name} <- inner_join({args[0]}, {args[1]})\n'
+            return f'{name} <- inner_join({args[0]}, {args[1]}, na_matches="{util.get_config().na_matches}")\n'
         else:
-            return f'{name} <- full_join({args[0]}, {args[1]}, by=character())\n'
+            return f'{name} <- full_join({args[0]}, {args[1]}, by=character(), na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator
     def eval_natural_join3(self, name, args):
-        _script = f'{name} <-'
+        _script = f'{name} <- '
         if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
-            _script += f'inner_join({args[0]}, {args[1]}) '
+            _script += f'inner_join({args[0]}, {args[1]}, na_matches="{util.get_config().na_matches}") '
         else:
-            _script += f'full_join({args[0]}, {args[1]}, by=character()) '
+            _script += f'full_join({args[0]}, {args[1]}, by=character(), na_matches="{util.get_config().na_matches}") '
         if robjects.r(f'length(intersect(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})))')[0] > 0:
-            _script += f'%>% inner_join({args[2]})\n'
+            _script += f'%>% inner_join({args[2]}, na_matches="{util.get_config().na_matches}")\n'
         else:
-            _script += f'%>% full_join({args[2]}, by=character())\n'
+            _script += f'%>% full_join({args[2]}, by=character(), na_matches="{util.get_config().na_matches}")\n'
         return _script
 
     @eval_decorator
     def eval_natural_join4(self, name, args):
-        _script = f'{name} <-'
+        _script = f'{name} <- '
         if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
-            _script += f'inner_join({args[0]}, {args[1]}) '
+            _script += f'inner_join({args[0]}, {args[1]}, na_matches="{util.get_config().na_matches}") '
         else:
-            _script += f'full_join({args[0]}, {args[1]}, by=character()) '
+            _script += f'full_join({args[0]}, {args[1]}, by=character(), na_matches="{util.get_config().na_matches}") '
         if robjects.r(f'length(intersect(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})))')[0] > 0:
-            _script += f'%>% inner_join({args[2]}) '
+            _script += f'%>% inner_join({args[2]}, na_matches="{util.get_config().na_matches}") '
         else:
-            _script += f'%>% full_join({args[2]}, by=character()) '
+            _script += f'%>% full_join({args[2]}, by=character(), na_matches="{util.get_config().na_matches}") '
         if robjects.r(f'length(intersect(union(union(colnames({args[0]}), colnames({args[1]})), colnames({args[2]})), colnames({args[3]})))')[0] > 0:
-            _script += f'%>% inner_join({args[3]})\n'
+            _script += f'%>% inner_join({args[3]}, na_matches="{util.get_config().na_matches}")\n'
         else:
-            _script += f'%>% full_join({args[3]}, by=character())\n'
+            _script += f'%>% full_join({args[3]}, by=character(), na_matches="{util.get_config().na_matches}")\n'
         return _script
 
     @eval_decorator
     def eval_anti_join(self, name, args):
-        return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args[2]}))\n'
+        return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args[2]}), na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator
     def eval_left_join(self, name, args):
-        return f'{name} <- left_join({args[0]}, {args[1]})\n'
+        return f'{name} <- left_join({args[0]}, {args[1]}, na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator
     def eval_union(self, name, args):
@@ -158,11 +158,11 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_semi_join(self, name, args):
-        return f'{name} <- semi_join({args[0]}, {args[1]})\n'
+        return f'{name} <- semi_join({args[0]}, {args[1]}, na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator
     def eval_cross_join(self, name, args):
-        _script = f'{name} <- full_join({args[0]}, {args[1]}, by=character(), suffix = c("", ".other"))'
+        _script = f'{name} <- full_join({args[0]}, {args[1]}, by=character(), suffix = c("", ".other"), na_matches="{util.get_config().na_matches}")'
 
         if args[2] != '':
             _script += f' %>% filter({args[2]})'

@@ -74,7 +74,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests/**/*.yaml', recursive=True):
+    for file in glob.glob('tests/kaggle/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                     reader = csv.reader(f)
                     next(reader)  # skip header
                     for line in reader:
-                        line2 = ','.join(map(str, line)).replace('\n', '\\n')
+                        line2 = ','.join(map(lambda x: x if x != '' else 'NULL', map(str, line))).replace('\n', '\\n')
                         result += line2 + '\n'
                 result += '\n'
 

@@ -1,0 +1,36 @@
+inputs:
+  - tests-examples/kaggle/tables/bikeshare_trips_2.csv
+output: tests-examples/kaggle/tables/2_2_T_2.csv
+functions:
+  - first
+  - last
+constants:
+  - 2015-10-25
+columns:
+  - start_station_id
+  - end_station_id
+  - start_date
+loc: 1
+sql:
+  SELECT bike_number,
+  TIME(start_date) AS trip_time,
+  FIRST_VALUE(start_station_id)
+  OVER (
+  PARTITION BY bike_number
+  ORDER BY start_date
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  ) AS first_station_id,
+  LAST_VALUE(end_station_id)
+  OVER (
+  PARTITION BY bike_number
+  ORDER BY start_date
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+  ) AS last_station_id,
+  start_station_id,
+  end_station_id
+  FROM `bigquery-public-data.san_francisco.bikeshare_trips`
+  WHERE DATE(start_date) = '2015-10-25'
+comment:
+  df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
+  df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
+  out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)

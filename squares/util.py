@@ -153,6 +153,7 @@ def create_argparser(all_inputs=False):
     g.add_argument('-M', '--heap-limit', type=parse_size, help='sets a memory usage limit')
     g.add_argument('--no-r', action='store_true', help="don't output R program")
     g.add_argument('--append', action='store_true', help='store the solution in the specification file')
+    g.add_argument('--top', type=int, default=1, help='number of programs that should be returned')
 
     g = parser.add_argument_group('Program space arguments')
     g.add_argument('--disable', nargs='+', default=[], help='disable DSL components')
@@ -305,3 +306,5 @@ class Message(Enum):
     DEBUG_STATS = 3
     EVAL_INFO = 4
     SOLUTION = 5
+    DONE = 6
+    RESUME_SOLVE = 7

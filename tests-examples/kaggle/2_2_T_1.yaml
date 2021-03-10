@@ -1,0 +1,31 @@
+inputs:
+  - tests-examples/kaggle/tables/bikeshare_trips.csv
+output: tests-examples/kaggle/tables/2_2_T_1.csv
+functions:
+  - cumsum
+constants:
+  - 2015
+columns:
+  - start_date
+  - num_trips
+loc: 1
+sql:
+  WITH trips_by_day AS
+  (
+  SELECT DATE(start_date) AS trip_date,
+  COUNT(*) as num_trips
+  FROM `bigquery-public-data.san_francisco.bikeshare_trips`
+  WHERE EXTRACT(YEAR FROM start_date) = 2015
+  GROUP BY trip_date
+  )
+  SELECT *,
+  SUM(num_trips)
+  OVER (
+  ORDER BY trip_date
+  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS cumulative_trips
+  FROM trips_by_day
+comment:
+  df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
+  df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
+  out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)

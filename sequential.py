@@ -40,11 +40,15 @@ def main():
                          max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
                          subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
                          use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
-                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
+                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top)
     util.store_config(base_config)
 
     specification = Specification(spec)
     results.specification = specification
+
+    if util.get_config().verbosity >= 3:
+        with open('dump.dsl', 'w') as f:
+            f.write(str(specification))
 
     configs = [base_config]
 
@@ -70,12 +74,15 @@ def main():
 
     while True:
         packet = queue.get()
-        if packet[0] == util.Message.DEBUG_STATS:
+        if packet[0] == util.Message.DONE:
+            break
+        elif packet[0] == util.Message.DEBUG_STATS:
             results.update_stats(*packet[1:])
         elif packet[0] == util.Message.SOLUTION:
             logger.debug('Solution found using process %d', packet[1])
             results.store_solution(*packet[2:])
-            break
+            results.print_results()
+            results.specification = Specification(spec)
         elif packet[0] == util.Message.EVAL_INFO:
             pass
         else:
@@ -85,7 +92,6 @@ def main():
     for p in processes:
         p.kill()
 
-    results.print_results()
     exit(results.exit_code)
 
 

@@ -28,6 +28,7 @@ class ExitCode(IntEnum):
 start_time = time.time()
 specification = None
 solution = None
+solution_found = False
 solution_size = None
 n_cubes = 0
 blocked_cubes = 0
@@ -52,7 +53,7 @@ def handle_sigint(signal, stackframe):
 
 
 def beautifier(sql):
-    sql = sql.replace('.other`', '_other`')
+    sql = re.sub(r'\.(?=other(\.other)*`)', '_', sql)
     sql = re.sub(r"""`(?=([^"'\\]*(\\.|"([^"'\\]*\\.)*[^"'\\]*"))*[^"']*$)""", '', sql)  # remove backticks if not inside strings
     return sqlparse.format(sql, reindent=True, keyword_case='upper')
 
@@ -80,10 +81,12 @@ def print_results():
     if solution is not None:
         logger.info(f'Solution found: {solution}')
         logger.info(f'Solution size: {solution_size}')
+        old_cache = util.get_config().cache_ops
         util.get_config().cache_ops = True
         interp = interpreter.SquaresInterpreter(specification, True)
         evaluation = interp.eval(solution, specification.tables)
         assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
+        util.get_config().cache_ops = old_cache
 
         try:
             program = specification.r_init + interp.program
@@ -110,7 +113,8 @@ def print_results():
         if exceeded_max_loc:
             exit_code = ExitCode.END_SEARCH_SPACE
 
-        print("No solution found")
+        if not solution_found:
+            print("No solution found")
 
 
 def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t, redundant):
@@ -133,7 +137,8 @@ def increment_cubes():
 
 
 def store_solution(sol, size: int, optimal: bool):
-    global solution, solution_size, exit_code
+    global solution, solution_size, exit_code, solution_found
     solution = sol
     solution_size = size
     exit_code = ExitCode.OK if optimal else ExitCode.NON_OPTIMAL
+    solution_found = True

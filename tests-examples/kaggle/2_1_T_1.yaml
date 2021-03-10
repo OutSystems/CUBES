@@ -1,0 +1,28 @@
+inputs:
+  - tests-examples/kaggle/tables/comments_5.csv
+  - tests-examples/kaggle/tables/stories.csv
+output: tests-examples/kaggle/tables/2_1_T_1.csv
+functions:
+  - n
+constants:
+  - 2012-01-01
+columns:
+  - time_ts
+loc: 1
+sql:
+  WITH c AS
+  (
+  SELECT parent, COUNT(*) as num_comments
+  FROM `bigquery-public-data.hacker_news.comments`
+  GROUP BY parent
+  )
+  SELECT s.id as story_id, s.by, s.title, c.num_comments
+  FROM `bigquery-public-data.hacker_news.stories` AS s
+  LEFT JOIN c
+  ON s.id = c.parent
+  WHERE EXTRACT(DATE FROM s.time_ts) = '2012-01-01'
+  ORDER BY c.num_comments DESC
+comment:
+  df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
+  df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
+  out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)

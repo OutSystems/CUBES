@@ -1,0 +1,21 @@
+inputs:
+  - tests-examples/kaggle/tables/posts_questions_5.csv
+  - tests-examples/kaggle/tables/posts_answers_6.csv
+output: tests-examples/kaggle/tables/2_1_X_4.csv
+constants:
+  - 2019-01-01
+columns:
+  - creation_date
+loc: 1
+sql:
+  SELECT q.owner_user_id
+  FROM `bigquery-public-data.stackoverflow.posts_questions` AS q
+  WHERE EXTRACT(DATE FROM q.creation_date) = '2019-01-01'
+  UNION DISTINCT
+  SELECT a.owner_user_id
+  FROM `bigquery-public-data.stackoverflow.posts_answers` AS a
+  WHERE EXTRACT(DATE FROM a.creation_date) = '2019-01-01'
+comment:
+  df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
+  df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
+  out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)

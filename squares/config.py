@@ -20,6 +20,7 @@ class Config:
     smoothing_bias: float = 1
 
     optimal: bool = False
+    top_programs: int = 1
     advance_processes: bool = False
     programs_per_cube_threshold: int = 500
     bitenum_enabled: bool = True
@@ -42,6 +43,7 @@ class Config:
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
     max_join_combinations: int = 2
+    na_matches: str = 'never'
 
     lines_force_all_inputs: bool = True
     is_not_parent_enabled: bool = True

@@ -84,7 +84,7 @@ if __name__ == '__main__':
                     z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
     util.store_config(config)
 
-    for file in glob.glob('tests-examples/spider/**/*.yaml', recursive=True):
+    for file in glob.glob('tests-examples/kaggle/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 

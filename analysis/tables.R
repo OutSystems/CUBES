@@ -12,7 +12,7 @@ benchmark_summary <- function(filename, ...) {
               p2 = p2_tmp / n_inst) %>%
     ungroup() %>% group_by(try) %>%
     select(-n_inst, -p_tmp, -p2_tmp) %>%
-    mutate(benchmark = ifelse(benchmark != 'All', paste0('\\begin{sideways}\\texttt{', benchmark, '}\\end{sideways}'), benchmark)) %>%
+    mutate(benchmark = ifelse(benchmark != 'All', paste0('\\begin{rotate}{45}\\texttt{', benchmark, '}\\end{rotate}'), benchmark)) %>%
     rename('10 min' = p, '10 sec' = p2) %>%
     gather('10 min', '10 sec', key = 'info', value = 'val') %>%
     spread(benchmark, val) %>%
@@ -25,7 +25,8 @@ benchmark_summary <- function(filename, ...) {
     relocate(info, .before = try) %>%
     rename('Run' = try) %>%
     rename('~' = info) %>%
+    select(-'~', -All) %>%
     xtable()
-  align(table) <- "lllcccccl"
+  align(table) <- "llcccccc"
     print(table, include.rownames = FALSE, file = paste0('tables/', filename, ".tex"), sanitize.text.function = function(x) { x }, booktabs = TRUE, hline.after = c(0,length(tries),length(tries)*2))
 }

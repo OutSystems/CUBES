@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/kaggle/tables/comments.csv
+output: tests-examples/kaggle/tables/1_3_T_1.csv
+columns:
+  - id
+constants:
+  - 10
+functions:
+  - n
+loc: 1
+sql:
+  SELECT parent, COUNT(id)
+  FROM `bigquery-public-data.hacker_news.comments`
+  GROUP BY parent
+  HAVING COUNT(id) > 10
+comment:
+  df1 <- df_comments %>% group_by(dead,parent) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n > 10)
+  out <- df2 %>% select(parent, count = n) %>% arrange(parent)

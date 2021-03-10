@@ -1,9 +1,3 @@
-# File:	squares-enumerator.py
-# Description: An SQL Synthesizer Using Query Reverse Engineering
-# Author:	Pedro M Orvalho
-# Created on:	22-02-2019 15:13:15
-# Usage:	python3 squares_enumerator.py [flags|(-h for help)] specFile.in
-# Python version:	3.6.4
 import contextlib
 import logging
 import signal
@@ -73,12 +67,17 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
-        prog, attempts = synthesizer.synthesize()
-        if prog:
-            logger.info(f'Solution found: {prog}')
-            queue.put((util.Message.SOLUTION, id, prog, loc, True))
-            return
+        found = False
+        print(util.get_config().top_programs)
+        for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
+            if prog:
+                logger.info(f'Solution found: {prog}')
+                queue.put((util.Message.SOLUTION, id, prog, loc, True))
+                found = True
 
+        if found:
+            queue.put((util.Message.DONE, None, None, None, None))
+            return
         else:
             logger.info('Increasing the number of lines of code to %d.', loc + 1)
             loc = loc + 1

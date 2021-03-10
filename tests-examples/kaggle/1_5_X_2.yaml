@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/kaggle/tables/taxi_trips_2.csv
+output: tests-examples/kaggle/tables/1_5_X_2.csv
+functions:
+  - n
+constants:
+  - 2017
+columns:
+  - trip_start_timestamp
+loc: 1
+sql:
+  SELECT EXTRACT(MONTH FROM trip_start_timestamp) AS month,
+  COUNT(1) AS num_trips
+  FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+  WHERE EXTRACT(YEAR FROM trip_start_timestamp) = 2017
+  GROUP BY month
+  ORDER BY month
+comment:
+  df1 <- df_transactions %>% group_by(block_timestamp,size) %>% summarise(n = n()) %>% ungroup()
+  out <- df1 %>% select(transactions = n, trans_date = block_timestamp) %>% arrange(transactions)

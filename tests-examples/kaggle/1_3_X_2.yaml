@@ -1,0 +1,16 @@
+inputs:
+  - tests-examples/kaggle/tables/comments_3.csv
+output: tests-examples/kaggle/tables/1_3_X_2.csv
+constants:
+  - TRUE
+columns:
+  - deleted
+loc: 2
+sql:
+  SELECT COUNT(1) AS num_deleted_posts
+  FROM `bigquery-public-data.hacker_news.comments`
+  WHERE deleted = True
+comment:
+  df1 <- df_comments %>% group_by(author) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n > 10)
+  out <- df2 %>% select(author, NumPosts = n) %>% arrange(parent)

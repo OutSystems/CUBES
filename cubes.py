@@ -97,7 +97,7 @@ def main():
                     subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking, use_solution_dsl=args.use_dsl,
                     use_solution_cube=args.use_cube, probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
                     split_complex_joins=args.split_complex_joins, bitenum_enabled=args.bitenum, split_complex_joins_ratio=args.split_ratio,
-                    deduce_cubes=args.deduce_cubes, z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
+                    deduce_cubes=args.deduce_cubes, z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top)
     util.store_config(config)
 
     specification = Specification(spec)
@@ -120,22 +120,24 @@ def main():
     signal.signal(signal.SIGTERM, results.handle_sigint)
 
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
-    program = synthesizer.synthesize()  # program is stored in the results holder
+    for program, loc, optimal in synthesizer.synthesize(top_n=util.get_config().top_programs):
+        if args.append:
+            spec = parse_specification(args.input)
+            if 'comment' not in spec:
+                spec['comment'] = ''
+            interp = interpreter.SquaresInterpreter(specification, True)
+            evaluation = interp.eval(program, specification.tables)
+            assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
+            spec['comment'] += '\n\n' + interp.program
+            if 'solution' not in spec:
+                spec['solution'] = [line.production.name for line in program]
+            with open(args.input, 'w') as f:
+                write_specification(spec, f)
 
-    if args.append:
-        spec = parse_specification(args.input)
-        if 'comment' not in spec:
-            spec['comment'] = ''
-        interp = interpreter.SquaresInterpreter(specification, True)
-        evaluation = interp.eval(program, specification.tables)
-        assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
-        spec['comment'] += '\n\n' + interp.program
-        if 'solution' not in spec:
-            spec['solution'] = [line.production.name for line in program]
-        with open(args.input, 'w') as f:
-            write_specification(spec, f)
-
-    results.print_results()
+        results.store_solution(program, loc, optimal)
+        results.print_results()
+        results.solution = None
+        results.specification = Specification(spec)
     exit(results.exit_code)
 
 

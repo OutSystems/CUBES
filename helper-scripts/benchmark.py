@@ -22,6 +22,7 @@ parser.add_argument('--portfolio2', action='store_true', help='use portfolio 2')
 parser.add_argument('--sequential2', action='store_true', help='use sequential 2')
 parser.add_argument('--resume', action='store_true', help='resume previous run')
 parser.add_argument('--sample', type=float)
+parser.add_argument('--instances')
 parser.add_argument('name', metavar='NAME', help="name of the result file")
 
 args, other_args = parser.parse_known_args()
@@ -83,7 +84,15 @@ if not args.append and not args.resume:
         writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
         f.flush()
 
-instances = glob.glob('tests/**/*.yaml', recursive=True)
+if not args.instances:
+    instances = glob.glob('tests/**/*.yaml', recursive=True)
+else:
+    instances = []
+    with open(args.instances) as inst_list:
+        for inst in inst_list.readlines():
+            instances += list(glob.glob(inst[:-1], recursive=True))
+
+print(instances)
 
 if args.sample:
     instances = random.sample(instances, int(len(instances) * args.sample))

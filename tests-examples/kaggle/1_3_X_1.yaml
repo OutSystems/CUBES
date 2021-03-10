@@ -1,0 +1,17 @@
+inputs:
+  - tests-examples/kaggle/tables/comments_2.csv
+output: tests-examples/kaggle/tables/1_3_X_1.csv
+constants:
+  - 10
+functions:
+  - n
+loc: 1
+sql:
+  SELECT author, COUNT(1) AS NumPosts
+  FROM `bigquery-public-data.hacker_news.comments`
+  GROUP BY author
+  HAVING COUNT(1) > 10
+comment:
+  df1 <- df_comments %>% group_by(author) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n > 10)
+  out <- df2 %>% select(author, NumPosts = n) %>% arrange(parent)

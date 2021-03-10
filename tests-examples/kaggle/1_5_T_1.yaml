@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/kaggle/tables/transactions.csv
+output: tests-examples/kaggle/tables/1_5_T_1.csv
+functions:
+  - n
+loc: 1
+sql:
+  WITH time AS
+  (
+  SELECT DATE(block_timestamp) AS trans_date
+  FROM `bigquery-public-data.crypto_bitcoin.transactions`
+  )
+  SELECT COUNT(1) AS transactions,
+  trans_date
+  FROM time
+  GROUP BY trans_date
+  ORDER BY trans_date
+comment:
+  df1 <- df_transactions %>% group_by(block_timestamp,size) %>% summarise(n = n()) %>% ungroup()
+  out <- df1 %>% select(transactions = n, trans_date = block_timestamp) %>% arrange(transactions)

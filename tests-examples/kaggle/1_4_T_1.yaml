@@ -1,0 +1,15 @@
+inputs:
+  - tests-examples/kaggle/tables/comments_4.csv
+output: tests-examples/kaggle/tables/1_4_T_1.csv
+functions:
+  - n
+loc: 2
+sql:
+  SELECT COUNT(consecutive_number) AS num_accidents,
+  EXTRACT(DAYOFWEEK FROM timestamp_of_crash) AS day_of_week
+  FROM `bigquery-public-data.nhtsa_traffic_fatalities.accident_2015`
+  GROUP BY day_of_week
+  ORDER BY num_accidents DESC
+comment:
+  df1 <- df_comments_4 %>% group_by(day_of_week,number_of_vehicle_forms_submitted_all) %>% summarise(n = n()) %>% ungroup()
+  out <- df1 %>% select(num_accidents = n, day_of_week) %>% arrange(num_accidents)

@@ -1,0 +1,25 @@
+inputs:
+  - tests-examples/kaggle/tables/taxi_trips_5.csv
+output: tests-examples/kaggle/tables/2_2_X_2.csv
+functions:
+  - rank
+constants:
+  - 2017-05-01
+columns:
+  - trip_start_timestamp
+loc: 1
+sql:
+  SELECT pickup_community_area,
+  trip_start_timestamp,
+  trip_end_timestamp,
+  RANK()
+  OVER (
+  PARTITION BY pickup_community_area
+  ORDER BY trip_start_timestamp
+  ) AS trip_number
+  FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
+  WHERE DATE(trip_start_timestamp) = '2017-05-01'
+comment:
+  df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
+  df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
+  out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)

@@ -321,8 +321,6 @@ class Specification:
         function_difficulty = {prod.name: reduce(operator.mul, (len(rhs.domain) if rhs.is_enum() else len(self.inputs) for rhs in prod.rhs), 1) for prod
                   in self.tyrell_spec.get_function_productions() if prod.name != 'empty'}
         logger.debug(function_difficulty)
-        function_difficulty = {key: value / sum( function_difficulty.values()) for key, value in function_difficulty.items()}
-        logger.debug(function_difficulty)
         return self.tyrell_spec
 
     def get_bitvecnum(self, columns: Sequence[str]) -> int:

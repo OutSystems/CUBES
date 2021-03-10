@@ -1,10 +1,12 @@
 status_levels <- rev(c(0, 3, 2, 4, -2, -1, 5, 1, 143))
-status_meanings <- rev(c('R and SQL', 'Non-optimal', 'Just R', 'Just R Non-optimal', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
+status_meanings <- rev(c('Solved', 'Non-optimal', 'Solved (Just R)', 'Just R Non-optimal', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
 status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#4B44CC", "#cc241d", "#653e9c", "#3c3836", '#000000'))
 
-fuzzy_levels <- rev(c(0, 1, 2, 3, -1))
-fuzzy_meanings <- rev(c('Correct', 'Incorrect', 'Fuzzying Incorrect', 'Timeout', 'Error'))
-fuzzy_colors <- rev(c("#57853C", "#B4560E", "#d79921", "#4B44CC", "#cc241d"))
+fuzzy_levels <- rev(c(0, 4, 5, 1, 2, 3, -1, -2, -3))
+fuzzy_meanings <- rev(c('Possibly Correct', 'Possibly Correct Top 3', 'Possibly Correct Top 5', 'Incorrect', 'Incorrect by Fuzzing', 'Timeout', 'Error', 'Fuzzer Error', 'GT Mismatch'))
+fuzzy_colors <- rev(c("#57853C", "#085F05", "#052C03", "#B4560E", "#d79921", "#4B44CC", "#cc241d", "#aa241d", '#000000'))
+
+test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set', 'outsystems', 'leetcode')
 
 instance_info <- read_csv('instances.csv', col_types = cols(
   name = col_character(),
@@ -34,6 +36,7 @@ max_non_inf <- function(...) {
   }
 }
 
+
 is_solved_status <- function(status) {
   status != -2 &
     status != -1 &
@@ -55,16 +58,25 @@ load_result_squares <- function(file) {
     filter(!(benchmark %in% test_filter)) %>%
     left_join(instance_info)
   if (file.exists(paste0('fuzzy/', file, '.csv'))) {
-    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default='?', base_eq='c'))
-    result <- left_join(result, result_fuzzy) %>%
-      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == fuzzies, 0, 2))))) %>%
-      mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
+    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default = '?', base_eq = 'c'))
+    result <- left_join(result, result_fuzzy, by='name')
+    result <- result %>%
+      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == '-4', -2, ifelse(base_eq == '-5', -3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == fuzzies, 0, ifelse(base_eq == 'True', 2,-1))))))))
+
+    if ('top_i' %in% names(result)) {
+      result <- result %>% mutate(fuzzy = ifelse(!is.na(top_i) &
+                                                   fuzzy == 0 &
+                                                   top_i > 1 &
+                                                   top_i <= 3, 4, fuzzy),
+                                  fuzzy = ifelse(!is.na(top_i) & fuzzy == 0 & top_i > 3, 5, fuzzy))
+    }
+    result <- result %>% mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
   }
   gc()
   result
 }
 
-load_result_file <- function(file) {
+load_result_file <- function(file, top_n = F, fuzzies = NULL) {
   result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?', status = col_factor(levels = status_levels))) %>%
     #mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     mutate(benchmark = ifelse(grepl("spider", name, fixed = TRUE), "spider", gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)))) %>%
@@ -76,13 +88,11 @@ load_result_file <- function(file) {
            status = ifelse(is.na(status), 1, as.character(status)),  # *sighs* factors are weird
            status = ifelse(timeout, ifelse(status == 3 | status == 4, as.character(status), -1), as.character(status)),  # *sighs* factors are weird
            status = ifelse(memout, -2, as.character(status)),  # *sighs* factors are weird
-           solved = is_solved_status(status),
            log_suff = paste0('_', run_number),
            log = paste0('data/', file, '/', name, log_suff, '.log'),
            log_content = map(log, function(x) { ifelse(file.exists(x), read_file(x), NA) }),
-           skewed = unlist(map(log_content, function(x) { str_detect(x, 'ypcall') })),
            hard_h = unlist(map(log_content, function(x) { str_match(x, '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2] })),
-           loc_reached = unlist(map(log_content, function(x) { max_non_inf(parse_integer(str_match_all(x, 'Enumerator for loc (.*) constructed')[[1]][,2])) })),
+           loc_reached = unlist(map(log_content, function(x) { max_non_inf(parse_integer(str_match_all(x, 'Enumerator for loc (.*) constructed')[[1]][, 2])) })),
            loc_found = unlist(map(log_content, function(x) { str_match(x, 'Solution size: (.*)')[, 2] })),
            fails = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Failed: (.*) \\(approx\\)')[, 2] }))),
            init = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in enumerator init: (.*) \\(approx\\)')[, 2] }))),
@@ -93,18 +103,49 @@ load_result_file <- function(file) {
            cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Generated cubes: (.*)')[, 2] }))),
            blocked_cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Blocked cubes: (.*) \\(.*\\)')[, 2] }))),
            attempts = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Attempted programs: (.*) \\(approx\\)')[, 2] }))),
-           solution = map(log_content, function(x) { str_match(x, 'Solution found: \\[(.*)\\]')[, 2] }),
+           solution = map(log_content, function(x) { map(str_match_all(x, '\\[MainProcess\\]\\[INFO\\] Solution found: \\[(.*)\\]'), function(x) { x[, 2] }) }),
+           solution = ifelse(solution != '', solution, NA_character_),
+           solutions = unlist(map(log_content, function(x) { str_count(x, '------------------------------------- R Solution ---------------------------------------') })),
+           status = ifelse(solutions > 0, 0, as.character(status)),  # *sighs* factors are weird
            #status = ifelse(is.na(solution), as.character(status), ifelse(status == -2, 2, as.character(status))),  # *sighs* factors are weird
            #solved = ifelse(is.na(solution), solved, ifelse(status == -2, T, solved)),  # *sighs* factors are weird
-           equivalent_p = cpu / real) %>%
-    filter(!skewed) %>%
-    select(-log, -log_content, -log_suff, -several_runs, -skewed) %>%
+           solved = is_solved_status(status),
+           equivalent_p = cpu / real)
+  if (top_n) {
+    result <- result %>% unnest(solution)
+  } else {
+    result <- result %>% mutate(solution = unlist(map(solution, function(s) {ifelse(length(s) == 0, NA, s[[1]])})) )
+  }
+  result <- result %>%
+    select(-log, -log_content, -log_suff, -several_runs) %>%
     left_join(instance_info)
   if (file.exists(paste0('fuzzy/', file, '.csv'))) {
-    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default='?', base_eq = 'c'))
-    result <- left_join(result, result_fuzzy) %>%
-      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == fuzzies, 0, 2))))) %>%
-      mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
+    result_fuzzy <- read_csv(paste0('fuzzy/', file, '.csv'), col_types = cols(.default = '?', base_eq = 'c'))
+    result <- left_join(result, result_fuzzy, by='name')
+  }
+  for (f in fuzzies) {
+    if (file.exists(paste0('fuzzy/', f, '.csv'))) {
+      result_fuzzy <- read_csv(paste0('fuzzy/', f, '.csv'), col_types = cols(.default = '?', base_eq = 'c'))
+      result <- left_join(result, result_fuzzy, suffix = c('.o', ''), by = 'name') %>%
+        mutate(fuzzies = coalesce(fuzzies, fuzzies.o),
+               base_eq = coalesce(base_eq, base_eq.o),
+               fuzzy_eq = coalesce(fuzzy_eq, fuzzy_eq.o),
+               fuzzy_neq = coalesce(fuzzy_neq, fuzzy_neq.o),
+               fuzzy_err = coalesce(fuzzy_err, fuzzy_err.o)) %>%
+        select(-fuzzies.o, -base_eq.o, -fuzzy_eq.o, -fuzzy_neq.o, -fuzzy_err.o)
+    }
+  }
+  if ('base_eq' %in% names(result)) {
+    result <- result %>%
+      mutate(fuzzy = ifelse(is.na(base_eq), -1, ifelse(base_eq == '-1', 3, ifelse(base_eq == '-4', -2, ifelse(base_eq == '-5', -3, ifelse(base_eq == 'False', 1, ifelse(fuzzy_eq == fuzzies, 0, ifelse(base_eq == 'True', 2,-1))))))))
+    if ('top_i' %in% names(result)) {
+      result <- result %>% mutate(fuzzy = ifelse(!is.na(top_i) &
+                                                   fuzzy == 0 &
+                                                   top_i > 1 &
+                                                   top_i <= 3, 4, fuzzy),
+                                  fuzzy = ifelse(!is.na(top_i) & fuzzy == 0 & top_i > 3, 5, fuzzy))
+    }
+    result <- result %>% mutate(fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings))
   }
   gc()
   result
@@ -189,14 +230,19 @@ load_result_file_worst <- function(file) {
     distinct()
 }
 
-test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set', 'outsystems', 'leetcode')
+
+a <- load_result_file('sequential_sem_top_5')
+
+
 {
-  squares <- load_result_squares('squares')
-  squares_2 <- load_result_squares('squares_2')
-  scythe <- load_result_squares('scythe')
-  scythe_2 <- load_result_squares('scythe_2')
-  scythe_3 <- load_result_squares('scythe_3')
-  patsql <- load_result_squares('patsql')
+  # squares <- load_result_squares('squares')
+  squares <- load_result_squares('squares_2')
+  # scythe <- load_result_squares('scythe')
+  # scythe_2 <- load_result_squares('scythe_2')
+  scythe <- load_result_squares('scythe_3')
+  # patsql <- load_result_squares('patsql')
+  # patsql_2 <- load_result_squares('patsql_2')
+  patsql <- load_result_squares('patsql_3')
 
   #single <- load_result_file('single')
   #single_np <- load_result_file('single_np')
@@ -206,11 +252,13 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   #bitenum_nofd <- load_result_file('bitenum_nofd')
 
   #sequential1 <- load_result_file('sequential')
-  sequential <- load_result_file('sequential_2')
-  sequential_3 <- load_result_file('sequential_3')
-  sequential_subsume <- load_result_file('sequential_subsume')
-  sequential_no_qffd <- load_result_file('sequential_no_qffd')
-  sequential_simple_dsl <- load_result_file('sequential_simple_dsl')
+  # sequential <- load_result_file('sequential_2')
+  # sequential_3 <- load_result_file('sequential_3')
+  sequential <- load_result_file('sequential_semantics')
+  sequential_top5 <- load_result_file('sequential_sem_top_5_2')
+  # sequential_subsume <- load_result_file('sequential_subsume')
+  # sequential_no_qffd <- load_result_file('sequential_no_qffd')
+  # sequential_simple_dsl <- load_result_file('sequential_simple_dsl')
   sequential_no_bitvec <- load_result_file('sequential_no_bitvec')
 
   #qffd_r <- load_result_file('qffd_r')
@@ -385,12 +433,16 @@ test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-ex
   c50_8 <- load_result_file('c50_8')
   #c50_16_1 <- load_result_file('c50_16')
   c50_16 <- load_result_file('c50_16_2')
+  c50_16_top5 <- load_result_file('c50_16_top5')
   #c50_16_optimal <- load_result_file('c50_16_optimal')
-  c50_16_optimal <- load_result_file('c50_16_optimal_2')
-  c50_16_static <- load_result_file('c50_16_static')
-  c50_16_no_dedu <- load_result_file('c50_16_no_dedu')
-  c50_16_no_split <- load_result_file('c50_16_no_split')
+  # c50_16_optimal <- load_result_file('c50_16_optimal_2')
+  # c50_16_static <- load_result_file('c50_16_static')
+  # c50_16_no_dedu <- load_result_file('c50_16_no_dedu')
+  # c50_16_no_split <- load_result_file('c50_16_no_split')
 
-  determ <- load_result_file_median('determinism')
-  determ2 <- load_result_file_median('determinism_2')
+  # determ <- load_result_file_median('determinism')
+  # determ2 <- load_result_file_median('determinism_2')
+
+  determ5 <- load_result_file('determinism_5')
+  determ5 <- load_result_file_median('determinism_5')
 }

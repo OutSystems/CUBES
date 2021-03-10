@@ -1,0 +1,18 @@
+inputs:
+  - tests-examples/kaggle/tables/sample_files.csv
+  - tests-examples/kaggle/tables/licenses.csv
+output: tests-examples/kaggle/tables/1_6_T_1.csv
+functions:
+  - n
+loc: 2
+sql:
+  SELECT L.license, COUNT(1) AS number_of_files
+  FROM `bigquery-public-data.github_repos.sample_files` AS sf
+  INNER JOIN `bigquery-public-data.github_repos.licenses` AS L
+  ON sf.repo_name = L.repo_name
+  GROUP BY L.license
+  ORDER BY number_of_files DESC
+comment:
+  df1 <- inner_join(df_sample_files, df_licenses, na_matches="never")
+  df2 <- df1 %>% group_by(id,license) %>% summarise(n = n()) %>% ungroup()
+  out <- df2 %>% select(license, number_of_files = n) %>% arrange(license)

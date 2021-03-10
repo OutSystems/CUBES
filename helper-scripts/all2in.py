@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests/**/*.yaml', recursive=True):
+    for file in glob.glob('tests/kaggle/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 

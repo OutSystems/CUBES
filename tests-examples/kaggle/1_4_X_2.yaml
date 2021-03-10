@@ -1,0 +1,22 @@
+inputs:
+  - tests-examples/kaggle/tables/international_education_2.csv
+output: tests-examples/kaggle/tables/1_4_X_2.csv
+functions:
+  - n
+constants:
+  - 5
+  - 2016
+columns:
+  - year
+loc: 2
+sql:
+  SELECT indicator_code, indicator_name, COUNT(1) AS num_rows
+  FROM `bigquery-public-data.world_bank_intl_education.international_education`
+  WHERE year = 2016
+  GROUP BY indicator_name, indicator_code
+  HAVING COUNT(1) >= 175
+  ORDER BY COUNT(1) DESC
+comment:
+  df1 <- df_international_education_2 %>% group_by(indicator_code,year) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n >= 5 & n < 2016)
+  out <- df2 %>% select(indicator_code, num_rows = n) %>% arrange(indicator_code)

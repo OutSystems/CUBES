@@ -93,6 +93,7 @@ class ProcessSetManager:
         self.alternate_j = alternate_j
         self.current_cube = {}
         self.current_cube_generator = {}
+        self.stop_incrementing = False
 
     def register_process(self, process_set: ProcessSet, process: Process, pipe: Connection):
         self.process_sets[pipe] = process_set
@@ -122,7 +123,7 @@ class ProcessSetManager:
         process_loc = self.get_loc(pipe)
         return program, process_loc
 
-    def send(self, pipe: Connection):
+    def send(self, pipe: Connection, continue_previous=False):
         if pipe in self.waiting_list:
             cube = self.waiting_list[pipe]
             self.waiting_list.pop(pipe)
@@ -130,6 +131,8 @@ class ProcessSetManager:
             self.current_cube[pipe] = cube
             pipe.send((Message.SOLVE, cube))
             self.poll.modify(pipe.fileno(), select.EPOLLIN)
+        elif continue_previous:
+            pipe.send((Message.RESUME_SOLVE,))
         else:
             if self.alternated and self.left_to_switch > 0 and \
                     self.process_sets[pipe] in self.process_set_stack and self.process_sets[pipe] != self.process_set_stack[-1]:
@@ -148,6 +151,8 @@ class ProcessSetManager:
                     if loc + 1 > util.get_config().maximum_loc:
                         self.poll.unregister(pipe.fileno())
                         raise MaximumLinesOfCodeReached
+                    if self.stop_incrementing:
+                        return
                     if self.process_sets[pipe].cube_generator.next_generator is None:
                         logger.info('Generator for loc %d is exhausted!', loc)
                     self.process_sets[pipe].cube_generator = self.process_sets[pipe].cube_generator.get_next_generator()
@@ -155,13 +160,17 @@ class ProcessSetManager:
 
             self.current_cube_generator[pipe] = self.process_sets[pipe].cube_generator
             if self.should_reinit(pipe):
-                self.init(pipe)
-                self.poll.modify(pipe.fileno(), select.EPOLLIN)
-                assert pipe not in self.waiting_list
-                self.waiting_list[pipe] = cube
+                if not self.stop_incrementing:
+                    self.init(pipe)
+                    self.poll.modify(pipe.fileno(), select.EPOLLIN)
+                    assert pipe not in self.waiting_list
+                    self.waiting_list[pipe] = cube
+                    logger.info('Asking for re-init of process %s to loc %d', self.process_sets[pipe].processes[pipe].name,
+                                self.process_sets[pipe].cube_generator.loc)
             else:
                 self.current_cube[pipe] = cube
-                pipe.send((Message.SOLVE, cube))
+                if not continue_previous:
+                    pipe.send((Message.SOLVE, cube))
                 self.poll.modify(pipe.fileno(), select.EPOLLIN)
 
     def min_loc(self) -> int:

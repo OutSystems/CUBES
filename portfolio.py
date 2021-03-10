@@ -76,7 +76,7 @@ def main():
                          max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
                          subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
                          use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
-                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
+                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top)
     util.store_config(base_config)
 
     specification = Specification(spec)
