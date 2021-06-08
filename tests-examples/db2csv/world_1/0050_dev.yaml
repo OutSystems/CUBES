@@ -1,0 +1,778 @@
+db: tests-examples/db2csv/world_1/tables/world_1.sqlite
+inputs:
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+ - tests-examples/db2csv/world_1/tables/country.csv
+output: tests-examples/db2csv/world_1/tables/0050_dev.csv
+raw_question: How many continents speak Chinese? 
+question_index: 751 
+constants:
+ - Chinese
+join_columns:
+ - code
+ - countrycode
+functions:
+ - count
+columns:
+ - continent
+ - language
+filters:
+ - '='
+comment: |-
+  SELECT COUNT(DISTINCT Continent)
+  FROM country AS T1
+  JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode
+  WHERE T2.Language = "Chinese"
+
+sql: |-
+  SELECT COUNT(DISTINCT Continent)
+  FROM country AS T1
+  JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode
+  WHERE T2.Language = "Chinese"
+smbop_beam_join_columns:
+- - code
+  - countrycode
+- - code
+  - countrycode
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+smbop_beam_constants:
+- - Chinese
+- - Chinese
+- - Chinese
+smbop_beam_functions:
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- - continent
+  - language
+- - language
+- - continent
+  - code
+  - language
+smbop_beam_ieu:
+- []
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - '='
+- - '='
+  - '>='
+  - '>'
+smbop_beam_inferred_code:
+  - SELECT COUNT( DISTINCT country.continent ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
+  - SELECT COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
+  - SELECT COUNT( DISTINCT country.continent ) FROM country, countrylanguage WHERE country.code >= countrylanguage.countrycode AND countrylanguage.language = 'Chinese'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT COUNT( DISTINCT country.continent ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
+  - SELECT COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
+  - SELECT COUNT( DISTINCT country.continent ) FROM country, countrylanguage WHERE country.code >= countrylanguage.countrycode AND countrylanguage.language = 'Chinese'
+ratsql_beam_join_columns:
+- - code
+  - countrycode
+- - code
+  - countrycode
+- - code
+  - countrycode
+- []
+- - code
+  - countrycode
+- - code
+  - countrycode
+- - code
+  - countrycode
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+ratsql_beam_constants:
+- - Chinese
+- - Chinese
+- - Chinese
+- - Chinese
+- - Chinese
+- - Chinese
+- - Chinese
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- - continent
+  - language
+- - continent
+  - language
+- - continent
+  - language
+- - language
+- - language
+- - continent
+  - language
+- - continent
+  - language
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal'
+  - SELECT Count(DISTINCT country.Continent) FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal'
+  - SELECT Count(country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal'
+  - SELECT Count(*) FROM countrylanguage WHERE countrylanguage.Language = 'terminal'
+  - SELECT Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal'
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'terminal'
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' LIMIT 1
+  - SELECT DISTINCT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+  - SELECT Count(DISTINCT country.Continent) FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+  - SELECT Count(country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+  - SELECT Count(*) FROM countrylanguage WHERE countrylanguage.Language = 'Chinese'
+  - SELECT Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'Chinese'
+  - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese' LIMIT 1
+  - SELECT DISTINCT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+ratsql_beam_score_history:
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -0.2352174073457718
+  - -0.16364789009094238
+  - -0.1050729751586914
+  - -0.0935211181640625
+  - -0.10503959655761719
+  - -0.10214090347290039
+  - -0.10143184661865234
+  - -0.10486268997192383
+  - -0.10444879531860352
+  - -0.10573387145996094
+  - -0.06320361793041229
+  - -0.1118001937866211
+  - -0.10540890693664551
+  - -0.10486698150634766
+  - -0.10095071792602539
+  - -0.10088968276977539
+  - -0.10774445533752441
+  - -0.10454297065734863
+  - -0.09938907623291016
+  - -0.1030263900756836
+  - -0.1438889503479004
+  - -0.10558891296386719
+  - -0.10404539108276367
+  - -0.8230971693992615
+  - -0.10463237762451172
+  - -0.10747575759887695
+  - -0.08791044354438782
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -0.2352174073457718
+  - -0.16364789009094238
+  - -0.1050729751586914
+  - -0.0935211181640625
+  - -0.10503959655761719
+  - -0.10214090347290039
+  - -0.10143184661865234
+  - -0.10486268997192383
+  - -0.10444879531860352
+  - -0.10573387145996094
+  - -0.06320361793041229
+  - -0.1118001937866211
+  - -0.10540890693664551
+  - -0.10486698150634766
+  - -0.10095071792602539
+  - -0.10088968276977539
+  - -0.10774445533752441
+  - -0.10454297065734863
+  - -0.09938907623291016
+  - -0.1030263900756836
+  - -0.1438889503479004
+  - -0.10558891296386719
+  - -0.10404539108276367
+  - -2.5807950496673584
+  - -0.10567092895507812
+  - -0.10521316528320312
+  - -0.44644492864608765
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -0.2352174073457718
+  - -2.3201441764831543
+  - -0.10481405258178711
+  - -0.08951997756958008
+  - -0.10287809371948242
+  - -0.10212469100952148
+  - -0.1013803482055664
+  - -0.10493183135986328
+  - -0.10447311401367188
+  - -0.10555648803710938
+  - -0.06417283415794373
+  - -0.11180615425109863
+  - -0.10541677474975586
+  - -0.1049342155456543
+  - -0.10090351104736328
+  - -0.10108232498168945
+  - -0.10773324966430664
+  - -0.10455751419067383
+  - -0.09942913055419922
+  - -0.10309600830078125
+  - -0.14996910095214844
+  - -0.10548257827758789
+  - -0.10395431518554688
+  - -0.8154904246330261
+  - -0.10463714599609375
+  - -0.10759782791137695
+  - -0.08785934746265411
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -2.4072580337524414
+  - -0.11114668846130371
+  - -0.10615324974060059
+  - -0.09984159469604492
+  - -0.10189247131347656
+  - -0.10377359390258789
+  - -0.1016855239868164
+  - -0.1052694320678711
+  - -0.10442686080932617
+  - -0.10524940490722656
+  - -0.05981265753507614
+  - -0.11181092262268066
+  - -0.10539627075195312
+  - -0.10519218444824219
+  - -0.10067987442016602
+  - -0.10149717330932617
+  - -0.10766720771789551
+  - -0.10460519790649414
+  - -0.0990896224975586
+  - -0.103057861328125
+  - -0.7738595008850098
+  - -0.10538005828857422
+  - -0.10346317291259766
+  - -0.7218698859214783
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -2.4072580337524414
+  - -0.11114668846130371
+  - -0.10615324974060059
+  - -0.09984159469604492
+  - -0.10189247131347656
+  - -0.10377359390258789
+  - -0.1016855239868164
+  - -0.1052694320678711
+  - -0.10442686080932617
+  - -0.10524940490722656
+  - -0.05981265753507614
+  - -0.11181092262268066
+  - -0.10539627075195312
+  - -0.10519218444824219
+  - -0.10067987442016602
+  - -0.10149717330932617
+  - -0.10766720771789551
+  - -0.10460519790649414
+  - -0.0990896224975586
+  - -0.103057861328125
+  - -0.7738595008850098
+  - -0.10538005828857422
+  - -0.10346317291259766
+  - -0.849866509437561
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -0.2352174073457718
+  - -0.16364789009094238
+  - -0.1050729751586914
+  - -0.0935211181640625
+  - -0.10503959655761719
+  - -0.10214090347290039
+  - -0.10143184661865234
+  - -0.10486268997192383
+  - -0.10444879531860352
+  - -0.10573387145996094
+  - -0.06320361793041229
+  - -3.448298692703247
+  - -0.10546660423278809
+  - -0.10475969314575195
+  - -0.10086584091186523
+  - -0.10133647918701172
+  - -0.10772895812988281
+  - -0.10454583168029785
+  - -0.09942340850830078
+  - -0.10311412811279297
+  - -0.15257024765014648
+  - -0.1056218147277832
+  - -0.1040339469909668
+  - -0.884736955165863
+  - -0.10455513000488281
+  - -0.10510730743408203
+  - -0.02942011132836342
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -0.10700702667236328
+  - -0.10387682914733887
+  - -0.10110950469970703
+  - -0.10495328903198242
+  - -0.1138753890991211
+  - -0.10199785232543945
+  - -0.10632896423339844
+  - -0.10417604446411133
+  - -0.1063833236694336
+  - -0.2352174073457718
+  - -0.16364789009094238
+  - -0.1050729751586914
+  - -0.0935211181640625
+  - -0.10503959655761719
+  - -0.10214090347290039
+  - -0.10143184661865234
+  - -0.10486268997192383
+  - -0.10444879531860352
+  - -0.10573387145996094
+  - -0.06320361793041229
+  - -0.1118001937866211
+  - -0.10540890693664551
+  - -0.10486698150634766
+  - -0.10095071792602539
+  - -0.10088968276977539
+  - -3.5534701347351074
+  - -0.10491657257080078
+  - -0.0998072624206543
+  - -0.10306692123413086
+  - -0.1413135528564453
+  - -0.10556697845458984
+  - -0.10397052764892578
+  - -0.8212728500366211
+  - -0.1046457290649414
+  - -0.10745906829833984
+  - -0.08765406906604767
+- - -0.10917520523071289
+  - -0.10504770278930664
+  - -3.547114372253418
+  - -0.10296630859375
+  - -0.10091829299926758
+  - -0.10744285583496094
+  - -0.1126852035522461
+  - -0.1019439697265625
+  - -0.10643434524536133
+  - -0.10412836074829102
+  - -0.10643863677978516
+  - -0.237106591463089
+  - -0.1690349578857422
+  - -0.10506296157836914
+  - -0.0939478874206543
+  - -0.10485219955444336
+  - -0.10226106643676758
+  - -0.10142850875854492
+  - -0.10492610931396484
+  - -0.10445499420166016
+  - -0.10570430755615234
+  - -0.06304066628217697
+  - -0.11178469657897949
+  - -0.10539722442626953
+  - -0.10486459732055664
+  - -0.10094785690307617
+  - -0.10086536407470703
+  - -0.10774421691894531
+  - -0.10454273223876953
+  - -0.0994100570678711
+  - -0.1030263900756836
+  - -0.1468949317932129
+  - -0.10558462142944336
+  - -0.10402917861938477
+  - -0.8214645385742188
+  - -0.10463285446166992
+  - -0.10748147964477539
+  - -0.08786436915397644
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'

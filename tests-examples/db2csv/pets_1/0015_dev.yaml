@@ -1,0 +1,1749 @@
+db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
+inputs:
+ - tests-examples/db2csv/pets_1/tables/pets.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
+ - tests-examples/db2csv/pets_1/tables/student.csv
+output: tests-examples/db2csv/pets_1/tables/0015_dev.csv
+raw_question: Find the first name of students who have both cat and dog pets . 
+question_index: 59 
+constants:
+ - cat
+ - dog
+join_columns:
+ - stuid
+ - petid
+columns:
+ - pettype
+filters:
+ - '='
+ieu:
+ - intersect
+comment: |-
+  select t1.fname
+  from student as t1
+  join has_pet as t2 on t1.stuid = t2.stuid
+  join pets as t3 on t3.petid = t2.petid
+  where t3.pettype = 'cat' intersect
+    select t1.fname
+    from student as t1
+    join has_pet as t2 on t1.stuid = t2.stuid
+    join pets as t3 on t3.petid = t2.petid where t3.pettype = 'dog'
+
+sql: |-
+  select t1.fname
+  from student as t1
+  join has_pet as t2 on t1.stuid = t2.stuid
+  join pets as t3 on t3.petid = t2.petid
+  where t3.pettype = 'cat' intersect
+    select t1.fname
+    from student as t1
+    join has_pet as t2 on t1.stuid = t2.stuid
+    join pets as t3 on t3.petid = t2.petid where t3.pettype = 'dog'
+smbop_beam_join_columns:
+- - petid
+- - petid
+- []
+- []
+- - petid
+- - petid
+- - petid
+- - petid
+- - petid
+- - petid
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+smbop_beam_constants:
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+smbop_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - pettype
+  - stuid
+- - pettype
+- []
+- []
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- - intersect
+- []
+- []
+- - intersect
+- - intersect
+smbop_beam_filters:
+- - '='
+- - '='
+- []
+- []
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT student.fname FROM student WHERE student.stuid IN (SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog')
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat'
+  - SELECT has_pet.stuid FROM has_pet
+  - SELECT pets.petid FROM pets
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT student.fname FROM student WHERE student.stuid IN (SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog')
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat'
+  - SELECT has_pet.stuid FROM has_pet
+  - SELECT pets.petid FROM pets
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'dog'
+  - SELECT has_pet.stuid FROM pets JOIN has_pet ON pets.petid = has_pet.petid WHERE pets.pettype = 'cat' INTERSECT SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'dog'
+ratsql_beam_join_columns:
+- - stuid
+  - petid
+- - stuid
+  - petid
+- - stuid
+  - petid
+- - stuid
+  - petid
+- - stuid
+  - petid
+- - stuid
+  - petid
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+ratsql_beam_constants:
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+- - cat
+  - dog
+ratsql_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_columns:
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+- - pettype
+ratsql_beam_ieu:
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT Student.LName FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT DISTINCT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE DISTINCT Pets.PetType = 'terminal'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE DISTINCT Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT DISTINCT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' LIMIT 1
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' INTERSECT SELECT Student.LName FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal' LIMIT 1 INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT Student.LName FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT DISTINCT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE DISTINCT Pets.PetType = 'cat'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE DISTINCT Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT DISTINCT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat' LIMIT 1
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.LName FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+  - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' LIMIT 1 INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+ratsql_beam_score_history:
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -0.1076822280883789
+  - -0.10595118999481201
+  - -0.08499336242675781
+  - -0.1032552719116211
+  - -0.1061859130859375
+  - -0.10997343063354492
+  - -0.10384845733642578
+  - -0.10055971145629883
+  - -0.10387849807739258
+  - -0.10476016998291016
+  - -0.1020665168762207
+  - -0.10429716110229492
+  - -0.10467004776000977
+  - -0.10358047485351562
+  - -0.13606052100658417
+  - -0.11202430725097656
+  - -0.10552382469177246
+  - -0.09300374984741211
+  - -0.10006523132324219
+  - -0.10081815719604492
+  - -0.10243606567382812
+  - -0.10502767562866211
+  - -0.10463762283325195
+  - -0.10466575622558594
+  - -0.07498975843191147
+  - -0.11209630966186523
+  - -0.10634541511535645
+  - -0.10413837432861328
+  - -0.10108757019042969
+  - -0.1046457290649414
+  - -0.10772204399108887
+  - -0.10509443283081055
+  - -0.10149478912353516
+  - -0.10708856582641602
+  - -0.10563373565673828
+  - -0.10736656188964844
+  - -0.10501623153686523
+  - -0.6301444172859192
+  - -0.10596418380737305
+  - -0.10712337493896484
+  - -0.06371501833200455
+  - -0.10564184188842773
+  - -0.1037745475769043
+  - -0.06055808812379837
+  - -0.10535287857055664
+  - -0.11754274368286133
+  - -0.11398696899414062
+  - -0.10778427124023438
+  - -0.3151156008243561
+  - -0.10371017456054688
+  - -0.10544681549072266
+  - -0.05524514243006706
+  - -0.10709857940673828
+  - -0.10426855087280273
+  - -0.07398990541696548
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -3.2843990325927734
+  - -0.10975909233093262
+  - -0.10510969161987305
+  - -0.0940403938293457
+  - -0.1254429817199707
+  - -0.1028132438659668
+  - -0.10045957565307617
+  - -0.10471487045288086
+  - -0.10507965087890625
+  - -0.10497426986694336
+  - -0.10503982752561569
+  - -0.11083507537841797
+  - -0.1060640811920166
+  - -0.10309934616088867
+  - -0.10146617889404297
+  - -0.10287952423095703
+  - -0.1077127456665039
+  - -0.1058274507522583
+  - -0.08488798141479492
+  - -0.1030426025390625
+  - -0.1060943603515625
+  - -0.1099698543548584
+  - -0.10386443138122559
+  - -0.10050249099731445
+  - -0.10386371612548828
+  - -0.10474729537963867
+  - -0.1020669937133789
+  - -0.10429668426513672
+  - -0.10468101501464844
+  - -0.10356330871582031
+  - -0.13580964505672455
+  - -0.11202359199523926
+  - -0.10552620887756348
+  - -0.092864990234375
+  - -0.09999752044677734
+  - -0.10082530975341797
+  - -0.10241937637329102
+  - -0.10501766204833984
+  - -0.10463666915893555
+  - -0.10466432571411133
+  - -0.07522076368331909
+  - -0.11210298538208008
+  - -0.10634636878967285
+  - -0.10413599014282227
+  - -0.1010580062866211
+  - -0.10466432571411133
+  - -0.10771894454956055
+  - -0.10509467124938965
+  - -0.1016550064086914
+  - -0.1071162223815918
+  - -0.1056985855102539
+  - -0.10740423202514648
+  - -0.10503530502319336
+  - -0.631498396396637
+  - -0.10596609115600586
+  - -0.10713481903076172
+  - -0.06364981085062027
+  - -0.1056365966796875
+  - -0.10377264022827148
+  - -0.06062338873744011
+  - -0.10530853271484375
+  - -0.11753606796264648
+  - -0.11400651931762695
+  - -0.10777759552001953
+  - -0.31573519110679626
+  - -0.10371017456054688
+  - -0.10544443130493164
+  - -0.05520927160978317
+  - -0.10709524154663086
+  - -0.10426616668701172
+  - -0.07405101507902145
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -0.1076822280883789
+  - -0.10595118999481201
+  - -0.08499336242675781
+  - -0.1032552719116211
+  - -0.1061859130859375
+  - -0.10997343063354492
+  - -0.10384845733642578
+  - -0.10055971145629883
+  - -0.10387849807739258
+  - -0.10476016998291016
+  - -0.1020665168762207
+  - -0.10429716110229492
+  - -0.10467004776000977
+  - -0.10358047485351562
+  - -0.13606052100658417
+  - -3.4523797035217285
+  - -0.10375213623046875
+  - -0.0891265869140625
+  - -0.1007070541381836
+  - -0.10084104537963867
+  - -0.10282135009765625
+  - -0.10501337051391602
+  - -0.10462141036987305
+  - -0.10458183288574219
+  - -0.07672274112701416
+  - -0.11200356483459473
+  - -0.10626912117004395
+  - -0.10422039031982422
+  - -0.10092020034790039
+  - -0.10413980484008789
+  - -0.10767579078674316
+  - -0.10512042045593262
+  - -0.10230541229248047
+  - -0.10711431503295898
+  - -0.10560321807861328
+  - -0.10741949081420898
+  - -0.10501289367675781
+  - -0.6297047734260559
+  - -0.10596132278442383
+  - -0.1071157455444336
+  - -0.06381724774837494
+  - -0.10564279556274414
+  - -0.10378217697143555
+  - -0.06099054217338562
+  - -0.10530424118041992
+  - -0.11749505996704102
+  - -0.11398124694824219
+  - -0.10780096054077148
+  - -0.3158658444881439
+  - -0.10370016098022461
+  - -0.10544776916503906
+  - -0.05523250997066498
+  - -0.10709762573242188
+  - -0.10430288314819336
+  - -0.07448630779981613
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -0.1076822280883789
+  - -0.10595118999481201
+  - -0.08499336242675781
+  - -0.1032552719116211
+  - -0.1061859130859375
+  - -0.10997343063354492
+  - -0.10384845733642578
+  - -0.10055971145629883
+  - -0.10387849807739258
+  - -0.10476016998291016
+  - -0.1020665168762207
+  - -0.10429716110229492
+  - -0.10467004776000977
+  - -0.10358047485351562
+  - -0.13606052100658417
+  - -0.11202430725097656
+  - -0.10552382469177246
+  - -0.09300374984741211
+  - -0.10006523132324219
+  - -0.10081815719604492
+  - -0.10243606567382812
+  - -0.10502767562866211
+  - -0.10463762283325195
+  - -0.10466575622558594
+  - -0.07498975843191147
+  - -3.444432258605957
+  - -0.10601425170898438
+  - -0.10408782958984375
+  - -0.10110759735107422
+  - -0.10455703735351562
+  - -0.10765790939331055
+  - -0.10506033897399902
+  - -0.09998750686645508
+  - -0.10707235336303711
+  - -0.10505294799804688
+  - -0.10737991333007812
+  - -0.10497903823852539
+  - -0.6456867456436157
+  - -0.10591840744018555
+  - -0.10713958740234375
+  - -0.06342460960149765
+  - -0.10566043853759766
+  - -0.1037592887878418
+  - -0.06038897857069969
+  - -0.10541677474975586
+  - -0.11752700805664062
+  - -0.11401939392089844
+  - -0.10779047012329102
+  - -0.3138638436794281
+  - -0.10373210906982422
+  - -0.10544300079345703
+  - -0.0552448034286499
+  - -0.10710000991821289
+  - -0.1042623519897461
+  - -0.07390686869621277
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -3.465303659439087
+  - -0.10572648048400879
+  - -0.1014242172241211
+  - -0.10237503051757812
+  - -0.10241889953613281
+  - -0.10761284828186035
+  - -0.10605871677398682
+  - -0.08829259872436523
+  - -0.10293197631835938
+  - -0.10590028762817383
+  - -0.10994720458984375
+  - -0.1038508415222168
+  - -0.10078907012939453
+  - -0.10407781600952148
+  - -0.10473299026489258
+  - -0.1020355224609375
+  - -0.1042795181274414
+  - -0.10474872589111328
+  - -0.10348653793334961
+  - -0.1361711174249649
+  - -0.11199522018432617
+  - -0.10551714897155762
+  - -0.09315681457519531
+  - -0.09985733032226562
+  - -0.10079431533813477
+  - -0.10235929489135742
+  - -0.10503721237182617
+  - -0.10463333129882812
+  - -0.10465574264526367
+  - -0.07531209290027618
+  - -0.11210179328918457
+  - -0.10634970664978027
+  - -0.10413217544555664
+  - -0.10114812850952148
+  - -0.10480165481567383
+  - -0.10771656036376953
+  - -0.10509419441223145
+  - -0.1011958122253418
+  - -0.1070713996887207
+  - -0.10571622848510742
+  - -0.10733985900878906
+  - -0.1050119400024414
+  - -0.6283877491950989
+  - -0.10598373413085938
+  - -0.10709571838378906
+  - -0.06355259567499161
+  - -0.10564184188842773
+  - -0.10378122329711914
+  - -0.060638535767793655
+  - -0.10535097122192383
+  - -0.11752653121948242
+  - -0.11397552490234375
+  - -0.10778379440307617
+  - -0.31476715207099915
+  - -0.10371160507202148
+  - -0.10544490814208984
+  - -0.05525439232587814
+  - -0.10709905624389648
+  - -0.10427570343017578
+  - -0.07410237938165665
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -3.4631898403167725
+  - -0.10110974311828613
+  - -0.11910390853881836
+  - -0.10929679870605469
+  - -0.10447835922241211
+  - -0.10003376007080078
+  - -0.10510396957397461
+  - -0.10517358779907227
+  - -0.10497808456420898
+  - -0.10342083871364594
+  - -0.11066460609436035
+  - -0.10609006881713867
+  - -0.10255670547485352
+  - -0.10210800170898438
+  - -0.10272359848022461
+  - -0.10768914222717285
+  - -0.10593855381011963
+  - -0.08505868911743164
+  - -0.10318422317504883
+  - -0.10613203048706055
+  - -0.1099693775177002
+  - -0.10385417938232422
+  - -0.10054826736450195
+  - -0.10386800765991211
+  - -0.10475778579711914
+  - -0.10207033157348633
+  - -0.10429716110229492
+  - -0.10467195510864258
+  - -0.1035771369934082
+  - -0.13604220747947693
+  - -0.11202454566955566
+  - -0.10552477836608887
+  - -0.09294462203979492
+  - -0.10005855560302734
+  - -0.10082006454467773
+  - -0.1024332046508789
+  - -0.1050267219543457
+  - -0.10463714599609375
+  - -0.10466432571411133
+  - -0.07503996789455414
+  - -0.11209678649902344
+  - -0.10634589195251465
+  - -0.10413932800292969
+  - -0.10107946395874023
+  - -0.1046452522277832
+  - -0.10772085189819336
+  - -0.10509443283081055
+  - -0.1015315055847168
+  - -0.10709095001220703
+  - -0.10565757751464844
+  - -0.1073756217956543
+  - -0.10502147674560547
+  - -0.6304338574409485
+  - -0.10596609115600586
+  - -0.10712766647338867
+  - -0.06371825933456421
+  - -0.10564041137695312
+  - -0.1037750244140625
+  - -0.06055887043476105
+  - -0.10535955429077148
+  - -0.11754512786865234
+  - -0.11398458480834961
+  - -0.10778141021728516
+  - -0.3150302469730377
+  - -0.10371112823486328
+  - -0.10544729232788086
+  - -0.055250559002161026
+  - -0.10709905624389648
+  - -0.10426950454711914
+  - -0.07399134337902069
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -0.1076822280883789
+  - -0.10595118999481201
+  - -0.08499336242675781
+  - -0.1032552719116211
+  - -0.1061859130859375
+  - -0.10997343063354492
+  - -0.10384845733642578
+  - -0.10055971145629883
+  - -0.10387849807739258
+  - -0.10476016998291016
+  - -0.1020665168762207
+  - -0.10429716110229492
+  - -0.10467004776000977
+  - -0.10358047485351562
+  - -0.13606052100658417
+  - -0.11202430725097656
+  - -0.10552382469177246
+  - -0.09300374984741211
+  - -0.10006523132324219
+  - -0.10081815719604492
+  - -0.10243606567382812
+  - -0.10502767562866211
+  - -0.10463762283325195
+  - -0.10466575622558594
+  - -0.07498975843191147
+  - -0.11209630966186523
+  - -0.10634541511535645
+  - -0.10413837432861328
+  - -0.10108757019042969
+  - -0.1046457290649414
+  - -3.547398090362549
+  - -0.10506987571716309
+  - -0.09858131408691406
+  - -0.1068582534790039
+  - -0.1034846305847168
+  - -0.10725116729736328
+  - -0.10487937927246094
+  - -0.6018797755241394
+  - -0.10602712631225586
+  - -0.10706615447998047
+  - -0.06332044303417206
+  - -0.10573148727416992
+  - -0.10374021530151367
+  - -0.05793321132659912
+  - -0.10550403594970703
+  - -0.11794185638427734
+  - -0.1139683723449707
+  - -0.10776853561401367
+  - -0.3106280267238617
+  - -0.10383462905883789
+  - -0.10547637939453125
+  - -0.05498351901769638
+  - -0.10721063613891602
+  - -0.10407733917236328
+  - -0.07133316248655319
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -0.1076822280883789
+  - -0.10595118999481201
+  - -0.08499336242675781
+  - -0.1032552719116211
+  - -0.1061859130859375
+  - -0.10997343063354492
+  - -0.10384845733642578
+  - -0.10055971145629883
+  - -0.10387849807739258
+  - -0.10476016998291016
+  - -0.1020665168762207
+  - -0.10429716110229492
+  - -0.10467004776000977
+  - -0.10358047485351562
+  - -3.5906789302825928
+  - -0.11108112335205078
+  - -0.1052546501159668
+  - -0.09208297729492188
+  - -0.10067224502563477
+  - -0.10066843032836914
+  - -0.10239028930664062
+  - -0.10447025299072266
+  - -0.1047215461730957
+  - -0.1045989990234375
+  - -0.08099237084388733
+  - -0.11207461357116699
+  - -0.10635685920715332
+  - -0.10432291030883789
+  - -0.10108041763305664
+  - -0.10444068908691406
+  - -0.10771965980529785
+  - -0.10508179664611816
+  - -0.10049629211425781
+  - -0.10694742202758789
+  - -0.10569524765014648
+  - -0.10723400115966797
+  - -0.10495185852050781
+  - -0.6331168413162231
+  - -0.1059274673461914
+  - -0.10704231262207031
+  - -0.0625762864947319
+  - -0.1056661605834961
+  - -0.10376262664794922
+  - -0.06014755740761757
+  - -0.10554075241088867
+  - -0.11862802505493164
+  - -0.11385679244995117
+  - -0.10772943496704102
+  - -0.3151356875896454
+  - -0.10355710983276367
+  - -0.10544252395629883
+  - -0.05532082915306091
+  - -0.10711669921875
+  - -0.10426473617553711
+  - -0.0736025720834732
+- - -0.1036534309387207
+  - -0.10468578338623047
+  - -0.10552406311035156
+  - -0.10444378852844238
+  - -0.10182476043701172
+  - -0.10252571105957031
+  - -0.10502386093139648
+  - -0.10131978988647461
+  - -0.10479354858398438
+  - -0.10457277297973633
+  - -0.10440826416015625
+  - -0.15166357159614563
+  - -0.11160802841186523
+  - -0.10526347160339355
+  - -0.09520626068115234
+  - -0.10490179061889648
+  - -0.1041116714477539
+  - -0.1002044677734375
+  - -0.10515069961547852
+  - -0.10526275634765625
+  - -0.10494375228881836
+  - -0.10449254512786865
+  - -0.11070394515991211
+  - -0.10608911514282227
+  - -0.10237455368041992
+  - -0.1025848388671875
+  - -0.10252523422241211
+  - -3.5467677116394043
+  - -0.10448408126831055
+  - -0.10302352905273438
+  - -0.10483455657958984
+  - -0.10666036605834961
+  - -0.11017346382141113
+  - -0.10383248329162598
+  - -0.10061502456665039
+  - -0.10369300842285156
+  - -0.10462379455566406
+  - -0.10200786590576172
+  - -0.1043233871459961
+  - -0.1047663688659668
+  - -0.10350847244262695
+  - -0.13560189306735992
+  - -0.11201119422912598
+  - -0.10551834106445312
+  - -0.09455108642578125
+  - -0.10016679763793945
+  - -0.1007990837097168
+  - -0.10237836837768555
+  - -0.10501718521118164
+  - -0.10463953018188477
+  - -0.10465526580810547
+  - -0.075358085334301
+  - -0.11211395263671875
+  - -0.10635113716125488
+  - -0.10413074493408203
+  - -0.10100603103637695
+  - -0.10462760925292969
+  - -0.10771918296813965
+  - -0.10509681701660156
+  - -0.10193157196044922
+  - -0.10733461380004883
+  - -0.10561800003051758
+  - -0.10744094848632812
+  - -0.10504770278930664
+  - -0.6317630410194397
+  - -0.10594797134399414
+  - -0.10712766647338867
+  - -0.06366322934627533
+  - -0.10562849044799805
+  - -0.1037755012512207
+  - -0.06065266951918602
+  - -0.10529708862304688
+  - -0.11757850646972656
+  - -0.11399221420288086
+  - -0.10777997970581055
+  - -0.3155161738395691
+  - -0.10372734069824219
+  - -0.10544681549072266
+  - -0.05522935092449188
+  - -0.10709810256958008
+  - -0.10427284240722656
+  - -0.07409053295850754
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LName'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LName'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Fname'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'PetType'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Has_Pet'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Pets'

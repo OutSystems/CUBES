@@ -28,6 +28,9 @@ class LinesDecider(ExampleDecider):
         for example in self._examples:
             output = self.interpreter.eval(prog, example.input)
             result = self.interpreter.equals(output, example.output, prog)
+            # for var in self.interpreter.current_vars:
+            #     robjects.r(f'rm({var})')
+            # self.interpreter.current_vars = set()
             if not result[0]:
                 fails.append((example, output, result[1], result[2]))
         return fails

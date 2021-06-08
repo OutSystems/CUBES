@@ -1,6 +1,9 @@
 import argparse
 import csv
+import re
+import shutil
 import sqlite3
+import traceback
 from collections import defaultdict
 from difflib import ndiff
 from functools import singledispatchmethod
@@ -8,6 +11,7 @@ from itertools import chain
 from logging import getLogger
 from os.path import isfile
 from pathlib import Path
+from typing import List, Tuple
 
 import sqlparse
 import yaml
@@ -17,11 +21,23 @@ from rpy2 import robjects
 from sqlparse.sql import Statement, Token, Function, Identifier, Where, Comparison, IdentifierList, Parenthesis
 from sqlparse.tokens import Operator, Number, Punctuation, Wildcard, String, Name
 
+from squares import types
+
 robjects.r('library(vctrs)')
 
 vec_as_names = robjects.r('vec_as_names')
 
-allowed_keywords_as_identifiers = ['events', 'length', 'month', 'location', 'position', 'uid', 'source', 'year', 'section', 'connection', 'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics', 'result']
+allowed_keywords_as_identifiers = ['events', 'length', 'month', 'location', 'position', 'uid', 'source', 'year',
+                                   'section', 'connection',
+                                   'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics', 'result']
+
+
+def removesuffix(self: str, suffix: str, /) -> str:
+    # suffix='' should not call self[:-0].
+    if suffix and self.endswith(suffix):
+        return self[:-len(suffix)]
+    else:
+        return self[:]
 
 
 def askbool(message):
@@ -67,6 +83,7 @@ connections = {}
 tables = {}
 column_map = defaultdict(OrderedSet)
 invalid_instance_sets = set()
+column_types = defaultdict(dict)
 
 counters = defaultdict(lambda: 1)
 failed = 0
@@ -166,7 +183,9 @@ class InstanceCollector:
                 self.order_col.add(node.value.lower())
             elif len(node.tokens) == 3:
                 arg = node.tokens[0]
-                if len(arg.tokens) == 1:
+                if not arg.is_group:
+                    pass
+                elif len(arg.tokens) == 1:
                     self.order_col.add(arg.value.lower())
                 elif len(arg.tokens) == 3:
                     self.order_col.add(arg.tokens[2].value.lower())
@@ -194,8 +213,8 @@ class InstanceCollector:
             if elem.value.lower() == 'intersect':
                 break
             self.visit_where(elem)
-        if node.tokens[i+1:]:
-            self.visit(sqlparse.parse(''.join(map(lambda x: x.value, node.tokens[i+1:])))[0])
+        if node.tokens[i + 1:]:
+            self.visit(sqlparse.parse(''.join(map(lambda x: x.value, node.tokens[i + 1:])))[0])
 
     @visit.register
     def _(self, node: Parenthesis):
@@ -269,6 +288,52 @@ class InstanceCollector:
             raise NotImplementedError
 
 
+def map_type(t: str) -> str:
+    t = t.lower()
+    if t == 'integer' or t == 'int' or t == 'bigint' or t == 'smallint' or t == 'smallint unsigned' or t == 'tinyint unsigned' or re.match(
+            r'(big)?int\(\d+\)', t) or t == 'year':
+        return 'int'
+    elif t == 'text' or re.match(r'(character )?(var)?char(2)?\(\d+\)', t):
+        return 'str'
+    elif t == 'real' or t == 'numeric' or t == 'decimal' or t == 'double' or t == 'float' or re.match(
+            r'(number)|(numeric)|(decimal)\(\d+,\d+\)', t) or re.match(r'float\(\d+\)', t):
+        return 'real'
+    elif t == 'datetime' or t == 'timestamp':
+        return 'datetime'
+    elif t == 'date':
+        return 'datetime'
+    elif t == 'bit' or t == 'bool' or t == 'boolean':
+        return 'bool'
+    elif t == '':
+        return 'guess'
+    else:
+        raise NotImplementedError(f'Unknown type {t}')
+
+
+def coalesce_type(current, new):
+    logger.warning('Column with mixed types found: %s and %s', current, new)
+    if {current, new} == {'int', 'real'}:
+        return 'real'
+    if {current, new} == {'text', 'int'}:
+        return 'str'
+    else:
+        raise NotImplementedError(f'Unknown type mixing: {current} with {new}')
+
+
+def coalesce_types(cell_types: List[Tuple[str]]) -> List[str]:
+    result = None
+    for row in cell_types:
+        if result is None:
+            result = list(map(map_type, row))
+            continue
+
+        for i, (current, new) in enumerate(zip(result, map(map_type, row))):
+            if current != new:
+                result[i] = coalesce_type(current, new)
+
+    return result
+
+
 with open('spider/train_gold.sql') as f:
     for line in OrderedSet(f):
         orig_query, instance_set = line.strip().split('\t')
@@ -279,11 +344,12 @@ with open('spider/train_gold.sql') as f:
         Path(f'tests-examples/spider/{instance_set}/tables').mkdir(exist_ok=True)
 
         if instance_set not in connections:
+            shutil.copyfile(f'spider/database/{instance_set}/{instance_set}.sqlite', f'tests-examples/spider/{instance_set}/tables/db.sqlite')
             connections[instance_set] = sqlite3.connect(f'spider/database/{instance_set}/{instance_set}.sqlite')
 
             c = connections[instance_set].cursor()
             c.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables[instance_set] = list(map(lambda x: x.lower(), chain.from_iterable(c.fetchall())))
+            tables[instance_set] = [c.lower() for c in chain.from_iterable(c.fetchall()) if c != 'sqlite_sequence']
             print(f'Found new instance set {instance_set} with tables {tables[instance_set]}')
             conn = connections[instance_set]
             c = conn.cursor()
@@ -292,9 +358,25 @@ with open('spider/train_gold.sql') as f:
                     columns = OrderedSet()
                     with open(f'tests-examples/spider/{instance_set}/tables/{table}.csv', 'w', newline='') as out_f:
                         writer = csv.writer(out_f)
+
+                        c.execute(f"PRAGMA table_info({table});")
+                        csv_cols = []
+                        cols = []
+                        row = c.fetchone()
+                        while row:
+                            cols.append(row[1].lower())
+                            csv_cols.append(f'{cols[-1]}:{map_type(row[2])}')
+                            if cols[-1] not in column_types[instance_set]:
+                                column_types[instance_set][cols[-1]] = map_type(row[2])
+                            elif column_types[instance_set][cols[-1]] == map_type(row[2]):
+                                pass
+                            else:
+                                column_types[instance_set][cols[-1]] = types.UNKNOWN
+                            row = c.fetchone()
+                        writer.writerow(csv_cols)
+                        columns.update(cols)
+
                         c.execute(f"SELECT * FROM {table};")
-                        writer.writerow([desc[0].lower() for desc in c.description])
-                        columns.update([desc[0].lower() for desc in c.description])
                         row = c.fetchone()
                         if row is None:
                             raise EmptyOutputException(f'{instance_set}/{table}')
@@ -316,16 +398,33 @@ with open('spider/train_gold.sql') as f:
 
         print(f'Executing query {counters[instance_set]} of {instance_set} (total {sum(counters.values())})')
         cur = conn.cursor()
+        cur2 = conn.cursor()
         try:
-            with open(f'tests-examples/spider/{instance_set}/tables/{str(counters[instance_set]).rjust(4, "0")}.csv', 'w',
+            with open(f'tests-examples/spider/{instance_set}/tables/{str(counters[instance_set]).rjust(4, "0")}.csv',
+                      'w',
                       newline='') as out_f:
                 writer = csv.writer(out_f)
                 cur.execute(query)
                 cols = [desc[0].lower() for desc in cur.description]
-                writer.writerow(list(vec_as_names(robjects.StrVector(cols), repair='unique')))
                 row = cur.fetchone()
                 if row is None:
                     raise EmptyOutputException
+                tmp = ', '.join(map(lambda x: f'typeof("{x}")', cols))
+                cur2.execute(f'SELECT {tmp} FROM ({removesuffix(query, ";")})')
+                cols_types = coalesce_types(cur2.fetchall())
+                cols_types2 = list()
+                for col, col_type in zip(cols, cols_types):
+                    if col in column_types[instance_set]:
+                        if column_types[instance_set][col] != types.UNKNOWN:
+                            cols_types2.append(column_types[instance_set][col])
+                            if column_types[instance_set][col] != col_type:
+                                logger.warning('Column %s has type %s in inputs for data is stored as %s', col,
+                                               column_types[instance_set][col], col_type)
+                            continue
+                    logger.warning('No column named %s in inputs, using data store type %s', col, col_type)
+                    cols_types2.append(col_type)
+                writer.writerow(map(lambda x: f'{x[0]}:{x[1]}',
+                                    zip(list(vec_as_names(robjects.StrVector(cols), repair='unique')), cols_types2)))
                 while row:
                     writer.writerow(row)
                     row = cur.fetchone()
@@ -336,10 +435,12 @@ with open('spider/train_gold.sql') as f:
             collector.visit(stmt)
 
             instance = {
-                'inputs': [f'tests-examples/spider/{instance_set}/tables/{table}.csv' for table in tables[instance_set] if
+                'db': f'tests-examples/spider/{instance_set}/tables/db.sqlite',
+                'inputs': [f'tests-examples/spider/{instance_set}/tables/{table}.csv' for table in tables[instance_set]
+                           if
                            table in collector.identifiers],
                 'output': f'tests-examples/spider/{instance_set}/tables/{str(counters[instance_set]).rjust(4, "0")}.csv',
-                }
+            }
 
             if collector.constants:
                 instance['constants'] = list(collector.constants)
@@ -350,7 +451,7 @@ with open('spider/train_gold.sql') as f:
             if collector.filters:
                 instance['filters'] = list(collector.filters)
 
-            instance['comment'] = literal(sqlparse.format(orig_query, reindent=True, keyword_case='upper'))
+            instance['sql'] = literal(sqlparse.format(orig_query, reindent=True, keyword_case='upper'))
 
             output = yaml.dump(instance, default_flow_style=False, sort_keys=False)
 
@@ -360,7 +461,8 @@ with open('spider/train_gold.sql') as f:
                     current_content = f.read()
                     if output == current_content:
                         continue
-                print(''.join(color_diff(ndiff(current_content.splitlines(keepends=True), output.splitlines(keepends=True)))))
+                print(''.join(
+                    color_diff(ndiff(current_content.splitlines(keepends=True), output.splitlines(keepends=True)))))
                 if args.force or askbool(
                         f'Instance {instance_set}/{str(counters[instance_set]).rjust(4, "0")} has changed. Do you wish to replace it?'):
                     with open(file_path, 'w') as f:
@@ -375,6 +477,7 @@ with open('spider/train_gold.sql') as f:
             print(f'{Fore.RED}Error while executing query {counters[instance_set]} of {instance_set} (total {sum(counters.values())})')
             print(f"\t{query}")
             print(f'\t{e}{Fore.RESET}')
+            # traceback.print_exc()
             failed += 1
         finally:
             cur.close()

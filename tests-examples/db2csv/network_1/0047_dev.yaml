@@ -1,0 +1,1071 @@
+db: tests-examples/db2csv/network_1/tables/network_1.sqlite
+inputs:
+ - tests-examples/db2csv/network_1/tables/likes.csv
+ - tests-examples/db2csv/network_1/tables/highschooler.csv
+output: tests-examples/db2csv/network_1/tables/0047_dev.csv
+raw_question: Show the names of students who have at least 2 likes. 
+question_index: 908 
+constants:
+ - 2
+join_columns:
+ - id
+ - student_id
+groupby_columns:
+ - student_id
+functions:
+ - count
+comment: |-
+  SELECT T2.name
+  FROM Likes AS T1
+  JOIN Highschooler AS T2 ON T1.student_id = T2.id
+  GROUP BY T1.student_id
+  HAVING count(*) >= 2
+
+sql: |-
+  SELECT T2.name
+  FROM Likes AS T1
+  JOIN Highschooler AS T2 ON T1.student_id = T2.id
+  GROUP BY T1.student_id
+  HAVING count(*) >= 2
+smbop_beam_join_columns:
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - liked_id
+smbop_beam_groupby_columns:
+- - student_id
+- - student_id
+- - student_id
+smbop_beam_tables:
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+smbop_beam_constants:
+- - 2
+- - 2
+- - 2
+smbop_beam_functions:
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.student_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+  - SELECT highschooler.name FROM likes JOIN highschooler ON likes.student_id = highschooler.id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+  - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.liked_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+smbop_beam_inferred_code_w_terminals:
+  - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.student_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+  - SELECT highschooler.name FROM likes JOIN highschooler ON likes.student_id = highschooler.id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+  - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.liked_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+ratsql_beam_join_columns:
+- - id
+  - liked_id
+- - id
+  - liked_id
+- - id
+  - student_id
+  - liked_id
+- - id
+  - liked_id
+- - id
+  - liked_id
+- - id
+  - liked_id
+- - id
+  - liked_id
+- - id
+  - student_id
+  - liked_id
+ratsql_beam_groupby_columns:
+- - student_id
+- - name
+- - student_id
+- - student_id
+- - id
+- - student_id
+- - student_id
+- - friend_id
+ratsql_beam_tables:
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+ratsql_beam_constants:
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.name HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY DISTINCT Likes.student_id HAVING Count(*) >= 'terminal'
+  - SELECT DISTINCT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(DISTINCT *) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.ID HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 'terminal' LIMIT 1
+  - SELECT Likes.student_id FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.friend_id HAVING Count(*) >= 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.name HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.student_id HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY DISTINCT Likes.student_id HAVING Count(*) >= 2
+  - SELECT DISTINCT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(DISTINCT *) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.ID HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2 LIMIT 1
+  - SELECT Likes.student_id FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.friend_id HAVING Count(*) >= 2
+ratsql_beam_score_history:
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -0.2823188006877899
+  - -0.11116385459899902
+  - -0.10579895973205566
+  - -0.08962631225585938
+  - -0.10798025131225586
+  - -0.10069417953491211
+  - -0.10469722747802734
+  - -0.1069936752319336
+  - -0.11211490631103516
+  - -0.10423404723405838
+  - -0.11053085327148438
+  - -0.10625171661376953
+  - -0.10640287399291992
+  - -0.09906673431396484
+  - -0.1071479320526123
+  - -0.1051020622253418
+  - -0.09591341018676758
+  - -0.10491561889648438
+  - -0.11120462417602539
+  - -0.1031045913696289
+  - -0.10484886169433594
+  - -0.11168224364519119
+  - -0.10442399978637695
+  - -0.10525274276733398
+  - -0.04293093830347061
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -2.227733612060547
+  - -0.11064767837524414
+  - -0.10571813583374023
+  - -0.1189718246459961
+  - -0.11521625518798828
+  - -0.1012277603149414
+  - -0.10500288009643555
+  - -0.10691308975219727
+  - -0.11500740051269531
+  - -0.10351134836673737
+  - -0.1103978157043457
+  - -0.10622525215148926
+  - -0.1060948371887207
+  - -0.09946680068969727
+  - -0.10713481903076172
+  - -0.10509085655212402
+  - -0.09507989883422852
+  - -0.10439395904541016
+  - -0.11038637161254883
+  - -0.10347604751586914
+  - -0.10472440719604492
+  - -0.10805266350507736
+  - -0.10447406768798828
+  - -0.1051025390625
+  - -0.043654244393110275
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -3.5972213745117188
+  - -0.11023330688476562
+  - -0.10536789894104004
+  - -0.1164088249206543
+  - -0.11110305786132812
+  - -0.10143756866455078
+  - -0.10484981536865234
+  - -0.10700368881225586
+  - -0.11429834365844727
+  - -0.10289977490901947
+  - -0.11035346984863281
+  - -0.10624313354492188
+  - -0.10618209838867188
+  - -0.09908914566040039
+  - -0.10714197158813477
+  - -0.10510087013244629
+  - -0.09607410430908203
+  - -0.10495519638061523
+  - -0.11122274398803711
+  - -0.1029806137084961
+  - -0.10488176345825195
+  - -0.11165015399456024
+  - -0.10443115234375
+  - -0.1052083969116211
+  - -0.0429806113243103
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -0.2823188006877899
+  - -3.4663264751434326
+  - -0.10532093048095703
+  - -0.08766555786132812
+  - -0.1101837158203125
+  - -0.10072088241577148
+  - -0.10469245910644531
+  - -0.10699081420898438
+  - -0.11185216903686523
+  - -0.10224973410367966
+  - -0.11046576499938965
+  - -0.10624265670776367
+  - -0.10633659362792969
+  - -0.09918642044067383
+  - -0.1071476936340332
+  - -0.10509371757507324
+  - -0.09611368179321289
+  - -0.10492944717407227
+  - -0.11129140853881836
+  - -0.10312414169311523
+  - -0.10479497909545898
+  - -0.11156027764081955
+  - -0.10442352294921875
+  - -0.1052713394165039
+  - -0.042973075062036514
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -3.468770980834961
+  - -0.10002899169921875
+  - -0.11447286605834961
+  - -0.13076019287109375
+  - -0.10551977157592773
+  - -0.1040353775024414
+  - -0.10539960861206055
+  - -0.2828602194786072
+  - -0.11129140853881836
+  - -0.10579586029052734
+  - -0.09009790420532227
+  - -0.10870552062988281
+  - -0.10063600540161133
+  - -0.10465574264526367
+  - -0.10695362091064453
+  - -0.11229515075683594
+  - -0.10488537698984146
+  - -0.11052536964416504
+  - -0.1062476634979248
+  - -0.10647773742675781
+  - -0.09917593002319336
+  - -0.10715031623840332
+  - -0.10510110855102539
+  - -0.0957026481628418
+  - -0.10488748550415039
+  - -0.11115503311157227
+  - -0.10315895080566406
+  - -0.10480070114135742
+  - -0.11124898493289948
+  - -0.1044301986694336
+  - -0.10524845123291016
+  - -0.04297729954123497
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -0.2823188006877899
+  - -0.11116385459899902
+  - -0.10579895973205566
+  - -0.08962631225585938
+  - -0.10798025131225586
+  - -0.10069417953491211
+  - -0.10469722747802734
+  - -0.1069936752319336
+  - -0.11211490631103516
+  - -0.10423404723405838
+  - -3.476759433746338
+  - -0.10628104209899902
+  - -0.10482454299926758
+  - -0.09984254837036133
+  - -0.1071326732635498
+  - -0.10511231422424316
+  - -0.09665060043334961
+  - -0.10466766357421875
+  - -0.11123800277709961
+  - -0.10321187973022461
+  - -0.10493993759155273
+  - -0.11217286437749863
+  - -0.1044316291809082
+  - -0.10529041290283203
+  - -0.042416561394929886
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -3.693408966064453
+  - -0.10977983474731445
+  - -0.10561490058898926
+  - -0.10515642166137695
+  - -0.11008262634277344
+  - -0.10093021392822266
+  - -0.1048431396484375
+  - -0.10708427429199219
+  - -0.11473464965820312
+  - -0.09923045337200165
+  - -0.10987067222595215
+  - -0.10624384880065918
+  - -0.10633659362792969
+  - -0.09929132461547852
+  - -0.1071319580078125
+  - -0.10509896278381348
+  - -0.09634160995483398
+  - -0.10498046875
+  - -0.11129379272460938
+  - -0.10292911529541016
+  - -0.104888916015625
+  - -0.11173736304044724
+  - -0.10442686080932617
+  - -0.10520601272583008
+  - -0.042936645448207855
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -0.2823188006877899
+  - -0.11116385459899902
+  - -0.10579895973205566
+  - -0.08962631225585938
+  - -0.10798025131225586
+  - -0.10069417953491211
+  - -0.10469722747802734
+  - -0.1069936752319336
+  - -0.11211490631103516
+  - -0.10423404723405838
+  - -0.11053085327148438
+  - -0.10625171661376953
+  - -0.10640287399291992
+  - -0.09906673431396484
+  - -3.5544095039367676
+  - -0.10519623756408691
+  - -0.09952783584594727
+  - -0.10572576522827148
+  - -0.11092138290405273
+  - -0.10358667373657227
+  - -0.10472917556762695
+  - -0.11124621331691742
+  - -0.10441827774047852
+  - -0.1052861213684082
+  - -0.04369247332215309
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -3.3514928817749023
+  - -0.11276650428771973
+  - -0.10515356063842773
+  - -0.1118316650390625
+  - -0.14287948608398438
+  - -0.10573005676269531
+  - -0.10592412948608398
+  - -0.10573816299438477
+  - -0.3005024194717407
+  - -0.11129450798034668
+  - -0.10581493377685547
+  - -0.07922029495239258
+  - -0.10498714447021484
+  - -0.10060787200927734
+  - -0.1048893928527832
+  - -0.10748577117919922
+  - -0.11166858673095703
+  - -0.10199248045682907
+  - -0.11032533645629883
+  - -0.10629105567932129
+  - -0.10646486282348633
+  - -0.1000370979309082
+  - -0.10720562934875488
+  - -0.10512399673461914
+  - -0.10082483291625977
+  - -0.10409832000732422
+  - -0.3048739433288574
+  - -0.10657358169555664
+  - -0.1042032241821289
+  - -0.13214600086212158
+  - -0.1044926643371582
+  - -0.1057286262512207
+  - -0.037189994007349014
+- - -0.10218620300292969
+  - -0.10595893859863281
+  - -0.10669684410095215
+  - -0.10428929328918457
+  - -0.10197210311889648
+  - -0.10286521911621094
+  - -0.10456132888793945
+  - -0.10216712951660156
+  - -0.10433197021484375
+  - -0.1045842170715332
+  - -0.10560369491577148
+  - -0.11131660640239716
+  - -0.11153674125671387
+  - -0.1051790714263916
+  - -0.11041545867919922
+  - -0.12845563888549805
+  - -0.10571813583374023
+  - -0.10407018661499023
+  - -0.10551214218139648
+  - -3.7223947048187256
+  - -0.1106417179107666
+  - -0.1050710678100586
+  - -0.12676382064819336
+  - -0.11019611358642578
+  - -0.10160160064697266
+  - -0.10470771789550781
+  - -0.10705423355102539
+  - -0.11426401138305664
+  - -0.10378153622150421
+  - -0.11039161682128906
+  - -0.1062469482421875
+  - -0.1061863899230957
+  - -0.09918832778930664
+  - -0.10713624954223633
+  - -0.10509920120239258
+  - -0.0960087776184082
+  - -0.10492658615112305
+  - -0.1112055778503418
+  - -0.10299253463745117
+  - -0.10487651824951172
+  - -0.1114996001124382
+  - -0.10443544387817383
+  - -0.10519886016845703
+  - -0.043012816458940506
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'True'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'ID'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'friend_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'

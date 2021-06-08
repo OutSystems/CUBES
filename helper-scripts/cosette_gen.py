@@ -113,7 +113,7 @@ def compare(instance_file: str):
             cosette = ''
 
             specification = Specification(spec_in)
-            for table in specification.tables:
+            for table in specification.input_tables:
                 cosette += f'schema {table}('
                 cols = []
                 for column in specification.data_frames[table]:
@@ -121,7 +121,7 @@ def compare(instance_file: str):
                 cosette += ', '.join(cols) + ');\n'
 
             cosette += '\n'
-            for table in specification.tables:
+            for table in specification.input_tables:
                 ground_truth = re.sub(fr'\b{table[3:]}\b', f'{table}', ground_truth)
                 ground_truth = re.sub(fr'\bfrom {table}(?! as)\b', f'from {table} {table}', ground_truth)
                 actual_query = re.sub(fr'\bfrom {table}(?! as)\b', f'from {table} {table}', actual_query)

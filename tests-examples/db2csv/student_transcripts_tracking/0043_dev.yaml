@@ -1,0 +1,1664 @@
+db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
+inputs:
+ - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+output: tests-examples/db2csv/student_transcripts_tracking/tables/0043_dev.csv
+raw_question: Find the last name of the students who currently live in the state of North Carolina but have not registered in any degree program. 
+question_index: 549 
+constants:
+ - NorthCarolina
+join_columns:
+ - address_id
+ - student_id
+ - current_address_id
+columns:
+ - state_province_county
+filters:
+ - '='
+ieu:
+ - except
+comment: |-
+  SELECT T1.last_name
+  FROM Students AS T1
+  JOIN Addresses AS T2 ON T1.current_address_id = T2.address_id
+  WHERE T2.state_province_county = 'NorthCarolina'
+  EXCEPT
+  SELECT DISTINCT T3.last_name
+  FROM Students AS T3
+  JOIN Student_Enrolment AS T4 ON T3.student_id = T4.student_id
+
+sql: |-
+  SELECT T1.last_name
+  FROM Students AS T1
+  JOIN Addresses AS T2 ON T1.current_address_id = T2.address_id
+  WHERE T2.state_province_county = 'NorthCarolina'
+  EXCEPT
+  SELECT DISTINCT T3.last_name
+  FROM Students AS T3
+  JOIN Student_Enrolment AS T4 ON T3.student_id = T4.student_id
+smbop_beam_join_columns:
+- - address_id
+  - student_id
+  - permanent_address_id
+- []
+- []
+- - address_id
+  - permanent_address_id
+- - address_id
+  - student_id
+  - permanent_address_id
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+smbop_beam_constants:
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+smbop_beam_functions:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - state_province_county
+- []
+- []
+- - state_province_county
+- - state_province_county
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- - union
+smbop_beam_filters:
+- - '='
+- []
+- []
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+  - SELECT students.last_name FROM students
+  - SELECT student_enrolment.student_id FROM student_enrolment
+  - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+  - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina' UNION SELECT students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+  - SELECT students.last_name FROM students
+  - SELECT student_enrolment.student_id FROM student_enrolment
+  - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+  - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina' UNION SELECT students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+ratsql_beam_join_columns:
+- - address_id
+  - current_address_id
+- - address_id
+  - current_address_id
+- - address_id
+  - student_id
+  - current_address_id
+- - address_id
+  - student_id
+  - current_address_id
+- - address_id
+  - current_address_id
+- - address_id
+  - student_id
+  - current_address_id
+- - address_id
+  - current_address_id
+- - address_id
+  - student_id
+  - current_address_id
+- - address_id
+  - current_address_id
+- - address_id
+  - current_address_id
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+ratsql_beam_constants:
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+- - NorthCarolina
+ratsql_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_columns:
+- - city
+- - city
+- - city
+- - city
+  - degree_program_id
+- - city
+- - city
+- - city
+  - date_first_registered
+- - city
+  - degree_program_id
+- - city
+  - degree_program_id
+- - city
+  - state_province_county
+ratsql_beam_ieu:
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Student_Enrolment.student_id FROM Student_Enrolment
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id AND Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Addresses.city = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id AND Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Student_Enrolment.degree_program_id = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Student_Enrolment.student_id FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id AND Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Addresses.city = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Students.date_first_registered = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Student_Enrolment.degree_program_id = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Student_Enrolment.student_id FROM Student_Enrolment WHERE Student_Enrolment.degree_program_id = 'terminal'
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.state_province_county = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - 
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = NorthCarolina EXCEPT SELECT Student_Enrolment.student_id FROM Student_Enrolment
+  - 
+  - 
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = NorthCarolina EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id
+  - 
+  - 
+  - 
+  - 
+  - 
+ratsql_beam_score_history:
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -0.8037064671516418
+  - -0.1109166145324707
+  - -0.1062779426574707
+  - -0.103851318359375
+  - -0.10073041915893555
+  - -0.10544538497924805
+  - -0.10813140869140625
+  - -0.10519671440124512
+  - -0.0990452766418457
+  - -0.1066126823425293
+  - -0.10976982116699219
+  - -0.10495615005493164
+  - -0.10527706146240234
+  - -0.23723983764648438
+  - -0.10465764999389648
+  - -0.10223054885864258
+  - -0.3945840001106262
+  - -0.12477874755859375
+  - -0.10411500930786133
+  - -0.10473251342773438
+  - -0.10342216491699219
+  - -0.15720084309577942
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -1.8094923496246338
+  - -0.1129765510559082
+  - -0.1056065559387207
+  - -1.6213164329528809
+  - -0.309722900390625
+  - -0.11046028137207031
+  - -0.10779261589050293
+  - -0.10483503341674805
+  - -0.09490728378295898
+  - -0.10847949981689453
+  - -0.11017084121704102
+  - -0.10459327697753906
+  - -0.10335159301757812
+  - -0.35964998602867126
+  - -0.0973820686340332
+  - -0.11154890060424805
+  - -0.10479402542114258
+  - -0.10447883605957031
+  - -0.10175400972366333
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -0.8037064671516418
+  - -0.1109166145324707
+  - -0.1062779426574707
+  - -0.103851318359375
+  - -0.10073041915893555
+  - -0.10544538497924805
+  - -0.10813140869140625
+  - -0.10519671440124512
+  - -0.0990452766418457
+  - -0.1066126823425293
+  - -0.10976982116699219
+  - -0.10495615005493164
+  - -0.10527706146240234
+  - -0.23723983764648438
+  - -0.10465764999389648
+  - -0.10223054885864258
+  - -1.389793872833252
+  - -0.1008453369140625
+  - -0.17874526977539062
+  - -0.10501623153686523
+  - -0.10407543182373047
+  - -0.09001392871141434
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -2.1734795570373535
+  - -0.1122899055480957
+  - -0.10591006278991699
+  - -0.10352611541748047
+  - -0.10040950775146484
+  - -0.1049504280090332
+  - -0.10802388191223145
+  - -0.10502290725708008
+  - -0.09677553176879883
+  - -0.10597753524780273
+  - -0.1003727912902832
+  - -0.1051340103149414
+  - -0.10560750961303711
+  - -0.2506551444530487
+  - -0.10466289520263672
+  - -0.10254144668579102
+  - -0.40005478262901306
+  - -0.12107658386230469
+  - -0.10341548919677734
+  - -0.10475635528564453
+  - -0.10343122482299805
+  - -0.15883979201316833
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -3.4810757637023926
+  - -0.22031927108764648
+  - -0.10901021957397461
+  - -0.10767483711242676
+  - -0.10506439208984375
+  - -0.09530258178710938
+  - -0.10682916641235352
+  - -0.1038360595703125
+  - -0.10496997833251953
+  - -0.10588836669921875
+  - -0.27605724334716797
+  - -0.10460615158081055
+  - -0.10198736190795898
+  - -0.3841312527656555
+  - -0.12153100967407227
+  - -0.0987997055053711
+  - -0.10480499267578125
+  - -0.10351943969726562
+  - -0.15502247214317322
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -1.8094923496246338
+  - -0.1129765510559082
+  - -0.1056065559387207
+  - -0.41954851150512695
+  - -0.10329723358154297
+  - -0.10136270523071289
+  - -0.10164117813110352
+  - -0.10387802124023438
+  - -0.10433483123779297
+  - -0.104278564453125
+  - -0.7826156616210938
+  - -0.11048555374145508
+  - -0.10628604888916016
+  - -0.10377740859985352
+  - -0.10075759887695312
+  - -0.10594034194946289
+  - -0.10803055763244629
+  - -0.10519146919250488
+  - -0.10056352615356445
+  - -0.10609865188598633
+  - -0.10494279861450195
+  - -0.10495662689208984
+  - -0.10600471496582031
+  - -0.3739476501941681
+  - -0.10443305969238281
+  - -0.10303306579589844
+  - -0.4082179069519043
+  - -0.1270751953125
+  - -0.09919595718383789
+  - -0.10479545593261719
+  - -0.10383987426757812
+  - -0.15708868205547333
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -3.08390474319458
+  - -0.10925436019897461
+  - -0.10575509071350098
+  - -0.09950017929077148
+  - -0.10093402862548828
+  - -0.10371971130371094
+  - -0.10797476768493652
+  - -0.10507559776306152
+  - -0.10265159606933594
+  - -0.1069188117980957
+  - -0.10779905319213867
+  - -0.10494661331176758
+  - -0.10515499114990234
+  - -0.2325877845287323
+  - -0.10463094711303711
+  - -0.10237836837768555
+  - -0.39761462807655334
+  - -0.12392520904541016
+  - -0.10368585586547852
+  - -0.10474681854248047
+  - -0.10342168807983398
+  - -0.15986379981040955
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -2.1734795570373535
+  - -0.1122899055480957
+  - -0.10591006278991699
+  - -0.10352611541748047
+  - -0.10040950775146484
+  - -0.1049504280090332
+  - -0.10802388191223145
+  - -0.10502290725708008
+  - -0.09677553176879883
+  - -0.10597753524780273
+  - -0.1003727912902832
+  - -0.1051340103149414
+  - -0.10560750961303711
+  - -0.2506551444530487
+  - -0.10466289520263672
+  - -0.10254144668579102
+  - -1.3945268392562866
+  - -0.10036754608154297
+  - -0.18079757690429688
+  - -0.10498189926147461
+  - -0.10404062271118164
+  - -0.08990170806646347
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -1.8094923496246338
+  - -0.1129765510559082
+  - -0.1056065559387207
+  - -0.41954851150512695
+  - -0.10329723358154297
+  - -0.10136270523071289
+  - -0.10164117813110352
+  - -0.10387802124023438
+  - -0.10433483123779297
+  - -0.104278564453125
+  - -2.1332333087921143
+  - -0.1120448112487793
+  - -0.10592937469482422
+  - -0.10344457626342773
+  - -0.10064840316772461
+  - -0.10500001907348633
+  - -0.10800790786743164
+  - -0.10500407218933105
+  - -0.09560346603393555
+  - -0.10765409469604492
+  - -0.10906696319580078
+  - -0.10455989837646484
+  - -0.1032257080078125
+  - -0.38273385167121887
+  - -0.09862279891967773
+  - -0.11144495010375977
+  - -0.10479450225830078
+  - -0.10457420349121094
+  - -0.10587766766548157
+- - -0.1047821044921875
+  - -0.10436058044433594
+  - -0.10658049583435059
+  - -0.10423111915588379
+  - -0.10204076766967773
+  - -0.10259103775024414
+  - -0.105072021484375
+  - -0.1018514633178711
+  - -0.10436582565307617
+  - -0.10506916046142578
+  - -0.10817909240722656
+  - -0.10762949287891388
+  - -0.10987591743469238
+  - -0.1058504581451416
+  - -0.08941936492919922
+  - -0.1733107566833496
+  - -0.10132074356079102
+  - -0.10114192962646484
+  - -0.10415458679199219
+  - -0.10452413558959961
+  - -0.10502862930297852
+  - -0.13580745458602905
+  - -0.10959815979003906
+  - -0.10627937316894531
+  - -0.10300159454345703
+  - -0.09973573684692383
+  - -0.10660409927368164
+  - -0.10772514343261719
+  - -0.1053934097290039
+  - -0.07839155197143555
+  - -0.10479307174682617
+  - -0.1063995361328125
+  - -0.10947036743164062
+  - -0.1045835018157959
+  - -0.10131311416625977
+  - -0.1026296615600586
+  - -0.10413074493408203
+  - -0.10291624069213867
+  - -0.10448026657104492
+  - -0.1050567626953125
+  - -0.1049647331237793
+  - -0.3492518663406372
+  - -0.11138153076171875
+  - -0.10613369941711426
+  - -0.13109397888183594
+  - -0.09991025924682617
+  - -0.10210609436035156
+  - -0.10147285461425781
+  - -0.1038823127746582
+  - -0.10432672500610352
+  - -0.10423803329467773
+  - -3.4667842388153076
+  - -0.1111752986907959
+  - -0.10602021217346191
+  - -0.10445880889892578
+  - -0.1010141372680664
+  - -0.10512971878051758
+  - -0.10808563232421875
+  - -0.10514020919799805
+  - -0.09815740585327148
+  - -0.10660219192504883
+  - -0.10745811462402344
+  - -0.10506153106689453
+  - -0.10549211502075195
+  - -0.24080754816532135
+  - -0.10466146469116211
+  - -0.10230159759521484
+  - -0.39614951610565186
+  - -0.12408113479614258
+  - -0.10601329803466797
+  - -0.10470819473266602
+  - -0.10339593887329102
+  - -0.15607701241970062
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student_Enrolment'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student_Enrolment'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'degree_program_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'date_first_registered'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'degree_program_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student_Enrolment'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'degree_program_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Student_Enrolment'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'city'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'last_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'state_province_county'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Students'

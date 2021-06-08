@@ -1,0 +1,1323 @@
+db: tests-examples/db2csv/tvshow/tables/tvshow.sqlite
+inputs:
+ - tests-examples/db2csv/tvshow/tables/cartoon.csv
+ - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+output: tests-examples/db2csv/tvshow/tables/0059_dev.csv
+raw_question: find the id of tv channels that do not play any cartoon directed by Ben Jones. 
+question_index: 643 
+constants:
+ - Ben Jones
+columns:
+ - directed_by
+filters:
+ - '='
+ieu:
+ - except
+comment: |-
+  SELECT id
+  FROM TV_Channel
+  EXCEPT
+  SELECT channel
+  FROM cartoon
+  WHERE directed_by = 'Ben Jones'
+
+sql: |-
+  SELECT id
+  FROM TV_Channel
+  EXCEPT
+  SELECT channel
+  FROM cartoon
+  WHERE directed_by = 'Ben Jones'
+smbop_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- - id
+- - channel
+smbop_beam_tables:
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+smbop_beam_constants:
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+smbop_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - directed_by
+- []
+- []
+- - directed_by
+- []
+- []
+- - directed_by
+smbop_beam_ieu:
+- - except
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '='
+- []
+- []
+- - '='
+- []
+- []
+- - '='
+smbop_beam_inferred_code:
+  - SELECT tv_channel.id FROM tv_channel EXCEPT SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones'
+  - SELECT cartoon.channel FROM cartoon
+  - SELECT tv_channel.id FROM tv_channel
+  - SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones'
+  - SELECT * FROM tv_channel
+  - SELECT tv_channel.id FROM tv_channel GROUP BY tv_channel.id
+  - SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones' GROUP BY cartoon.channel
+smbop_beam_inferred_code_w_terminals:
+  - SELECT tv_channel.id FROM tv_channel EXCEPT SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones'
+  - SELECT cartoon.channel FROM cartoon
+  - SELECT tv_channel.id FROM tv_channel
+  - SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones'
+  - SELECT * FROM tv_channel
+  - SELECT tv_channel.id FROM tv_channel GROUP BY tv_channel.id
+  - SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones' GROUP BY cartoon.channel
+ratsql_beam_join_columns:
+- []
+- - id
+  - channel
+- []
+- - id
+  - channel
+- - id
+  - channel
+- - id
+  - channel
+- []
+- []
+- []
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_series.csv
+  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/cartoon.csv
+ratsql_beam_constants:
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+- - Ben Jones
+ratsql_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_columns:
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+- - directed_by
+ratsql_beam_ieu:
+- - except
+- []
+- []
+- - except
+- - except
+- - except
+- - except
+- - except
+- - except
+ratsql_beam_filters:
+- - '='
+- - '!='
+- - '!='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by != 'terminal'
+  - SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by != 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT Cartoon.Channel FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT DISTINCT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT DISTINCT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE DISTINCT Cartoon.Directed_by = 'terminal'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'terminal' LIMIT 1
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by != 'Ben Jones'
+  - SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by != 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Channel FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT DISTINCT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT DISTINCT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE DISTINCT Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' LIMIT 1
+ratsql_beam_score_history:
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -0.11203384399414062
+  - -0.10546231269836426
+  - -0.08904075622558594
+  - -0.10112810134887695
+  - -0.10394477844238281
+  - -0.10461568832397461
+  - -0.10550832748413086
+  - -0.10559463500976562
+  - -0.10479545593261719
+  - -0.06989065557718277
+  - -0.11114311218261719
+  - -0.10567784309387207
+  - -0.10452747344970703
+  - -0.10128116607666016
+  - -0.10431814193725586
+  - -0.10820317268371582
+  - -0.10518074035644531
+  - -0.10501623153686523
+  - -0.10585594177246094
+  - -0.10922527313232422
+  - -0.10544347763061523
+  - -0.10388946533203125
+  - -0.05985173583030701
+  - -0.10544919967651367
+  - -0.11002731323242188
+  - -0.10503530502319336
+  - -0.10389900207519531
+  - -0.21507754921913147
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -2.510798931121826
+  - -0.5376176834106445
+  - -0.07718610763549805
+  - -0.10398483276367188
+  - -0.10475301742553711
+  - -0.10483312606811523
+  - -0.10488080978393555
+  - -0.09947913140058517
+  - -0.11178469657897949
+  - -0.10558056831359863
+  - -0.10659360885620117
+  - -0.104705810546875
+  - -0.10346603393554688
+  - -0.10886859893798828
+  - -0.10476088523864746
+  - -0.13382911682128906
+  - -0.1048736572265625
+  - -0.1264209747314453
+  - -0.10607671737670898
+  - -0.1045680046081543
+  - -0.20440155267715454
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -2.1775903701782227
+  - -0.1119375228881836
+  - -0.10524559020996094
+  - -2.0102639198303223
+  - -0.19555425643920898
+  - -0.07643890380859375
+  - -0.1043405532836914
+  - -0.10477066040039062
+  - -0.10465335845947266
+  - -0.10498857498168945
+  - -0.09092148393392563
+  - -0.11166715621948242
+  - -0.10548663139343262
+  - -0.10543489456176758
+  - -0.10692596435546875
+  - -0.1022043228149414
+  - -0.10904502868652344
+  - -0.10477232933044434
+  - -0.12842559814453125
+  - -0.10639286041259766
+  - -0.11231756210327148
+  - -0.10570430755615234
+  - -0.10352134704589844
+  - -0.07575501501560211
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -0.11203384399414062
+  - -0.10546231269836426
+  - -0.08904075622558594
+  - -0.10112810134887695
+  - -0.10394477844238281
+  - -0.10461568832397461
+  - -0.10550832748413086
+  - -0.10559463500976562
+  - -0.10479545593261719
+  - -0.06989065557718277
+  - -0.11114311218261719
+  - -0.10567784309387207
+  - -0.10452747344970703
+  - -0.10128116607666016
+  - -0.10431814193725586
+  - -0.10820317268371582
+  - -0.10518074035644531
+  - -0.10501623153686523
+  - -0.10585594177246094
+  - -0.10922527313232422
+  - -0.10544347763061523
+  - -0.10388946533203125
+  - -0.05985173583030701
+  - -0.10544919967651367
+  - -0.11002731323242188
+  - -0.10503530502319336
+  - -0.10389900207519531
+  - -2.0664122104644775
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -2.1775903701782227
+  - -0.1119375228881836
+  - -0.10524559020996094
+  - -0.27896928787231445
+  - -0.10250091552734375
+  - -0.1089777946472168
+  - -0.10831952095031738
+  - -0.10417842864990234
+  - -0.10030603408813477
+  - -0.12205266952514648
+  - -0.1041727066040039
+  - -0.11029553413391113
+  - -0.10340547561645508
+  - -0.10257863998413086
+  - -0.10527658462524414
+  - -0.10351896286010742
+  - -0.10264253616333008
+  - -0.10491371154785156
+  - -0.10522270202636719
+  - -0.10846757888793945
+  - -0.01897609978914261
+  - -0.11202073097229004
+  - -0.10545992851257324
+  - -0.08936214447021484
+  - -0.10108232498168945
+  - -0.1038661003112793
+  - -0.10470199584960938
+  - -0.10552310943603516
+  - -0.10559654235839844
+  - -0.10478544235229492
+  - -0.06922011822462082
+  - -0.11113452911376953
+  - -0.10567593574523926
+  - -0.1045231819152832
+  - -0.10112619400024414
+  - -0.10396337509155273
+  - -0.10828614234924316
+  - -0.10518932342529297
+  - -0.10251760482788086
+  - -0.10587692260742188
+  - -0.10896492004394531
+  - -0.10547208786010742
+  - -0.10391378402709961
+  - -0.05980457365512848
+  - -0.10534858703613281
+  - -0.1102147102355957
+  - -0.10505962371826172
+  - -0.10384368896484375
+  - -0.24247950315475464
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -0.11203384399414062
+  - -0.10546231269836426
+  - -0.08904075622558594
+  - -0.10112810134887695
+  - -0.10394477844238281
+  - -0.10461568832397461
+  - -0.10550832748413086
+  - -0.10559463500976562
+  - -0.10479545593261719
+  - -0.06989065557718277
+  - -0.11114311218261719
+  - -0.10567784309387207
+  - -0.10452747344970703
+  - -0.10128116607666016
+  - -0.10431814193725586
+  - -0.10820317268371582
+  - -0.10518074035644531
+  - -0.10501623153686523
+  - -0.10585594177246094
+  - -0.10922527313232422
+  - -0.10544347763061523
+  - -0.10388946533203125
+  - -0.05985173583030701
+  - -0.10544919967651367
+  - -0.11002731323242188
+  - -0.10503530502319336
+  - -0.10389900207519531
+  - -2.7048287391662598
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -3.522763729095459
+  - -0.10373640060424805
+  - -0.10823535919189453
+  - -0.10437250137329102
+  - -0.10446786880493164
+  - -0.10142707824707031
+  - -0.10453176498413086
+  - -0.10482501983642578
+  - -0.10498857498168945
+  - -0.22014422714710236
+  - -0.10999035835266113
+  - -0.10518693923950195
+  - -0.16126108169555664
+  - -0.10253667831420898
+  - -0.10810089111328125
+  - -0.10857510566711426
+  - -0.1043703556060791
+  - -0.09067296981811523
+  - -0.11192512512207031
+  - -0.10359525680541992
+  - -0.10981035232543945
+  - -0.10340642929077148
+  - -0.10558319091796875
+  - -0.10577154159545898
+  - -0.103668212890625
+  - -0.10243797302246094
+  - -0.10491704940795898
+  - -0.1051797866821289
+  - -0.10842370986938477
+  - -0.01915130391716957
+  - -0.11203789710998535
+  - -0.10546469688415527
+  - -0.08906888961791992
+  - -0.10111522674560547
+  - -0.10393142700195312
+  - -0.10456085205078125
+  - -0.10550355911254883
+  - -0.1055912971496582
+  - -0.10479450225830078
+  - -0.0697978287935257
+  - -0.11114120483398438
+  - -0.10567808151245117
+  - -0.10452795028686523
+  - -0.10128498077392578
+  - -0.10429143905639648
+  - -0.10820245742797852
+  - -0.10518121719360352
+  - -0.10497713088989258
+  - -0.1058645248413086
+  - -0.10924625396728516
+  - -0.10544490814208984
+  - -0.10388708114624023
+  - -0.05982860550284386
+  - -0.10546159744262695
+  - -0.11002206802368164
+  - -0.10503578186035156
+  - -0.1038970947265625
+  - -0.2148088961839676
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -3.4456119537353516
+  - -0.10563039779663086
+  - -0.0914616584777832
+  - -0.09955692291259766
+  - -0.10410833358764648
+  - -0.1039891242980957
+  - -0.10549068450927734
+  - -0.10581588745117188
+  - -0.10482931137084961
+  - -0.07460016012191772
+  - -0.1111152172088623
+  - -0.10562419891357422
+  - -0.1045370101928711
+  - -0.10140657424926758
+  - -0.104156494140625
+  - -0.10823249816894531
+  - -0.10518598556518555
+  - -0.10488653182983398
+  - -0.10591650009155273
+  - -0.10920047760009766
+  - -0.1054391860961914
+  - -0.10390520095825195
+  - -0.05985768511891365
+  - -0.10539484024047852
+  - -0.11003351211547852
+  - -0.10503673553466797
+  - -0.10387659072875977
+  - -0.21367128193378448
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -0.11203384399414062
+  - -0.10546231269836426
+  - -0.08904075622558594
+  - -0.10112810134887695
+  - -0.10394477844238281
+  - -0.10461568832397461
+  - -0.10550832748413086
+  - -0.10559463500976562
+  - -0.10479545593261719
+  - -0.06989065557718277
+  - -3.4577131271362305
+  - -0.10595130920410156
+  - -0.10396385192871094
+  - -0.10109758377075195
+  - -0.10447406768798828
+  - -0.10812211036682129
+  - -0.1052091121673584
+  - -0.1052408218383789
+  - -0.10615062713623047
+  - -0.10921287536621094
+  - -0.10543251037597656
+  - -0.10388517379760742
+  - -0.05979323387145996
+  - -0.10545873641967773
+  - -0.11007308959960938
+  - -0.10503911972045898
+  - -0.10388469696044922
+  - -0.21600784361362457
+- - -0.10889482498168945
+  - -0.10542058944702148
+  - -0.10718631744384766
+  - -0.10393309593200684
+  - -0.11222410202026367
+  - -0.10547447204589844
+  - -0.1050257682800293
+  - -0.10155200958251953
+  - -0.10456037521362305
+  - -0.10470867156982422
+  - -0.10489654541015625
+  - -0.276933878660202
+  - -0.11018896102905273
+  - -0.10514402389526367
+  - -0.18891000747680664
+  - -0.10202693939208984
+  - -0.10725545883178711
+  - -0.10861873626708984
+  - -0.10442948341369629
+  - -0.09178972244262695
+  - -0.1123204231262207
+  - -0.103607177734375
+  - -0.10983538627624512
+  - -0.10342073440551758
+  - -0.10535621643066406
+  - -0.10573005676269531
+  - -0.10366535186767578
+  - -0.10243415832519531
+  - -0.1049203872680664
+  - -0.10517215728759766
+  - -0.10843801498413086
+  - -0.019082067534327507
+  - -0.11203384399414062
+  - -0.10546231269836426
+  - -0.08904075622558594
+  - -0.10112810134887695
+  - -0.10394477844238281
+  - -0.10461568832397461
+  - -0.10550832748413086
+  - -0.10559463500976562
+  - -0.10479545593261719
+  - -0.06989065557718277
+  - -0.11114311218261719
+  - -0.10567784309387207
+  - -0.10452747344970703
+  - -0.10128116607666016
+  - -0.10431814193725586
+  - -3.5390470027923584
+  - -0.10548043251037598
+  - -0.10941267013549805
+  - -0.10576343536376953
+  - -0.10948419570922852
+  - -0.1054983139038086
+  - -0.10386514663696289
+  - -0.059449005872011185
+  - -0.10531854629516602
+  - -0.10971307754516602
+  - -0.1050262451171875
+  - -0.1040191650390625
+  - -0.2042820155620575
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_series'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, True, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Channel'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Directed_by'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Cartoon'
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'TV_Channel'

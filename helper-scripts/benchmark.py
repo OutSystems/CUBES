@@ -70,48 +70,46 @@ def test_file(filename: str, run: str = ''):
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])
     ram = int(re.search('Max. memory \(cumulated for all children\) \(KiB\): (.*)', p.stdout)[1])
 
-    with open('analysis/data/' + args.name + '.csv',
-              'a') as f:  # TODO use a queue so that only one process needs to have the file open
+    with open('analysis/data/' + args.name + '.csv', 'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
         writer.writerow((test_name, timeout, real, cpu, ram, process, status, memout))
         f.flush()
 
 
-if not args.append and not args.resume:
-    os.mkdir(f'analysis/data/{args.name}')
-    with open('analysis/data/' + args.name + '.csv', 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
-        f.flush()
+if __name__ == '__main__':
+    if not args.append and not args.resume:
+        os.mkdir(f'analysis/data/{args.name}')
+        with open('analysis/data/' + args.name + '.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
+            f.flush()
 
-if not args.instances:
-    instances = glob.glob('tests/**/*.yaml', recursive=True)
-else:
-    instances = []
-    with open(args.instances) as inst_list:
-        for inst in inst_list.readlines():
-            instances += list(glob.glob(inst[:-1], recursive=True))
+    if not args.instances:
+        instances = glob.glob('tests/**/*.yaml', recursive=True)
+    else:
+        instances = []
+        with open(args.instances) as inst_list:
+            for inst in inst_list.readlines():
+                instances += list(glob.glob(inst[:-1], recursive=True))
 
-print(instances)
+    if args.sample:
+        instances = random.sample(instances, int(len(instances) * args.sample))
 
-if args.sample:
-    instances = random.sample(instances, int(len(instances) * args.sample))
+    if args.resume:
+        with open('analysis/data/' + args.name + '.csv', 'r') as f:
+            reader = csv.reader(f)
+            existing_instances = []
+            for row in reader:
+                existing_instances.append('tests/' + row[0] + '.yaml')
+                print('Skipping', 'tests/' + row[0] + '.yaml')
 
-if args.resume:
-    with open('analysis/data/' + args.name + '.csv', 'r') as f:
-        reader = csv.reader(f)
-        existing_instances = []
-        for row in reader:
-            existing_instances.append('tests/' + row[0] + '.yaml')
-            print('Skipping', 'tests/' + row[0] + '.yaml')
+        instances = filter(lambda x: x not in existing_instances, instances)
 
-    instances = filter(lambda x: x not in existing_instances, instances)
-
-if args.p == 1:
-    for i in range(args.n):
-        for file in instances:
-            test_file(file, f'_{i}')
-else:
-    with Pool(processes=args.p) as pool:
+    if args.p == 1:
         for i in range(args.n):
-            pool.map(test_file, instances, chunksize=1)
+            for file in instances:
+                test_file(file, f'_{i}')
+    else:
+        with Pool(processes=args.p) as pool:
+            for i in range(args.n):
+                pool.map(test_file, instances, chunksize=1)

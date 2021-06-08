@@ -17,6 +17,7 @@ from squares import util, results
 from squares.config import Config
 from squares.dsl import interpreter
 from squares.dsl.specification import Specification
+from squares.exceptions import SquaresException
 from squares.parallel_synthesizer import ParallelSynthesizer
 from squares.util import create_argparser, parse_specification, write_specification
 
@@ -36,7 +37,8 @@ suppressMessages(library(stringr))
 suppressMessages(library(readr))
 suppressMessages(library(lubridate))
 suppressMessages(library(dplyr))
-suppressMessages(library(dbplyr))''')
+suppressMessages(library(dbplyr))
+suppressMessages(library(purrr))''')
 
 logger = getLogger('squares')
 
@@ -97,7 +99,9 @@ def main():
                     subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking, use_solution_dsl=args.use_dsl,
                     use_solution_cube=args.use_cube, probing_threads=args.probing_threads, cube_freedom=args.cube_freedom,
                     split_complex_joins=args.split_complex_joins, bitenum_enabled=args.bitenum, split_complex_joins_ratio=args.split_ratio,
-                    deduce_cubes=args.deduce_cubes, z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top)
+                    deduce_cubes=args.deduce_cubes, z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top,
+                    use_beam_info=args.beam_info, beam_threshold=args.beam_threshold, enum_until=args.under, max_min_gen_cols=args.max_min_use_gen_cols,
+                    beam_name=args.beam_name)
     util.store_config(config)
 
     specification = Specification(spec)
@@ -107,6 +111,8 @@ def main():
 
     if util.get_config().verbosity >= 3:
         with open('dump.dsl', 'w') as f:
+            f.write(args.input)
+            f.write('\n')
             f.write(str(specification))
 
     results.specification = specification
@@ -119,14 +125,19 @@ def main():
     signal.signal(signal.SIGINT, results.handle_sigint)
     signal.signal(signal.SIGTERM, results.handle_sigint)
 
+    if util.get_config().enum_until is not None:
+        signal.signal(signal.SIGALRM, results.handle_timeout)
+        signal.alarm(util.get_config().enum_until)
+
     synthesizer = ParallelSynthesizer(tyrell_spec, specification, processes)
-    for program, loc, optimal in synthesizer.synthesize(top_n=util.get_config().top_programs):
+    first = True
+    for program, loc, optimal in synthesizer.synthesize(top_n=util.get_config().top_programs, enum_all=util.get_config().enum_until is not None):
         if args.append:
             spec = parse_specification(args.input)
             if 'comment' not in spec:
                 spec['comment'] = ''
             interp = interpreter.SquaresInterpreter(specification, True)
-            evaluation = interp.eval(program, specification.tables)
+            evaluation = interp.eval(program, specification.input_tables)
             assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
             spec['comment'] += '\n\n' + interp.program
             if 'solution' not in spec:
@@ -134,12 +145,26 @@ def main():
             with open(args.input, 'w') as f:
                 write_specification(spec, f)
 
+        if not first:
+            results.specification = Specification(spec)
+        else:
+            first = False
+
         results.store_solution(program, loc, optimal)
         results.print_results()
         results.solution = None
-        results.specification = Specification(spec)
+
+    if util.get_config().enum_until is not None:
+        print()
+        print('All solutions found')
+
     exit(results.exit_code)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except SquaresException as e:
+        logger.error(e.args[0])
+        results.print_results()
+        exit(e.exit_status)

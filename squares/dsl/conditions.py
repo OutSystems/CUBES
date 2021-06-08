@@ -65,6 +65,7 @@ class ConditionGenerator:
         self.inner_join_conditions = []
         self.cross_join_conditions = []
         self.cols = []
+        self.group_cols = []
         self.more_restrictive = ConditionTable()
         self.less_restrictive = ConditionTable()
 
@@ -73,7 +74,7 @@ class ConditionGenerator:
         self.generate_filter()
         self.generate_inner_join()
         self.generate_cross_join()
-        self.generate_cols()
+        # self.generate_cols()
 
     def generate_summarise(self) -> None:
         frozen_columns = self.specification.filter_columns(self.specification.columns_by_type)
@@ -86,10 +87,14 @@ class ConditionGenerator:
                     self.specification.all_columns.add(new_col)
                     if save_generated:
                         self.specification.generated_columns[new_col] = cond
+                        for t in new_col_types:
+                            self.specification.generated_columns_by_type[t].append(new_col)
                 self.summarise_conditions.append((cond, (dependencies, self.specification.get_bitvecnum([new_col]))))
                 current_predicate.append(cond)
                 for type in new_col_types:
                     self.specification.columns_by_type[type].append(new_col)
+                    if self.specification.join_columns_by_type:
+                        self.specification.join_columns_by_type[type].append(new_col)  # TODO not all cols should be added
 
             if aggr == 'n' or aggr == 'count':
                 add_condition('n = n()', 'n', [types.INT], 0)
@@ -114,8 +119,11 @@ class ConditionGenerator:
 
             if aggr == 'mean' or aggr == 'avg':
                 for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                    add_condition(f'mean{column} = mean({column})', f'mean{column}', [types.FLOAT],
+                    add_condition(f'mean{column} = mean({column}, na.rm = T)', f'mean{column}', [types.FLOAT],
                                   self.specification.get_bitvecnum([column]))
+                # for column in frozen_columns[types.DATETIME]:
+                #     add_condition(f'mean{column} = mean({column}, na.rm = T)', f'mean{column}', [types.DATETIME],
+                #                   self.specification.get_bitvecnum([column]))
 
             if aggr in ['sum', 'cumsum']:
                 for type, column in [(t, col) for t in [types.INT, types.FLOAT] for col in frozen_columns[t]]:
@@ -123,7 +131,13 @@ class ConditionGenerator:
                                   self.specification.get_bitvecnum([column]))
 
             if aggr in ['min', 'max']:
-                for type, column in [(t, col) for t in [types.INT, types.FLOAT] for col in frozen_columns[t]]:
+                if util.get_config().max_min_gen_cols:
+                    for type, column in [(t, col) for t in [types.INT, types.FLOAT] for col in self.specification.generated_columns_by_type[t]]:
+                        add_condition(f'{column} = {aggr}({column})', column, [type], self.specification.get_bitvecnum([column]),
+                                      save_generated=False)
+                        add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type],
+                                      self.specification.get_bitvecnum([column]))
+                for type, column in [(t, col) for t in [types.INT, types.FLOAT, types.STRING] for col in frozen_columns[t]]:
                     add_condition(f'{column} = {aggr}({column})', column, [type], self.specification.get_bitvecnum([column]),
                                   save_generated=False)
                     add_condition(f'{aggr}{column} = {aggr}({column})', f'{aggr}{column}', [type],
@@ -303,11 +317,18 @@ class ConditionGenerator:
 
     def generate_inner_join(self) -> None:
         column_pairs = []
-        for cols in self.specification.columns_by_type.values():
-            column_pairs += product(cols, repeat=2)
-        simple_column_pairs = []
-        for cols in self.specification.columns_by_type.values():
-            simple_column_pairs += combinations(cols, 2)
+        if self.specification.join_columns is None:
+            for cols in self.specification.columns_by_type.values():
+                column_pairs += product(cols, repeat=2)
+            simple_column_pairs = []
+            for cols in self.specification.columns_by_type.values():
+                simple_column_pairs += combinations(cols, 2)
+        else:
+            for cols in self.specification.join_columns_by_type.values():
+                column_pairs += product(cols, repeat=2)
+            simple_column_pairs = []
+            for cols in self.specification.join_columns_by_type.values():
+                simple_column_pairs += combinations(cols, 2)
 
         on_conditions = list(combinations(column_pairs, 2)) + list(combinations(simple_column_pairs, 1))
         on_conditions = list(filter(lambda t: any(map(lambda cond: cond[0] != cond[1], t)), on_conditions))
@@ -320,13 +341,21 @@ class ConditionGenerator:
                 self.specification.get_bitvecnum([pair[1] for pair in on_condition])
                 )))
 
-        for subset in powerset_except_empty(self.specification.columns, util.get_config().max_join_combinations):
-            self.inner_join_conditions.append((','.join(map(util.single_quote_str, subset)),
-                                               (self.specification.get_bitvecnum(subset), self.specification.get_bitvecnum(subset))))
+        if self.specification.join_columns is None:
+            for subset in powerset_except_empty(self.specification.columns, util.get_config().max_join_combinations):
+                self.inner_join_conditions.append((','.join(map(util.single_quote_str, subset)),
+                                                   (self.specification.get_bitvecnum(subset), self.specification.get_bitvecnum(subset))))
+        else:
+            for subset in powerset_except_empty(self.specification.join_columns, util.get_config().max_join_combinations):
+                self.inner_join_conditions.append((','.join(map(util.single_quote_str, subset)),
+                                                   (self.specification.get_bitvecnum(subset), self.specification.get_bitvecnum(subset))))
 
     def generate_cross_join(self) -> None:
         if util.get_config().full_cross_join:
-            all_columns = self.specification.filter_columns(self.specification.columns_by_type)
+            if self.specification.join_columns is None:
+                all_columns = self.specification.filter_columns(self.specification.columns_by_type)
+            else:
+                all_columns = self.specification.filter_columns(self.specification.join_columns_by_type)
 
             for type in all_columns:
                 all_columns[type] |= [col + '.other' for col in all_columns[type]]
@@ -413,3 +442,20 @@ class ConditionGenerator:
                 self.more_restrictive.append(dsl.Cols, cols1[1][0], cols2[1][0])
 
         self.cols = [cols[1] for cols in cols_tmp]
+
+        if self.specification.group_columns:
+            cols_tmp = []
+            for cols in powerset_except_empty(self.specification.group_columns, util.get_config().max_column_combinations):
+                cols_tmp.append((set(cols), (','.join(cols), self.specification.get_bitvecnum(cols))))
+
+            for cols1, cols2 in permutations(cols_tmp, 2):
+                if cols1[0] <= cols2[0]:
+                    self.less_restrictive.append(dsl.Cols, cols1[1][0], cols2[1][0])
+                    self.more_restrictive.append(dsl.Cols, cols2[1][0], cols1[1][0])
+                if cols2[0] <= cols1[0]:
+                    self.less_restrictive.append(dsl.Cols, cols2[1][0], cols1[1][0])
+                    self.more_restrictive.append(dsl.Cols, cols1[1][0], cols2[1][0])
+
+            self.group_cols = [cols[1] for cols in cols_tmp]
+        else:
+            self.group_cols = self.cols

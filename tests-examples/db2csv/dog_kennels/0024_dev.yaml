@@ -1,0 +1,1236 @@
+db: tests-examples/db2csv/dog_kennels/tables/dog_kennels.sqlite
+inputs:
+ - tests-examples/db2csv/dog_kennels/tables/owners.csv
+ - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+ - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+output: tests-examples/db2csv/dog_kennels/tables/0024_dev.csv
+raw_question: Find the owner id and zip code of the owner who spent the most money in total for his or her dogs. 
+question_index: 941 
+join_columns:
+ - owner_id
+ - dog_id
+groupby_columns:
+ - owner_id
+functions:
+ - max
+ - sum
+columns:
+ - cost_of_treatment
+comment: |-
+  SELECT T1.owner_id,
+         T1.zip_code
+  FROM Owners AS T1
+  JOIN Dogs AS T2 ON T1.owner_id = T2.owner_id
+  JOIN Treatments AS T3 ON T2.dog_id = T3.dog_id
+  GROUP BY T1.owner_id
+  ORDER BY sum(T3.cost_of_treatment) DESC
+  LIMIT 1
+
+sql: |-
+  SELECT T1.owner_id,
+         T1.zip_code
+  FROM Owners AS T1
+  JOIN Dogs AS T2 ON T1.owner_id = T2.owner_id
+  JOIN Treatments AS T3 ON T2.dog_id = T3.dog_id
+  GROUP BY T1.owner_id
+  ORDER BY sum(T3.cost_of_treatment) DESC
+  LIMIT 1
+smbop_beam_join_columns:
+- - owner_id
+  - dog_id
+  - charge_id
+- - owner_id
+  - charge_id
+- - owner_id
+  - charge_id
+- []
+- - owner_id
+  - charge_id
+- - owner_id
+  - dog_id
+  - charge_id
+- - owner_id
+  - charge_id
+- - owner_id
+- []
+- - owner_id
+  - charge_id
+smbop_beam_groupby_columns:
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+smbop_beam_constants:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_functions:
+- - max
+  - sum
+- - max
+  - sum
+- - max
+  - sum
+- - max
+  - sum
+- - max
+  - sum
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- []
+- []
+- []
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON dogs.dog_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON owners.owner_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON charges.charge_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners, dogs, charges WHERE owners.owner_id = dogs.owner_id OR dogs.dog_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN charges ON owners.owner_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON dogs.dog_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON charges.charge_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners, dogs, charges WHERE owners.owner_id = dogs.owner_id OR dogs.dog_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON owners.owner_id = charges.charge_id
+smbop_beam_inferred_code_w_terminals:
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON dogs.dog_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON owners.owner_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON charges.charge_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners, dogs, charges WHERE owners.owner_id = dogs.owner_id OR dogs.dog_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN charges ON owners.owner_id = charges.charge_id GROUP BY owners.owner_id ORDER BY SUM( charges.charge_amount ) DESC LIMIT 1
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON dogs.dog_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON charges.charge_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners, dogs, charges WHERE owners.owner_id = dogs.owner_id OR dogs.dog_id = charges.charge_id
+  - SELECT owners.owner_id , owners.zip_code FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON owners.owner_id = charges.charge_id
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_groupby_columns:
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - first_name
+- - owner_id
+ratsql_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+ratsql_beam_constants:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_functions:
+- - max
+  - sum
+- - max
+  - sum
+- - max
+  - sum
+- - max
+  - sum
+- - sum
+- - max
+  - sum
+- - max
+  - sum
+ratsql_beam_columns:
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+- - charge_amount
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Dogs.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT DISTINCT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, DISTINCT Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(DISTINCT Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY DISTINCT Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.first_name ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Dogs.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT DISTINCT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, DISTINCT Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(DISTINCT Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY DISTINCT Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners JOIN Dogs GROUP BY Owners.first_name ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+  - SELECT Owners.owner_id, Owners.zip_code FROM Charges JOIN Owners GROUP BY Owners.owner_id ORDER BY Sum(Charges.charge_amount) Desc LIMIT 1
+ratsql_beam_score_history:
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -0.18061932921409607
+  - -0.11063194274902344
+  - -0.10587453842163086
+  - -0.09827423095703125
+  - -0.10463094711303711
+  - -0.09860420227050781
+  - -0.10251951217651367
+  - -0.08788585662841797
+  - -0.10517024993896484
+  - -0.10474777221679688
+  - -0.09453344345092773
+  - -0.08347853273153305
+  - -0.10987591743469238
+  - -0.10584092140197754
+  - -0.09868836402893066
+  - -0.10500884056091309
+  - -0.09807205200195312
+  - -0.10463523864746094
+  - -0.14436006546020508
+  - -0.10457372665405273
+  - -0.10551071166992188
+  - -0.07324046641588211
+  - -0.1044154167175293
+  - -0.10357284545898438
+  - -0.07447944581508636
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -3.510376453399658
+  - -0.1120302677154541
+  - -0.10544919967651367
+  - -0.0997314453125
+  - -0.10525178909301758
+  - -0.09835052490234375
+  - -0.10247182846069336
+  - -0.08675527572631836
+  - -0.10508537292480469
+  - -0.10412883758544922
+  - -0.09396219253540039
+  - -0.08399491012096405
+  - -0.10975360870361328
+  - -0.10585641860961914
+  - -0.09894585609436035
+  - -0.10497379302978516
+  - -0.09816932678222656
+  - -0.10473918914794922
+  - -0.14542293548583984
+  - -0.10457944869995117
+  - -0.10556364059448242
+  - -0.07335534691810608
+  - -0.10441446304321289
+  - -0.10360574722290039
+  - -0.07430592179298401
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -3.459047794342041
+  - -0.10528683662414551
+  - -0.10035181045532227
+  - -0.1066288948059082
+  - -0.10394573211669922
+  - -0.10583209991455078
+  - -0.1063532829284668
+  - -0.10498046875
+  - -0.05148945748806
+  - -0.11124682426452637
+  - -0.10507798194885254
+  - -0.11752080917358398
+  - -0.10948514938354492
+  - -0.10309696197509766
+  - -0.1047210693359375
+  - -0.1046915054321289
+  - -0.17756249010562897
+  - -0.11061596870422363
+  - -0.10587263107299805
+  - -0.0982365608215332
+  - -0.10459041595458984
+  - -0.09859704971313477
+  - -0.10251665115356445
+  - -0.08788061141967773
+  - -0.10517311096191406
+  - -0.10476446151733398
+  - -0.09387350082397461
+  - -0.08344223350286484
+  - -0.10985994338989258
+  - -0.10584092140197754
+  - -0.09870147705078125
+  - -0.10500884056091309
+  - -0.09807109832763672
+  - -0.10464668273925781
+  - -0.14443016052246094
+  - -0.10457420349121094
+  - -0.1055150032043457
+  - -0.07322961091995239
+  - -0.1044158935546875
+  - -0.10357141494750977
+  - -0.07447513192892075
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -3.466973304748535
+  - -0.10405087471008301
+  - -0.11687612533569336
+  - -0.10790014266967773
+  - -0.10421180725097656
+  - -0.10467815399169922
+  - -0.10463571548461914
+  - -0.18231365084648132
+  - -0.11062049865722656
+  - -0.10588622093200684
+  - -0.09815454483032227
+  - -0.1047663688659668
+  - -0.09839725494384766
+  - -0.10253572463989258
+  - -0.08781099319458008
+  - -0.10518169403076172
+  - -0.10486268997192383
+  - -0.09460783004760742
+  - -0.08347787708044052
+  - -0.10985660552978516
+  - -0.10584115982055664
+  - -0.09871625900268555
+  - -0.10500526428222656
+  - -0.09807348251342773
+  - -0.10465240478515625
+  - -0.14438533782958984
+  - -0.10457515716552734
+  - -0.10551881790161133
+  - -0.0732169821858406
+  - -0.1044168472290039
+  - -0.10357046127319336
+  - -0.07451164722442627
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -0.18061932921409607
+  - -0.11063194274902344
+  - -0.10587453842163086
+  - -0.09827423095703125
+  - -0.10463094711303711
+  - -0.09860420227050781
+  - -0.10251951217651367
+  - -0.08788585662841797
+  - -0.10517024993896484
+  - -0.10474777221679688
+  - -0.09453344345092773
+  - -0.08347853273153305
+  - -3.48592209815979
+  - -0.1057274341583252
+  - -0.09884214401245117
+  - -0.10501861572265625
+  - -0.09801864624023438
+  - -0.10479450225830078
+  - -0.14062881469726562
+  - -0.1045689582824707
+  - -0.10536050796508789
+  - -0.07333596050739288
+  - -0.10441398620605469
+  - -0.10357141494750977
+  - -0.07428833097219467
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -0.18061932921409607
+  - -3.4829139709472656
+  - -0.10602569580078125
+  - -0.10025548934936523
+  - -0.1037745475769043
+  - -0.09828424453735352
+  - -0.10280752182006836
+  - -0.0879364013671875
+  - -0.10520315170288086
+  - -0.10495424270629883
+  - -0.0950775146484375
+  - -0.08332587778568268
+  - -0.1098930835723877
+  - -0.10584163665771484
+  - -0.09903454780578613
+  - -0.10496020317077637
+  - -0.09834098815917969
+  - -0.10466814041137695
+  - -0.14391469955444336
+  - -0.10458660125732422
+  - -0.1054830551147461
+  - -0.07333064824342728
+  - -0.1044158935546875
+  - -0.10357666015625
+  - -0.07429695874452591
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -0.18061932921409607
+  - -0.11063194274902344
+  - -0.10587453842163086
+  - -0.09827423095703125
+  - -0.10463094711303711
+  - -0.09860420227050781
+  - -0.10251951217651367
+  - -0.08788585662841797
+  - -0.10517024993896484
+  - -0.10474777221679688
+  - -0.09453344345092773
+  - -0.08347853273153305
+  - -0.10987591743469238
+  - -0.10584092140197754
+  - -3.756559371948242
+  - -0.11970043182373047
+  - -0.10354137420654297
+  - -0.1363682746887207
+  - -0.10480499267578125
+  - -0.1055302619934082
+  - -0.07385870814323425
+  - -0.10441064834594727
+  - -0.10314035415649414
+  - -0.07555441558361053
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -3.8590433597564697
+  - -0.11127376556396484
+  - -0.1055152416229248
+  - -0.10172319412231445
+  - -0.10537147521972656
+  - -0.09833765029907227
+  - -0.1022791862487793
+  - -0.08685922622680664
+  - -0.10509777069091797
+  - -0.10412454605102539
+  - -0.09328556060791016
+  - -0.08367689698934555
+  - -0.10988140106201172
+  - -0.10584020614624023
+  - -0.09896731376647949
+  - -0.10496735572814941
+  - -0.0982198715209961
+  - -0.10467720031738281
+  - -0.14712238311767578
+  - -0.10457086563110352
+  - -0.10558557510375977
+  - -0.07327613979578018
+  - -0.10441255569458008
+  - -0.10359859466552734
+  - -0.07439091801643372
+- - -0.1055154800415039
+  - -0.10349130630493164
+  - -0.10759663581848145
+  - -0.10423874855041504
+  - -0.12132787704467773
+  - -0.10380697250366211
+  - -0.10451412200927734
+  - -0.1015467643737793
+  - -0.10453939437866211
+  - -0.10602760314941406
+  - -0.1046910285949707
+  - -0.18149304389953613
+  - -0.11305665969848633
+  - -0.1050267219543457
+  - -0.09990501403808594
+  - -0.10684347152709961
+  - -0.10463809967041016
+  - -0.10593986511230469
+  - -0.10634231567382812
+  - -0.10496664047241211
+  - -0.0510948970913887
+  - -0.1112370491027832
+  - -0.1051332950592041
+  - -0.11686897277832031
+  - -0.10860395431518555
+  - -0.10318231582641602
+  - -0.10473966598510742
+  - -0.10470962524414062
+  - -0.18061932921409607
+  - -0.11063194274902344
+  - -0.10587453842163086
+  - -0.09827423095703125
+  - -0.10463094711303711
+  - -0.09860420227050781
+  - -0.10251951217651367
+  - -0.08788585662841797
+  - -0.10517024993896484
+  - -0.10474777221679688
+  - -0.09453344345092773
+  - -0.08347853273153305
+  - -0.10987591743469238
+  - -0.10584092140197754
+  - -0.09868836402893066
+  - -0.10500884056091309
+  - -0.09807205200195312
+  - -0.10463523864746094
+  - -0.14436006546020508
+  - -0.10457372665405273
+  - -0.10551071166992188
+  - -0.07324046641588211
+  - -0.1044154167175293
+  - -0.10357284545898438
+  - -4.266587734222412
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'True'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'True'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'True'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'zip_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, False))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Sum')
+  - ('agg_type', 'Sum')
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'

@@ -24,34 +24,27 @@ setwd('..')
 setwd('SQUARES')
 
 
-input1 <- read_csv("tests-examples/text2sql/geography/tables/highlow.csv")
-input1
-input2 <- read_csv("tests-examples/55-tests/tables/9-2.txt")
-input3 <- read_csv("tests-examples/textbook/tables/23-3.txt")
-expected_output <- read_csv("tests-examples/spider/apartment_rentals/tables/0014.csv", col_types = cols(apt_number = col_character(),booking_start_date...2 = col_character(),booking_start_date...3 = col_character()))
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_has_allergy <- read_csv("tests-examples/spider/allergy_1/tables/has_allergy.csv", skip=1, col_names=c('stuid','allergy'), col_types=cols(col_integer(),col_character()))
+df_has_allergy <- copy_to(con, df_has_allergy)
+expected_output <- read_csv("tests-examples/spider/allergy_1/tables/0033.csv", skip=1, col_names=c('count___'), col_types=cols(col_integer()))
 
-expected_output$booking_start_date...2 <- parse_datetime(expected_output$booking_start_date...2)
+A
+V
+C
+A
 
-expected_output$booking_start_date...3 <- parse_datetime(expected_output$booking_start_date...3)
-expected_output
 
-df1 <- input1 %>% mutate(highest_elevation = max(highest_elevation))
-df1
-df2 <- input1 %>% filter(highest_elevation > 4399)
-df2
-df3 <- df1 %>% filter(color == 'red') %>% select(S_name)
-df3
-df4 <- intersect(df2, df3)
-df4
-df5 <- df1 %>% group_by(S_name, P_name) %>% summarise(n = max(cost)) %>% ungroup()
-df5
-df6 <- df5 %>% filter(n == max(n))
-df6
-df7 <- inner_join(df4, df6)
-df7
-df8 <- df7 %>% mutate(perc = replace_na(n.y, 0) / n.x)
-df8
-out <- df1 %>% select(highest_elevation) %>% distinct()
-out
+4
 
-all_equal(out, expected_output, convert = T)
+4
+4
+4
+4
+
+
+df1 <- df_has_allergy %>% filter(allergy == 'Cat')
+df2 <- df1 %>% summarise(n = n())
+out <- df2 %>% select(count___ = n) %>% distinct() %>% arrange(count___)
+
+show_query(out)

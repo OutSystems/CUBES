@@ -1,0 +1,1102 @@
+db: tests-examples/db2csv/orchestra/tables/orchestra.sqlite
+inputs:
+ - tests-examples/db2csv/orchestra/tables/performance.csv
+output: tests-examples/db2csv/orchestra/tables/0011_dev.csv
+raw_question: What are the maximum and minimum share of performances whose type is not "Live final". 
+question_index: 832 
+constants:
+ - Live final
+functions:
+ - min
+ - max
+columns:
+ - share
+ - type
+filters:
+ - '!='
+comment: |-
+  SELECT max(SHARE),
+         min(SHARE)
+  FROM performance
+  WHERE TYPE != "Live final"
+
+sql: |-
+  SELECT max(SHARE),
+         min(SHARE)
+  FROM performance
+  WHERE TYPE != "Live final"
+smbop_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+smbop_beam_constants:
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+smbop_beam_functions:
+- - min
+  - max
+- - min
+  - max
+- - count
+- - min
+  - max
+- - max
+smbop_beam_columns:
+- - share
+  - type
+- - share
+  - type
+- - type
+- - share
+  - type
+- - share
+  - type
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '!='
+- - '='
+- - '!='
+- - '>='
+  - '>'
+- - '!='
+smbop_beam_inferred_code:
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type != 'Live final'
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type = 'Live final'
+  - SELECT COUNT( DISTINCT performance.type ) FROM performance WHERE performance.type != 'Live final'
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type >= 'Live final'
+  - SELECT MAX( performance.share ) , MAX( performance.share ) FROM performance WHERE performance.type != 'Live final'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type != 'Live final'
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type = 'Live final'
+  - SELECT COUNT( DISTINCT performance.type ) FROM performance WHERE performance.type != 'Live final'
+  - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type >= 'Live final'
+  - SELECT MAX( performance.share ) , MAX( performance.share ) FROM performance WHERE performance.type != 'Live final'
+ratsql_beam_join_columns:
+- []
+- []
+- - orchestra_id
+- []
+- - conductor_id
+  - orchestra_id
+- []
+- []
+- - performance_id
+- []
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/orchestra.csv
+  - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/orchestra.csv
+  - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/show.csv
+  - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+ratsql_beam_constants:
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+- - Live final
+ratsql_beam_functions:
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+- - min
+  - max
+ratsql_beam_columns:
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+- - share
+  - type
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '!='
+- - '='
+- - '!='
+- - '!='
+- - '!='
+- - '!='
+- - '!='
+- - '!='
+- - '!='
+ratsql_beam_inferred_code:
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type = 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE DISTINCT performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(DISTINCT performance.Share) FROM performance WHERE performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'terminal' LIMIT 1
+  - SELECT DISTINCT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'terminal'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance JOIN show ON performance.Performance_ID = show.Performance_ID WHERE performance.Type != 'terminal'
+  - SELECT Max(DISTINCT performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type = 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE DISTINCT performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(DISTINCT performance.Share) FROM performance WHERE performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'Live final' LIMIT 1
+  - SELECT DISTINCT Max(performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'Live final'
+  - SELECT Max(performance.Share), Min(performance.Share) FROM performance JOIN show ON performance.Performance_ID = show.Performance_ID WHERE performance.Type != 'Live final'
+  - SELECT Max(DISTINCT performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'Live final'
+ratsql_beam_score_history:
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -0.11138057708740234
+  - -0.1055600643157959
+  - -0.10482168197631836
+  - -0.09961509704589844
+  - -0.10259103775024414
+  - -0.10834074020385742
+  - -0.10471677780151367
+  - -0.09329462051391602
+  - -0.1062922477722168
+  - -0.10771703720092773
+  - -0.10590267181396484
+  - -0.10321807861328125
+  - -0.09316788613796234
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -1.6952672004699707
+  - -0.10325002670288086
+  - -0.10136222839355469
+  - -0.10463476181030273
+  - -0.10564136505126953
+  - -0.10379981994628906
+  - -0.09643923491239548
+  - -0.11138272285461426
+  - -0.10547137260437012
+  - -0.10424327850341797
+  - -0.10008382797241211
+  - -0.10204410552978516
+  - -0.108428955078125
+  - -0.10444426536560059
+  - -0.13004636764526367
+  - -0.10529708862304688
+  - -0.10757160186767578
+  - -0.10650777816772461
+  - -0.10345268249511719
+  - -0.09629341214895248
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -3.4453279972076416
+  - -0.10565590858459473
+  - -0.10483789443969727
+  - -0.09896326065063477
+  - -0.10248184204101562
+  - -0.10817527770996094
+  - -0.10472345352172852
+  - -0.0935215950012207
+  - -0.10673236846923828
+  - -0.10784673690795898
+  - -0.1060948371887207
+  - -0.10322856903076172
+  - -0.09369415044784546
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -0.11138057708740234
+  - -0.1055600643157959
+  - -0.10482168197631836
+  - -0.09961509704589844
+  - -0.10259103775024414
+  - -0.10834074020385742
+  - -0.10471677780151367
+  - -0.09329462051391602
+  - -0.1062922477722168
+  - -0.10771703720092773
+  - -0.10590267181396484
+  - -0.10321807861328125
+  - -3.476673126220703
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -3.505197525024414
+  - -0.10500311851501465
+  - -0.09523296356201172
+  - -0.39119386672973633
+  - -0.0667271614074707
+  - -0.10071992874145508
+  - -0.10456323623657227
+  - -0.1063222885131836
+  - -0.10321474075317383
+  - -0.07140153646469116
+  - -0.11136054992675781
+  - -0.10557031631469727
+  - -0.10462379455566406
+  - -0.09961986541748047
+  - -0.10263204574584961
+  - -0.10828709602355957
+  - -0.1047203540802002
+  - -0.09340476989746094
+  - -0.10626697540283203
+  - -0.10769462585449219
+  - -0.10585594177246094
+  - -0.1032247543334961
+  - -0.09480711817741394
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -0.11138057708740234
+  - -0.1055600643157959
+  - -0.10482168197631836
+  - -0.09961509704589844
+  - -0.10259103775024414
+  - -0.10834074020385742
+  - -0.10471677780151367
+  - -0.09329462051391602
+  - -0.1062922477722168
+  - -0.10771703720092773
+  - -0.10590267181396484
+  - -0.10321807861328125
+  - -3.4837193489074707
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -0.11138057708740234
+  - -0.1055600643157959
+  - -0.10482168197631836
+  - -0.09961509704589844
+  - -0.10259103775024414
+  - -3.547360897064209
+  - -0.10370230674743652
+  - -0.09653329849243164
+  - -0.10571050643920898
+  - -0.10760784149169922
+  - -0.10582971572875977
+  - -0.10323190689086914
+  - -0.09330124408006668
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -3.5482447147369385
+  - -0.10333657264709473
+  - -0.12181711196899414
+  - -0.1092538833618164
+  - -0.09218025207519531
+  - -0.10034370422363281
+  - -0.1060171127319336
+  - -0.1037592887878418
+  - -0.108642578125
+  - -0.09201198816299438
+  - -0.1070091724395752
+  - -0.1051182746887207
+  - -0.09667634963989258
+  - -0.11133718490600586
+  - -0.09288787841796875
+  - -0.10921287536621094
+  - -0.10586071014404297
+  - -0.10657024383544922
+  - -0.09959158301353455
+  - -0.10976409912109375
+  - -0.10499167442321777
+  - -0.09660911560058594
+  - -0.4306821823120117
+  - -0.06592130661010742
+  - -0.10094833374023438
+  - -0.1045231819152832
+  - -0.1054534912109375
+  - -0.10312557220458984
+  - -0.06837904453277588
+  - -0.11139559745788574
+  - -0.1055612564086914
+  - -0.10486936569213867
+  - -0.09969186782836914
+  - -0.10259008407592773
+  - -0.10833382606506348
+  - -0.10471105575561523
+  - -0.09339761734008789
+  - -0.10636043548583984
+  - -0.10771846771240234
+  - -0.10590028762817383
+  - -0.10321760177612305
+  - -0.09297270327806473
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -0.10710978507995605
+  - -0.1051025390625
+  - -0.09708547592163086
+  - -0.10747766494750977
+  - -0.09383058547973633
+  - -0.10885953903198242
+  - -0.10603523254394531
+  - -0.1067514419555664
+  - -0.09829853475093842
+  - -0.10955381393432617
+  - -0.10503911972045898
+  - -0.09670257568359375
+  - -0.3992452621459961
+  - -0.06463384628295898
+  - -0.1009054183959961
+  - -0.10457658767700195
+  - -0.10547113418579102
+  - -0.10303878784179688
+  - -0.07207615673542023
+  - -0.11138057708740234
+  - -0.1055600643157959
+  - -0.10482168197631836
+  - -0.09961509704589844
+  - -0.10259103775024414
+  - -0.10834074020385742
+  - -0.10471677780151367
+  - -0.09329462051391602
+  - -0.1062922477722168
+  - -0.10771703720092773
+  - -0.10590267181396484
+  - -0.10321807861328125
+  - -3.5988075733184814
+- - -0.11639404296875
+  - -0.10574531555175781
+  - -0.10663175582885742
+  - -0.10433268547058105
+  - -0.12088203430175781
+  - -0.1085348129272461
+  - -0.0884556770324707
+  - -0.10085058212280273
+  - -0.10554695129394531
+  - -0.10383033752441406
+  - -0.10838651657104492
+  - -0.08973868936300278
+  - -3.580778121948242
+  - -0.10592770576477051
+  - -0.09985160827636719
+  - -0.11469125747680664
+  - -0.09282159805297852
+  - -0.10917043685913086
+  - -0.10599851608276367
+  - -0.10595178604125977
+  - -0.10956129431724548
+  - -0.10970664024353027
+  - -0.10500907897949219
+  - -0.09630489349365234
+  - -0.43942880630493164
+  - -0.0651860237121582
+  - -0.10087203979492188
+  - -0.10456514358520508
+  - -0.10528135299682617
+  - -0.10326004028320312
+  - -0.06954454630613327
+  - -0.11139106750488281
+  - -0.1055595874786377
+  - -0.10484027862548828
+  - -0.09970283508300781
+  - -0.10259485244750977
+  - -0.10829877853393555
+  - -0.10470843315124512
+  - -0.09334516525268555
+  - -0.10637998580932617
+  - -0.1076669692993164
+  - -0.10588550567626953
+  - -0.10321474075317383
+  - -0.093582883477211
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'orchestra'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'conductor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'show'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'True'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'Min')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Share'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Type'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'performance'

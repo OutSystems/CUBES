@@ -16,11 +16,15 @@ class Config:
     subsume_conditions: bool
     transitive_blocking: bool
 
+    fp_comparison_digits = 5
+    fp_comparison_epsilon = 10 ** (-fp_comparison_digits)
+
     advance_percentage = .6
     smoothing_bias: float = 1
 
     optimal: bool = False
     top_programs: int = 1
+    enum_until: int = None
     advance_processes: bool = False
     programs_per_cube_threshold: int = 500
     bitenum_enabled: bool = True
@@ -36,6 +40,11 @@ class Config:
 
     use_solution_dsl: bool = False
     use_solution_cube: bool = False
+    use_solution_loc: bool = False
+
+    use_beam_info: bool = True
+    beam_threshold: float = 0.9
+    beam_name: str = None
 
     bitvector_size: int = 16  # TODO should not be a fixed number # NOTE: not used anymore
 
@@ -43,6 +52,7 @@ class Config:
     max_column_combinations: int = 2
     max_filter_combinations: int = 2
     max_join_combinations: int = 2
+    max_min_gen_cols: bool = True
     na_matches: str = 'never'
 
     lines_force_all_inputs: bool = True
@@ -58,9 +68,6 @@ class Config:
     ignore_attrs: bool = False
     force_constants: bool = True
     force_summarise: bool = True
-
-    solution_use_lines: List[int] = field(default_factory=list)
-    solution_use_last_line: bool = False
 
     z3_smt_phase: int = 3
     z3_smt_case_split: int = 1

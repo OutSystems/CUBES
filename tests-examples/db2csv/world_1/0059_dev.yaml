@@ -1,0 +1,874 @@
+db: tests-examples/db2csv/world_1/tables/world_1.sqlite
+inputs:
+ - tests-examples/db2csv/world_1/tables/city.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+output: tests-examples/db2csv/world_1/tables/0059_dev.csv
+raw_question: Find the city with the largest population that uses English. 
+question_index: 760 
+constants:
+ - English
+join_columns:
+ - countrycode
+functions:
+ - max
+columns:
+ - language
+ - population
+filters:
+ - '='
+comment: |-
+  SELECT T1.Name,
+         T1.Population
+  FROM city AS T1
+  JOIN countrylanguage AS T2 ON T1.CountryCode = T2.CountryCode
+  WHERE T2.Language = "English"
+  ORDER BY T1.Population DESC
+  LIMIT 1
+
+sql: |-
+  SELECT T1.Name,
+         T1.Population
+  FROM city AS T1
+  JOIN countrylanguage AS T2 ON T1.CountryCode = T2.CountryCode
+  WHERE T2.Language = "English"
+  ORDER BY T1.Population DESC
+  LIMIT 1
+smbop_beam_join_columns:
+- - id
+  - countrycode
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+smbop_beam_constants:
+- - English
+- - English
+smbop_beam_functions:
+- []
+- []
+smbop_beam_columns:
+- - language
+- []
+smbop_beam_ieu:
+- []
+- []
+smbop_beam_filters:
+- - '='
+- []
+smbop_beam_inferred_code:
+  - SELECT city.name FROM city JOIN countrylanguage ON city.id = countrylanguage.countrycode WHERE countrylanguage.language = 'English'
+  - SELECT city.name FROM city
+smbop_beam_inferred_code_w_terminals:
+  - SELECT city.name FROM city JOIN countrylanguage ON city.id = countrylanguage.countrycode WHERE countrylanguage.language = 'English'
+  - SELECT city.name FROM city
+ratsql_beam_join_columns:
+- - code
+  - countrycode
+- - code
+  - countrycode
+- - code
+  - countrycode
+- - code
+  - countrycode
+- - code
+  - countrycode
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+ratsql_beam_constants:
+- - English
+- - English
+- - English
+- - English
+- - English
+ratsql_beam_functions:
+- - max
+- - max
+- - max
+- []
+- - max
+ratsql_beam_columns:
+- - language
+  - population
+- - language
+  - population
+- - language
+  - population
+- - language
+- - language
+  - population
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' ORDER BY DISTINCT city.Population Desc LIMIT 1
+  - SELECT DISTINCT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'terminal' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal' ORDER BY city.Population Desc
+  - SELECT city.Name FROM city WHERE city.Population = (SELECT Max(city.Population) FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'terminal')
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English' ORDER BY DISTINCT city.Population Desc LIMIT 1
+  - SELECT DISTINCT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'English' ORDER BY city.Population Desc LIMIT 1
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English' ORDER BY city.Population Desc
+  - SELECT city.Name FROM city WHERE city.Population = (SELECT Max(city.Population) FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'English'
+ratsql_beam_score_history:
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -0.23851120471954346
+  - -0.1105492115020752
+  - -0.10612225532531738
+  - -0.10529136657714844
+  - -0.10282659530639648
+  - -0.09666299819946289
+  - -0.10225343704223633
+  - -0.09587430953979492
+  - -0.1059260368347168
+  - -0.08772993087768555
+  - -0.10506057739257812
+  - -0.10432910919189453
+  - -0.10288333892822266
+  - -0.08065349608659744
+  - -0.11208534240722656
+  - -0.10562777519226074
+  - -0.09931230545043945
+  - -0.10491228103637695
+  - -0.09724140167236328
+  - -0.10669326782226562
+  - -0.10680150985717773
+  - -0.10477209091186523
+  - -0.10489177703857422
+  - -0.25344642996788025
+  - -0.10443544387817383
+  - -0.10278463363647461
+  - -0.2782430946826935
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -0.23851120471954346
+  - -0.1105492115020752
+  - -0.10612225532531738
+  - -0.10529136657714844
+  - -0.10282659530639648
+  - -0.09666299819946289
+  - -0.10225343704223633
+  - -0.09587430953979492
+  - -0.1059260368347168
+  - -0.08772993087768555
+  - -0.10506057739257812
+  - -0.10432910919189453
+  - -0.10288333892822266
+  - -0.08065349608659744
+  - -0.11208534240722656
+  - -0.10562777519226074
+  - -0.09931230545043945
+  - -0.10491228103637695
+  - -0.09724140167236328
+  - -0.10669326782226562
+  - -0.10680150985717773
+  - -0.10477209091186523
+  - -0.10489177703857422
+  - -0.25344642996788025
+  - -0.10443544387817383
+  - -0.10278463363647461
+  - -1.7439014911651611
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -0.23851120471954346
+  - -0.1105492115020752
+  - -0.10612225532531738
+  - -0.10529136657714844
+  - -0.10282659530639648
+  - -0.09666299819946289
+  - -0.10225343704223633
+  - -0.09587430953979492
+  - -0.1059260368347168
+  - -0.08772993087768555
+  - -0.10506057739257812
+  - -0.10432910919189453
+  - -0.10288333892822266
+  - -0.08065349608659744
+  - -3.452664852142334
+  - -0.10489988327026367
+  - -0.09973025321960449
+  - -0.10485053062438965
+  - -0.0971822738647461
+  - -0.10680913925170898
+  - -0.10438108444213867
+  - -0.10472679138183594
+  - -0.10484027862548828
+  - -0.2575754225254059
+  - -0.10439825057983398
+  - -0.10282707214355469
+  - -0.27876678109169006
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -3.451974868774414
+  - -0.1062619686126709
+  - -0.08957862854003906
+  - -0.10625171661376953
+  - -0.1001291275024414
+  - -0.10153341293334961
+  - -0.10430335998535156
+  - -0.10457277297973633
+  - -0.10550642013549805
+  - -0.24150826036930084
+  - -0.11053228378295898
+  - -0.1061246395111084
+  - -0.10512971878051758
+  - -0.10282516479492188
+  - -0.09670495986938477
+  - -0.10227727890014648
+  - -0.09586858749389648
+  - -0.10593414306640625
+  - -0.08775186538696289
+  - -0.10506057739257812
+  - -0.10433769226074219
+  - -0.10288667678833008
+  - -0.08053922653198242
+  - -0.11208391189575195
+  - -0.10562586784362793
+  - -0.09930610656738281
+  - -0.10491156578063965
+  - -0.09723901748657227
+  - -0.10669326782226562
+  - -0.10676145553588867
+  - -0.10477161407470703
+  - -0.10489177703857422
+  - -0.253530353307724
+  - -0.10443544387817383
+  - -0.10278558731079102
+  - -0.2782514691352844
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -0.23851120471954346
+  - -3.4647583961486816
+  - -0.10637402534484863
+  - -0.10343503952026367
+  - -0.10283660888671875
+  - -0.09617233276367188
+  - -0.10247564315795898
+  - -0.09596014022827148
+  - -0.10582542419433594
+  - -0.08755779266357422
+  - -0.10505819320678711
+  - -0.10431528091430664
+  - -0.10292816162109375
+  - -0.07995074987411499
+  - -0.11209249496459961
+  - -0.10561823844909668
+  - -0.09933137893676758
+  - -0.10490798950195312
+  - -0.09727001190185547
+  - -0.10658788681030273
+  - -0.1093745231628418
+  - -0.10480594635009766
+  - -0.10488128662109375
+  - -0.2494712471961975
+  - -0.10444211959838867
+  - -0.10275411605834961
+  - -0.27802932262420654
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -0.23851120471954346
+  - -0.1105492115020752
+  - -0.10612225532531738
+  - -0.10529136657714844
+  - -0.10282659530639648
+  - -0.09666299819946289
+  - -0.10225343704223633
+  - -0.09587430953979492
+  - -0.1059260368347168
+  - -0.08772993087768555
+  - -0.10506057739257812
+  - -0.10432910919189453
+  - -0.10288333892822266
+  - -0.08065349608659744
+  - -0.11208534240722656
+  - -0.10562777519226074
+  - -3.749821901321411
+  - -0.10013103485107422
+  - -0.10598325729370117
+  - -0.1158909797668457
+  - -0.10489416122436523
+  - -0.10485553741455078
+  - -0.23976340889930725
+  - -0.10444021224975586
+  - -0.10266828536987305
+  - -0.2777766287326813
+- - -0.10515403747558594
+  - -0.10425281524658203
+  - -0.1070549488067627
+  - -0.10407733917236328
+  - -0.10120201110839844
+  - -0.1027064323425293
+  - -0.10444450378417969
+  - -0.1015024185180664
+  - -0.1047215461730957
+  - -0.1055135726928711
+  - -0.10484695434570312
+  - -0.0923246517777443
+  - -0.11336565017700195
+  - -0.10534214973449707
+  - -0.08762645721435547
+  - -0.1060175895690918
+  - -0.10025358200073242
+  - -0.10149002075195312
+  - -0.10431385040283203
+  - -0.10455036163330078
+  - -0.10551309585571289
+  - -1.9084323644638062
+  - -0.10998034477233887
+  - -0.10543990135192871
+  - -0.09312295913696289
+  - -0.10161924362182617
+  - -0.10771846771240234
+  - -0.10570573806762695
+  - -0.1077890396118164
+  - -0.10425329208374023
+  - -0.10445690155029297
+  - -0.10377168655395508
+  - -0.12840032577514648
+  - -0.10555648803710938
+  - -0.10491037368774414
+  - -0.10433816909790039
+  - -0.1043243408203125
+  - -0.173629030585289
+  - -0.11131572723388672
+  - -0.10505247116088867
+  - -0.08457803726196289
+  - -0.09293031692504883
+  - -0.10076618194580078
+  - -0.10218572616577148
+  - -0.1045827865600586
+  - -0.10465002059936523
+  - -0.10370397567749023
+  - -0.08118385821580887
+  - -0.11168265342712402
+  - -0.1058814525604248
+  - -0.1050252914428711
+  - -0.10190391540527344
+  - -0.10395526885986328
+  - -0.10783720016479492
+  - -0.1049494743347168
+  - -0.09961700439453125
+  - -0.10953283309936523
+  - -0.11713790893554688
+  - -0.10499715805053711
+  - -0.10565757751464844
+  - -0.9954345226287842
+  - -0.10580110549926758
+  - -0.11014080047607422
+  - -0.599210798740387
+  - -0.10351276397705078
+  - -0.10242414474487305
+  - -0.10767793655395508
+  - -0.10473990440368652
+  - -0.09888076782226562
+  - -0.10584688186645508
+  - -0.11107063293457031
+  - -0.10504627227783203
+  - -0.10313224792480469
+  - -0.05008310079574585
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'True'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (True, 'bool'))
+  - ('order_by', (True, True))
+  - ('order', 'Desc')
+  - ('val_unit*', 1)
+  - ('val_unit_seq_elem', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Max')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Population'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'

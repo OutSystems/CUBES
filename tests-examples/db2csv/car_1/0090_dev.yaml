@@ -1,0 +1,2405 @@
+db: tests-examples/db2csv/car_1/tables/car_1.sqlite
+inputs:
+ - tests-examples/db2csv/car_1/tables/model_list.csv
+ - tests-examples/db2csv/car_1/tables/car_makers.csv
+ - tests-examples/db2csv/car_1/tables/car_names.csv
+output: tests-examples/db2csv/car_1/tables/0090_dev.csv
+raw_question: What are the ids and makers of all car makers that produce at least 2 models and make more than 3 cars? 
+question_index: 176 
+constants:
+ - 3
+ - 2
+join_columns:
+ - id
+ - maker
+ - model
+groupby_columns:
+ - id
+functions:
+ - count
+ieu:
+ - intersect
+comment: |-
+  SELECT T1.Id,
+         T1.Maker
+  FROM CAR_MAKERS AS T1
+  JOIN MODEL_LIST AS T2 ON T1.Id = T2.Maker
+  GROUP BY T1.Id
+  HAVING count(*) >= 2 INTERSECT
+  SELECT T1.Id,
+         T1.Maker
+  FROM CAR_MAKERS AS T1
+  JOIN MODEL_LIST AS T2 ON T1.Id = T2.Maker
+  JOIN CAR_NAMES AS T3 ON T2.model = T3.model
+  GROUP BY T1.Id
+  HAVING count(*) > 3;
+
+sql: |-
+  SELECT T1.Id,
+         T1.Maker
+  FROM CAR_MAKERS AS T1
+  JOIN MODEL_LIST AS T2 ON T1.Id = T2.Maker
+  GROUP BY T1.Id
+  HAVING count(*) >= 2 INTERSECT
+  SELECT T1.Id,
+         T1.Maker
+  FROM CAR_MAKERS AS T1
+  JOIN MODEL_LIST AS T2 ON T1.Id = T2.Maker
+  JOIN CAR_NAMES AS T3 ON T2.model = T3.model
+  GROUP BY T1.Id
+  HAVING count(*) > 3;
+smbop_beam_join_columns:
+- - id
+  - maker
+- - id
+  - maker
+- - id
+  - maker
+- - id
+  - maker
+smbop_beam_groupby_columns:
+- - id
+- - id
+- - id
+- - id
+smbop_beam_tables:
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+smbop_beam_constants:
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+smbop_beam_functions:
+- - count
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+- []
+- []
+smbop_beam_ieu:
+- - intersect
+- - intersect
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) >= 2 INTERSECT SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3 INTERSECT SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) >= 2
+smbop_beam_inferred_code_w_terminals:
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) >= 2 INTERSECT SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3 INTERSECT SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) > 3
+  - SELECT car_makers.id , car_makers.maker FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY car_makers.id HAVING COUNT( * ) >= 2
+ratsql_beam_join_columns:
+- - id
+  - maker
+  - model
+- - id
+  - maker
+  - model
+- - id
+  - maker
+  - model
+- - id
+  - maker
+  - model
+  - makeid
+- - id
+  - maker
+  - model
+- - id
+  - maker
+  - model
+- - id
+  - maker
+  - model
+  - makeid
+- - id
+  - maker
+  - model
+- - model
+  - country
+  - countryid
+  - id
+  - maker
+- - id
+  - maker
+  - model
+ratsql_beam_groupby_columns:
+- - id
+- - id
+- - id
+  - maker
+- - id
+- - id
+- - id
+  - maker
+- - id
+- - id
+  - maker
+- - id
+- - id
+  - maker
+ratsql_beam_tables:
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/countries.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+ratsql_beam_constants:
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+- - 3
+  - 2
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_ieu:
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY car_makers.Id HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY model_list.Maker HAVING Count(*) >= 'terminal' INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY model_list.Maker HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY car_makers.Id HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+  - SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY model_list.Maker HAVING Count(*) >= 2 INTERSECT SELECT car_makers.Id, car_makers.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Id HAVING Count(*) >= 3
+ratsql_beam_score_history:
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -0.2347436398267746
+  - -0.10479402542114258
+  - -0.1093282699584961
+  - -0.180373415350914
+  - -0.10807323455810547
+  - -0.12993144989013672
+  - -0.10502910614013672
+  - -0.10632944107055664
+  - -0.47013336420059204
+  - -0.10490751266479492
+  - -0.10385465621948242
+  - -0.37352582812309265
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -0.2347436398267746
+  - -0.10479402542114258
+  - -0.1093282699584961
+  - -0.180373415350914
+  - -0.10807323455810547
+  - -0.12993144989013672
+  - -0.10502910614013672
+  - -0.10632944107055664
+  - -0.47013336420059204
+  - -0.10490751266479492
+  - -0.10385465621948242
+  - -1.4364724159240723
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -1.928917407989502
+  - -0.11067819595336914
+  - -0.10606551170349121
+  - -0.1117253303527832
+  - -0.08965158462524414
+  - -0.10158061981201172
+  - -0.10422372817993164
+  - -0.10925769805908203
+  - -0.14473819732666016
+  - -0.140444815158844
+  - -0.11016154289245605
+  - -0.10632514953613281
+  - -0.10388708114624023
+  - -0.10091018676757812
+  - -0.10791945457458496
+  - -0.10496068000793457
+  - -0.09102201461791992
+  - -0.10458517074584961
+  - -0.6600580215454102
+  - -0.10772895812988281
+  - -0.11010408401489258
+  - -0.2336907833814621
+  - -0.10480499267578125
+  - -0.10915088653564453
+  - -0.18037500977516174
+  - -0.10801315307617188
+  - -0.12895584106445312
+  - -0.10503673553466797
+  - -0.10635519027709961
+  - -0.46898216009140015
+  - -0.10490608215332031
+  - -0.10385990142822266
+  - -0.3729293644428253
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -0.2347436398267746
+  - -0.10479402542114258
+  - -0.1093282699584961
+  - -0.180373415350914
+  - -0.10807323455810547
+  - -0.12993144989013672
+  - -0.10502910614013672
+  - -0.10632944107055664
+  - -2.1286096572875977
+  - -0.10635709762573242
+  - -0.1034088134765625
+  - -0.3935587704181671
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -0.2347436398267746
+  - -0.10479402542114258
+  - -0.1093282699584961
+  - -2.2217068672180176
+  - -0.11090373992919922
+  - -0.1827383041381836
+  - -0.10463714599609375
+  - -0.10365152359008789
+  - -0.2891053259372711
+  - -0.10463190078735352
+  - -0.1036229133605957
+  - -0.17775601148605347
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -2.1694631576538086
+  - -0.1106405258178711
+  - -0.10569334030151367
+  - -0.12035989761352539
+  - -0.09085655212402344
+  - -0.1013631820678711
+  - -0.10461950302124023
+  - -0.10894584655761719
+  - -0.11146259307861328
+  - -0.11319893598556519
+  - -0.11028170585632324
+  - -0.10585927963256836
+  - -0.10669231414794922
+  - -0.10274839401245117
+  - -0.10680389404296875
+  - -0.10487103462219238
+  - -0.05619335174560547
+  - -0.10300445556640625
+  - -0.10337066650390625
+  - -0.10955190658569336
+  - -0.10399055480957031
+  - -0.12874460220336914
+  - -0.103607177734375
+  - -0.10456991195678711
+  - -0.10364246368408203
+  - -0.10427665710449219
+  - -0.10618972778320312
+  - -0.10447883605957031
+  - -0.21547269821166992
+  - -0.11132192611694336
+  - -0.10587358474731445
+  - -0.10218334197998047
+  - -0.10562753677368164
+  - -0.10189676284790039
+  - -0.10451221466064453
+  - -0.10681390762329102
+  - -0.1094522476196289
+  - -0.08187959343194962
+  - -0.11104464530944824
+  - -0.1055445671081543
+  - -0.10981607437133789
+  - -0.09889936447143555
+  - -0.10748720169067383
+  - -0.10403108596801758
+  - -0.10460758209228516
+  - -0.42957907915115356
+  - -0.10903453826904297
+  - -0.10622859001159668
+  - -0.1228032112121582
+  - -0.08820867538452148
+  - -0.102142333984375
+  - -0.10416889190673828
+  - -0.10947656631469727
+  - -0.1457219123840332
+  - -0.14019232988357544
+  - -0.11014723777770996
+  - -0.10633468627929688
+  - -0.10412359237670898
+  - -0.1004643440246582
+  - -0.10787820816040039
+  - -0.10496044158935547
+  - -0.09133243560791016
+  - -0.10453605651855469
+  - -0.6620712280273438
+  - -0.10758399963378906
+  - -0.11005210876464844
+  - -0.23463231325149536
+  - -0.10480117797851562
+  - -0.1094207763671875
+  - -0.18066838383674622
+  - -0.1078948974609375
+  - -0.12967205047607422
+  - -0.1050262451171875
+  - -0.10634088516235352
+  - -0.4691839814186096
+  - -0.10490846633911133
+  - -0.10385608673095703
+  - -0.37318533658981323
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -2.249528408050537
+  - -0.10588932037353516
+  - -0.10506486892700195
+  - -0.3044857680797577
+  - -0.10273456573486328
+  - -0.11886358261108398
+  - -0.10512495040893555
+  - -0.10592031478881836
+  - -0.4006778299808502
+  - -0.10455083847045898
+  - -0.10515165328979492
+  - -0.24554826319217682
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -1.928917407989502
+  - -0.11067819595336914
+  - -0.10606551170349121
+  - -0.1117253303527832
+  - -0.08965158462524414
+  - -0.10158061981201172
+  - -0.10422372817993164
+  - -0.10925769805908203
+  - -0.14473819732666016
+  - -0.140444815158844
+  - -0.11016154289245605
+  - -0.10632514953613281
+  - -0.10388708114624023
+  - -0.10091018676757812
+  - -0.10791945457458496
+  - -0.10496068000793457
+  - -0.09102201461791992
+  - -0.10458517074584961
+  - -0.6600580215454102
+  - -0.10772895812988281
+  - -0.11010408401489258
+  - -0.2336907833814621
+  - -0.10480499267578125
+  - -0.10915088653564453
+  - -0.18037500977516174
+  - -0.10801315307617188
+  - -0.12895584106445312
+  - -0.10503673553466797
+  - -0.10635519027709961
+  - -0.46898216009140015
+  - -0.10490608215332031
+  - -0.10385990142822266
+  - -1.438428282737732
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -0.3045463562011719
+  - -0.10989570617675781
+  - -0.10578298568725586
+  - -0.10921764373779297
+  - -0.09169960021972656
+  - -0.10119009017944336
+  - -0.10455703735351562
+  - -0.1089487075805664
+  - -0.11334943771362305
+  - -0.11139019578695297
+  - -0.11026477813720703
+  - -0.10584712028503418
+  - -0.10814094543457031
+  - -0.10220050811767578
+  - -0.10681033134460449
+  - -0.1048734188079834
+  - -0.05533123016357422
+  - -0.1030430793762207
+  - -0.10347557067871094
+  - -0.10947418212890625
+  - -0.10397052764892578
+  - -0.12863588333129883
+  - -0.10352420806884766
+  - -0.10456609725952148
+  - -0.10360002517700195
+  - -0.10429620742797852
+  - -0.10614538192749023
+  - -0.10449743270874023
+  - -0.2162405550479889
+  - -0.11131501197814941
+  - -0.10587692260742188
+  - -0.10217666625976562
+  - -0.10561847686767578
+  - -0.10189056396484375
+  - -0.10450887680053711
+  - -0.10679435729980469
+  - -0.1094655990600586
+  - -0.08232960850000381
+  - -0.11106348037719727
+  - -0.10553932189941406
+  - -0.11020421981811523
+  - -0.09821653366088867
+  - -0.1075143814086914
+  - -0.10401391983032227
+  - -0.10462236404418945
+  - -0.4272964298725128
+  - -0.10902714729309082
+  - -0.10622859001159668
+  - -0.12152814865112305
+  - -0.08810138702392578
+  - -0.10214090347290039
+  - -0.10416793823242188
+  - -0.10946130752563477
+  - -0.1457991600036621
+  - -0.14005906879901886
+  - -0.11015105247497559
+  - -0.10633111000061035
+  - -0.1041111946105957
+  - -0.1009817123413086
+  - -0.10788607597351074
+  - -0.1049649715423584
+  - -0.0913381576538086
+  - -0.10454130172729492
+  - -0.6644573211669922
+  - -0.10756731033325195
+  - -0.10991334915161133
+  - -0.2347436398267746
+  - -0.10479402542114258
+  - -0.1093282699584961
+  - -0.180373415350914
+  - -0.10807323455810547
+  - -0.12993144989013672
+  - -0.10502910614013672
+  - -0.10632944107055664
+  - -3.151684284210205
+  - -0.10590124130249023
+  - -0.10368204116821289
+  - -0.501497745513916
+- - -0.10310506820678711
+  - -0.10513877868652344
+  - -0.10708498954772949
+  - -0.10446739196777344
+  - -0.1321568489074707
+  - -0.10289430618286133
+  - -0.10512590408325195
+  - -0.10190105438232422
+  - -0.10412454605102539
+  - -0.1054530143737793
+  - -0.10614633560180664
+  - -0.09449014067649841
+  - -0.11286759376525879
+  - -0.10518503189086914
+  - -0.10171794891357422
+  - -0.10550737380981445
+  - -0.10180139541625977
+  - -0.10438299179077148
+  - -0.10617780685424805
+  - -0.10391902923583984
+  - -0.0832483246922493
+  - -0.11152815818786621
+  - -0.10436677932739258
+  - -0.13762283325195312
+  - -0.11154699325561523
+  - -0.1055145263671875
+  - -0.10404634475708008
+  - -0.10501575469970703
+  - -2.1694631576538086
+  - -0.1106405258178711
+  - -0.10569334030151367
+  - -0.12035989761352539
+  - -0.09085655212402344
+  - -0.1013631820678711
+  - -0.10461950302124023
+  - -0.10894584655761719
+  - -0.11146259307861328
+  - -0.11319893598556519
+  - -0.11028170585632324
+  - -0.10585927963256836
+  - -0.10669231414794922
+  - -0.10274839401245117
+  - -0.10680389404296875
+  - -0.10487103462219238
+  - -0.05619335174560547
+  - -0.10300445556640625
+  - -0.10337066650390625
+  - -0.10955190658569336
+  - -0.10399055480957031
+  - -0.12874460220336914
+  - -0.103607177734375
+  - -0.10456991195678711
+  - -0.10364246368408203
+  - -0.10427665710449219
+  - -0.10618972778320312
+  - -0.10447883605957031
+  - -0.21547269821166992
+  - -0.11132192611694336
+  - -0.10587358474731445
+  - -0.10218334197998047
+  - -0.10562753677368164
+  - -0.10189676284790039
+  - -0.10451221466064453
+  - -0.10681390762329102
+  - -0.1094522476196289
+  - -0.08187959343194962
+  - -0.11104464530944824
+  - -0.1055445671081543
+  - -0.10981607437133789
+  - -0.09889936447143555
+  - -0.10748720169067383
+  - -0.10403108596801758
+  - -0.10460758209228516
+  - -0.42957907915115356
+  - -0.10903453826904297
+  - -0.10622859001159668
+  - -0.1228032112121582
+  - -0.08820867538452148
+  - -0.102142333984375
+  - -0.10416889190673828
+  - -0.10947656631469727
+  - -0.1457219123840332
+  - -0.14019232988357544
+  - -0.11014723777770996
+  - -0.10633468627929688
+  - -0.10412359237670898
+  - -0.1004643440246582
+  - -0.10787820816040039
+  - -0.10496044158935547
+  - -0.09133243560791016
+  - -0.10453605651855469
+  - -0.6620712280273438
+  - -0.10758399963378906
+  - -0.11005210876464844
+  - -0.23463231325149536
+  - -0.10480117797851562
+  - -0.1094207763671875
+  - -0.18066838383674622
+  - -0.1078948974609375
+  - -0.12967205047607422
+  - -0.1050262451171875
+  - -0.10634088516235352
+  - -0.4691839814186096
+  - -0.10490846633911133
+  - -0.10385608673095703
+  - -1.4376323223114014
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'cars_data'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'cars_data'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countries'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Maker'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_names'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'model_list'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'car_makers'

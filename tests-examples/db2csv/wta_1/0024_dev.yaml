@@ -1,0 +1,2058 @@
+db: tests-examples/db2csv/wta_1/tables/wta_1.sqlite
+inputs:
+ - tests-examples/db2csv/wta_1/tables/matches.csv
+ - tests-examples/db2csv/wta_1/tables/players.csv
+output: tests-examples/db2csv/wta_1/tables/0024_dev.csv
+raw_question: What are the first names and country codes for players who won both the WTA Championships and the Australian Open? 
+question_index: 452 
+constants:
+ - Australian Open
+ - WTA Championships
+join_columns:
+ - player_id
+ - winner_id
+columns:
+ - tourney_name
+filters:
+ - '='
+ieu:
+ - intersect
+comment: |-
+  SELECT T1.country_code,
+         T1.first_name
+  FROM players AS T1
+  JOIN matches AS T2 ON T1.player_id = T2.winner_id
+  WHERE T2.tourney_name = 'WTA Championships' INTERSECT
+    SELECT T1.country_code,
+           T1.first_name
+    FROM players AS T1
+    JOIN matches AS T2 ON T1.player_id = T2.winner_id WHERE T2.tourney_name = 'Australian Open'
+
+sql: |-
+  SELECT T1.country_code,
+         T1.first_name
+  FROM players AS T1
+  JOIN matches AS T2 ON T1.player_id = T2.winner_id
+  WHERE T2.tourney_name = 'WTA Championships' INTERSECT
+    SELECT T1.country_code,
+           T1.first_name
+    FROM players AS T1
+    JOIN matches AS T2 ON T1.player_id = T2.winner_id WHERE T2.tourney_name = 'Australian Open'
+smbop_beam_join_columns:
+- - player_id
+  - winner_id
+- - player_id
+  - winner_id
+- - player_id
+  - winner_id
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+smbop_beam_constants:
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+smbop_beam_functions:
+- []
+- []
+- []
+smbop_beam_columns:
+- - tourney_name
+- - tourney_name
+- - tourney_name
+smbop_beam_ieu:
+- - intersect
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'WTA Championships'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name , players.country_code FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'WTA Championships'
+ratsql_beam_join_columns:
+- - player_id
+  - loser_id
+- - player_id
+  - loser_id
+- - player_id
+  - loser_id
+- - player_id
+  - loser_id
+- - player_id
+  - loser_id
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+ratsql_beam_constants:
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+ratsql_beam_functions:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_columns:
+- - tourney_name
+- - tourney_name
+- - tourney_name
+- - tourney_name
+- - tourney_name
+ratsql_beam_ieu:
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'terminal'
+  - SELECT DISTINCT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT DISTINCT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, DISTINCT players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, DISTINCT players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' LIMIT 1 INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT DISTINCT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT DISTINCT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, DISTINCT players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, DISTINCT players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' LIMIT 1 INTERSECT SELECT players.first_name, players.country_code FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+ratsql_beam_score_history:
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -0.11323761940002441
+  - -0.10547852516174316
+  - -0.10156536102294922
+  - -0.10618209838867188
+  - -0.10580778121948242
+  - -0.10685586929321289
+  - -0.10611104965209961
+  - -0.10459136962890625
+  - -0.06800122559070587
+  - -0.11136841773986816
+  - -0.1055593490600586
+  - -0.09566783905029297
+  - -0.10685396194458008
+  - -0.10124349594116211
+  - -0.10237789154052734
+  - -0.10580205917358398
+  - -0.10599708557128906
+  - -0.10422325134277344
+  - -0.10139505565166473
+  - -0.11181426048278809
+  - -0.10608530044555664
+  - -0.10413551330566406
+  - -0.10092306137084961
+  - -0.10420513153076172
+  - -0.10743260383605957
+  - -0.10513091087341309
+  - -0.10617971420288086
+  - -0.10827922821044922
+  - -0.11481428146362305
+  - -0.10601329803466797
+  - -0.10454702377319336
+  - -0.17833445966243744
+  - -0.10580110549926758
+  - -0.10491132736206055
+  - -0.05507524684071541
+  - -0.09389400482177734
+  - -0.1179952621459961
+  - -0.10750341415405273
+  - -0.10300874710083008
+  - -0.17365218698978424
+  - -0.1053619384765625
+  - -0.10484647750854492
+  - -0.08129871636629105
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -0.11323761940002441
+  - -0.10547852516174316
+  - -0.10156536102294922
+  - -0.10618209838867188
+  - -0.10580778121948242
+  - -0.10685586929321289
+  - -0.10611104965209961
+  - -0.10459136962890625
+  - -0.06800122559070587
+  - -0.11136841773986816
+  - -0.1055593490600586
+  - -0.09566783905029297
+  - -0.10685396194458008
+  - -0.10124349594116211
+  - -0.10237789154052734
+  - -0.10580205917358398
+  - -0.10599708557128906
+  - -0.10422325134277344
+  - -0.10139505565166473
+  - -0.11181426048278809
+  - -0.10608530044555664
+  - -0.10413551330566406
+  - -0.10092306137084961
+  - -0.10420513153076172
+  - -0.10743260383605957
+  - -0.10513091087341309
+  - -0.10617971420288086
+  - -0.10827922821044922
+  - -0.11481428146362305
+  - -0.10601329803466797
+  - -0.10454702377319336
+  - -0.17833445966243744
+  - -0.10580110549926758
+  - -0.10491132736206055
+  - -0.05507524684071541
+  - -0.09389400482177734
+  - -0.1179952621459961
+  - -0.10750341415405273
+  - -0.10300874710083008
+  - -2.411647319793701
+  - -0.10603666305541992
+  - -0.10382556915283203
+  - -0.37253519892692566
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -0.11323761940002441
+  - -0.10547852516174316
+  - -0.10156536102294922
+  - -0.10618209838867188
+  - -0.10580778121948242
+  - -0.10685586929321289
+  - -0.10611104965209961
+  - -0.10459136962890625
+  - -0.06800122559070587
+  - -0.11136841773986816
+  - -0.1055593490600586
+  - -0.09566783905029297
+  - -0.10685396194458008
+  - -0.10124349594116211
+  - -0.10237789154052734
+  - -0.10580205917358398
+  - -0.10599708557128906
+  - -0.10422325134277344
+  - -0.10139505565166473
+  - -0.11181426048278809
+  - -0.10608530044555664
+  - -0.10413551330566406
+  - -0.10092306137084961
+  - -0.10420513153076172
+  - -0.10743260383605957
+  - -0.10513091087341309
+  - -0.10617971420288086
+  - -0.10827922821044922
+  - -0.11481428146362305
+  - -0.10601329803466797
+  - -0.10454702377319336
+  - -2.4467196464538574
+  - -0.10538101196289062
+  - -0.10420608520507812
+  - -0.6252261996269226
+  - -0.10491037368774414
+  - -0.11149978637695312
+  - -0.11077308654785156
+  - -0.10376787185668945
+  - -0.16466543078422546
+  - -0.10518884658813477
+  - -0.103912353515625
+  - -0.07548820227384567
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -3.374274730682373
+  - -0.10444402694702148
+  - -0.12839508056640625
+  - -0.10199451446533203
+  - -0.10519838333129883
+  - -0.10175323486328125
+  - -0.10515499114990234
+  - -0.10481882095336914
+  - -0.10463190078735352
+  - -0.10979662835597992
+  - -0.11313843727111816
+  - -0.10530209541320801
+  - -0.10116291046142578
+  - -0.10579729080200195
+  - -0.10311508178710938
+  - -0.10716009140014648
+  - -0.1066446304321289
+  - -0.10204553604125977
+  - -0.05888787657022476
+  - -0.11074209213256836
+  - -0.10529184341430664
+  - -0.08714151382446289
+  - -0.10882186889648438
+  - -0.1019124984741211
+  - -0.10180139541625977
+  - -0.10524129867553711
+  - -0.10565757751464844
+  - -0.10564327239990234
+  - -0.1349843293428421
+  - -0.11196088790893555
+  - -0.10614013671875
+  - -0.10467672348022461
+  - -0.09713602066040039
+  - -0.10331106185913086
+  - -0.10718107223510742
+  - -0.1054466962814331
+  - -0.0805058479309082
+  - -0.11595010757446289
+  - -0.1043553352355957
+  - -0.11108517646789551
+  - -0.10381340980529785
+  - -0.1529674530029297
+  - -0.10362911224365234
+  - -0.10483694076538086
+  - -0.10184669494628906
+  - -0.10478496551513672
+  - -0.10671615600585938
+  - -0.10384225845336914
+  - -0.1372283697128296
+  - -0.11324048042297363
+  - -0.10547876358032227
+  - -0.10157251358032227
+  - -0.10619020462036133
+  - -0.10580301284790039
+  - -0.10685539245605469
+  - -0.10612201690673828
+  - -0.10459041595458984
+  - -0.06779416650533676
+  - -0.1113736629486084
+  - -0.1055607795715332
+  - -0.0956563949584961
+  - -0.1068568229675293
+  - -0.10123777389526367
+  - -0.10237360000610352
+  - -0.10579729080200195
+  - -0.10599613189697266
+  - -0.10422897338867188
+  - -0.10150804370641708
+  - -0.1118168830871582
+  - -0.10608577728271484
+  - -0.10413503646850586
+  - -0.1009221076965332
+  - -0.10420083999633789
+  - -0.10743260383605957
+  - -0.10513114929199219
+  - -0.10619306564331055
+  - -0.10827302932739258
+  - -0.11481475830078125
+  - -0.10601043701171875
+  - -0.10454607009887695
+  - -0.17827121913433075
+  - -0.10579681396484375
+  - -0.10491037368774414
+  - -0.05506938323378563
+  - -0.09389448165893555
+  - -0.11799430847167969
+  - -0.10750341415405273
+  - -0.10300827026367188
+  - -0.17366892099380493
+  - -0.1053624153137207
+  - -0.10484600067138672
+  - -0.08129827678203583
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -3.4410531520843506
+  - -0.10558509826660156
+  - -0.10069608688354492
+  - -0.10596609115600586
+  - -0.10574007034301758
+  - -0.10682344436645508
+  - -0.10511493682861328
+  - -0.10455179214477539
+  - -0.07078266888856888
+  - -0.11135745048522949
+  - -0.1056051254272461
+  - -0.09560537338256836
+  - -0.10681390762329102
+  - -0.10127735137939453
+  - -0.1024169921875
+  - -0.10585880279541016
+  - -0.10599184036254883
+  - -0.10424470901489258
+  - -0.09899865835905075
+  - -0.11183047294616699
+  - -0.1060793399810791
+  - -0.10412073135375977
+  - -0.10093307495117188
+  - -0.10419321060180664
+  - -0.10742902755737305
+  - -0.10513043403625488
+  - -0.10632896423339844
+  - -0.10883903503417969
+  - -0.11542558670043945
+  - -0.10609817504882812
+  - -0.10461711883544922
+  - -0.17890240252017975
+  - -0.10585546493530273
+  - -0.10487556457519531
+  - -0.054775435477495193
+  - -0.09388875961303711
+  - -0.11791610717773438
+  - -0.10746908187866211
+  - -0.10301780700683594
+  - -0.174528107047081
+  - -0.10537242889404297
+  - -0.10484457015991211
+  - -0.0813070684671402
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -3.4470722675323486
+  - -0.10576462745666504
+  - -0.103759765625
+  - -0.09800195693969727
+  - -0.10342550277709961
+  - -0.1072533130645752
+  - -0.1054755449295044
+  - -0.08277750015258789
+  - -0.1158761978149414
+  - -0.1042780876159668
+  - -0.1111900806427002
+  - -0.10377764701843262
+  - -0.15247249603271484
+  - -0.10367202758789062
+  - -0.1048121452331543
+  - -0.10184955596923828
+  - -0.10477495193481445
+  - -0.10670614242553711
+  - -0.10384321212768555
+  - -0.13662594556808472
+  - -0.11323213577270508
+  - -0.10547661781311035
+  - -0.10162925720214844
+  - -0.1062765121459961
+  - -0.10564327239990234
+  - -0.10683202743530273
+  - -0.10624885559082031
+  - -0.10459136962890625
+  - -0.06838905811309814
+  - -0.11137938499450684
+  - -0.1055593490600586
+  - -0.09565353393554688
+  - -0.10687398910522461
+  - -0.10123825073242188
+  - -0.1023707389831543
+  - -0.10579347610473633
+  - -0.10599517822265625
+  - -0.10422658920288086
+  - -0.1015959233045578
+  - -0.1118171215057373
+  - -0.1060943603515625
+  - -0.10414505004882812
+  - -0.10091829299926758
+  - -0.10419607162475586
+  - -0.1074376106262207
+  - -0.10512971878051758
+  - -0.1061549186706543
+  - -0.10820770263671875
+  - -0.11484718322753906
+  - -0.10599660873413086
+  - -0.10454654693603516
+  - -0.17775081098079681
+  - -0.10578584671020508
+  - -0.10490608215332031
+  - -0.05504332110285759
+  - -0.09389591217041016
+  - -0.1179804801940918
+  - -0.10750341415405273
+  - -0.10300683975219727
+  - -0.1737411618232727
+  - -0.1053614616394043
+  - -0.10484504699707031
+  - -0.08130091428756714
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -0.11323761940002441
+  - -0.10547852516174316
+  - -0.10156536102294922
+  - -0.10618209838867188
+  - -0.10580778121948242
+  - -0.10685586929321289
+  - -0.10611104965209961
+  - -0.10459136962890625
+  - -0.06800122559070587
+  - -0.11136841773986816
+  - -0.1055593490600586
+  - -0.09566783905029297
+  - -0.10685396194458008
+  - -0.10124349594116211
+  - -0.10237789154052734
+  - -0.10580205917358398
+  - -0.10599708557128906
+  - -0.10422325134277344
+  - -0.10139505565166473
+  - -3.446640968322754
+  - -0.10587215423583984
+  - -0.10441923141479492
+  - -0.10083961486816406
+  - -0.10403871536254883
+  - -0.10738325119018555
+  - -0.10518360137939453
+  - -0.11404895782470703
+  - -0.10924673080444336
+  - -0.11531543731689453
+  - -0.10599946975708008
+  - -0.10460710525512695
+  - -0.177801713347435
+  - -0.10575389862060547
+  - -0.10482406616210938
+  - -0.05475500971078873
+  - -0.09386873245239258
+  - -0.11790752410888672
+  - -0.10745477676391602
+  - -0.10303592681884766
+  - -0.17493300139904022
+  - -0.10538291931152344
+  - -0.10484457015991211
+  - -0.08142652362585068
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -0.10717940330505371
+  - -0.10544335842132568
+  - -0.08048534393310547
+  - -0.11594486236572266
+  - -0.10434961318969727
+  - -0.11110186576843262
+  - -0.1038055419921875
+  - -0.15305328369140625
+  - -0.10347986221313477
+  - -0.10483694076538086
+  - -0.10184526443481445
+  - -0.10478544235229492
+  - -0.10671377182006836
+  - -0.10384416580200195
+  - -0.1374424248933792
+  - -0.11323761940002441
+  - -0.10547852516174316
+  - -0.10156536102294922
+  - -0.10618209838867188
+  - -0.10580778121948242
+  - -0.10685586929321289
+  - -0.10611104965209961
+  - -0.10459136962890625
+  - -0.06800122559070587
+  - -3.461007595062256
+  - -0.1092374324798584
+  - -0.09455347061157227
+  - -0.10895538330078125
+  - -0.1017618179321289
+  - -0.1023106575012207
+  - -0.10634708404541016
+  - -0.10620498657226562
+  - -0.10446357727050781
+  - -0.10201358050107956
+  - -0.11182904243469238
+  - -0.10611486434936523
+  - -0.1042165756225586
+  - -0.10089731216430664
+  - -0.10426807403564453
+  - -0.10744071006774902
+  - -0.10512757301330566
+  - -0.10620880126953125
+  - -0.10921764373779297
+  - -0.1157999038696289
+  - -0.10613870620727539
+  - -0.10466289520263672
+  - -0.17928270995616913
+  - -0.10588884353637695
+  - -0.10486650466918945
+  - -0.054664496332407
+  - -0.09389066696166992
+  - -0.11790180206298828
+  - -0.10745382308959961
+  - -0.10302209854125977
+  - -0.17482471466064453
+  - -0.10537433624267578
+  - -0.10484457015991211
+  - -0.08132113516330719
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -3.4814634323120117
+  - -0.10574865341186523
+  - -0.08901691436767578
+  - -0.10762357711791992
+  - -0.10228490829467773
+  - -0.10190200805664062
+  - -0.10518598556518555
+  - -0.10542917251586914
+  - -0.10568857192993164
+  - -0.13428175449371338
+  - -0.11195039749145508
+  - -0.10616946220397949
+  - -0.10458230972290039
+  - -0.09694099426269531
+  - -0.10329723358154297
+  - -0.10719537734985352
+  - -0.10545766353607178
+  - -0.08030986785888672
+  - -0.11539793014526367
+  - -0.10448551177978516
+  - -0.11099433898925781
+  - -0.1038517951965332
+  - -0.15158510208129883
+  - -0.1047215461730957
+  - -0.1048269271850586
+  - -0.10184812545776367
+  - -0.10478353500366211
+  - -0.106719970703125
+  - -0.10383939743041992
+  - -0.13691499829292297
+  - -0.11324238777160645
+  - -0.10547709465026855
+  - -0.10161209106445312
+  - -0.10626554489135742
+  - -0.10578346252441406
+  - -0.10685920715332031
+  - -0.10617256164550781
+  - -0.10459184646606445
+  - -0.06862850487232208
+  - -0.1113748550415039
+  - -0.1055610179901123
+  - -0.09562444686889648
+  - -0.1068716049194336
+  - -0.10124444961547852
+  - -0.10237789154052734
+  - -0.10580587387084961
+  - -0.10599327087402344
+  - -0.10422325134277344
+  - -0.10118930041790009
+  - -0.11181879043579102
+  - -0.10608863830566406
+  - -0.10413742065429688
+  - -0.10093069076538086
+  - -0.10415792465209961
+  - -0.10743427276611328
+  - -0.1051332950592041
+  - -0.1064138412475586
+  - -0.10824155807495117
+  - -0.11484289169311523
+  - -0.10599422454833984
+  - -0.1045389175415039
+  - -0.1779756247997284
+  - -0.10578536987304688
+  - -0.10490274429321289
+  - -0.055043093860149384
+  - -0.09390115737915039
+  - -0.11799430847167969
+  - -0.10750246047973633
+  - -0.10300779342651367
+  - -0.17374756932258606
+  - -0.1053628921508789
+  - -0.10484600067138672
+  - -0.08129344135522842
+- - -0.10218143463134766
+  - -0.10405731201171875
+  - -0.1118772029876709
+  - -0.10440325736999512
+  - -0.13546133041381836
+  - -0.10136985778808594
+  - -0.1051645278930664
+  - -0.10171794891357422
+  - -0.10515117645263672
+  - -0.10479164123535156
+  - -0.10455751419067383
+  - -0.10984618961811066
+  - -0.11312127113342285
+  - -0.10532569885253906
+  - -0.10124540328979492
+  - -0.10569381713867188
+  - -0.10295915603637695
+  - -0.10705852508544922
+  - -0.10678291320800781
+  - -0.10195684432983398
+  - -0.06357810646295547
+  - -0.11070752143859863
+  - -0.10527563095092773
+  - -0.08729934692382812
+  - -0.1084904670715332
+  - -0.10185623168945312
+  - -0.10179424285888672
+  - -0.10523271560668945
+  - -0.10562801361083984
+  - -0.10563039779663086
+  - -0.13487599790096283
+  - -0.11195945739746094
+  - -0.1061396598815918
+  - -0.10466718673706055
+  - -0.0971527099609375
+  - -0.1033177375793457
+  - -3.5546035766601562
+  - -0.10506010055541992
+  - -0.08490991592407227
+  - -0.11443042755126953
+  - -0.10495233535766602
+  - -0.11048460006713867
+  - -0.10393428802490234
+  - -0.14884710311889648
+  - -0.10522651672363281
+  - -0.10489702224731445
+  - -0.10184383392333984
+  - -0.1047821044921875
+  - -0.10669565200805664
+  - -0.10382843017578125
+  - -0.1347251534461975
+  - -0.11326026916503906
+  - -0.10547685623168945
+  - -0.10164117813110352
+  - -0.10638236999511719
+  - -0.10566091537475586
+  - -0.10672569274902344
+  - -0.10646247863769531
+  - -0.10458040237426758
+  - -0.06433437019586563
+  - -0.11138272285461426
+  - -0.1055459976196289
+  - -0.09554290771484375
+  - -0.10695600509643555
+  - -0.10128259658813477
+  - -0.10236644744873047
+  - -0.10584354400634766
+  - -0.10602664947509766
+  - -0.1042637825012207
+  - -0.10325119644403458
+  - -0.11176848411560059
+  - -0.10603570938110352
+  - -0.1041116714477539
+  - -0.1009821891784668
+  - -0.10406732559204102
+  - -0.10739731788635254
+  - -0.10514259338378906
+  - -0.1053767204284668
+  - -0.10834360122680664
+  - -0.11485576629638672
+  - -0.10599279403686523
+  - -0.10452938079833984
+  - -0.17913353443145752
+  - -0.1057882308959961
+  - -0.1049051284790039
+  - -0.05511259287595749
+  - -0.0938873291015625
+  - -0.11796379089355469
+  - -0.10749626159667969
+  - -0.10300874710083008
+  - -0.17364777624607086
+  - -0.10536575317382812
+  - -0.10484790802001953
+  - -0.08129530400037766
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'rankings'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'rankings'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'True'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'first_name'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'country_code'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'tourney_name'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'players'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'matches'

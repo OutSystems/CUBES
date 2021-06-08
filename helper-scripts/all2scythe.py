@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
             result = ''
 
-            for input_name, table_name in zip(spec['inputs'], specification.tables):
+            for input_name, table_name in zip(spec['inputs'], specification.input_tables):
                 result += '#input\n\n'
                 with open(input_name) as f:
                     reader = csv.reader(f)

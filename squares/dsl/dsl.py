@@ -30,6 +30,7 @@ Table = ValueType('Table',
 JoinCondition = EnumType('JoinCondition')
 Col = EnumType('Col')
 Cols = EnumType('Cols')
+GroupCols = EnumType('GroupCols')
 CrossJoinCondition = EnumType('CrossJoinCondition')
 FilterCondition = EnumType('FilterCondition')
 Op = EnumType('Op')
@@ -118,7 +119,7 @@ filters = ('filters',
 
 summarise = ('summarise',
              Table,
-             [Table, SummariseCondition, Cols],
+             [Table, SummariseCondition, GroupCols],
              [h.LE(h.col(0), ConstExpr(3)),  # TODO should depend on max_cols
               h.LE(h.row(0), h.row(1))])
 

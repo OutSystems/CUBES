@@ -23,6 +23,7 @@ from .process_manager import ProcessSet, ProcessSetManager, MaximumLinesOfCodeRe
 from .statistics import BigramStatistics
 from .tyrell.decider import Example
 from .tyrell.enumerator.bitenum import BitEnumerator
+from .tyrell.enumerator.input_enumerator import InputEnumerator
 from .tyrell.spec import TyrellSpec
 from .tyrell.synthesizer.synthesizer import Synthesizer, AbstractSynthesizer
 from .util import pipe_write, pipe_read, Message
@@ -54,7 +55,7 @@ class ChildSynthesizer(Process, Synthesizer):
         self.tyrell_specification = self.specification.generate_dsl()
 
         self._decider = LinesDecider(interpreter=SquaresInterpreter(self.specification),
-                                     examples=[Example(input=self.specification.tables, output='expected_output')])
+                                     examples=[Example(input=self.specification.input_table_names, output='expected_output')])
 
         while True:
             msg = self.pipe.recv()
@@ -76,45 +77,50 @@ class ChildSynthesizer(Process, Synthesizer):
             self.tyrell_specification = self.specification.generate_dsl(discard=True)
 
         start = time.time()
-        self._enumerator = BitEnumerator(self.tyrell_specification, self.specification, loc)
-        util.get_program_queue().put((Message.DEBUG_STATS, 0, 0, 0, 0, 0, 0, 0, time.time() - start, 0, 0))
+        if loc > 0:
+            self._enumerator = BitEnumerator(self.tyrell_specification, self.specification, loc)
+        else:
+            self._enumerator = InputEnumerator(self.tyrell_specification, self.specification)
+        util.get_program_queue().put((Message.DEBUG_STATS, 0, 0, 0, 0, 0, 0, 0, time.time() - start, 0, 0, 0, 0))
         pipe_write(self.pipe, (None, None, 0))
 
     def solve(self, cube):
         logger.debug('Solving cube %s', repr(cube))
 
         try:
-            self._enumerator.z3_solver.push()
+            if isinstance(self._enumerator, BitEnumerator):
+                self._enumerator.z3_solver.push()
 
-            for i, constraint in enumerate(cube):
-                self._enumerator.assert_expr(constraint.realize_constraint(self.tyrell_specification, self._enumerator), f'cube_line_{i}',
-                                             track=True)
+                for i, constraint in enumerate(cube):
+                    self._enumerator.assert_expr(constraint.realize_constraint(self.tyrell_specification, self._enumerator), f'cube_line_{i}',
+                                                 track=True)
 
             ret, attempts = self.synthesize()
 
-            core = None
-            if attempts == 0:
-                # logger.warning('Cube generated 0 programs')
-                unsat_core = [str(clause) for clause in self._enumerator.unsat_core]
+            if isinstance(self._enumerator, BitEnumerator):
+                core = None
+                if attempts == 0:
+                    # logger.warning('Cube generated 0 programs')
+                    unsat_core = [str(clause) for clause in self._enumerator.unsat_core]
 
-                core = []
-                for i, constraint in enumerate(cube):
-                    if f'cube_line_{i}' in unsat_core:
-                        core.append(constraint.production)
-                    else:
-                        core.append(None)
+                    core = []
+                    for i, constraint in enumerate(cube):
+                        if f'cube_line_{i}' in unsat_core:
+                            core.append(constraint.production)
+                        else:
+                            core.append(None)
 
             if ret:
                 logger.debug('Found solution with cube %s', repr(cube))
-            pipe_write(self.pipe, (ret, core, attempts))
+            pipe_write(self.pipe, (ret, core if isinstance(self._enumerator, BitEnumerator) else None, attempts))
 
         except:
-            logger.error('Exception while enumerating cube with hash %d', repr(cube))
+            logger.error('Exception while enumerating cube with hash %s', repr(cube))
             print(traceback.format_exc())
 
         finally:
             self._enumerator.blocked_models = {}
-            if not ret:
+            if isinstance(self._enumerator, BitEnumerator) and not ret:
                 self._enumerator.z3_solver.pop()
 
     def resume_solve(self):
@@ -151,7 +157,7 @@ class ParallelSynthesizer(AbstractSynthesizer):
         # dont alternate so many processes such that there are no longer any processes searching the previous loc
         self.alternate_j = min(round(self.j * util.get_config().advance_percentage), j - 1 - util.get_config().probing_threads)
 
-    def synthesize(self, top_n: int = 1):
+    def synthesize(self, top_n: int = 1, enum_all=False):
         pipes = {}
         stopped = 0
 
@@ -222,7 +228,7 @@ class ParallelSynthesizer(AbstractSynthesizer):
         found_solutions = set()
 
         while True and stopped < self.j:
-            if solution_n >= top_n:
+            if (not enum_all) and (solution_n >= top_n):
                 process_manager.kill_above(0)
                 return
 
@@ -247,22 +253,25 @@ class ParallelSynthesizer(AbstractSynthesizer):
 
                     if program:
                         if loc <= process_manager.min_loc() or not util.get_config().optimal:
-                            stopped += process_manager.kill_above(loc+1)
+                            if not enum_all:
+                                stopped += process_manager.kill_above(loc+1)
                             process_manager.stop_incrementing = True
                             found_solutions.add(pipe)
                             yield program, loc, True
                             solution_n += 1
-                            logger.info('Found program of loc %d. %d programs to go.', loc, top_n - solution_n)
+                            if util.get_config().enum_until is None:
+                                logger.info('Found program of loc %d. %d programs to go.', loc, top_n - solution_n)
                         else:
                             logger.info('Waiting for loc %d to finish before returning solution of loc %d', process_manager.min_loc(), loc)
                             if solution_loc is None or loc < solution_loc:
                                 solution = program
                                 results.store_solution(solution, loc, optimal=False)
                                 solution_loc = loc
-                                stopped += process_manager.kill_above(solution_loc)
+                                if not enum_all:
+                                    stopped += process_manager.kill_above(solution_loc)
 
                 if event & select.EPOLLOUT:
-                    if solution is not None:
+                    if solution is not None and not enum_all:
                         poll.unregister(pipe)
                         process_manager.set_loc(pipe, solution_loc)
                         continue

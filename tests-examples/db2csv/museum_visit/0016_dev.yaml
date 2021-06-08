@@ -1,0 +1,1958 @@
+db: tests-examples/db2csv/museum_visit/tables/museum_visit.sqlite
+inputs:
+ - tests-examples/db2csv/museum_visit/tables/visit.csv
+ - tests-examples/db2csv/museum_visit/tables/museum.csv
+ - tests-examples/db2csv/museum_visit/tables/visitor.csv
+output: tests-examples/db2csv/museum_visit/tables/0016_dev.csv
+raw_question: What is the name of the visitor who visited both a museum opened before 2009 and a museum opened after 2011? 
+question_index: 426 
+constants:
+ - 2009
+ - 2011
+join_columns:
+ - id
+ - visitor_id
+ - museum_id
+columns:
+ - open_year
+filters:
+ - '>'
+ - '<'
+ieu:
+ - intersect
+comment: |-
+  SELECT t1.name
+  FROM visitor AS t1
+  JOIN visit AS t2 ON t1.id = t2.visitor_id
+  JOIN museum AS t3 ON t3.Museum_ID = t2.Museum_ID
+  WHERE t3.open_year < 2009 INTERSECT
+    SELECT t1.name
+    FROM visitor AS t1
+    JOIN visit AS t2 ON t1.id = t2.visitor_id
+    JOIN museum AS t3 ON t3.Museum_ID = t2.Museum_ID WHERE t3.open_year > 2011
+
+sql: |-
+  SELECT t1.name
+  FROM visitor AS t1
+  JOIN visit AS t2 ON t1.id = t2.visitor_id
+  JOIN museum AS t3 ON t3.Museum_ID = t2.Museum_ID
+  WHERE t3.open_year < 2009 INTERSECT
+    SELECT t1.name
+    FROM visitor AS t1
+    JOIN visit AS t2 ON t1.id = t2.visitor_id
+    JOIN museum AS t3 ON t3.Museum_ID = t2.Museum_ID WHERE t3.open_year > 2011
+smbop_beam_join_columns:
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- []
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/museum.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+smbop_beam_constants:
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+smbop_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - open_year
+- - open_year
+- - open_year
+- - open_year
+- - open_year
+- []
+- - open_year
+- - open_year
+- - open_year
+smbop_beam_ieu:
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '<'
+- []
+- - '>'
+- - '<'
+- - '>'
+smbop_beam_inferred_code:
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009
+  - SELECT museum.open_year FROM museum
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+smbop_beam_inferred_code_w_terminals:
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009 INTERSECT SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year<2009
+  - SELECT museum.open_year FROM museum
+  - SELECT visitor.name FROM visitor JOIN visit ON visitor.id = visit.visitor_id JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2011
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year<2009
+  - SELECT visitor.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id JOIN visitor ON visit.visitor_id = visitor.id WHERE museum.open_year > 2011
+ratsql_beam_join_columns:
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+- - id
+  - visitor_id
+  - museum_id
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+ratsql_beam_constants:
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+- - 2009
+  - 2011
+ratsql_beam_functions:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_columns:
+- - open_year
+- - open_year
+- - age
+  - open_year
+- - open_year
+- - open_year
+- - open_year
+- - open_year
+ratsql_beam_ieu:
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+- - intersect
+ratsql_beam_filters:
+- - '>'
+  - '<'
+- - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+- - '>'
+  - '<'
+ratsql_beam_inferred_code:
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE visitor.Age < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT DISTINCT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE DISTINCT museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE DISTINCT museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT DISTINCT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal' LIMIT 1
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' LIMIT 1 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 'terminal'
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 'terminal' INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID WHERE museum.Open_Year > 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE visitor.Age < 2009 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2011
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT DISTINCT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE DISTINCT museum.Open_Year > 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE DISTINCT museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009
+  - SELECT DISTINCT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009 LIMIT 1
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 LIMIT 1 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2009
+  - SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2011 INTERSECT SELECT visitor.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID WHERE museum.Open_Year > 2009
+ratsql_beam_score_history:
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -0.11208224296569824
+  - -0.10577607154846191
+  - -0.09326553344726562
+  - -0.28600072860717773
+  - -0.10786628723144531
+  - -0.10126399993896484
+  - -0.10449838638305664
+  - -0.10461044311523438
+  - -0.10473823547363281
+  - -0.132041335105896
+  - -0.11091446876525879
+  - -0.10654664039611816
+  - -0.11113595962524414
+  - -0.1019449234008789
+  - -0.1030879020690918
+  - -0.10767960548400879
+  - -0.10502028465270996
+  - -0.09653711318969727
+  - -0.11001014709472656
+  - -0.11662530899047852
+  - -0.10656166076660156
+  - -0.10371589660644531
+  - -0.649662435054779
+  - -0.10478830337524414
+  - -0.1030426025390625
+  - -0.1174313873052597
+  - -0.10427331924438477
+  - -0.10512685775756836
+  - -0.0799233466386795
+  - -0.10135078430175781
+  - -0.08728885650634766
+  - -0.10508394241333008
+  - -0.10520792007446289
+  - -0.45784223079681396
+  - -0.10552978515625
+  - -0.10307121276855469
+  - -0.11745353788137436
+  - -0.10405683517456055
+  - -0.10576820373535156
+  - -0.09451660513877869
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -0.11208224296569824
+  - -0.10577607154846191
+  - -0.09326553344726562
+  - -1.9600234031677246
+  - -0.10360860824584961
+  - -0.10032844543457031
+  - -0.10499763488769531
+  - -0.10558128356933594
+  - -0.10425186157226562
+  - -0.13743162155151367
+  - -0.11115527153015137
+  - -0.10657763481140137
+  - -0.10415029525756836
+  - -0.10232067108154297
+  - -0.10460615158081055
+  - -0.10833048820495605
+  - -0.1048729419708252
+  - -0.09667015075683594
+  - -0.1094822883605957
+  - -0.11316871643066406
+  - -0.1062016487121582
+  - -0.10376119613647461
+  - -0.652284562587738
+  - -0.1048727035522461
+  - -0.10292387008666992
+  - -0.11641792953014374
+  - -0.10423898696899414
+  - -0.1040806770324707
+  - -0.0843394473195076
+  - -0.1018972396850586
+  - -0.08896303176879883
+  - -0.10494041442871094
+  - -0.10513925552368164
+  - -0.45146244764328003
+  - -0.10549783706665039
+  - -0.10293102264404297
+  - -0.11691905558109283
+  - -0.10364389419555664
+  - -0.10485506057739258
+  - -0.09755953401327133
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -2.457575559616089
+  - -0.11101984977722168
+  - -0.10569095611572266
+  - -0.09341001510620117
+  - -0.10181140899658203
+  - -0.10387372970581055
+  - -0.10721421241760254
+  - -0.10501885414123535
+  - -0.08637666702270508
+  - -0.10209274291992188
+  - -0.10391807556152344
+  - -0.10775494575500488
+  - -0.10427093505859375
+  - -0.10304832458496094
+  - -0.10236787796020508
+  - -0.10488748550415039
+  - -0.1026606559753418
+  - -0.10424232482910156
+  - -0.10567474365234375
+  - -0.10404539108276367
+  - -0.09447158873081207
+  - -0.11299848556518555
+  - -0.10658478736877441
+  - -0.08747100830078125
+  - -0.10410594940185547
+  - -0.09377098083496094
+  - -0.10108041763305664
+  - -0.10463142395019531
+  - -0.1046600341796875
+  - -0.10378313064575195
+  - -0.11596251279115677
+  - -0.1108391284942627
+  - -0.10663437843322754
+  - -0.11148405075073242
+  - -0.09981298446655273
+  - -0.10326433181762695
+  - -0.10748529434204102
+  - -0.10489416122436523
+  - -0.09664249420166016
+  - -0.1103215217590332
+  - -0.11591482162475586
+  - -0.10556650161743164
+  - -0.10379886627197266
+  - -0.779970645904541
+  - -0.10461950302124023
+  - -0.10309028625488281
+  - -0.11087337136268616
+  - -0.10448408126831055
+  - -0.10428571701049805
+  - -0.07913373410701752
+  - -0.10412311553955078
+  - -0.08850717544555664
+  - -0.10531091690063477
+  - -0.10527753829956055
+  - -0.4864714443683624
+  - -0.10519266128540039
+  - -0.10303401947021484
+  - -0.11257003992795944
+  - -0.10460567474365234
+  - -0.10503005981445312
+  - -0.08560054004192352
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -3.462834358215332
+  - -0.10320019721984863
+  - -0.09071016311645508
+  - -0.23565196990966797
+  - -0.10178232192993164
+  - -0.10105085372924805
+  - -0.10445737838745117
+  - -0.10452842712402344
+  - -0.10473251342773438
+  - -0.1309649795293808
+  - -0.11089539527893066
+  - -0.10658097267150879
+  - -0.11117029190063477
+  - -0.10185480117797852
+  - -0.10302066802978516
+  - -0.10769844055175781
+  - -0.10499167442321777
+  - -0.09653663635253906
+  - -0.11000347137451172
+  - -0.11635875701904297
+  - -0.10663652420043945
+  - -0.10372018814086914
+  - -0.6564459800720215
+  - -0.10480070114135742
+  - -0.1030583381652832
+  - -0.11778462678194046
+  - -0.10427522659301758
+  - -0.10512113571166992
+  - -0.07961470633745193
+  - -0.10139846801757812
+  - -0.08728504180908203
+  - -0.10507774353027344
+  - -0.10521221160888672
+  - -0.45595473051071167
+  - -0.10553169250488281
+  - -0.10307025909423828
+  - -0.11749646812677383
+  - -0.10404777526855469
+  - -0.10575437545776367
+  - -0.09461399167776108
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -0.11208224296569824
+  - -0.10577607154846191
+  - -0.09326553344726562
+  - -0.28600072860717773
+  - -0.10786628723144531
+  - -0.10126399993896484
+  - -0.10449838638305664
+  - -0.10461044311523438
+  - -0.10473823547363281
+  - -0.132041335105896
+  - -3.4561519622802734
+  - -0.10525989532470703
+  - -0.10453128814697266
+  - -0.10203933715820312
+  - -0.10328197479248047
+  - -0.10759305953979492
+  - -0.10511493682861328
+  - -0.09655046463012695
+  - -0.10965490341186523
+  - -0.11698722839355469
+  - -0.10668420791625977
+  - -0.10370063781738281
+  - -0.6402884125709534
+  - -0.10479164123535156
+  - -0.1029973030090332
+  - -0.11634927242994308
+  - -0.1042628288269043
+  - -0.10509777069091797
+  - -0.07989297062158585
+  - -0.10140657424926758
+  - -0.08731698989868164
+  - -0.10508251190185547
+  - -0.10520696640014648
+  - -0.4585188925266266
+  - -0.10552978515625
+  - -0.10307168960571289
+  - -0.11747612059116364
+  - -0.10405874252319336
+  - -0.10576868057250977
+  - -0.09444426000118256
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -3.4417319297790527
+  - -0.10443568229675293
+  - -0.10004854202270508
+  - -0.09886455535888672
+  - -0.10619354248046875
+  - -0.10701560974121094
+  - -0.10528016090393066
+  - -0.08402442932128906
+  - -0.10117006301879883
+  - -0.10433006286621094
+  - -0.1077566146850586
+  - -0.10434412956237793
+  - -0.10262584686279297
+  - -0.10228586196899414
+  - -0.10482168197631836
+  - -0.10263681411743164
+  - -0.10399675369262695
+  - -0.1063241958618164
+  - -0.10415458679199219
+  - -0.09891767799854279
+  - -0.11203908920288086
+  - -0.10578298568725586
+  - -0.09334993362426758
+  - -0.28287363052368164
+  - -0.10740232467651367
+  - -0.10120725631713867
+  - -0.10449743270874023
+  - -0.10459136962890625
+  - -0.10469388961791992
+  - -0.13432011008262634
+  - -0.11093735694885254
+  - -0.10653924942016602
+  - -0.11112594604492188
+  - -0.10191869735717773
+  - -0.1032099723815918
+  - -0.10768365859985352
+  - -0.10500454902648926
+  - -0.09651947021484375
+  - -0.1100616455078125
+  - -0.11674737930297852
+  - -0.10660552978515625
+  - -0.10371780395507812
+  - -0.6500489711761475
+  - -0.10479021072387695
+  - -0.10303401947021484
+  - -0.11729633063077927
+  - -0.10427045822143555
+  - -0.10512542724609375
+  - -0.07997044920921326
+  - -0.10137271881103516
+  - -0.0873103141784668
+  - -0.10508060455322266
+  - -0.10520744323730469
+  - -0.4575784206390381
+  - -0.1055302619934082
+  - -0.10307121276855469
+  - -0.11746159195899963
+  - -0.10405588150024414
+  - -0.10576581954956055
+  - -0.09455673396587372
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -3.486750602722168
+  - -0.10001802444458008
+  - -0.09992122650146484
+  - -0.05720663070678711
+  - -0.09040451049804688
+  - -0.09941577911376953
+  - -0.1041097640991211
+  - -0.10524892807006836
+  - -0.10472917556762695
+  - -0.2454652637243271
+  - -0.11145949363708496
+  - -0.10583734512329102
+  - -0.1001882553100586
+  - -0.09645891189575195
+  - -0.10724544525146484
+  - -0.10701227188110352
+  - -0.10525369644165039
+  - -0.08231258392333984
+  - -0.10164690017700195
+  - -0.10441398620605469
+  - -0.10779094696044922
+  - -0.10434985160827637
+  - -0.10283470153808594
+  - -0.10229015350341797
+  - -0.10486221313476562
+  - -0.10261154174804688
+  - -0.10400104522705078
+  - -0.10622549057006836
+  - -0.10416460037231445
+  - -0.10091561079025269
+  - -0.11210751533508301
+  - -0.1057729721069336
+  - -0.09315204620361328
+  - -0.28841114044189453
+  - -0.10803461074829102
+  - -0.10129165649414062
+  - -0.10449075698852539
+  - -0.10462045669555664
+  - -0.10474729537963867
+  - -0.13066689670085907
+  - -0.1109018325805664
+  - -0.10655760765075684
+  - -0.11123514175415039
+  - -0.10190391540527344
+  - -0.10306406021118164
+  - -0.10766911506652832
+  - -0.10502767562866211
+  - -0.0965566635131836
+  - -0.10994577407836914
+  - -0.11659955978393555
+  - -0.10653209686279297
+  - -0.1037130355834961
+  - -0.6519562005996704
+  - -0.1047825813293457
+  - -0.10305023193359375
+  - -0.1173955574631691
+  - -0.10427713394165039
+  - -0.10512876510620117
+  - -0.07987590879201889
+  - -0.10133838653564453
+  - -0.08729743957519531
+  - -0.10509347915649414
+  - -0.10520744323730469
+  - -0.4583958089351654
+  - -0.10552740097045898
+  - -0.10307168960571289
+  - -0.11738485097885132
+  - -0.1040639877319336
+  - -0.10576248168945312
+  - -0.09443005174398422
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -0.11208224296569824
+  - -0.10577607154846191
+  - -0.09326553344726562
+  - -0.28600072860717773
+  - -0.10786628723144531
+  - -0.10126399993896484
+  - -0.10449838638305664
+  - -0.10461044311523438
+  - -0.10473823547363281
+  - -0.132041335105896
+  - -0.11091446876525879
+  - -0.10654664039611816
+  - -0.11113595962524414
+  - -0.1019449234008789
+  - -0.1030879020690918
+  - -3.5478153228759766
+  - -0.10478067398071289
+  - -0.09598684310913086
+  - -0.10947370529174805
+  - -0.117523193359375
+  - -0.10689258575439453
+  - -0.10379505157470703
+  - -0.6521271467208862
+  - -0.10483407974243164
+  - -0.10301399230957031
+  - -0.11720960587263107
+  - -0.10427570343017578
+  - -0.10483884811401367
+  - -0.07943250238895416
+  - -0.10138750076293945
+  - -0.08706045150756836
+  - -0.10510540008544922
+  - -0.10520744323730469
+  - -0.45788198709487915
+  - -0.10552740097045898
+  - -0.10304927825927734
+  - -0.11706731468439102
+  - -0.10399913787841797
+  - -0.10553979873657227
+  - -0.09490817040205002
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -3.5615196228027344
+  - -0.10487675666809082
+  - -0.07554101943969727
+  - -0.1009984016418457
+  - -0.10454034805297852
+  - -0.10793519020080566
+  - -0.10431933403015137
+  - -0.10312461853027344
+  - -0.10232305526733398
+  - -0.10488128662109375
+  - -0.1025233268737793
+  - -0.10404634475708008
+  - -0.1062312126159668
+  - -0.10411930084228516
+  - -0.10091377794742584
+  - -0.11212277412414551
+  - -0.10577106475830078
+  - -0.09350204467773438
+  - -0.3159632682800293
+  - -0.10787200927734375
+  - -0.10130786895751953
+  - -0.10450029373168945
+  - -0.1046152114868164
+  - -0.10474109649658203
+  - -0.13241127133369446
+  - -0.11092376708984375
+  - -0.10654997825622559
+  - -0.11110639572143555
+  - -0.10187864303588867
+  - -0.10309505462646484
+  - -0.10766410827636719
+  - -0.10501694679260254
+  - -0.09658193588256836
+  - -0.10977888107299805
+  - -0.11670541763305664
+  - -0.10646867752075195
+  - -0.1037135124206543
+  - -0.6517782211303711
+  - -0.10478353500366211
+  - -0.10304117202758789
+  - -0.11727279424667358
+  - -0.10427522659301758
+  - -0.10512685775756836
+  - -0.07979170978069305
+  - -0.10133123397827148
+  - -0.0872654914855957
+  - -0.1050882339477539
+  - -0.1052083969116211
+  - -0.45823872089385986
+  - -0.10552835464477539
+  - -0.10307121276855469
+  - -0.11742883920669556
+  - -0.10406017303466797
+  - -0.10576772689819336
+  - -0.09445185214281082
+- - -0.10415887832641602
+  - -0.10509920120239258
+  - -0.1047515869140625
+  - -0.10451507568359375
+  - -0.10066890716552734
+  - -0.10340356826782227
+  - -0.10464048385620117
+  - -0.10180282592773438
+  - -0.10445308685302734
+  - -0.10473775863647461
+  - -0.10405540466308594
+  - -0.10232183337211609
+  - -0.11056804656982422
+  - -0.10503840446472168
+  - -0.09594964981079102
+  - -0.05409383773803711
+  - -0.09113454818725586
+  - -0.09993457794189453
+  - -0.1041116714477539
+  - -0.10528850555419922
+  - -0.10471963882446289
+  - -0.24549968540668488
+  - -0.11147022247314453
+  - -0.10582447052001953
+  - -0.10022115707397461
+  - -0.09651947021484375
+  - -0.10736417770385742
+  - -0.10702061653137207
+  - -0.10524868965148926
+  - -0.08276939392089844
+  - -0.10152864456176758
+  - -0.1045079231262207
+  - -0.10779190063476562
+  - -0.10434913635253906
+  - -0.10279321670532227
+  - -0.10229063034057617
+  - -0.10486125946044922
+  - -0.10262870788574219
+  - -0.10399580001831055
+  - -0.10622978210449219
+  - -0.10416364669799805
+  - -0.1002395823597908
+  - -0.11208224296569824
+  - -0.10577607154846191
+  - -0.09326553344726562
+  - -0.28600072860717773
+  - -0.10786628723144531
+  - -0.10126399993896484
+  - -0.10449838638305664
+  - -0.10461044311523438
+  - -0.10473823547363281
+  - -0.132041335105896
+  - -0.11091446876525879
+  - -0.10654664039611816
+  - -0.11113595962524414
+  - -0.1019449234008789
+  - -0.1030879020690918
+  - -0.10767960548400879
+  - -0.10502028465270996
+  - -0.09653711318969727
+  - -0.11001014709472656
+  - -0.11662530899047852
+  - -0.10656166076660156
+  - -0.10371589660644531
+  - -0.9383866786956787
+  - -0.10425758361816406
+  - -0.10458755493164062
+  - -2.690721273422241
+  - -0.10438203811645508
+  - -0.1051788330078125
+  - -0.6315729022026062
+  - -0.11168336868286133
+  - -0.08828020095825195
+  - -0.10497426986694336
+  - -0.10575246810913086
+  - -0.5546748638153076
+  - -0.10522890090942383
+  - -0.10335683822631836
+  - -0.15030786395072937
+  - -0.10407209396362305
+  - -0.10504436492919922
+  - -0.07987117767333984
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Age'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Lt')
+  - ('Lt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (True, False, False))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Open_Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('from', (True, False))
+  - ('table_unit*', 3)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visit'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'museum'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'visitor'

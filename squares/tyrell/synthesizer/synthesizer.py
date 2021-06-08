@@ -59,7 +59,7 @@ class Synthesizer(AbstractSynthesizer):
             if attempts == 50:
                 util.get_program_queue().put(
                     (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                     block_time, results.redundant_lines))
+                     block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
                 attempts = 0
                 rejected = 0
                 failed = 0
@@ -77,7 +77,7 @@ class Synthesizer(AbstractSynthesizer):
                 if res.is_ok():
                     util.get_program_queue().put(
                         (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                         block_time, results.redundant_lines))
+                         block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
                     results.empty_output = 0
                     results.redundant_lines = 0
                     # pr.dump_stats(f'profiles/{counter}.cProfile')
@@ -110,14 +110,14 @@ class Synthesizer(AbstractSynthesizer):
             enum_time += time.time() - start
 
         util.get_program_queue().put(
-            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time, results.redundant_lines))
+            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
         results.empty_output = 0
         results.redundant_lines = 0
         # pr.dump_stats(f'profiles/{counter}.cProfile')
         # counter += 1
         return None, total_attempts
 
-    def multi_synth(self, n=3):
+    def multi_synth(self, n=3, enum_all=False):
         '''
         A convenient method to enumerate ASTs until the result passes the analysis.
         Returns the synthesized program, or `None` if the synthesis failed.
@@ -136,14 +136,14 @@ class Synthesizer(AbstractSynthesizer):
         enum_time += time.time() - start
         n_progs = 0
         # pr = cProfile.Profile()
-        while prog and n_progs < n:
+        while prog and (n_progs < n or enum_all):
             # logger.debug('Testing program %s', prog)
             total_attempts += 1
             attempts += 1
             if attempts == 50:
                 util.get_program_queue().put(
                     (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                     block_time, results.redundant_lines))
+                     block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
                 attempts = 0
                 rejected = 0
                 failed = 0
@@ -161,7 +161,7 @@ class Synthesizer(AbstractSynthesizer):
                 if res.is_ok():
                     util.get_program_queue().put(
                         (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0,
-                         block_time, results.redundant_lines))
+                         block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
                     results.empty_output = 0
                     results.redundant_lines = 0
                     # pr.dump_stats(f'profiles/{counter}.cProfile')
@@ -195,7 +195,7 @@ class Synthesizer(AbstractSynthesizer):
             enum_time += time.time() - start
 
         util.get_program_queue().put(
-            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time, results.redundant_lines))
+            (util.Message.DEBUG_STATS, attempts, rejected, failed, blocked, results.empty_output, enum_time, analysis_time, 0, block_time, results.redundant_lines, results.cache_hit, results.cache_miss))
         results.empty_output = 0
         results.redundant_lines = 0
         # pr.dump_stats(f'profiles/{counter}.cProfile')

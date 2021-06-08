@@ -36,6 +36,10 @@ class Root(Node):
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
+        self.join_counter = enumerator.create_variable(f'join_counter_{id}', z3.Int)
+        enumerator.assert_expr(z3.And(self.join_counter >= 0, self.join_counter <= 3))
+        self.filter_counter = enumerator.create_variable(f'filter_counter_{id}', z3.Int)
+        enumerator.assert_expr(z3.And(self.filter_counter >= 0, self.filter_counter <= 2))
 
     def _create_root_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
         var = enumerator.create_variable(f'root_{self.id}', z3.Int)
@@ -125,8 +129,8 @@ class BitEnumerator(Enumerator):
         self.loc = loc
         self.debug = debug
 
-        if loc <= 0:
-            raise ValueError(f'LOC cannot be non-positive: {loc}')
+        if loc < 0:
+            raise ValueError(f'LOC cannot be negative: {loc}')
 
         self.line_productions = []
         self.line_productions_by_id = {}
@@ -162,6 +166,7 @@ class BitEnumerator(Enumerator):
         self._production_id_cache.default_factory = lambda: None  # from now on throw errors id invalid keys are accessed
         self.resolve_predicates()
         self.create_bitvector_constraints()
+        self.create_operator_usage_constraints()
 
         self.more_restrictive = self.specification.condition_generator.more_restrictive.compile(tyrell_spec)
         self.less_restrictive = self.specification.condition_generator.less_restrictive.compile(tyrell_spec)
@@ -171,6 +176,8 @@ class BitEnumerator(Enumerator):
         self.natural_join4 = self.spec.get_function_production('natural_join4')
 
         self.blocked_models = set()
+
+        # print(self.z3_solver.to_smt2())
 
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
                      self.num_constraints)
@@ -411,6 +418,81 @@ class BitEnumerator(Enumerator):
                                                    (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
                                                    root.children[0].bitvec == root.bitvec)), f'unite_bv_{i}')
 
+    def create_operator_usage_constraints(self) -> None:
+        if self.specification.sql_visitor is None:
+            return
+
+        join_counter = self.create_variable('join_counter', z3.Int)
+        self.assert_expr(z3.And(join_counter >= 0, join_counter <= self.loc * 3))
+        self.assert_expr(join_counter == z3.Sum(*map(lambda x: x.join_counter, self.roots)))
+        self.assert_expr(join_counter >= self.specification.sql_visitor.join_usages)
+
+        filter_counter = self.create_variable('filter_counter', z3.Int)
+        self.assert_expr(z3.And(filter_counter >= 0, filter_counter <= self.loc * 2))
+        self.assert_expr(filter_counter == z3.Sum(*map(lambda x: x.filter_counter, self.roots)))
+        self.assert_expr(filter_counter >= self.specification.sql_visitor.join_usages)
+
+        for i, root in enumerate(self.roots):
+            natural_join = self.spec.get_function_production('natural_join')
+            if natural_join:
+                self.assert_expr(z3.Implies(root.var == natural_join.id, z3.And(root.join_counter == 1, root.filter_counter == 0)))
+
+            natural_join3 = self.spec.get_function_production('natural_join3')
+            if natural_join3:
+                self.assert_expr(z3.Implies(root.var == natural_join3.id, z3.And(root.join_counter == 2, root.filter_counter == 0)))
+
+            natural_join4 = self.spec.get_function_production('natural_join4')
+            if natural_join4:
+                self.assert_expr(z3.Implies(root.var == natural_join4.id, z3.And(root.join_counter == 3, root.filter_counter == 0)))
+
+            inner_join = self.spec.get_function_production('inner_join')
+            if inner_join:
+                self.assert_expr(z3.Implies(root.var == inner_join.id, z3.And(root.join_counter == 2, root.filter_counter == 0)))  # TODO using upper bound
+
+            left_join = self.spec.get_function_production('left_join')
+            if left_join:
+                self.assert_expr(z3.Implies(root.var == left_join.id, z3.And(root.join_counter == 1, root.filter_counter == 0)))
+
+            cross_join = self.spec.get_function_production('cross_join')
+            if cross_join:
+                self.assert_expr(z3.Implies(root.var == cross_join.id, z3.And(root.join_counter == 2, root.filter_counter == 2)))  # TODO using upper bound
+
+            anti_join = self.spec.get_function_production('anti_join')
+            if anti_join:
+                self.assert_expr(z3.Implies(root.var == anti_join.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            semi_join = self.spec.get_function_production('semi_join')
+            if semi_join:
+                self.assert_expr(z3.Implies(root.var == semi_join.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            intersect = self.spec.get_function_production('intersect')
+            if intersect:
+                self.assert_expr(z3.Implies(root.var == intersect.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            union = self.spec.get_function_production('union')
+            if union:
+                self.assert_expr(z3.Implies(root.var == union.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            filter = self.spec.get_function_production('filter')
+            if filter:
+                self.assert_expr(z3.Implies(root.var == filter.id, z3.And(root.join_counter == 0, root.filter_counter == 2)))  # TODO using upper bound
+
+            summarise = self.spec.get_function_production('summarise')
+            if summarise:
+                self.assert_expr(z3.Implies(root.var == summarise.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            mutate = self.spec.get_function_production('mutate')
+            if mutate:
+                self.assert_expr(z3.Implies(root.var == mutate.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+            unite = self.spec.get_function_production('unite')
+            if unite:
+                self.assert_expr(z3.Implies(root.var == unite.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
+
+
+
+
+
     @staticmethod
     def _check_arg_types(pred: Predicate, python_tys: List[Type]):
         if pred.num_args() < len(python_tys):
@@ -459,6 +541,8 @@ class BitEnumerator(Enumerator):
             self.z3_solver.add(z3.Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
 
     def _resolve_constant_occurs_predicate(self, pred: Predicate):
+        if not util.get_config().force_constants:
+            return
         conditions = pred.args
         lst = []
         ids = ''

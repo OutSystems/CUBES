@@ -1,0 +1,1335 @@
+db: tests-examples/db2csv/dog_kennels/tables/dog_kennels.sqlite
+inputs:
+ - tests-examples/db2csv/dog_kennels/tables/owners.csv
+ - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+output: tests-examples/db2csv/dog_kennels/tables/0063_dev.csv
+raw_question: How many owners temporarily do not have any dogs? 
+question_index: 980 
+functions:
+ - count
+columns:
+ - owner_id
+comment: |-
+  SELECT count(*)
+  FROM Owners
+  WHERE owner_id NOT IN
+      (SELECT owner_id
+       FROM Dogs)
+
+sql: |-
+  SELECT count(*)
+  FROM Owners
+  WHERE owner_id NOT IN
+      (SELECT owner_id
+       FROM Dogs)
+smbop_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_groupby_columns:
+- []
+- - owner_id
+- []
+- - owner_id
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+smbop_beam_constants:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_functions:
+- - count
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_columns:
+- - owner_id
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- - except
+- - union
+smbop_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT COUNT( * ) FROM owners WHERE owners.owner_id NOT IN (SELECT dogs.owner_id FROM dogs)
+  - SELECT owners.owner_id FROM owners GROUP BY owners.owner_id
+  - SELECT dogs.owner_id FROM dogs
+  - SELECT dogs.owner_id FROM dogs GROUP BY dogs.owner_id
+  - SELECT owners.owner_id FROM owners
+  - SELECT dogs.owner_id FROM dogs EXCEPT SELECT dogs.owner_id FROM dogs
+  - SELECT dogs.owner_id FROM dogs UNION SELECT dogs.owner_id FROM dogs
+smbop_beam_inferred_code_w_terminals:
+  - SELECT COUNT( * ) FROM owners WHERE owners.owner_id NOT IN (SELECT dogs.owner_id FROM dogs)
+  - SELECT owners.owner_id FROM owners GROUP BY owners.owner_id
+  - SELECT dogs.owner_id FROM dogs
+  - SELECT dogs.owner_id FROM dogs GROUP BY dogs.owner_id
+  - SELECT owners.owner_id FROM owners
+  - SELECT dogs.owner_id FROM dogs EXCEPT SELECT dogs.owner_id FROM dogs
+  - SELECT dogs.owner_id FROM dogs UNION SELECT dogs.owner_id FROM dogs
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- - owner_id
+- - professional_id
+  - dog_id
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+ratsql_beam_constants:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+- - owner_id
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT DISTINCT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE DISTINCT Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(DISTINCT *) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs LIMIT 1)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs) LIMIT 1
+  - SELECT DISTINCT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id)
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT DISTINCT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE DISTINCT Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(DISTINCT *) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs LIMIT 1)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs) LIMIT 1
+  - SELECT DISTINCT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id)
+  - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id)
+ratsql_beam_score_history:
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -0.11837220191955566
+  - -0.1044168472290039
+  - -0.10135412216186523
+  - -0.10248899459838867
+  - -0.10313272476196289
+  - -0.10233592987060547
+  - -0.10482215881347656
+  - -0.10454273223876953
+  - -0.1049509048461914
+  - -0.0804716944694519
+  - -0.11278223991394043
+  - -0.10593032836914062
+  - -0.12054014205932617
+  - -0.1071009635925293
+  - -0.1017308235168457
+  - -0.1080622673034668
+  - -0.10526657104492188
+  - -0.09827232360839844
+  - -0.10547018051147461
+  - -0.10941886901855469
+  - -0.10509300231933594
+  - -0.10335922241210938
+  - -0.15010373294353485
+  - -0.10008716583251953
+  - -0.10509634017944336
+  - -0.10841774940490723
+  - -0.10445499420166016
+  - -0.10045099258422852
+  - -0.10229301452636719
+  - -0.11703681945800781
+  - -0.1061701774597168
+  - -0.1051034927368164
+  - -0.05519043281674385
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -3.306525230407715
+  - -0.10370945930480957
+  - -0.10271549224853516
+  - -0.10255146026611328
+  - -0.10261726379394531
+  - -0.1024022102355957
+  - -0.1048269271850586
+  - -0.10452842712402344
+  - -0.10495376586914062
+  - -0.07989649474620819
+  - -0.11280131340026855
+  - -0.10591983795166016
+  - -0.12053155899047852
+  - -0.10729074478149414
+  - -0.1017460823059082
+  - -0.10806655883789062
+  - -0.10526156425476074
+  - -0.0984039306640625
+  - -0.10546064376831055
+  - -0.1093907356262207
+  - -0.10511112213134766
+  - -0.10337543487548828
+  - -0.15016527473926544
+  - -0.09990930557250977
+  - -0.10500907897949219
+  - -0.10841965675354004
+  - -0.10445642471313477
+  - -0.10062360763549805
+  - -0.10251617431640625
+  - -0.11714601516723633
+  - -0.10615873336791992
+  - -0.10509777069091797
+  - -0.05509848892688751
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -3.466301441192627
+  - -0.10519099235534668
+  - -0.09939336776733398
+  - -0.09581661224365234
+  - -0.10186386108398438
+  - -0.09457254409790039
+  - -0.11820626258850098
+  - -0.10430097579956055
+  - -0.10135793685913086
+  - -0.1025390625
+  - -0.10338592529296875
+  - -0.10249090194702148
+  - -0.1048126220703125
+  - -0.10456466674804688
+  - -0.10487842559814453
+  - -0.08147300034761429
+  - -0.11278510093688965
+  - -0.10592484474182129
+  - -0.12012243270874023
+  - -0.10707950592041016
+  - -0.10156917572021484
+  - -0.10806775093078613
+  - -0.10525131225585938
+  - -0.09840965270996094
+  - -0.10561800003051758
+  - -0.10939311981201172
+  - -0.10517311096191406
+  - -0.10338115692138672
+  - -0.14841802418231964
+  - -0.09982824325561523
+  - -0.10503101348876953
+  - -0.10842275619506836
+  - -0.10447025299072266
+  - -0.10036420822143555
+  - -0.10226678848266602
+  - -0.1169581413269043
+  - -0.10617494583129883
+  - -0.10510063171386719
+  - -0.055230703204870224
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -3.5018393993377686
+  - -0.10409975051879883
+  - -0.09702825546264648
+  - -0.10272979736328125
+  - -0.09091329574584961
+  - -0.09761762619018555
+  - -0.0997467041015625
+  - -0.10167932510375977
+  - -0.10514307022094727
+  - -0.1047210693359375
+  - -0.10576009750366211
+  - -0.06410731375217438
+  - -0.11133265495300293
+  - -0.10516977310180664
+  - -0.10043096542358398
+  - -0.09701013565063477
+  - -0.10391950607299805
+  - -0.0933084487915039
+  - -0.11838054656982422
+  - -0.1044468879699707
+  - -0.1013946533203125
+  - -0.10248279571533203
+  - -0.10310840606689453
+  - -0.10233116149902344
+  - -0.10482215881347656
+  - -0.10453939437866211
+  - -0.10495471954345703
+  - -0.08016323298215866
+  - -0.11278581619262695
+  - -0.10593461990356445
+  - -0.12060928344726562
+  - -0.10705375671386719
+  - -0.10175228118896484
+  - -0.10806083679199219
+  - -0.10526847839355469
+  - -0.09809637069702148
+  - -0.10557317733764648
+  - -0.10940265655517578
+  - -0.10507488250732422
+  - -0.10336780548095703
+  - -0.15050570666790009
+  - -0.10008525848388672
+  - -0.1051025390625
+  - -0.10841703414916992
+  - -0.10445261001586914
+  - -0.10044479370117188
+  - -0.10230064392089844
+  - -0.11703205108642578
+  - -0.10616779327392578
+  - -0.1051034927368164
+  - -0.05520002171397209
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -0.11837220191955566
+  - -0.1044168472290039
+  - -0.10135412216186523
+  - -0.10248899459838867
+  - -0.10313272476196289
+  - -0.10233592987060547
+  - -0.10482215881347656
+  - -0.10454273223876953
+  - -0.1049509048461914
+  - -0.0804716944694519
+  - -0.11278223991394043
+  - -0.10593032836914062
+  - -0.12054014205932617
+  - -0.1071009635925293
+  - -0.1017308235168457
+  - -3.5400302410125732
+  - -0.1053917407989502
+  - -0.098114013671875
+  - -0.10614299774169922
+  - -0.10940074920654297
+  - -0.1051487922668457
+  - -0.10337686538696289
+  - -0.1468600034713745
+  - -0.10007381439208984
+  - -0.10493946075439453
+  - -0.10843324661254883
+  - -0.10446882247924805
+  - -0.10028934478759766
+  - -0.10231685638427734
+  - -0.11705827713012695
+  - -0.10617256164550781
+  - -0.1051030158996582
+  - -0.05524040386080742
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -0.11837220191955566
+  - -0.1044168472290039
+  - -0.10135412216186523
+  - -0.10248899459838867
+  - -0.10313272476196289
+  - -0.10233592987060547
+  - -0.10482215881347656
+  - -0.10454273223876953
+  - -0.1049509048461914
+  - -0.0804716944694519
+  - -0.11278223991394043
+  - -0.10593032836914062
+  - -0.12054014205932617
+  - -0.1071009635925293
+  - -0.1017308235168457
+  - -0.1080622673034668
+  - -0.10526657104492188
+  - -0.09827232360839844
+  - -0.10547018051147461
+  - -0.10941886901855469
+  - -0.10509300231933594
+  - -0.10335922241210938
+  - -0.15010373294353485
+  - -0.10008716583251953
+  - -0.10509634017944336
+  - -3.537970542907715
+  - -0.10319185256958008
+  - -0.10429716110229492
+  - -0.10367012023925781
+  - -0.11984825134277344
+  - -0.10684347152709961
+  - -0.1058497428894043
+  - -0.052811749279499054
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -3.5398387908935547
+  - -0.10167765617370605
+  - -0.10593700408935547
+  - -0.1172342300415039
+  - -0.10400199890136719
+  - -0.10313177108764648
+  - -0.10479402542114258
+  - -0.10490274429321289
+  - -0.09906530380249023
+  - -0.12895426154136658
+  - -0.10974264144897461
+  - -0.10454654693603516
+  - -0.09450387954711914
+  - -0.09804773330688477
+  - -0.0912165641784668
+  - -0.09443807601928711
+  - -0.09656047821044922
+  - -0.10180282592773438
+  - -0.10520648956298828
+  - -0.10462760925292969
+  - -0.10550260543823242
+  - -0.06334282457828522
+  - -0.11126708984375
+  - -0.10515260696411133
+  - -0.10051250457763672
+  - -0.09734773635864258
+  - -0.10364341735839844
+  - -0.09285545349121094
+  - -0.11838078498840332
+  - -0.10441255569458008
+  - -0.10136795043945312
+  - -0.10249137878417969
+  - -0.1031336784362793
+  - -0.10233640670776367
+  - -0.10482215881347656
+  - -0.10454225540161133
+  - -0.104949951171875
+  - -0.08054384589195251
+  - -0.11278557777404785
+  - -0.10593080520629883
+  - -0.12053918838500977
+  - -0.1071324348449707
+  - -0.1017465591430664
+  - -0.108062744140625
+  - -0.10526657104492188
+  - -0.09824705123901367
+  - -0.10548114776611328
+  - -0.109405517578125
+  - -0.10508966445922852
+  - -0.10336160659790039
+  - -0.15008781850337982
+  - -0.10007476806640625
+  - -0.10509443283081055
+  - -0.10841774940490723
+  - -0.10445451736450195
+  - -0.10044670104980469
+  - -0.10229682922363281
+  - -0.11703157424926758
+  - -0.1061697006225586
+  - -0.1051034927368164
+  - -0.05519968271255493
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -0.11837220191955566
+  - -0.1044168472290039
+  - -0.10135412216186523
+  - -0.10248899459838867
+  - -0.10313272476196289
+  - -0.10233592987060547
+  - -0.10482215881347656
+  - -0.10454273223876953
+  - -0.1049509048461914
+  - -0.0804716944694519
+  - -0.11278223991394043
+  - -0.10593032836914062
+  - -0.12054014205932617
+  - -0.1071009635925293
+  - -0.1017308235168457
+  - -0.1080622673034668
+  - -0.10526657104492188
+  - -0.09827232360839844
+  - -0.10547018051147461
+  - -0.10941886901855469
+  - -0.10509300231933594
+  - -0.10335922241210938
+  - -3.3986377716064453
+  - -0.09547042846679688
+  - -0.10143661499023438
+  - -0.10844278335571289
+  - -0.10492682456970215
+  - -0.10492372512817383
+  - -0.1033625602722168
+  - -0.11848831176757812
+  - -0.10607481002807617
+  - -0.10428380966186523
+  - -0.25519871711730957
+- - -0.10740232467651367
+  - -0.10266542434692383
+  - -0.10728883743286133
+  - -0.10396313667297363
+  - -0.1005101203918457
+  - -0.10850763320922852
+  - -0.1043095588684082
+  - -0.10365438461303711
+  - -0.10468196868896484
+  - -0.10489130020141602
+  - -0.09914970397949219
+  - -0.13089480996131897
+  - -0.10976719856262207
+  - -0.10456132888793945
+  - -0.0941014289855957
+  - -0.09670019149780273
+  - -0.09241390228271484
+  - -0.09470319747924805
+  - -0.09649896621704102
+  - -0.10192012786865234
+  - -0.10518074035644531
+  - -0.10459470748901367
+  - -0.10547113418579102
+  - -0.06302276253700256
+  - -0.11124277114868164
+  - -0.10515308380126953
+  - -0.1004490852355957
+  - -0.09745979309082031
+  - -0.1036376953125
+  - -0.09272432327270508
+  - -0.11837220191955566
+  - -0.1044168472290039
+  - -0.10135412216186523
+  - -0.10248899459838867
+  - -0.10313272476196289
+  - -0.10233592987060547
+  - -0.10482215881347656
+  - -0.10454273223876953
+  - -0.1049509048461914
+  - -0.0804716944694519
+  - -0.11278223991394043
+  - -0.10593032836914062
+  - -0.12054014205932617
+  - -0.1071009635925293
+  - -0.1017308235168457
+  - -0.1080622673034668
+  - -0.10526657104492188
+  - -0.09827232360839844
+  - -0.10547018051147461
+  - -0.10941886901855469
+  - -0.10509300231933594
+  - -0.10335922241210938
+  - -3.895725965499878
+  - -0.10240650177001953
+  - -0.10492897033691406
+  - -0.10821652412414551
+  - -0.10472631454467773
+  - -0.09907150268554688
+  - -0.10439205169677734
+  - -0.11713743209838867
+  - -0.1060638427734375
+  - -0.10375070571899414
+  - -0.10415982455015182
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Dogs'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'owner_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Owners'

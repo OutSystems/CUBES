@@ -1,0 +1,877 @@
+db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
+inputs:
+ - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+output: tests-examples/db2csv/student_transcripts_tracking/tables/0046_dev.csv
+raw_question: What is the date and id of the transcript with at least 2 courses listed? 
+question_index: 552 
+constants:
+ - 2
+join_columns:
+ - transcript_id
+groupby_columns:
+ - transcript_id
+functions:
+ - count
+comment: |-
+  SELECT T2.transcript_date,
+         T1.transcript_id
+  FROM Transcript_Contents AS T1
+  JOIN Transcripts AS T2 ON T1.transcript_id = T2.transcript_id
+  GROUP BY T1.transcript_id
+  HAVING count(*) >= 2
+
+sql: |-
+  SELECT T2.transcript_date,
+         T1.transcript_id
+  FROM Transcript_Contents AS T1
+  JOIN Transcripts AS T2 ON T1.transcript_id = T2.transcript_id
+  GROUP BY T1.transcript_id
+  HAVING count(*) >= 2
+smbop_beam_join_columns:
+- - transcript_id
+- - transcript_id
+- - transcript_id
+smbop_beam_groupby_columns:
+- - transcript_id
+- - transcript_id
+- - transcript_id
+smbop_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+smbop_beam_constants:
+- - 2
+- - 2
+- - 2
+smbop_beam_functions:
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcripts JOIN transcript_contents ON transcripts.transcript_id = transcript_contents.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) > 2
+smbop_beam_inferred_code_w_terminals:
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcripts JOIN transcript_contents ON transcripts.transcript_id = transcript_contents.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
+  - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) > 2
+ratsql_beam_join_columns:
+- - transcript_id
+- - transcript_id
+- - transcript_id
+- - transcript_id
+ratsql_beam_groupby_columns:
+- - transcript_id
+- - transcript_id
+- - transcript_id
+- - transcript_id
+ratsql_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+ratsql_beam_constants:
+- - 2
+- - 2
+- - 2
+- - 2
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- []
+- []
+- []
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal'
+  - SELECT Transcripts.transcript_date, DISTINCT Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal'
+  - SELECT DISTINCT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal'
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY DISTINCT Transcripts.transcript_id HAVING Count(*) >= 'terminal'
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(DISTINCT *) >= 'terminal'
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal' LIMIT 1
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) > 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 2
+  - SELECT Transcripts.transcript_date, DISTINCT Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 2
+  - SELECT DISTINCT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 2
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY DISTINCT Transcripts.transcript_id HAVING Count(*) >= 2
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(DISTINCT *) >= 2
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 2 LIMIT 1
+  - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) > 2
+ratsql_beam_score_history:
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -0.11286187171936035
+  - -0.10530424118041992
+  - -0.09572982788085938
+  - -0.13822603225708008
+  - -0.10253715515136719
+  - -0.10326147079467773
+  - -0.10564422607421875
+  - -0.09949899464845657
+  - -0.11049771308898926
+  - -0.10553503036499023
+  - -0.12557506561279297
+  - -0.10206127166748047
+  - -0.10291385650634766
+  - -0.10500526428222656
+  - -0.10795927047729492
+  - -0.11255598068237305
+  - -0.1280704140663147
+  - -0.10821390151977539
+  - -0.10619020462036133
+  - -0.10390233993530273
+  - -0.10435819625854492
+  - -0.10718727111816406
+  - -0.10515475273132324
+  - -0.09730958938598633
+  - -0.10736799240112305
+  - -0.10962343215942383
+  - -0.10456085205078125
+  - -0.10354852676391602
+  - -0.07872217148542404
+  - -0.10443401336669922
+  - -0.10408973693847656
+  - -0.07049819082021713
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -3.4575912952423096
+  - -0.1046900749206543
+  - -0.10406208038330078
+  - -0.13373184204101562
+  - -0.10165834426879883
+  - -0.10333013534545898
+  - -0.10556411743164062
+  - -0.094081811606884
+  - -0.11039280891418457
+  - -0.10553550720214844
+  - -0.12615728378295898
+  - -0.10278081893920898
+  - -0.10292720794677734
+  - -0.10498714447021484
+  - -0.10793876647949219
+  - -0.11260557174682617
+  - -0.1282307654619217
+  - -0.10819530487060547
+  - -0.10619044303894043
+  - -0.10389900207519531
+  - -0.10432767868041992
+  - -0.10718750953674316
+  - -0.10515594482421875
+  - -0.0974416732788086
+  - -0.10699033737182617
+  - -0.10923624038696289
+  - -0.10457277297973633
+  - -0.10356807708740234
+  - -0.07827416807413101
+  - -0.10442590713500977
+  - -0.10411500930786133
+  - -0.07088073343038559
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -3.4751086235046387
+  - -0.10487532615661621
+  - -0.10190296173095703
+  - -0.10500955581665039
+  - -0.10203218460083008
+  - -0.10590171813964844
+  - -0.10662364959716797
+  - -0.10615396499633789
+  - -0.04365595802664757
+  - -0.11281323432922363
+  - -0.10531163215637207
+  - -0.0992879867553711
+  - -0.14041805267333984
+  - -0.10218524932861328
+  - -0.10334634780883789
+  - -0.10558176040649414
+  - -0.10071245580911636
+  - -0.11049890518188477
+  - -0.10553145408630371
+  - -0.12304878234863281
+  - -0.10162353515625
+  - -0.10293436050415039
+  - -0.10500669479370117
+  - -0.10792970657348633
+  - -0.11251258850097656
+  - -0.12849047780036926
+  - -0.1081838607788086
+  - -0.10618972778320312
+  - -0.10389089584350586
+  - -0.1044163703918457
+  - -0.10719013214111328
+  - -0.10515093803405762
+  - -0.09743881225585938
+  - -0.10722923278808594
+  - -0.10959434509277344
+  - -0.10456657409667969
+  - -0.10352134704589844
+  - -0.07786665856838226
+  - -0.10442590713500977
+  - -0.1041250228881836
+  - -0.07070936262607574
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -0.11286187171936035
+  - -0.10530424118041992
+  - -0.09572982788085938
+  - -0.13822603225708008
+  - -0.10253715515136719
+  - -0.10326147079467773
+  - -0.10564422607421875
+  - -0.09949899464845657
+  - -3.477529287338257
+  - -0.10215401649475098
+  - -0.13360595703125
+  - -0.09919118881225586
+  - -0.1032705307006836
+  - -0.10499095916748047
+  - -0.10824203491210938
+  - -0.11226320266723633
+  - -0.12435604631900787
+  - -0.10796999931335449
+  - -0.10618948936462402
+  - -0.10394144058227539
+  - -0.10424232482910156
+  - -0.10716986656188965
+  - -0.10515737533569336
+  - -0.09801864624023438
+  - -0.10717344284057617
+  - -0.10922718048095703
+  - -0.1045680046081543
+  - -0.10356283187866211
+  - -0.07881108671426773
+  - -0.10443401336669922
+  - -0.10410213470458984
+  - -0.0708073228597641
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -0.11286187171936035
+  - -0.10530424118041992
+  - -0.09572982788085938
+  - -0.13822603225708008
+  - -0.10253715515136719
+  - -0.10326147079467773
+  - -0.10564422607421875
+  - -0.09949899464845657
+  - -0.11049771308898926
+  - -0.10553503036499023
+  - -0.12557506561279297
+  - -0.10206127166748047
+  - -0.10291385650634766
+  - -0.10500526428222656
+  - -0.10795927047729492
+  - -0.11255598068237305
+  - -0.1280704140663147
+  - -3.5255911350250244
+  - -0.10619688034057617
+  - -0.10341882705688477
+  - -0.10343599319458008
+  - -0.10715055465698242
+  - -0.1052403450012207
+  - -0.09891939163208008
+  - -0.10662508010864258
+  - -0.10874605178833008
+  - -0.10453128814697266
+  - -0.10338020324707031
+  - -0.08020206540822983
+  - -0.10442161560058594
+  - -0.10405874252319336
+  - -0.07056373357772827
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -0.11286187171936035
+  - -0.10530424118041992
+  - -0.09572982788085938
+  - -0.13822603225708008
+  - -0.10253715515136719
+  - -0.10326147079467773
+  - -0.10564422607421875
+  - -0.09949899464845657
+  - -0.11049771308898926
+  - -0.10553503036499023
+  - -0.12557506561279297
+  - -0.10206127166748047
+  - -0.10291385650634766
+  - -0.10500526428222656
+  - -0.10795927047729492
+  - -0.11255598068237305
+  - -0.1280704140663147
+  - -0.10821390151977539
+  - -0.10619020462036133
+  - -0.10390233993530273
+  - -0.10435819625854492
+  - -3.5529541969299316
+  - -0.10492753982543945
+  - -0.10335254669189453
+  - -0.10687780380249023
+  - -0.10892868041992188
+  - -0.10462141036987305
+  - -0.10382795333862305
+  - -0.07680664956569672
+  - -0.10443544387817383
+  - -0.10418701171875
+  - -0.06905069202184677
+- - -0.10369443893432617
+  - -0.1045217514038086
+  - -0.10681939125061035
+  - -0.10432004928588867
+  - -0.12904119491577148
+  - -0.10347557067871094
+  - -0.1106729507446289
+  - -0.10126972198486328
+  - -0.10450887680053711
+  - -0.10521316528320312
+  - -0.107513427734375
+  - -0.09606754034757614
+  - -0.11202406883239746
+  - -0.10522866249084473
+  - -0.10256147384643555
+  - -0.10469341278076172
+  - -0.1028599739074707
+  - -0.10607528686523438
+  - -0.10786581039428711
+  - -0.10688018798828125
+  - -0.062434177845716476
+  - -0.11286187171936035
+  - -0.10530424118041992
+  - -0.09572982788085938
+  - -0.13822603225708008
+  - -0.10253715515136719
+  - -0.10326147079467773
+  - -0.10564422607421875
+  - -0.09949899464845657
+  - -0.11049771308898926
+  - -0.10553503036499023
+  - -3.643998861312866
+  - -0.10696983337402344
+  - -0.10281610488891602
+  - -0.10392284393310547
+  - -0.10682296752929688
+  - -0.11097908020019531
+  - -0.1353069543838501
+  - -0.10460042953491211
+  - -0.10617232322692871
+  - -0.10417699813842773
+  - -0.10566854476928711
+  - -0.1073005199432373
+  - -0.10498809814453125
+  - -0.10091352462768555
+  - -0.10645914077758789
+  - -0.1079568862915039
+  - -0.10463237762451172
+  - -0.10387992858886719
+  - -0.08018787205219269
+  - -0.10445261001586914
+  - -0.10412740707397461
+  - -0.0685778558254242
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'True'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'True'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_date'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'transcript_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Gt')
+  - ('Gt', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'

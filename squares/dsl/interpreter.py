@@ -4,9 +4,16 @@ from itertools import permutations
 from logging import getLogger
 from typing import Tuple, Union
 
+import pylru
 from rpy2 import robjects
 from rpy2.rinterface_lib.embedded import RRuntimeError
 from z3 import BitVecVal
+
+import rpy2
+from rpy2.robjects.packages import importr
+import pandas
+from rpy2.robjects import pandas2ri
+from rpy2.robjects.conversion import localconverter
 
 from .. import util, results
 from ..decider import RowNumberInfo
@@ -29,17 +36,36 @@ class RedudantError(InterpreterError):
 
 
 def eval_decorator(func):
-    def wrapper(self, args, key):
+    def wrapper(self, args, key, line_index):
         if key and not self.final_interpretation and util.get_config().cache_ops:
+            # self._cache_counter += 1
+            # if self._cache_counter >= 25:
+            #     self._cache_counter = 0
+            #     total_size = sum(map(lambda x: list(robjects.r(f'object.size({x})'))[0], self.cache.values()))
+            #     total_size_est = (total_size / len(self.cache)) * self.cache.size()
+            #     print('Estimated cache size if it were full: ', util.sizeof_fmt(total_size_est))
+            #     if total_size_est >= 78643200:
+            #         new_size = max(int(52428800 / (total_size / len(self.cache))), 1)
+            #         print('Updating max number of elements to', new_size)
+            #         self.cache.size(new_size)
+            #     elif total_size_est <= 26214400:
+            #         new_size = max(int(52428800 / (total_size / len(self.cache))), 1)
+            #         print('Updating max number of elements to', new_size)
+            #         self.cache.size(new_size)
             if not key in self.cache:
+                results.cache_miss += 1
                 name = util.get_fresh_name()
                 self.try_execute(func(self, name, args))
                 # if robjects.r(f'all_equal({name}, {args[0]}, convert=T, ignore_row_order=T)')[0] is True:
                 #     results.redundant_lines += 1
                 #     raise RedudantError()
+                # print(list(robjects.r(f'object.size({name})'))[0])
                 self.cache[key] = name
+            else:
+                results.cache_hit += 1
             return self.cache[key]
         name = util.get_fresh_name()
+        # self.current_vars.add(name)
         script = func(self, name, args)
         if self.final_interpretation:
             self.program += script
@@ -49,13 +75,20 @@ def eval_decorator(func):
     return wrapper
 
 
+def cache_evict(key, val):
+    # print(list(robjects.r(f'object.size({val})'))[0])
+    robjects.r(f'rm({val})')
+
+
 class SquaresInterpreter(LineInterpreter):
 
     def __init__(self, problem, final_interpretation=False):
         self.problem = problem
         self.program = ''
         self.final_interpretation = final_interpretation
-        self.cache = {}
+        self.cache = pylru.lrucache(40, cache_evict)
+        self._cache_counter = 0
+        # self.current_vars = set()
 
     def try_execute(self, script):
         try:
@@ -192,12 +225,26 @@ class SquaresInterpreter(LineInterpreter):
         # with rpy2.robjects.conversion.localconverter(robjects.default_converter + pandas2ri.converter):
         #     print(robjects.conversion.rpy2py(robjects.r(actual)))
 
-        score = robjects.r(f'ue <- {expect} %>% unlist %>% unique;length(intersect({actual} %>% unlist %>% unique, ue)) / length(ue)')[0]
+        score = robjects.r(f'ue <- unique(reduce(map({expect}, as.list), c)) %>% {{intersect(.,.)}};length(intersect(unique(reduce(map({actual}, as.list), c)) %>% {{intersect(.,.)}}, ue)) / length(ue)')[0]
         if math.isnan(score):
             score = 0
+        # print(score)
+
+        # with localconverter(robjects.default_converter + pandas2ri.converter):
+        #     pandas.set_option('display.max_columns', None)
+        #     print('EXPECTED')
+        #     print(robjects.conversion.rpy2py(robjects.r[expect]))
+        #     print(list(map(list, robjects.r(f'unique(reduce(map({expect}, as.list), c)) %>% {{intersect(.,.)}}'))))
+        #     print('ACTUAL')
+        #     print(robjects.conversion.rpy2py(robjects.r[actual]))
+        #     print(list(map(list, robjects.r(f'unique(reduce(map({actual}, as.list), c)) %>% {{intersect(.,.)}}'))))
+        #     print('INTERSECTION')
+        #     print(list(map(list, robjects.r(f'intersect(unique(reduce(map({expect}, as.list), c)) %>% {{intersect(.,.)}}, unique(reduce(map({actual}, as.list), c)) %>% {{intersect(.,.)}})'))))
 
         if not util.get_config().subsume_conditions and score < 1:
             return False, score, None
+        # elif len(args) > 0:
+        #     logger.info('Promising program found: %s', args[0])
 
         a_cols = list(robjects.r(f'colnames({actual})'))
         e_cols = list(robjects.r(f'colnames({expect})'))
@@ -220,8 +267,9 @@ class SquaresInterpreter(LineInterpreter):
 
                             self.program += _script + '\n'
                         return True, score, None
-                except:
-                    continue
+                except Exception as e:
+                    logger.error("Error while testing program")
+                    logger.error("%s", str(e))
                 finally:
                     if util.get_config().subsume_conditions and result != RowNumberInfo.UNKNOWN:
                         actual_n = int(robjects.r(f'nrow(out)')[0])
@@ -239,9 +287,13 @@ class SquaresInterpreter(LineInterpreter):
 
     def test_equality(self, actual: str, expect: str, keep_order: bool = False) -> bool:
         if not keep_order:
-            _script = f'all_equal({actual}, {expect}, convert=T)'
+            _script = f'all_equal({actual} %>% mutate(across(where(function(x) {{is.numeric(x) & is.double(x)}}), round, {util.get_config().fp_comparison_digits})), {expect} %>% mutate(across(where(function(x) {{is.numeric(x) & is.double(x)}}), round, {util.get_config().fp_comparison_digits})), convert=T)'
         else:
-            _script = f'all_equal({actual}, {expect}, convert=T, ignore_row_order=T)'
+            _script = f'all_equal({actual} %>% mutate(across(where(function(x) {{is.numeric(x) & is.double(x)}}), round, {util.get_config().fp_comparison_digits})), {expect} %>% mutate(across(where(function(x) {{is.numeric(x) & is.double(x)}}), round, {util.get_config().fp_comparison_digits})), convert=T, ignore_row_order=T)'
+        # if not keep_order:
+        #     _script = f'all_equal({actual}, {expect}, convert=T)'
+        # else:
+        #     _script = f'all_equal({actual}, {expect}, convert=T, ignore_row_order=T)'
         try:
             return robjects.r(_script)[0] is True
         except:

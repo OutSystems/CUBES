@@ -135,6 +135,10 @@ class TreeBasedCubeGenerator:
         if self.force_stop:
             raise StopIteration
 
+        if self.loc == 0:
+            self.force_stop = True
+            return True
+
         if util.get_config().use_solution_cube and self.specification.solution:
             if len(self.specification.solution) == self.loc:
                 self.force_stop = True
@@ -189,9 +193,10 @@ class TreeBasedCubeGenerator:
                 self.specification.condition_generator.summarise_conditions:
             productions = list(filter(lambda p: p.name == 'summarise' or p.name == 'mutate', productions))
 
-        if not self.specification.aggrs_use_const and self.specification.condition_generator.filter_conditions and \
-                count(l for l in current_path if l.head.name == 'filter') == 0 and len(current_path) == self.loc - 1:
-            productions = list(filter(lambda p: p.name == 'filter', productions))
+        # if not self.specification.aggrs_use_const and self.specification.condition_generator.filter_conditions and \
+        #         count(l for l in current_path if l.head.name == 'filter') == 0 and len(current_path) == self.loc - 1:
+        #     productions = list(filter(lambda p: p.name == 'filter', productions))
+        # TODO FIXME
 
         return productions
 

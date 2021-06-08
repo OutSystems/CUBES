@@ -1,0 +1,1015 @@
+db: tests-examples/db2csv/flight_2/tables/flight_2.sqlite
+inputs:
+ - tests-examples/db2csv/flight_2/tables/airlines.csv
+ - tests-examples/db2csv/flight_2/tables/flights.csv
+output: tests-examples/db2csv/flight_2/tables/0064_dev.csv
+raw_question: Which airlines have at least 10 flights? 
+question_index: 242 
+constants:
+ - 10
+join_columns:
+ - airline
+ - uid
+groupby_columns:
+ - airline
+functions:
+ - count
+comment: |-
+  SELECT T1.Airline
+  FROM AIRLINES AS T1
+  JOIN FLIGHTS AS T2 ON T1.uid = T2.Airline
+  GROUP BY T1.Airline
+  HAVING count(*) > 10
+
+sql: |-
+  SELECT T1.Airline
+  FROM AIRLINES AS T1
+  JOIN FLIGHTS AS T2 ON T1.uid = T2.Airline
+  GROUP BY T1.Airline
+  HAVING count(*) > 10
+smbop_beam_join_columns:
+- - airline
+  - uid
+- - airline
+  - uid
+- - airline
+  - uid
+smbop_beam_groupby_columns:
+- - airline
+- - airline
+- - airline
+smbop_beam_tables:
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+smbop_beam_constants:
+- - 10
+- - 10
+- - 10
+smbop_beam_functions:
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
+  - SELECT flights.airline , airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
+  - SELECT airlines.airline FROM airlines JOIN flights ON airlines.uid = flights.airline GROUP BY flights.airline HAVING COUNT( * ) >= 10
+smbop_beam_inferred_code_w_terminals:
+  - SELECT airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
+  - SELECT flights.airline , airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
+  - SELECT airlines.airline FROM airlines JOIN flights ON airlines.uid = flights.airline GROUP BY flights.airline HAVING COUNT( * ) >= 10
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- - sourceairport
+  - airportcode
+- []
+ratsql_beam_groupby_columns:
+- - airline
+- - airline
+- - airline
+- - airline
+- - airline
+- - airline
+- - airline
+- - airline
+ratsql_beam_tables:
+- - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/flights.csv
+ratsql_beam_constants:
+- - 10
+- - 10
+- - 10
+- - 10
+- - 10
+- - 10
+- - 10
+- - 10
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- []
+- []
+- []
+- - flightno
+- []
+- []
+- []
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(*) >= 'terminal'
+  - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 'terminal'
+  - SELECT flights.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 'terminal'
+  - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 'terminal'
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(flights.FlightNo) >= 'terminal'
+  - SELECT flights.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 'terminal'
+  - SELECT flights.Airline FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY flights.Airline HAVING Count(*) >= 'terminal'
+  - SELECT DISTINCT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(*) >= 'terminal'
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(DISTINCT *) >= 'terminal'
+  - SELECT flights.Airline FROM flights GROUP BY DISTINCT flights.Airline HAVING Count(*) >= 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(*) >= 10
+  - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 10
+  - SELECT flights.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 10
+  - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 10
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(flights.FlightNo) >= 10
+  - SELECT flights.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 10
+  - SELECT flights.Airline FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY flights.Airline HAVING Count(*) >= 10
+  - SELECT DISTINCT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(*) >= 10
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(DISTINCT *) >= 10
+  - SELECT flights.Airline FROM flights GROUP BY DISTINCT flights.Airline HAVING Count(*) >= 10
+ratsql_beam_score_history:
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -0.11252784729003906
+  - -0.10546255111694336
+  - -0.0864558219909668
+  - -0.1026158332824707
+  - -0.10199117660522461
+  - -0.10528802871704102
+  - -0.10798835754394531
+  - -0.11732816696166992
+  - -0.20701883733272552
+  - -0.11097049713134766
+  - -0.10640382766723633
+  - -0.10641813278198242
+  - -0.10346031188964844
+  - -0.10718536376953125
+  - -0.10553145408630371
+  - -0.0978550910949707
+  - -0.10368490219116211
+  - -0.10883235931396484
+  - -0.1051173210144043
+  - -0.10353803634643555
+  - -0.0842117965221405
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.8354803919792175
+  - -0.11211848258972168
+  - -0.10554623603820801
+  - -0.09753894805908203
+  - -0.12711238861083984
+  - -0.1053018569946289
+  - -0.10281658172607422
+  - -0.10469198226928711
+  - -0.22331805527210236
+  - -0.11239337921142578
+  - -0.10557961463928223
+  - -0.09497594833374023
+  - -0.10230255126953125
+  - -0.10183334350585938
+  - -0.1053934097290039
+  - -0.10695314407348633
+  - -0.11767578125
+  - -0.2004191130399704
+  - -0.11113405227661133
+  - -0.10636663436889648
+  - -0.10637521743774414
+  - -0.10264062881469727
+  - -0.10729193687438965
+  - -0.10548233985900879
+  - -0.09732437133789062
+  - -0.10481691360473633
+  - -0.10791254043579102
+  - -0.1047811508178711
+  - -0.10560083389282227
+  - -0.4065297245979309
+  - -0.10468864440917969
+  - -0.10523605346679688
+  - -0.14847105741500854
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -1.9627001285552979
+  - -0.10979080200195312
+  - -0.1052694320678711
+  - -0.08872461318969727
+  - -0.10459518432617188
+  - -0.1019291877746582
+  - -0.10586404800415039
+  - -0.10719537734985352
+  - -0.11573457717895508
+  - -0.18483702838420868
+  - -0.1109464168548584
+  - -0.10632944107055664
+  - -0.10619735717773438
+  - -0.10391855239868164
+  - -0.1072242259979248
+  - -0.10548686981201172
+  - -0.0975804328918457
+  - -0.1054983139038086
+  - -0.10876989364624023
+  - -0.10471582412719727
+  - -0.10590553283691406
+  - -0.4162012040615082
+  - -0.10472917556762695
+  - -0.10498380661010742
+  - -0.14934024214744568
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.8354803919792175
+  - -0.11211848258972168
+  - -0.10554623603820801
+  - -0.09753894805908203
+  - -0.12711238861083984
+  - -0.1053018569946289
+  - -0.10281658172607422
+  - -0.10469198226928711
+  - -1.9502078294754028
+  - -0.10962343215942383
+  - -0.10530853271484375
+  - -0.10524654388427734
+  - -0.10586786270141602
+  - -0.10188007354736328
+  - -0.10603618621826172
+  - -0.10684061050415039
+  - -0.11599254608154297
+  - -0.1740235835313797
+  - -0.11101698875427246
+  - -0.10630416870117188
+  - -0.10600662231445312
+  - -0.103546142578125
+  - -0.10729622840881348
+  - -0.10542011260986328
+  - -0.09717082977294922
+  - -0.10422754287719727
+  - -0.11011171340942383
+  - -0.10487508773803711
+  - -0.10525178909301758
+  - -0.39523398876190186
+  - -0.10467243194580078
+  - -0.10547685623168945
+  - -0.14798322319984436
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -0.11252784729003906
+  - -0.10546255111694336
+  - -0.0864558219909668
+  - -0.1026158332824707
+  - -0.10199117660522461
+  - -0.10528802871704102
+  - -0.10798835754394531
+  - -0.11732816696166992
+  - -2.9547572135925293
+  - -0.11038422584533691
+  - -0.1057894229888916
+  - -0.10302257537841797
+  - -0.10385656356811523
+  - -0.10728216171264648
+  - -0.10541796684265137
+  - -0.0975489616394043
+  - -0.10393047332763672
+  - -0.10995912551879883
+  - -0.10503530502319336
+  - -0.10348749160766602
+  - -0.08596017211675644
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -0.11252784729003906
+  - -0.10546255111694336
+  - -0.0864558219909668
+  - -0.1026158332824707
+  - -0.10199117660522461
+  - -0.10528802871704102
+  - -0.10798835754394531
+  - -0.11732816696166992
+  - -0.20701883733272552
+  - -0.11097049713134766
+  - -0.10640382766723633
+  - -0.10641813278198242
+  - -0.10346031188964844
+  - -0.10718536376953125
+  - -0.10553145408630371
+  - -0.0978550910949707
+  - -0.10368490219116211
+  - -0.10883235931396484
+  - -0.1051173210144043
+  - -0.10353803634643555
+  - -3.0874135494232178
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -0.11252784729003906
+  - -0.10546255111694336
+  - -0.0864558219909668
+  - -0.1026158332824707
+  - -0.10199117660522461
+  - -0.10528802871704102
+  - -0.10798835754394531
+  - -0.11732816696166992
+  - -0.20701883733272552
+  - -0.11097049713134766
+  - -0.10640382766723633
+  - -0.10641813278198242
+  - -0.10346031188964844
+  - -0.10718536376953125
+  - -0.10553145408630371
+  - -0.0978550910949707
+  - -0.10368490219116211
+  - -0.10883235931396484
+  - -0.1051173210144043
+  - -0.10353803634643555
+  - -3.34831166267395
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -3.4248764514923096
+  - -0.1041567325592041
+  - -0.10236501693725586
+  - -0.10240459442138672
+  - -0.10428524017333984
+  - -0.10220718383789062
+  - -0.10449600219726562
+  - -0.10455703735351562
+  - -0.10807180404663086
+  - -0.6509217023849487
+  - -0.11255073547363281
+  - -0.10527157783508301
+  - -0.09502220153808594
+  - -0.12476348876953125
+  - -0.10847806930541992
+  - -0.10461854934692383
+  - -0.10551309585571289
+  - -0.2279677838087082
+  - -0.1125025749206543
+  - -0.10545849800109863
+  - -0.08479166030883789
+  - -0.10263442993164062
+  - -0.10201358795166016
+  - -0.10528564453125
+  - -0.1080007553100586
+  - -0.11707067489624023
+  - -0.20765577256679535
+  - -0.11096453666687012
+  - -0.10640311241149902
+  - -0.10645914077758789
+  - -0.10343074798583984
+  - -0.10718417167663574
+  - -0.10553193092346191
+  - -0.09783744812011719
+  - -0.10368871688842773
+  - -0.10871458053588867
+  - -0.1051177978515625
+  - -0.10352706909179688
+  - -0.08413497358560562
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -0.11252784729003906
+  - -0.10546255111694336
+  - -0.0864558219909668
+  - -0.1026158332824707
+  - -0.10199117660522461
+  - -0.10528802871704102
+  - -0.10798835754394531
+  - -0.11732816696166992
+  - -0.20701883733272552
+  - -3.463484525680542
+  - -0.10627937316894531
+  - -0.10686254501342773
+  - -0.10214042663574219
+  - -0.10720062255859375
+  - -0.10554242134094238
+  - -0.09838485717773438
+  - -0.10383129119873047
+  - -0.10893058776855469
+  - -0.10518550872802734
+  - -0.1035313606262207
+  - -0.08410406857728958
+- - -0.10300779342651367
+  - -0.10513830184936523
+  - -0.11073088645935059
+  - -0.10421538352966309
+  - -0.10280466079711914
+  - -0.10257101058959961
+  - -0.10425376892089844
+  - -0.1023569107055664
+  - -0.10448503494262695
+  - -0.10459136962890625
+  - -0.10797119140625
+  - -0.6714553833007812
+  - -0.112548828125
+  - -0.10529685020446777
+  - -0.0962991714477539
+  - -0.1256237030029297
+  - -0.10768985748291016
+  - -0.10464048385620117
+  - -0.10553789138793945
+  - -0.2240866720676422
+  - -3.437331438064575
+  - -0.10924959182739258
+  - -0.09991025924682617
+  - -0.11353111267089844
+  - -0.1027674674987793
+  - -0.10537099838256836
+  - -0.10775899887084961
+  - -0.11786556243896484
+  - -0.20672328770160675
+  - -0.11088681221008301
+  - -0.10639786720275879
+  - -0.10599374771118164
+  - -0.10370826721191406
+  - -0.10720539093017578
+  - -0.10553503036499023
+  - -0.09800434112548828
+  - -0.10371971130371094
+  - -0.10909128189086914
+  - -0.1051173210144043
+  - -0.10355091094970703
+  - -0.08467773348093033
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('cond', 'In')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Airline'
+  - 'True'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'

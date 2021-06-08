@@ -1,0 +1,1525 @@
+db: tests-examples/db2csv/world_1/tables/world_1.sqlite
+inputs:
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+ - tests-examples/db2csv/world_1/tables/country.csv
+output: tests-examples/db2csv/world_1/tables/0063_dev.csv
+raw_question: What is average life expectancy in the countries where English is not the official language? 
+question_index: 764 
+constants:
+ - T
+ - English
+join_columns:
+ - code
+ - countrycode
+functions:
+ - avg
+columns:
+ - language
+ - lifeexpectancy
+ - name
+ - isofficial
+filters:
+ - '='
+comment: |-
+  SELECT avg(LifeExpectancy)
+  FROM country
+  WHERE Name NOT IN
+      (SELECT T1.Name
+       FROM country AS T1
+       JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode
+       WHERE T2.Language = "English"
+         AND T2.IsOfficial = "T")
+
+sql: |-
+  SELECT avg(LifeExpectancy)
+  FROM country
+  WHERE Name NOT IN
+      (SELECT T1.Name
+       FROM country AS T1
+       JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode
+       WHERE T2.Language = "English"
+         AND T2.IsOfficial = "T")
+smbop_beam_join_columns:
+- - code
+  - countrycode
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+smbop_beam_constants:
+- - t
+  - English
+- - t
+  - English
+smbop_beam_functions:
+- - avg
+- []
+smbop_beam_columns:
+- - language
+  - lifeexpectancy
+- - language
+smbop_beam_ieu:
+- []
+- []
+smbop_beam_filters:
+- - '!='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT AVG( country.lifeexpectancy ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language != 'English'
+  - SELECT countrylanguage.countrycode FROM countrylanguage WHERE countrylanguage.language = 'English'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT AVG( country.lifeexpectancy ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language != 'English'
+  - SELECT countrylanguage.countrycode FROM countrylanguage WHERE countrylanguage.language = 'English'
+ratsql_beam_join_columns:
+- []
+- - code
+  - countrycode
+- - code
+  - countrycode
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+ratsql_beam_constants:
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+- - t
+  - English
+ratsql_beam_functions:
+- - avg
+- - avg
+- - avg
+- - avg
+- - avg
+- - avg
+- - avg
+- - avg
+ratsql_beam_columns:
+- - code
+  - language
+  - lifeexpectancy
+- - language
+  - lifeexpectancy
+- - language
+  - lifeexpectancy
+- - code
+  - language
+  - lifeexpectancy
+- - code
+  - language
+  - lifeexpectancy
+- - code
+  - language
+  - lifeexpectancy
+- - code
+  - language
+  - lifeexpectancy
+- - code
+  - language
+  - lifeexpectancy
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '!='
+- - '<'
+  - '<='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
+  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'terminal'
+  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language <= 'terminal'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT DISTINCT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE DISTINCT countrylanguage.Language = 'terminal')
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
+  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal') LIMIT 1
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal' LIMIT 1)
+  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language <= 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT DISTINCT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE DISTINCT countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' LIMIT 1
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' LIMIT 1)
+  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+ratsql_beam_score_history:
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -0.11138176918029785
+  - -0.10523056983947754
+  - -0.11277389526367188
+  - -0.10103225708007812
+  - -0.10134649276733398
+  - -0.10367584228515625
+  - -0.10929226875305176
+  - -0.10490822792053223
+  - -0.1059880256652832
+  - -0.10237264633178711
+  - -0.10667276382446289
+  - -0.10364246368408203
+  - -0.10615396499633789
+  - -0.10544681549072266
+  - -0.10387945175170898
+  - -0.08918449282646179
+  - -0.11233878135681152
+  - -0.10538840293884277
+  - -0.09031534194946289
+  - -0.1067514419555664
+  - -0.10225963592529297
+  - -0.10275602340698242
+  - -0.10534238815307617
+  - -0.10489702224731445
+  - -0.10406017303466797
+  - -0.12704668939113617
+  - -0.11105632781982422
+  - -0.10602188110351562
+  - -0.10439586639404297
+  - -0.0966939926147461
+  - -0.10026931762695312
+  - -0.10775566101074219
+  - -0.10523080825805664
+  - -0.09444713592529297
+  - -0.10512542724609375
+  - -0.10488748550415039
+  - -0.10504484176635742
+  - -0.10475397109985352
+  - -0.058821339160203934
+  - -0.10033226013183594
+  - -0.10260438919067383
+  - -0.10850405693054199
+  - -0.10453057289123535
+  - -0.09588432312011719
+  - -0.10271024703979492
+  - -0.12099218368530273
+  - -0.10586309432983398
+  - -0.10380172729492188
+  - -0.027116285637021065
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -4.619708061218262
+  - -0.17470836639404297
+  - -0.10141611099243164
+  - -0.10558319091796875
+  - -0.10544538497924805
+  - -0.10476016998291016
+  - -0.22060078382492065
+  - -0.11051201820373535
+  - -0.10579490661621094
+  - -0.10585355758666992
+  - -0.09827423095703125
+  - -0.10193777084350586
+  - -0.1075754165649414
+  - -0.10454487800598145
+  - -0.09020805358886719
+  - -0.10510921478271484
+  - -0.18965625762939453
+  - -0.10628414154052734
+  - -0.1040334701538086
+  - -0.30547288060188293
+  - -0.10718011856079102
+  - -0.10425662994384766
+  - -0.05642266944050789
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -4.8576884269714355
+  - -0.2738361358642578
+  - -0.10301494598388672
+  - -0.10877227783203125
+  - -0.10408735275268555
+  - -0.10569953918457031
+  - -0.4486888647079468
+  - -0.11037397384643555
+  - -0.10580658912658691
+  - -0.10411596298217773
+  - -0.09970617294311523
+  - -0.10170125961303711
+  - -0.1076500415802002
+  - -0.10444068908691406
+  - -0.09096097946166992
+  - -0.10412454605102539
+  - -0.15485763549804688
+  - -0.1067953109741211
+  - -0.10401535034179688
+  - -0.313779354095459
+  - -0.10708332061767578
+  - -0.10429763793945312
+  - -0.055615853518247604
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -0.11138176918029785
+  - -0.10523056983947754
+  - -0.11277389526367188
+  - -0.10103225708007812
+  - -0.10134649276733398
+  - -0.10367584228515625
+  - -0.10929226875305176
+  - -0.10490822792053223
+  - -0.1059880256652832
+  - -0.10237264633178711
+  - -0.10667276382446289
+  - -0.10364246368408203
+  - -0.10615396499633789
+  - -0.10544681549072266
+  - -0.10387945175170898
+  - -0.08918449282646179
+  - -3.449453353881836
+  - -0.10467743873596191
+  - -0.0902557373046875
+  - -0.10748481750488281
+  - -0.10247468948364258
+  - -0.10265874862670898
+  - -0.10533857345581055
+  - -0.10492610931396484
+  - -0.10413026809692383
+  - -0.12152376025915146
+  - -0.11097931861877441
+  - -0.1060018539428711
+  - -0.10469198226928711
+  - -0.09676456451416016
+  - -0.10036611557006836
+  - -0.10777473449707031
+  - -0.10521364212036133
+  - -0.09389257431030273
+  - -0.10533618927001953
+  - -0.10944318771362305
+  - -0.10502910614013672
+  - -0.1048121452331543
+  - -0.05850859358906746
+  - -0.10035562515258789
+  - -0.10269546508789062
+  - -0.10850977897644043
+  - -0.10452842712402344
+  - -0.09589719772338867
+  - -0.1027216911315918
+  - -0.12088537216186523
+  - -0.10585451126098633
+  - -0.10378122329711914
+  - -0.027171161025762558
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -0.11138176918029785
+  - -0.10523056983947754
+  - -0.11277389526367188
+  - -0.10103225708007812
+  - -0.10134649276733398
+  - -0.10367584228515625
+  - -0.10929226875305176
+  - -0.10490822792053223
+  - -0.1059880256652832
+  - -0.10237264633178711
+  - -0.10667276382446289
+  - -0.10364246368408203
+  - -0.10615396499633789
+  - -0.10544681549072266
+  - -0.10387945175170898
+  - -0.08918449282646179
+  - -0.11233878135681152
+  - -0.10538840293884277
+  - -0.09031534194946289
+  - -0.1067514419555664
+  - -0.10225963592529297
+  - -0.10275602340698242
+  - -0.10534238815307617
+  - -0.10489702224731445
+  - -0.10406017303466797
+  - -0.12704668939113617
+  - -3.4599227905273438
+  - -0.10548090934753418
+  - -0.10349273681640625
+  - -0.09540748596191406
+  - -0.10074663162231445
+  - -0.10779094696044922
+  - -0.10521101951599121
+  - -0.09384965896606445
+  - -0.10524225234985352
+  - -0.1079254150390625
+  - -0.10502815246582031
+  - -0.10483264923095703
+  - -0.05840424820780754
+  - -0.10041141510009766
+  - -0.10263967514038086
+  - -0.10850381851196289
+  - -0.10453081130981445
+  - -0.09592819213867188
+  - -0.10270833969116211
+  - -0.12097024917602539
+  - -0.10586357116699219
+  - -0.10380125045776367
+  - -0.02711605280637741
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -3.467709541320801
+  - -0.1051018238067627
+  - -0.11520910263061523
+  - -0.10019969940185547
+  - -0.1019430160522461
+  - -0.10386800765991211
+  - -0.10886907577514648
+  - -0.10485696792602539
+  - -0.10724973678588867
+  - -0.10249519348144531
+  - -0.10624885559082031
+  - -0.10373735427856445
+  - -0.10592269897460938
+  - -0.10543012619018555
+  - -0.10384035110473633
+  - -0.08992034196853638
+  - -0.11238265037536621
+  - -0.10538911819458008
+  - -0.08994674682617188
+  - -0.10693979263305664
+  - -0.10221004486083984
+  - -0.10271263122558594
+  - -0.10539817810058594
+  - -0.10489320755004883
+  - -0.10402965545654297
+  - -0.12388685345649719
+  - -0.11104917526245117
+  - -0.1060326099395752
+  - -0.10446023941040039
+  - -0.09658622741699219
+  - -0.10038137435913086
+  - -0.10776519775390625
+  - -0.10523438453674316
+  - -0.09457969665527344
+  - -0.10480690002441406
+  - -0.10569286346435547
+  - -0.10501575469970703
+  - -0.10472297668457031
+  - -0.058926649391651154
+  - -0.1003103256225586
+  - -0.10256242752075195
+  - -0.10850405693054199
+  - -0.10452961921691895
+  - -0.09593629837036133
+  - -0.10283041000366211
+  - -0.12110328674316406
+  - -0.10587739944458008
+  - -0.1038045883178711
+  - -0.0271652452647686
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -3.4827022552490234
+  - -0.1052544116973877
+  - -0.08499860763549805
+  - -0.11112260818481445
+  - -0.08620262145996094
+  - -0.0943746566772461
+  - -0.09056758880615234
+  - -0.10103845596313477
+  - -0.10697412490844727
+  - -0.10971355438232422
+  - -0.10509681701660156
+  - -0.0743698924779892
+  - -0.11141657829284668
+  - -0.10521435737609863
+  - -0.11330747604370117
+  - -0.10033941268920898
+  - -0.10140800476074219
+  - -0.10365438461303711
+  - -0.10936832427978516
+  - -0.10490560531616211
+  - -0.10593128204345703
+  - -0.10237979888916016
+  - -0.10674667358398438
+  - -0.10365104675292969
+  - -0.10619878768920898
+  - -0.10544395446777344
+  - -0.10385513305664062
+  - -0.08854139596223831
+  - -0.1123499870300293
+  - -0.10539031028747559
+  - -0.0905599594116211
+  - -0.10687589645385742
+  - -0.10227489471435547
+  - -0.1027379035949707
+  - -0.10532522201538086
+  - -0.10489749908447266
+  - -0.10409402847290039
+  - -0.12712343037128448
+  - -0.11105203628540039
+  - -0.10602450370788574
+  - -0.1043553352355957
+  - -0.09647035598754883
+  - -0.10039234161376953
+  - -0.10774993896484375
+  - -0.10523128509521484
+  - -0.09418630599975586
+  - -0.1050567626953125
+  - -0.10399866104125977
+  - -0.10505056381225586
+  - -0.10460805892944336
+  - -0.06019728258252144
+  - -0.10054969787597656
+  - -0.101593017578125
+  - -0.1085209846496582
+  - -0.10452818870544434
+  - -0.09608030319213867
+  - -0.10282468795776367
+  - -0.12109375
+  - -0.10582542419433594
+  - -0.10382413864135742
+  - -0.027142390608787537
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -0.11138176918029785
+  - -0.10523056983947754
+  - -0.11277389526367188
+  - -0.10103225708007812
+  - -0.10134649276733398
+  - -0.10367584228515625
+  - -0.10929226875305176
+  - -0.10490822792053223
+  - -0.1059880256652832
+  - -0.10237264633178711
+  - -0.10667276382446289
+  - -0.10364246368408203
+  - -0.10615396499633789
+  - -0.10544681549072266
+  - -0.10387945175170898
+  - -0.08918449282646179
+  - -0.11233878135681152
+  - -0.10538840293884277
+  - -0.09031534194946289
+  - -0.1067514419555664
+  - -0.10225963592529297
+  - -0.10275602340698242
+  - -0.10534238815307617
+  - -0.10489702224731445
+  - -0.10406017303466797
+  - -0.12704668939113617
+  - -0.11105632781982422
+  - -0.10602188110351562
+  - -0.10439586639404297
+  - -0.0966939926147461
+  - -0.10026931762695312
+  - -0.10775566101074219
+  - -0.10523080825805664
+  - -0.09444713592529297
+  - -0.10512542724609375
+  - -0.10488748550415039
+  - -0.10504484176635742
+  - -0.10475397109985352
+  - -0.058821339160203934
+  - -0.10033226013183594
+  - -0.10260438919067383
+  - -3.53764009475708
+  - -0.10439109802246094
+  - -0.09629344940185547
+  - -0.10305023193359375
+  - -0.11917400360107422
+  - -0.10626554489135742
+  - -0.10413169860839844
+  - -0.02591034024953842
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -0.10595560073852539
+  - -0.10408520698547363
+  - -0.10199165344238281
+  - -0.10042238235473633
+  - -0.10538244247436523
+  - -0.1034703254699707
+  - -0.1085042953491211
+  - -0.10351991653442383
+  - -0.10505247116088867
+  - -0.06494574248790741
+  - -0.11043453216552734
+  - -0.10466551780700684
+  - -0.0848541259765625
+  - -0.1196889877319336
+  - -0.07890605926513672
+  - -0.09351825714111328
+  - -0.09142351150512695
+  - -0.10097980499267578
+  - -0.10659217834472656
+  - -0.1099400520324707
+  - -0.10495758056640625
+  - -0.07352615147829056
+  - -0.11138176918029785
+  - -0.10523056983947754
+  - -0.11277389526367188
+  - -0.10103225708007812
+  - -0.10134649276733398
+  - -0.10367584228515625
+  - -0.10929226875305176
+  - -0.10490822792053223
+  - -0.1059880256652832
+  - -0.10237264633178711
+  - -0.10667276382446289
+  - -0.10364246368408203
+  - -0.10615396499633789
+  - -0.10544681549072266
+  - -0.10387945175170898
+  - -0.08918449282646179
+  - -0.11233878135681152
+  - -0.10538840293884277
+  - -0.09031534194946289
+  - -0.1067514419555664
+  - -0.10225963592529297
+  - -0.10275602340698242
+  - -0.10534238815307617
+  - -0.10489702224731445
+  - -0.10406017303466797
+  - -0.12704668939113617
+  - -0.11105632781982422
+  - -0.10602188110351562
+  - -0.10439586639404297
+  - -0.0966939926147461
+  - -0.10026931762695312
+  - -3.5410895347595215
+  - -0.10514020919799805
+  - -0.09541988372802734
+  - -0.10541296005249023
+  - -0.1069788932800293
+  - -0.10519742965698242
+  - -0.10463285446166992
+  - -0.05876637250185013
+  - -0.10025835037231445
+  - -0.1026754379272461
+  - -0.10849833488464355
+  - -0.10452723503112793
+  - -0.09583663940429688
+  - -0.1027078628540039
+  - -0.12100696563720703
+  - -0.10585880279541016
+  - -0.10379981994628906
+  - -0.0270988829433918
+- - -0.11358833312988281
+  - -0.10397911071777344
+  - -3.5673463344573975
+  - -0.10301709175109863
+  - -0.1035013198852539
+  - -0.10259246826171875
+  - -0.10090160369873047
+  - -0.10282659530639648
+  - -0.10779523849487305
+  - -0.1027979850769043
+  - -0.10431146621704102
+  - -0.05873130261898041
+  - -0.11026382446289062
+  - -0.10467362403869629
+  - -0.08678531646728516
+  - -0.1150212287902832
+  - -0.08315467834472656
+  - -0.09392881393432617
+  - -0.0907297134399414
+  - -0.10099124908447266
+  - -0.1066584587097168
+  - -0.11009407043457031
+  - -0.10498905181884766
+  - -0.07333153486251831
+  - -0.11131525039672852
+  - -0.10523319244384766
+  - -0.11283016204833984
+  - -0.10099506378173828
+  - -0.10132694244384766
+  - -0.10370397567749023
+  - -0.10924315452575684
+  - -0.10491466522216797
+  - -0.106048583984375
+  - -0.10235404968261719
+  - -0.10663843154907227
+  - -0.10363912582397461
+  - -0.10615921020507812
+  - -0.1054372787475586
+  - -0.10390901565551758
+  - -0.08908122777938843
+  - -0.11231493949890137
+  - -0.10538697242736816
+  - -0.09022235870361328
+  - -0.10679912567138672
+  - -0.10226154327392578
+  - -0.10272693634033203
+  - -0.10534381866455078
+  - -0.10488224029541016
+  - -0.10410928726196289
+  - -0.12667003273963928
+  - -0.1110544204711914
+  - -0.10602164268493652
+  - -0.10439443588256836
+  - -0.09668684005737305
+  - -0.1002817153930664
+  - -0.1077570915222168
+  - -0.10523223876953125
+  - -0.09435844421386719
+  - -0.10509300231933594
+  - -0.10511350631713867
+  - -0.10505199432373047
+  - -0.10465669631958008
+  - -0.059609510004520416
+  - -0.10044384002685547
+  - -0.10214376449584961
+  - -0.10851240158081055
+  - -0.10453128814697266
+  - -0.095977783203125
+  - -0.1027536392211914
+  - -0.12098884582519531
+  - -0.10586309432983398
+  - -0.10381031036376953
+  - -0.02706906385719776
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ne')
+  - ('Ne', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Le')
+  - ('Le', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Avg')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'LifeExpectancy'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Not')
+  - ('Not', (True,))
+  - ('cond', 'In')
+  - ('In', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Code'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'ValSql')
+  - ('ValSql', (True,))
+  - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'CountryCode'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Language'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'

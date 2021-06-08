@@ -1,0 +1,1212 @@
+db: tests-examples/db2csv/dog_kennels/tables/dog_kennels.sqlite
+inputs:
+ - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+ - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+output: tests-examples/db2csv/dog_kennels/tables/0025_dev.csv
+raw_question: Which professionals have done at least two types of treatments? List the professional id and cell phone. 
+question_index: 942 
+constants:
+ - 2
+join_columns:
+ - professional_id
+groupby_columns:
+ - professional_id
+functions:
+ - count
+comment: |-
+  SELECT T1.professional_id,
+         T1.cell_number
+  FROM Professionals AS T1
+  JOIN Treatments AS T2 ON T1.professional_id = T2.professional_id
+  GROUP BY T1.professional_id
+  HAVING count(*) >= 2
+
+sql: |-
+  SELECT T1.professional_id,
+         T1.cell_number
+  FROM Professionals AS T1
+  JOIN Treatments AS T2 ON T1.professional_id = T2.professional_id
+  GROUP BY T1.professional_id
+  HAVING count(*) >= 2
+smbop_beam_join_columns:
+- - professional_id
+- - professional_id
+smbop_beam_groupby_columns:
+- - professional_id
+- - professional_id
+smbop_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+smbop_beam_constants:
+- - 2
+- - 2
+smbop_beam_functions:
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT professionals.professional_id , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
+  - SELECT professionals.professional_id , professionals.home_phone FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
+smbop_beam_inferred_code_w_terminals:
+  - SELECT professionals.professional_id , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
+  - SELECT professionals.professional_id , professionals.home_phone FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
+ratsql_beam_join_columns:
+- - professional_id
+- []
+- - professional_id
+- - professional_id
+- - professional_id
+- - treatment_type_code
+  - professional_id
+- - professional_id
+ratsql_beam_groupby_columns:
+- - professional_id
+- - professional_id
+- - professional_id
+- - professional_id
+- - professional_id
+- - professional_id
+- - professional_id
+ratsql_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+ratsql_beam_constants:
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+- - 2
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Treatments.professional_id, Treatments.professional_id FROM Treatments GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY DISTINCT Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Treatments.professional_id, DISTINCT Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT DISTINCT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(DISTINCT *) >= 'terminal'
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal' LIMIT 1
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Treatment_Types JOIN Professionals JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.professional_id = Professionals.professional_id AND Treatment_Types.treatment_type_code = Treatments.treatment_type_code GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+  - SELECT Professionals.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT Treatments.professional_id, Treatments.professional_id FROM Treatments GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) >= 2
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY DISTINCT Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT Treatments.professional_id, DISTINCT Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT DISTINCT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(DISTINCT *) >= 2
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2 LIMIT 1
+  - SELECT Treatments.professional_id, Professionals.cell_number FROM Treatment_Types JOIN Professionals JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.professional_id = Professionals.professional_id AND Treatment_Types.treatment_type_code = Treatments.treatment_type_code GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+  - SELECT Professionals.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+ratsql_beam_score_history:
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -0.19982841610908508
+  - -0.1120443344116211
+  - -0.1055593490600586
+  - -0.08146333694458008
+  - -0.08876514434814453
+  - -0.1023702621459961
+  - -0.10489416122436523
+  - -0.10839414596557617
+  - -0.11288642883300781
+  - -0.12512874603271484
+  - -0.10840296745300293
+  - -0.10629749298095703
+  - -0.1051626205444336
+  - -0.10411500930786133
+  - -0.107421875
+  - -0.10477423667907715
+  - -0.1301102638244629
+  - -0.1042337417602539
+  - -0.11090421676635742
+  - -0.10469436645507812
+  - -0.10337400436401367
+  - -0.19967679679393768
+  - -0.10573387145996094
+  - -0.10680770874023438
+  - -0.1225988119840622
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -3.143483877182007
+  - -0.11208224296569824
+  - -0.10550928115844727
+  - -0.11603593826293945
+  - -0.13372516632080078
+  - -0.10251140594482422
+  - -0.10445737838745117
+  - -0.10526037216186523
+  - -0.1870424449443817
+  - -0.11235833168029785
+  - -0.10564017295837402
+  - -0.07839488983154297
+  - -0.08897113800048828
+  - -0.10241174697875977
+  - -0.10495615005493164
+  - -0.1083984375
+  - -0.11244869232177734
+  - -0.12936504185199738
+  - -0.10832619667053223
+  - -0.10633373260498047
+  - -0.10546684265136719
+  - -0.10412263870239258
+  - -0.10740852355957031
+  - -0.10476183891296387
+  - -0.16611719131469727
+  - -0.10314130783081055
+  - -0.11445045471191406
+  - -0.10714864730834961
+  - -0.10360383987426758
+  - -0.12463486194610596
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -3.002908229827881
+  - -0.11122584342956543
+  - -0.1056971549987793
+  - -0.07530832290649414
+  - -0.09380960464477539
+  - -0.10204267501831055
+  - -0.10514116287231445
+  - -0.1088247299194336
+  - -0.11237192153930664
+  - -0.1273505836725235
+  - -0.10874724388122559
+  - -0.10625195503234863
+  - -0.10581827163696289
+  - -0.1043405532836914
+  - -0.10741543769836426
+  - -0.10479068756103516
+  - -0.1366410255432129
+  - -0.10433626174926758
+  - -0.1102895736694336
+  - -0.10465764999389648
+  - -0.10329389572143555
+  - -0.19889310002326965
+  - -0.1057276725769043
+  - -0.10682439804077148
+  - -0.12198952585458755
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -0.19982841610908508
+  - -3.4520859718322754
+  - -0.10410475730895996
+  - -0.08111286163330078
+  - -0.09029579162597656
+  - -0.10219001770019531
+  - -0.10495328903198242
+  - -0.1086273193359375
+  - -0.11285161972045898
+  - -0.12526851892471313
+  - -0.10841631889343262
+  - -0.1062936782836914
+  - -0.10525846481323242
+  - -0.1041264533996582
+  - -0.1074225902557373
+  - -0.1047811508178711
+  - -0.13233613967895508
+  - -0.1042470932006836
+  - -0.11072540283203125
+  - -0.1046900749206543
+  - -0.10335969924926758
+  - -0.19964653253555298
+  - -0.10573291778564453
+  - -0.10681629180908203
+  - -0.12230487167835236
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -3.456106662750244
+  - -0.10021018981933594
+  - -0.12082481384277344
+  - -0.1344590187072754
+  - -0.10318565368652344
+  - -0.103790283203125
+  - -0.10498666763305664
+  - -0.19820968806743622
+  - -0.11231446266174316
+  - -0.10554361343383789
+  - -0.08044958114624023
+  - -0.08922052383422852
+  - -0.10232925415039062
+  - -0.1049032211303711
+  - -0.1084146499633789
+  - -0.11284255981445312
+  - -0.1262550950050354
+  - -0.10846161842346191
+  - -0.1062920093536377
+  - -0.10526752471923828
+  - -0.10416793823242188
+  - -0.1074213981628418
+  - -0.10477232933044434
+  - -0.13346338272094727
+  - -0.1042022705078125
+  - -0.1121969223022461
+  - -0.10473775863647461
+  - -0.10337257385253906
+  - -0.1955454796552658
+  - -0.10579681396484375
+  - -0.10697555541992188
+  - -0.12439572811126709
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -3.4492504596710205
+  - -0.10528755187988281
+  - -0.10162353515625
+  - -0.10863161087036133
+  - -0.10184335708618164
+  - -0.1058969497680664
+  - -0.1053628921508789
+  - -0.10490274429321289
+  - -0.14908753335475922
+  - -0.11246085166931152
+  - -0.10514569282531738
+  - -0.1181783676147461
+  - -0.1326766014099121
+  - -0.10255861282348633
+  - -0.10371112823486328
+  - -0.1045827865600586
+  - -0.19252660870552063
+  - -0.11209464073181152
+  - -0.1055443286895752
+  - -0.08026981353759766
+  - -0.08841276168823242
+  - -0.10230493545532227
+  - -0.10490798950195312
+  - -0.10841035842895508
+  - -0.1128687858581543
+  - -0.1262342929840088
+  - -0.10848116874694824
+  - -0.10628676414489746
+  - -0.10532283782958984
+  - -0.10413885116577148
+  - -0.10741710662841797
+  - -0.10476541519165039
+  - -0.12857818603515625
+  - -0.10391521453857422
+  - -0.1100473403930664
+  - -0.10463380813598633
+  - -0.10330820083618164
+  - -0.20880372822284698
+  - -0.1056966781616211
+  - -0.1065511703491211
+  - -0.1169721931219101
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -0.19982841610908508
+  - -0.1120443344116211
+  - -0.1055593490600586
+  - -0.08146333694458008
+  - -0.08876514434814453
+  - -0.1023702621459961
+  - -0.10489416122436523
+  - -0.10839414596557617
+  - -0.11288642883300781
+  - -0.12512874603271484
+  - -3.5145375728607178
+  - -0.10609149932861328
+  - -0.10441446304321289
+  - -0.10390520095825195
+  - -0.10750484466552734
+  - -0.10479879379272461
+  - -0.13315534591674805
+  - -0.1041102409362793
+  - -0.11110877990722656
+  - -0.10471820831298828
+  - -0.10336446762084961
+  - -0.199995219707489
+  - -0.10574769973754883
+  - -0.10677862167358398
+  - -0.1229647845029831
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -0.19982841610908508
+  - -0.1120443344116211
+  - -0.1055593490600586
+  - -0.08146333694458008
+  - -0.08876514434814453
+  - -0.1023702621459961
+  - -0.10489416122436523
+  - -0.10839414596557617
+  - -0.11288642883300781
+  - -0.12512874603271484
+  - -0.10840296745300293
+  - -0.10629749298095703
+  - -0.1051626205444336
+  - -0.10411500930786133
+  - -3.5480740070343018
+  - -0.10503602027893066
+  - -0.21526288986206055
+  - -0.10438966751098633
+  - -0.11116456985473633
+  - -0.10476064682006836
+  - -0.10335636138916016
+  - -0.1987387090921402
+  - -0.1057744026184082
+  - -0.10692167282104492
+  - -0.12203331291675568
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -0.14101293683052063
+  - -0.11286282539367676
+  - -0.10559344291687012
+  - -0.1023097038269043
+  - -0.10216045379638672
+  - -0.10184574127197266
+  - -0.10649919509887695
+  - -0.1058645248413086
+  - -0.1056222915649414
+  - -0.12615999579429626
+  - -0.11245322227478027
+  - -0.10484147071838379
+  - -0.11742925643920898
+  - -0.13385820388793945
+  - -0.10268068313598633
+  - -0.10362625122070312
+  - -0.10479497909545898
+  - -0.19982841610908508
+  - -0.1120443344116211
+  - -0.1055593490600586
+  - -0.08146333694458008
+  - -0.08876514434814453
+  - -0.1023702621459961
+  - -0.10489416122436523
+  - -0.10839414596557617
+  - -0.11288642883300781
+  - -0.12512874603271484
+  - -0.10840296745300293
+  - -0.10629749298095703
+  - -0.1051626205444336
+  - -0.10411500930786133
+  - -0.107421875
+  - -0.10477423667907715
+  - -0.1301102638244629
+  - -0.1042337417602539
+  - -0.11090421676635742
+  - -0.10469436645507812
+  - -0.10337400436401367
+  - -0.19967679679393768
+  - -0.10573387145996094
+  - -0.10680770874023438
+  - -3.775515556335449
+- - -0.1047658920288086
+  - -0.1041250228881836
+  - -0.10785913467407227
+  - -0.10418248176574707
+  - -0.12310457229614258
+  - -0.10281133651733398
+  - -0.10467529296875
+  - -0.10196352005004883
+  - -0.10395097732543945
+  - -0.10485124588012695
+  - -0.10497283935546875
+  - -3.839670181274414
+  - -0.11232185363769531
+  - -0.10554981231689453
+  - -0.10276460647583008
+  - -0.10152626037597656
+  - -0.10184812545776367
+  - -0.10644054412841797
+  - -0.10582685470581055
+  - -0.1057729721069336
+  - -0.140981987118721
+  - -0.11248922348022461
+  - -0.10492944717407227
+  - -0.11771583557128906
+  - -0.13515853881835938
+  - -0.10255098342895508
+  - -0.10356950759887695
+  - -0.10463619232177734
+  - -0.20049433410167694
+  - -0.11208057403564453
+  - -0.10552310943603516
+  - -0.08142232894897461
+  - -0.08879518508911133
+  - -0.10223531723022461
+  - -0.1049189567565918
+  - -0.10857963562011719
+  - -0.1120443344116211
+  - -0.12760286033153534
+  - -0.10859394073486328
+  - -0.10626935958862305
+  - -0.1054677963256836
+  - -0.1041264533996582
+  - -0.10741686820983887
+  - -0.10479116439819336
+  - -0.13088274002075195
+  - -0.10396051406860352
+  - -0.10959482192993164
+  - -0.10459232330322266
+  - -0.10333061218261719
+  - -0.2143900990486145
+  - -0.10581398010253906
+  - -0.1065530776977539
+  - -0.10735135525465012
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'True'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'True'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatment_Types'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 2)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'cell_number'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'professional_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Treatments'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Professionals'

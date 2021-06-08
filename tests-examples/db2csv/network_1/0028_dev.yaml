@@ -1,0 +1,1026 @@
+db: tests-examples/db2csv/network_1/tables/network_1.sqlite
+inputs:
+ - tests-examples/db2csv/network_1/tables/highschooler.csv
+ - tests-examples/db2csv/network_1/tables/friend.csv
+output: tests-examples/db2csv/network_1/tables/0028_dev.csv
+raw_question: What are the names of high schoolers who have 3 or more friends? 
+question_index: 889 
+constants:
+ - 3
+join_columns:
+ - id
+ - student_id
+groupby_columns:
+ - student_id
+functions:
+ - count
+comment: |-
+  SELECT T2.name
+  FROM Friend AS T1
+  JOIN Highschooler AS T2 ON T1.student_id = T2.id
+  GROUP BY T1.student_id
+  HAVING count(*) >= 3
+
+sql: |-
+  SELECT T2.name
+  FROM Friend AS T1
+  JOIN Highschooler AS T2 ON T1.student_id = T2.id
+  GROUP BY T1.student_id
+  HAVING count(*) >= 3
+smbop_beam_join_columns:
+- - id
+  - student_id
+- - id
+  - student_id
+smbop_beam_groupby_columns:
+- - student_id
+- - student_id
+smbop_beam_tables:
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+smbop_beam_constants:
+- - 3
+- - 3
+smbop_beam_functions:
+- - count
+- - count
+smbop_beam_columns:
+- []
+- []
+smbop_beam_ieu:
+- []
+- []
+smbop_beam_filters:
+- []
+- []
+smbop_beam_inferred_code:
+  - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.student_id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
+  - SELECT highschooler.name FROM friend JOIN highschooler ON friend.student_id = highschooler.id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
+smbop_beam_inferred_code_w_terminals:
+  - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.student_id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
+  - SELECT highschooler.name FROM friend JOIN highschooler ON friend.student_id = highschooler.id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
+ratsql_beam_join_columns:
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - student_id
+- - id
+  - student_id
+  - liked_id
+- - id
+  - student_id
+ratsql_beam_groupby_columns:
+- - student_id
+- - student_id
+- - name
+- - student_id
+- []
+- - student_id
+- - student_id
+- - student_id
+ratsql_beam_tables:
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/likes.csv
+  - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+- - tests-examples/db2csv/network_1/tables/highschooler.csv
+  - tests-examples/db2csv/network_1/tables/friend.csv
+ratsql_beam_constants:
+- - 3
+- - 3
+- - 3
+- - 3
+- - 3
+- - 3
+- - 3
+- - 3
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- []
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- []
+- - friend_id
+- []
+- []
+- []
+- []
+- []
+- - id
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- []
+- - '>='
+  - '>'
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_inferred_code:
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(DISTINCT Friend.friend_id) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Highschooler.name HAVING Count(*) >= 'terminal'
+  - SELECT DISTINCT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY DISTINCT Friend.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(DISTINCT *) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 'terminal' LIMIT 1
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.student_id HAVING Count(*) >= 'terminal'
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.ID) >= 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(DISTINCT Friend.friend_id) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Highschooler.name HAVING Count(*) >= 3
+  - SELECT DISTINCT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY DISTINCT Friend.student_id HAVING Count(*) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(DISTINCT *) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 3 LIMIT 1
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.student_id HAVING Count(*) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.ID) >= 3
+ratsql_beam_score_history:
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -0.31655123829841614
+  - -0.11001706123352051
+  - -0.10623478889465332
+  - -0.1036672592163086
+  - -0.10162687301635742
+  - -0.10745787620544434
+  - -0.10529947280883789
+  - -0.09841489791870117
+  - -0.10500907897949219
+  - -0.1111607551574707
+  - -0.10448694229125977
+  - -0.10589838027954102
+  - -0.12708574533462524
+  - -0.10810279846191406
+  - -0.10383319854736328
+  - -0.052608076483011246
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -1.8095747232437134
+  - -0.16760516166687012
+  - -0.10626959800720215
+  - -0.10317564010620117
+  - -0.10114240646362305
+  - -0.10741710662841797
+  - -0.10535717010498047
+  - -0.09770584106445312
+  - -0.1045989990234375
+  - -0.11248922348022461
+  - -0.10446310043334961
+  - -0.10584449768066406
+  - -0.1350184977054596
+  - -0.10914134979248047
+  - -0.10404396057128906
+  - -0.05297253280878067
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -3.057492971420288
+  - -0.11114788055419922
+  - -0.10534501075744629
+  - -0.12615060806274414
+  - -0.10583019256591797
+  - -0.10035467147827148
+  - -0.10512065887451172
+  - -0.10675430297851562
+  - -0.11467361450195312
+  - -0.3096700608730316
+  - -0.1099853515625
+  - -0.10622262954711914
+  - -0.10335731506347656
+  - -0.10133600234985352
+  - -0.10746407508850098
+  - -0.10529017448425293
+  - -0.09775829315185547
+  - -0.10433721542358398
+  - -0.11275434494018555
+  - -0.10439491271972656
+  - -0.1058340072631836
+  - -0.11754607409238815
+  - -0.10765695571899414
+  - -0.10404396057128906
+  - -0.05167626589536667
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -3.3581552505493164
+  - -0.1041865348815918
+  - -0.1029815673828125
+  - -0.10242509841918945
+  - -0.10435676574707031
+  - -0.1020197868347168
+  - -0.10441064834594727
+  - -0.10480690002441406
+  - -0.10767698287963867
+  - -0.10429086536169052
+  - -0.11121058464050293
+  - -0.1056361198425293
+  - -0.10794973373413086
+  - -0.11741113662719727
+  - -0.10615158081054688
+  - -0.10769987106323242
+  - -0.10500669479370117
+  - -0.1265215128660202
+  - -0.11210751533508301
+  - -0.10531473159790039
+  - -0.10192394256591797
+  - -0.10478639602661133
+  - -0.10052204132080078
+  - -0.10508346557617188
+  - -0.10656499862670898
+  - -0.11510181427001953
+  - -0.31895947456359863
+  - -0.11002922058105469
+  - -0.10623741149902344
+  - -0.10364532470703125
+  - -0.10161924362182617
+  - -0.10745811462402344
+  - -0.1052999496459961
+  - -0.09844255447387695
+  - -0.10503101348876953
+  - -0.11113262176513672
+  - -0.1044917106628418
+  - -0.10592412948608398
+  - -0.127365380525589
+  - -0.10811996459960938
+  - -0.10382890701293945
+  - -0.05265964940190315
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -3.4466757774353027
+  - -0.10445261001586914
+  - -0.1143040657043457
+  - -0.1075444221496582
+  - -0.1005706787109375
+  - -0.10509967803955078
+  - -0.10649299621582031
+  - -0.11487674713134766
+  - -0.3157532811164856
+  - -0.10999560356140137
+  - -0.1062312126159668
+  - -0.10367536544799805
+  - -0.10170984268188477
+  - -0.10744929313659668
+  - -0.10529947280883789
+  - -0.09886598587036133
+  - -0.10503816604614258
+  - -0.11110210418701172
+  - -0.1044611930847168
+  - -0.10587692260742188
+  - -0.12779328227043152
+  - -0.10813331604003906
+  - -0.10383224487304688
+  - -0.05266541615128517
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -5.086572647094727
+  - -0.1003117561340332
+  - -0.10699295997619629
+  - -0.10574138164520264
+  - -0.400728702545166
+  - -0.1053628921508789
+  - -0.10599899291992188
+  - -0.11219120025634766
+  - -0.10845470428466797
+  - -0.13757863640785217
+  - -0.10842180252075195
+  - -0.10443449020385742
+  - -0.05613081157207489
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -0.31655123829841614
+  - -3.484710931777954
+  - -0.10625696182250977
+  - -0.1031494140625
+  - -0.10223865509033203
+  - -0.10741901397705078
+  - -0.10528016090393066
+  - -0.09735345840454102
+  - -0.10502243041992188
+  - -0.11083650588989258
+  - -0.10425424575805664
+  - -0.10598373413085938
+  - -0.12916171550750732
+  - -0.1080327033996582
+  - -0.10380315780639648
+  - -0.05268724262714386
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -0.31655123829841614
+  - -0.11001706123352051
+  - -0.10623478889465332
+  - -0.1036672592163086
+  - -0.10162687301635742
+  - -3.5470924377441406
+  - -0.10521364212036133
+  - -0.09955167770385742
+  - -0.10555171966552734
+  - -0.11166572570800781
+  - -0.10442447662353516
+  - -0.10570383071899414
+  - -0.1293748915195465
+  - -0.10839223861694336
+  - -0.10383176803588867
+  - -0.05328938737511635
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -0.31655123829841614
+  - -0.11001706123352051
+  - -0.10623478889465332
+  - -0.1036672592163086
+  - -0.10162687301635742
+  - -0.10745787620544434
+  - -0.10529947280883789
+  - -0.09841489791870117
+  - -0.10500907897949219
+  - -0.1111607551574707
+  - -0.10448694229125977
+  - -0.10589838027954102
+  - -0.12708574533462524
+  - -0.10810279846191406
+  - -0.10383319854736328
+  - -3.5011789798736572
+- - -0.10306262969970703
+  - -0.10805988311767578
+  - -0.11173176765441895
+  - -0.10453128814697266
+  - -0.10150337219238281
+  - -0.10309648513793945
+  - -0.10448837280273438
+  - -0.10222434997558594
+  - -0.10442018508911133
+  - -0.10459327697753906
+  - -0.10817337036132812
+  - -0.10688461363315582
+  - -0.11128711700439453
+  - -0.10565567016601562
+  - -0.10854625701904297
+  - -0.11611175537109375
+  - -0.1059575080871582
+  - -0.10758686065673828
+  - -0.10503768920898438
+  - -0.1250501573085785
+  - -0.11213135719299316
+  - -0.10531282424926758
+  - -0.10157108306884766
+  - -0.10445690155029297
+  - -0.10050201416015625
+  - -0.1050267219543457
+  - -0.1065678596496582
+  - -0.11495351791381836
+  - -3.858088493347168
+  - -0.1126108169555664
+  - -0.10606670379638672
+  - -0.10344743728637695
+  - -0.10236930847167969
+  - -0.10737776756286621
+  - -0.10521817207336426
+  - -0.09904193878173828
+  - -0.10498046875
+  - -0.11083269119262695
+  - -0.10438346862792969
+  - -0.10579538345336914
+  - -0.12896829843521118
+  - -0.10840749740600586
+  - -0.1039423942565918
+  - -0.05269855260848999
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Sum')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'True'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Avg')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Likes'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'NoneAggOp')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'name'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (False,))
+  - ('sql_groupby', (True, True))
+  - ('col_unit*', 1)
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'student_id'
+  - 'False'
+  - '<EOS>'
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'Count')
+  - ('agg_type', 'Count')
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Highschooler'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Friend'

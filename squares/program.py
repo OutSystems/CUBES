@@ -59,13 +59,16 @@ class LineInterpreter(Interpreter):
 
     def eval(self, prog: Program, inputs: List[Any]) -> Any:
         self.program = ''
-        vars = []
-        for line in prog:
-            method_name = self._eval_method_name(line.production.name)
-            method = getattr(self, method_name)
-            new_var = method(tuple(self.transform_arg(arg, inputs, vars) for arg in line.arguments), self.filled_program(prog, line))
-            vars.append(new_var)
-        return vars[-1]
+        if isinstance(prog, List):
+            vars = []
+            for li, line in enumerate(prog):
+                method_name = self._eval_method_name(line.production.name)
+                method = getattr(self, method_name)
+                new_var = method(tuple(self.transform_arg(arg, inputs, vars) for arg in line.arguments), self.filled_program(prog, line), li)
+                vars.append(new_var)
+            return vars[-1]
+        else:
+            return prog
 
     def transform_arg(self, arg, inputs, vars):
         if isinstance(arg, ProgramInput):

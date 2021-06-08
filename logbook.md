@@ -459,3 +459,48 @@ Misc changes
 
 #### c50
 Disable condition subsumption
+
+
+#### c55
+Added type info do spider instances
+Max and min can now use other generated columns
+
+
+#### c56
+Flag: disable max min gen cols
+
+#### c57
+Added cache
+
+#### c58
+Disabled cache
+Fixed a few types inference
+
+## db2cvs
+
+### 6
+Added extra info (join cols and group cols)
+
+### 7
+Float comparison
+
+### 8
+New score algorithm
+
+### 9
+Score algorithm bugfix
+
+### 10
+Data update
+
+### 11
+Majority added (75%) and small beam code refactoring
+
+### 12
+Better memory management
+
+## 15
+Misc CUBES changes from the other project
+
+## 16
+Instance files update from Pedro

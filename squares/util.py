@@ -1,9 +1,10 @@
 import argparse
+import itertools
 import pickle
 import re
 import time
 from argparse import _StoreAction
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from enum import Enum
 from itertools import permutations, combinations, tee, chain
 from logging import getLogger
@@ -13,6 +14,7 @@ from typing import List, Any, Iterable
 
 import yaml
 import z3
+from ordered_set import OrderedSet
 
 from .config import Config
 from .tyrell.logger import setup_logger
@@ -123,6 +125,14 @@ def parse_size(size):
     return int(float(number) * units[unit])
 
 
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
 class CubesHelpFormatter(argparse.HelpFormatter):
     """Help message formatter which adds default values to argument help.
 
@@ -154,6 +164,10 @@ def create_argparser(all_inputs=False):
     g.add_argument('--no-r', action='store_true', help="don't output R program")
     g.add_argument('--append', action='store_true', help='store the solution in the specification file')
     g.add_argument('--top', type=int, default=1, help='number of programs that should be returned')
+    g.add_argument('--under', type=int, default=None, help='enumerate all programs found in under x seconds')
+    g.add_argument('--no-beam-info', dest='beam_info', action='store_false', help='disable beam info usage')
+    g.add_argument('--beam-threshold', type=float, default=0.9, help='minimum percentage of beams that must agree for it to be considered a majority')
+    g.add_argument('--beam-name', type=str, help='beam name')
 
     g = parser.add_argument_group('Program space arguments')
     g.add_argument('--disable', nargs='+', default=[], help='disable DSL components')
@@ -162,15 +176,17 @@ def create_argparser(all_inputs=False):
     g.add_argument('--max-cols-combo', type=int, default=2, help='maximum size of column combinations')
     g.add_argument('--max-join-combo', type=int, default=2, help='maximum size of join column combinations')
 
+    g.add_argument('--no-max-min-use-gen-cols', dest='max_min_use_gen_cols', action='store_false', help='allow max and min functions to use results from other generated columns')
+
     g.add_argument('--max-lines', type=int, default=7, help='maximum program size')
-    g.add_argument('--min-lines', type=int, default=1, help='minimum program size')
+    g.add_argument('--min-lines', type=int, default=0, help='minimum program size')
 
     g = parser.add_argument_group('Synthesizer arguments')
     g.add_argument('--no-fd', dest='qffd', action='store_false', help='use this flag to disable QF_FD theory')
     g.add_argument('--no-bitenum', dest='bitenum', action='store_false', help='use bitvector restrictions')
     g.add_argument('--subsume-conditions', dest='subsume_conditions', action='store_true', help='subsume conditions')
     g.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false',
-                        help='disable transitive condition blocking')
+                   help='disable transitive condition blocking')
     g.add_argument('--no-cache', dest='cache_operations', action='store_false',
                    help='increased memory usage, but possibly faster results')
 
@@ -207,7 +223,7 @@ def parse_specification(filename):
         logger.warning('"const" field is deprecated. Please use "constants"')
         spec['constants'] = spec['const']
 
-    for field in ['constants', 'functions', 'columns', 'filters']:
+    for field in ['constants', 'functions', 'columns', 'filters', 'join_columns', 'groupby_columns']:
         if field not in spec:
             spec[field] = None
 
@@ -258,6 +274,19 @@ def count(iter: Iterable) -> int:
         return sum(1 for _ in iter)
 
 
+def all_equal(iterable):
+    g = itertools.groupby(iterable)
+    return next(g, True) and not next(g, False)
+
+
+def at_least(iterable, percentage=0.75):
+    c = Counter(map(lambda x: frozenset(x) if isinstance(x, OrderedSet) else x, iterable))
+    for key, count in c.items():
+        if count >= len(iterable) * percentage:
+            return True, key
+    return False, None
+
+
 def pipe_write(pipe: Connection, ret: Any):
     data = pickle.dumps(ret, protocol=-1)
     size = len(data)
@@ -281,7 +310,7 @@ def pipe_read(pipe: Connection) -> Any:
 
 
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
@@ -300,6 +329,30 @@ def flatten(list_of_lists):
     return chain.from_iterable(list_of_lists)
 
 
+def summing_dict(key_values):
+    result = dict()
+    for key, value in key_values:
+        if key not in result:
+            result[key] = value
+        else:
+            result[key] += value
+    return result
+
+
+def sum_dicts(a, b):
+    if a is None:
+        return b
+    if len(a) < len(b):
+        a, b = b, a
+    result = a
+    for key, value in b.items():
+        if key not in result:
+            result[key] = value
+        else:
+            result[key] += value
+    return result
+
+
 class Message(Enum):
     INIT = 1
     SOLVE = 2
@@ -308,3 +361,4 @@ class Message(Enum):
     SOLUTION = 5
     DONE = 6
     RESUME_SOLVE = 7
+    NO_SOLUTION = 8

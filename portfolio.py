@@ -12,6 +12,7 @@ import signal
 from squares import squares_enumerator, results, util
 from squares.config import Config
 from squares.dsl.specification import Specification
+from squares.exceptions import SquaresException
 from squares.util import create_argparser, parse_specification
 
 logger = getLogger('squares')
@@ -76,7 +77,8 @@ def main():
                          max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
                          subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
                          use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
-                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top)
+                         z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top,
+                         use_beam_info=args.beam_info, beam_threshold=args.beam_threshold, max_min_gen_cols=args.max_min_use_gen_cols)
     util.store_config(base_config)
 
     specification = Specification(spec)
@@ -131,4 +133,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except SquaresException as e:
+        logger.error(e.args[0])
+        results.print_results()
+        exit(e.exit_status)

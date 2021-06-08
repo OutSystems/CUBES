@@ -1,0 +1,866 @@
+db: tests-examples/db2csv/world_1/tables/world_1.sqlite
+inputs:
+ - tests-examples/db2csv/world_1/tables/country.csv
+output: tests-examples/db2csv/world_1/tables/0025_dev.csv
+raw_question: What is the total surface area of the continents Asia and Europe? 
+question_index: 726 
+constants:
+ - Europe
+ - Asia
+functions:
+ - sum
+columns:
+ - surfacearea
+ - continent
+filters:
+ - '='
+comment: |-
+  SELECT sum(SurfaceArea)
+  FROM country
+  WHERE Continent = "Asia"
+    OR Continent = "Europe"
+
+sql: |-
+  SELECT sum(SurfaceArea)
+  FROM country
+  WHERE Continent = "Asia"
+    OR Continent = "Europe"
+smbop_beam_join_columns:
+- []
+- []
+- []
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+smbop_beam_constants:
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+smbop_beam_functions:
+- - sum
+- - sum
+- - sum
+- - sum
+smbop_beam_columns:
+- - surfacearea
+  - continent
+- - surfacearea
+  - region
+  - continent
+- - surfacearea
+  - region
+  - continent
+- - surfacearea
+  - region
+  - continent
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' OR country.continent = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' OR country.region = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' AND country.region = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Europe' AND country.region = 'Asia'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' OR country.continent = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' OR country.region = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' AND country.region = 'Europe'
+  - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Europe' AND country.region = 'Asia'
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- - code
+  - countrycode
+- - code
+  - countrycode
+- []
+- []
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+ratsql_beam_constants:
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+- - Europe
+  - Asia
+ratsql_beam_functions:
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+ratsql_beam_columns:
+- - surfacearea
+  - continent
+- - surfacearea
+  - region
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+- - surfacearea
+  - continent
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - 'like'
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Region = 'terminal'
+  - SELECT Sum(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'terminal'
+  - SELECT DISTINCT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal' LIMIT 1
+  - SELECT Sum(country.SurfaceArea) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.Continent = 'terminal'
+  - SELECT Sum(country.SurfaceArea) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Continent = 'terminal'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent LIKE 'terminal'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal' AND country.Continent = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
+  - 
+  - SELECT Sum(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
+  - SELECT DISTINCT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia' LIMIT 1
+  - SELECT Sum(country.SurfaceArea) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.Continent = 'Asia'
+  - SELECT Sum(country.SurfaceArea) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Continent = 'Asia'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent LIKE 'Asia'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia' AND country.Continent = 'Europe'
+ratsql_beam_score_history:
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -0.36251068115234375
+  - -0.10214614868164062
+  - -0.10104656219482422
+  - -0.10481452941894531
+  - -0.10473871231079102
+  - -0.1048283576965332
+  - -0.2934659719467163
+  - -0.11184144020080566
+  - -0.10569095611572266
+  - -0.10464191436767578
+  - -0.10016393661499023
+  - -0.10343647003173828
+  - -0.10760354995727539
+  - -0.10395574569702148
+  - -0.7582063674926758
+  - -0.10658836364746094
+  - -0.10931730270385742
+  - -0.10727930068969727
+  - -0.10338830947875977
+  - -0.07109692692756653
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -0.36251068115234375
+  - -0.10214614868164062
+  - -0.10104656219482422
+  - -0.10481452941894531
+  - -0.10473871231079102
+  - -0.1048283576965332
+  - -2.154651165008545
+  - -0.11264657974243164
+  - -0.10540437698364258
+  - -0.10408735275268555
+  - -0.09975337982177734
+  - -0.10367584228515625
+  - -0.10757756233215332
+  - -0.10396528244018555
+  - -1.486928939819336
+  - -0.10684871673583984
+  - -0.10982799530029297
+  - -0.10748910903930664
+  - -0.1034083366394043
+  - -0.07187404483556747
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -3.5296764373779297
+  - -0.10555100440979004
+  - -0.09226322174072266
+  - -0.33289670944213867
+  - -0.10229158401489258
+  - -0.1009969711303711
+  - -0.10485172271728516
+  - -0.10496664047241211
+  - -0.10471773147583008
+  - -0.2920554280281067
+  - -0.11179661750793457
+  - -0.1056976318359375
+  - -0.10462665557861328
+  - -0.10019683837890625
+  - -0.10342836380004883
+  - -0.10760903358459473
+  - -0.10395526885986328
+  - -0.6655030250549316
+  - -0.10652589797973633
+  - -0.10935783386230469
+  - -0.10723495483398438
+  - -0.10337686538696289
+  - -0.07092703878879547
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -3.552013874053955
+  - -0.10408639907836914
+  - -0.10142803192138672
+  - -0.10355949401855469
+  - -0.0965871810913086
+  - -0.10444927215576172
+  - -0.10604381561279297
+  - -0.10396718978881836
+  - -0.10462570190429688
+  - -0.06601337343454361
+  - -0.10821127891540527
+  - -0.10531830787658691
+  - -0.09326553344726562
+  - -0.3453211784362793
+  - -0.101898193359375
+  - -0.10106086730957031
+  - -0.10473060607910156
+  - -0.10480642318725586
+  - -0.1049032211303711
+  - -0.28580987453460693
+  - -0.1118319034576416
+  - -0.10569381713867188
+  - -0.10466432571411133
+  - -0.10014867782592773
+  - -0.10341596603393555
+  - -0.10761713981628418
+  - -0.103973388671875
+  - -0.7091808319091797
+  - -0.10654783248901367
+  - -0.10932064056396484
+  - -0.10728979110717773
+  - -0.1033930778503418
+  - -0.07102975249290466
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -0.36251068115234375
+  - -0.10214614868164062
+  - -0.10104656219482422
+  - -0.10481452941894531
+  - -0.10473871231079102
+  - -0.1048283576965332
+  - -0.2934659719467163
+  - -0.11184144020080566
+  - -0.10569095611572266
+  - -0.10464191436767578
+  - -0.10016393661499023
+  - -0.10343647003173828
+  - -3.557811737060547
+  - -0.1040797233581543
+  - -0.9030160903930664
+  - -0.10590267181396484
+  - -0.11008691787719727
+  - -0.10732460021972656
+  - -0.10337257385253906
+  - -0.0710829347372055
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -0.36251068115234375
+  - -0.10214614868164062
+  - -0.10104656219482422
+  - -0.10481452941894531
+  - -0.10473871231079102
+  - -0.1048283576965332
+  - -0.2934659719467163
+  - -0.11184144020080566
+  - -0.10569095611572266
+  - -0.10464191436767578
+  - -0.10016393661499023
+  - -0.10343647003173828
+  - -0.10760354995727539
+  - -0.10395574569702148
+  - -0.7582063674926758
+  - -0.10658836364746094
+  - -0.10931730270385742
+  - -0.10727930068969727
+  - -0.10338830947875977
+  - -3.7539234161376953
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -0.36251068115234375
+  - -0.10214614868164062
+  - -0.10104656219482422
+  - -0.10481452941894531
+  - -0.10473871231079102
+  - -0.1048283576965332
+  - -0.2934659719467163
+  - -0.11184144020080566
+  - -0.10569095611572266
+  - -0.10464191436767578
+  - -0.10016393661499023
+  - -0.10343647003173828
+  - -0.10760354995727539
+  - -0.10395574569702148
+  - -0.7582063674926758
+  - -0.10658836364746094
+  - -0.10931730270385742
+  - -0.10727930068969727
+  - -0.10338830947875977
+  - -3.8729817867279053
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -4.822178840637207
+  - -0.10484933853149414
+  - -0.1009054183959961
+  - -0.10489130020141602
+  - -0.10479497909545898
+  - -0.10472488403320312
+  - -0.3095352053642273
+  - -0.11194825172424316
+  - -0.10572409629821777
+  - -0.10173225402832031
+  - -0.10042476654052734
+  - -0.10305404663085938
+  - -0.10759449005126953
+  - -0.10416412353515625
+  - -0.15961599349975586
+  - -0.10572528839111328
+  - -0.1083221435546875
+  - -0.1054983139038086
+  - -0.10336065292358398
+  - -0.07124535739421844
+- - -0.10545825958251953
+  - -0.10558652877807617
+  - -0.10671257972717285
+  - -0.10403966903686523
+  - -0.10117769241333008
+  - -0.10269498825073242
+  - -0.1103353500366211
+  - -0.10515499114990234
+  - -0.10570526123046875
+  - -0.10427045822143555
+  - -0.10479879379272461
+  - -0.06978370994329453
+  - -0.10794734954833984
+  - -0.10542488098144531
+  - -0.09328174591064453
+  - -3.3685214519500732
+  - -0.09740877151489258
+  - -0.10724449157714844
+  - -0.10038614273071289
+  - -0.10113811492919922
+  - -0.10468721389770508
+  - -0.10423612594604492
+  - -0.10486888885498047
+  - -0.269388347864151
+  - -0.11197996139526367
+  - -0.10579633712768555
+  - -0.1053004264831543
+  - -0.10652828216552734
+  - -0.10083341598510742
+  - -0.10240316390991211
+  - -0.10553884506225586
+  - -0.1046757698059082
+  - -0.1029200553894043
+  - -0.4726960062980652
+  - -0.11096429824829102
+  - -0.10576176643371582
+  - -0.10477113723754883
+  - -0.10130023956298828
+  - -0.10268878936767578
+  - -0.10836219787597656
+  - -0.10444307327270508
+  - -0.09672689437866211
+  - -0.1041417121887207
+  - -0.10994291305541992
+  - -0.10465049743652344
+  - -0.10378599166870117
+  - -0.07176364958286285
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Region'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'countrylanguage'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'city'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Like')
+  - ('Like', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Sum')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'SurfaceArea'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'And')
+  - ('And', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Continent'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'country'

@@ -1,0 +1,706 @@
+db: tests-examples/db2csv/flight_2/tables/flight_2.sqlite
+inputs:
+ - tests-examples/db2csv/flight_2/tables/airports.csv
+ - tests-examples/db2csv/flight_2/tables/flights.csv
+output: tests-examples/db2csv/flight_2/tables/0029_dev.csv
+raw_question: How many flights depart from City Aberdeen? 
+question_index: 207 
+constants:
+ - Aberdeen
+join_columns:
+ - sourceairport
+ - airportcode
+functions:
+ - count
+columns:
+ - city
+filters:
+ - '='
+comment: |-
+  SELECT count(*)
+  FROM FLIGHTS AS T1
+  JOIN AIRPORTS AS T2 ON T1.SourceAirport = T2.AirportCode
+  WHERE T2.City = "Aberdeen"
+
+sql: |-
+  SELECT count(*)
+  FROM FLIGHTS AS T1
+  JOIN AIRPORTS AS T2 ON T1.SourceAirport = T2.AirportCode
+  WHERE T2.City = "Aberdeen"
+smbop_beam_join_columns:
+- - sourceairport
+  - airportcode
+- - destairport
+  - airportcode
+- - sourceairport
+  - airportcode
+- - destairport
+  - airportcode
+- - sourceairport
+  - airportcode
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+smbop_beam_constants:
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+smbop_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- - city
+- - city
+- - city
+- - city
+- - city
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'City Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'City Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen' AND airports.city = 'City Aberdeen'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'City Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'City Aberdeen'
+  - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen' AND airports.city = 'City Aberdeen'
+ratsql_beam_join_columns:
+- - sourceairport
+  - airportcode
+- []
+- []
+- - sourceairport
+  - airportcode
+- - sourceairport
+  - airportcode
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+- - tests-examples/db2csv/flight_2/tables/airports.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
+ratsql_beam_constants:
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+- - Aberdeen
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- - city
+- - city
+- - city
+- - city
+- - city
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'terminal'
+  - SELECT Count(*) FROM airlines JOIN airports JOIN flights WHERE airports.City = 'terminal'
+  - SELECT Count(*) FROM airlines JOIN airports WHERE airports.City = 'terminal'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE DISTINCT airports.City = 'terminal'
+  - SELECT Count(DISTINCT *) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'terminal'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'terminal' LIMIT 1
+  - SELECT DISTINCT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
+  - SELECT Count(*) FROM airlines JOIN airports JOIN flights WHERE airports.City = 'Aberdeen'
+  - SELECT Count(*) FROM airlines JOIN airports WHERE airports.City = 'Aberdeen'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE DISTINCT airports.City = 'Aberdeen'
+  - SELECT Count(DISTINCT *) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' LIMIT 1
+  - SELECT DISTINCT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
+ratsql_beam_score_history:
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -0.11001229286193848
+  - -0.10515666007995605
+  - -0.09978866577148438
+  - -0.10674905776977539
+  - -0.10089588165283203
+  - -0.10628271102905273
+  - -0.10422611236572266
+  - -0.10446405410766602
+  - -0.10595226287841797
+  - -0.07559210807085037
+  - -0.11232471466064453
+  - -0.10598301887512207
+  - -0.1051034927368164
+  - -0.10063695907592773
+  - -0.10805654525756836
+  - -0.10773873329162598
+  - -0.10487914085388184
+  - -0.09815168380737305
+  - -0.10384941101074219
+  - -0.1155095100402832
+  - -0.10498666763305664
+  - -0.10465574264526367
+  - -0.684373140335083
+  - -0.10787677764892578
+  - -0.1048283576965332
+  - -0.03779097646474838
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -0.11001229286193848
+  - -0.10515666007995605
+  - -0.09978866577148438
+  - -0.10674905776977539
+  - -0.10089588165283203
+  - -0.10628271102905273
+  - -0.10422611236572266
+  - -0.10446405410766602
+  - -0.10595226287841797
+  - -0.07559210807085037
+  - -0.11232471466064453
+  - -0.10598301887512207
+  - -0.1051034927368164
+  - -0.10063695907592773
+  - -0.10805654525756836
+  - -0.10773873329162598
+  - -0.10487914085388184
+  - -0.09815168380737305
+  - -0.10384941101074219
+  - -0.1155095100402832
+  - -0.10498666763305664
+  - -0.10465574264526367
+  - -2.3674824237823486
+  - -0.10519742965698242
+  - -0.10400152206420898
+  - -0.6041565537452698
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -0.11001229286193848
+  - -0.10515666007995605
+  - -0.09978866577148438
+  - -0.10674905776977539
+  - -0.10089588165283203
+  - -0.10628271102905273
+  - -0.10422611236572266
+  - -0.10446405410766602
+  - -0.10595226287841797
+  - -0.07559210807085037
+  - -0.11232471466064453
+  - -0.10598301887512207
+  - -0.1051034927368164
+  - -0.10063695907592773
+  - -0.10805654525756836
+  - -0.10773873329162598
+  - -0.10487914085388184
+  - -0.09815168380737305
+  - -0.10384941101074219
+  - -0.1155095100402832
+  - -0.10498666763305664
+  - -0.10465574264526367
+  - -2.3674824237823486
+  - -0.10519742965698242
+  - -0.10400152206420898
+  - -1.0686678886413574
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -0.11001229286193848
+  - -0.10515666007995605
+  - -0.09978866577148438
+  - -0.10674905776977539
+  - -0.10089588165283203
+  - -0.10628271102905273
+  - -0.10422611236572266
+  - -0.10446405410766602
+  - -0.10595226287841797
+  - -0.07559210807085037
+  - -3.43996524810791
+  - -0.10520386695861816
+  - -0.10435247421264648
+  - -0.10078763961791992
+  - -0.10943889617919922
+  - -0.10773396492004395
+  - -0.10488343238830566
+  - -0.09790802001953125
+  - -0.10377645492553711
+  - -0.11630058288574219
+  - -0.10501861572265625
+  - -0.10456180572509766
+  - -0.6866435408592224
+  - -0.10782527923583984
+  - -0.10480451583862305
+  - -0.037935372442007065
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -3.4881160259246826
+  - -0.10544466972351074
+  - -0.10163593292236328
+  - -0.10708475112915039
+  - -0.10099124908447266
+  - -0.10619592666625977
+  - -0.10418176651000977
+  - -0.10448026657104492
+  - -0.10609245300292969
+  - -0.07584994286298752
+  - -0.11228632926940918
+  - -0.10597372055053711
+  - -0.10507822036743164
+  - -0.10064268112182617
+  - -0.10807609558105469
+  - -0.1077413558959961
+  - -0.10487961769104004
+  - -0.09812498092651367
+  - -0.1038665771484375
+  - -0.1150045394897461
+  - -0.10497570037841797
+  - -0.10470247268676758
+  - -0.6842675805091858
+  - -0.10790872573852539
+  - -0.10481595993041992
+  - -0.03776847943663597
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -0.10652875900268555
+  - -0.10376119613647461
+  - -0.10133123397827148
+  - -0.10709476470947266
+  - -0.1132349967956543
+  - -0.1019129753112793
+  - -0.1057596206665039
+  - -0.10450363159179688
+  - -0.10501956939697266
+  - -0.10038386285305023
+  - -0.11001229286193848
+  - -0.10515666007995605
+  - -0.09978866577148438
+  - -0.10674905776977539
+  - -0.10089588165283203
+  - -0.10628271102905273
+  - -0.10422611236572266
+  - -0.10446405410766602
+  - -0.10595226287841797
+  - -0.07559210807085037
+  - -0.11232471466064453
+  - -0.10598301887512207
+  - -0.1051034927368164
+  - -0.10063695907592773
+  - -0.10805654525756836
+  - -3.5498392581939697
+  - -0.10502052307128906
+  - -0.09764719009399414
+  - -0.10399913787841797
+  - -0.11519098281860352
+  - -0.10496807098388672
+  - -0.10475397109985352
+  - -0.6878992915153503
+  - -0.10801124572753906
+  - -0.10476160049438477
+  - -0.03729439526796341
+- - -0.10665225982666016
+  - -0.10484075546264648
+  - -3.5661089420318604
+  - -0.10373878479003906
+  - -0.10106992721557617
+  - -0.10794353485107422
+  - -0.11399555206298828
+  - -0.10197114944458008
+  - -0.10577630996704102
+  - -0.10446739196777344
+  - -0.10520601272583008
+  - -0.10029015690088272
+  - -0.11004877090454102
+  - -0.10512924194335938
+  - -0.09897708892822266
+  - -0.10667181015014648
+  - -0.10090112686157227
+  - -0.10627126693725586
+  - -0.10429525375366211
+  - -0.10448646545410156
+  - -0.10601186752319336
+  - -0.07519423216581345
+  - -0.1122748851776123
+  - -0.10597372055053711
+  - -0.10515832901000977
+  - -0.10060453414916992
+  - -0.10791158676147461
+  - -0.1077280044555664
+  - -0.10487890243530273
+  - -0.09815740585327148
+  - -0.10386419296264648
+  - -0.11541032791137695
+  - -0.10498380661010742
+  - -0.10465097427368164
+  - -0.6844241619110107
+  - -0.10788249969482422
+  - -0.10482025146484375
+  - -0.037699028849601746
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airlines'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'City'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 2)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'airports'
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'flights'

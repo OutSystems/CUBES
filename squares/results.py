@@ -6,9 +6,9 @@ import time
 from enum import IntEnum
 from logging import getLogger
 
+import psutil
 import sqlparse
 from rpy2 import robjects
-
 
 from . import util
 from .dsl import interpreter
@@ -44,11 +44,23 @@ init_time = 0
 block_time = 0
 empty_output = 0
 redundant_lines = 0
+cache_miss = 0
+cache_hit = 0
 
 
 def handle_sigint(signal, stackframe):
     print()
     print_results()
+    exit(exit_code)
+
+
+def handle_timeout(signal, stackframe):
+    print()
+    print('Timeout reached')
+    current_process = psutil.Process()
+    children = current_process.children(recursive=True)
+    for child in children:
+        child.kill()
     exit(exit_code)
 
 
@@ -69,6 +81,8 @@ def print_results():
     logger.info('\t\tFailed: %d (approx)', n_fails)
     logger.info('\t\tEmpty outputs: %d (%.1f%%) (approx)', empty_output, empty_output / n_attempts * 100 if n_attempts else 0)
     logger.info('\t\tRedundant lines: %d (approx)', redundant_lines)
+    logger.info('\t\tCache hits: %d (approx)', cache_hit)
+    logger.info('\t\tCache misses: %d (approx)', cache_miss)
     logger.info('\tBlocked programs: %d (%f / attempted avg.) (approx)', n_blocks, n_blocks / n_attempts if n_attempts else 0)
     logger.info('\tTotal time spent in enumerator init: %f (approx)', init_time)
     logger.info('\tTotal time spent in enumerator: %f (approx)', enum_time)
@@ -84,7 +98,7 @@ def print_results():
         old_cache = util.get_config().cache_ops
         util.get_config().cache_ops = True
         interp = interpreter.SquaresInterpreter(specification, True)
-        evaluation = interp.eval(solution, specification.tables)
+        evaluation = interp.eval(solution, specification.input_table_names)
         assert interp.equals(evaluation, 'expected_output')[0]  # this call makes it so that the select() appears in the output
         util.get_config().cache_ops = old_cache
 
@@ -92,8 +106,9 @@ def print_results():
             program = specification.r_init + interp.program
             robjects.r(program)
             sql_query = robjects.r(f'sink(); sql_render(out, bare_identifier_ok=T)')
-        except:
+        except Exception as e:
             logger.error('Error while trying to convert R code to SQL.')
+            logger.error("%s", str(e))
             sql_query = None
             exit_code = ExitCode.SQL_FAILED if exit_code != ExitCode.NON_OPTIMAL else ExitCode.SQL_FAILED_NON_OPTIMAL
 
@@ -117,8 +132,8 @@ def print_results():
             print("No solution found")
 
 
-def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t, redundant):
-    global n_attempts, n_rejects, n_fails, n_blocks, empty_output, enum_time, analysis_time, init_time, block_time, redundant_lines
+def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, init_t, block_t, redundant, hit, miss):
+    global n_attempts, n_rejects, n_fails, n_blocks, empty_output, enum_time, analysis_time, init_time, block_time, redundant_lines, cache_hit, cache_miss
     n_attempts += attempts
     n_rejects += rejects
     n_fails += fails
@@ -129,6 +144,8 @@ def update_stats(attempts, rejects, fails, blocks, emptys, enum_t, analysis_t, i
     init_time += init_t
     block_time += block_t
     redundant_lines += redundant
+    cache_hit += hit
+    cache_miss += miss
 
 
 def increment_cubes():

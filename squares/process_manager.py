@@ -106,7 +106,7 @@ class ProcessSetManager:
             self.current_cube_generator[pipe].block(core)
             results.block_time += time.time() - start
             if results.blocked_cubes - old > 0:
-                logger.info('Blocked %d cubes in %s due to %s', results.blocked_cubes - old, self.current_cube_generator[pipe],
+                logger.debug('Blocked %d cubes in %s due to %s', results.blocked_cubes - old, self.current_cube_generator[pipe],
                             self.current_cube[pipe])
 
         if util.get_config().advance_processes and \

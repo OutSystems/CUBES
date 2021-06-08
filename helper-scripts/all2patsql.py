@@ -1,68 +1,30 @@
 #!/usr/bin/python3
 import argparse
 import csv
-
 import glob
-
 import os
-import re
 
 import pandas
 import yaml
 
 from squares import types
+from squares.dsl.table import Table
 
 
-def read_table(path: str):
-    df = pandas.read_csv(path)
-    df = df.convert_dtypes(convert_integer=False, convert_boolean=False)
-
-    replacements = {}
-
-    for col in df.columns:
-        new_col, n = re.subn('[^a-zA-Z0-9._]', '.', col)
-        new_col, n2 = re.subn('^([0-9])', r'col_\1', new_col)
-        if n + n2:
-            replacements[col] = new_col
-
-    df = df.rename(columns=replacements)
-
-    for col in df:  # try to coerce columns to datetime
-        if types.get_type(df[col].dtype) == types.INT:
-            for elem in df[col]:
-                if elem >= 2 ** 32 - 1:
-                    df[col] = df[col].astype(str)
-                    break
-
-        if all(types.is_time(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_time(elem) for elem in df[col]):
-            try:
-                df[col] = pandas.to_timedelta(df[col], errors='coerce')
-            except Exception:
-                pass
-
-        elif all(types.is_date(elem) or pandas.isna(elem) for elem in df[col]) and any(types.is_date(elem) for elem in df[col]):
-            try:
-                df[col] = pandas.to_datetime(df[col], errors='coerce')
-            except Exception:
-                pass
-
-    return df
-
-
-def map_type(dtype) -> str:
-    if pandas.api.types.is_integer_dtype(dtype):
+def map_type(t) -> str:
+    if t == types.INT:
         return 'Int'
 
-    elif pandas.api.types.is_float_dtype(dtype):
+    elif t == types.FLOAT:
         return 'Dbl'
 
-    elif pandas.api.types.is_bool_dtype(dtype):
+    elif t == types.STRING:
         return 'Str'
 
-    elif pandas.api.types.is_datetime64_any_dtype(dtype):
+    elif types == types.DATETIME:
         return 'Date'
 
-    elif pandas.api.types.is_timedelta64_dtype(dtype):
+    elif types == types.TIME:
         return 'Date'
 
     else:
@@ -74,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests/kaggle/*.yaml', recursive=True):
+    for file in glob.glob('tests/**/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
@@ -88,8 +50,8 @@ if __name__ == '__main__':
 
             for input_name in spec['inputs']:
                 result += '#input\n\n'
-                df = read_table(input_name)
-                result += ','.join(map(lambda t: f'{t[0]}:{map_type(t[1])}', zip(list(df.columns), list(df.dtypes)))) + '\n'
+                table = Table(input_name)
+                result += ','.join(map(lambda t: f'{t}:{map_type(table.col_types[t])}', table.col_names)) + '\n'
                 with open(input_name) as f:
                     reader = csv.reader(f)
                     next(reader)  # skip header
@@ -99,8 +61,14 @@ if __name__ == '__main__':
                 result += '\n'
 
             result += '#output\n\n'
+            table = Table(spec['output'])
+            result += ','.join(map(lambda t: f'{t}:{map_type(table.col_types[t])}', table.col_names)) + '\n'
             with open(spec['output']) as f:
-                result += f.read()
+                reader = csv.reader(f)
+                next(reader)  # skip header
+                for line in reader:
+                    line2 = ','.join(map(lambda x: x if x != '' else 'NULL', map(str, line))).replace('\n', '\\n')
+                    result += line2 + '\n'
             result += '\n'
 
             result += '#constraint\n{\n'
@@ -134,3 +102,4 @@ if __name__ == '__main__':
 
         except Exception as e:
             print(f'Failed to convert {file}!')
+            print(e)

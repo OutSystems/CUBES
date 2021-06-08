@@ -13,6 +13,7 @@ from .config import Config
 from .decider import LinesDecider
 from .tyrell.decider import Example
 from .tyrell.enumerator.bitenum import BitEnumerator
+from .tyrell.enumerator.input_enumerator import InputEnumerator
 from .tyrell.synthesizer import Synthesizer
 
 logger = logging.getLogger('squares')
@@ -25,7 +26,9 @@ suppressMessages(library(stringr))
 suppressMessages(library(readr))
 suppressMessages(library(lubridate))
 suppressMessages(library(dplyr))
-suppressMessages(library(dbplyr))''')
+suppressMessages(library(dbplyr))
+suppressMessages(library(purrr))''')
+
 
 def do_not_print(msg):
     pass
@@ -55,32 +58,39 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
     spec = specification.generate_dsl()
 
     decider = LinesDecider(interpreter=SquaresInterpreter(specification),
-                           examples=[Example(input=specification.tables, output='expected_output')],
+                           examples=[Example(input=specification.input_table_names, output='expected_output')],
                            )
 
     logger.info('Building synthesizer...')
     loc = max(specification.min_loc, conf.minimum_loc)
     while loc <= util.get_config().maximum_loc:
         start = time.time()
-        enumerator = BitEnumerator(spec, specification, loc=loc)
+        enumerator = BitEnumerator(spec, specification, loc=loc) if loc > 0 else InputEnumerator(spec, specification)
         results.init_time += time.time() - start
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
         found = False
-        print(util.get_config().top_programs)
-        for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
-            if prog:
-                logger.info(f'Solution found: {prog}')
-                queue.put((util.Message.SOLUTION, id, prog, loc, True))
-                found = True
+        if util.get_config().enum_until is None:
+            for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
+                if prog:
+                    logger.info(f'Solution found: {prog}')
+                    queue.put((util.Message.SOLUTION, id, prog, loc, True))
+                    found = True
+        else:
+            for prog, attempts in synthesizer.multi_synth(enum_all=True):
+                if prog:
+                    logger.info(f'Solution found: {prog}')
+                    queue.put((util.Message.SOLUTION, id, prog, loc, True))
+                    found = True
 
         if found:
-            queue.put((util.Message.DONE, None, None, None, None))
+            queue.put((util.Message.DONE, loc, None, None, None))
             return
         else:
             logger.info('Increasing the number of lines of code to %d.', loc + 1)
             loc = loc + 1
 
     results.exceeded_max_loc = True
+    queue.put((util.Message.NO_SOLUTION, loc, None, None, None))
     logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, util.get_config().maximum_loc)

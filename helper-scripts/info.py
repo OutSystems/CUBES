@@ -60,7 +60,7 @@ with open('instances.csv', 'w') as output:
             specification = Specification(spec_in)
             # tyrell_spec = specification.generate_dsl()
             cols = len(specification.columns)
-            tables = len(specification.tables)
+            tables = len(specification.input_tables)
             total_rows = sum(map(len, specification.data_frames.values()))
             total_cells = sum(map(lambda df: len(df.columns) * len(df), specification.data_frames.values()))
             length = None

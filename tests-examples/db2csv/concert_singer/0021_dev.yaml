@@ -1,0 +1,1099 @@
+db: tests-examples/db2csv/concert_singer/tables/concert_singer.sqlite
+inputs:
+ - tests-examples/db2csv/concert_singer/tables/concert.csv
+output: tests-examples/db2csv/concert_singer/tables/0021_dev.csv
+raw_question: How many concerts are there in year 2014 or 2015? 
+question_index: 20 
+constants:
+ - 2014
+ - 2015
+functions:
+ - count
+columns:
+ - year
+filters:
+ - '='
+comment: |-
+  SELECT count(*)
+  FROM concert
+  WHERE YEAR = 2014
+    OR YEAR = 2015
+
+sql: |-
+  SELECT count(*)
+  FROM concert
+  WHERE YEAR = 2014
+    OR YEAR = 2015
+smbop_beam_join_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+smbop_beam_constants:
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+smbop_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+smbop_beam_columns:
+- - year
+- - year
+- - year
+- - year
+- - year
+- - year
+smbop_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - ' between '
+- - ' between '
+- - ' between '
+- - ' between '
+- - '='
+smbop_beam_inferred_code:
+  - SELECT COUNT( * ) FROM concert WHERE concert.year = 2014 OR concert.year = 2015
+  - SELECT COUNT( * ) FROM concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM concert, singer WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer_in_concert, concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer, concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer, concert WHERE concert.year = concert.year OR concert.year = 2015
+smbop_beam_inferred_code_w_terminals:
+  - SELECT COUNT( * ) FROM concert WHERE concert.year = 2014 OR concert.year = 2015
+  - SELECT COUNT( * ) FROM concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM concert, singer WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer_in_concert, concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer, concert WHERE concert.year BETWEEN 2014 and 2015
+  - SELECT COUNT( * ) FROM singer, concert WHERE concert.year = concert.year OR concert.year = 2015
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- - concert_id
+- - singer_id
+  - concert_id
+- - stadium_id
+- []
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/concert.csv
+ratsql_beam_constants:
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+- - 2014
+  - 2015
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- - year
+- - year
+- - year
+- - year
+- - year
+- - year
+- - year
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '>='
+  - '>'
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Count(*) FROM concert WHERE concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM concert WHERE concert.Year = 'terminal'
+  - SELECT Count(*) FROM concert WHERE concert.Year >= 'terminal'
+  - SELECT Count(*) FROM concert JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID WHERE concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM singer JOIN concert JOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID AND singer_in_concert.concert_ID = concert.concert_ID WHERE concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM concert WHERE DISTINCT concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM concert WHERE concert.Year = 'terminal' OR DISTINCT concert.Year = 'terminal'
+  - SELECT Count(DISTINCT *) FROM concert WHERE concert.Year = 'terminal' OR concert.Year = 'terminal'
+  - SELECT Count(*) FROM concert WHERE concert.Year = 'terminal' OR concert.Year = 'terminal' LIMIT 1
+ratsql_beam_inferred_code_w_terminals:
+  - SELECT Count(*) FROM concert WHERE concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM concert WHERE concert.Year = 2015
+  - SELECT Count(*) FROM concert WHERE concert.Year >= 2015
+  - SELECT Count(*) FROM concert JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID WHERE concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM singer JOIN concert JOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID AND singer_in_concert.concert_ID = concert.concert_ID WHERE concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM concert WHERE DISTINCT concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM concert WHERE concert.Year = 2015 OR DISTINCT concert.Year = 2014
+  - SELECT Count(DISTINCT *) FROM concert WHERE concert.Year = 2015 OR concert.Year = 2014
+  - SELECT Count(*) FROM concert WHERE concert.Year = 2015 OR concert.Year = 2014 LIMIT 1
+ratsql_beam_score_history:
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -0.11194586753845215
+  - -0.10584282875061035
+  - -0.10528945922851562
+  - -0.10098791122436523
+  - -0.10262584686279297
+  - -0.10823464393615723
+  - -0.10465240478515625
+  - -0.09707117080688477
+  - -0.10418272018432617
+  - -0.10988903045654297
+  - -0.10509061813354492
+  - -0.1041407585144043
+  - -0.12476219981908798
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -2.917367458343506
+  - -0.10920286178588867
+  - -0.10153961181640625
+  - -0.10419511795043945
+  - -0.10460615158081055
+  - -0.10485601425170898
+  - -0.05502244830131531
+  - -0.1119227409362793
+  - -0.10536694526672363
+  - -0.1064157485961914
+  - -0.10124874114990234
+  - -0.10201168060302734
+  - -0.10814189910888672
+  - -0.1045522689819336
+  - -0.19408702850341797
+  - -0.1058812141418457
+  - -0.11042499542236328
+  - -0.10569620132446289
+  - -0.10404205322265625
+  - -0.11784841120243073
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -3.693309783935547
+  - -0.06824398040771484
+  - -0.10119009017944336
+  - -0.10579252243041992
+  - -0.10540771484375
+  - -0.10491180419921875
+  - -0.31987446546554565
+  - -0.11209535598754883
+  - -0.1054682731628418
+  - -0.10543203353881836
+  - -0.10692405700683594
+  - -0.10254144668579102
+  - -0.10812258720397949
+  - -0.10455131530761719
+  - -0.10021209716796875
+  - -0.10438680648803711
+  - -0.1104426383972168
+  - -0.10551118850708008
+  - -0.10381746292114258
+  - -0.12057995796203613
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -0.11194586753845215
+  - -0.10584282875061035
+  - -0.10528945922851562
+  - -0.10098791122436523
+  - -0.10262584686279297
+  - -0.10823464393615723
+  - -0.10465240478515625
+  - -0.09707117080688477
+  - -0.10418272018432617
+  - -0.10988903045654297
+  - -0.10509061813354492
+  - -0.1041407585144043
+  - -3.2023088932037354
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -0.11194586753845215
+  - -0.10584282875061035
+  - -0.10528945922851562
+  - -0.10098791122436523
+  - -0.10262584686279297
+  - -0.10823464393615723
+  - -0.10465240478515625
+  - -0.09707117080688477
+  - -0.10418272018432617
+  - -0.10988903045654297
+  - -0.10509061813354492
+  - -0.1041407585144043
+  - -3.2578330039978027
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -0.11194586753845215
+  - -0.10584282875061035
+  - -0.10528945922851562
+  - -0.10098791122436523
+  - -0.10262584686279297
+  - -0.10823464393615723
+  - -0.10465240478515625
+  - -0.09707117080688477
+  - -0.10418272018432617
+  - -0.10988903045654297
+  - -0.10509061813354492
+  - -0.1041407585144043
+  - -3.2661406993865967
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -3.443342685699463
+  - -0.10543942451477051
+  - -0.10590696334838867
+  - -0.10208988189697266
+  - -0.1006622314453125
+  - -0.10220575332641602
+  - -0.104766845703125
+  - -0.10422611236572266
+  - -0.10290050506591797
+  - -0.0725095346570015
+  - -0.11194252967834473
+  - -0.10582947731018066
+  - -0.10531425476074219
+  - -0.10095834732055664
+  - -0.10262060165405273
+  - -0.10823917388916016
+  - -0.10464644432067871
+  - -0.0970611572265625
+  - -0.10418272018432617
+  - -0.10986661911010742
+  - -0.10509681701660156
+  - -0.10413599014282227
+  - -0.12464875727891922
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -3.4533982276916504
+  - -0.10623598098754883
+  - -0.10483074188232422
+  - -0.10085010528564453
+  - -0.10255575180053711
+  - -0.1082305908203125
+  - -0.10467052459716797
+  - -0.09704923629760742
+  - -0.10416316986083984
+  - -0.11008024215698242
+  - -0.10505104064941406
+  - -0.10414409637451172
+  - -0.12581464648246765
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -3.466320514678955
+  - -0.10451292991638184
+  - -0.09856319427490234
+  - -0.28743839263916016
+  - -0.10698699951171875
+  - -0.09451580047607422
+  - -0.10187244415283203
+  - -0.10119104385375977
+  - -0.10378026962280273
+  - -0.10433816909790039
+  - -0.10462760925292969
+  - -0.06428004056215286
+  - -0.11214232444763184
+  - -0.10556983947753906
+  - -0.10602807998657227
+  - -0.09537220001220703
+  - -0.10064458847045898
+  - -0.10210609436035156
+  - -0.10474061965942383
+  - -0.1041879653930664
+  - -0.1030278205871582
+  - -0.07161995023488998
+  - -0.11195564270019531
+  - -0.10583901405334473
+  - -0.10528707504272461
+  - -0.1009974479675293
+  - -0.10262870788574219
+  - -0.10823369026184082
+  - -0.10465407371520996
+  - -0.097076416015625
+  - -0.10418558120727539
+  - -0.10989093780517578
+  - -0.10508918762207031
+  - -0.10414266586303711
+  - -0.12485247850418091
+- - -0.10387802124023438
+  - -0.10493803024291992
+  - -0.10587477684020996
+  - -0.10382413864135742
+  - -0.10239124298095703
+  - -0.10284709930419922
+  - -0.1134805679321289
+  - -0.10171127319335938
+  - -0.1072072982788086
+  - -0.10462093353271484
+  - -0.10518455505371094
+  - -0.10134238749742508
+  - -0.11176776885986328
+  - -0.10519719123840332
+  - -0.09734249114990234
+  - -0.26166534423828125
+  - -0.10764694213867188
+  - -0.0957183837890625
+  - -0.10134172439575195
+  - -0.1011962890625
+  - -0.10377216339111328
+  - -0.10432720184326172
+  - -0.10457706451416016
+  - -0.06636382639408112
+  - -0.11213135719299316
+  - -0.10556745529174805
+  - -0.10599756240844727
+  - -0.09519720077514648
+  - -0.10063505172729492
+  - -0.10211896896362305
+  - -0.1047525405883789
+  - -0.1041879653930664
+  - -0.10298490524291992
+  - -0.07187182456254959
+  - -0.11194586753845215
+  - -0.10584282875061035
+  - -0.10528945922851562
+  - -0.10098791122436523
+  - -0.10262584686279297
+  - -3.5433459281921387
+  - -0.10472631454467773
+  - -0.09720087051391602
+  - -0.10395288467407227
+  - -0.10982704162597656
+  - -0.10513639450073242
+  - -0.1041259765625
+  - -0.12396204471588135
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Ge')
+  - ('Ge', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'singer_in_concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'singer'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'stadium'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Or')
+  - ('Or', (True, True))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'Year'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'concert'

@@ -51,112 +51,226 @@ source('loading.R')
 source('plots.R')
 source('tables.R')
 
-sequential %>% filter(fuzzy == 'Exec. Error')
-a <- scythe %>%
-  inner_join(c50_16, by = 'name') %>%
-  select(name, status_scythe = status.x, real_scythe = real.x, status_cubes = status.y) %>%
-  filter(status_scythe == 1)
+a <- solved_not_solved(db2csv_10, db2csv_beam_10)
+a <- solved_not_solved(db2csv_beam_10, db2csv_10)
 
-determ_instances <- sequential_sem %>% select(name) %>% sample_frac(.2)
-determ_instances_split <- determ_instances %>% group_split(row_number() %% 4, .keep=F)
+all_vbs_no_beam <- vbs(cubes1 = db2csv_1,
+                       cubes2 = db2csv_2,
+                       cubes3 = db2csv_3,
+                       cubes4 = db2csv_4,
+                       cubes5 = db2csv_5,
+                       cubes6 = db2csv_6,
+                       cubes7 = db2csv_7,
+                       cubes8 = db2csv_8,
+                       cubes9 = db2csv_9,
+                       cubes10 = db2csv_10,
+                       cubes2_c20 = db2csv_2_c20,
+                       cubes3_c20 = db2csv_3_c20,
+                       cubes9_c20 = db2csv_9_c20)
 
-different_solutions(determ5)
-n_solveds(determ5)
-non_determinism_plot(determ5)
+all_vbs_beam <- vbs(beam1 = db2csv_beam_1,
+                    beam2 = db2csv_beam_2,
+                    beam3 = db2csv_beam_3,
+                    beam10 = db2csv_beam_10,
+                    beam11 = db2csv_beam_11,
+                    beam12_p51 = db2csv_beam_12_p51,
+                    beam12_p75 = db2csv_beam_12_p75,
+                    beam12_p9 = db2csv_beam_12_p9,
+                    beam12_p9_combo = db2csv_beam_12_p9_combo,
+                    beam2_c20 = db2csv_beam_2_c20,
+                    beam3_c20 = db2csv_beam_3_c20,
+                    beam12_p9_combo_c20 = db2csv_beam_12_p9_combo_c20,
+                    beam12_p9_combo_c20_nosplit = db2csv_beam_12_combo_c20,
+                    beam14_combo_c20 = db2csv_beam_14_combo_c20,
+                    beam1_no_conserv = db2csv_beam_no_conserv)
 
-scythe_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
-sequential_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
-sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% count()
-sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% sample_n(1) %>% select(name, status, fuzzy)
-sequential_3 %>% filter(solved) %>% count()
+all_vbs <- vbs(all_vbs_no_beam, all_vbs_beam)
+
+a <- all_vbs %>% filter(!solved)
+b <- all_vbs %>% filter(!solved)
+anti_join(a, b, by = 'name')
+
+a <- solved_not_solved(db2csv_beam_10, db2csv_beam_11)
+b <- solved_not_solved(db2csv_beam_11, db2csv_beam_10)
+
+scatter(ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
+invsolved(use_vbs = T, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
+invsolved(use_vbs = T, beam14_combo_c20 = db2csv_beam_14_combo_c20, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
+
+invsolved(use_vbs = F, cubes9_c20 = db2csv_9_c20, beam14_combo_c20 = db2csv_beam_14_combo_c20, beam16_combo = db2csv_beam_16_combo, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20, ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300)
+
+a <- inner_join(ratsql, db2csv_ratsql_17_combo_c20, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct')
+a <- inner_join(db2csv_ratsql_17_combo_c20, ratsql, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct') %>% group_by(fuzzy.y) %>% summarise(n = n())
+
+plot_fuzzy(ratsql = ratsql, smbop = smbop,
+           beam16_combo = db2csv_beam_16_combo,
+           ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
+           ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
+           smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
+plot_fuzzy(drop_error = T,, fill_bars = T, ratsql = ratsql, smbop = smbop,
+           beam16_combo = db2csv_beam_16_combo,
+           ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
+           ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
+           smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
+plot_fuzzy(ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300)[[1]] + facet_wrap(~ceiling(log10(solutions)))
+plot_fuzzy(drop_error = T, ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
+plot_fuzzy(ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
+plot_fuzzy(fill_bars = T, ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
+plot_fuzzy(beam14_combo_c20 = db2csv_beam_14_combo_c20)
+plot_fuzzy(fill_bars = T, beam15_combo = db2csv_beam_15_combo, beam16_combo = db2csv_beam_16_combo)
+plot_fuzzy(fill_bars = T, drop_error = T, beam12_combo_c20_nosplit = db2csv_beam_12_p9_combo_c20_nosplit)
+
+### ORIGNAL INSTANCES
+
+scatter(c55 = c55_16, c57 = c57_16)
+scatter_ram(c55 = c55_16, c57 = c57_16)
+scatter(c57 = c57_16, c57_nc = c57_16_no_cache)
+scatter_ram(c57 = c57_16, c57_nc = c57_16_no_cache)
+
+invsolved('Programs with 1 line' = c55_16, 'LRU (40 positions)' = c57_16, 'No cache' = c57_16_no_cache) + labs(title = 'Cache implementations comparison')
+
+bars(use_vbs=F, c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache)
+bars(use_vbs=F, c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache, c58 = c58_16)
+invsolved(c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache, c58 = c58_16)
 
 
-a <- squares %>% filter(status == 1) %>% select(name) %>% arrange(name)
+a <- c57_16 %>% filter(status == 1)
 
-invsolved('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'SQUARES2' = squares_2, 'CUBES-SEQ' = sequential)
-invsolved('CUBES-SEQ' = sequential, 'CUBES-SEQ-TOP5' = sequential_top5)
-invsolved('CUBES-DC16' = c50_16, 'CUBES-DC16-TOP5' = c50_16_top5)
-a <- sequential %>% inner_join(sequential_top5, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct')
+plot_fuzzy(c53 = c53_16, c55 = c55_16, c58 = c58_16)
 
+c57_16 %>% ggplot(aes(x = cache_hit_ratio, y = eval_p)) + geom_point()
+c57_16 %>% ggplot(aes(x = eval_p)) + geom_histogram()
+c57_16_no_cache %>% ggplot(aes(x = eval_p)) + geom_histogram()
+c55_16 %>% ggplot(aes(x = eval_p)) + geom_histogram()
 
-scatter('CUBES-SEQ3' = sequential_3, 'CUBES-SEQ-SEM' = sequential_sem)
+c57_16_no_cache %>% ggplot(aes(x = real, y = eval_p)) + geom_point() + scale_x_log10()
 
-plot_cells_time('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'PatSQL' = patsql_3)
-plot_cells_ram('Scythe3' = scythe_3, 'SQUARES2' = squares_2, 'CUBES-SEQ3' = sequential_3, 'PatSQL2' = patsql_3)
-scatter_real_cpu('Scythe3' = scythe_3, 'SQUARES2' = squares_2, 'CUBES-SEQ3' = sequential_3, 'PatSQL2' = patsql_3)
-scatter_equiv(x = 'real', seq = sequential_3, sem = sequential_sem)
-scatter_equiv(x = 'cpu', seq = sequential_3, sem = sequential_sem)
+c53_16 %>% summarise(init = mean(init, na.rm=T), enum = mean(enum, na.rm=T), eval = mean(eval, na.rm=T), block = mean(block, na.rm=T))
 
-plot_sql_size('\\textsc{Scythe}' = scythe_3,
-              '\\textsc{Squares}' = squares_2,
-              '\\textsc{PatSQL}' = patsql_3,
-              '\\textsc{Cubes-Seq}' = sequential_sem,
-              '\\textsc{Cubes-DC16}' = c50_16)
+a <- c58_16 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts')
 
-sequential_sem %>%
-  ggplot(aes(x = sql_size)) +
-  geom_histogram(bins=15)
+a <- c54_16 %>% filter(fuzzy == 'Incorrect')
+c54_16 %>% summarise(a = sum(real)) / 60 / 60
 
-plot_fuzzy('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
-plot_fuzzy(refactor = T, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
-plot_fuzzy(refactor = T, fill_bars = T, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql)
-plot_fuzzy('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_3)
-plot_fuzzy(fill_bars = T, 'Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_3)
+c52_16_all600 %>% ggplot(aes(x = solutions)) +
+  geom_histogram() +
+  facet_grid(~fuzzy) +
+  scale_x_log10()
+c52_16_all600 %>% ggplot(aes(x = top_i)) + geom_histogram()
+c52_16_all600 %>%
+  select(name, top_i) %>%
+  arrange(-top_i)
+c52_16_all600 %>%
+  select(name, solutions) %>%
+  arrange(-solutions)
 
-scatter(seq = sequential, seq3 = sequential_3)
-scatter(seq = sequential, sem = sequential_sem)
-
-sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
-scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
-
-sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% count()
-patsql %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / patsql %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
-scythe %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / scythe %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
-sequential_sem %>% filter(benchmark == 'textbook' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_sem %>% filter(benchmark == 'textbook' & solved& fuzzy != 'Error') %>% count()
-
-sequential_3 %>% filter(fuzzy == 'Correct') %>% count()
-scythe_3 %>% filter(fuzzy == 'Correct') %>% count()
-patsql %>% filter(fuzzy == 'Correct') %>% count()
-
-scythe %>%
-  filter(solved) %>%
-  summarise(m = mean(sql_size, na.rm = T))
-squares %>%
-  filter(solved) %>%
-  summarise(m = mean(sql_size, na.rm = T))
-sequential %>%
-  filter(solved) %>%
-  summarise(m = mean(sql_size, na.rm = T))
-
-instance_info %>% ggplot(aes(x = sql_size)) +
-  geom_histogram(bins = 15) +
-  facet_wrap(~benchmark, scales = 'free_y')
-
-scatter(seq = sequential_3, sem = sequential_sem)
-
-a <- sequential_sem %>% filter(solved & (fuzzy == 'Incorrect' | fuzzy == 'Fuzzying Incorrect')) %>% select(name) %>% mutate(name = paste0('tests/', name))
-
-a <- sequential_3 %>%
-  filter(fuzzy == 'Incorrect') %>%
-  select(name) %>% arrange(name)
-
-intent <- bitenum %>%
-  inner_join(squares, by = c('name', 'benchmark')) %>%
-  inner_join(scythe, by = c('name', 'benchmark')) %>%
-  filter(solved.x & solved.y & solved) %>%
-  group_by(benchmark) %>%
-  sample_frac(.15) %>%
-  ungroup() %>%
-  select(name) %>%
-  mutate(intent = NA)
-
-a <- determ5 %>% filter(solution_n == 10) %>% select(solutions)
-determ5 %>% filter(solution_n == 10) %>% select(name)
+stop
+# sequential %>% filter(fuzzy == 'Exec. Error')
+# a <- scythe %>%
+#   inner_join(c50_16, by = 'name') %>%
+#   select(name, status_scythe = status.x, real_scythe = real.x, status_cubes = status.y) %>%
+#   filter(status_scythe == 1)
+#
+# determ_instances <- sequential_sem %>% select(name) %>% sample_frac(.2)
+# determ_instances_split <- determ_instances %>% group_split(row_number() %% 4, .keep=F)
+#
+# different_solutions(determ5)
+# n_solveds(determ5)
+# non_determinism_plot(determ5)
+#
+# scythe_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
+# sequential_3 %>% filter(solved) %>% filter(fuzzy == 'Error') %>% count()
+# sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% count()
+# sequential_3 %>% filter(status == 0) %>% filter(fuzzy == 'Error') %>% sample_n(1) %>% select(name, status, fuzzy)
+# sequential_3 %>% filter(solved) %>% count()
+#
+#
+# a <- squares %>% filter(status == 1) %>% select(name) %>% arrange(name)
+#
+# invsolved('Scythe' = scythe, 'Scythe3' = scythe_3, 'SQUARES' = squares, 'SQUARES2' = squares_2, 'CUBES-SEQ' = sequential)
+# invsolved('CUBES-SEQ' = sequential, 'CUBES-SEQ-TOP5' = sequential_top5)
+# invsolved('CUBES-DC16' = c50_16, 'CUBES-DC16-TOP5' = c50_16_top5)
+# a <- sequential %>% inner_join(sequential_top5, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct')
+#
+#
+# scatter('CUBES-SEQ3' = sequential_3, 'CUBES-SEQ-SEM' = sequential_sem)
+#
+# plot_cells_time('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'PatSQL' = patsql_3)
+# plot_cells_ram('Scythe3' = scythe_3, 'SQUARES2' = squares_2, 'CUBES-SEQ3' = sequential_3, 'PatSQL2' = patsql_3)
+# scatter_real_cpu('Scythe3' = scythe_3, 'SQUARES2' = squares_2, 'CUBES-SEQ3' = sequential_3, 'PatSQL2' = patsql_3)
+# scatter_equiv(x = 'real', seq = sequential_3, sem = sequential_sem)
+# scatter_equiv(x = 'cpu', seq = sequential_3, sem = sequential_sem)
+#
+# plot_sql_size('\\textsc{Scythe}' = scythe_3,
+#               '\\textsc{Squares}' = squares_2,
+#               '\\textsc{PatSQL}' = patsql_3,
+#               '\\textsc{Cubes-Seq}' = sequential_sem,
+#               '\\textsc{Cubes-DC16}' = c50_16)
+#
+# sequential_sem %>%
+#   ggplot(aes(x = sql_size)) +
+#   geom_histogram(bins=15)
+#
+# plot_fuzzy('Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
+# plot_fuzzy(refactor = T, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql, 'CUBES-DC16' = c50_16)
+# plot_fuzzy(refactor = T, fill_bars = T, 'Scythe' = scythe, 'SQUARES' = squares, 'CUBES-SEQ' = sequential, 'CUBES-SEQ-T5' = sequential_top5, 'PatSQL' = patsql)
+# plot_fuzzy('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_3)
+# plot_fuzzy(fill_bars = T, 'Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_3)
+#
+# scatter(seq = sequential, seq3 = sequential_3)
+# scatter(seq = sequential, sem = sequential_sem)
+#
+# sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
+# scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% filter(fuzzy == 'Correct') %>% count() / scythe_3 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts' & solved) %>% count()
+#
+# sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_3 %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% count()
+# patsql %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / patsql %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
+# scythe %>% filter(benchmark == 'spider' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / scythe %>% filter(benchmark == 'spider' & solved& fuzzy != 'Error') %>% count()
+# sequential_sem %>% filter(benchmark == 'textbook' & solved & fuzzy != 'Error') %>% filter(fuzzy == 'Correct') %>% count() / sequential_sem %>% filter(benchmark == 'textbook' & solved& fuzzy != 'Error') %>% count()
+#
+# sequential_3 %>% filter(fuzzy == 'Correct') %>% count()
+# scythe_3 %>% filter(fuzzy == 'Correct') %>% count()
+# patsql %>% filter(fuzzy == 'Correct') %>% count()
+#
+# scythe %>%
+#   filter(solved) %>%
+#   summarise(m = mean(sql_size, na.rm = T))
+# squares %>%
+#   filter(solved) %>%
+#   summarise(m = mean(sql_size, na.rm = T))
+# sequential %>%
+#   filter(solved) %>%
+#   summarise(m = mean(sql_size, na.rm = T))
+#
+# instance_info %>% ggplot(aes(x = sql_size)) +
+#   geom_histogram(bins = 15) +
+#   facet_wrap(~benchmark, scales = 'free_y')
+#
+# scatter(seq = sequential_3, sem = sequential_sem)
+#
+# a <- sequential_sem %>% filter(solved & (fuzzy == 'Incorrect' | fuzzy == 'Fuzzying Incorrect')) %>% select(name) %>% mutate(name = paste0('tests/', name))
+#
+# a <- sequential_3 %>%
+#   filter(fuzzy == 'Incorrect') %>%
+#   select(name) %>% arrange(name)
+#
+# intent <- bitenum %>%
+#   inner_join(squares, by = c('name', 'benchmark')) %>%
+#   inner_join(scythe, by = c('name', 'benchmark')) %>%
+#   filter(solved.x & solved.y & solved) %>%
+#   group_by(benchmark) %>%
+#   sample_frac(.15) %>%
+#   ungroup() %>%
+#   select(name) %>%
+#   mutate(intent = NA)
+#
+# a <- determ5 %>% filter(solution_n == 10) %>% select(solutions)
+# determ5 %>% filter(solution_n == 10) %>% select(name)
 
 ####### PAPER PLOTS ######
 
 plot_pdf('seq_solved', 0.9, 0.65,
-         invsolved(every_other = 150, point_size = 1, step_size = .75, use_vbs=T,
+         invsolved(every_other = 150, point_size = 1, step_size = .75, use_vbs = T,
                    '\\textsc{Squares}' = squares,
                    '\\textsc{Scythe}' = scythe,
                    '\\textsc{PatSQL}' = patsql,
@@ -214,24 +328,59 @@ plot_pdf('parallel_solved', .9, .65,
          invsolved(every_other = 150, point_size = 1, step_size = .75,
                    '\\textsc{Cubes-Seq}' = sequential_sem,
                    '\\textsc{Cubes-Port8}' = portfolio5_8,
-                   '\\textsc{Cubes-DC16}' = c50_16) + guides(color = guide_legend(nrow = 1)) + theme(legend.spacing.x = unit(0, 'cm')))
+                   '\\textsc{Cubes-DC16}' = c50_16) +
+           guides(color = guide_legend(nrow = 1)) +
+           theme(legend.spacing.x = unit(0, 'cm')))
 
-gm_mean <- function(x, na.rm=TRUE){
-  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
+gm_mean <- function(x, na.rm = TRUE) {
+  exp(sum(log(x[x > 0]), na.rm = na.rm) / length(x))
 }
 
-sequential %>% inner_join(c50_16, by='name') %>% filter(solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% select(speedup) %>% ggplot(aes(x=speedup)) + geom_histogram() + scale_x_log10()
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  select(speedup) %>%
+  ggplot(aes(x = speedup)) +
+  geom_histogram() +
+  scale_x_log10()
 
 # SPEEDUP EASY VS HARD
 # FAZER TABELA CONFIGURAÇÕES
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = gm_mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = median(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = sd(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% filter(speedup > 10) %>% count() /
-  sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% count()
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 1 & real.x < 60)
-
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = gm_mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = median(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = sd(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  filter(speedup > 10) %>%
+  count() /
+  sequential %>%
+    inner_join(c50_16, by = 'name') %>%
+    filter(real.x > 60 & solved.x & solved.y) %>%
+    mutate(speedup = real.x / real.y) %>%
+    count()
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 1 & real.x < 60)
 
 
 speedup(sequential, c50_4)
@@ -239,22 +388,78 @@ speedup(sequential, c50_8)
 speedup(sequential, c50_16)
 
 
-
-sequential %>% inner_join(c50_4, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_8, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% mutate(speedup = real.x / real.y) %>% select(speedup) %>% ggplot(aes(x=speedup)) + geom_histogram()
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 10 & real.y > 10) %>% mutate(speedup = real.x / real.y) %>% select(speedup) %>% ggplot(aes(x=speedup)) + geom_histogram()
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% select(speedup)
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% select(speedup) %>% ggplot(aes(x=speedup)) + geom_histogram() + scale_x_log10()
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 60 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = gm_mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = median(speedup))
-sequential %>% inner_join(c50_4, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = gm_mean(speedup))
-sequential %>% inner_join(c50_8, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = gm_mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = gm_mean(speedup))
-sequential %>% inner_join(c50_16, by='name') %>% mutate(speedup = real.x / real.y) %>% summarise(speedup = g(speedup))
+sequential %>%
+  inner_join(c50_4, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_8, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  select(speedup) %>%
+  ggplot(aes(x = speedup)) + geom_histogram()
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 10 & real.y > 10) %>%
+  mutate(speedup = real.x / real.y) %>%
+  select(speedup) %>%
+  ggplot(aes(x = speedup)) + geom_histogram()
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  select(speedup)
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  select(speedup) %>%
+  ggplot(aes(x = speedup)) +
+  geom_histogram() +
+  scale_x_log10()
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 60 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = gm_mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  filter(real.x > 10 & real.y > 10 & solved.x & solved.y) %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = median(speedup))
+sequential %>%
+  inner_join(c50_4, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = gm_mean(speedup))
+sequential %>%
+  inner_join(c50_8, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = gm_mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = gm_mean(speedup))
+sequential %>%
+  inner_join(c50_16, by = 'name') %>%
+  mutate(speedup = real.x / real.y) %>%
+  summarise(speedup = g(speedup))
 
 # plot_pdf('dc_solved', .9, .7,
 #          invsolved(every_other = 150, point_size = 1, step_size = .75,
@@ -291,7 +496,7 @@ plot_pdf('port_scythe', .9, .7,
                    '\\textsc{Scythe}+\\textsc{Cubes-Port4}' = vbs(scythe, portfolio5_4)) + guides(color = guide_legend(nrow = 2)))
 
 plot_pdf('speedup', .9, .5,
-  speedup(sequential, c50_16))
+         speedup(sequential, c50_16))
 
 speedup_data(sequential, portfolio5_4)
 speedup_data(sequential, portfolio5_8)
@@ -300,7 +505,9 @@ speedup_data(sequential, c50_4)
 speedup_data(sequential, c50_8)
 speedup_data(sequential, c50_16)
 
-sequential %>% filter(solved & real > 60) %>% count()
+sequential %>%
+  filter(solved & real > 60) %>%
+  count()
 
 benchmark_summary('extended_abstract_summary',
                   "\\textsc{Squares}" = squares,
@@ -357,7 +564,7 @@ plot_pdf('port_solved_results', 1.2, .675,
                    '\\textsc{Cubes-Port16}' = portfolio5_16))
 
 plot_pdf('fuzzy_slides', 1.2, .675,
-  plot_fuzzy('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_2))
+         plot_fuzzy('Scythe' = scythe_3, 'SQUARES' = squares_2, 'CUBES-SEQ' = sequential_sem, 'CUBES-SEQ-T5' = sequential_sem_top5, 'PatSQL' = patsql_2))
 
 plot_pdf('nondeterm_slides', 1.1, 1,
-  non_determinism_plot(determ5))
+         non_determinism_plot(determ5))

@@ -1,0 +1,881 @@
+db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
+inputs:
+ - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+output: tests-examples/db2csv/student_transcripts_tracking/tables/0016_dev.csv
+raw_question: How many degrees does the engineering department have? 
+question_index: 522 
+constants:
+ - engineer
+join_columns:
+ - department_id
+functions:
+ - count
+columns:
+ - department_name
+filters:
+ - '='
+comment: |-
+  SELECT count(*)
+  FROM Departments AS T1
+  JOIN Degree_Programs AS T2 ON T1.department_id = T2.department_id
+  WHERE T1.department_name = 'engineer'
+
+sql: |-
+  SELECT count(*)
+  FROM Departments AS T1
+  JOIN Degree_Programs AS T2 ON T1.department_id = T2.department_id
+  WHERE T1.department_name = 'engineer'
+smbop_beam_join_columns:
+- - department_id
+- []
+smbop_beam_groupby_columns:
+- []
+- []
+smbop_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+smbop_beam_constants:
+- []
+- []
+smbop_beam_functions:
+- - count
+- - count
+smbop_beam_columns:
+- - department_name
+- - department_name
+smbop_beam_ieu:
+- []
+- []
+smbop_beam_filters:
+- - '='
+- - '='
+smbop_beam_inferred_code:
+  - SELECT COUNT( * ) FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id WHERE departments.department_name = 'engineering'
+  - SELECT COUNT( * ) FROM departments, degree_programs WHERE degree_programs.department_id = departments.department_id OR departments.department_name = 'engineering'
+smbop_beam_inferred_code_w_terminals:
+  - SELECT COUNT( * ) FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id WHERE departments.department_name = 'engineering'
+  - SELECT COUNT( * ) FROM departments, degree_programs WHERE degree_programs.department_id = departments.department_id OR departments.department_name = 'engineering'
+ratsql_beam_join_columns:
+- []
+- []
+- []
+- []
+- - address_id
+  - student_id
+  - degree_program_id
+  - current_address_id
+- - student_course_id
+  - student_enrolment_id
+  - degree_program_id
+  - transcript_id
+- - student_enrolment_id
+  - course_id
+  - degree_program_id
+- - student_course_id
+  - student_enrolment_id
+  - degree_program_id
+ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+ratsql_beam_constants:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_functions:
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+ratsql_beam_columns:
+- - department_id
+- - department_id
+  - degree_summary_name
+- - department_id
+- - department_id
+- - department_id
+- - department_id
+- - department_id
+- - department_id
+ratsql_beam_ieu:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_filters:
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+ratsql_beam_inferred_code:
+  - SELECT Count(*) FROM Degree_Programs WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(DISTINCT Degree_Programs.degree_summary_name) FROM Degree_Programs WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Degree_Programs WHERE DISTINCT Degree_Programs.department_id = 'terminal'
+  - SELECT Count(DISTINCT *) FROM Degree_Programs WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Degree_Programs WHERE Degree_Programs.department_id = 'terminal' LIMIT 1
+  - SELECT DISTINCT Count(*) FROM Degree_Programs WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Addresses JOIN Degree_Programs JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Courses JOIN Degree_Programs JOIN Sections ON Courses.course_id = Sections.course_id JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id AND Student_Enrolment_Courses.course_id = Courses.course_id WHERE Degree_Programs.department_id = 'terminal'
+  - SELECT Count(*) FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id WHERE Degree_Programs.department_id = 'terminal'
+ratsql_beam_inferred_code_w_terminals:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+ratsql_beam_score_history:
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -0.10766744613647461
+  - -0.10473871231079102
+  - -0.0976405143737793
+  - -0.10328245162963867
+  - -0.10843706130981445
+  - -0.1053018569946289
+  - -0.10408544540405273
+  - -0.10953458398580551
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -2.9961371421813965
+  - -0.10551261901855469
+  - -0.1049797534942627
+  - -0.09611797332763672
+  - -0.10612726211547852
+  - -0.10148477554321289
+  - -0.10153532028198242
+  - -0.10479927062988281
+  - -0.10530567169189453
+  - -0.10576057434082031
+  - -0.057984624058008194
+  - -0.11257719993591309
+  - -0.10566329956054688
+  - -0.10554361343383789
+  - -0.1007547378540039
+  - -0.10235977172851562
+  - -0.10774660110473633
+  - -0.10471963882446289
+  - -0.09776163101196289
+  - -0.10348892211914062
+  - -0.10848617553710938
+  - -0.10553359985351562
+  - -0.10423755645751953
+  - -0.11516251415014267
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -3.4368844032287598
+  - -0.10564136505126953
+  - -0.10715103149414062
+  - -0.10071754455566406
+  - -0.1023259162902832
+  - -0.10765957832336426
+  - -0.10477232933044434
+  - -0.0976247787475586
+  - -0.1032266616821289
+  - -0.1084599494934082
+  - -0.1052398681640625
+  - -0.10407590866088867
+  - -0.11015310883522034
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -3.513476610183716
+  - -0.10530686378479004
+  - -0.09796619415283203
+  - -0.10648870468139648
+  - -0.10149049758911133
+  - -0.10148096084594727
+  - -0.1045083999633789
+  - -0.10532140731811523
+  - -0.10586166381835938
+  - -0.056606754660606384
+  - -0.11208701133728027
+  - -0.10574102401733398
+  - -0.10645723342895508
+  - -0.10073089599609375
+  - -0.10231447219848633
+  - -0.10767197608947754
+  - -0.10473775863647461
+  - -0.09765768051147461
+  - -0.1032557487487793
+  - -0.10852479934692383
+  - -0.10528802871704102
+  - -0.10409307479858398
+  - -0.11007014662027359
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -3.5525026321411133
+  - -0.10481524467468262
+  - -0.09794807434082031
+  - -0.10329151153564453
+  - -0.10849237442016602
+  - -0.10517406463623047
+  - -0.10413265228271484
+  - -0.11046356707811356
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -3.566392660140991
+  - -0.10344743728637695
+  - -0.1008596420288086
+  - -0.1028289794921875
+  - -0.11571931838989258
+  - -0.10189104080200195
+  - -0.10455751419067383
+  - -0.10469818115234375
+  - -0.10546875
+  - -0.21125957369804382
+  - -0.10912370681762695
+  - -0.10489797592163086
+  - -0.09714698791503906
+  - -0.10616445541381836
+  - -0.10165596008300781
+  - -0.1014547348022461
+  - -0.1045541763305664
+  - -0.10529661178588867
+  - -0.10582542419433594
+  - -0.056370388716459274
+  - -0.11207795143127441
+  - -0.10573887825012207
+  - -0.10664176940917969
+  - -0.10072946548461914
+  - -0.10229969024658203
+  - -0.10764741897583008
+  - -0.10474514961242676
+  - -0.09763145446777344
+  - -0.1032710075378418
+  - -0.10844945907592773
+  - -0.10528326034545898
+  - -0.10409355163574219
+  - -0.10955317318439484
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -0.10766744613647461
+  - -0.10473871231079102
+  - -0.0976405143737793
+  - -0.10328245162963867
+  - -0.10843706130981445
+  - -0.1053018569946289
+  - -0.10408544540405273
+  - -4.49224328994751
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -0.10766744613647461
+  - -0.10473871231079102
+  - -0.0976405143737793
+  - -0.10328245162963867
+  - -0.10843706130981445
+  - -0.1053018569946289
+  - -0.10408544540405273
+  - -4.513186454772949
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -0.10766744613647461
+  - -0.10473871231079102
+  - -0.0976405143737793
+  - -0.10328245162963867
+  - -0.10843706130981445
+  - -0.1053018569946289
+  - -0.10408544540405273
+  - -4.5170464515686035
+- - -0.10626602172851562
+  - -0.10502147674560547
+  - -0.10628938674926758
+  - -0.10352945327758789
+  - -0.1018056869506836
+  - -0.10272645950317383
+  - -0.10945749282836914
+  - -0.10216522216796875
+  - -0.10462570190429688
+  - -0.10472249984741211
+  - -0.10550832748413086
+  - -0.20964379608631134
+  - -0.10911822319030762
+  - -0.10489988327026367
+  - -0.09702587127685547
+  - -0.10621976852416992
+  - -0.10158777236938477
+  - -0.10145711898803711
+  - -0.10453176498413086
+  - -0.1053004264831543
+  - -0.10580873489379883
+  - -0.05636373907327652
+  - -0.11209702491760254
+  - -0.1057429313659668
+  - -0.1065988540649414
+  - -0.10073184967041016
+  - -0.10231351852416992
+  - -0.10766744613647461
+  - -0.10473871231079102
+  - -0.0976405143737793
+  - -0.10328245162963867
+  - -0.10843706130981445
+  - -0.1053018569946289
+  - -0.10408544540405273
+  - -4.5326247215271
+ratsql_beam_actions:
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'degree_summary_name'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'True'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'True'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'True'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'True'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Degree_Programs'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Addresses'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcripts'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Sections'
+- - ('sql', (True, True, True, True, True, True))
+  - ('select', ('bool', True))
+  - 'False'
+  - '<EOS>'
+  - ('agg*', 1)
+  - ('agg', (True, True))
+  - ('agg_type', 'Count')
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - '*'
+  - 'False'
+  - '<EOS>'
+  - ('sql_where', (True,))
+  - ('cond', 'Eq')
+  - ('Eq', (True, True))
+  - ('val_unit', 'Column')
+  - ('Column', (True,))
+  - ('col_unit', (True, 'int', 'bool'))
+  - ('agg_type', 'NoneAggOp')
+  - 'department_id'
+  - 'False'
+  - '<EOS>'
+  - ('val', 'Terminal')
+  - ('sql_groupby', (False, False))
+  - ('sql_orderby', (False, 'bool'))
+  - 'False'
+  - '<EOS>'
+  - ('sql_ieu', (False, False, False))
+  - ('from', (True, False))
+  - ('table_unit*', 1)
+  - ('table_unit_seq_elem', 'Table')
+  - ('Table', ('int',))
+  - 'Transcript_Contents'
