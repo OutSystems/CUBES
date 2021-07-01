@@ -5,18 +5,23 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0078_dev.csv
 raw_question: How many flights land in Aberdeen or Abilene? 
 question_index: 256 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Aberdeen
  - Abilene
 join_columns:
- - destairport
  - airportcode
+ - destairport
+groupby_columns: []
 functions:
  - count
 columns:
  - city
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM Flights AS T1
@@ -31,18 +36,18 @@ sql: |-
   WHERE T2.city = "Aberdeen"
     OR T2.city = "Abilene"
 smbop_beam_join_columns:
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
-- - destairport
-  - airportcode
-- - destairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
+- - airportcode
+  - destairport
+- - airportcode
+  - destairport
+- - airportcode
+  - destairport
 smbop_beam_groupby_columns:
 - []
 - []
@@ -118,20 +123,41 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen' OR airports.city = 'Aberdeen'
   - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen' OR airports.city = 'Abilene' UNION SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen' OR airports.city = 'Abilene'
   - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen' OR airports.city = 'Abilene' EXCEPT SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen' OR airports.city = 'Abilene'
-ratsql_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_join_columns:
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- []
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -145,9 +171,9 @@ ratsql_beam_tables:
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
@@ -157,6 +183,12 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 ratsql_beam_constants:
+- - Aberdeen
+  - Abilene
+- - Aberdeen
+  - Abilene
+- - Aberdeen
+  - Abilene
 - - Aberdeen
   - Abilene
 - - Aberdeen
@@ -222,13 +254,37 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.City = 'Abilene'
   - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
   - SELECT Count(*) FROM airlines JOIN airports JOIN flights WHERE airports.City = 'Aberdeen' OR airports.City = 'Abilene'
-  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.CountryAbbrev = Abilene
-  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.AirportName = Abilene
-  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.Country = Abilene
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.CountryAbbrev = 'Abilene'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.AirportName = 'Abilene'
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.Country = 'Abilene'
   - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE DISTINCT airports.City = 'Aberdeen' OR airports.City = 'Abilene'
   - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR DISTINCT airports.City = 'Abilene'
-  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR flights.FlightNo = Abilene
+  - SELECT Count(*) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR flights.FlightNo = 'Abilene'
   - SELECT Count(DISTINCT *) FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen' OR airports.City = 'Abilene'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10360193252563477
   - -0.10483789443969727

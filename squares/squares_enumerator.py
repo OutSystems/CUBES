@@ -11,6 +11,8 @@ from squares.dsl.interpreter import SquaresInterpreter
 from . import util, results
 from .config import Config
 from .decider import LinesDecider
+from .disambiguating_synthesizer import DisambiguatingSynthesizer
+from .disambiguator import FuzzingDisambiguator
 from .tyrell.decider import Example
 from .tyrell.enumerator.bitenum import BitEnumerator
 from .tyrell.enumerator.input_enumerator import InputEnumerator
@@ -70,15 +72,22 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
+        if util.get_config().disambiguate:
+            disambiguator = FuzzingDisambiguator(16)
+            disambiguating = DisambiguatingSynthesizer(synthesizer, disambiguator)
+            synth = disambiguating
+        else:
+            synth = synthesizer
+
         found = False
         if util.get_config().enum_until is None:
-            for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
+            for prog, _ in synth.synthesize(util.get_config().top_programs):
                 if prog:
                     logger.info(f'Solution found: {prog}')
                     queue.put((util.Message.SOLUTION, id, prog, loc, True))
                     found = True
         else:
-            for prog, attempts in synthesizer.multi_synth(enum_all=True):
+            for prog, _ in synthesizer.synthesize(enum_all=True):
                 if prog:
                     logger.info(f'Solution found: {prog}')
                     queue.put((util.Message.SOLUTION, id, prog, loc, True))

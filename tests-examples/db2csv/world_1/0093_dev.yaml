@@ -4,6 +4,11 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0093_dev.csv
 raw_question: Find the number of cities in each district whose population is greater than the average population of cities? 
 question_index: 794 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
 groupby_columns:
  - district
 functions:
@@ -13,6 +18,7 @@ columns:
  - population
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT count(*),
          District
@@ -49,9 +55,9 @@ smbop_beam_groupby_columns:
 - []
 - []
 - - population
-- []
 - - district
 - []
+- - district
 smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
@@ -87,7 +93,7 @@ smbop_beam_functions:
 - - avg
 - - avg
 - - avg
-- - count
+- - avg
 - - count
 smbop_beam_columns:
 - - population
@@ -98,7 +104,7 @@ smbop_beam_columns:
 - - population
 - - population
 - - population
-- []
+- - population
 - []
 smbop_beam_ieu:
 - []
@@ -130,9 +136,9 @@ smbop_beam_inferred_code:
   - SELECT COUNT( * ) , city.district FROM city WHERE city.population > (SELECT AVG( city.population ) FROM city) ORDER BY city.district ASC
   - SELECT AVG( city.population ) FROM city ORDER BY city.population DESC
   - SELECT AVG( city.population ) FROM city GROUP BY city.population
+  - SELECT AVG( city.population ) FROM city GROUP BY city.district
   - SELECT AVG( city.population ) , city.district FROM city
   - SELECT COUNT( * ) , city.district FROM city GROUP BY city.district
-  - SELECT COUNT( * ) , city.district FROM city
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) , city.district FROM city WHERE city.population > (SELECT AVG( city.population ) FROM city) GROUP BY city.district
   - SELECT COUNT( * ) , city.district FROM city WHERE city.population > (SELECT AVG( city.population ) FROM city)
@@ -141,31 +147,64 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) , city.district FROM city WHERE city.population > (SELECT AVG( city.population ) FROM city) ORDER BY city.district ASC
   - SELECT AVG( city.population ) FROM city ORDER BY city.population DESC
   - SELECT AVG( city.population ) FROM city GROUP BY city.population
+  - SELECT AVG( city.population ) FROM city GROUP BY city.district
   - SELECT AVG( city.population ) , city.district FROM city
   - SELECT COUNT( * ) , city.district FROM city GROUP BY city.district
-  - SELECT COUNT( * ) , city.district FROM city
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
-- - code
-  - countrycode
+- - countrycode
+  - code
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
-- - district)
-  - district
 - - district
-- - district)
-  - district
-- - district)
-  - district
-- - district)
-  - district
-- - district)
-  - district
+  - district)
+- - district
+- - district
+  - district)
+- - district
+  - district)
+- - district
+  - district)
+- - district
+  - district)
 ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
@@ -175,9 +214,12 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
+- []
+- []
+- []
 - []
 - []
 - []
@@ -238,6 +280,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*), city.District FROM city WHERE city.Population > (SELECT Avg(city.Population) FROM city GROUP BY DISTINCT city.District) GROUP BY city.District
   - SELECT Count(*), city.District FROM city WHERE city.Population > (SELECT Avg(city.Population) FROM city GROUP BY city.District) GROUP BY DISTINCT city.District
   - SELECT Count(*), city.District FROM city WHERE city.Population > (SELECT Avg(city.Population) FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY city.District) GROUP BY city.District
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11006832122802734
   - -0.10529470443725586

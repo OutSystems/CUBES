@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0009_dev.csv
 raw_question: Which region is the city Kabul located in? 
 question_index: 710 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Kabul
 join_columns:
- - code
  - countrycode
+ - code
+groupby_columns: []
+functions: []
 columns:
  - name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT Region
   FROM country AS T1
@@ -26,10 +32,10 @@ sql: |-
   JOIN city AS T2 ON T1.Code = T2.CountryCode
   WHERE T2.Name = "Kabul"
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 smbop_beam_groupby_columns:
 - []
 - []
@@ -59,15 +65,24 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT country.region FROM city JOIN country ON city.countrycode = country.code WHERE city.name = 'Kabul'
   - SELECT country.region FROM country JOIN city ON country.code = city.countrycode WHERE city.name = 'Kabul'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -77,8 +92,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
@@ -88,6 +103,8 @@ ratsql_beam_constants:
 - - Kabul
 - - Kabul
 - - Kabul
+- - Kabul
+  - '1'
 ratsql_beam_functions:
 - []
 - []
@@ -120,6 +137,21 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Name = 'Kabul'
   - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE DISTINCT city.Name = 'Kabul'
   - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Name = 'Kabul' LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10571718215942383
   - -0.10431480407714844

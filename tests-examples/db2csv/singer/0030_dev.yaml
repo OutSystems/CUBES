@@ -4,14 +4,20 @@ inputs:
 output: tests-examples/db2csv/singer/tables/0030_dev.csv
 raw_question: What are the citizenships that are shared by singers with a birth year before 1945 and after 1955? 
 question_index: 1029 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - 1945
  - 1955
+ - 1945
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - birth_year
 filters:
- - '>'
  - '<'
+ - '>'
 ieu:
  - intersect
 comment: |-
@@ -52,39 +58,39 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 smbop_beam_constants:
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
 smbop_beam_functions:
 - []
 - []
@@ -119,17 +125,17 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
+- - '<'
+  - '>'
 - - '>'
+- - '='
   - '<'
+- - '='
+  - '>'
+- - '='
+  - '>'
 - - '>'
-- - '='
-  - '<'
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '>='
-  - '>'
+  - '>='
 - - '>'
 - - '<'
 - - '<'
@@ -156,6 +162,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT singer.citizenship FROM song, singer WHERE singer.birth_year<1945
   - SELECT singer.citizenship FROM singer WHERE singer.birth_year<1945
   - SELECT singer.citizenship FROM singer, song WHERE singer.birth_year = 1955
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - singer_id
@@ -172,26 +211,34 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/singer/tables/singer.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
 ratsql_beam_constants:
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
-- - 1945
-  - 1955
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+- - 1955
+  - 1945
+  - '1'
+- - 1955
+  - 1945
+  - '1 intersect select singer.citizenship from singer where singer.birth_year > 1945'
 ratsql_beam_functions:
 - []
 - []
@@ -214,18 +261,18 @@ ratsql_beam_ieu:
 - - intersect
 - - intersect
 ratsql_beam_filters:
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
 ratsql_beam_inferred_code:
   - SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year < 'terminal' INTERSECT SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year > 'terminal'
   - SELECT singer.Citizenship FROM singer JOIN song ON singer.Singer_ID = song.Singer_ID WHERE singer.Birth_Year < 'terminal' INTERSECT SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year > 'terminal'
@@ -246,6 +293,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year < 1955 INTERSECT SELECT singer.Citizenship FROM singer WHERE DISTINCT singer.Birth_Year > 1945
   - SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year < 1955 INTERSECT SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year > 1945 LIMIT 1
   - SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year < 1955 LIMIT 1 INTERSECT SELECT singer.Citizenship FROM singer WHERE singer.Birth_Year > 1945
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10332822799682617
   - -0.10482311248779297

@@ -1,16 +1,23 @@
 db: tests-examples/db2csv/concert_singer/tables/concert_singer.sqlite
 inputs:
- - tests-examples/db2csv/concert_singer/tables/singer.csv
  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+ - tests-examples/db2csv/concert_singer/tables/singer.csv
 output: tests-examples/db2csv/concert_singer/tables/0037_dev.csv
 raw_question: What are the names of the singers and number of concerts for each person? 
 question_index: 36 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
  - singer_id
 groupby_columns:
  - singer_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.name,
          count(*)
@@ -150,6 +157,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT singer_in_concert.singer_id , COUNT( * ) FROM singer_in_concert JOIN singer ON singer_in_concert.singer_id = singer.singer_id GROUP BY singer.name
   - SELECT singer_in_concert.concert_id , COUNT( * ) FROM singer_in_concert JOIN singer ON singer_in_concert.singer_id = singer.singer_id GROUP BY singer.name
   - SELECT singer_in_concert.singer_id , COUNT( * ) FROM singer_in_concert JOIN singer ON singer_in_concert.singer_id = singer.singer_id GROUP BY singer_in_concert.concert_id
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - singer_id
 - - singer_id
@@ -183,36 +223,36 @@ ratsql_beam_groupby_columns:
 - - year
 - - location
 ratsql_beam_tables:
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
 - []
 - []
@@ -290,6 +330,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT singer.Name, Count(*) FROM singer JOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID GROUP BY singer.Song_release_year
   - SELECT singer.Name, Count(*) FROM singer JOIN concert JOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID AND singer_in_concert.concert_ID = concert.concert_ID AND singer.Singer_ID = singer_in_concert.Singer_ID GROUP BY concert.Year
   - SELECT singer.Name, Count(*) FROM stadium JOIN singer JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID AND stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID AND singer_in_concert.Singer_ID = singer.Singer_ID AND concert.concert_ID = singer_in_concert.concert_ID GROUP BY stadium.Location
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10304021835327148
   - -0.10440444946289062

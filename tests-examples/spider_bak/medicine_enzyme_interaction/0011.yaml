@@ -1,0 +1,31 @@
+db: tests-examples/spider/medicine_enzyme_interaction/tables/db.sqlite
+inputs:
+- tests-examples/spider/medicine_enzyme_interaction/tables/enzyme.csv
+- tests-examples/spider/medicine_enzyme_interaction/tables/medicine_enzyme_interaction.csv
+output: tests-examples/spider/medicine_enzyme_interaction/tables/0011.csv
+constants:
+- activitor
+functions:
+- count
+- max
+columns:
+- interaction_type
+comment: |-
+  SELECT T1.id,
+         T1.name
+  FROM enzyme AS T1
+  JOIN medicine_enzyme_interaction AS T2 ON T1.id = T2.enzyme_id
+  WHERE T2.interaction_type = 'activitor'
+  GROUP BY T1.id
+  ORDER BY count(*) DESC
+  LIMIT 1
+
+sql: |-
+  SELECT T1.id,
+         T1.name
+  FROM enzyme AS T1
+  JOIN medicine_enzyme_interaction AS T2 ON T1.id = T2.enzyme_id
+  WHERE T2.interaction_type = 'activitor'
+  GROUP BY T1.id
+  ORDER BY count(*) DESC
+  LIMIT 1

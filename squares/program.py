@@ -59,6 +59,7 @@ class LineInterpreter(Interpreter):
 
     def eval(self, prog: Program, inputs: List[Any]) -> Any:
         self.program = ''
+        self.has_limit = False
         if isinstance(prog, List):
             vars = []
             for li, line in enumerate(prog):

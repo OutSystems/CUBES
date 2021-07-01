@@ -4,11 +4,20 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0033_dev.csv
 raw_question: Find the year that has the most number of matches. 
 question_index: 461 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
+join_columns: []
 groupby_columns:
  - year
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT YEAR
   FROM matches
@@ -56,8 +65,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -67,10 +76,8 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - min
-  - count
+- - count
+- - count
 - []
 - - count
 - - count
@@ -134,13 +141,46 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT matches.year FROM matches ORDER BY matches.year DESC
   - SELECT matches.year FROM matches GROUP BY matches.year
   - SELECT COUNT( * ) FROM matches
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -153,32 +193,29 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -218,6 +255,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT matches.year FROM players JOIN matches ON matches.loser_id = players.player_id JOIN rankings ON players.player_id = rankings.player_id GROUP BY matches.year ORDER BY Count(*) Desc LIMIT 1
   - SELECT matches.year FROM matches GROUP BY matches.year ORDER BY Count(*) Desc
   - SELECT matches.year FROM matches GROUP BY matches.year ORDER BY Count(matches.year) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.11020135879516602
   - -0.10445070266723633

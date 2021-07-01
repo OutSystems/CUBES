@@ -1,22 +1,27 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/cars_data.csv
  - tests-examples/db2csv/car_1/tables/car_names.csv
+ - tests-examples/db2csv/car_1/tables/cars_data.csv
 output: tests-examples/db2csv/car_1/tables/0080_dev.csv
 raw_question: For all of the 4 cylinder cars, which model has the most horsepower? 
 question_index: 166 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
 constants:
  - 4
+ - '1;'
 join_columns:
- - id
  - makeid
-functions:
- - max
+ - id
+groupby_columns: []
+functions: []
 columns:
  - cylinders
- - horsepower
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.Model
   FROM CAR_NAMES AS T1
@@ -33,26 +38,26 @@ sql: |-
   ORDER BY T2.horsepower DESC
   LIMIT 1;
 smbop_beam_join_columns:
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -65,60 +70,60 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 smbop_beam_constants:
 - - 4
+  - '1'
+- - 4
+  - '1'
 - - 4
 - - 4
 - - 4
+  - '1'
 - - 4
 - - 4
-- - 4
+  - '1'
 - - 4
 - - 4
 - - 4
 smbop_beam_functions:
-- - max
-- - max
 - []
 - []
-- - max
 - []
-- - max
+- []
+- []
+- []
+- []
 - []
 - []
 - []
 smbop_beam_columns:
 - - cylinders
-  - horsepower
-- - cylinders
-  - horsepower
 - - cylinders
 - - cylinders
 - - cylinders
-  - horsepower
 - - cylinders
 - - cylinders
-  - horsepower
+- - cylinders
 - - cylinders
 - - cylinders
 - - cylinders
@@ -166,15 +171,48 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT car_names.model FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE cars_data.cylinders = 4 GROUP BY car_names.model
   - SELECT car_names.model FROM car_names JOIN cars_data ON car_names.makeid = cars_data.id WHERE cars_data.cylinders = '4'
   - SELECT cars_data.cylinders FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE cars_data.cylinders = 4
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- -  desc 
+- []
+- -  desc 
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - makeid
+- - makeid
+  - id
 - []
 - []
 - - model
-  - id
   - makeid
+  - id
 - []
 - []
 - []
@@ -189,49 +227,53 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
 - - 4
+  - '1'
 - - 4
+  - '1'
 - - 4
+  - '1'
 - - 4
+  - '1'
 - - 4
+  - '1'
 - - 4
+  - '1'
 - - 4
+  - '1'
+- - 4
+  - '1'
+- - 4
+  - '1'
 - - 4
 ratsql_beam_functions:
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 ratsql_beam_columns:
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
-  - horsepower
 - - cylinders
 ratsql_beam_ieu:
 - []
@@ -273,6 +315,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT cars_data.Year FROM cars_data WHERE cars_data.Cylinders = 4 ORDER BY cars_data.Horsepower Desc LIMIT 1
   - SELECT cars_data.Horsepower FROM cars_data WHERE cars_data.Cylinders = 4 ORDER BY cars_data.Horsepower Desc LIMIT 1
   - SELECT cars_data.Cylinders FROM cars_data WHERE cars_data.Cylinders = 4 ORDER BY cars_data.Horsepower Desc
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
 ratsql_beam_score_history:
 - - -0.10448217391967773
   - -0.10486745834350586

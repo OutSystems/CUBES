@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0076_dev.csv
 raw_question: What are the ids of documents that have 2 or more paragraphs? 
 question_index: 372 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
+join_columns: []
 groupby_columns:
  - document_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT document_id
   FROM Paragraphs
@@ -29,8 +36,8 @@ smbop_beam_groupby_columns:
 - - document_id
 smbop_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 smbop_beam_constants:
 - - 2
 - - 2
@@ -52,13 +59,22 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT paragraphs.document_id FROM paragraphs GROUP BY paragraphs.document_id HAVING COUNT( * ) >= 2
   - SELECT paragraphs.document_id FROM documents JOIN paragraphs ON documents.document_id = paragraphs.document_id GROUP BY paragraphs.document_id HAVING COUNT( * ) >= 2
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - template_id
-  - document_id
+- - document_id
   - template_type_code
-- - template_id
-  - document_id
+  - template_id
+- - document_id
+  - template_id
 - []
 - []
 - - document_id
@@ -76,16 +92,16 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
 ratsql_beam_constants:
@@ -96,6 +112,9 @@ ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+  - '1'
 - - 2
 ratsql_beam_functions:
 - - count
@@ -148,13 +167,40 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2
   - SELECT Paragraphs.Document_ID FROM Ref_Template_Types JOIN Templates ON Ref_Template_Types.Template_Type_Code = Templates.Template_Type_Code JOIN Documents ON Templates.Template_ID = Documents.Template_ID JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2
   - SELECT Paragraphs.Document_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2
-  - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(Paragraphs.Paragraph_ID) >= 2
+  - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(Paragraphs.Paragraph_ID) >= '2'
   - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY DISTINCT Paragraphs.Document_ID HAVING Count(*) >= 2
   - SELECT DISTINCT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2
   - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(DISTINCT *) >= 2
   - SELECT Paragraphs.Document_ID FROM Documents JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2
   - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(*) >= 2 LIMIT 1
   - SELECT Paragraphs.Document_ID FROM Paragraphs GROUP BY Paragraphs.Document_ID HAVING Count(*) > 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1029505729675293
   - -0.10467004776000977

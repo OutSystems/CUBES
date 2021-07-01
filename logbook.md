@@ -476,6 +476,12 @@ Added cache
 Disabled cache
 Fixed a few types inference
 
+#### c59
+misc changes?
+
+#### c60
+Fixed bug in bool constants
+
 ## db2cvs
 
 ### 6

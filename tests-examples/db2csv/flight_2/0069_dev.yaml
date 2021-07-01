@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0069_dev.csv
 raw_question: What are flight numbers of flights departing from Airport "APG"? 
 question_index: 247 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - APG
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - sourceairport
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT FlightNo
   FROM FLIGHTS
@@ -20,20 +27,20 @@ sql: |-
   FROM FLIGHTS
   WHERE SourceAirport = "APG"
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 - []
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 smbop_beam_groupby_columns:
 - []
 - []
@@ -86,14 +93,14 @@ smbop_beam_functions:
 smbop_beam_columns:
 - - airportname
 - - airportname
-- - sourceairport
-  - airportname
-- - destairport
-  - airportname
-- - sourceairport
-  - airportname
-- - destairport
-  - airportname
+- - airportname
+  - sourceairport
+- - airportname
+  - destairport
+- - airportname
+  - sourceairport
+- - airportname
+  - destairport
 - - airportname
 - - airportname
 - - airportname
@@ -111,17 +118,17 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
 - - '='
 - - '='
@@ -145,15 +152,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT flights.sourceairport FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.airportname = 'APG'
   - SELECT airports.airportcode FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.airportname = 'APG'
   - SELECT flights.sourceairport FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.airportname = 'APG'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -186,6 +223,9 @@ ratsql_beam_constants:
 - - APG
 - - APG
 - - APG
+- - APG
+- - APG
+  - '1'
 - - APG
 ratsql_beam_functions:
 - []
@@ -245,6 +285,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT flights.FlightNo FROM flights WHERE flights.SourceAirport = 'APG'
   - SELECT flights.FlightNo FROM flights WHERE flights.SourceAirport = 'APG' LIMIT 1
   - SELECT flights.FlightNo FROM flights WHERE DISTINCT flights.DestAirport = 'APG'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1050105094909668
   - -0.1049203872680664

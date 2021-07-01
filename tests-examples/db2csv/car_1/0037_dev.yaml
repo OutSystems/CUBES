@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0037_dev.csv
 raw_question: What are the countries having at least one car maker? List name and id. 
 question_index: 123 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 1
 join_columns:
@@ -14,6 +17,9 @@ groupby_columns:
  - countryid
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.CountryName,
          T1.CountryId
@@ -36,8 +42,8 @@ smbop_beam_join_columns:
   - countryid
 - - country
   - countryid
-- - id
-  - countryid
+- - countryid
+  - id
 smbop_beam_groupby_columns:
 - []
 - - countryid
@@ -87,6 +93,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT countries.countryname , car_makers.id FROM countries JOIN car_makers ON countries.countryid = car_makers.country GROUP BY countries.countryid HAVING COUNT( * ) >= 1
   - SELECT DISTINCT countries.countryname , car_makers.id FROM countries JOIN car_makers ON countries.countryid = car_makers.country GROUP BY car_makers.id HAVING COUNT( * ) >= 1
   - SELECT DISTINCT countries.countryname , car_makers.id FROM countries JOIN car_makers ON countries.countryid = car_makers.id GROUP BY car_makers.id HAVING COUNT( * ) >= 1
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - country
   - countryid
@@ -100,11 +121,11 @@ ratsql_beam_join_columns:
   - countryid
 - - country
   - countryid
-- - model
-  - country
+- - country
   - countryid
-  - id
   - maker
+  - model
+  - id
 ratsql_beam_groupby_columns:
 - - country
 - []
@@ -127,8 +148,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 ratsql_beam_constants:
 - - 1
@@ -136,6 +157,10 @@ ratsql_beam_constants:
 - - 1
 - - 1
 - - 1
+- - 1
+- - 1
+- - 1
+  - '1'
 - - 1
 - - 1
 ratsql_beam_functions:
@@ -192,6 +217,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT countries.CountryName, car_makers.Country FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY car_makers.Country HAVING Count(*) >= 1 LIMIT 1
   - SELECT countries.CountryName, car_makers.Country FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY countries.CountryId HAVING Count(*) >= 1
   - SELECT countries.CountryName, car_makers.Country FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model GROUP BY car_makers.Country HAVING Count(*) >= 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10397100448608398
   - -0.10638713836669922

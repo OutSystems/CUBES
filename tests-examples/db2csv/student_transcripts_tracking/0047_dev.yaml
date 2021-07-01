@@ -4,14 +4,21 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0047_dev.csv
 raw_question: What is the phone number of the man with the first name Timmothy and the last name Ward? 
 question_index: 553 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Ward
  - Timmothy
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - first_name
  - last_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT cell_mobile_number
   FROM Students
@@ -79,8 +86,8 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
   - '>'
 - - '='
@@ -96,23 +103,41 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT students.cell_mobile_number FROM students WHERE students.first_name >= 'Timmothy' AND students.last_name = 'Ward'
   - SELECT students.cell_mobile_number FROM students WHERE students.first_name > 'Timmothy' AND students.last_name = 'Ward'
   - SELECT students.cell_mobile_number FROM students WHERE students.first_name = 'Timmothy' AND students.last_name = 'Ward' ORDER BY students.cell_mobile_number DESC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - - address_id
   - current_address_id
-- - department_id
+- - degree_program_id
+  - department_id
   - student_id
-  - degree_program_id
-- - student_id
-  - student_enrolment_id
+- - student_enrolment_id
   - student_course_id
-- - student_id
-  - degree_program_id
-- - student_id
-  - student_enrolment_id
+  - student_id
+- - degree_program_id
+  - student_id
+- - student_enrolment_id
   - course_id
+  - student_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -128,22 +153,22 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 ratsql_beam_constants:
 - - Ward
   - Timmothy
@@ -151,6 +176,11 @@ ratsql_beam_constants:
   - Timmothy
 - - Ward
   - Timmothy
+- - Ward
+  - Timmothy
+- - Ward
+  - Timmothy
+  - '1'
 - - Ward
   - Timmothy
 - - Ward
@@ -227,6 +257,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Students.cell_mobile_number FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
   - SELECT Students.cell_mobile_number FROM Degree_Programs JOIN Students JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id AND Student_Enrolment.student_id = Students.student_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
   - SELECT Students.cell_mobile_number FROM Courses JOIN Sections ON Sections.course_id = Courses.course_id JOIN Students JOIN Student_Enrolment ON Student_Enrolment.student_id = Students.student_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10581398010253906
   - -0.10494565963745117

@@ -5,10 +5,18 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0063_dev.csv
 raw_question: How many owners temporarily do not have any dogs? 
 question_index: 980 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - owner_id
+filters: []
+ieu: []
 comment: |-
   SELECT count(*)
   FROM Owners
@@ -103,6 +111,30 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.owner_id FROM owners
   - SELECT dogs.owner_id FROM dogs EXCEPT SELECT dogs.owner_id FROM dogs
   - SELECT dogs.owner_id FROM dogs UNION SELECT dogs.owner_id FROM dogs
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -133,15 +165,17 @@ ratsql_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 ratsql_beam_constants:
 - []
 - []
 - []
 - []
+- - '1)'
+- - '1'
 - []
 - []
 - []
@@ -197,6 +231,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs)
   - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id)
   - SELECT Count(*) FROM Owners WHERE Owners.owner_id NOT IN (SELECT Dogs.owner_id FROM Dogs JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10740232467651367
   - -0.10266542434692383

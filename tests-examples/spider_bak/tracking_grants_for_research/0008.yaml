@@ -1,0 +1,30 @@
+db: tests-examples/spider/tracking_grants_for_research/tables/db.sqlite
+inputs:
+- tests-examples/spider/tracking_grants_for_research/tables/documents.csv
+- tests-examples/spider/tracking_grants_for_research/tables/grants.csv
+- tests-examples/spider/tracking_grants_for_research/tables/organisation_types.csv
+- tests-examples/spider/tracking_grants_for_research/tables/organisations.csv
+output: tests-examples/spider/tracking_grants_for_research/tables/0008.csv
+constants:
+- '5000'
+- Research
+columns:
+- grant_amount
+- organisation_type_description
+comment: |-
+  SELECT T1.sent_date
+  FROM documents AS T1
+  JOIN Grants AS T2 ON T1.grant_id = T2.grant_id
+  JOIN Organisations AS T3 ON T2.organisation_id = T3.organisation_id
+  JOIN organisation_Types AS T4 ON T3.organisation_type = T4.organisation_type
+  WHERE T2.grant_amount > 5000
+    AND T4.organisation_type_description = 'Research'
+
+sql: |-
+  SELECT T1.sent_date
+  FROM documents AS T1
+  JOIN Grants AS T2 ON T1.grant_id = T2.grant_id
+  JOIN Organisations AS T3 ON T2.organisation_id = T3.organisation_id
+  JOIN organisation_Types AS T4 ON T3.organisation_type = T4.organisation_type
+  WHERE T2.grant_amount > 5000
+    AND T4.organisation_type_description = 'Research'

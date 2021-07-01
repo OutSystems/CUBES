@@ -4,14 +4,20 @@ inputs:
 output: tests-examples/db2csv/employee_hire_evaluation/tables/0035_dev.csv
 raw_question: Which district has both stores with less than 3000 products and stores with more than 10000 products? 
 question_index: 293 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 3000
  - 10000
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - number_products
 filters:
- - '>'
  - '<'
+ - '>'
 ieu:
  - intersect
 comment: |-
@@ -115,16 +121,16 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
+- - '<'
+  - '>'
 - - '>'
-  - '<'
 - - '>'
-- - '>'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
 - - '>'
 - - '<'
 - - '>'
@@ -151,6 +157,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT shop.district FROM shop WHERE shop.number_products<3000 ORDER BY shop.district DESC
   - SELECT shop.district FROM shop WHERE shop.number_products > 10000
   - SELECT shop.district FROM shop WHERE shop.number_products<3000
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - shop_id
@@ -177,27 +216,29 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
   - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/evaluation.csv
   - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
   - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
-- - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
   - tests-examples/db2csv/employee_hire_evaluation/tables/evaluation.csv
-  - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
   - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
+- - tests-examples/db2csv/employee_hire_evaluation/tables/employee.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/hiring.csv
+  - tests-examples/db2csv/employee_hire_evaluation/tables/evaluation.csv
 - - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
 - - tests-examples/db2csv/employee_hire_evaluation/tables/shop.csv
 ratsql_beam_constants:
+- - 3000
+  - 10000
 - - 3000
   - 10000
 - - 3000
@@ -247,24 +288,24 @@ ratsql_beam_ieu:
 - - intersect
 - - intersect
 ratsql_beam_filters:
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
-- - '>'
-  - '<'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
+- - '<'
+  - '>'
 ratsql_beam_inferred_code:
   - SELECT shop.District FROM shop WHERE shop.Number_products < 'terminal' INTERSECT SELECT shop.District FROM shop WHERE shop.Number_products > 'terminal'
   - SELECT shop.District FROM shop WHERE shop.Number_products < 'terminal' INTERSECT SELECT shop.District FROM employee JOIN shop JOIN hiring ON employee.Employee_ID = hiring.Employee_ID AND hiring.Shop_ID = shop.Shop_ID WHERE shop.Number_products > 'terminal'
@@ -287,6 +328,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT shop.District FROM shop WHERE shop.Number_products < 10000 INTERSECT SELECT DISTINCT shop.District FROM shop WHERE shop.Number_products > 3000
   - SELECT shop.District FROM shop WHERE DISTINCT shop.Number_products < 10000 INTERSECT SELECT shop.District FROM shop WHERE shop.Number_products > 3000
   - SELECT DISTINCT shop.District FROM shop WHERE shop.Number_products < 10000 INTERSECT SELECT shop.District FROM shop WHERE shop.Number_products > 3000
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10546398162841797
   - -0.10466527938842773

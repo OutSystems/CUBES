@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0020_dev.csv
 raw_question: Which grades have 4 or more high schoolers? 
 question_index: 881 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 4
+join_columns: []
 groupby_columns:
  - grade
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT grade
   FROM Highschooler
@@ -51,18 +58,27 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.grade FROM highschooler GROUP BY highschooler.grade HAVING COUNT( * ) >= 4
   - SELECT COUNT( DISTINCT 4 ) FROM highschooler GROUP BY highschooler.grade HAVING COUNT( * ) >= 4
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - liked_id
-- - id
-  - student_id
+- - liked_id
+  - id
+- - student_id
+  - id
 - []
 - []
 - []
 - []
-- - id
-  - liked_id
+- - liked_id
+  - id
 ratsql_beam_groupby_columns:
 - - grade
 - - grade
@@ -90,6 +106,9 @@ ratsql_beam_constants:
 - - 4
 - - 4
 - - 4
+- - 4
+- - 4
+  - '1'
 - - 4
 - - 4
 - - 4
@@ -126,8 +145,8 @@ ratsql_beam_filters:
 - []
 - []
 - []
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - []
 - []
 ratsql_beam_inferred_code:
@@ -150,8 +169,35 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.grade FROM Highschooler GROUP BY Highschooler.grade HAVING Count(DISTINCT *) >= 4
   - SELECT Highschooler.grade FROM Highschooler GROUP BY Highschooler.grade HAVING Count(*) >= 4 LIMIT 1
   - SELECT Highschooler.grade FROM Highschooler GROUP BY Highschooler.grade HAVING Count(DISTINCT Highschooler.grade) >= 4
-  - SELECT Highschooler.grade FROM Highschooler GROUP BY Highschooler.grade HAVING Count(Highschooler.ID) >= 4
-  - SELECT Highschooler.grade FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.grade HAVING Count(Likes.student_id) >= 4
+  - SELECT Highschooler.grade FROM Highschooler GROUP BY Highschooler.grade HAVING Count(Highschooler.ID) >= '4'
+  - SELECT Highschooler.grade FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Highschooler.grade HAVING Count(Likes.student_id) >= '4'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10266876220703125
   - -0.10531139373779297

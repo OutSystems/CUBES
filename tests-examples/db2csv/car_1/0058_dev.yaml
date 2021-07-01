@@ -4,14 +4,20 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0058_dev.csv
 raw_question: What is the number of cars with more than 4 cylinders? 
 question_index: 144 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 4
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - cylinders
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT count(*)
   FROM CARS_DATA
@@ -36,10 +42,10 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 smbop_beam_constants:
 - - 4
@@ -83,33 +89,51 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM car_names, cars_data WHERE cars_data.cylinders = 4
   - SELECT COUNT( * ) FROM car_names, cars_data WHERE cars_data.cylinders<4
   - SELECT cars_data.cylinders FROM cars_data
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - - model
+  - makeid
   - id
+- - makeid
+  - id
+- - country
   - makeid
-- - id
-  - makeid
-- - model
-  - country
+  - countryid
+  - maker
   - contid
+  - model
+  - id
   - continent
-  - countryid
-  - id
-  - maker
+- - country
   - makeid
-- - model
-  - country
   - countryid
-  - id
-  - maker
-  - makeid
-- - id
   - maker
   - model
+  - id
+- - model
+  - maker
   - makeid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -123,30 +147,33 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/continents.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 ratsql_beam_constants:
 - - 4
 - - 4
 - - 4
+- - 4
+- - 4
+  - '1'
 - - 4
 - - 4
 - - 4
@@ -210,6 +237,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM continents JOIN countries ON continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders > 4
   - SELECT Count(*) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders > 4
   - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders > 4
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10406684875488281
   - -0.1049036979675293

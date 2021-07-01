@@ -1,10 +1,13 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0019_dev.csv
 raw_question: What are the names and id of courses having at most 2 sections? 
 question_index: 525 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
@@ -13,6 +16,9 @@ groupby_columns:
  - course_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.course_name,
          T1.course_id
@@ -33,8 +39,8 @@ smbop_beam_join_columns:
 smbop_beam_groupby_columns:
 - - course_name,
 smbop_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 smbop_beam_constants:
 - - 2
 smbop_beam_functions:
@@ -49,19 +55,25 @@ smbop_beam_inferred_code:
   - SELECT courses.course_name , courses.course_id FROM courses JOIN sections ON courses.course_id = sections.course_id GROUP BY courses.course_name , sections.course_id HAVING COUNT( * ) <= 2
 smbop_beam_inferred_code_w_terminals:
   - SELECT courses.course_name , courses.course_id FROM courses JOIN sections ON courses.course_id = sections.course_id GROUP BY courses.course_name , sections.course_id HAVING COUNT( * ) <= 2
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
 - - course_id
 - - course_id
 - - course_id
 - - course_id
 - - student_enrolment_id
-  - course_id
   - degree_program_id
-- - student_id
-  - student_enrolment_id
   - course_id
-- - student_course_id
+- - student_enrolment_id
   - course_id
+  - student_id
+- - course_id
+  - student_course_id
 ratsql_beam_groupby_columns:
 - - course_id
 - - course_id
@@ -71,33 +83,37 @@ ratsql_beam_groupby_columns:
 - - course_id
 - - course_id
 ratsql_beam_tables:
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+- - 2
+  - '1'
 - - 2
 - - 2
 - - 2
@@ -155,6 +171,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Courses.course_name, Sections.course_id FROM Courses JOIN Degree_Programs JOIN Sections ON Courses.course_id = Sections.course_id JOIN Student_Enrolment ON Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id GROUP BY Sections.course_id HAVING Count(*) <= 2
   - SELECT Courses.course_name, Sections.course_id FROM Courses JOIN Sections ON Courses.course_id = Sections.course_id JOIN Students JOIN Student_Enrolment ON Student_Enrolment.student_id = Students.student_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id GROUP BY Sections.course_id HAVING Count(*) <= 2
   - SELECT Courses.course_name, Sections.course_id FROM Courses JOIN Sections ON Courses.course_id = Sections.course_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id GROUP BY Sections.course_id HAVING Count(*) <= 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1043863296508789
   - -0.10408782958984375

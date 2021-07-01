@@ -4,15 +4,20 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0019_dev.csv
 raw_question: What is the name of country that has the shortest life expectancy in Asia? 
 question_index: 720 
+has_limit: True 
+has_order_by: True 
+order_by_direction: []
 constants:
  - Asia
-functions:
- - min
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - continent
- - lifeexpectancy
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT Name
   FROM country
@@ -62,7 +67,9 @@ smbop_beam_tables:
 smbop_beam_constants:
 - - Asia
 - - Asia
+  - '1'
 - - Asia
+  - '1'
 - - Asia
 - - Asia
 - - Asia
@@ -72,8 +79,8 @@ smbop_beam_constants:
 - - Asia
 smbop_beam_functions:
 - - min
-- - min
-- - min
+- []
+- []
 - - min
 - []
 - []
@@ -82,18 +89,16 @@ smbop_beam_functions:
 - []
 - []
 smbop_beam_columns:
-- - lifeexpectancy
-  - region
-- - lifeexpectancy
-  - region
-- - continent
+- - region
   - lifeexpectancy
-- - lifeexpectancy
-  - region
+- - region
+- - continent
+- - region
+  - lifeexpectancy
 - - continent
 - - continent
-- - lifeexpectancy
-  - region
+- - region
+  - lifeexpectancy
 - - continent
   - lifeexpectancy
 - - region
@@ -142,14 +147,47 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MIN( country.lifeexpectancy ) FROM country WHERE country.continent = 'Asia'
   - SELECT country.name FROM country WHERE country.region = 'Asia'
   - SELECT country.name FROM country WHERE country.region = 'Asia' ORDER BY country.lifeexpectancy ASC
+smbop_beam_has_limit:
+  - False
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - True
+  - True
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -164,38 +202,42 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
 - - Asia
+  - '1'
+- - Asia
+  - '1'
+- - Asia
+  - '1'
+- - Asia
+  - '1'
 - - Asia
 - - Asia
+  - '1'
 - - Asia
-- - Asia
+  - '1'
 - - Asia
 - - Asia
 ratsql_beam_functions:
-- - min
-- - min
 - []
-- - min
-- - min
+- []
+- []
+- []
+- []
 - - min
 - - min
 ratsql_beam_columns:
 - - continent
-  - lifeexpectancy
-- - continent
-  - lifeexpectancy
 - - continent
 - - continent
-  - lifeexpectancy
 - - continent
-  - lifeexpectancy
+- - continent
 - - continent
   - lifeexpectancy
 - - continent
@@ -216,8 +258,8 @@ ratsql_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '<'
   - '<='
+  - '<'
 ratsql_beam_inferred_code:
   - SELECT country.Name FROM country WHERE country.Continent = 'terminal' ORDER BY country.LifeExpectancy Asc LIMIT 1
   - SELECT DISTINCT country.Name FROM country WHERE country.Continent = 'terminal' ORDER BY country.LifeExpectancy Asc LIMIT 1
@@ -236,8 +278,32 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT country.Name FROM country WHERE country.Continent = 'Asia' ORDER BY country.LifeExpectancy Asc
   - SELECT country.Name FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.Continent = 'Asia' ORDER BY country.LifeExpectancy Asc LIMIT 1
   - SELECT country.Name FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Continent = 'Asia' ORDER BY country.LifeExpectancy Asc LIMIT 1
-  - SELECT country.Name FROM country WHERE country.LifeExpectancy = (SELECT Min(country.LifeExpectancy) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.LifeExpectancy <= (SELECT Min(country.LifeExpectancy) FROM country WHERE country.Continent = 'Asia'
+  - SELECT country.Name FROM country WHERE country.LifeExpectancy = (SELECT Min(country.LifeExpectancy) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.LifeExpectancy <= (SELECT Min(country.LifeExpectancy) FROM country WHERE country.Continent = 'Asia' )
+ratsql_beam_has_limit:
+  - True
+  - True
+  - False
+  - True
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- []
+- -  asc 
+- -  asc 
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10558938980102539
   - -0.10625123977661133

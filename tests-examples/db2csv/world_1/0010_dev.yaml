@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0010_dev.csv
 raw_question: What region is Kabul in? 
 question_index: 711 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Kabul
 join_columns:
- - code
  - countrycode
+ - code
+groupby_columns: []
+functions: []
 columns:
  - name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT Region
   FROM country AS T1
@@ -26,12 +32,12 @@ sql: |-
   JOIN city AS T2 ON T1.Code = T2.CountryCode
   WHERE T2.Name = "Kabul"
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 smbop_beam_groupby_columns:
 - []
 - []
@@ -71,20 +77,32 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT country.region FROM city JOIN country ON city.countrycode = country.code WHERE city.name = 'Kabul'
   - SELECT country.region FROM country JOIN city ON country.code = city.countrycode WHERE city.name = 'Kabul'
   - SELECT country.region FROM city JOIN country ON city.countrycode = country.code WHERE city.name = 'Kabul' ORDER BY country.region DESC
-ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
 - []
-- - code
-  - countrycode
+- []
+- []
+ratsql_beam_join_columns:
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- []
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -101,18 +119,20 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
 - - Kabul
 - - Kabul
 - - Kabul
+- - Kabul
+  - '1'
 - - Kabul
 - - Kabul
 - - Kabul
@@ -164,9 +184,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE DISTINCT city.Name = 'Kabul'
   - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Name = 'Kabul' LIMIT 1
   - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Name = 'Kabul'
-  - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Code = Kabul
+  - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Code = 'Kabul'
   - SELECT city.ID FROM city WHERE city.Name = 'Kabul'
-  - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.CountryCode = Kabul
+  - SELECT country.Region FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.CountryCode = 'Kabul'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10641860961914062
   - -0.10439300537109375

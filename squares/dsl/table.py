@@ -21,6 +21,10 @@ def sanitize_col(col, path=''):
     return new_col
 
 
+def get_table_name(path: str) -> str:
+    return 'df_' + os.path.splitext(os.path.basename(path))[0]
+
+
 class Table:
 
     def __init__(self, filename: str, name: str = None):
@@ -32,7 +36,7 @@ class Table:
         if name is not None:
             self.name = name
         else:
-            self.name = 'df_' + os.path.splitext(os.path.basename(filename))[0]
+            self.name = get_table_name(filename)
         self.name = re.sub('[^a-zA-Z0-9._]', '_', self.name)
 
         with open(filename, 'r') as file:
@@ -58,7 +62,8 @@ class Table:
                                 if self.col_types[col] == types.STRING:
                                     give_up = True
                                 else:
-                                    logger.error('Column %s in table %s was labeled as %s but parsing failed due to entry "%s". Attempting to use column as string...', col, self.name, self.col_types[col], failing_string)
+                                    logger.error('Column %s in table %s was labeled as %s but parsing failed due to entry "%s". Attempting to use column as string...', col,
+                                                 self.name, self.col_types[col], failing_string)
                                     self.col_types[col] = types.STRING
                                 break
                 else:
@@ -111,5 +116,5 @@ class Table:
         code = f'{self.name} <- read_csv("{self.path}", skip=1, ' \
                f'col_names=c({",".join(map(util.single_quote_str, self.col_names))}), ' \
                f'col_types=cols({types.get_r_types([self.col_types[col] for col in self.col_names])}))\n'
-
+        # print(code)
         return code

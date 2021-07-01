@@ -1,0 +1,31 @@
+db: tests-examples/spider/customers_campaigns_ecommerce/tables/db.sqlite
+inputs:
+- tests-examples/spider/customers_campaigns_ecommerce/tables/customers.csv
+- tests-examples/spider/customers_campaigns_ecommerce/tables/mailshot_customers.csv
+output: tests-examples/spider/customers_campaigns_ecommerce/tables/0011.csv
+constants:
+- Order
+- No Response
+columns:
+- outcome_code
+comment: |-
+  SELECT T2.customer_name,
+         T2.payment_method
+  FROM mailshot_customers AS T1
+  JOIN customers AS T2 ON T1.customer_id = T2.customer_id
+  WHERE T1.outcome_code = 'Order' INTERSECT
+    SELECT T2.customer_name,
+           T2.payment_method
+    FROM mailshot_customers AS T1
+    JOIN customers AS T2 ON T1.customer_id = T2.customer_id WHERE T1.outcome_code = 'No Response'
+
+sql: |-
+  SELECT T2.customer_name,
+         T2.payment_method
+  FROM mailshot_customers AS T1
+  JOIN customers AS T2 ON T1.customer_id = T2.customer_id
+  WHERE T1.outcome_code = 'Order' INTERSECT
+    SELECT T2.customer_name,
+           T2.payment_method
+    FROM mailshot_customers AS T1
+    JOIN customers AS T2 ON T1.customer_id = T2.customer_id WHERE T1.outcome_code = 'No Response'

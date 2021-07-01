@@ -1,24 +1,29 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
  - tests-examples/db2csv/world_1/tables/country.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 output: tests-examples/db2csv/world_1/tables/0056_dev.csv
 raw_question: What is the language that is used by the largest number of Asian nations? 
 question_index: 757 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
 constants:
  - Asia
+ - '1'
 join_columns:
- - code
  - countrycode
+ - code
 groupby_columns:
  - language
 functions:
- - max
  - count
 columns:
  - continent
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T2.Language
   FROM country AS T1
@@ -37,10 +42,10 @@ sql: |-
   ORDER BY COUNT (*) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 - []
 - []
@@ -61,10 +66,10 @@ smbop_beam_groupby_columns:
 - []
 - - language
 smbop_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
@@ -75,29 +80,31 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
 - - Asia
+  - '1)'
+- - Asia
+  - '1)'
 - - Asia
 - - Asia
 - - Asia
 - - Asia
+  - '2'
 - - Asia
 - - Asia
 - - Asia
+  - '1'
 - - Asia
-- - Asia
+  - '1'
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
 - []
 - []
 - - count
 - []
 - []
 - []
-- - min
-- - max
-  - count
+- []
+- - count
 smbop_beam_columns:
 - - continent
 - - region
@@ -107,7 +114,7 @@ smbop_beam_columns:
 - []
 - []
 - []
-- - region
+- []
 - []
 smbop_beam_ieu:
 - []
@@ -153,15 +160,48 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT countrylanguage.language FROM countrylanguage GROUP BY countrylanguage.language
   - SELECT country.code FROM country ORDER BY country.region ASC LIMIT 1
   - SELECT countrylanguage.language FROM countrylanguage GROUP BY countrylanguage.language ORDER BY COUNT( * ) DESC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - True
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - False
+  - False
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- -  asc 
+- []
+- []
+- -  asc 
+- -  desc 
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 ratsql_beam_groupby_columns:
 - - language
@@ -176,34 +216,38 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/city.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - Asia
+  - '1'
+- - Asia
+  - '1'
+- - Asia
+  - '1'
+- - Asia
+  - '1'
+- - Asia
+  - '1'
 - - Asia
 - - Asia
+  - '1'
 - - Asia
+  - '1'
 - - Asia
-- - Asia
-- - Asia
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - - isofficial
@@ -248,6 +292,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT countrylanguage.Language FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY countrylanguage.Language ORDER BY Count(*) Desc LIMIT 1
   - SELECT countrylanguage.Language FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY countrylanguage.Language ORDER BY Count(*) Desc LIMIT 1
   - SELECT countrylanguage.Language FROM countrylanguage GROUP BY countrylanguage.Language ORDER BY Count(countrylanguage.Percentage) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10460424423217773
   - -0.10392045974731445

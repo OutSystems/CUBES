@@ -4,15 +4,21 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0021_dev.csv
 raw_question: List the number of all matches who played in years of 2013 or 2016. 
 question_index: 449 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - 2016
  - 2013
+ - 2016
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - year
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM matches
@@ -58,26 +64,26 @@ smbop_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
 smbop_beam_functions:
 - - count
 - - count
@@ -119,13 +125,13 @@ smbop_beam_filters:
 - - '='
   - '>'
 - - '='
-- - '='
-  - '!='
+- - '!='
+  - '='
 - - ' between '
 - - '='
   - '<'
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '='
   - '<'
 smbop_beam_inferred_code:
@@ -150,16 +156,49 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM matches WHERE matches.year = 2013 OR matches.year<2016
   - SELECT COUNT( * ) FROM matches WHERE matches.year >= 2013 OR matches.year >= 2016
   - SELECT COUNT( * ) FROM matches WHERE matches.year = 2013 OR matches.year<2013
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
 - []
 - []
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -172,28 +211,35 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+  - '1'
+- - 2013
+  - 2016
+- - 2013
+  - 2016
 ratsql_beam_functions:
 - - count
 - - count
@@ -221,8 +267,8 @@ ratsql_beam_ieu:
 ratsql_beam_filters:
 - - '='
 - - '='
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '='
 - - '='
 - - '='
@@ -249,6 +295,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM matches WHERE matches.year = 2016 OR matches.year = 2013 LIMIT 1
   - SELECT DISTINCT Count(*) FROM matches WHERE matches.year = 2016 OR matches.year = 2013
   - SELECT Count(*) FROM players JOIN matches ON matches.loser_id = players.player_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.year = 2016 OR matches.year = 2013
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10671615600585938
   - -0.10459041595458984

@@ -4,8 +4,13 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0031_dev.csv
 raw_question: What is the average miles per gallon(mpg) of the cars with 4 cylinders? 
 question_index: 117 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 4
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
@@ -13,6 +18,7 @@ columns:
  - mpg
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT avg(mpg)
   FROM CARS_DATA
@@ -87,11 +93,11 @@ smbop_beam_ieu:
 smbop_beam_filters:
 - - '='
 - - '='
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '!='
-- - '<'
-  - '<='
+- - '<='
+  - '<'
 - - '>'
 - - '='
 smbop_beam_inferred_code:
@@ -110,34 +116,58 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( cars_data.mpg ) FROM cars_data WHERE cars_data.cylinders <= 4
   - SELECT AVG( cars_data.mpg ) FROM cars_data WHERE cars_data.cylinders > 4
   - SELECT cars_data.mpg FROM cars_data WHERE cars_data.cylinders = 4
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - model
-  - country
+- - country
+  - makeid
+  - countryid
+  - maker
   - contid
+  - model
+  - id
   - continent
-  - countryid
-  - id
-  - maker
+- - country
   - makeid
-- - model
-  - country
   - countryid
-  - id
-  - maker
-  - makeid
-- - id
   - maker
   - model
-  - makeid
-- - model
   - id
+- - model
+  - maker
   - makeid
-- - id
+  - id
+- - model
   - makeid
+  - id
+- - makeid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -153,30 +183,32 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/continents.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
 - - 4
 - - 4
 - - 4
+- - 4
+  - '1'
 - - 4
 - - 4
 - - 4
@@ -254,6 +286,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(cars_data.MPG) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders = 4
   - SELECT Avg(cars_data.MPG) FROM model_list JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders = 4
   - SELECT Avg(cars_data.MPG) FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Cylinders = 4
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10500717163085938
   - -0.10467147827148438

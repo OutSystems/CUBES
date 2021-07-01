@@ -1,5 +1,7 @@
 import argparse
 import csv
+import logging
+import os.path
 import re
 import shutil
 import sqlite3
@@ -8,7 +10,6 @@ from collections import defaultdict
 from difflib import ndiff
 from functools import singledispatchmethod
 from itertools import chain
-from logging import getLogger
 from os.path import isfile
 from pathlib import Path
 from typing import List, Tuple
@@ -21,7 +22,9 @@ from rpy2 import robjects
 from sqlparse.sql import Statement, Token, Function, Identifier, Where, Comparison, IdentifierList, Parenthesis
 from sqlparse.tokens import Operator, Number, Punctuation, Wildcard, String, Name
 
+import squares.util
 from squares import types
+import squares.tyrell.logger
 
 robjects.r('library(vctrs)')
 
@@ -29,7 +32,7 @@ vec_as_names = robjects.r('vec_as_names')
 
 allowed_keywords_as_identifiers = ['events', 'length', 'month', 'location', 'position', 'uid', 'source', 'year',
                                    'section', 'connection',
-                                   'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics', 'result']
+                                   'type', 'roles', 'host', 'match', 'class', 'block', 'characteristics', 'result', 'title', 'user']
 
 
 def removesuffix(self: str, suffix: str, /) -> str:
@@ -77,16 +80,19 @@ parser.add_argument('--force', action='store_true')
 
 args, other_args = parser.parse_known_args()
 
-logger = getLogger('spider-parser')
+squares.tyrell.logger.setup_logger('spider-parser')
+logger = logging.getLogger('spider-parser')
+logger.setLevel(logging.INFO)
 
 connections = {}
 tables = {}
+empty_tables = defaultdict(set)
 column_map = defaultdict(OrderedSet)
-invalid_instance_sets = set()
 column_types = defaultdict(dict)
 
 counters = defaultdict(lambda: 1)
 failed = 0
+skipped = 0
 
 
 def color_diff(diff):
@@ -129,18 +135,18 @@ class InstanceCollector:
     def _(self, node: Token):
         if not node.is_keyword and not node.is_whitespace and not node.ttype in Punctuation and not node.ttype in Operator and not node.ttype in Wildcard and not node.ttype in Name.Builtin:
             if node.ttype in Number:
-                if self.in_limit:
-                    self.limit = node.value
-                    self.in_limit = False
-                    if int(self.limit) == 1:
-                        self.functions.add(self.limit_func)
-                        self.columns.update(self.order_col)
-                else:
-                    self.constants.add(node.value)
+                # if self.in_limit:
+                #     self.limit = node.value
+                #     self.in_limit = False
+                #     if int(self.limit) == 1:
+                #         self.functions.add(self.limit_func)
+                #         self.columns.update(self.order_col)
+                # else:
+                self.constants.add(node.value)
             elif node.ttype in String:
                 self.constants.add(node.value[1:-1])
             else:
-                raise NotImplementedError(node, type(node))
+                logger.error('Unknown token found %s (of type %s)', node, type(node))
         elif node.is_keyword:
             if node.value.lower() == 'limit':
                 self.in_limit = True
@@ -248,7 +254,7 @@ class InstanceCollector:
                     self.in_like = False
                 self.constants.add(const)
             else:
-                raise NotImplementedError(node, type(node))
+                logger.error('Unknown token found %s (of type %s)', node, type(node))
         elif node.ttype in Operator:
             if node.value.lower() == 'like':
                 self.filters.add('like')
@@ -290,10 +296,10 @@ class InstanceCollector:
 
 def map_type(t: str) -> str:
     t = t.lower()
-    if t == 'integer' or t == 'int' or t == 'bigint' or t == 'smallint' or t == 'smallint unsigned' or t == 'tinyint unsigned' or re.match(
+    if t == 'integer' or t == 'int' or t == 'bigint' or t == 'smallint' or t == 'smallint unsigned' or t == 'tinyint unsigned' or t == 'mediumint unsigned' or re.match(
             r'(big)?int\(\d+\)', t) or t == 'year':
         return 'int'
-    elif t == 'text' or re.match(r'(character )?(var)?char(2)?\(\d+\)', t):
+    elif t == 'text' or re.match(r'(character )?(var)?char(2)?\(\d+\)', t) or t == 'blob':
         return 'str'
     elif t == 'real' or t == 'numeric' or t == 'decimal' or t == 'double' or t == 'float' or re.match(
             r'(number)|(numeric)|(decimal)\(\d+,\d+\)', t) or re.match(r'float\(\d+\)', t):
@@ -304,7 +310,7 @@ def map_type(t: str) -> str:
         return 'datetime'
     elif t == 'bit' or t == 'bool' or t == 'boolean':
         return 'bool'
-    elif t == '':
+    elif t == '' or t == 'null':
         return 'guess'
     else:
         raise NotImplementedError(f'Unknown type {t}')
@@ -314,8 +320,12 @@ def coalesce_type(current, new):
     logger.warning('Column with mixed types found: %s and %s', current, new)
     if {current, new} == {'int', 'real'}:
         return 'real'
-    if {current, new} == {'text', 'int'}:
+    if {current, new} == {'str', 'int'}:
         return 'str'
+    if {current, new} == {'str', 'real'}:
+        return 'str'
+    if {'guess'}.issubset({current, new}):
+        return 'guess'
     else:
         raise NotImplementedError(f'Unknown type mixing: {current} with {new}')
 
@@ -353,8 +363,9 @@ with open('spider/train_gold.sql') as f:
             print(f'Found new instance set {instance_set} with tables {tables[instance_set]}')
             conn = connections[instance_set]
             c = conn.cursor()
-            try:
-                for table in tables[instance_set]:
+
+            for table in tables[instance_set]:
+                try:
                     columns = OrderedSet()
                     with open(f'tests-examples/spider/{instance_set}/tables/{table}.csv', 'w', newline='') as out_f:
                         writer = csv.writer(out_f)
@@ -368,6 +379,7 @@ with open('spider/train_gold.sql') as f:
                             csv_cols.append(f'{cols[-1]}:{map_type(row[2])}')
                             if cols[-1] not in column_types[instance_set]:
                                 column_types[instance_set][cols[-1]] = map_type(row[2])
+                                logger.debug('Mapped column %s to type %s', cols[-1], column_types[instance_set][cols[-1]])
                             elif column_types[instance_set][cols[-1]] == map_type(row[2]):
                                 pass
                             else:
@@ -379,30 +391,25 @@ with open('spider/train_gold.sql') as f:
                         c.execute(f"SELECT * FROM {table};")
                         row = c.fetchone()
                         if row is None:
-                            raise EmptyOutputException(f'{instance_set}/{table}')
+                            raise EmptyOutputException(table)
                         while row:
                             writer.writerow(row)
                             row = c.fetchone()
                     column_map[instance_set].update(columns)
-            except EmptyOutputException as e:
-                print(f"\tTable {e.args[0]} is empty!! Skipping instance set.")
-                invalid_instance_sets.add(instance_set)
-            finally:
-                c.close()
-
-        if instance_set in invalid_instance_sets:
-            continue
+                except EmptyOutputException as e:
+                    empty_tables[instance_set].add(e.args[0])
+                    logger.error('Table %s/%s is empty...', instance_set, e.args[0])
+            c.close()
 
         conn = connections[instance_set]
         columns = column_map[instance_set]
 
-        print(f'Executing query {counters[instance_set]} of {instance_set} (total {sum(counters.values())})')
+        logger.info('Executing query %s of %s (total %d)', counters[instance_set], instance_set, sum(counters.values()))
         cur = conn.cursor()
         cur2 = conn.cursor()
+        output_filename = f'tests-examples/spider/{instance_set}/tables/{str(counters[instance_set]).rjust(4, "0")}.csv'
         try:
-            with open(f'tests-examples/spider/{instance_set}/tables/{str(counters[instance_set]).rjust(4, "0")}.csv',
-                      'w',
-                      newline='') as out_f:
+            with open(output_filename, 'w', newline='') as out_f:
                 writer = csv.writer(out_f)
                 cur.execute(query)
                 cols = [desc[0].lower() for desc in cur.description]
@@ -414,6 +421,23 @@ with open('spider/train_gold.sql') as f:
                 cols_types = coalesce_types(cur2.fetchall())
                 cols_types2 = list()
                 for col, col_type in zip(cols, cols_types):
+                    if col == 'count(*)':
+                        cols_types2.append('int')
+                        continue
+                    tmp = re.match(rf'(\w+)\s*\((?:distinct\s+)?(.+)\)', col)
+                    if tmp is not None:
+                        col = tmp[2]
+                        if tmp[1] == 'avg' or tmp[1] == 'mean':
+                            cols_types2.append('real')
+                            continue
+                        elif tmp[1] == 'count':
+                            cols_types2.append('int')
+                            continue
+
+                    tmp = re.match(rf'.+\.(.+)', col)
+                    if tmp is not None:
+                        col = tmp[1]
+
                     if col in column_types[instance_set]:
                         if column_types[instance_set][col] != types.UNKNOWN:
                             cols_types2.append(column_types[instance_set][col])
@@ -433,6 +457,19 @@ with open('spider/train_gold.sql') as f:
 
             collector = InstanceCollector()
             collector.visit(stmt)
+
+            has_empty_input = False
+            for table in tables[instance_set]:
+                if table in collector.identifiers:
+                    if table in empty_tables[instance_set]:
+                        logger.error('Skipping instance %d of %s because table %s is empty', counters[instance_set], instance_set, table)
+                        has_empty_input = True
+                        break
+            if has_empty_input:
+                if os.path.isfile(output_filename):
+                    os.remove(output_filename)
+                skipped += 1
+                continue
 
             instance = {
                 'db': f'tests-examples/spider/{instance_set}/tables/db.sqlite',
@@ -473,15 +510,16 @@ with open('spider/train_gold.sql') as f:
 
         except EmptyOutputException:
             print(f'Empty output while executing query {counters[instance_set]} of {instance_set} (total {sum(counters.values())})')
+            skipped += 1
+            if os.path.isfile(output_filename):
+                os.remove(output_filename)
         except Exception as e:
-            print(f'{Fore.RED}Error while executing query {counters[instance_set]} of {instance_set} (total {sum(counters.values())})')
-            print(f"\t{query}")
-            print(f'\t{e}{Fore.RESET}')
-            # traceback.print_exc()
+            logger.exception('Error while executing query %s of %s (total %d)\n%s', counters[instance_set], instance_set, sum(counters.values()), query)
             failed += 1
         finally:
             cur.close()
             counters[instance_set] += 1
 
 print(f'Failed to produce {failed} instances!')
-print(f'Invalid instance sets: {invalid_instance_sets}')
+print(f'Skipped {skipped} instances due to empty inputs/outputs!')
+

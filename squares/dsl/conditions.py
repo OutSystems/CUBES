@@ -206,15 +206,27 @@ class ConditionGenerator:
                         filter_parts[frozenset((column, constant))].add(f"{column} {op} {types.to_r_repr(constant)}")
                         parts_2_cols[f"{column} {op} {types.to_r_repr(constant)}"].add(column)
 
+        for column in frozen_columns[types.BOOL]:
+            if self.specification.consts_by_type[types.BOOL]:
+                for op in types.operators_by_type[types.BOOL]:
+                    filter_parts[frozenset((column, self.specification.consts_by_type[types.BOOL][0]))].add(f"{column} {op} T")
+                    parts_2_cols[f"{column} {op} T"].add(column)
+
         for constant in self.specification.consts_by_type[types.INT] | self.specification.consts_by_type[types.FLOAT]:
-            for column in frozen_columns[types.INT] | frozen_columns[types.FLOAT]:
-                for op in types.operators_by_type[types.INT]:
-                    filter_parts[frozenset((column, constant))].add(f'{column} {op} {constant}')
-                    parts_2_cols[f'{column} {op} {constant}'].add(column)
-                    for op2 in more_restrictive_op(op):
-                        self.more_restrictive.append(dsl.FilterCondition, f'{column} {op} {constant}', f'{column} {op2} {constant}')
-                    for op2 in less_restrictive_op(op):
-                        self.less_restrictive.append(dsl.FilterCondition, f'{column} {op} {constant}', f'{column} {op2} {constant}')
+            visited_cols = set()
+            for col_t in [types.INT, types.FLOAT]:
+                for column in frozen_columns[col_t]:
+                    if column in visited_cols:
+                        continue
+                    else:
+                        visited_cols.add(column)
+                    for op in types.operators_by_type[types.INT]:
+                        filter_parts[frozenset((column, constant))].add(f'{column} {op} {types.to_r_repr(constant, col_t)}')
+                        parts_2_cols[f'{column} {op} {types.to_r_repr(constant, col_t)}'].add(column)
+                        for op2 in more_restrictive_op(op):
+                            self.more_restrictive.append(dsl.FilterCondition, f'{column} {op} {types.to_r_repr(constant, col_t)}', f'{column} {op2} {types.to_r_repr(constant, col_t)}')
+                        for op2 in less_restrictive_op(op):
+                            self.less_restrictive.append(dsl.FilterCondition, f'{column} {op} {types.to_r_repr(constant, col_t)}', f'{column} {op2} {types.to_r_repr(constant, col_t)}')
 
         for constant in self.specification.consts_by_type[types.DATETIME]:
             for column in frozen_columns[types.DATETIME]:
@@ -304,8 +316,20 @@ class ConditionGenerator:
                         self.more_restrictive.append(dsl.FilterCondition, part_combo[0], conditions[-2][0])
                         self.more_restrictive.append(dsl.FilterCondition, part_combo[1], conditions[-2][0])
 
-        for spec_part in [self.specification.consts, self.specification.filters]:
+        tmp = []
+
+        if util.get_config().force_constants:
+            tmp.append(self.specification.consts)
+        if util.get_config().force_filters:
+            tmp.append(self.specification.filters)
+
+        for spec_part in tmp:
             for constant in spec_part:
+                try:
+                    if 'limit' not in util.get_config().disabled and (constant == self.specification.output_table.df.shape[0] or int(constant) == self.specification.output_table.df.shape[0]):
+                        continue
+                except:
+                    pass
                 current_predicate = []
                 for key, value in condition_map.items():
                     if constant in key:

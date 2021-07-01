@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/battle_death/tables/0008_dev.csv
 raw_question: What are the different ids and names of the battles that lost any 'Brig' type shipes? 
 question_index: 498 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Brig
 join_columns:
- - id
  - lost_in_battle
+ - id
+groupby_columns: []
+functions: []
 columns:
  - ship_type
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT DISTINCT T1.id,
                   T1.name
@@ -28,14 +34,14 @@ sql: |-
   JOIN ship AS T2 ON T1.id = T2.lost_in_battle
   WHERE T2.ship_type = 'Brig'
 smbop_beam_join_columns:
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
 - - lost_in_battle
-  - name
+  - id
 - - lost_in_battle
-  - name
+  - id
+- - name
+  - lost_in_battle
+- - name
+  - lost_in_battle
 smbop_beam_groupby_columns:
 - []
 - []
@@ -85,22 +91,37 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT battle.id , battle.name FROM ship JOIN battle ON ship.lost_in_battle = battle.id WHERE ship.ship_type = 'Brig'
   - SELECT DISTINCT battle.id , battle.name FROM ship JOIN battle ON ship.lost_in_battle = battle.name WHERE ship.ship_type = 'Brig'
   - SELECT DISTINCT battle.id , battle.name FROM ship JOIN battle ON ship.lost_in_battle = battle.name
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
-- - id
+- - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -117,8 +138,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
@@ -131,6 +152,10 @@ ratsql_beam_constants:
 - - Brig
 - - Brig
 - - Brig
+- - Brig
+- - Brig
+- - Brig
+  - '1'
 - - Brig
 - - Brig
 ratsql_beam_functions:
@@ -187,6 +212,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.ship_type = 'Brig' LIMIT 1
   - SELECT DISTINCT battle.name, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.ship_type = 'Brig'
   - SELECT DISTINCT ship.lost_in_battle, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.ship_type = 'Brig'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10388469696044922
   - -0.10412263870239258

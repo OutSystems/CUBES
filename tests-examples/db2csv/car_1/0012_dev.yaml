@@ -1,19 +1,25 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/cars_data.csv
  - tests-examples/db2csv/car_1/tables/car_names.csv
+ - tests-examples/db2csv/car_1/tables/cars_data.csv
 output: tests-examples/db2csv/car_1/tables/0012_dev.csv
 raw_question: What is the model for the car with a weight smaller than the average? 
 question_index: 98 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
- - id
  - makeid
+ - id
+groupby_columns: []
 functions:
  - avg
 columns:
  - weight
 filters:
  - '<'
+ieu: []
 comment: |-
   SELECT T1.model
   FROM CAR_NAMES AS T1
@@ -30,15 +36,15 @@ sql: |-
       (SELECT avg(Weight)
        FROM CARS_DATA)
 smbop_beam_join_columns:
-- - id
-  - makeid
+- - makeid
+  - id
 - []
-- - id
-  - makeid
+- - makeid
+  - id
 - []
 - []
-- - id
-  - makeid
+- - makeid
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -47,15 +53,15 @@ smbop_beam_groupby_columns:
 - []
 - - weight
 smbop_beam_tables:
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 smbop_beam_constants:
 - []
 - []
@@ -105,37 +111,58 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( cars_data.weight ) FROM cars_data ORDER BY cars_data.weight ASC
   - SELECT cars_data.weight FROM cars_data
   - SELECT car_names.model FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid GROUP BY cars_data.weight HAVING AVG( cars_data.weight )<cars_data.weight
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - makeid
-- - id
-  - makeid
-- - model
+- - makeid
   - id
-  - makeid
-- - model
+- - makeid
   - id
-  - makeid
 - - model
-  - country
+  - makeid
+  - id
+- - model
+  - makeid
+  - id
+- - country
+  - makeid
+  - countryid
+  - maker
   - contid
+  - model
+  - id
   - continent
+- - country
+  - makeid
   - countryid
-  - id
   - maker
-  - makeid
-- - model
-  - country
-  - countryid
+  - model
   - id
-  - maker
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -147,33 +174,33 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/continents.csv
+- - tests-examples/db2csv/car_1/tables/continents.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
 - []
 - []
@@ -184,6 +211,7 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1)'
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -246,6 +274,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT car_names.Model FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Weight < (SELECT Avg(DISTINCT cars_data.Weight) FROM cars_data)
   - SELECT car_names.Model FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Weight < (SELECT DISTINCT Avg(cars_data.Weight) FROM cars_data)
   - SELECT car_names.Model FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Weight < (SELECT Avg(cars_data.Weight) FROM cars_data LIMIT 1)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10516023635864258
   - -0.10447931289672852

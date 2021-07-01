@@ -4,13 +4,20 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0045_dev.csv
 raw_question: List the emails of the professionals who live in the state of Hawaii or the state of Wisconsin. 
 question_index: 962 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Wisconsin
  - Hawaii
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - state
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT email_address
   FROM Professionals
@@ -93,8 +100,8 @@ smbop_beam_columns:
 - - state
 - - state
 - - state
-- - state
-  - email_address
+- - email_address
+  - state
 - - state
 - - state
 - - state
@@ -143,17 +150,50 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT professionals.email_address FROM professionals WHERE professionals.state = 'Hawaii' OR professionals.state = 'Wisconsin' UNION SELECT professionals.email_address FROM professionals WHERE professionals.state = 'Wisconsin'
   - SELECT professionals.email_address FROM professionals WHERE professionals.state = 'Hawaii' OR professionals.state = 'Wisconsin' ORDER BY professionals.email_address ASC
   - SELECT professionals.email_address FROM professionals WHERE professionals.state = 'Wisconsin'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - - owner_id
-  - professional_id
   - dog_id
+  - professional_id
 - []
 - - professional_id
-- - treatment_type_code
-  - professional_id
+- - professional_id
+  - treatment_type_code
 - []
 ratsql_beam_groupby_columns:
 - []
@@ -168,18 +208,18 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/charges.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
 ratsql_beam_constants:
 - - Wisconsin
   - Hawaii
@@ -187,6 +227,11 @@ ratsql_beam_constants:
   - Hawaii
 - - Wisconsin
   - Hawaii
+- - Wisconsin
+  - Hawaii
+- - Wisconsin
+  - Hawaii
+  - '1'
 - - Wisconsin
   - Hawaii
 - - Wisconsin
@@ -255,6 +300,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Professionals.email_address FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Hawaii' OR Professionals.state = 'Wisconsin'
   - SELECT Professionals.email_address FROM Treatment_Types JOIN Professionals JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.professional_id = Professionals.professional_id WHERE Professionals.state = 'Hawaii' OR Professionals.state = 'Wisconsin'
   - SELECT Professionals.email_address FROM Charges JOIN Professionals WHERE Professionals.state = 'Hawaii' OR Professionals.state = 'Wisconsin'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10384273529052734
   - -0.1035313606262207

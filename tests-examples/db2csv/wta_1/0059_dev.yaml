@@ -1,17 +1,24 @@
 db: tests-examples/db2csv/wta_1/tables/wta_1.sqlite
 inputs:
- - tests-examples/db2csv/wta_1/tables/matches.csv
  - tests-examples/db2csv/wta_1/tables/players.csv
+ - tests-examples/db2csv/wta_1/tables/matches.csv
 output: tests-examples/db2csv/wta_1/tables/0059_dev.csv
 raw_question: Find the first name, country code and birth date of the winner who has the highest rank points in all matches. 
 question_index: 487 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - player_id
  - winner_id
-functions:
- - max
-columns:
- - winner_rank_points
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.first_name,
          T1.country_code,
@@ -62,54 +69,54 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 - []
 smbop_beam_functions:
-- - max
-- - max
-- - max
-- - min
-- - min
+- []
+- []
+- []
+- []
+- []
 - []
 - []
 - []
 - []
 - []
 smbop_beam_columns:
-- - winner_rank_points
-- - winner_rank_points
-- - winner_rank_points
-- - winner_rank_points
-- - winner_rank_points
+- []
+- []
+- []
+- []
+- []
 - []
 - []
 - []
@@ -159,20 +166,53 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT players.first_name , players.country_code , players.birth_date FROM players JOIN matches ON players.player_id = matches.winner_id GROUP BY matches.winner_rank_points
   - SELECT players.first_name , players.country_code , players.birth_date FROM players JOIN matches ON players.player_id = matches.winner_id ORDER BY matches.winner_rank_points ASC
   - SELECT players.first_name , players.country_code , players.birth_date FROM players JOIN matches ON players.player_id = matches.winner_id ORDER BY matches.winner_rank_points DESC
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 - - player_id
-  - loser_id
-- - player_id
-  - loser_id
-- - player_id
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -182,47 +222,50 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-- - max
-- - max
-- - max
-- - min
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - ranking_points
-- - winner_rank_points
-- - ranking_points
-- - ranking_points
-- - ranking_points
-- - birth_date
-- - match_num
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -261,6 +304,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT players.first_name, DISTINCT players.country_code, players.birth_date FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id ORDER BY rankings.ranking_points Desc LIMIT 1
   - SELECT players.first_name, players.country_code, DISTINCT players.birth_date FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id ORDER BY rankings.ranking_points Desc LIMIT 1
   - SELECT players.first_name, players.country_code, players.birth_date FROM players JOIN matches ON players.player_id = matches.loser_id ORDER BY matches.match_num Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  asc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10822248458862305
   - -0.10433149337768555

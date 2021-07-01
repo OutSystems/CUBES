@@ -1,24 +1,30 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
  - tests-examples/db2csv/world_1/tables/city.csv
- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
  - tests-examples/db2csv/world_1/tables/country.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 output: tests-examples/db2csv/world_1/tables/0085_dev.csv
 raw_question: Which unique cities are in Asian countries where Chinese is the official language ? 
 question_index: 786 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - asia
  - t
  - chinese
 join_columns:
- - code
  - countrycode
+ - code
+groupby_columns: []
+functions: []
 columns:
+ - isofficial
  - continent
  - language
- - isofficial
 filters:
  - '='
+ieu: []
 comment: |-
   select distinct t3.name
   from country as t1
@@ -46,15 +52,18 @@ smbop_beam_ieu:
 smbop_beam_filters:
 smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
+smbop_beam_has_limit:
+smbop_beam_has_order_by:
+smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -62,17 +71,17 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - Chinese
   - t
@@ -86,6 +95,13 @@ ratsql_beam_constants:
 - - Chinese
   - t
   - Asia
+- - Chinese
+  - t
+  - Asia
+- - Chinese
+  - t
+  - Asia
+  - '1'
 ratsql_beam_functions:
 - []
 - []
@@ -120,6 +136,21 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT DISTINCT city.Name FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
   - SELECT DISTINCT city.Name FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'Chinese'
   - SELECT DISTINCT city.Name FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese' LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10415792465209961
   - -0.10409355163574219

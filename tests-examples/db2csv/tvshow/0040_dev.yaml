@@ -1,19 +1,25 @@
 db: tests-examples/db2csv/tvshow/tables/tvshow.sqlite
 inputs:
- - tests-examples/db2csv/tvshow/tables/tv_series.csv
  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+ - tests-examples/db2csv/tvshow/tables/tv_series.csv
 output: tests-examples/db2csv/tvshow/tables/0040_dev.csv
 raw_question: What is the name of the series that has the episode "A Love of a Lifetime"? 
 question_index: 624 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - A Love of a Lifetime
 join_columns:
- - id
  - channel
+ - id
+groupby_columns: []
+functions: []
 columns:
  - episode
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.series_name
   FROM TV_Channel AS T1
@@ -28,16 +34,16 @@ sql: |-
 smbop_beam_join_columns:
 - - id
   - channel
-- - id
-  - channel
+- - channel
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
 smbop_beam_constants:
 - - A Love of a Lifetime
 - - A Love of a Lifetime
@@ -59,25 +65,34 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT tv_channel.series_name FROM tv_series JOIN tv_channel ON tv_series.channel = tv_channel.id WHERE tv_series.episode = 'A Love of a Lifetime'
   - SELECT tv_channel.series_name FROM tv_channel JOIN tv_series ON tv_channel.id = tv_series.channel WHERE tv_series.episode = 'A Love of a Lifetime'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -89,30 +104,32 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
   - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
 ratsql_beam_constants:
 - - A Love of a Lifetime
 - - A Love of a Lifetime
 - - A Love of a Lifetime
 - - A Love of a Lifetime
+- - A Love of a Lifetime
+  - '1'
 - - A Love of a Lifetime
 - - A Love of a Lifetime
 - - A Love of a Lifetime
@@ -180,6 +197,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT TV_series.Channel FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel WHERE TV_series.Episode = 'A Love of a Lifetime'
   - SELECT TV_series.id FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel WHERE TV_series.Episode = 'A Love of a Lifetime'
   - SELECT TV_series.Share FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel WHERE TV_series.Episode = 'A Love of a Lifetime'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10477256774902344
   - -0.10382223129272461

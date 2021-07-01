@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0021_dev.csv
 raw_question: What is the total population and maximum GNP in Asia? 
 question_index: 722 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Asia
+join_columns: []
+groupby_columns: []
 functions:
  - max
  - sum
 columns:
- - continent
- - population
  - gnp
+ - population
+ - continent
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT sum(Population),
          max(GNP)
@@ -56,18 +62,18 @@ smbop_beam_functions:
 - - max
   - sum
 smbop_beam_columns:
-- - continent
+- - gnp
   - population
-  - gnp
-- - population
-  - region
-  - gnp
-- - continent
+  - continent
+- - gnp
   - population
-  - gnp
-- - population
   - region
-  - gnp
+- - gnp
+  - population
+  - continent
+- - gnp
+  - population
+  - region
 smbop_beam_ieu:
 - []
 - []
@@ -88,6 +94,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT SUM( country.population ) , MAX( country.gnp ) FROM country WHERE country.region = 'Asia'
   - SELECT MAX( country.gnp ) , SUM( country.population ) FROM country WHERE country.continent = 'Asia'
   - SELECT MAX( country.gnp ) , SUM( country.population ) FROM country WHERE country.region = 'Asia'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -128,6 +149,8 @@ ratsql_beam_constants:
 - - Asia
 - - Asia
 - - Asia
+  - '1'
+- - Asia
 ratsql_beam_functions:
 - - sum
 - - max
@@ -142,31 +165,31 @@ ratsql_beam_functions:
 - - max
   - sum
 ratsql_beam_columns:
-- - continent
+- - population
+  - continent
+  - gnp
+- - gnp
   - population
+  - continent
+- - gnp
+  - continent
+- - gnp
+  - continent
+- - population
+  - continent
   - gnp
-- - continent
-  - population
-  - gnp
-- - continent
-  - gnp
-- - continent
-  - gnp
-- - continent
-  - population
-  - gnp
-- - continent
+- - population
   - gnpold
-  - population
-- - continent
-  - population
+  - continent
+- - population
+  - continent
   - gnp
-- - continent
-  - population
+- - population
+  - continent
   - gnp
-- - continent
+- - gnp
   - population
-  - gnp
+  - continent
 ratsql_beam_ieu:
 - []
 - []
@@ -209,6 +232,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Sum(country.Population), Sum(DISTINCT country.GNP) FROM country WHERE country.Continent = 'Asia'
   - SELECT Sum(country.Population), Sum(country.GNP) FROM country WHERE country.Continent = 'Asia' LIMIT 1
   - SELECT DISTINCT Sum(country.Population), Max(country.GNP) FROM country WHERE country.Continent = 'Asia'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1063995361328125
   - -0.10578680038452148

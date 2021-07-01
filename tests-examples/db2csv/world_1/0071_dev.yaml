@@ -4,8 +4,13 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0071_dev.csv
 raw_question: What are the countries that have greater surface area than any country in Europe? 
 question_index: 772 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Europe
+join_columns: []
+groupby_columns: []
 functions:
  - min
 columns:
@@ -14,6 +19,7 @@ columns:
 filters:
  - '='
  - '>'
+ieu: []
 comment: |-
   SELECT Name
   FROM country
@@ -131,6 +137,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MAX( country.surfacearea ) FROM country WHERE country.region = 'Europe'
   - SELECT country.surfacearea FROM country WHERE country.region = 'Europe'
   - SELECT MAX( country.surfacearea ) FROM country WHERE country.surfacearea > (SELECT MAX( country.surfacearea ) FROM country WHERE country.region = 'Europe')
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -163,6 +196,10 @@ ratsql_beam_constants:
 - - Europe
 - - Europe
 - - Europe
+- - Europe
+  - '1)'
+- - Europe
+  - '1'
 ratsql_beam_functions:
 - - max
 - - max
@@ -220,15 +257,39 @@ ratsql_beam_inferred_code:
   - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal' LIMIT 1)
   - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal') LIMIT 1
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Region = Europe
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE DISTINCT country.Continent = 'Europe'
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
-  - SELECT country.Name FROM country WHERE DISTINCT country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
-  - SELECT DISTINCT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT DISTINCT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' )
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Region = 'Europe' )
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE DISTINCT country.Continent = 'Europe' )
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' )
+  - SELECT country.Name FROM country WHERE DISTINCT country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' )
+  - SELECT DISTINCT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' )
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT DISTINCT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' )
   - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' LIMIT 1)
-  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' LIMIT 1
+  - SELECT country.Name FROM country WHERE country.SurfaceArea > (SELECT Max(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' ) LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1083064079284668
   - -0.10511398315429688

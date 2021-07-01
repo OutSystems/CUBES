@@ -4,8 +4,13 @@ inputs:
 output: tests-examples/db2csv/museum_visit/tables/0006_dev.csv
 raw_question: Find the average number of staff working for the museums that were open before 2009. 
 question_index: 416 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2009
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
@@ -13,6 +18,7 @@ columns:
  - num_of_staff
 filters:
  - '<'
+ieu: []
 comment: |-
   SELECT avg(num_of_staff)
   FROM museum
@@ -47,16 +53,16 @@ smbop_beam_tables:
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visit.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/museum.csv
 smbop_beam_constants:
 - - 2009
 - - 2009
@@ -135,11 +141,41 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( museum.num_of_staff ) FROM visit, museum WHERE museum.open_year = 2009
   - SELECT AVG( museum.num_of_staff ) FROM visit, museum WHERE museum.open_year<museum.open_year
   - SELECT AVG( museum.num_of_staff ) FROM visitor, museum WHERE museum.open_year<museum.open_year
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
+- - museum_id
   - visitor_id
-  - museum_id
+  - id
 - - museum_id
 - []
 - []
@@ -159,9 +195,9 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
@@ -177,6 +213,8 @@ ratsql_beam_constants:
 - - 2009
 - - 2009
 - - 2009
+- - 2009
+  - '1'
 - - 2009
 - - 2009
 - - 2009
@@ -205,10 +243,10 @@ ratsql_beam_columns:
 - - open_year
   - num_of_staff
 - - open_year
-- - open_year
-  - museum_id
-- - open_year
-  - museum_id
+- - museum_id
+  - open_year
+- - museum_id
+  - open_year
 ratsql_beam_ieu:
 - []
 - []
@@ -251,6 +289,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(museum.Open_Year) FROM museum WHERE museum.Open_Year < 2009
   - SELECT Avg(visit.Museum_ID) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year < 2009
   - SELECT Avg(museum.Museum_ID) FROM museum WHERE museum.Open_Year < 2009
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10460090637207031
   - -0.10434722900390625

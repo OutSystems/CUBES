@@ -1,10 +1,13 @@
 db: tests-examples/db2csv/singer/tables/singer.sqlite
 inputs:
- - tests-examples/db2csv/singer/tables/singer.csv
  - tests-examples/db2csv/singer/tables/song.csv
+ - tests-examples/db2csv/singer/tables/singer.csv
 output: tests-examples/db2csv/singer/tables/0024_dev.csv
 raw_question: What are the names of the singers that have more than one songs? 
 question_index: 1023 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 1
 join_columns:
@@ -13,6 +16,9 @@ groupby_columns:
  - name
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.Name
   FROM singer AS T1
@@ -43,20 +49,20 @@ smbop_beam_groupby_columns:
 - - singer_id
 - - name
 smbop_beam_tables:
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 smbop_beam_constants:
 - - 1
 - - 1
@@ -113,6 +119,30 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT singer.name FROM song JOIN singer ON song.singer_id = singer.singer_id GROUP BY singer.name HAVING COUNT( * ) > 1
   - SELECT singer.name FROM singer JOIN song ON singer.singer_id = song.singer_id GROUP BY song.singer_id HAVING SUM( 1 ) > singer.name
   - SELECT singer.name FROM singer JOIN song ON singer.singer_id = song.singer_id GROUP BY singer.name HAVING COUNT( * ) > 1
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - singer_id
 - - singer_id
@@ -130,25 +160,29 @@ ratsql_beam_groupby_columns:
 - - singer_id
 - - name
 ratsql_beam_tables:
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 - - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
-- - tests-examples/db2csv/singer/tables/singer.csv
-  - tests-examples/db2csv/singer/tables/song.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
+- - tests-examples/db2csv/singer/tables/song.csv
+  - tests-examples/db2csv/singer/tables/singer.csv
 ratsql_beam_constants:
 - - 1
 - - 1
 - - 1
 - - 1
 - - 1
+- - 1
+- - 1
+- - 1
+  - '1'
 - - 1
 - - 1
 ratsql_beam_functions:
@@ -205,6 +239,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT singer.Name FROM singer JOIN song ON singer.Singer_ID = song.Singer_ID GROUP BY song.Singer_ID HAVING Count(*) > 1 LIMIT 1
   - SELECT DISTINCT singer.Name FROM singer JOIN song ON singer.Singer_ID = song.Singer_ID GROUP BY singer.Name HAVING Count(*) > 1
   - SELECT singer.Name FROM singer JOIN song ON singer.Singer_ID = song.Singer_ID GROUP BY singer.Name HAVING Count(DISTINCT *) > 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10173988342285156
   - -0.106536865234375

@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0056_dev.csv
 raw_question: Return the type code of the template type with the description "Book". 
 question_index: 352 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Book
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - template_type_description
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT template_type_code
   FROM Ref_template_types
@@ -74,15 +81,15 @@ smbop_beam_columns:
 - - template_type_description
 - - template_type_description
 - - template_type_description
+- - template_type_code
+  - template_type_description
+- - template_type_code
+  - template_type_description
+- - template_type_code
+  - template_type_description
 - - template_type_description
-  - template_type_code
-- - template_type_description
-  - template_type_code
-- - template_type_description
-  - template_type_code
-- - template_type_description
-- - template_type_description
-  - template_type_code
+- - template_type_code
+  - template_type_description
 smbop_beam_ieu:
 - []
 - []
@@ -97,11 +104,11 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
   - '>'
 - - 'like'
@@ -125,20 +132,47 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT templates.template_type_code FROM templates, ref_template_types WHERE templates.template_type_code > ref_template_types.template_type_code AND ref_template_types.template_type_description = 'Book'
   - SELECT ref_template_types.template_type_code FROM ref_template_types WHERE ref_template_types.template_type_description LIKE '%Book%'
   - SELECT templates.template_type_code FROM ref_template_types, templates WHERE templates.template_type_code > ref_template_types.template_type_code AND ref_template_types.template_type_description = 'Book'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - template_id
-  - document_id
+- - document_id
   - template_type_code
-- - template_id
-  - template_type_code
+  - template_id
 - - template_type_code
-- - template_id
-  - template_type_code
-- - template_id
-  - template_type_code
+  - template_id
+- - template_type_code
+- - template_type_code
+  - template_id
+- - template_type_code
+  - template_id
 - []
 ratsql_beam_groupby_columns:
 - []
@@ -155,25 +189,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
 ratsql_beam_constants:
 - - Book
 - - Book
 - - Book
+- - Book
+  - '1'
 - - Book
 - - Book
 - - Book
@@ -242,6 +278,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Documents.Template_ID FROM Ref_Template_Types JOIN Templates ON Ref_Template_Types.Template_Type_Code = Templates.Template_Type_Code JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Ref_Template_Types.Template_Type_Description = 'Book'
   - SELECT Documents.Document_ID FROM Ref_Template_Types JOIN Templates ON Ref_Template_Types.Template_Type_Code = Templates.Template_Type_Code JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Ref_Template_Types.Template_Type_Description = 'Book'
   - SELECT * FROM Ref_Template_Types WHERE Ref_Template_Types.Template_Type_Description = 'Book'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10377836227416992
   - -0.10532808303833008

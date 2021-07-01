@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0080_dev.csv
 raw_question: Give the country codes for countries in which people speak langauges that are not English. 
 question_index: 781 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - English
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - language
 filters:
  - '!='
+ieu: []
 comment: |-
   SELECT DISTINCT CountryCode
   FROM countrylanguage
@@ -76,8 +83,8 @@ smbop_beam_functions:
 - []
 smbop_beam_columns:
 - - language
-- - language
-  - countrycode
+- - countrycode
+  - language
 - - language
 - - language
 - - language
@@ -105,8 +112,8 @@ smbop_beam_filters:
 - - '!='
 - - '!='
 - - '='
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '!='
 - - 'like'
 smbop_beam_inferred_code:
@@ -131,20 +138,53 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT countrylanguage.countrycode FROM countrylanguage WHERE countrylanguage.language >= 'English'
   - SELECT countrylanguage.countrycode FROM countrylanguage WHERE countrylanguage.language != 'English' ORDER BY countrylanguage.countrycode DESC
   - SELECT countrylanguage.countrycode FROM countrylanguage WHERE countrylanguage.language LIKE '%English%'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
-- - code
-  - countrycode
+- - countrycode
+  - code
 - []
 ratsql_beam_groupby_columns:
 - []
@@ -157,21 +197,21 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - English
@@ -200,8 +240,8 @@ ratsql_beam_columns:
 - - language
 - - language
 - - language
-- - code
-  - language
+- - language
+  - code
 - - language
 - - language
 ratsql_beam_ieu:
@@ -222,8 +262,8 @@ ratsql_beam_filters:
 - - '!='
 - - '!='
 - - '='
-- - '<'
-  - '<='
+- - '<='
+  - '<'
 - - '='
 ratsql_beam_inferred_code:
   - SELECT country.Code FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'terminal'
@@ -242,9 +282,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language != 'English'
   - SELECT country.Code FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'English'
   - SELECT DISTINCT country.Code FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'English'
-  - SELECT country.Code FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT country.Code FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
   - SELECT country.Code FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language <= 'English'
   - SELECT country.Name FROM country EXCEPT SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1045231819152832
   - -0.1046438217163086

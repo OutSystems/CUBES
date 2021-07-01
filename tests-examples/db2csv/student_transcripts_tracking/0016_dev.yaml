@@ -5,16 +5,21 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0016_dev.csv
 raw_question: How many degrees does the engineering department have? 
 question_index: 522 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - engineer
 join_columns:
  - department_id
+groupby_columns: []
 functions:
  - count
 columns:
  - department_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM Departments AS T1
@@ -35,11 +40,11 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
 smbop_beam_constants:
-- []
-- []
+- - engineer
+- - engineer
 smbop_beam_functions:
 - - count
 - - count
@@ -58,25 +63,34 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id WHERE departments.department_name = 'engineering'
   - SELECT COUNT( * ) FROM departments, degree_programs WHERE degree_programs.department_id = departments.department_id OR departments.department_name = 'engineering'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - address_id
-  - student_id
+- - student_id
   - degree_program_id
+  - address_id
   - current_address_id
-- - student_course_id
-  - student_enrolment_id
+- - transcript_id
   - degree_program_id
-  - transcript_id
+  - student_enrolment_id
+  - student_course_id
 - - student_enrolment_id
+  - degree_program_id
   - course_id
-  - degree_program_id
-- - student_course_id
+- - degree_program_id
   - student_enrolment_id
-  - degree_program_id
+  - student_course_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -92,27 +106,29 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 ratsql_beam_constants:
 - []
 - []
 - []
+- []
+- - '1'
 - []
 - []
 - []
@@ -177,6 +193,33 @@ ratsql_beam_inferred_code_w_terminals:
   - 
   - 
   - 
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10626602172851562
   - -0.10502147674560547

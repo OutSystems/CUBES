@@ -1,0 +1,30 @@
+db: tests-examples/spider/hospital_1/tables/db.sqlite
+inputs:
+- tests-examples/spider/hospital_1/tables/patient.csv
+- tests-examples/spider/hospital_1/tables/medication.csv
+- tests-examples/spider/hospital_1/tables/prescribes.csv
+output: tests-examples/spider/hospital_1/tables/0048.csv
+constants:
+- Procrastin-X
+functions:
+- count
+columns:
+- ssn
+- name
+comment: |-
+  SELECT count(*)
+  FROM patient
+  WHERE SSN NOT IN
+      (SELECT T1.patient
+       FROM Prescribes AS T1
+       JOIN Medication AS T2 ON T1.Medication = T2.Code
+       WHERE T2.name = 'Procrastin-X' )
+
+sql: |-
+  SELECT count(*)
+  FROM patient
+  WHERE SSN NOT IN
+      (SELECT T1.patient
+       FROM Prescribes AS T1
+       JOIN Medication AS T2 ON T1.Medication = T2.Code
+       WHERE T2.name = 'Procrastin-X' )

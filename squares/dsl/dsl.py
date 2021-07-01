@@ -35,6 +35,8 @@ CrossJoinCondition = EnumType('CrossJoinCondition')
 FilterCondition = EnumType('FilterCondition')
 Op = EnumType('Op')
 SummariseCondition = EnumType('SummariseCondition')
+# SortOrder = EnumType('SortOrder')
+LimitCols = EnumType('LimitCols')
 
 functions = OrderedSet(['natural_join', 'natural_join3', 'natural_join4', 'inner_join', 'anti_join', 'left_join', 'union', 'intersect', 'semi_join', 'cross_join', 'unite', 'filter', 'filters', 'summarise', 'mutate'])
 
@@ -128,3 +130,8 @@ mutate = ('mutate',
           [Table, SummariseCondition],
           [h.GE(h.col(0), h.col(1)),
            h.EQ(h.row(0), h.row(1))])
+
+limit = ('limit',
+         Table,
+         [Table, LimitCols],
+         [])

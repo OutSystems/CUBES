@@ -86,40 +86,47 @@ all_vbs_beam <- vbs(beam1 = db2csv_beam_1,
 
 all_vbs <- vbs(all_vbs_no_beam, all_vbs_beam)
 
-a <- all_vbs %>% filter(!solved)
-b <- all_vbs %>% filter(!solved)
-anti_join(a, b, by = 'name')
+bars(use_vbs=F, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
+          ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
+          smbop17_combo_c20 = db2csv_smbop_17_combo_c20,
+          smbop17_combo_c20_all300 = db2csv_smbop_17_combo_c20_all300)
 
-a <- solved_not_solved(db2csv_beam_10, db2csv_beam_11)
-b <- solved_not_solved(db2csv_beam_11, db2csv_beam_10)
-
-scatter(ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
-invsolved(use_vbs = T, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
-invsolved(use_vbs = T, beam14_combo_c20 = db2csv_beam_14_combo_c20, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
-
-invsolved(use_vbs = F, cubes9_c20 = db2csv_9_c20, beam14_combo_c20 = db2csv_beam_14_combo_c20, beam16_combo = db2csv_beam_16_combo, ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20, smbop17_combo_c20 = db2csv_smbop_17_combo_c20, ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300)
-
-a <- inner_join(ratsql, db2csv_ratsql_17_combo_c20, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct')
-a <- inner_join(db2csv_ratsql_17_combo_c20, ratsql, by='name') %>% filter(fuzzy.x == 'Possibly Correct' & fuzzy.y != 'Possibly Correct') %>% group_by(fuzzy.y) %>% summarise(n = n())
+invsolved(ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
+          ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
+          smbop17_combo_c20 = db2csv_smbop_17_combo_c20,
+          smbop17_combo_c20_all300 = db2csv_smbop_17_combo_c20_all300,
+          smbop18_combo_c20_all300 = db2csv_smbop_18_combo_c20_all300)
 
 plot_fuzzy(ratsql = ratsql, smbop = smbop,
-           beam16_combo = db2csv_beam_16_combo,
-           ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
-           ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
-           smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
-plot_fuzzy(drop_error = T,, fill_bars = T, ratsql = ratsql, smbop = smbop,
-           beam16_combo = db2csv_beam_16_combo,
-           ratsql17_combo_c20 = db2csv_ratsql_17_combo_c20,
-           ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300,
-           smbop17_combo_c20 = db2csv_smbop_17_combo_c20)
-plot_fuzzy(ratsql17_combo_c20_all300 = db2csv_ratsql_17_combo_c20_all300)[[1]] + facet_wrap(~ceiling(log10(solutions)))
-plot_fuzzy(drop_error = T, ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
-plot_fuzzy(ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
-plot_fuzzy(fill_bars = T, ratsql = ratsql, smbop = smbop, beam16_combo = db2csv_beam_16_combo)
-plot_fuzzy(beam14_combo_c20 = db2csv_beam_14_combo_c20)
-plot_fuzzy(fill_bars = T, beam15_combo = db2csv_beam_15_combo, beam16_combo = db2csv_beam_16_combo)
-plot_fuzzy(fill_bars = T, drop_error = T, beam12_combo_c20_nosplit = db2csv_beam_12_p9_combo_c20_nosplit)
+           smbop17_combo_c20_all300 = db2csv_smbop_17_combo_c20_all300,
+           smbop18_combo_c20_all300 = db2csv_smbop_18_combo_c20_all300)
 
+plot_fuzzy(fill_bars = T, drop_error = T, ratsql = ratsql, smbop = smbop,
+           smbop17_combo_c20_all300 = db2csv_smbop_17_combo_c20_all300,
+           smbop18_combo_c20_all300 = db2csv_smbop_18_combo_c20_all300)
+
+a <- vbs(smbop = smbop,
+              smbop17_combo_c20_all300 = db2csv_smbop_17_combo_c20_all300)
+
+plot_fuzzy(smbop18_combo_c20_all300 = db2csv_smbop_18_combo_c20_all300, smbop = smbop,
+           vbs = vbs(smbop = smbop,
+                     smbop18_combo_c20_all300 = db2csv_smbop_18_combo_c20_all300))
+
+solution_min_max_size(db2csv_smbop_17_combo_c20_all300)
+
+a <- inner_join(smbop, db2csv_smbop_17_combo_c20_all300, by='name', suffix=c('.smbop', '.cubes')) %>%
+  filter((fuzzy.smbop == 'Possibly Correct' | fuzzy.smbop == 'Possibly Correct Top 5' | fuzzy.smbop == 'Possibly Correct Any')
+           & fuzzy.cubes != 'Possibly Correct'
+           & fuzzy.cubes != 'Possibly Correct Top 5'
+           & fuzzy.cubes != 'Possibly Correct Any'
+           & solved.cubes)
+
+a <- inner_join(db2csv_smbop_17_combo_c20_all300, smbop, by='name', suffix=c('.smbop', '.cubes')) %>%
+  filter((fuzzy.smbop == 'Possibly Correct' | fuzzy.smbop == 'Possibly Correct Top 5' | fuzzy.smbop == 'Possibly Correct Any')
+           & fuzzy.cubes != 'Possibly Correct'
+           & fuzzy.cubes != 'Possibly Correct Top 5'
+           & fuzzy.cubes != 'Possibly Correct Any'
+           & solved.cubes)
 ### ORIGNAL INSTANCES
 
 scatter(c55 = c55_16, c57 = c57_16)
@@ -129,27 +136,40 @@ scatter_ram(c57 = c57_16, c57_nc = c57_16_no_cache)
 
 invsolved('Programs with 1 line' = c55_16, 'LRU (40 positions)' = c57_16, 'No cache' = c57_16_no_cache) + labs(title = 'Cache implementations comparison')
 
-bars(use_vbs=F, c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache)
-bars(use_vbs=F, c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache, c58 = c58_16)
-invsolved(c53 = c53_16, c55 = c55_16, c57 = c57_16, c57_nc = c57_16_no_cache, c58 = c58_16)
+bars(use_vbs = F, c53 = c53_16, c59 = c59_16, c59_600 = c59_16_all600, c60 = c60_16, patsql3 = patsql_3_500, patsql4 = patsql_4_500)
+bars(use_vbs = F, c59 = c59_16, c60 = c60_16, c61 = c61_16, c62 = c62_16, patsql4 = patsql_4_500)
+invsolved(c53 = c53_16, c59 = c59_16, c59_600 = c59_16_all600, c60 = c60_16, c61 = c61_16, patsql3 = patsql_3_500, patsql4 = patsql_4_500)
+invsolved(c59 = c59_16, c60 = c60_16, c61 = c61_16, c62 = c62_16, patsql4 = patsql_4_500)
 
+c59_16 %>% ggplot(aes(x = fuzzy_neq)) + geom_bar()
+c59_16 %>%
+  filter(fuzzy_neq != 0) %>%
+  summarise(a = median(fuzzy_neq, na.rm = T))
 
-a <- c57_16 %>% filter(status == 1)
+a <- c59_16 %>% select(name, status, fuzzy, real, ram)
+a <- anti_join(c59_16, patsql_4_500, by='name')
 
-plot_fuzzy(c53 = c53_16, c55 = c55_16, c58 = c58_16)
+plot_fuzzy(c53 = c53_16, c55 = c55_16, c59 = c59_16, c59_600 = c59_16_all600, c60 = c60_16, patsql3 = patsql_3_500, patsql4 = patsql_4_500)
+plot_fuzzy(c53 = c53_16, c55 = c55_16, c59 = c59_16, c62 = c62_16, patsql4 = patsql_4_500)
+plot_fuzzy(drop_nones=T, c53 = c53_16, c55 = c55_16, c59 = c59_16, c62 = c62_16, patsql4 = patsql_4_500)
+plot_fuzzy(drop_error = T, fill_bars = T, c53 = c53_16, c55 = c55_16, c59 = c59_16, c59_600 = c59_16_all600, patsql3 = patsql_3_500, patsql4 = patsql_4_500)
+
+solution_min_max_size(c59_16_all600)
+solution_min_top_size(c59_16_all600)
+
+a <- c59_16_all600 %>% filter(fuzzy == 'Possibly Correct' & top_i_sol_loc > min_sol_loc)
 
 c57_16 %>% ggplot(aes(x = cache_hit_ratio, y = eval_p)) + geom_point()
 c57_16 %>% ggplot(aes(x = eval_p)) + geom_histogram()
 c57_16_no_cache %>% ggplot(aes(x = eval_p)) + geom_histogram()
 c55_16 %>% ggplot(aes(x = eval_p)) + geom_histogram()
 
-c57_16_no_cache %>% ggplot(aes(x = real, y = eval_p)) + geom_point() + scale_x_log10()
+c57_16_no_cache %>% ggplot(aes(x = real, y = eval_p)) +
+  geom_point() +
+  scale_x_log10()
 
-c53_16 %>% summarise(init = mean(init, na.rm=T), enum = mean(enum, na.rm=T), eval = mean(eval, na.rm=T), block = mean(block, na.rm=T))
+c53_16 %>% summarise(init = mean(init, na.rm = T), enum = mean(enum, na.rm = T), eval = mean(eval, na.rm = T), block = mean(block, na.rm = T))
 
-a <- c58_16 %>% filter(benchmark == 'scythe/recent-posts' | benchmark == 'scythe/top-rated-posts')
-
-a <- c54_16 %>% filter(fuzzy == 'Incorrect')
 c54_16 %>% summarise(a = sum(real)) / 60 / 60
 
 c52_16_all600 %>% ggplot(aes(x = solutions)) +

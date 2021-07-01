@@ -5,12 +5,19 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0028_dev.csv
 raw_question: Which professionals have operated a treatment that costs less than the average? Give me theor first names and last names. 
 question_index: 945 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
  - cost_of_treatment
 filters:
  - '<'
+ieu: []
 comment: |-
   SELECT DISTINCT T1.first_name,
                   T1.last_name
@@ -123,6 +130,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( treatments.cost_of_treatment ) FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id
   - SELECT AVG( treatments.cost_of_treatment ) FROM treatments
   - SELECT AVG( treatments.cost_of_treatment ) FROM treatments GROUP BY treatments.cost_of_treatment
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
@@ -166,6 +200,8 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1)'
+- - '1'
 - []
 ratsql_beam_functions:
 - - avg
@@ -225,6 +261,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Professionals.first_name, Professionals.last_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Treatments.cost_of_treatment < (SELECT Avg(Treatments.cost_of_treatment) FROM Treatments LIMIT 1)
   - SELECT Professionals.first_name, Professionals.last_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Treatments.cost_of_treatment < (SELECT Avg(Treatments.cost_of_treatment) FROM Treatments) LIMIT 1
   - SELECT Professionals.first_name, Professionals.last_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Treatments.cost_of_treatment < (SELECT Avg(DISTINCT Treatments.cost_of_treatment) FROM Treatments)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10477590560913086
   - -0.10443305969238281

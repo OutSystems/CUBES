@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0076_dev.csv
 raw_question: Give the flight numbers of flights arriving in Aberdeen. 
 question_index: 254 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Aberdeen
 join_columns:
- - destairport
  - airportcode
+ - destairport
+groupby_columns: []
+functions: []
 columns:
  - city
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.FlightNo
   FROM FLIGHTS AS T1
@@ -26,18 +32,18 @@ sql: |-
   JOIN AIRPORTS AS T2 ON T1.DestAirport = T2.AirportCode
   WHERE T2.City = "Aberdeen"
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 - []
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 smbop_beam_groupby_columns:
 - []
 - []
@@ -82,8 +88,8 @@ smbop_beam_columns:
 - - city
 - - city
   - sourceairport
-- - destairport
-  - city
+- - city
+  - destairport
 - - city
 - - city
 - - city
@@ -99,11 +105,11 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
-  - '>='
   - '>'
+  - '>='
 - - '='
 - - '='
 - - '='
@@ -123,24 +129,48 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT airports.airportname FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen'
   - SELECT flights.sourceairport FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen'
   - SELECT flights.sourceairport FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen'
-ratsql_beam_join_columns:
-- - sourceairport
-  - airportcode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_join_columns:
+- - airportcode
+  - sourceairport
+- []
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -154,9 +184,9 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
@@ -176,6 +206,8 @@ ratsql_beam_constants:
 - - Aberdeen
 - - Aberdeen
 - - Aberdeen
+- - Aberdeen
+  - '1'
 - - Aberdeen
 - - Aberdeen
 - - Aberdeen
@@ -242,7 +274,37 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.SourceAirport FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
   - SELECT flights.Airline FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
   - SELECT * FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
-  - SELECT flights.FlightNo FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE flights.Airline = Aberdeen
+  - SELECT flights.FlightNo FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE flights.Airline = 'Aberdeen'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10335540771484375
   - -0.10479402542114258

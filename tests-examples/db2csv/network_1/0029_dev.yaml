@@ -5,16 +5,22 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0029_dev.csv
 raw_question: Show the names of all of the high schooler Kyle's friends. 
 question_index: 890 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Kyle
 join_columns:
+ - friend_id
  - id
  - student_id
- - friend_id
+groupby_columns: []
+functions: []
 columns:
  - name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T3.name
   FROM Friend AS T1
@@ -29,14 +35,14 @@ sql: |-
   JOIN Highschooler AS T3 ON T1.friend_id = T3.id
   WHERE T2.name = "Kyle"
 smbop_beam_join_columns:
-- - id
-  - student_id
+- - student_id
+  - id
 - - id
   - student_id
 - - friend_id
   - id
-- - id
-  - friend_id
+- - friend_id
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -86,24 +92,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM friend JOIN highschooler ON friend.student_id = highschooler.id WHERE highschooler.name = 'Kyle'
   - SELECT highschooler.name FROM friend JOIN highschooler ON friend.friend_id = highschooler.id WHERE highschooler.name = 'Kyle'
   - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.friend_id WHERE highschooler.name = 'Kyle'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
+- - student_id
+  - id
+- - liked_id
   - student_id
-- - id
+  - id
+- - liked_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - liked_id
   - student_id
-  - liked_id
-- - id
-  - liked_id
-- - id
+  - id
+- - liked_id
   - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-  - liked_id
-- - id
-  - student_id
-  - liked_id
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -136,6 +157,8 @@ ratsql_beam_constants:
 - - Kyle
 - - Kyle
 - - Kyle
+- - Kyle
+  - '1'
 - - Kyle
 - - Kyle
 ratsql_beam_functions:
@@ -188,6 +211,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id WHERE Highschooler.name = 'Kyle' LIMIT 1
   - SELECT Likes.liked_id FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id WHERE Highschooler.name = 'Kyle'
   - SELECT Likes.student_id FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id WHERE Highschooler.name = 'Kyle'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10309791564941406
   - -0.10477018356323242

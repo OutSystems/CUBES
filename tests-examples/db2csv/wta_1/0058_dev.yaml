@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0058_dev.csv
 raw_question: Find the number of left handed winners who participated in the WTA Championships. 
 question_index: 486 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - L
  - WTA Championships
+ - L
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
- - tourney_name
- - winner_hand
  - winner_name
+ - winner_hand
+ - tourney_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(DISTINCT winner_name)
   FROM matches
@@ -37,15 +43,18 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
 - - WTA Championships
+  - L
 - - WTA Championships
+  - L
 - - WTA Championships
+  - L
 smbop_beam_functions:
 - - count
 - - count
@@ -72,16 +81,28 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM players JOIN matches ON players.player_id = matches.winner_hand WHERE matches.tourney_name = 'WTA Championships' AND players.hand = 'left'
   - SELECT COUNT( * ) FROM players JOIN matches ON players.player_id = matches.winner_id WHERE matches.tourney_name = 'WTA Championships' AND players.hand = 'left'
   - SELECT matches.winner_hand FROM matches WHERE matches.tourney_name = 'WTA Championships'
-ratsql_beam_join_columns:
-- - player_id
-  - loser_id
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- []
+- []
+ratsql_beam_join_columns:
+- - loser_id
+  - player_id
+- []
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -89,22 +110,26 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
 - - WTA Championships
 - - WTA Championships
 - - WTA Championships
 - - WTA Championships
 - - WTA Championships
+- - WTA Championships
+- - WTA Championships
+- - WTA Championships
+  - '1'
 ratsql_beam_functions:
 - - count
 - - count
@@ -114,8 +139,8 @@ ratsql_beam_functions:
 ratsql_beam_columns:
 - - tourney_name
   - hand
-- - tourney_name
-  - winner_hand
+- - winner_hand
+  - tourney_name
 - - tourney_name
   - hand
 - - tourney_name
@@ -152,6 +177,24 @@ ratsql_beam_inferred_code_w_terminals:
   - 
   - 
   - 
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10744571685791016
   - -0.10545825958251953

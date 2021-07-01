@@ -5,20 +5,25 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0025_dev.csv
 raw_question: Show the stadium name and capacity with most number of concerts in year 2014 or after. 
 question_index: 24 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
 constants:
  - 2014
+ - '1'
 join_columns:
  - stadium_id
 groupby_columns:
  - stadium_id
 functions:
- - max
  - count
 columns:
  - year
 filters:
- - '>='
  - '>'
+ - '>='
+ieu: []
 comment: |-
   SELECT T2.name,
          T2.capacity
@@ -83,32 +88,32 @@ smbop_beam_tables:
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 smbop_beam_constants:
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
 - - 2014
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 - []
 smbop_beam_columns:
@@ -134,16 +139,16 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- - '>='
-  - '>'
-- - '>='
-  - '>'
+- - '>'
+  - '>='
+- - '>'
+  - '>='
 - []
 - - '>'
-- - '>='
-  - '>'
-- - '<'
-  - '<='
+- - '>'
+  - '>='
+- - '<='
+  - '<'
 - - '!='
 - - '>'
 - []
@@ -170,6 +175,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT stadium.name , stadium.capacity FROM stadium JOIN concert ON stadium.stadium_id = concert.stadium_id WHERE concert.year > 2014 GROUP BY concert.stadium_id ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT stadium.name , stadium.capacity FROM concert JOIN stadium ON concert.stadium_id = stadium.stadium_id GROUP BY concert.stadium_id ORDER BY COUNT( * ) DESC
   - SELECT stadium.name , stadium.capacity FROM concert JOIN stadium ON concert.stadium_id = stadium.stadium_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
 ratsql_beam_join_columns:
 - - stadium_id
 - - stadium_id
@@ -211,51 +249,52 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 - - 2014
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-- - max
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- []
+- []
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - - year
 - - year
 - - year
 - - year
 - - year
-  - capacity
 - - year
 - - year
 - - year
@@ -274,20 +313,20 @@ ratsql_beam_ieu:
 - []
 ratsql_beam_filters:
 - - '>'
-- - '>='
-  - '>'
 - - '>'
-- - '>='
-  - '>'
-- - '>='
-  - '>'
-- - '>='
-  - '>'
+  - '>='
 - - '>'
 - - '>'
+  - '>='
 - - '>'
-- - '>='
-  - '>'
+  - '>='
+- - '>'
+  - '>='
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+  - '>='
 ratsql_beam_inferred_code:
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year > 'terminal' GROUP BY stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year >= 'terminal' GROUP BY stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
@@ -310,6 +349,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID AND stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID WHERE concert.Year > 2014 GROUP BY stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN singer JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID AND stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID AND singer_in_concert.Singer_ID = singer.Singer_ID WHERE concert.Year > 2014 GROUP BY stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year >= 2014 GROUP BY stadium.Name ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1038970947265625
   - -0.1040496826171875

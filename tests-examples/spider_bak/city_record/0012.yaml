@@ -1,0 +1,26 @@
+db: tests-examples/spider/city_record/tables/db.sqlite
+inputs:
+- tests-examples/spider/city_record/tables/city.csv
+- tests-examples/spider/city_record/tables/temperature.csv
+- tests-examples/spider/city_record/tables/hosting_city.csv
+output: tests-examples/spider/city_record/tables/0012.csv
+columns:
+- mar
+- jul
+comment: |-
+  SELECT T1.city
+  FROM city AS T1
+  JOIN temperature AS T2 ON T1.city_id = T2.city_id
+  WHERE T2.Mar < T2.Jul INTERSECT
+    SELECT T3.city
+    FROM city AS T3
+    JOIN hosting_city AS T4 ON T3.city_id = T4.host_city
+
+sql: |-
+  SELECT T1.city
+  FROM city AS T1
+  JOIN temperature AS T2 ON T1.city_id = T2.city_id
+  WHERE T2.Mar < T2.Jul INTERSECT
+    SELECT T3.city
+    FROM city AS T3
+    JOIN hosting_city AS T4 ON T3.city_id = T4.host_city

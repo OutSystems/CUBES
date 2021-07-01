@@ -1,17 +1,25 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0010_dev.csv
 raw_question: What is the name and id of the department with the most number of degrees ? 
 question_index: 516 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - department_id
 groupby_columns:
  - department_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   select t2.department_name,
          t1.department_id
@@ -73,8 +81,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 smbop_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -84,10 +92,8 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
 - []
 - []
 - []
@@ -151,6 +157,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT departments.department_name , degree_programs.department_id FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id GROUP BY degree_programs.department_id
   - SELECT degree_programs.department_id FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id GROUP BY degree_programs.department_id
   - SELECT departments.department_name , degree_programs.department_id FROM degree_programs JOIN departments ON degree_programs.department_id = departments.department_id GROUP BY degree_programs.department_id ORDER BY COUNT( * ) DESC
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - department_id
 - - department_id
@@ -160,21 +199,22 @@ ratsql_beam_groupby_columns:
 - - department_id
 - - department_id
 ratsql_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
 ratsql_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
 - - count
 ratsql_beam_columns:
 - []
@@ -202,6 +242,18 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Departments.department_name, DISTINCT Degree_Programs.department_id FROM Departments JOIN Degree_Programs ON Departments.department_id = Degree_Programs.department_id GROUP BY Degree_Programs.department_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Departments.department_name, Degree_Programs.department_id FROM Departments JOIN Degree_Programs ON Departments.department_id = Degree_Programs.department_id GROUP BY Degree_Programs.department_id ORDER BY Count(DISTINCT *) Desc LIMIT 1
   - SELECT Departments.department_name, Degree_Programs.department_id FROM Departments JOIN Degree_Programs ON Departments.department_id = Degree_Programs.department_id GROUP BY Degree_Programs.department_id ORDER BY Count(*) Desc
+ratsql_beam_has_limit:
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
 ratsql_beam_score_history:
 - - -0.1077876091003418
   - -0.10383892059326172

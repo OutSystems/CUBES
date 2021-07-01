@@ -5,10 +5,15 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0032_dev.csv
 raw_question: Show names for all stadiums except for stadiums having a concert in year 2014. 
 question_index: 31 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2014
 join_columns:
  - stadium_id
+groupby_columns: []
+functions: []
 columns:
  - year
 filters:
@@ -150,6 +155,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT stadium.name FROM stadium WHERE stadium.name != 2014
   - SELECT stadium.name FROM stadium JOIN concert ON stadium.stadium_id = concert.stadium_id WHERE concert.year = 2014
   - SELECT * FROM stadium
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - stadium_id
 - []
@@ -179,12 +217,12 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
@@ -192,6 +230,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
+- - 2014
+- - 2014
 - - 2014
 - - 2014
 - - 2014
@@ -253,15 +293,42 @@ ratsql_beam_inferred_code:
   - SELECT stadium.Name FROM stadium WHERE DISTINCT stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year != 'terminal')
 ratsql_beam_inferred_code_w_terminals:
   - SELECT stadium.Name FROM stadium EXCEPT SELECT stadium.Name FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year = 2014
-  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year != 2014
-  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year = 2014
+  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year != 2014 )
+  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year = 2014 )
   - SELECT stadium.Name FROM stadium EXCEPT SELECT stadium.Name FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID AND stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID WHERE concert.Year = 2014
   - SELECT stadium.Name FROM stadium EXCEPT SELECT stadium.Name FROM stadium JOIN singer JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID AND stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID AND singer_in_concert.Singer_ID = singer.Singer_ID WHERE concert.Year = 2014
-  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year < 2014
+  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year < 2014 )
   - SELECT DISTINCT stadium.Name FROM stadium EXCEPT SELECT stadium.Name FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year = 2014
-  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT DISTINCT concert.Stadium_ID FROM concert WHERE concert.Year != 2014
-  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE DISTINCT concert.Year != 2014
-  - SELECT stadium.Name FROM stadium WHERE DISTINCT stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year != 2014
+  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT DISTINCT concert.Stadium_ID FROM concert WHERE concert.Year != 2014 )
+  - SELECT stadium.Name FROM stadium WHERE stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE DISTINCT concert.Year != 2014 )
+  - SELECT stadium.Name FROM stadium WHERE DISTINCT stadium.Stadium_ID NOT IN (SELECT concert.Stadium_ID FROM concert WHERE concert.Year != 2014 )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11220884323120117
   - -0.10477304458618164

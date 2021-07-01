@@ -1,0 +1,31 @@
+db: tests-examples/spider/shop_membership/tables/db.sqlite
+inputs:
+- tests-examples/spider/shop_membership/tables/branch.csv
+- tests-examples/spider/shop_membership/tables/membership_register_branch.csv
+output: tests-examples/spider/shop_membership/tables/0015.csv
+constants:
+- '2016'
+functions:
+- count
+- max
+columns:
+- register_year
+comment: |-
+  SELECT T2.name,
+         T2.open_year
+  FROM membership_register_branch AS T1
+  JOIN branch AS T2 ON T1.branch_id = T2.branch_id
+  WHERE T1.register_year = 2016
+  GROUP BY T2.branch_id
+  ORDER BY count(*) DESC
+  LIMIT 1
+
+sql: |-
+  SELECT T2.name,
+         T2.open_year
+  FROM membership_register_branch AS T1
+  JOIN branch AS T2 ON T1.branch_id = T2.branch_id
+  WHERE T1.register_year = 2016
+  GROUP BY T2.branch_id
+  ORDER BY count(*) DESC
+  LIMIT 1

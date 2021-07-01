@@ -4,10 +4,17 @@ inputs:
 output: tests-examples/db2csv/pets_1/tables/0003_dev.csv
 raw_question: Find the weight of the youngest dog. 
 question_index: 47 
-functions:
- - min
-columns:
- - pet_age
+has_limit: True 
+has_order_by: True 
+order_by_direction: []
+constants:
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT weight
   FROM pets
@@ -68,10 +75,10 @@ smbop_beam_functions:
 - - min
 - - min
 - - min
-- - min
-  - avg
-- - min
-  - max
+- - avg
+  - min
+- - max
+  - min
 - - max
 - - min
 - - count
@@ -133,22 +140,55 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MIN( pets.weight ) FROM pets
   - SELECT COUNT( DISTINCT pets.pet_age ) FROM pets
   - SELECT AVG( pets.weight ) FROM pets
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
 - - petid
 - []
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -161,55 +201,56 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 ratsql_beam_functions:
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 - - min
 ratsql_beam_columns:
-- - pet_age
-- - age
-- - age
-- - pet_age
-- - pet_age
-- - pet_age
-- - age
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 - - age
 ratsql_beam_ieu:
@@ -254,6 +295,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Pets.weight FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID ORDER BY Student.Age Asc LIMIT 1
   - SELECT Pets.weight FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID ORDER BY Student.Age Asc
   - SELECT Pets.weight FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Student.Age = (SELECT Min(Student.Age) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID)
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10445880889892578
   - -0.1043086051940918

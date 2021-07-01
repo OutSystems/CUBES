@@ -1,15 +1,20 @@
 db: tests-examples/db2csv/tvshow/tables/tvshow.sqlite
 inputs:
- - tests-examples/db2csv/tvshow/tables/cartoon.csv
  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+ - tests-examples/db2csv/tvshow/tables/cartoon.csv
 output: tests-examples/db2csv/tvshow/tables/0051_dev.csv
 raw_question: which countries' tv channels are not playing any cartoon written by Todd Casey? 
 question_index: 635 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Todd Casey
 join_columns:
- - id
  - channel
+ - id
+groupby_columns: []
+functions: []
 columns:
  - written_by
 filters:
@@ -36,8 +41,8 @@ sql: |-
 smbop_beam_join_columns:
 - - id
   - channel
-- - id
-  - channel
+- - channel
+  - id
 - - id
   - channel
 - []
@@ -51,12 +56,12 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/tv_channel.csv
 - - tests-examples/db2csv/tvshow/tables/tv_channel.csv
@@ -109,12 +114,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT cartoon.channel FROM cartoon
   - SELECT DISTINCT tv_channel.country FROM tv_channel
   - SELECT tv_channel.country FROM tv_channel
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - channel
-- - id
-  - channel
+- - channel
+  - id
+- - channel
+  - id
 - []
 - []
 - - id
@@ -132,15 +158,15 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
   - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
@@ -153,6 +179,9 @@ ratsql_beam_constants:
 - - Todd Casey
 - - Todd Casey
 - - Todd Casey
+- - Todd Casey
+- - Todd Casey
+  - '1'
 ratsql_beam_functions:
 - []
 - []
@@ -166,8 +195,8 @@ ratsql_beam_columns:
 - - written_by
 - - written_by
 - - written_by
-- - id
-  - written_by
+- - written_by
+  - id
 - - written_by
 - - written_by
 - - written_by
@@ -205,13 +234,40 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Written_by != 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT TV_Channel.Country FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Written_by = 'Todd Casey'
-  - SELECT TV_Channel.Country FROM TV_Channel WHERE TV_Channel.id NOT IN (SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey'
+  - SELECT TV_Channel.Country FROM TV_Channel WHERE TV_Channel.id NOT IN (SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey' )
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT DISTINCT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM TV_Channel JOIN TV_series ON TV_series.Channel = TV_Channel.id JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Written_by = 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE DISTINCT Cartoon.Written_by = 'Todd Casey'
   - SELECT DISTINCT TV_Channel.Country FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel LIMIT 1 EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey'
   - SELECT TV_Channel.Country FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Written_by = 'Todd Casey' LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11156702041625977
   - -0.10454511642456055

@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0023_dev.csv
 raw_question: What is the average life expectancy in African countries that are republics? 
 question_index: 724 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - Africa
  - Republic
+ - Africa
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
+ - governmentform
  - continent
  - lifeexpectancy
- - governmentform
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT avg(LifeExpectancy)
   FROM country
@@ -45,11 +51,16 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 smbop_beam_constants:
-- - Africa
-- - Africa
-- - Africa
-- - Africa
-- - Africa
+- - Republic
+  - Africa
+- - Republic
+  - Africa
+- - Republic
+  - Africa
+- - Republic
+  - Africa
+- - Republic
+  - Africa
 smbop_beam_functions:
 - - avg
 - - avg
@@ -58,20 +69,20 @@ smbop_beam_functions:
 - - avg
 smbop_beam_columns:
 - - governmentform
-  - lifeexpectancy
   - region
+  - lifeexpectancy
 - - governmentform
-  - lifeexpectancy
   - region
-- - continent
   - lifeexpectancy
-  - governmentform
-- - continent
-  - lifeexpectancy
-  - governmentform
 - - governmentform
+  - continent
   - lifeexpectancy
+- - governmentform
+  - continent
+  - lifeexpectancy
+- - governmentform
   - region
+  - lifeexpectancy
 smbop_beam_ieu:
 - []
 - []
@@ -96,6 +107,24 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( country.lifeexpectancy ) FROM country WHERE country.continent = 'African' AND country.governmentform = 'republics'
   - SELECT AVG( country.lifeexpectancy ) FROM country WHERE country.continent = 'African' AND country.governmentform = 'republic'
   - SELECT AVG( country.lifeexpectancy ) FROM country WHERE country.region = 'republics' AND country.governmentform = 'African'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -103,10 +132,10 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -123,8 +152,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
@@ -133,6 +162,8 @@ ratsql_beam_constants:
 - - Africa
 - - Africa
 - - Africa
+- - Africa
+  - '1'
 - - Africa
 - - Africa
 - - Africa
@@ -146,23 +177,23 @@ ratsql_beam_functions:
 - - avg
 - - avg
 ratsql_beam_columns:
-- - lifeexpectancy
-  - headofstate
+- - headofstate
+  - lifeexpectancy
 - - name
   - lifeexpectancy
-- - lifeexpectancy
-  - headofstate
-- - lifeexpectancy
-  - headofstate
-- - lifeexpectancy
-  - headofstate
-- - name
+- - headofstate
   - lifeexpectancy
+- - headofstate
+  - lifeexpectancy
+- - headofstate
+  - lifeexpectancy
+- - name
   - headofstate
-- - lifeexpectancy
-  - headofstate
-- - lifeexpectancy
-  - headofstate
+  - lifeexpectancy
+- - headofstate
+  - lifeexpectancy
+- - headofstate
+  - lifeexpectancy
 ratsql_beam_ieu:
 - []
 - []
@@ -192,15 +223,42 @@ ratsql_beam_inferred_code:
   - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.HeadOfState = 'terminal'
   - SELECT Avg(country.LifeExpectancy) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.HeadOfState = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = Africa
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = 'Africa'
   - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Name = 'Arica'
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.HeadOfState = Africa
-  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.HeadOfState = Africa
-  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = Africa
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = Africa LIMIT 1
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = Africa AND country.Name = 'Arica'
-  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.HeadOfState = Africa
-  - SELECT Avg(country.LifeExpectancy) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.HeadOfState = Africa
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.HeadOfState = 'Africa'
+  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.HeadOfState = 'Africa'
+  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = 'Africa'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = 'Africa' LIMIT 1
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.HeadOfState = 'Africa' AND country.Name = 'Arica'
+  - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.HeadOfState = 'Africa'
+  - SELECT Avg(country.LifeExpectancy) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.HeadOfState = 'Africa'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1059732437133789
   - -0.10467958450317383

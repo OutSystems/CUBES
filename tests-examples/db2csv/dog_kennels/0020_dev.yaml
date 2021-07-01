@@ -6,14 +6,22 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0020_dev.csv
 raw_question: Tell me the owner id and last name of the owner who spent the most on treatments of his or her dogs. 
 question_index: 937 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - owner_id
  - dog_id
 groupby_columns:
  - owner_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.owner_id,
          T1.last_name
@@ -70,38 +78,38 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 smbop_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -111,10 +119,8 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - max
-  - sum
-- - max
-  - count
+- - sum
+- - count
 - []
 - []
 - []
@@ -178,18 +184,51 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.owner_id FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id
   - SELECT owners.owner_id FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN charges ON dogs.dog_id = charges.charge_id
   - SELECT owners.owner_id , owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id JOIN treatments ON treatments.dog_id = dogs.dog_id JOIN charges ON dogs.dog_id = charges.charge_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - owner_id
 - - owner_id
   - dog_id
-- - treatment_type_code
-  - owner_id
+- - owner_id
   - dog_id
+  - treatment_type_code
 - - owner_id
   - dog_id
 - - owner_id
+  - dog_id
   - professional_id
-  - dog_id
 - - owner_id
 - - owner_id
   - size_code
@@ -210,51 +249,45 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -304,6 +337,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Owners.owner_id, DISTINCT Owners.last_name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id GROUP BY Owners.owner_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Owners.owner_id, Owners.last_name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id GROUP BY Owners.owner_id ORDER BY Count(DISTINCT *) Desc LIMIT 1
   - SELECT Owners.owner_id, Owners.last_name FROM Breeds JOIN Owners JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Dogs.owner_id = Owners.owner_id AND Breeds.breed_code = Dogs.breed_code GROUP BY Owners.owner_id ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10445213317871094
   - -0.10402870178222656

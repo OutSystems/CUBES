@@ -4,14 +4,21 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0048_dev.csv
 raw_question: What is the mobile phone number of the student named Timmothy Ward ? 
 question_index: 554 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - ward
  - timmothy
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - first_name
  - last_name
 filters:
  - '='
+ieu: []
 comment: |-
   select cell_mobile_number
   from students
@@ -57,31 +64,31 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 smbop_beam_constants:
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
-- - Ward
-  - Timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
+- - ward
+  - timmothy
 smbop_beam_functions:
 - []
 - []
@@ -129,14 +136,14 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
+  - '>'
   - '>='
-  - '>'
 - - '='
 - - '='
   - '>'
 - - '='
+  - '>'
   - '>='
-  - '>'
 - - '='
 - - '='
 smbop_beam_inferred_code:
@@ -161,17 +168,50 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT students.cell_mobile_number FROM student_enrolment, students WHERE students.first_name >= 'Timmothy' AND students.last_name = 'Ward'
   - SELECT students.cell_mobile_number FROM transcripts, students WHERE students.student_id = 'Tim'
   - SELECT students.cell_mobile_number FROM students, student_enrolment WHERE students.student_id = 'Tim'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - - address_id
   - current_address_id
-- - department_id
+- - degree_program_id
+  - department_id
   - student_id
-  - degree_program_id
-- - student_id
-  - student_enrolment_id
+- - student_enrolment_id
+  - student_id
 - - student_id
   - semester_id
 - - student_id
@@ -190,13 +230,13 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
@@ -209,6 +249,11 @@ ratsql_beam_constants:
   - Timmothy
 - - Ward
   - Timmothy
+- - Ward
+  - Timmothy
+- - Ward
+  - Timmothy
+  - '1'
 - - Ward
   - Timmothy
 - - Ward
@@ -285,6 +330,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Students.cell_mobile_number FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
   - SELECT Students.cell_mobile_number FROM Semesters JOIN Students JOIN Student_Enrolment ON Semesters.semester_id = Student_Enrolment.semester_id AND Student_Enrolment.student_id = Students.student_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
   - SELECT Students.cell_mobile_number FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Students.first_name = 'Timmothy' AND Students.last_name = 'Ward'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10480356216430664
   - -0.10468816757202148

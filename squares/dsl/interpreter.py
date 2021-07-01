@@ -205,6 +205,11 @@ class SquaresInterpreter(LineInterpreter):
     def eval_unite(self, name, args):
         return f'{name} <- unite({args[0]}, {args[1]}, {args[1]}, {args[2]}, sep=":", remove=F)\n'
 
+    @eval_decorator
+    def eval_limit(self, name, args):
+        self.has_limit = True
+        return f'{name} <- {args[0]} %>% arrange({args[1]}) %>% head({self.problem.output_table.df.shape[0]})\n'
+
     def apply_row(self, val):
         df = robjects.r(val)
         return df.nrow
@@ -257,13 +262,14 @@ class SquaresInterpreter(LineInterpreter):
                     robjects.r(_script)
                     if self.test_equality('out', expect, False):
                         if self.final_interpretation:
-                            for perm in util.get_permutations(e_cols, len(e_cols)):
-                                name = util.get_fresh_name()
-                                new_script = f'{name} <- out %>% arrange({perm})'
-                                robjects.r(new_script)
-                                if self.test_equality(name, expect, True):
-                                    _script += f' %>% arrange({perm})'
-                                    break
+                            if not self.has_limit:
+                                for perm in util.get_permutations(e_cols, len(e_cols)):
+                                    name = util.get_fresh_name()
+                                    new_script = f'{name} <- out %>% arrange({perm})'
+                                    robjects.r(new_script)
+                                    if self.test_equality(name, expect, True):
+                                        _script += f' %>% arrange({perm})'
+                                        break
 
                             self.program += _script + '\n'
                         return True, score, None

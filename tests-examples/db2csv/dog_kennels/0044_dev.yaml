@@ -5,14 +5,20 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0044_dev.csv
 raw_question: Who owns the youngest dog? Give me his or her last name. 
 question_index: 961 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
  - owner_id
+groupby_columns: []
 functions:
  - max
 columns:
  - age
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.last_name
   FROM Owners AS T1
@@ -72,8 +78,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 smbop_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -83,7 +89,7 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - min
+- []
 - - min
 - - min
 - - min
@@ -94,7 +100,7 @@ smbop_beam_functions:
 - - min
 - - min
 smbop_beam_columns:
-- - age
+- []
 - - age
 - - age
 - - age
@@ -148,6 +154,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.last_name FROM owners, dogs WHERE owners.owner_id = dogs.owner_id OR dogs.age = (SELECT MIN( dogs.age ) FROM dogs)
   - SELECT owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id WHERE dogs.age = (SELECT MIN( dogs.age ) FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id) ORDER BY dogs.age ASC
   - SELECT DISTINCT owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id WHERE dogs.age = (SELECT MIN( dogs.age ) FROM dogs)
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - False
+  - True
+  - True
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - owner_id
@@ -185,34 +224,35 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
 - []
 ratsql_beam_functions:
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
 - []
-- - min
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 ratsql_beam_columns:
-- - age
-- - age
-- - age
-- - age
-- - last_name
-- - age
 - []
-- - last_name
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 ratsql_beam_ieu:
 - []
@@ -256,6 +296,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Dogs.name FROM Dogs ORDER BY DISTINCT Dogs.age Asc LIMIT 1
   - SELECT Owners.last_name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id ORDER BY Owners.last_name Asc LIMIT 1
   - SELECT Dogs.name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id ORDER BY Dogs.age Asc
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- -  asc 
+- []
 ratsql_beam_score_history:
 - - -0.10633516311645508
   - -0.10444164276123047

@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/battle_death/tables/0005_dev.csv
 raw_question: What is the average number of injuries caused each time? 
 question_index: 495 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
  - injured
+filters: []
+ieu: []
 comment: |-
   SELECT avg(injured)
   FROM death
@@ -39,8 +47,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
-- - tests-examples/db2csv/battle_death/tables/death.csv
-  - tests-examples/db2csv/battle_death/tables/ship.csv
+- - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
@@ -109,18 +117,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT death.caused_by_ship_id , AVG( death.injured ) FROM battle , death
   - SELECT AVG( death.injured ) FROM death GROUP BY death.caused_by_ship_id
   - SELECT battle.name , AVG( death.injured ) FROM battle , death
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
-  - caused_by_ship_id
+  - id
+- - caused_by_ship_id
+  - id
 - []
 - []
 - []
-- - id
-  - caused_by_ship_id
+- - caused_by_ship_id
+  - id
 - []
 ratsql_beam_groupby_columns:
 - - injured
@@ -134,15 +169,15 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
+  - tests-examples/db2csv/battle_death/tables/ship.csv
   - tests-examples/db2csv/battle_death/tables/death.csv
-  - tests-examples/db2csv/battle_death/tables/ship.csv
-- - tests-examples/db2csv/battle_death/tables/death.csv
-  - tests-examples/db2csv/battle_death/tables/ship.csv
-- - tests-examples/db2csv/battle_death/tables/death.csv
+- - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
-  - tests-examples/db2csv/battle_death/tables/ship.csv
+- - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/death.csv
 ratsql_beam_constants:
 - []
@@ -151,6 +186,8 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- []
+- - '1'
 - []
 - []
 ratsql_beam_functions:
@@ -211,6 +248,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(death.injured), death.injured FROM death GROUP BY death.injured LIMIT 1
   - SELECT Avg(death.injured), ship.name FROM ship JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.injured
   - SELECT Avg(death.killed), death.injured FROM death GROUP BY death.injured
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10436820983886719
   - -0.10535335540771484

@@ -24,27 +24,6 @@ setwd('..')
 setwd('SQUARES')
 
 
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-df_has_allergy <- read_csv("tests-examples/spider/allergy_1/tables/has_allergy.csv", skip=1, col_names=c('stuid','allergy'), col_types=cols(col_integer(),col_character()))
-df_has_allergy <- copy_to(con, df_has_allergy)
-expected_output <- read_csv("tests-examples/spider/allergy_1/tables/0033.csv", skip=1, col_names=c('count___'), col_types=cols(col_integer()))
+df_teacher <- read_csv("tests-examples/db2csv/course_teach/tables/teacher.csv", skip=1, col_names=c('teacher_id','name','age','hometown'), col_types=cols(col_integer(),col_character(),col_integer(),col_character()))
 
-A
-V
-C
-A
-
-
-4
-
-4
-4
-4
-4
-
-
-df1 <- df_has_allergy %>% filter(allergy == 'Cat')
-df2 <- df1 %>% summarise(n = n())
-out <- df2 %>% select(count___ = n) %>% distinct() %>% arrange(count___)
-
-show_query(out)
+df_teacher %>% arrange(age) %>% head(1L)

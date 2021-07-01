@@ -1,16 +1,21 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/pets.csv
- - tests-examples/db2csv/pets_1/tables/has_pet.csv
  - tests-examples/db2csv/pets_1/tables/student.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
+ - tests-examples/db2csv/pets_1/tables/pets.csv
 output: tests-examples/db2csv/pets_1/tables/0019_dev.csv
 raw_question: Find the id of students who do not have a cat pet. 
 question_index: 63 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - cat
 join_columns:
- - stuid
  - petid
+ - stuid
+groupby_columns: []
+functions: []
 columns:
  - pettype
 filters:
@@ -49,14 +54,14 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
 - - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
 - - cat
 - - cat
@@ -99,19 +104,37 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT student.stuid FROM student
   - SELECT has_pet.stuid FROM has_pet
   - SELECT has_pet.stuid FROM has_pet JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
 - - petid
-- - stuid
-  - petid
+  - stuid
+- - petid
+  - stuid
 - - petid
 - - petid
-- - stuid
-  - petid
+  - stuid
+- - petid
+- - petid
+- - petid
+  - stuid
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -122,32 +145,35 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
 - - cat
 - - cat
 - - cat
 - - cat
 - - cat
+- - cat
+- - cat
+  - '1'
 - - cat
 - - cat
 - - cat
@@ -209,6 +235,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Student.StuID FROM Student EXCEPT SELECT Has_Pet.StuID FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
   - SELECT Student.StuID FROM Student LIMIT 1 EXCEPT SELECT Has_Pet.StuID FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
   - SELECT Student.StuID FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID EXCEPT SELECT Has_Pet.StuID FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10910987854003906
   - -0.10372352600097656

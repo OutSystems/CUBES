@@ -5,19 +5,24 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0026_dev.csv
 raw_question: What is the name and capacity of the stadium with the most concerts after 2013 ? 
 question_index: 25 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
 constants:
  - 2013
+ - '1'
 join_columns:
  - stadium_id
 groupby_columns:
  - stadium_id
 functions:
- - max
  - count
 columns:
  - year
 filters:
  - '>'
+ieu: []
 comment: |-
   select t2.name,
          t2.capacity
@@ -82,26 +87,26 @@ smbop_beam_tables:
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 smbop_beam_constants:
 - - 2013
+  - '1'
 - - 2013
 - - 2013
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
 - - 2013
 - - 2013
 - - 2013
 smbop_beam_functions:
-- - max
-  - count
+- - count
 - - count
 - []
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
 - []
 - []
 - []
@@ -161,6 +166,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT stadium.name , stadium.capacity FROM stadium JOIN concert ON stadium.stadium_id = concert.stadium_id WHERE concert.year > 2013
   - SELECT stadium.name FROM stadium JOIN concert ON stadium.stadium_id = concert.stadium_id WHERE concert.year > 2013
   - SELECT stadium.name , stadium.capacity FROM concert JOIN stadium ON concert.stadium_id = stadium.stadium_id WHERE concert.year > 2013 GROUP BY concert.stadium_id
+smbop_beam_has_limit:
+  - True
+  - False
+  - False
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- []
+- []
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - stadium_id
 - - stadium_id
@@ -185,35 +223,43 @@ ratsql_beam_tables:
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
+  - '1'
 - - 2013
+  - '1'
+- - 2013
+  - '1'
+- - 2013
+  - '1'
+- - 2013
+  - '1'
+- - 2013
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - - year
 - - year
@@ -257,6 +303,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year > 2013 GROUP BY DISTINCT stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE concert.Year > 2013 GROUP BY stadium.Stadium_ID ORDER BY Count(DISTINCT *) Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE DISTINCT concert.Year > 2013 GROUP BY stadium.Stadium_ID ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10365867614746094
   - -0.10435104370117188

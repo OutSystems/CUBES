@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0017_dev.csv
 raw_question: Show ids for all templates that are used by more than one document. 
 question_index: 313 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 1
+join_columns: []
 groupby_columns:
  - template_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT template_id
   FROM Documents
@@ -63,18 +70,19 @@ smbop_beam_constants:
 - - 1
 - - 1
 - - 1
+  - '1'
 - - 1
 - - 1
 - - 1
 - - 1
+  - '2'
 - - 1
 smbop_beam_functions:
 - - count
 - - count
 - - count
 - - count
-- - max
-  - count
+- - count
 - []
 - - count
 - []
@@ -138,14 +146,47 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT documents.template_id FROM documents GROUP BY documents.template_id INTERSECT SELECT documents.template_id FROM documents GROUP BY documents.template_id
   - SELECT documents.template_id FROM documents GROUP BY documents.template_id ORDER BY COUNT( DISTINCT documents.template_id ) DESC LIMIT 2
   - SELECT documents.template_id FROM documents GROUP BY documents.template_id
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- -  desc 
+- []
+- []
+- []
+- -  desc 
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - - template_id
 - []
 - []
-- - template_id
-  - template_type_code
+- - template_type_code
+  - template_id
 - - document_id
 - []
 ratsql_beam_groupby_columns:
@@ -165,16 +206,19 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 ratsql_beam_constants:
 - - 1
 - - 1
 - - 1
 - - 1
+- - 1
+- - 1
+  - '1'
 - - 1
 - - 1
 - - 1
@@ -233,10 +277,37 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Documents.Template_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID GROUP BY Documents.Template_ID HAVING Count(*) > 1
   - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(DISTINCT *) > 1
   - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(*) > 1 LIMIT 1
-  - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(Documents.Document_ID) > 1
+  - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(Documents.Document_ID) > '1'
   - SELECT Documents.Template_ID FROM Ref_Template_Types JOIN Templates ON Ref_Template_Types.Template_Type_Code = Templates.Template_Type_Code JOIN Documents ON Templates.Template_ID = Documents.Template_ID GROUP BY Documents.Template_ID HAVING Count(*) > 1
   - SELECT Documents.Template_ID FROM Documents JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID GROUP BY Documents.Template_ID HAVING Count(*) > 1
-  - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(Documents.Document_Description) > 1
+  - SELECT Documents.Template_ID FROM Documents GROUP BY Documents.Template_ID HAVING Count(Documents.Document_Description) > '1'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10183286666870117
   - -0.10637187957763672

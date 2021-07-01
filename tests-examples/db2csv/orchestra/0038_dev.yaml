@@ -4,15 +4,21 @@ inputs:
 output: tests-examples/db2csv/orchestra/tables/0038_dev.csv
 raw_question: Count the number of orchestras that have CD or DVD as their record format. 
 question_index: 859 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - DVD
  - CD
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - major_record_format
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT COUNT(*)
   FROM orchestra
@@ -42,12 +48,12 @@ smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
@@ -114,6 +120,30 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM orchestra WHERE orchestra.major_record_format = 'DVD' OR orchestra.major_record_format = 'DVD'
   - SELECT COUNT( * ) FROM orchestra WHERE orchestra.major_record_format = 'CD or DVD'
   - SELECT orchestra.major_record_format FROM orchestra WHERE orchestra.major_record_format = 'CD' OR orchestra.major_record_format = 'DVD'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - conductor_id
@@ -133,13 +163,13 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/show.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
   - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+  - tests-examples/db2csv/orchestra/tables/show.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
 - - tests-examples/db2csv/orchestra/tables/orchestra.csv
@@ -154,6 +184,13 @@ ratsql_beam_constants:
   - CD
 - - DVD
   - CD
+- - DVD
+  - CD
+- - DVD
+  - CD
+- - DVD
+  - CD
+  - '1'
 - - DVD
   - CD
 - - DVD
@@ -173,8 +210,8 @@ ratsql_beam_columns:
 - - major_record_format
 - - major_record_format
 - - major_record_format
-- - record_company
-  - major_record_format
+- - major_record_format
+  - record_company
 ratsql_beam_ieu:
 - []
 - []
@@ -203,16 +240,40 @@ ratsql_beam_inferred_code:
   - SELECT DISTINCT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'terminal' OR orchestra.Major_Record_Format = 'terminal'
   - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'terminal' OR orchestra.Record_Company = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID JOIN show ON performance.Performance_ID = show.Performance_ID WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra WHERE DISTINCT orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(DISTINCT *) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR DISTINCT orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD' LIMIT 1
-  - SELECT DISTINCT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Major_Record_Format = 'DVD'
-  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'CD' OR orchestra.Record_Company = DVD
+  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID JOIN show ON performance.Performance_ID = show.Performance_ID WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra WHERE DISTINCT orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(DISTINCT *) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR DISTINCT orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD' LIMIT 1
+  - SELECT DISTINCT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Major_Record_Format = 'CD'
+  - SELECT Count(*) FROM orchestra WHERE orchestra.Major_Record_Format = 'DVD' OR orchestra.Record_Company = 'CD'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10332632064819336
   - -0.10674905776977539

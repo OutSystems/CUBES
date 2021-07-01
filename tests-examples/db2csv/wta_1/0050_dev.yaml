@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0050_dev.csv
 raw_question: What are the codes of countries with more than 50 players? 
 question_index: 478 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 50
+join_columns: []
 groupby_columns:
  - country_code
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT country_code
   FROM players
@@ -22,29 +29,22 @@ sql: |-
   GROUP BY country_code
   HAVING count(*) > 50
 smbop_beam_join_columns:
-- []
 smbop_beam_groupby_columns:
-- - country_code
 smbop_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/players.csv
 smbop_beam_constants:
-- - 50
 smbop_beam_functions:
-- - count
 smbop_beam_columns:
-- - country_code
 smbop_beam_ieu:
-- []
 smbop_beam_filters:
-- []
 smbop_beam_inferred_code:
-  - SELECT COUNT( DISTINCT players.country_code ) FROM players GROUP BY players.country_code HAVING COUNT( * ) > 50
 smbop_beam_inferred_code_w_terminals:
-  - SELECT COUNT( DISTINCT players.country_code ) FROM players GROUP BY players.country_code HAVING COUNT( * ) > 50
+smbop_beam_has_limit:
+smbop_beam_has_order_by:
+smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
 - []
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
 - - player_id
 - []
 - []
@@ -62,10 +62,10 @@ ratsql_beam_groupby_columns:
 - - country_code
 ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
@@ -77,6 +77,9 @@ ratsql_beam_constants:
 - - 50
 - - 50
 - - 50
+- - 50
+- - 50
+  - '1'
 - - 50
 - - 50
 - - 50
@@ -135,9 +138,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT players.country_code FROM players GROUP BY DISTINCT players.country_code HAVING Count(*) > 50
   - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Count(DISTINCT *) > 50
   - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Count(*) > 50 LIMIT 1
-  - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Count(players.player_id) > 50
+  - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Count(players.player_id) > '50'
   - SELECT players.country_code FROM players WHERE players.player_id > 50
-  - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Avg(players.player_id) > 50
+  - SELECT players.country_code FROM players GROUP BY players.country_code HAVING Avg(players.player_id) > '50'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10534000396728516
   - -0.10423564910888672

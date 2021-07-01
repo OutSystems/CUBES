@@ -5,19 +5,24 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0039_dev.csv
 raw_question: How many 'United Airlines' flights depart from Airport 'AHD'? 
 question_index: 217 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - United Airlines
  - AHD
 join_columns:
  - airline
  - uid
+groupby_columns: []
 functions:
  - count
 columns:
- - sourceairport
  - airline
+ - sourceairport
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM AIRLINES AS T1
@@ -32,30 +37,30 @@ sql: |-
   WHERE T1.Airline = "United Airlines"
     AND T2.SourceAirport = "AHD"
 smbop_beam_join_columns:
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
+  - destairport
   - uid
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
+  - destairport
   - uid
-- - destairport
-  - airportcode
+- - airportcode
+  - destairport
   - uid
 smbop_beam_groupby_columns:
 - []
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 smbop_beam_constants:
 - - United Airlines
@@ -91,6 +96,18 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM flights JOIN airports ON flights.sourceairport = airports.airportcode JOIN airlines ON flights.destairport = airlines.uid WHERE airports.airportname = 'AHD' AND airlines.airline = 'United Airlines'
   - SELECT COUNT( * ) FROM flights JOIN airlines ON flights.destairport = airlines.uid JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.airportname = 'AHD' AND airlines.airline = 'United Airlines'
   - SELECT COUNT( * ) FROM flights JOIN airports ON flights.destairport = airports.airportcode JOIN airlines ON flights.destairport = airlines.uid WHERE airports.airportname = 'AHD' AND airlines.airline = 'United Airlines'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -114,12 +131,12 @@ ratsql_beam_tables:
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
@@ -139,6 +156,13 @@ ratsql_beam_constants:
   - AHD
 - - United Airlines
   - AHD
+- - United Airlines
+  - AHD
+  - '1'
+- - United Airlines
+  - AHD
+- - United Airlines
+  - AHD
 ratsql_beam_functions:
 - - count
 - - count
@@ -148,19 +172,19 @@ ratsql_beam_functions:
 - - count
 - - count
 ratsql_beam_columns:
-- - destairport
-  - airline
-- - sourceairport
-  - airline
 - - airline
-- - destairport
-  - airline
-- - sourceairport
-  - airline
-- - destairport
-  - airline
-- - destairport
-  - airline
+  - destairport
+- - airline
+  - sourceairport
+- - airline
+- - airline
+  - destairport
+- - airline
+  - sourceairport
+- - airline
+  - destairport
+- - airline
+  - destairport
 ratsql_beam_ieu:
 - []
 - []
@@ -199,6 +223,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines' AND flights.DestAirport = 'AHD' LIMIT 1
   - SELECT DISTINCT Count(*) FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines' AND flights.DestAirport = 'AHD'
   - SELECT Count(DISTINCT *) FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines' AND flights.DestAirport = 'AHD'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10479497909545898
   - -0.1053018569946289

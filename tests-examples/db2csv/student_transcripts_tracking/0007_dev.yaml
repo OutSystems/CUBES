@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0007_dev.csv
 raw_question: What is the zip code of the address in the city Port Chelsea? 
 question_index: 513 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Port Chelsea
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - city
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT zip_postcode
   FROM Addresses
@@ -54,8 +61,8 @@ smbop_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
 smbop_beam_constants:
 - - Port Chelsea
 - - Port Chelsea
@@ -133,32 +140,65 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT addresses.zip_postcode FROM addresses, transcript_contents WHERE addresses.city = 'Port'
   - SELECT addresses.zip_postcode FROM addresses, transcripts WHERE addresses.city = 'Port'
   - SELECT addresses.zip_postcode FROM addresses, semesters WHERE addresses.city = 'Port'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - - address_id
   - current_address_id
-- - student_enrolment_id
+- - current_address_id
+  - address_id
   - course_id
+  - student_enrolment_id
+  - student_id
+- - degree_program_id
   - current_address_id
+  - department_id
   - address_id
   - student_id
-- - department_id
-  - degree_program_id
-  - current_address_id
-  - address_id
-  - student_id
-- - address_id
-  - student_id
-  - current_address_id
+- - student_id
   - semester_id
-- - address_id
-  - student_id
-  - degree_program_id
+  - address_id
   - current_address_id
-- - address_id
-  - student_id
+- - student_id
+  - degree_program_id
+  - address_id
+  - current_address_id
+- - student_id
+  - address_id
   - current_address_id
 ratsql_beam_groupby_columns:
 - []
@@ -176,24 +216,24 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
@@ -202,6 +242,8 @@ ratsql_beam_constants:
 - - Port Chelsea
 - - Port Chelsea
 - - Port Chelsea
+- - Port Chelsea
+  - '1'
 - - Port Chelsea
 - - Port Chelsea
 - - Port Chelsea
@@ -270,6 +312,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Addresses.zip_postcode FROM Addresses JOIN Semesters JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.semester_id = Semesters.semester_id WHERE Addresses.city = 'Port Chelsea'
   - SELECT Addresses.zip_postcode FROM Addresses JOIN Degree_Programs JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id WHERE Addresses.city = 'Port Chelsea'
   - SELECT Addresses.zip_postcode FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id WHERE Addresses.city = 'Port Chelsea'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10405445098876953
   - -0.10469770431518555

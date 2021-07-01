@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0012_dev.csv
 raw_question: How many different departments offer degrees? 
 question_index: 518 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - department_id
+filters: []
+ieu: []
 comment: |-
   SELECT count(DISTINCT department_id)
   FROM Degree_Programs
@@ -45,26 +53,35 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( DISTINCT degree_programs.department_id ) FROM degree_programs
   - SELECT COUNT( * ) FROM degree_programs
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - department_id
 - []
 - []
 - []
-- - address_id
-  - student_id
-  - degree_program_id
-  - current_address_id
-- - student_enrolment_id
-  - course_id
-  - degree_program_id
 - - student_id
   - degree_program_id
+  - address_id
+  - current_address_id
 - - student_enrolment_id
   - degree_program_id
-- - student_enrolment_id
   - course_id
+- - degree_program_id
+  - student_id
+- - degree_program_id
+  - student_enrolment_id
+- - student_enrolment_id
   - degree_program_id
+  - course_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -78,36 +95,36 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 ratsql_beam_constants:
 - []
 - []
 - []
 - []
-- []
+- - '1'
 - []
 - []
 - []
@@ -179,6 +196,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT Degree_Programs.department_id) FROM Degree_Programs JOIN Students JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id AND Student_Enrolment.student_id = Students.student_id
   - SELECT Count(DISTINCT Degree_Programs.department_id) FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id
   - SELECT Count(DISTINCT Degree_Programs.department_id) FROM Courses JOIN Degree_Programs JOIN Student_Enrolment ON Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11512613296508789
   - -0.10508871078491211

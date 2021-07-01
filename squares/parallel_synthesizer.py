@@ -95,7 +95,7 @@ class ChildSynthesizer(Process, Synthesizer):
                     self._enumerator.assert_expr(constraint.realize_constraint(self.tyrell_specification, self._enumerator), f'cube_line_{i}',
                                                  track=True)
 
-            ret, attempts = self.synthesize()
+            ret, attempts = next(self.synthesize())
 
             if isinstance(self._enumerator, BitEnumerator):
                 core = None
@@ -127,12 +127,13 @@ class ChildSynthesizer(Process, Synthesizer):
         logger.debug('Resuming solving previous cube')
 
         try:
-            ret, attempts = self.synthesize()
+            ret, attempts = next(self.synthesize())
 
-            core = None
-            if attempts == 0:
-                # logger.warning('Cube generated 0 programs')
-                unsat_core = [str(clause) for clause in self._enumerator.unsat_core]
+            if isinstance(self._enumerator, BitEnumerator):
+                core = None
+                if attempts == 0:
+                    # logger.warning('Cube generated 0 programs')
+                    unsat_core = [str(clause) for clause in self._enumerator.unsat_core]
 
             if ret:
                 logger.debug('Found solution with cube')

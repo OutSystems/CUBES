@@ -4,8 +4,13 @@ inputs:
 output: tests-examples/db2csv/museum_visit/tables/0008_dev.csv
 raw_question: find the names of museums which have more staff than the minimum staff number of all museums opened after 2010. 
 question_index: 418 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2010
+join_columns: []
+groupby_columns: []
 functions:
  - min
 columns:
@@ -13,6 +18,7 @@ columns:
  - num_of_staff
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT name
   FROM museum
@@ -112,8 +118,8 @@ smbop_beam_ieu:
 smbop_beam_filters:
 - - '>'
 - - '>'
-- - '>'
-  - '<'
+- - '<'
+  - '>'
 - - '>'
 - - '<'
 - - '>'
@@ -143,12 +149,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT museum.open_year FROM museum WHERE museum.open_year > 2010
   - SELECT museum.name FROM museum WHERE museum.open_year > 2010
   - SELECT museum.name FROM museum WHERE museum.open_year > 2010 OR museum.open_year > 2010
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
-- - id
+- - museum_id
   - visitor_id
-  - museum_id
+  - id
 - - museum_id
 - []
 - []
@@ -170,9 +209,9 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
@@ -190,6 +229,7 @@ ratsql_beam_constants:
 - - 2010
 - - 2010
 - - 2010
+  - '1'
 - - 2010
 - - 2010
 - - 2010
@@ -255,12 +295,45 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT museum.Name FROM museum WHERE museum.Open_Year > 2010
   - SELECT museum.Name FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID WHERE museum.Num_of_Staff > 2010
   - SELECT museum.Name FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Num_of_Staff > 2010
-  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Num_of_Staff > 2010
+  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Num_of_Staff > 2010 )
   - SELECT DISTINCT museum.Name FROM museum WHERE museum.Num_of_Staff > 2010
   - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > 2010 LIMIT 1
-  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Open_Year > 2010
-  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Open_Year) FROM museum WHERE museum.Num_of_Staff > 2010
-  - SELECT museum.Name FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Num_of_Staff > 2010
+  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Open_Year > 2010 )
+  - SELECT museum.Name FROM museum WHERE museum.Num_of_Staff > (SELECT Min(museum.Open_Year) FROM museum WHERE museum.Num_of_Staff > 2010 )
+  - SELECT museum.Name FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Num_of_Staff > (SELECT Min(museum.Num_of_Staff) FROM museum WHERE museum.Num_of_Staff > 2010 )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10452508926391602
   - -0.10547971725463867

@@ -4,16 +4,22 @@ inputs:
 output: tests-examples/db2csv/orchestra/tables/0012_dev.csv
 raw_question: Return the maximum and minimum shares for performances that do not have the type "Live final". 
 question_index: 833 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Live final
+join_columns: []
+groupby_columns: []
 functions:
- - min
  - max
+ - min
 columns:
- - share
  - type
+ - share
 filters:
  - '!='
+ieu: []
 comment: |-
   SELECT max(SHARE),
          min(SHARE)
@@ -54,28 +60,28 @@ smbop_beam_constants:
 - - Live final
 - - Live final
 smbop_beam_functions:
-- - min
-  - max
-- - min
-  - max
+- - max
+  - min
+- - max
+  - min
 - - count
 - - max
-- - min
-  - max
-- - min
-  - max
+- - max
+  - min
+- - max
+  - min
 smbop_beam_columns:
-- - share
-  - type
-- - share
-  - type
 - - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
+  - share
+- - type
+  - share
+- - type
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
 smbop_beam_ieu:
 - []
 - []
@@ -88,8 +94,8 @@ smbop_beam_filters:
 - - '='
 - - '!='
 - - '!='
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '<'
 smbop_beam_inferred_code:
   - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type != 'Live final'
@@ -105,6 +111,27 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MAX( performance.share ) , MAX( performance.share ) FROM performance WHERE performance.type != 'Live final'
   - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type >= 'Live final'
   - SELECT MAX( performance.share ) , MIN( performance.share ) FROM performance WHERE performance.type<'Live final'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -132,62 +159,64 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/orchestra/tables/performance.csv
 - - tests-examples/db2csv/orchestra/tables/performance.csv
 - - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
 - - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/show.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
+  - tests-examples/db2csv/orchestra/tables/show.csv
 ratsql_beam_constants:
 - - Live final
 - - Live final
 - - Live final
 - - Live final
 - - Live final
+  - '1'
+- - Live final
 - - Live final
 - - Live final
 - - Live final
 - - Live final
 ratsql_beam_functions:
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
 ratsql_beam_columns:
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
-- - share
-  - type
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
+- - type
+  - share
 ratsql_beam_ieu:
 - []
 - []
@@ -230,6 +259,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Max(performance.Share), Min(performance.Share) FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID WHERE performance.Type != 'Live final'
   - SELECT Max(DISTINCT performance.Share), Min(performance.Share) FROM performance WHERE performance.Type != 'Live final'
   - SELECT Max(performance.Share), Min(performance.Share) FROM performance JOIN show ON performance.Performance_ID = show.Performance_ID WHERE performance.Type != 'Live final'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.12023496627807617
   - -0.10554122924804688

@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0047_dev.csv
 raw_question: Show the names of students who have at least 2 likes. 
 question_index: 908 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
@@ -14,6 +17,9 @@ groupby_columns:
  - student_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.name
   FROM Likes AS T1
@@ -28,12 +34,12 @@ sql: |-
   GROUP BY T1.student_id
   HAVING count(*) >= 2
 smbop_beam_join_columns:
+- - student_id
+  - id
 - - id
   - student_id
-- - id
-  - student_id
-- - id
-  - liked_id
+- - liked_id
+  - id
 smbop_beam_groupby_columns:
 - - student_id
 - - student_id
@@ -73,25 +79,37 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.student_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
   - SELECT highschooler.name FROM likes JOIN highschooler ON likes.student_id = highschooler.id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
   - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.liked_id GROUP BY likes.student_id HAVING COUNT( * ) >= 2
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
   - student_id
-  - liked_id
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
+  - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
   - student_id
-  - liked_id
+  - id
 ratsql_beam_groupby_columns:
 - - student_id
 - - name
@@ -127,6 +145,9 @@ ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+  - '1'
 - - 2
 - - 2
 ratsql_beam_functions:
@@ -187,6 +208,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2 LIMIT 1
   - SELECT Likes.student_id FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Likes.student_id HAVING Count(*) >= 2
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.friend_id HAVING Count(*) >= 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10218620300292969
   - -0.10595893859863281

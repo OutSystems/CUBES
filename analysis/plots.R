@@ -325,7 +325,7 @@ vbs <- function(..., timelimit = 600) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   data %>%
-    group_by(name, benchmark) %>%
+    group_by(name) %>%
     summarise(real = min(ifelse(solved, real, timelimit)),
               cpu = min(ifelse(solved, cpu, timelimit)),
               all_status = paste(status, collapse = ','),
@@ -338,6 +338,7 @@ vbs <- function(..., timelimit = 600) {
                                                      ifelse(all(status == 1),
                                                             1,
                                                             -1)))), levels = status_levels, exclude = NULL),
+              fuzzy = factor(ifelse(any(fuzzy == "Possibly Correct"), 1, ifelse(any(fuzzy == "Possibly Correct Top 5"), 2, ifelse(any(fuzzy == "Possibly Correct Any"), 3, ifelse(any(fuzzy == "Incorrect by Fuzzing"), 4, ifelse(any(fuzzy == "Incorrect"), 0, -2))))), fuzzy_levels, fuzzy_meanings),
               solved_by = paste(as.character(try[which(solved)]), collapse = ", "),
               status = status_t,
               solved = is_solved_status(status)) %>%
@@ -345,7 +346,7 @@ vbs <- function(..., timelimit = 600) {
     mutate(try = 'VBS')
 }
 
-bars <- function(use_vbs = T, facet=F, facet_size = 4, ...) {
+bars <- function(use_vbs = T, facet = F, facet_size = 4, ...) {
   tries <- list(...)
   solved <- bind_rows(tries, .id = 'try')
   if (use_vbs) {
@@ -557,7 +558,7 @@ plot_sql_size <- function(...) {
     facet_wrap(~try)
 }
 
-plot_fuzzy <- function(drop_error = F, fill_bars = F, filter_all = F, facet = F, refactor = F, facet_size = 4, ...) {
+plot_fuzzy <- function(drop_error = F, drop_nones = F, fill_bars = F, filter_all = F, facet = F, refactor = F, facet_size = 4, ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try') %>%
     filter(solved) %>%
@@ -578,6 +579,9 @@ plot_fuzzy <- function(drop_error = F, fill_bars = F, filter_all = F, facet = F,
                               fuzzy == 'Possibly Correct Any' |
                               fuzzy == 'Incorrect' |
                               fuzzy == 'Incorrect by Fuzzing')
+  }
+  if (drop_nones) {
+    data <- data %>% filter(fuzzy != 'No solution', fuzzy != 'No database', fuzzy != 'No GT')
   }
 
   pages <- ifelse(facet == T, ceiling(length(unique(data$benchmark)) / (facet_size * facet_size)), 1)
@@ -642,6 +646,34 @@ non_determinism_plot <- function(data) {
     scale_x_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
     scale_y_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
     labs(x = 'Times Solved', y = 'Different Solutions') +
+    my_theme +
+    theme(panel.grid.major = element_blank())
+}
+
+solution_min_max_size <- function(data) {
+  data %>%
+    group_by(min_sol_loc, max_sol_loc, fuzzy) %>%
+    summarise(n = n()) %>%
+    ggplot(aes(x = min_sol_loc, y = max_sol_loc, fill = n)) +
+    geom_tile() +
+    geom_text(aes(label = n), size = 2.5) +
+    facet_wrap(~fuzzy) +
+    scale_fill_gradient(low = 'white', high = maincolor) +
+    labs(x = 'Size of shortest solution', y = 'Size of longest solution') +
+    my_theme +
+    theme(panel.grid.major = element_blank())
+}
+
+solution_min_top_size <- function(data) {
+  data %>%
+    group_by(min_sol_loc, top_i_sol_loc, fuzzy) %>%
+    summarise(n = n()) %>%
+    ggplot(aes(x = min_sol_loc, y = top_i_sol_loc, fill = n)) +
+    geom_tile() +
+    geom_text(aes(label = n), size = 2.5) +
+    facet_wrap(~fuzzy) +
+    scale_fill_gradient(low = 'white', high = maincolor) +
+    labs(x = 'Size of shortest solution', y = 'Size of first correct solution') +
     my_theme +
     theme(panel.grid.major = element_blank())
 }

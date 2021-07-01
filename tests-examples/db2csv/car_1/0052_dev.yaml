@@ -1,22 +1,27 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/cars_data.csv
  - tests-examples/db2csv/car_1/tables/car_names.csv
+ - tests-examples/db2csv/car_1/tables/cars_data.csv
 output: tests-examples/db2csv/car_1/tables/0052_dev.csv
 raw_question: What is the average edispl for all volvos? 
 question_index: 138 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - volvo
 join_columns:
- - id
  - makeid
+ - id
+groupby_columns: []
 functions:
  - avg
 columns:
- - model
  - edispl
+ - model
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT avg(T2.edispl)
   FROM CAR_NAMES AS T1
@@ -29,18 +34,18 @@ sql: |-
   JOIN CARS_DATA AS T2 ON T1.MakeId = T2.Id
   WHERE T1.Model = 'volvo';
 smbop_beam_join_columns:
-- - id
-  - makeid
-- - id
-  - makeid
+- - makeid
+  - id
+- - makeid
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 smbop_beam_constants:
 - - volvo
 - - volvo
@@ -48,10 +53,10 @@ smbop_beam_functions:
 - - avg
 - - avg
 smbop_beam_columns:
-- - make
-  - edispl
-- - model
-  - edispl
+- - edispl
+  - make
+- - edispl
+  - model
 smbop_beam_ieu:
 - []
 - []
@@ -64,6 +69,15 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( cars_data.edispl ) FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE car_names.make = 'volvos'
   - SELECT AVG( cars_data.edispl ) FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE car_names.model = 'volvos'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -104,6 +118,8 @@ ratsql_beam_constants:
 - - volvo
 - - volvo
 - - volvo
+- - volvo
+  - '1'
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -117,18 +133,18 @@ ratsql_beam_functions:
 ratsql_beam_columns:
 - - year
   - edispl
-- - accelerate
-  - edispl
+- - edispl
+  - accelerate
 - - edispl
   - mpg
 - - horsepower
   - edispl
-- - weight
-  - edispl
+- - edispl
+  - weight
 - - cylinders
   - edispl
-- - id
-  - edispl
+- - edispl
+  - id
 - - year
   - edispl
 - - year
@@ -165,16 +181,46 @@ ratsql_beam_inferred_code:
   - SELECT Avg(DISTINCT cars_data.Edispl) FROM cars_data WHERE cars_data.Year = 'terminal'
   - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Year = 'terminal' LIMIT 1
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Year = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Accelerate = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.MPG = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Horsepower = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Weight = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Cylinders = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Id = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE DISTINCT cars_data.Year = volvo
-  - SELECT Avg(DISTINCT cars_data.Edispl) FROM cars_data WHERE cars_data.Year = volvo
-  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Year = volvo LIMIT 1
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Year = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Accelerate = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.MPG = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Horsepower = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Weight = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Cylinders = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Id = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE DISTINCT cars_data.Year = 'volvo'
+  - SELECT Avg(DISTINCT cars_data.Edispl) FROM cars_data WHERE cars_data.Year = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM cars_data WHERE cars_data.Year = 'volvo' LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10550642013549805
   - -0.10427141189575195

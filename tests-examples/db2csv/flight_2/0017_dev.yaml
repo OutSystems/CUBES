@@ -4,14 +4,20 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0017_dev.csv
 raw_question: How many airlines are from USA? 
 question_index: 195 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - USA
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - country
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM AIRLINES
@@ -82,6 +88,24 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM airlines WHERE airlines.country != 'USA'
   - SELECT COUNT( DISTINCT airlines.country ) FROM airlines WHERE airlines.country = 'USA'
   - SELECT COUNT( * ) FROM flights, airlines WHERE airlines.country = 'USA'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -104,8 +128,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
@@ -116,6 +140,9 @@ ratsql_beam_constants:
 - - USA
 - - USA
 - - USA
+- - USA
+- - USA
+  - '1'
 - - USA
 - - USA
 - - USA
@@ -135,8 +162,8 @@ ratsql_beam_columns:
 - - country
 - - country
 - - country
-- - uid
-  - country
+- - country
+  - uid
 - - uid
 - - abbreviation
 ratsql_beam_ieu:
@@ -177,8 +204,35 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM airlines WHERE airlines.Country = 'USA' LIMIT 1
   - SELECT DISTINCT Count(*) FROM airlines WHERE airlines.Country = 'USA'
   - SELECT Count(DISTINCT airlines.uid) FROM airlines WHERE airlines.Country = 'USA'
-  - SELECT Count(*) FROM airlines WHERE airlines.uid = USA
-  - SELECT Count(*) FROM airlines WHERE airlines.Abbreviation = USA
+  - SELECT Count(*) FROM airlines WHERE airlines.uid = 'USA'
+  - SELECT Count(*) FROM airlines WHERE airlines.Abbreviation = 'UAL'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10498905181884766
   - -0.1048126220703125

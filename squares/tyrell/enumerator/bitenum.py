@@ -45,9 +45,13 @@ class Root(Node):
         var = enumerator.create_variable(f'root_{self.id}', z3.Int)
         enumerator.variables.append(var)
         ctr = []
-        for p in enumerator.spec.productions():
-            if p.is_function() and p.lhs.name != 'Empty':
+        for p in enumerator.spec.get_function_productions():
+            if p.lhs.name != 'Empty' and p.name != 'limit':  # This should be somewhere else. Some abstraction is needed
                 ctr.append(var == p.id)
+        if self.id == enumerator.loc:
+            limit = enumerator.spec.get_function_production('limit')
+            if limit:
+                ctr.append(var == limit.id)
         enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
         return var
 
@@ -277,7 +281,7 @@ class BitEnumerator(Enumerator):
 
     def create_children_constraints(self) -> None:
         for r in self.roots:
-            for p in self.spec.productions():
+            for p in self.spec.get_function_productions():
                 if not p.is_function() or p.lhs.name == 'Empty':
                     continue
                 aux = r.var == p.id
@@ -418,6 +422,12 @@ class BitEnumerator(Enumerator):
                                                    (root.children[0].bitvec & root.children[2].bitvec) == root.children[2].bitvec,
                                                    root.children[0].bitvec == root.bitvec)), f'unite_bv_{i}')
 
+            limit = self.spec.get_function_production('limit')
+            if limit:
+                self.assert_expr(z3.Implies(root.var == limit.id,
+                                            z3.And((root.children[0].bitvec & root.children[1].bitvec) == root.children[1].bitvec,
+                                                   root.children[0].bitvec == root.bitvec)), f'limit_bv_{i}')
+
     def create_operator_usage_constraints(self) -> None:
         if self.specification.sql_visitor is None:
             return
@@ -489,6 +499,7 @@ class BitEnumerator(Enumerator):
             if unite:
                 self.assert_expr(z3.Implies(root.var == unite.id, z3.And(root.join_counter == 0, root.filter_counter == 0)))
 
+            # TODO limit
 
 
 
@@ -541,8 +552,6 @@ class BitEnumerator(Enumerator):
             self.z3_solver.add(z3.Implies(r.var == prod0.id, r.children[int(pred.args[1])].var != r.children[int(pred.args[2])].var))
 
     def _resolve_constant_occurs_predicate(self, pred: Predicate):
-        if not util.get_config().force_constants:
-            return
         conditions = pred.args
         lst = []
         ids = ''

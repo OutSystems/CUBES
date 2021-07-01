@@ -1,12 +1,18 @@
 db: tests-examples/db2csv/tvshow/tables/tvshow.sqlite
 inputs:
- - tests-examples/db2csv/tvshow/tables/cartoon.csv
  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+ - tests-examples/db2csv/tvshow/tables/cartoon.csv
 output: tests-examples/db2csv/tvshow/tables/0060_dev.csv
 raw_question: What are the ids of the TV channels that do not have any cartoons directed by Ben Jones? 
 question_index: 644 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Ben Jones
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - directed_by
 filters:
@@ -55,17 +61,17 @@ smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/tv_channel.csv
 - - tests-examples/db2csv/tvshow/tables/tv_channel.csv
 - - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 smbop_beam_constants:
 - - Ben Jones
@@ -144,19 +150,52 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT cartoon.channel FROM cartoon JOIN tv_channel ON cartoon.channel = tv_channel.id WHERE cartoon.directed_by = 'Ben Jones'
   - SELECT tv_channel.id FROM tv_channel UNION SELECT cartoon.channel FROM cartoon JOIN tv_channel ON cartoon.channel = tv_channel.id WHERE cartoon.directed_by = 'Ben Jones'
   - SELECT tv_channel.id FROM tv_channel INTERSECT SELECT cartoon.channel FROM cartoon WHERE cartoon.directed_by = 'Ben Jones'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
 - []
-- - id
-  - channel
+- - channel
+  - id
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -171,18 +210,18 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
   - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 ratsql_beam_constants:
@@ -195,6 +234,8 @@ ratsql_beam_constants:
 - - Ben Jones
 - - Ben Jones
 - - Ben Jones
+- - Ben Jones
+  - '1'
 ratsql_beam_functions:
 - []
 - []
@@ -257,6 +298,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel EXCEPT SELECT Cartoon.Channel FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Ben Jones'
   - SELECT DISTINCT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones'
   - SELECT TV_Channel.id FROM TV_Channel EXCEPT SELECT Cartoon.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10871028900146484
   - -0.10559606552124023

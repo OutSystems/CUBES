@@ -1,0 +1,37 @@
+db: tests-examples/spider/assets_maintenance/tables/db.sqlite3
+inputs:
+- tests-examples/spider/assets_maintenance/tables/assets.csv
+- tests-examples/spider/assets_maintenance/tables/asset_parts.csv
+- tests-examples/spider/assets_maintenance/tables/fault_log.csv
+output: tests-examples/spider/assets_maintenance/tables/0001.csv
+constants:
+- '2'
+functions:
+- count
+comment: |-
+  SELECT T1.asset_id,
+         T1.asset_details
+  FROM Assets AS T1
+  JOIN Asset_Parts AS T2 ON T1.asset_id = T2.asset_id
+  GROUP BY T1.asset_id
+  HAVING count(*) = 2 INTERSECT
+  SELECT T1.asset_id,
+         T1.asset_details
+  FROM Assets AS T1
+  JOIN Fault_Log AS T2 ON T1.asset_id = T2.asset_id
+  GROUP BY T1.asset_id
+  HAVING count(*) < 2
+
+sql: |-
+  SELECT T1.asset_id,
+         T1.asset_details
+  FROM Assets AS T1
+  JOIN Asset_Parts AS T2 ON T1.asset_id = T2.asset_id
+  GROUP BY T1.asset_id
+  HAVING count(*) = 2 INTERSECT
+  SELECT T1.asset_id,
+         T1.asset_details
+  FROM Assets AS T1
+  JOIN Fault_Log AS T2 ON T1.asset_id = T2.asset_id
+  GROUP BY T1.asset_id
+  HAVING count(*) < 2

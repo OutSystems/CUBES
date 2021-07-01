@@ -5,12 +5,17 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0061_dev.csv
 raw_question: Find all airlines that have flights from airport 'CVO' but not from 'APG'. 
 question_index: 239 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - APG
  - CVO
+ - APG
 join_columns:
  - airline
  - uid
+groupby_columns: []
+functions: []
 columns:
  - sourceairport
 filters:
@@ -45,8 +50,8 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
 smbop_beam_constants:
-- - APG
-  - CVO
+- - CVO
+  - APG
 smbop_beam_functions:
 - []
 smbop_beam_columns:
@@ -59,6 +64,12 @@ smbop_beam_inferred_code:
   - SELECT airlines.airline FROM airlines
 smbop_beam_inferred_code_w_terminals:
   - SELECT airlines.airline FROM airlines
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -100,30 +111,30 @@ ratsql_beam_tables:
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 ratsql_beam_constants:
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
-- - APG
-  - CVO
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
+- - CVO
+  - APG
 ratsql_beam_functions:
 - []
 - []
@@ -137,19 +148,19 @@ ratsql_beam_functions:
 - []
 ratsql_beam_columns:
 - - destairport
-- - destairport
-  - sourceairport
-- - destairport
-  - sourceairport
+- - sourceairport
+  - destairport
+- - sourceairport
+  - destairport
 - - sourceairport
 - - destairport
+- - sourceairport
+  - destairport
 - - destairport
-  - sourceairport
-- - destairport
-- - destairport
-  - sourceairport
-- - destairport
-  - sourceairport
+- - sourceairport
+  - destairport
+- - sourceairport
+  - destairport
 - - destairport
 ratsql_beam_ieu:
 - - except
@@ -185,16 +196,49 @@ ratsql_beam_inferred_code:
   - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'terminal' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'terminal'
   - SELECT airlines.Airline FROM airlines JOIN airports JOIN flights WHERE flights.DestAirport = 'terminal' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO'
-  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO'
+  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG'
+  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG'
   - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO'
-  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO'
-  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT flights.Airline FROM flights WHERE flights.DestAirport = 'CVO'
-  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'APG' EXCEPT SELECT flights.Airline FROM flights WHERE flights.DestAirport = 'CVO'
-  - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO'
+  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'APG'
+  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO' EXCEPT SELECT flights.Airline FROM flights WHERE flights.DestAirport = 'APG'
+  - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO' EXCEPT SELECT flights.Airline FROM flights WHERE flights.DestAirport = 'APG'
+  - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG'
   - SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT flights.Airline FROM flights WHERE flights.SourceAirport = 'CVO'
-  - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO'
-  - SELECT airlines.Airline FROM airlines JOIN airports JOIN flights WHERE flights.DestAirport = 'APG' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'CVO'
+  - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.SourceAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG'
+  - SELECT airlines.Airline FROM airlines JOIN airports JOIN flights WHERE flights.DestAirport = 'CVO' EXCEPT SELECT airlines.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'APG'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10503673553466797
   - -0.1057896614074707

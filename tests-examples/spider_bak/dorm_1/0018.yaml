@@ -1,0 +1,32 @@
+db: tests-examples/spider/dorm_1/tables/db.sqlite
+inputs:
+- tests-examples/spider/dorm_1/tables/dorm.csv
+- tests-examples/spider/dorm_1/tables/dorm_amenity.csv
+- tests-examples/spider/dorm_1/tables/has_amenity.csv
+output: tests-examples/spider/dorm_1/tables/0018.csv
+constants:
+- TV Lounge
+- Study Room
+columns:
+- amenity_name
+comment: |-
+  SELECT T1.dorm_name
+  FROM dorm AS T1
+  JOIN has_amenity AS T2 ON T1.dormid = T2.dormid
+  JOIN dorm_amenity AS T3 ON T2.amenid = T3.amenid
+  WHERE T3.amenity_name = 'TV Lounge' INTERSECT
+    SELECT T1.dorm_name
+    FROM dorm AS T1
+    JOIN has_amenity AS T2 ON T1.dormid = T2.dormid
+    JOIN dorm_amenity AS T3 ON T2.amenid = T3.amenid WHERE T3.amenity_name = 'Study Room'
+
+sql: |-
+  SELECT T1.dorm_name
+  FROM dorm AS T1
+  JOIN has_amenity AS T2 ON T1.dormid = T2.dormid
+  JOIN dorm_amenity AS T3 ON T2.amenid = T3.amenid
+  WHERE T3.amenity_name = 'TV Lounge' INTERSECT
+    SELECT T1.dorm_name
+    FROM dorm AS T1
+    JOIN has_amenity AS T2 ON T1.dormid = T2.dormid
+    JOIN dorm_amenity AS T3 ON T2.amenid = T3.amenid WHERE T3.amenity_name = 'Study Room'

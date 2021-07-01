@@ -4,9 +4,14 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0025_dev.csv
 raw_question: What is the total surface area of the continents Asia and Europe? 
 question_index: 726 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - Europe
  - Asia
+ - Europe
+join_columns: []
+groupby_columns: []
 functions:
  - sum
 columns:
@@ -14,6 +19,7 @@ columns:
  - continent
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT sum(SurfaceArea)
   FROM country
@@ -41,14 +47,14 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 smbop_beam_constants:
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
 smbop_beam_functions:
 - - sum
 - - sum
@@ -86,16 +92,31 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' OR country.region = 'Europe'
   - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Asia' AND country.region = 'Europe'
   - SELECT SUM( country.surfacearea ) FROM country WHERE country.continent = 'Europe' AND country.region = 'Asia'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -114,31 +135,32 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
-- - Europe
-  - Asia
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+  - '1'
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
+- - Asia
+  - Europe
 ratsql_beam_functions:
 - - sum
 - - sum
@@ -199,15 +221,45 @@ ratsql_beam_inferred_code:
   - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent LIKE 'terminal'
   - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'terminal' AND country.Continent = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
   - 
-  - SELECT Sum(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
-  - SELECT DISTINCT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia'
-  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia' LIMIT 1
-  - SELECT Sum(country.SurfaceArea) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.Continent = 'Asia'
-  - SELECT Sum(country.SurfaceArea) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Continent = 'Asia'
-  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent LIKE 'Asia'
-  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Asia' AND country.Continent = 'Europe'
+  - SELECT Sum(DISTINCT country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
+  - SELECT DISTINCT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' LIMIT 1
+  - SELECT Sum(country.SurfaceArea) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.Continent = 'Europe'
+  - SELECT Sum(country.SurfaceArea) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.Continent = 'Europe'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent LIKE 'Europe'
+  - SELECT Sum(country.SurfaceArea) FROM country WHERE country.Continent = 'Europe' AND country.Continent = 'Asia'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10545825958251953
   - -0.10558652877807617

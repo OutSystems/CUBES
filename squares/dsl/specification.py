@@ -57,6 +57,7 @@ class Specification:
         self.group_columns = OrderedSet(spec['groupby_columns']) or None
         self.dateorder = spec['dateorder'] or 'parse_datetime'
         self.filters = OrderedSet(spec['filters']) or OrderedSet()
+        self.use_limit = spec['has_limit'] or None
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
@@ -108,7 +109,7 @@ class Specification:
             if f'{beam_name}_beam_constants' in spec:
                 def constants_callback():
                     logger.warning('Uncertainty in beam constants! Disabling forced usage of all consts.')
-                    util.get_config().force_constants = False  # TODO this disables the requirement for all filters
+                    util.get_config().force_constants = False
 
                 self.consts = beam_helper(spec[f'{beam_name}_beam_constants'], self.consts, 'constants', constants_callback)
 
@@ -125,7 +126,7 @@ class Specification:
             if f'{beam_name}_beam_filters' in spec:
                 def filters_callback():
                     logger.warning('Uncertainty in beam filters! Disabling forced usage of all filters')
-                    util.get_config().force_constants = False  # TODO this disables the requirement for all filters
+                    util.get_config().force_filters = False
 
                 self.filters = beam_helper(spec[f'{beam_name}_beam_filters'], self.filters, 'filters', filters_callback)
 
@@ -134,6 +135,19 @@ class Specification:
 
             if f'{beam_name}_beam_groupby_columns' in spec:
                 self.group_columns = beam_helper(spec[f'{beam_name}_beam_groupby_columns'], self.group_columns, 'group_by columns')
+
+            if f'{beam_name}_beam_groupby_columns' in spec:
+                self.use_limit = beam_helper(spec[f'{beam_name}_beam_groupby_columns'], self.group_columns, 'group_by columns')
+
+            if f'{beam_name}_beam_has_limit' in spec:
+                majority, majorant = util.at_least(spec[f'{beam_name}_beam_has_limit'], percentage=util.get_config().beam_threshold)
+                if majority:
+                    self.use_limit = majorant
+                    logger.debug('Setting use_limit to %s due to beam majority vote.', majorant)
+                else:
+                    self.use_limit = True
+                    logger.debug('Beam was inconclusive. Enabling limit operation.')
+
 
         if util.get_config().use_solution_dsl and self.solution:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
@@ -244,7 +258,7 @@ class Specification:
             dsl.Col.set_domain([(column, self.get_bitvecnum([column])) for column in self.columns])
             type_spec.define_type(dsl.Col)
 
-        if 'anti_join' not in util.get_config().disabled:
+        if 'anti_join' not in util.get_config().disabled or 'limit' not in util.get_config().disabled:
             dsl.Cols.set_domain([('', 0)] + [(','.join(map(util.single_quote_str, cols)), self.get_bitvecnum(cols)) for cols in
                                              powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
             type_spec.define_type(dsl.Cols)
@@ -307,6 +321,15 @@ class Specification:
 
         if 'cross_join' not in util.get_config().disabled:
             prod_spec.add_func_production(*dsl.cross_join)
+
+        if 'limit' not in util.get_config().disabled and (self.output_table.df.shape[0] in self.consts or str(self.output_table.df.shape[0]) in self.consts or self.use_limit):
+            tmp = []
+            for col in self.all_columns:
+                tmp.append((col, self.get_bitvecnum([col])))
+                tmp.append((f'desc({col})', self.get_bitvecnum([col])))
+            dsl.LimitCols.set_domain(tmp)
+            type_spec.define_type(dsl.LimitCols)
+            prod_spec.add_func_production(*dsl.limit)
 
         if 'concat' in self.aggrs:
             prod_spec.add_func_production(*dsl.unite)

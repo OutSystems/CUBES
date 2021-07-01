@@ -1,21 +1,26 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
  - tests-examples/db2csv/world_1/tables/country.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 output: tests-examples/db2csv/world_1/tables/0092_dev.csv
 raw_question: What are the names of countries that speak more than 2 languages, as well as how many languages they speak? 
 question_index: 793 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
- - code
  - countrycode
+ - code
 groupby_columns:
  - name
 functions:
  - count
 columns:
  - language
+filters: []
+ieu: []
 comment: |-
   SELECT COUNT(T2.Language),
          T1.Name
@@ -32,28 +37,28 @@ sql: |-
   GROUP BY T1.Name
   HAVING COUNT(*) > 2
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 smbop_beam_groupby_columns:
 - - countrycode
 - - countrycode
 - - name
 - - name
 smbop_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
 - - 2
 - - 2
@@ -89,18 +94,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT country.name , COUNT( * ) FROM countrylanguage JOIN country ON countrylanguage.countrycode = country.code GROUP BY countrylanguage.countrycode HAVING COUNT( * ) > 2
   - SELECT country.name , COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode GROUP BY country.name HAVING COUNT( * ) > 2
   - SELECT country.name , COUNT( * ) FROM countrylanguage JOIN country ON countrylanguage.countrycode = country.code GROUP BY country.name HAVING COUNT( * ) > 2
-ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- []
+- []
+- []
+ratsql_beam_join_columns:
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- []
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - - name
 - - countrycode
@@ -109,19 +129,22 @@ ratsql_beam_groupby_columns:
 - - name
 - - countrycode
 ratsql_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
+- - 2
+- - 2
+- - 2
 - - 2
 - - 2
 - - 2
@@ -176,6 +199,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT country.Name, Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY DISTINCT country.Name HAVING Count(*) > 2
   - SELECT country.Name, Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY country.Name HAVING Count(DISTINCT *) > 2
   - SELECT country.Name, Count(DISTINCT *) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY country.Name HAVING Count(*) > 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10251569747924805
   - -0.1073613166809082

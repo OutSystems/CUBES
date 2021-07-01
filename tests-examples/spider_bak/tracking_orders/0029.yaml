@@ -1,0 +1,25 @@
+db: tests-examples/spider/tracking_orders/tables/db.sqlite
+inputs:
+- tests-examples/spider/tracking_orders/tables/customers.csv
+- tests-examples/spider/tracking_orders/tables/orders.csv
+- tests-examples/spider/tracking_orders/tables/products.csv
+- tests-examples/spider/tracking_orders/tables/order_items.csv
+output: tests-examples/spider/tracking_orders/tables/0029.csv
+constants:
+- food
+- '1'
+functions:
+- count
+columns:
+- product_name
+comment: |-
+  SELECT T1.customer_name
+  FROM customers AS T1
+  JOIN orders AS T2
+  JOIN order_items AS T3
+  JOIN products AS T4 ON T1.customer_id = T2.customer_id
+  AND T2.order_id = T3.order_id
+  AND T3.product_id = T4.product_id
+  WHERE T4.product_name = "food"
+  GROUP BY T1.customer_id
+  HAVING count(*) >= 1

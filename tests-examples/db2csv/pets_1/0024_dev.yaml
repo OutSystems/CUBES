@@ -4,10 +4,17 @@ inputs:
 output: tests-examples/db2csv/pets_1/tables/0024_dev.csv
 raw_question: What type of pet is the youngest animal, and how much does it weigh? 
 question_index: 68 
-functions:
- - min
-columns:
- - pet_age
+has_limit: True 
+has_order_by: True 
+order_by_direction: []
+constants:
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT pettype,
          weight
@@ -51,12 +58,12 @@ smbop_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
-- []
+- - '1'
 - []
 - []
 - []
@@ -67,7 +74,7 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - min
+- []
 - - min
 - - min
 - []
@@ -78,7 +85,7 @@ smbop_beam_functions:
 - []
 - - min
 smbop_beam_columns:
-- - pet_age
+- []
 - - pet_age
 - - pet_age
 - []
@@ -132,17 +139,50 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT pets.pettype , pets.weight FROM has_pet , pets ORDER BY pets.weight ASC
   - SELECT pets.pettype , pets.weight FROM pets ORDER BY pets.weight ASC
   - SELECT MIN( pets.pet_age ) FROM pets GROUP BY pets.weight
+smbop_beam_has_limit:
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - False
+  - False
+  - False
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - stuid
-  - petid
+- - petid
+  - stuid
 - - petid
 - []
-- - stuid
-  - petid
+- - petid
+  - stuid
 - - petid
 ratsql_beam_groupby_columns:
 - []
@@ -159,47 +199,48 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - min
-- - max
-- - min
-- - max
-- - min
-- - min
-- - min
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - weight
-- - weight
-- - weight
-- - weight
-- - weight
-- - weight
-- - weight
-- - weight
-- - weight
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -242,6 +283,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Pets.PetType, Pets.weight FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID ORDER BY Pets.weight Desc LIMIT 1
   - SELECT Pets.PetType, Pets.weight FROM Pets ORDER BY DISTINCT Pets.weight Asc LIMIT 1
   - SELECT Pets.PetType, Pets.weight FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID ORDER BY Pets.weight Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  desc 
+- -  asc 
+- -  desc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10339117050170898
   - -0.10346651077270508

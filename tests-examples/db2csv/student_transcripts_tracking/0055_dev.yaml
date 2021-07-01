@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0055_dev.csv
 raw_question: Which address holds the most number of students currently? List the address id and all lines. 
 question_index: 561 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - address_id
  - current_address_id
 groupby_columns:
  - address_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.address_id,
          T1.line_1,
@@ -35,16 +43,16 @@ sql: |-
 smbop_beam_join_columns:
 - - address_id
   - current_address_id
-- - address_id
-  - permanent_address_id
-- - address_id
-  - current_address_id
-- - address_id
-  - permanent_address_id
+- - permanent_address_id
+  - address_id
 - - address_id
   - current_address_id
+- - permanent_address_id
+  - address_id
 - - address_id
-  - permanent_address_id
+  - current_address_id
+- - permanent_address_id
+  - address_id
 - - address_id
   - current_address_id
 - - address_id
@@ -86,33 +94,25 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - []
 - []
 smbop_beam_columns:
@@ -170,6 +170,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT addresses.address_id , addresses.line_1 FROM addresses JOIN students ON addresses.address_id = students.current_address_id GROUP BY addresses.address_id ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT addresses.address_id , addresses.line_1 FROM addresses JOIN students ON addresses.address_id = students.current_address_id GROUP BY students.current_address_id
   - SELECT students.current_address_id , addresses.line_1 FROM addresses JOIN students ON addresses.address_id = students.current_address_id GROUP BY addresses.address_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
 ratsql_beam_join_columns:
 - - address_id
   - current_address_id
@@ -204,23 +237,21 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 ratsql_beam_columns:
 - []
@@ -263,6 +294,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Addresses.address_id, DISTINCT Addresses.line_1 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Addresses.address_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Addresses.address_id, Addresses.line_1 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Students.current_address_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Addresses.address_id, Addresses.line_1 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Addresses.address_id ORDER BY Count(*) Desc
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
 ratsql_beam_score_history:
 - - -0.10525321960449219
   - -0.10417985916137695

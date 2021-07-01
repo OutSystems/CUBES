@@ -1,0 +1,27 @@
+db: tests-examples/spider/college_2/tables/db.sqlite
+inputs:
+- tests-examples/spider/college_2/tables/course.csv
+- tests-examples/spider/college_2/tables/prereq.csv
+output: tests-examples/spider/college_2/tables/0050.csv
+constants:
+- International Finance
+columns:
+- course_id
+- title
+comment: |-
+  SELECT title
+  FROM course
+  WHERE course_id IN
+      (SELECT T1.prereq_id
+       FROM prereq AS T1
+       JOIN course AS T2 ON T1.course_id = T2.course_id
+       WHERE T2.title = 'International Finance')
+
+sql: |-
+  SELECT title
+  FROM course
+  WHERE course_id IN
+      (SELECT T1.prereq_id
+       FROM prereq AS T1
+       JOIN course AS T2 ON T1.course_id = T2.course_id
+       WHERE T2.title = 'International Finance')

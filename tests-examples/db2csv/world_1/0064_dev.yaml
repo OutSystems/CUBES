@@ -1,25 +1,30 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
  - tests-examples/db2csv/world_1/tables/country.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 output: tests-examples/db2csv/world_1/tables/0064_dev.csv
 raw_question: Give the mean life expectancy of countries in which English is not the official language. 
 question_index: 765 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - T
  - English
 join_columns:
- - code
  - countrycode
+ - code
+groupby_columns: []
 functions:
  - avg
 columns:
- - language
- - lifeexpectancy
  - name
  - isofficial
+ - lifeexpectancy
+ - language
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT avg(LifeExpectancy)
   FROM country
@@ -40,31 +45,31 @@ sql: |-
        WHERE T2.Language = "English"
          AND T2.IsOfficial = "T")
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
-- - t
+- - T
   - English
-- - t
+- - T
   - English
 smbop_beam_functions:
 - - avg
 - - avg
 smbop_beam_columns:
-- - language
-  - lifeexpectancy
 - - lifeexpectancy
-  - isofficial
+  - language
+- - isofficial
+  - lifeexpectancy
 smbop_beam_ieu:
 - []
 - []
@@ -77,10 +82,19 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( country.lifeexpectancy ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language != 'English'
   - SELECT AVG( country.lifeexpectancy ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.isofficial != 'English'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - code
-  - countrycode
+- - countrycode
+  - code
 - []
 - []
 - []
@@ -95,20 +109,20 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - t
   - English
@@ -124,6 +138,12 @@ ratsql_beam_constants:
   - English
 - - t
   - English
+  - '1)'
+- - t
+  - English
+  - '1'
+- - t
+  - English
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -133,26 +153,26 @@ ratsql_beam_functions:
 - - avg
 - - avg
 ratsql_beam_columns:
-- - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
-- - language
-  - lifeexpectancy
-- - code
+  - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
-- - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
-- - code
+  - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
-- - code
+  - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
-- - code
+  - code
+- - lifeexpectancy
   - language
-  - lifeexpectancy
+  - code
+- - lifeexpectancy
+  - language
+  - code
 ratsql_beam_ieu:
 - []
 - []
@@ -180,15 +200,39 @@ ratsql_beam_inferred_code:
   - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal') LIMIT 1
   - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'terminal')
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
   - SELECT Avg(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language != 'English'
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT DISTINCT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE DISTINCT countrylanguage.Language = 'English'
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
-  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT DISTINCT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE DISTINCT countrylanguage.Language = 'English' )
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE DISTINCT country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
+  - SELECT Avg(DISTINCT country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
   - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' LIMIT 1)
-  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' LIMIT 1
-  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English'
+  - SELECT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' ) LIMIT 1
+  - SELECT DISTINCT Avg(country.LifeExpectancy) FROM country WHERE country.Code NOT IN (SELECT countrylanguage.CountryCode FROM countrylanguage WHERE countrylanguage.Language = 'English' )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11249160766601562
   - -0.10452079772949219

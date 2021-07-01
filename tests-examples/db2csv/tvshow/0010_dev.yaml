@@ -4,13 +4,20 @@ inputs:
 output: tests-examples/db2csv/tvshow/tables/0010_dev.csv
 raw_question: What are the titles of all cartoons directed by Ben Jones or Brandon Vietti? 
 question_index: 594 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - Brandon Vietti
  - Ben Jones
+ - Brandon Vietti
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - directed_by
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT Title
   FROM Cartoon
@@ -52,32 +59,32 @@ smbop_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 smbop_beam_constants:
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
 smbop_beam_functions:
 - []
 - []
@@ -144,18 +151,51 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT cartoon.title FROM cartoon, tv_channel WHERE cartoon.directed_by = 'Ben' OR cartoon.directed_by = 'Brandon'
   - SELECT cartoon.title FROM cartoon WHERE cartoon.directed_by = 'Ben Jones' OR cartoon.directed_by = 'Brandon Vietti' ORDER BY cartoon.title DESC
   - SELECT cartoon.title FROM cartoon, tv_channel WHERE cartoon.directed_by = 'Ben'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - - id
   - channel
-- - id
-  - channel
+- - channel
+  - id
 - []
 - []
 - []
-- - id
-  - channel
+- - channel
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -168,33 +208,38 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
   - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/cartoon.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/cartoon.csv
 ratsql_beam_constants:
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
-- - Brandon Vietti
-  - Ben Jones
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+  - '1'
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
+- - Ben Jones
+  - Brandon Vietti
 ratsql_beam_functions:
 - []
 - []
@@ -243,16 +288,43 @@ ratsql_beam_inferred_code:
   - SELECT Cartoon.id FROM Cartoon WHERE Cartoon.Directed_by = 'terminal' OR Cartoon.Directed_by = 'terminal'
   - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'terminal' OR Cartoon.Directed_by = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.Title FROM Cartoon WHERE DISTINCT Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR DISTINCT Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT DISTINCT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.Title FROM TV_Channel JOIN TV_series ON TV_series.Channel = TV_Channel.id JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.Title FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti' LIMIT 1
-  - SELECT Cartoon.Written_by FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT Cartoon.id FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
-  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Ben Jones' OR Cartoon.Directed_by = 'Brandon Vietti'
+  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Title FROM Cartoon WHERE DISTINCT Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR DISTINCT Cartoon.Directed_by = 'Ben Jones'
+  - SELECT DISTINCT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Title FROM TV_Channel JOIN TV_series ON TV_series.Channel = TV_Channel.id JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Title FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.Title FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones' LIMIT 1
+  - SELECT Cartoon.Written_by FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT Cartoon.id FROM Cartoon WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+  - SELECT TV_Channel.id FROM TV_Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel WHERE Cartoon.Directed_by = 'Brandon Vietti' OR Cartoon.Directed_by = 'Ben Jones'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10521841049194336
   - -0.10477590560913086

@@ -5,13 +5,21 @@ inputs:
 output: tests-examples/db2csv/voter_1/tables/0012_dev.csv
 raw_question: What is the area code in which the most voters voted? 
 question_index: 698 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - state
 groupby_columns:
  - area_code
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.area_code
   FROM area_code_state AS T1
@@ -28,20 +36,20 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - vote_id
-  - area_code
-- - vote_id
-  - area_code
+- - area_code
+  - vote_id
+- - area_code
+  - vote_id
 - []
 - []
-- - vote_id
-  - area_code
+- - area_code
+  - vote_id
 - []
-- - vote_id
-  - area_code
+- - area_code
+  - vote_id
 - []
-- - vote_id
-  - area_code
+- - area_code
+  - vote_id
 - []
 smbop_beam_groupby_columns:
 - - area_code
@@ -71,29 +79,25 @@ smbop_beam_tables:
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
 smbop_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '2'
 - []
 - []
 - []
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '2'
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
 - - count
 - - count
 - - count
 - []
-- - max
-  - count
+- - count
 - []
 - - count
 smbop_beam_columns:
@@ -151,6 +155,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT votes.vote_id FROM votes GROUP BY votes.vote_id ORDER BY COUNT( DISTINCT votes.state ) DESC LIMIT 1
   - SELECT area_code_state.area_code FROM votes JOIN area_code_state ON votes.vote_id = area_code_state.area_code GROUP BY area_code_state.area_code
   - SELECT votes.vote_id FROM votes GROUP BY votes.vote_id ORDER BY COUNT( DISTINCT votes.state ) DESC LIMIT 2
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_join_columns:
 - - state
 - - state
@@ -174,8 +211,8 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
-- - tests-examples/db2csv/voter_1/tables/votes.csv
-  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/contestants.csv
+  - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
@@ -183,37 +220,32 @@ ratsql_beam_tables:
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
-- - tests-examples/db2csv/voter_1/tables/votes.csv
-  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/contestants.csv
+  - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 - - tests-examples/db2csv/voter_1/tables/area_code_state.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -263,6 +295,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number GROUP BY AREA_CODE_STATE.area_code ORDER BY Count(*) Desc LIMIT 1
   - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state GROUP BY AREA_CODE_STATE.area_code ORDER BY Count(*) Desc
   - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE GROUP BY AREA_CODE_STATE.area_code ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1033182144165039
   - -0.10413122177124023

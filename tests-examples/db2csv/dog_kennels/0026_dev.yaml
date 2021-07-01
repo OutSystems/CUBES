@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0026_dev.csv
 raw_question: Find the id and cell phone of the professionals who operate two or more types of treatments. 
 question_index: 943 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
@@ -13,6 +16,9 @@ groupby_columns:
  - professional_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.professional_id,
          T1.cell_number
@@ -82,6 +88,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT treatments.professional_id , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
   - SELECT professionals.professional_id , professionals.home_phone FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
   - SELECT professionals.professional_id , professionals.cell_number FROM professionals JOIN treatments ON professionals.professional_id = treatments.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
@@ -90,8 +111,8 @@ ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
   - dog_id
-- - treatment_type_code
-  - professional_id
+- - professional_id
+  - treatment_type_code
 ratsql_beam_groupby_columns:
 - - professional_id
 - - professional_id
@@ -111,18 +132,22 @@ ratsql_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+- - 2
+  - '1'
 - - 2
 - - 2
 ratsql_beam_functions:
@@ -179,6 +204,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Treatments.professional_id, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2 LIMIT 1
   - SELECT Treatments.professional_id, Professionals.cell_number FROM Dogs JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id AND Dogs.dog_id = Treatments.dog_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
   - SELECT Treatments.professional_id, Professionals.cell_number FROM Treatment_Types JOIN Professionals JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.professional_id = Professionals.professional_id AND Treatment_Types.treatment_type_code = Treatments.treatment_type_code GROUP BY Treatments.professional_id HAVING Count(*) >= 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10481500625610352
   - -0.10429143905639648

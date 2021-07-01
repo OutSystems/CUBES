@@ -1,22 +1,27 @@
 db: tests-examples/db2csv/museum_visit/tables/museum_visit.sqlite
 inputs:
+ - tests-examples/db2csv/museum_visit/tables/visitor.csv
  - tests-examples/db2csv/museum_visit/tables/visit.csv
  - tests-examples/db2csv/museum_visit/tables/museum.csv
- - tests-examples/db2csv/museum_visit/tables/visitor.csv
 output: tests-examples/db2csv/museum_visit/tables/0017_dev.csv
 raw_question: Find the number of visitors who did not visit any museum opened after 2010. 
 question_index: 427 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2010
 join_columns:
  - museum_id
+groupby_columns: []
 functions:
  - count
 columns:
- - id
  - open_year
+ - id
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT count(*)
   FROM visitor
@@ -96,14 +101,14 @@ smbop_beam_functions:
 - []
 - []
 smbop_beam_columns:
-- - open_year
-  - visitor_id
-- - open_year
-  - museum_id
-- - open_year
-  - visitor_id
-- - open_year
-  - visitor_id
+- - visitor_id
+  - open_year
+- - museum_id
+  - open_year
+- - visitor_id
+  - open_year
+- - visitor_id
+  - open_year
 - - open_year
 - []
 - - open_year
@@ -154,14 +159,47 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT visit.visitor_id FROM visit JOIN museum ON visit.museum_id = museum.museum_id WHERE museum.open_year > 2010
   - SELECT visit.visitor_id FROM visit
   - SELECT museum.museum_id FROM museum ORDER BY museum.open_year DESC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - museum_id
 - - museum_id
 - - museum_id
-- - id
+- - museum_id
   - visitor_id
-  - museum_id
+  - id
 - - museum_id
 - []
 - []
@@ -187,9 +225,9 @@ ratsql_beam_tables:
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
@@ -225,8 +263,8 @@ ratsql_beam_functions:
 ratsql_beam_columns:
 - - num_of_ticket
   - museum_id
-- - open_year
-  - museum_id
+- - museum_id
+  - open_year
 - - num_of_ticket
   - museum_id
 - - num_of_ticket
@@ -235,8 +273,8 @@ ratsql_beam_columns:
   - museum_id
 - - num_of_ticket
   - museum_id
-- - total_spent
-  - museum_id
+- - museum_id
+  - total_spent
 - - num_of_ticket
   - museum_id
 - - num_of_ticket
@@ -277,16 +315,49 @@ ratsql_beam_inferred_code:
   - SELECT Count(*) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 'terminal')
   - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT museum.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 'terminal')
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2010
-  - SELECT Count(*) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT museum.Open_Year FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Total_spent > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.visitor_ID FROM visit WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010
-  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT museum.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Open_Year > 2010 )
+  - SELECT Count(*) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT museum.Open_Year FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM visit WHERE visit.Total_spent > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT visit.visitor_ID FROM visit WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE museum.Museum_ID NOT IN (SELECT visit.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010 )
+  - SELECT Count(*) FROM museum WHERE museum.Museum_ID NOT IN (SELECT museum.Museum_ID FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID WHERE visit.Num_of_Ticket > 2010 )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11411619186401367
   - -0.10483169555664062

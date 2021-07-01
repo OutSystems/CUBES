@@ -5,14 +5,20 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0044_dev.csv
 raw_question: What are the names of documents that use templates with the code BK? 
 question_index: 340 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - BK
 join_columns:
  - template_id
+groupby_columns: []
+functions: []
 columns:
  - template_type_code
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T2.document_name
   FROM Templates AS T1
@@ -29,8 +35,8 @@ smbop_beam_join_columns:
 - - template_id
 - []
 - []
-- - template_id
-  - document_id
+- - document_id
+  - template_id
 - - template_id
 - - document_id
 smbop_beam_groupby_columns:
@@ -51,12 +57,12 @@ smbop_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 smbop_beam_constants:
 - - BK
 - - BK
@@ -113,18 +119,42 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT documents.document_name FROM documents JOIN templates ON documents.template_id = templates.template_id JOIN paragraphs ON documents.document_id = paragraphs.document_id
   - SELECT documents.document_name FROM documents JOIN templates ON documents.template_id = templates.template_id WHERE templates.template_type_code = 'BK' ORDER BY documents.document_name DESC
   - SELECT documents.document_name FROM documents JOIN paragraphs ON documents.document_id = paragraphs.document_id
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - template_id
-- - template_id
-  - document_id
-- - template_id
-  - template_type_code
-- - template_id
-- - template_id
+- - document_id
+  - template_id
+- - template_type_code
+  - template_id
 - - template_id
 - - template_id
 - - template_id
-  - document_id
+- - template_id
+- - document_id
+  - template_id
 - - template_id
 ratsql_beam_groupby_columns:
 - []
@@ -140,12 +170,10 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
@@ -155,7 +183,9 @@ ratsql_beam_tables:
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 ratsql_beam_constants:
@@ -164,6 +194,8 @@ ratsql_beam_constants:
 - - BK
 - - BK
 - - BK
+- - BK
+  - '1'
 - - BK
 - - BK
 - - BK
@@ -230,6 +262,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Documents.Other_Details FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Templates.Template_Type_Code = 'BK'
   - SELECT Paragraphs.Document_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID AND Templates.Template_ID = Documents.Template_ID JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID WHERE Templates.Template_Type_Code = 'BK'
   - SELECT Documents.Document_Description FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Templates.Template_Type_Code = 'BK'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10434150695800781
   - -0.10408306121826172

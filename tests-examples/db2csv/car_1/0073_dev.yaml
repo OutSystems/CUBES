@@ -4,14 +4,21 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0073_dev.csv
 raw_question: How many cars have a larger accelerate than the car with the largest horsepower? 
 question_index: 159 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1 );'
+join_columns: []
+groupby_columns: []
 functions:
- - max
  - count
 columns:
  - accelerate
- - horsepower
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT COUNT(*)
   FROM CARS_DATA
@@ -71,8 +78,8 @@ smbop_beam_constants:
 - []
 - []
 - []
-- []
-- []
+- - '1'
+- - '1'
 smbop_beam_functions:
 - - max
   - count
@@ -84,20 +91,19 @@ smbop_beam_functions:
 - - max
 - []
 - []
-- - max
-- - max
-  - count
+- []
+- - count
 smbop_beam_columns:
 - - horsepower
-- - accelerate
-  - horsepower
+- - horsepower
+  - accelerate
 - - horsepower
 - []
 - - horsepower
 - - horsepower
 - []
 - []
-- - horsepower
+- []
 - []
 smbop_beam_ieu:
 - []
@@ -143,6 +149,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT cars_data.horsepower FROM cars_data
   - SELECT cars_data.horsepower FROM cars_data GROUP BY cars_data.horsepower ORDER BY cars_data.horsepower DESC LIMIT 1
   - SELECT cars_data.horsepower FROM cars_data GROUP BY cars_data.horsepower ORDER BY COUNT( * ) DESC LIMIT 1
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+  - True
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- -  desc 
+- -  desc 
 ratsql_beam_join_columns:
 - []
 - []
@@ -179,6 +218,8 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1)'
+- - '1'
 ratsql_beam_functions:
 - - max
   - count
@@ -197,20 +238,20 @@ ratsql_beam_functions:
 - - max
   - count
 ratsql_beam_columns:
-- - accelerate
-  - horsepower
+- - horsepower
+  - accelerate
 - - accelerate
 - - horsepower
-- - accelerate
-  - horsepower
-- - accelerate
-  - horsepower
-- - accelerate
-  - horsepower
-- - accelerate
-  - horsepower
-- - accelerate
-  - horsepower
+- - horsepower
+  - accelerate
+- - horsepower
+  - accelerate
+- - horsepower
+  - accelerate
+- - horsepower
+  - accelerate
+- - horsepower
+  - accelerate
 ratsql_beam_ieu:
 - []
 - []
@@ -251,6 +292,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM cars_data WHERE cars_data.Accelerate > (SELECT DISTINCT Max(cars_data.Horsepower) FROM cars_data)
   - SELECT Count(*) FROM cars_data WHERE cars_data.Accelerate > (SELECT Max(cars_data.Horsepower) FROM cars_data LIMIT 1)
   - SELECT Count(*) FROM cars_data WHERE cars_data.Accelerate > (SELECT Max(cars_data.Horsepower) FROM cars_data) LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.11110925674438477
   - -0.1072382926940918

@@ -6,8 +6,10 @@ import os
 import pathlib
 import random
 import re
+import resource
+import signal
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from contextlib import contextmanager
 from enum import Enum
 from itertools import permutations, count, repeat
@@ -57,8 +59,9 @@ logger.addHandler(handler)
 
 parser = create_argparser(all_inputs=True)
 parser.add_argument('-t', default=600, type=int, help='timeout')
-parser.add_argument('-m', default=57344, type=int, help='memout')
+parser.add_argument('-m', default=65536, type=int, help='memout')
 parser.add_argument('-p', default=1, type=int, help='#processes')
+parser.add_argument('--timeout', default=10, type=int, help='#processes')
 parser.add_argument('--run', help='run')
 parser.add_argument('--ratsql', action='store_true')
 parser.add_argument('--smbop', action='store_true')
@@ -86,7 +89,7 @@ is_cubes = not is_patsql and not is_scythe and not is_squares
 is_from_spec = run == 'ratsql' or run == 'smbop'
 
 cubes_sql_sep = r'\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+ SQL Solution \+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+'
-cubes_r_sep = r'(?:------------------------------------- R Solution ---------------------------------------)|(?:All solutions of length \d+ found)'
+cubes_r_sep = r'(?:------------------------------------- R Solution ---------------------------------------)|(?:All solutions of length \d+ found)|(?:Timeout reached)'
 scythe_sep = r'\[Query No\.\d]==============================='
 
 random.seed(args.seed)
@@ -199,12 +202,12 @@ def check(connection, expected_sql, actual_sql, instance='', verbose=False, base
         actual_df_try = actual_df.copy()
         actual_df_try.columns = perm
         try:
-            pandas.testing.assert_frame_equal(expected_df, actual_df_try, check_dtype=False, check_names=False, check_like=True)
+            pandas.testing.assert_frame_equal(expected_df, actual_df_try, check_dtype=False, check_names=False, check_like=True, check_datetimelike_compat=True)
             return ReturnCodes.CORRECT
         except:
             actual_df_try = actual_df_try.sort_values(by=sorted(list(actual_df_try.columns))).reset_index(drop=True)
             try:
-                pandas.testing.assert_frame_equal(expected_df, actual_df_try, check_dtype=False, check_names=False, check_like=True)
+                pandas.testing.assert_frame_equal(expected_df, actual_df_try, check_dtype=False, check_names=False, check_like=True, check_datetimelike_compat=True)
                 return ReturnCodes.CORRECT
             except:
                 pass
@@ -301,7 +304,7 @@ def compare(instance_file: str, n: int):
                         result_sql = re.sub(f'([^`]){table_name}([^`])', fr'\1`{table_name}`\2', result_sql)
                         spec_in['sql'] = re.sub(f'[^`]{table_name}[^`]', f'`{table_name}`', spec_in['sql'])
 
-                engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{spec_in['db']}", connect_args={'timeout': 60})
+                engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{spec_in['db']}", connect_args={'timeout': args.timeout})
 
                 try:
                     with engine.begin() as connection:
@@ -324,7 +327,7 @@ def compare(instance_file: str, n: int):
                         with suppress_stdout():
                             fuzz.generate_random_db_with_queries_wrapper((spec_in['db'], fuzzy_file, [spec_in['sql']], {}))
 
-                        fuzzied_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{fuzzy_file}", connect_args={'timeout': 60})
+                        fuzzied_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{fuzzy_file}", connect_args={'timeout': args.timeout})
                     except Exception as e:
                         os.remove(f'fuzzy_{multiprocessing.current_process().ident}.sqlite3')
                         logger.error('Error while fuzzing instance %s (%d)', instance, n)
@@ -366,9 +369,16 @@ def compare(instance_file: str, n: int):
         return instance, ReturnCodes.NO_SOLUTION, []
 
 
+def initializer():
+    """Set maximum amount of memory each worker process can allocate."""
+    soft, hard = resource.getrlimit(resource.RLIMIT_DATA)
+    resource.setrlimit(resource.RLIMIT_DATA, (args.m * 1024 * 1024, hard))
+
+
 if __name__ == '__main__':
 
     instances = list(glob.glob('tests/**/*.yaml', recursive=True))
+    print(instances)
     # instances = list(glob.glob('tests/spider/club_1/*.yaml', recursive=True))
 
     output_file = f'analysis/fuzzy/{run}{"_" if args.save_alt else ""}.csv'
@@ -382,15 +392,15 @@ if __name__ == '__main__':
 
     logger.info('Starting log for run %s', run)
 
-    with ProcessPool(max_workers=args.p) as pool:
+    with ProcessPool(max_workers=args.p, initializer=initializer) as pool:
         with open(output_file, 'w') as results_f:
             result_writer = csv.writer(results_f)
             result_writer.writerow(('name', 'fuzzies', 'base_eq', 'fuzzy_eq', 'fuzzy_neq', 'fuzzy_err', 'top_i'))
 
             if not args.force_pool or args.p != 1:
-                future = pool.map(compare, shuffled(instances), count(1), chunksize=1, timeout=10 * fuzzies)
+                future = pool.map(compare, shuffled(instances), count(1), chunksize=1, timeout=args.timeout * fuzzies)
             else:
-                future = pool.map(compare, instances, count(1), chunksize=1, timeout=10 * fuzzies)
+                future = pool.map(compare, instances, count(1), chunksize=1, timeout=args.timeout * fuzzies)
 
             iterator = future.result()
 
@@ -416,6 +426,9 @@ if __name__ == '__main__':
                     break
                 except TimeoutError as error:
                     logger.error('Timeout while getting results...')
+                    logger.error("\n%s", error)
+                except MemoryError as error:
+                    logger.error('Memout while getting results...')
                     logger.error("\n%s", error)
                 except Exception as error:
                     logger.error('Error while getting results...')

@@ -1,0 +1,30 @@
+db: tests-examples/spider/bike_1/tables/db.sqlite
+inputs:
+- tests-examples/spider/bike_1/tables/station.csv
+- tests-examples/spider/bike_1/tables/status.csv
+output: tests-examples/spider/bike_1/tables/0017.csv
+constants:
+- San Francisco
+- '10'
+functions:
+- avg
+columns:
+- city
+- bikes_available
+comment: |-
+  SELECT id
+  FROM station
+  WHERE city = "San Francisco" INTERSECT
+    SELECT station_id
+    FROM status
+  GROUP BY station_id
+  HAVING avg(bikes_available) > 10
+
+sql: |-
+  SELECT id
+  FROM station
+  WHERE city = "San Francisco" INTERSECT
+    SELECT station_id
+    FROM status
+  GROUP BY station_id
+  HAVING avg(bikes_available) > 10

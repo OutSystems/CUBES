@@ -5,13 +5,21 @@ inputs:
 output: tests-examples/db2csv/museum_visit/tables/0011_dev.csv
 raw_question: What are the id and name of the museum visited most times? 
 question_index: 421 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - museum_id
 groupby_columns:
  - museum_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT t2.Museum_ID,
          t1.name
@@ -35,8 +43,8 @@ smbop_beam_join_columns:
 - - museum_id
 - - museum_id
 - []
-- - name
-  - museum_id
+- - museum_id
+  - name
 - - museum_id
 - - museum_id
 - - museum_id
@@ -74,29 +82,23 @@ smbop_beam_tables:
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 - []
 - []
@@ -156,17 +158,50 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT visit.museum_id , museum.name FROM museum JOIN visit ON museum.museum_id = visit.museum_id GROUP BY visit.museum_id
   - SELECT museum.museum_id , museum.name FROM visit JOIN museum ON visit.museum_id = museum.museum_id GROUP BY visit.museum_id
   - SELECT museum.museum_id , museum.name FROM museum JOIN visit ON museum.museum_id = visit.museum_id GROUP BY visit.museum_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - museum_id
 - - museum_id
 - - museum_id
 - - museum_id
-- - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
+  - id
+- - museum_id
   - visitor_id
-  - museum_id
+  - id
 - - museum_id
 - []
 ratsql_beam_groupby_columns:
@@ -187,44 +222,40 @@ ratsql_beam_tables:
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
 - - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
 - - tests-examples/db2csv/museum_visit/tables/museum.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-- - max
-  - count
-- - max
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- []
+- - count
+- []
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
-- - num_of_ticket
 - []
-- - total_spent
+- []
+- []
 - []
 - []
 - []
@@ -269,6 +300,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT museum.Museum_ID, museum.Name FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID GROUP BY museum.Museum_ID ORDER BY Count(DISTINCT *) Desc LIMIT 1
   - SELECT museum.Museum_ID, museum.Name FROM museum JOIN visit ON museum.Museum_ID = visit.Museum_ID GROUP BY DISTINCT museum.Museum_ID ORDER BY Count(*) Desc LIMIT 1
   - SELECT museum.Museum_ID, museum.Name FROM museum GROUP BY museum.Museum_ID ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10352087020874023
   - -0.1042475700378418

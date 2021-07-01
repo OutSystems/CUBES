@@ -4,9 +4,15 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0019_dev.csv
 raw_question: List the names of all winners who played in both 2013 and 2016. 
 question_index: 447 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - 2016
  - 2013
+ - 2016
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - year
 filters:
@@ -60,26 +66,26 @@ smbop_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
 smbop_beam_functions:
 - []
 - []
@@ -122,8 +128,8 @@ smbop_beam_filters:
 - - '='
 - - '='
 - []
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - - '='
 smbop_beam_inferred_code:
   - SELECT matches.winner_name FROM matches WHERE matches.year = 2013 INTERSECT SELECT matches.winner_name FROM matches WHERE matches.year = 2016
@@ -147,17 +153,50 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT matches.winner_name FROM matches
   - SELECT matches.winner_name FROM matches WHERE matches.year >= 2013
   - SELECT matches.winner_name FROM matches WHERE matches.year = 2016
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 - []
 - []
 - []
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -168,31 +207,39 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
-- - 2016
-  - 2013
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+- - 2013
+  - 2016
+  - '1 intersect select matches.winner_name from matches where matches.year = 2013'
+- - 2013
+  - 2016
+  - '1'
+- - 2013
+  - 2016
 ratsql_beam_functions:
 - []
 - []
@@ -247,6 +294,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT matches.winner_name FROM matches WHERE matches.year = 2016 LIMIT 1 INTERSECT SELECT matches.winner_name FROM matches WHERE matches.year = 2013
   - SELECT matches.winner_name FROM matches WHERE matches.year = 2016 INTERSECT SELECT matches.winner_name FROM matches WHERE matches.year = 2013 LIMIT 1
   - SELECT matches.winner_name FROM matches WHERE matches.year = 2016 INTERSECT SELECT matches.winner_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.year = 2013
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10271263122558594
   - -0.10448312759399414

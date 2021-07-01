@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0019_dev.csv
 raw_question: What is the name and capacity for the stadium with highest average attendance? 
 question_index: 18 
-functions:
- - max
-columns:
- - average
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT name,
          capacity
@@ -53,13 +61,13 @@ smbop_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
 smbop_beam_constants:
+- - '1'
 - []
 - []
-- []
-- []
+- - '1'
 - []
 - []
 - []
@@ -67,11 +75,10 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - max
 - []
 - []
-- - max
-  - avg
+- []
+- - avg
 - - avg
 - - avg
 - - avg
@@ -79,7 +86,7 @@ smbop_beam_functions:
 - []
 - []
 smbop_beam_columns:
-- - average
+- []
 - []
 - []
 - - average
@@ -133,6 +140,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT stadium.name , stadium.capacity FROM stadium GROUP BY stadium.average
   - SELECT stadium.name , stadium.capacity FROM stadium ORDER BY 1 DESC
   - SELECT stadium.name , stadium.capacity FROM stadium, singer WHERE stadium.name<stadium.capacity
+smbop_beam_has_limit:
+  - True
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- []
+- []
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -159,48 +199,50 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/stadium.csv
-- - tests-examples/db2csv/concert_singer/tables/stadium.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
 ratsql_beam_functions:
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
 - []
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - average
-- - highest
-- - average
-- - average
-- - average
-- - average
 - []
-- - highest
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -241,6 +283,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT stadium.Name, stadium.Capacity FROM stadium ORDER BY DISTINCT stadium.Average Desc LIMIT 1
   - SELECT stadium.Name, stadium.Capacity FROM stadium ORDER BY stadium.Average Desc
   - SELECT stadium.Name, stadium.Capacity FROM stadium JOIN singer JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID AND singer_in_concert.Singer_ID = singer.Singer_ID ORDER BY stadium.Highest Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10589170455932617
   - -0.1042337417602539

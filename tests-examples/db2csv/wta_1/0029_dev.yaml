@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0029_dev.csv
 raw_question: List the first and last name of all players who are left / L hand in the order of birth date. 
 question_index: 457 
+has_limit: False 
+has_order_by: True 
+order_by_direction: []
 constants:
  - L
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - hand
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT first_name,
          last_name
@@ -26,12 +33,12 @@ sql: |-
 smbop_beam_join_columns:
 - []
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 - []
 - []
 - []
@@ -51,17 +58,17 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 smbop_beam_constants:
@@ -143,11 +150,44 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT players.first_name , players.last_name FROM players, matches WHERE players.hand = 'left / L' AND matches.loser_hand = 'L' ORDER BY players.birth_date ASC
   - SELECT players.first_name , players.last_name FROM players WHERE players.hand = 'left' OR players.hand = 'L' ORDER BY players.birth_date ASC
   - SELECT players.first_name , players.last_name FROM players WHERE players.hand = 'left' EXCEPT SELECT players.first_name , players.last_name FROM players WHERE players.hand = 'L'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - player_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
 - []
 - []
 - []
@@ -162,10 +202,10 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/players.csv
@@ -178,12 +218,16 @@ ratsql_beam_constants:
 - - L
 - - L
 - - L
+- - L
+  - '1'
+- - L
+- - L
 ratsql_beam_functions:
 - []
 - []
 - []
 - []
-- - min
+- []
 - []
 - []
 ratsql_beam_columns:
@@ -192,7 +236,6 @@ ratsql_beam_columns:
 - - hand
 - - hand
 - - hand
-  - birth_date
 - - hand
 - - hand
 ratsql_beam_ieu:
@@ -233,6 +276,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT players.first_name, players.last_name FROM players WHERE players.hand = 'L' ORDER BY players.birth_date Asc LIMIT 1
   - SELECT players.first_name, players.last_name FROM players WHERE players.hand = 'L' ORDER BY players.hand Asc
   - SELECT players.first_name FROM players WHERE players.hand = 'L' ORDER BY players.birth_date Asc
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- -  asc 
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10413312911987305
   - -0.1046609878540039

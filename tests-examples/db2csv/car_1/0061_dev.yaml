@@ -1,21 +1,26 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/model_list.csv
  - tests-examples/db2csv/car_1/tables/car_makers.csv
+ - tests-examples/db2csv/car_1/tables/model_list.csv
 output: tests-examples/db2csv/car_1/tables/0061_dev.csv
 raw_question: How many car models were produced by the maker with full name American Motor Company? 
 question_index: 147 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - American Motor Company
 join_columns:
- - id
  - maker
+ - id
+groupby_columns: []
 functions:
  - count
 columns:
  - fullname
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM CAR_MAKERS AS T1
@@ -30,16 +35,16 @@ sql: |-
 smbop_beam_join_columns:
 - - id
   - maker
-- - id
-  - maker
+- - maker
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 smbop_beam_constants:
 - - American Motor Company
 - - American Motor Company
@@ -61,31 +66,40 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM model_list JOIN car_makers ON model_list.maker = car_makers.id WHERE car_makers.fullname = 'American Motor Company'
   - SELECT COUNT( * ) FROM car_makers JOIN model_list ON car_makers.id = model_list.maker WHERE car_makers.fullname = 'American Motor Company'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
-- - id
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
+- - model
   - maker
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
-  - model
   - makeid
-- - id
-  - maker
-- - country
-  - maker
   - id
-  - countryid
+- - maker
+  - id
 - - country
+  - maker
+  - countryid
+  - id
+- - country
+  - countryid
+  - maker
   - contid
-  - continent
-  - countryid
   - id
-  - maker
+  - continent
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -96,32 +110,35 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
 ratsql_beam_constants:
 - - American Motor Company
 - - American Motor Company
 - - American Motor Company
 - - American Motor Company
+- - American Motor Company
+- - American Motor Company
+  - '1'
 - - American Motor Company
 - - American Motor Company
 - - American Motor Company
@@ -177,7 +194,7 @@ ratsql_beam_inferred_code:
 ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
   - SELECT Count(DISTINCT model_list.Model) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
-  - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.Maker = American Motor Company
+  - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.Maker = 'American Motor Company'
   - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE DISTINCT car_makers.FullName = 'American Motor Company'
   - SELECT Count(DISTINCT *) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
   - SELECT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company' LIMIT 1
@@ -185,6 +202,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Count(*) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
   - SELECT Count(*) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
   - SELECT Count(*) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker WHERE car_makers.FullName = 'American Motor Company'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10719919204711914
   - -0.10534906387329102

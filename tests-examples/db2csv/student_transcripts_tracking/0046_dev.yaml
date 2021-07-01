@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0046_dev.csv
 raw_question: What is the date and id of the transcript with at least 2 courses listed? 
 question_index: 552 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
@@ -13,6 +16,9 @@ groupby_columns:
  - transcript_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.transcript_date,
          T1.transcript_id
@@ -37,8 +43,8 @@ smbop_beam_groupby_columns:
 - - transcript_id
 - - transcript_id
 smbop_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
@@ -71,6 +77,18 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcripts JOIN transcript_contents ON transcripts.transcript_id = transcript_contents.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
   - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
   - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) > 2
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - transcript_id
 - - transcript_id
@@ -82,18 +100,22 @@ ratsql_beam_groupby_columns:
 - - transcript_id
 - - transcript_id
 ratsql_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+- - 2
+  - '1'
 - - 2
 ratsql_beam_functions:
 - - count
@@ -131,6 +153,21 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(DISTINCT *) >= 2
   - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 2 LIMIT 1
   - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) > 2
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10369443893432617
   - -0.1045217514038086

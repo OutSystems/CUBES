@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0033_dev.csv
 raw_question: What is the smallest weight of the car produced with 8 cylinders on 1974 ? 
 question_index: 119 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 1974
  - 8
+join_columns: []
+groupby_columns: []
 functions:
  - min
 columns:
- - weight
  - cylinders
  - year
+ - weight
 filters:
  - '='
+ieu: []
 comment: |-
   select min(weight)
   from cars_data
@@ -92,28 +98,28 @@ smbop_beam_functions:
 - - min
 - []
 smbop_beam_columns:
-- - weight
-  - cylinders
+- - cylinders
+  - year
+  - weight
+- - cylinders
   - year
 - - cylinders
   - year
-- - weight
-  - cylinders
-  - year
+  - weight
 - - cylinders
   - year
-- - weight
-  - cylinders
-- - weight
-  - cylinders
-- - weight
-  - cylinders
+- - cylinders
+  - weight
+- - cylinders
+  - weight
+- - cylinders
   - year
-- - weight
-  - cylinders
+  - weight
+- - cylinders
   - year
-- - weight
-  - year
+  - weight
+- - year
+  - weight
 - - cylinders
   - year
 smbop_beam_ieu:
@@ -160,31 +166,64 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT SUM( cars_data.weight ) FROM cars_data WHERE cars_data.cylinders = 8 AND cars_data.year = 1974
   - SELECT MIN( cars_data.weight ) FROM cars_data WHERE cars_data.year = 8 AND cars_data.year = 1974
   - SELECT DISTINCT cars_data.weight FROM cars_data WHERE cars_data.cylinders = 8 AND cars_data.year = 1974
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
 - []
-- - model
-  - country
+- - country
+  - makeid
+  - countryid
+  - maker
   - contid
+  - model
+  - id
   - continent
+- - country
+  - makeid
   - countryid
-  - id
   - maker
-  - makeid
-- - model
-  - country
-  - countryid
+  - model
   - id
-  - maker
-  - makeid
 - - model
+  - makeid
   - id
-  - makeid
-- - id
-  - makeid
+- - makeid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -201,22 +240,22 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/continents.csv
+- - tests-examples/db2csv/car_1/tables/continents.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
 - - 1974
   - 8
@@ -228,6 +267,9 @@ ratsql_beam_constants:
   - 8
 - - 1974
   - 8
+- - 1974
+  - 8
+  - '1'
 - - 1974
   - 8
 - - 1974
@@ -247,24 +289,24 @@ ratsql_beam_functions:
 - - min
 - - min
 ratsql_beam_columns:
-- - weight
-  - year
-- - weight
-  - cylinders
-- - weight
-  - year
-- - weight
-  - year
-- - weight
-  - year
-- - weight
-  - year
-- - weight
-  - year
-- - weight
-  - year
-- - weight
-  - year
+- - year
+  - weight
+- - cylinders
+  - weight
+- - year
+  - weight
+- - year
+  - weight
+- - year
+  - weight
+- - year
+  - weight
+- - year
+  - weight
+- - year
+  - weight
+- - year
+  - weight
 ratsql_beam_ieu:
 - []
 - []
@@ -307,6 +349,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Min(cars_data.Weight) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Year = 1974
   - SELECT Min(cars_data.Weight) FROM model_list JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Year = 1974
   - SELECT Min(cars_data.Weight) FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE cars_data.Year = 1974
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10397052764892578
   - -0.10434722900390625

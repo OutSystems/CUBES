@@ -1,0 +1,31 @@
+db: tests-examples/spider/college_2/tables/db.sqlite
+inputs:
+- tests-examples/spider/college_2/tables/classroom.csv
+- tests-examples/spider/college_2/tables/course.csv
+- tests-examples/spider/college_2/tables/section.csv
+output: tests-examples/spider/college_2/tables/0064.csv
+functions:
+- max
+columns:
+- capacity
+comment: |-
+  SELECT T3.title,
+         T3.credits
+  FROM classroom AS T1
+  JOIN SECTION AS T2 ON T1.building = T2.building
+  AND T1.room_number = T2.room_number
+  JOIN course AS T3 ON T2.course_id = T3.course_id
+  WHERE T1.capacity =
+      (SELECT max(capacity)
+       FROM classroom)
+
+sql: |-
+  SELECT T3.title,
+         T3.credits
+  FROM classroom AS T1
+  JOIN SECTION AS T2 ON T1.building = T2.building
+  AND T1.room_number = T2.room_number
+  JOIN course AS T3 ON T2.course_id = T3.course_id
+  WHERE T1.capacity =
+      (SELECT max(capacity)
+       FROM classroom)

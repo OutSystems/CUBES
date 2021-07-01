@@ -1,20 +1,27 @@
 db: tests-examples/db2csv/museum_visit/tables/museum_visit.sqlite
 inputs:
- - tests-examples/db2csv/museum_visit/tables/visit.csv
  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+ - tests-examples/db2csv/museum_visit/tables/visit.csv
 output: tests-examples/db2csv/museum_visit/tables/0010_dev.csv
 raw_question: What are the id, name and membership level of visitors who have spent the largest amount of money in total in all museum tickets? 
 question_index: 420 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
- - id
  - visitor_id
+ - id
 groupby_columns:
  - visitor_id
 functions:
- - max
  - sum
 columns:
  - total_spent
+filters: []
+ieu: []
 comment: |-
   SELECT t2.visitor_id,
          t1.name,
@@ -35,26 +42,26 @@ sql: |-
   ORDER BY sum(t2.Total_spent) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
-- - id
-  - visitor_id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
+- - visitor_id
+  - id
 smbop_beam_groupby_columns:
 - - visitor_id
 - - visitor_id
@@ -67,54 +74,46 @@ smbop_beam_groupby_columns:
 - []
 - - visitor_id
 smbop_beam_tables:
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 smbop_beam_functions:
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
 - []
 - []
 smbop_beam_columns:
@@ -172,27 +171,60 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT visit.visitor_id , visitor.name , visitor.level_of_membership FROM visitor JOIN visit ON visitor.id = visit.visitor_id GROUP BY visitor.id ORDER BY SUM( visit.total_spent ) DESC LIMIT 1
   - SELECT visit.visitor_id , visitor.name , visitor.level_of_membership FROM visitor JOIN visit ON visitor.id = visit.visitor_id
   - SELECT visitor.id , visitor.name , visitor.level_of_membership FROM visitor JOIN visit ON visitor.id = visit.visitor_id GROUP BY visit.visitor_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
 ratsql_beam_join_columns:
-- - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
+  - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
+  - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
+  - id
+- - visitor_id
+  - id
+- - museum_id
   - visitor_id
-- - id
+  - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
+  - id
+- - museum_id
   - visitor_id
-  - museum_id
-- - id
-  - visitor_id
-  - museum_id
+  - id
 ratsql_beam_groupby_columns:
 - - id
 - - id
@@ -202,49 +234,45 @@ ratsql_beam_groupby_columns:
 - - id
 - - id
 ratsql_beam_tables:
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
-- - tests-examples/db2csv/museum_visit/tables/visit.csv
+- - tests-examples/db2csv/museum_visit/tables/visitor.csv
+  - tests-examples/db2csv/museum_visit/tables/visit.csv
   - tests-examples/db2csv/museum_visit/tables/museum.csv
-  - tests-examples/db2csv/museum_visit/tables/visitor.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
-- - max
-  - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
 ratsql_beam_columns:
 - - total_spent
 - - num_of_ticket
@@ -291,6 +319,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT visitor.ID, visitor.Name, visitor.Level_of_membership FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID GROUP BY DISTINCT visitor.ID ORDER BY Sum(visit.Total_spent) Desc LIMIT 1
   - SELECT visitor.ID, visitor.Name, DISTINCT visitor.Level_of_membership FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID GROUP BY visitor.ID ORDER BY Sum(visit.Total_spent) Desc LIMIT 1
   - SELECT visitor.ID, visitor.Name, visitor.Level_of_membership FROM museum JOIN visitor JOIN visit ON museum.Museum_ID = visit.Museum_ID AND visit.visitor_ID = visitor.ID AND museum.Museum_ID = visit.Museum_ID GROUP BY visitor.ID ORDER BY Sum(DISTINCT visit.Total_spent) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1059122085571289
   - -0.10468339920043945

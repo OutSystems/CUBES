@@ -1,0 +1,33 @@
+db: tests-examples/spider/mountain_photos/tables/db.sqlite
+inputs:
+- tests-examples/spider/mountain_photos/tables/mountain.csv
+- tests-examples/spider/mountain_photos/tables/camera_lens.csv
+- tests-examples/spider/mountain_photos/tables/photos.csv
+output: tests-examples/spider/mountain_photos/tables/0015.csv
+constants:
+- Sigma
+columns:
+- brand
+comment: |-
+  SELECT name,
+         prominence
+  FROM mountain
+  EXCEPT
+  SELECT T1.name,
+         T1.prominence
+  FROM mountain AS T1
+  JOIN photos AS T2 ON T1.id = T2.mountain_id
+  JOIN camera_lens AS T3 ON T2.camera_lens_id = T3.id
+  WHERE T3.brand = 'Sigma'
+
+sql: |-
+  SELECT name,
+         prominence
+  FROM mountain
+  EXCEPT
+  SELECT T1.name,
+         T1.prominence
+  FROM mountain AS T1
+  JOIN photos AS T2 ON T1.id = T2.mountain_id
+  JOIN camera_lens AS T3 ON T2.camera_lens_id = T3.id
+  WHERE T3.brand = 'Sigma'

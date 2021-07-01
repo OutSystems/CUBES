@@ -4,16 +4,22 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0098_dev.csv
 raw_question: What are the different continents and the total popuation and average life expectancy corresponding to each, for continents that have an average life expectancy less than 72? 
 question_index: 799 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 72
+join_columns: []
 groupby_columns:
  - continent
 functions:
  - avg
  - sum
 columns:
- - lifeexpectancy
  - population
+ - lifeexpectancy
+filters: []
+ieu: []
 comment: |-
   SELECT sum(Population),
          avg(LifeExpectancy),
@@ -80,21 +86,21 @@ smbop_beam_functions:
 - - avg
   - sum
 smbop_beam_columns:
+- - population
+  - lifeexpectancy
+- - population
+  - lifeexpectancy
+- - population
+  - lifeexpectancy
+- - population
+  - lifeexpectancy
+- - population
+  - lifeexpectancy
 - - lifeexpectancy
-  - population
-- - lifeexpectancy
-  - population
-- - lifeexpectancy
-  - population
-- - lifeexpectancy
-  - population
-- - lifeexpectancy
-  - population
-- - lifeexpectancy
-- - lifeexpectancy
-  - population
-- - lifeexpectancy
-  - population
+- - population
+  - lifeexpectancy
+- - population
+  - lifeexpectancy
 smbop_beam_ieu:
 - []
 - []
@@ -131,6 +137,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( country.lifeexpectancy ) FROM country
   - SELECT country.continent , AVG( country.lifeexpectancy ) , SUM( country.population ) FROM country WHERE country.lifeexpectancy<72
   - SELECT country.continent , SUM( country.population ) FROM country WHERE country.lifeexpectancy<72 GROUP BY country.continent ORDER BY AVG( country.lifeexpectancy ) ASC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -138,10 +171,10 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -158,8 +191,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
@@ -169,6 +202,8 @@ ratsql_beam_constants:
 - - 72
 - - 72
 - - 72
+- - 72
+  - '1'
 - - 72
 - - 72
 ratsql_beam_functions:
@@ -227,6 +262,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT country.Continent, Sum(country.LifeExpectancy) FROM country WHERE country.LifeExpectancy < 72 LIMIT 1
   - SELECT country.Continent, Sum(country.LifeExpectancy) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.LifeExpectancy < 72
   - SELECT country.Continent, Sum(country.LifeExpectancy) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.LifeExpectancy < 72
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10373592376708984
   - -0.10493898391723633

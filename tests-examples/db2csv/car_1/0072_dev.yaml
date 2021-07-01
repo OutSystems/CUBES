@@ -1,22 +1,27 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/cars_data.csv
  - tests-examples/db2csv/car_1/tables/car_names.csv
+ - tests-examples/db2csv/car_1/tables/cars_data.csv
 output: tests-examples/db2csv/car_1/tables/0072_dev.csv
 raw_question: For a volvo model, how many cylinders does the version with least accelerate have? 
 question_index: 158 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  asc 
 constants:
  - volvo
+ - '1;'
 join_columns:
- - id
  - makeid
-functions:
- - min
+ - id
+groupby_columns: []
+functions: []
 columns:
  - model
- - accelerate
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.cylinders
   FROM CARS_DATA AS T1
@@ -33,26 +38,26 @@ sql: |-
   ORDER BY T1.accelerate ASC
   LIMIT 1;
 smbop_beam_join_columns:
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
-- - id
-  - makeid
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -65,69 +70,72 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
+- - volvo
+  - '1'
 smbop_beam_functions:
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
-- - min
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 smbop_beam_columns:
 - - model
-  - accelerate
 - - model
-  - accelerate
 - - model
-  - accelerate
 - - model
-  - accelerate
+- - make
+  - model
+- []
 - - model
-  - accelerate
-  - make
-- - accelerate
-- - model
-  - accelerate
 - - model
   - accelerate
 - - accelerate
-- - model
-  - accelerate
-  - make
+- - make
+  - model
 smbop_beam_ieu:
 - []
 - []
@@ -172,40 +180,73 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT cars_data.cylinders FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE car_names.model = 'volvo model,' AND cars_data.accelerate = 'volvo' ORDER BY cars_data.accelerate ASC LIMIT 1
   - SELECT cars_data.cylinders FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE cars_data.accelerate = 'volvo' ORDER BY cars_data.accelerate ASC LIMIT 1
   - SELECT cars_data.cylinders FROM cars_data JOIN car_names ON cars_data.id = car_names.makeid WHERE car_names.model = 'volvo' AND car_names.make = 'volvo' ORDER BY cars_data.accelerate ASC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
 ratsql_beam_join_columns:
-- - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - makeid
+  - id
+- - model
+  - maker
   - makeid
-- - id
+  - id
+- - model
   - makeid
-- - id
+  - id
+- - country
   - makeid
-- - id
+  - countryid
+  - maker
+  - contid
+  - model
+  - id
+  - continent
+- - makeid
+  - id
+- - country
   - makeid
-- - id
-  - makeid
-- - id
+  - countryid
   - maker
   - model
-  - makeid
-- - model
   - id
-  - makeid
-- - model
-  - country
-  - contid
-  - continent
-  - countryid
-  - id
-  - maker
-  - makeid
-- - id
-  - makeid
-- - model
-  - country
-  - countryid
-  - id
-  - maker
-  - makeid
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -218,80 +259,69 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
-  - tests-examples/db2csv/car_1/tables/continents.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/continents.csv
+  - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - min
-- - min
-- - min
-- - min
-- - min
-  - count
-- - min
-- - min
-- - min
-- - min
-- - min
+- []
+- []
+- []
+- []
+- - count
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - accelerate
-  - make
-- - accelerate
-  - make
-- - cylinders
-  - make
-- - cylinders
-  - make
-- - accelerate
-  - make
-- - accelerate
-  - make
-- - accelerate
-  - make
-- - accelerate
-  - make
+- - make
+- - make
+- - make
+- - make
+- - make
+- - make
+- - make
+- - make
 - - model
-  - accelerate
-- - accelerate
-  - make
+- - make
 ratsql_beam_ieu:
 - []
 - []
@@ -336,6 +366,39 @@ ratsql_beam_inferred_code_w_terminals:
   - 
   - 
   - 
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
 ratsql_beam_score_history:
 - - -0.10534048080444336
   - -0.10442018508911133

@@ -1,0 +1,27 @@
+db: tests-examples/spider/tracking_grants_for_research/tables/db.sqlite
+inputs:
+- tests-examples/spider/tracking_grants_for_research/tables/document_types.csv
+- tests-examples/spider/tracking_grants_for_research/tables/documents.csv
+- tests-examples/spider/tracking_grants_for_research/tables/grants.csv
+output: tests-examples/spider/tracking_grants_for_research/tables/0009.csv
+constants:
+- Regular
+- '100'
+columns:
+- document_description
+- grant_amount
+comment: |-
+  SELECT T1.response_received_date
+  FROM Documents AS T1
+  JOIN Document_Types AS T2 ON T1.document_type_code = T2.document_type_code
+  JOIN Grants AS T3 ON T1.grant_id = T3.grant_id
+  WHERE T2.document_description = 'Regular'
+    OR T3.grant_amount > 100
+
+sql: |-
+  SELECT T1.response_received_date
+  FROM Documents AS T1
+  JOIN Document_Types AS T2 ON T1.document_type_code = T2.document_type_code
+  JOIN Grants AS T3 ON T1.grant_id = T3.grant_id
+  WHERE T2.document_description = 'Regular'
+    OR T3.grant_amount > 100

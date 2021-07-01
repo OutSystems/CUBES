@@ -1,15 +1,19 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
  - tests-examples/db2csv/world_1/tables/country.csv
+ - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 output: tests-examples/db2csv/world_1/tables/0050_dev.csv
 raw_question: How many continents speak Chinese? 
 question_index: 751 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Chinese
 join_columns:
- - code
  - countrycode
+ - code
+groupby_columns: []
 functions:
  - count
 columns:
@@ -17,6 +21,7 @@ columns:
  - language
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT COUNT(DISTINCT Continent)
   FROM country AS T1
@@ -29,22 +34,22 @@ sql: |-
   JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode
   WHERE T2.Language = "Chinese"
 smbop_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 smbop_beam_groupby_columns:
 - []
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
 - - Chinese
 - - Chinese
@@ -58,8 +63,8 @@ smbop_beam_columns:
   - language
 - - language
 - - continent
-  - code
   - language
+  - code
 smbop_beam_ieu:
 - []
 - []
@@ -68,8 +73,8 @@ smbop_beam_filters:
 - - '='
 - - '='
 - - '='
-  - '>='
   - '>'
+  - '>='
 smbop_beam_inferred_code:
   - SELECT COUNT( DISTINCT country.continent ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
   - SELECT COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
@@ -78,20 +83,32 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( DISTINCT country.continent ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
   - SELECT COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode WHERE countrylanguage.language = 'Chinese'
   - SELECT COUNT( DISTINCT country.continent ) FROM country, countrylanguage WHERE country.code >= countrylanguage.countrycode AND countrylanguage.language = 'Chinese'
-ratsql_beam_join_columns:
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- []
+- []
+ratsql_beam_join_columns:
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- []
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -101,20 +118,20 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/city.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - Chinese
 - - Chinese
@@ -122,6 +139,8 @@ ratsql_beam_constants:
 - - Chinese
 - - Chinese
 - - Chinese
+- - Chinese
+  - '1'
 - - Chinese
 ratsql_beam_functions:
 - - count
@@ -178,6 +197,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE DISTINCT countrylanguage.Language = 'Chinese'
   - SELECT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese' LIMIT 1
   - SELECT DISTINCT Count(DISTINCT country.Continent) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Chinese'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10917520523071289
   - -0.10504770278930664

@@ -1,20 +1,26 @@
 db: tests-examples/db2csv/course_teach/tables/course_teach.sqlite
 inputs:
- - tests-examples/db2csv/course_teach/tables/teacher.csv
  - tests-examples/db2csv/course_teach/tables/course.csv
+ - tests-examples/db2csv/course_teach/tables/teacher.csv
  - tests-examples/db2csv/course_teach/tables/course_arrange.csv
 output: tests-examples/db2csv/course_teach/tables/0023_dev.csv
 raw_question: Show the name of the teacher for the math course. 
 question_index: 403 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Math
 join_columns:
  - teacher_id
  - course_id
+groupby_columns: []
+functions: []
 columns:
  - course
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T3.Name
   FROM course_arrange AS T1
@@ -37,11 +43,11 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
 smbop_beam_constants:
 - - Math
@@ -64,6 +70,15 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT teacher.name FROM course JOIN course_arrange ON course.course_id = course_arrange.course_id JOIN teacher ON course_arrange.teacher_id = teacher.teacher_id WHERE course.course = 'math'
   - SELECT teacher.name FROM course_arrange JOIN course ON course_arrange.course_id = course.course_id JOIN teacher ON course_arrange.teacher_id = teacher.teacher_id WHERE course.course = 'math'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - - teacher_id
   - course_id
@@ -94,37 +109,39 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
-- - tests-examples/db2csv/course_teach/tables/teacher.csv
-  - tests-examples/db2csv/course_teach/tables/course.csv
+- - tests-examples/db2csv/course_teach/tables/course.csv
+  - tests-examples/db2csv/course_teach/tables/teacher.csv
   - tests-examples/db2csv/course_teach/tables/course_arrange.csv
 ratsql_beam_constants:
 - - Math
 - - Math
 - - Math
+- - Math
+  - '1'
 - - Math
 - - Math
 - - Math
@@ -193,6 +210,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT course_arrange.Teacher_ID FROM course JOIN teacher JOIN course_arrange ON course.Course_ID = course_arrange.Course_ID AND course_arrange.Teacher_ID = teacher.Teacher_ID AND course.Course_ID = course_arrange.Course_ID WHERE course.Course = 'Math'
   - SELECT course.Staring_Date FROM course JOIN teacher JOIN course_arrange ON course.Course_ID = course_arrange.Course_ID AND course_arrange.Teacher_ID = teacher.Teacher_ID AND course.Course_ID = course_arrange.Course_ID WHERE course.Course = 'Math'
   - SELECT course_arrange.Course_ID FROM course JOIN teacher JOIN course_arrange ON course.Course_ID = course_arrange.Course_ID AND course_arrange.Teacher_ID = teacher.Teacher_ID AND course.Course_ID = course_arrange.Course_ID WHERE course.Course = 'Math'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10384750366210938
   - -0.1042933464050293

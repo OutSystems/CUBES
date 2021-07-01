@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0055_dev.csv
 raw_question: What are airlines that have some flight departing from airport 'AHD'? 
 question_index: 233 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - AHD
 join_columns:
  - airline
  - uid
+groupby_columns: []
+functions: []
 columns:
  - sourceairport
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.Airline
   FROM AIRLINES AS T1
@@ -26,25 +32,25 @@ sql: |-
   JOIN FLIGHTS AS T2 ON T1.uid = T2.Airline
   WHERE T2.SourceAirport = "AHD"
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-  - uid
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
   - uid
-- - sourceairport
-  - airportcode
-  - uid
-- - sourceairport
-  - airportcode
-  - uid
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
+  - destairport
   - uid
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
+  - uid
+- - airportcode
+  - sourceairport
+  - uid
+- - airportcode
+  - sourceairport
+  - destairport
+  - uid
+- - airportcode
+  - sourceairport
   - uid
 - []
 - []
@@ -58,23 +64,23 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
@@ -141,18 +147,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT airlines.airline FROM flights JOIN airports ON flights.sourceairport = airports.airportcode JOIN airlines ON airlines.uid = airlines.uid WHERE airports.airportname = 'AHD'
   - SELECT AVG( flights.airline ) FROM flights
   - SELECT airports.airportcode FROM airports
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -185,6 +218,8 @@ ratsql_beam_constants:
 - - AHD
 - - AHD
 - - AHD
+- - AHD
+  - '1'
 - - AHD
 - - AHD
 ratsql_beam_functions:
@@ -249,6 +284,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.Airline FROM flights WHERE flights.SourceAirport = 'AHD' LIMIT 1
   - SELECT DISTINCT flights.Airline FROM flights WHERE flights.DestAirport = 'AHD'
   - SELECT flights.Airline FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE flights.DestAirport = 'AHD'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10383892059326172
   - -0.1048431396484375

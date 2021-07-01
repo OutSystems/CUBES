@@ -6,12 +6,17 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0043_dev.csv
 raw_question: Find the last name of the students who currently live in the state of North Carolina but have not registered in any degree program. 
 question_index: 549 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - NorthCarolina
 join_columns:
- - address_id
  - student_id
+ - address_id
  - current_address_id
+groupby_columns: []
+functions: []
 columns:
  - state_province_county
 filters:
@@ -38,16 +43,16 @@ sql: |-
   FROM Students AS T3
   JOIN Student_Enrolment AS T4 ON T3.student_id = T4.student_id
 smbop_beam_join_columns:
-- - address_id
+- - permanent_address_id
+  - address_id
   - student_id
-  - permanent_address_id
 - []
 - []
-- - address_id
-  - permanent_address_id
-- - address_id
+- - permanent_address_id
+  - address_id
+- - permanent_address_id
+  - address_id
   - student_id
-  - permanent_address_id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -107,26 +112,44 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT student_enrolment.student_id FROM student_enrolment
   - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
   - SELECT students.last_name FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina' UNION SELECT students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN addresses ON students.permanent_address_id = addresses.address_id WHERE addresses.state_province_county = 'North Carolina'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - address_id
   - current_address_id
 - - address_id
   - current_address_id
-- - address_id
-  - student_id
+- - student_id
+  - address_id
   - current_address_id
-- - address_id
-  - student_id
-  - current_address_id
-- - address_id
-  - current_address_id
-- - address_id
-  - student_id
+- - student_id
+  - address_id
   - current_address_id
 - - address_id
   - current_address_id
+- - student_id
+  - address_id
+  - current_address_id
 - - address_id
-  - student_id
+  - current_address_id
+- - student_id
+  - address_id
   - current_address_id
 - - address_id
   - current_address_id
@@ -206,8 +229,8 @@ ratsql_beam_columns:
   - degree_program_id
 - - city
   - degree_program_id
-- - city
-  - state_province_county
+- - state_province_county
+  - city
 ratsql_beam_ieu:
 - - except
 - - except
@@ -243,15 +266,48 @@ ratsql_beam_inferred_code:
   - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'terminal' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.state_province_county = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
   - 
-  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = NorthCarolina EXCEPT SELECT Student_Enrolment.student_id FROM Student_Enrolment
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'NorthCarolina' EXCEPT SELECT Student_Enrolment.student_id FROM Student_Enrolment
   - 
   - 
-  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = NorthCarolina EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id
+  - SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id WHERE Addresses.city = 'NorthCarolina' EXCEPT SELECT Students.last_name FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id
   - 
   - 
   - 
   - 
   - 
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1047821044921875
   - -0.10436058044433594

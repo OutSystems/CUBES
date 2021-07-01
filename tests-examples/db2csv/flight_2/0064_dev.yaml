@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0064_dev.csv
 raw_question: Which airlines have at least 10 flights? 
 question_index: 242 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 10
 join_columns:
@@ -14,6 +17,9 @@ groupby_columns:
  - airline
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.Airline
   FROM AIRLINES AS T1
@@ -73,6 +79,18 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
   - SELECT flights.airline , airlines.airline FROM flights JOIN airlines ON flights.airline = airlines.uid GROUP BY flights.airline HAVING COUNT( * ) >= 10
   - SELECT airlines.airline FROM airlines JOIN flights ON airlines.uid = flights.airline GROUP BY flights.airline HAVING COUNT( * ) >= 10
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -80,8 +98,8 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 ratsql_beam_groupby_columns:
 - - airline
@@ -107,6 +125,8 @@ ratsql_beam_tables:
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/flights.csv
 ratsql_beam_constants:
+- - 10
+- - 10
 - - 10
 - - 10
 - - 10
@@ -167,12 +187,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 10
   - SELECT flights.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 10
   - SELECT airlines.Airline FROM airlines JOIN flights GROUP BY airlines.Airline HAVING Count(*) >= 10
-  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(flights.FlightNo) >= 10
+  - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(flights.FlightNo) >= '10'
   - SELECT flights.Airline FROM airlines JOIN flights GROUP BY flights.Airline HAVING Count(*) >= 10
   - SELECT flights.Airline FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY flights.Airline HAVING Count(*) >= 10
   - SELECT DISTINCT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(*) >= 10
   - SELECT flights.Airline FROM flights GROUP BY flights.Airline HAVING Count(DISTINCT *) >= 10
   - SELECT flights.Airline FROM flights GROUP BY DISTINCT flights.Airline HAVING Count(*) >= 10
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10300779342651367
   - -0.10513830184936523

@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0006_dev.csv
 raw_question: What are the descriptions for all the math courses? 
 question_index: 512 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - math
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - course_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT course_description
   FROM Courses
@@ -39,14 +46,14 @@ smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
@@ -113,19 +120,46 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT courses.course_description FROM courses JOIN sections ON courses.course_id = sections.course_id
   - SELECT courses.course_description FROM sections, courses WHERE courses.course_name = 'math'
   - SELECT courses.course_description FROM courses WHERE courses.course_name = 'math' ORDER BY courses.course_description DESC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - student_enrolment_id
-  - course_id
-  - current_address_id
+- - current_address_id
   - address_id
+  - course_id
+  - student_enrolment_id
   - student_id
 - - course_id
 - - course_id
-- - student_course_id
-  - course_id
+- - course_id
+  - student_course_id
 - - student_enrolment_id
   - course_id
 - - student_enrolment_id
@@ -145,29 +179,31 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 ratsql_beam_constants:
 - - math
 - - math
 - - math
+- - math
+  - '1'
 - - math
 - - math
 - - math
@@ -236,6 +272,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Courses.course_description FROM Courses JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id WHERE Courses.course_name = 'math'
   - SELECT Courses.course_description FROM Courses JOIN Student_Enrolment JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id WHERE Courses.course_name = 'math'
   - SELECT Courses.course_description FROM Courses JOIN Semesters JOIN Student_Enrolment ON Student_Enrolment.semester_id = Semesters.semester_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id AND Student_Enrolment_Courses.student_enrolment_id = Student_Enrolment.student_enrolment_id WHERE Courses.course_name = 'math'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10654687881469727
   - -0.10425233840942383

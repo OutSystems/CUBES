@@ -4,15 +4,21 @@ inputs:
 output: tests-examples/db2csv/wta_1/tables/0038_dev.csv
 raw_question: What is the name of the winner with the most rank points who participated in the Australian Open tournament? 
 question_index: 466 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
 constants:
  - Australian Open
-functions:
- - max
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - tourney_name
- - winner_rank_points
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT winner_name
   FROM matches
@@ -55,6 +61,7 @@ smbop_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 smbop_beam_constants:
 - - Australian Open
+  - '1'
 - - Australian Open
 - - Australian Open
 - - Australian Open
@@ -63,7 +70,7 @@ smbop_beam_constants:
 - - Australian Open
 - - Australian Open
 smbop_beam_functions:
-- - max
+- []
 - []
 - []
 - []
@@ -73,7 +80,6 @@ smbop_beam_functions:
 - []
 smbop_beam_columns:
 - - tourney_name
-  - winner_rank_points
 - - tourney_name
 - - tourney_name
 - []
@@ -117,19 +123,46 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT matches.winner_name FROM matches WHERE matches.tourney_name = 'Australian Open' ORDER BY matches.winner_rank_points DESC
   - SELECT matches.winner_name FROM matches WHERE matches.tourney_name = 'Australian Open' GROUP BY matches.winner_rank_points
   - SELECT matches.winner_name FROM matches WHERE matches.tourney_name = 'Australian Open' ORDER BY matches.winner_rank_points ASC
+smbop_beam_has_limit:
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 - []
 - []
 - []
-- - player_id
-  - loser_id
-- - player_id
-  - loser_id
+- - loser_id
+  - player_id
+- - loser_id
+  - player_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -141,55 +174,59 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
 - - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
-- - tests-examples/db2csv/wta_1/tables/rankings.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/matches.csv
-  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/players.csv
+  - tests-examples/db2csv/wta_1/tables/rankings.csv
+  - tests-examples/db2csv/wta_1/tables/matches.csv
 ratsql_beam_constants:
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
 - - Australian Open
+  - '1'
+- - Australian Open
+  - '1'
+- - Australian Open
+  - '1'
 ratsql_beam_functions:
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
 - - tourney_name
-  - winner_rank_points
 - - tourney_name
-  - ranking_points
 - - tourney_name
-  - ranking_points
 - - tourney_name
-  - loser_rank_points
-- - winner_rank
-  - tourney_name
 - - tourney_name
-  - winner_rank_points
 - - tourney_name
-  - winner_rank_points
 - - tourney_name
-  - winner_rank_points
+- - tourney_name
 ratsql_beam_ieu:
 - []
 - []
@@ -230,6 +267,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT matches.winner_name FROM players JOIN matches ON matches.loser_id = players.player_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'Australian Open' ORDER BY matches.winner_rank_points Desc LIMIT 1
   - SELECT matches.winner_name FROM matches WHERE DISTINCT matches.tourney_name = 'Australian Open' ORDER BY matches.winner_rank_points Desc LIMIT 1
   - SELECT matches.winner_name FROM matches WHERE matches.tourney_name = 'Australian Open' ORDER BY DISTINCT matches.winner_rank_points Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10741806030273438
   - -0.10811424255371094

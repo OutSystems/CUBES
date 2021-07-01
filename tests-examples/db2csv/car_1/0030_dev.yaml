@@ -1,24 +1,29 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
  - tests-examples/db2csv/car_1/tables/countries.csv
- - tests-examples/db2csv/car_1/tables/model_list.csv
  - tests-examples/db2csv/car_1/tables/car_makers.csv
+ - tests-examples/db2csv/car_1/tables/model_list.csv
 output: tests-examples/db2csv/car_1/tables/0030_dev.csv
 raw_question: What is the count of the car models produced in the United States? 
 question_index: 116 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - usa
 join_columns:
- - id
- - maker
  - countryid
  - country
+ - id
+ - maker
+groupby_columns: []
 functions:
  - count
 columns:
  - countryname
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM MODEL_LIST AS T1
@@ -33,15 +38,15 @@ sql: |-
   JOIN COUNTRIES AS T3 ON T2.Country = T3.CountryId
   WHERE T3.CountryName = 'usa';
 smbop_beam_join_columns:
-- - id
+- - countryid
+  - id
   - maker
-  - countryid
-- - id
-  - maker
-  - countryid
+- - countryid
   - country
-- - maker
-  - countryid
+  - id
+  - maker
+- - countryid
+  - maker
 - []
 smbop_beam_groupby_columns:
 - []
@@ -50,19 +55,19 @@ smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
+- - usa
+- - usa
+- - usa
+- - usa
 smbop_beam_functions:
 - - count
 - - count
@@ -93,29 +98,44 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM model_list JOIN car_makers ON model_list.maker = car_makers.id JOIN countries ON car_makers.country = countries.countryid WHERE countries.countryname = 'United States'
   - SELECT COUNT( * ) FROM model_list JOIN countries ON model_list.maker = countries.countryid WHERE countries.countryname = 'United States'
   - SELECT countries.countryid FROM countries
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - model
 - - model
 - - model
-  - id
   - makeid
+  - id
 - []
 - - model
-  - id
   - makeid
+  - id
 - - model
-  - id
   - makeid
+  - id
 - - model
-  - id
   - makeid
-- - id
+  - id
+- - model
   - maker
-  - model
+  - id
 - []
 - - model
-  - id
   - makeid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -132,25 +152,25 @@ ratsql_beam_tables:
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/model_list.csv
-- - tests-examples/db2csv/car_1/tables/cars_data.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 ratsql_beam_constants:
 - []
@@ -175,17 +195,17 @@ ratsql_beam_functions:
 - - count
 - - count
 ratsql_beam_columns:
-- - model
-  - make
 - - make
-- - model
-  - year
+  - model
 - - make
 - - year
-- - model
-  - edispl
-- - model
-  - year
+  - model
+- - make
+- - year
+- - edispl
+  - model
+- - year
+  - model
 - - model
   - maker
 - - model
@@ -235,6 +255,39 @@ ratsql_beam_inferred_code_w_terminals:
   - 
   - 
   - 
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10303735733032227
   - -0.10486221313476562

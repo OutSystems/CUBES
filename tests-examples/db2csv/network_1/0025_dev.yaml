@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0025_dev.csv
 raw_question: What is the name of the high schooler who has the greatest number of friends? 
 question_index: 886 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - id
  - student_id
 groupby_columns:
  - student_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.name
   FROM Friend AS T1
@@ -29,26 +37,26 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
+- - student_id
+  - id
+- - friend_id
+  - id
+- - student_id
+  - id
+- - friend_id
+  - id
+- - friend_id
+  - id
+- - student_id
+  - id
 - - id
   - student_id
 - - id
-  - friend_id
-- - id
   - student_id
-- - id
-  - friend_id
-- - id
-  - friend_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - friend_id
-- - id
-  - friend_id
+- - friend_id
+  - id
+- - friend_id
+  - id
 smbop_beam_groupby_columns:
 - - student_id
 - - student_id
@@ -82,35 +90,26 @@ smbop_beam_tables:
 - - tests-examples/db2csv/network_1/tables/highschooler.csv
   - tests-examples/db2csv/network_1/tables/friend.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 smbop_beam_columns:
 - []
@@ -167,25 +166,58 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM friend JOIN highschooler ON friend.student_id = highschooler.id GROUP BY highschooler.id ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.friend_id GROUP BY friend.student_id ORDER BY COUNT( friend.student_id ) DESC LIMIT 1
   - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.friend_id GROUP BY highschooler.name ORDER BY COUNT( * ) DESC
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
 ratsql_beam_join_columns:
-- - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - liked_id
   - student_id
-- - id
+  - id
+- - liked_id
   - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-  - liked_id
-- - id
-  - student_id
-  - liked_id
-- - id
-  - student_id
+  - id
+- - student_id
+  - id
 ratsql_beam_groupby_columns:
 - - friend_id
 - - student_id
@@ -215,34 +247,30 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/network_1/tables/highschooler.csv
   - tests-examples/db2csv/network_1/tables/friend.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-- - max
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- []
+- []
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
-- - grade
-- - friend_id
+- []
+- []
 - []
 - []
 - []
@@ -287,6 +315,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.friend_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY DISTINCT Friend.friend_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.friend_id ORDER BY Count(DISTINCT *) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.102508544921875
   - -0.10443496704101562

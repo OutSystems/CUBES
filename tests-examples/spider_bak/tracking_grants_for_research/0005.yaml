@@ -1,0 +1,26 @@
+db: tests-examples/spider/tracking_grants_for_research/tables/db.sqlite
+inputs:
+- tests-examples/spider/tracking_grants_for_research/tables/grants.csv
+- tests-examples/spider/tracking_grants_for_research/tables/organisations.csv
+output: tests-examples/spider/tracking_grants_for_research/tables/0005.csv
+constants:
+- '6000'
+functions:
+- sum
+columns:
+- grant_amount
+comment: |-
+  SELECT T2.organisation_id,
+         T2.organisation_details
+  FROM Grants AS T1
+  JOIN Organisations AS T2 ON T1.organisation_id = T2.organisation_id
+  GROUP BY T2.organisation_id
+  HAVING sum(T1.grant_amount) > 6000
+
+sql: |-
+  SELECT T2.organisation_id,
+         T2.organisation_details
+  FROM Grants AS T1
+  JOIN Organisations AS T2 ON T1.organisation_id = T2.organisation_id
+  GROUP BY T2.organisation_id
+  HAVING sum(T1.grant_amount) > 6000

@@ -1,15 +1,23 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/has_pet.csv
  - tests-examples/db2csv/pets_1/tables/student.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
 output: tests-examples/db2csv/pets_1/tables/0042_dev.csv
 raw_question: What is the average age for all students who do not own any pets ? 
 question_index: 86 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
- - age
  - stuid
+ - age
+filters: []
+ieu: []
 comment: |-
   select avg(age)
   from student
@@ -38,15 +46,15 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
 - - tests-examples/db2csv/pets_1/tables/has_pet.csv
 - - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
 smbop_beam_constants:
 - []
 - []
@@ -62,10 +70,10 @@ smbop_beam_functions:
 - []
 - []
 smbop_beam_columns:
-- - age
-  - stuid
-- - age
-  - stuid
+- - stuid
+  - age
+- - stuid
+  - age
 - []
 - []
 - []
@@ -98,12 +106,33 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT has_pet.stuid FROM has_pet GROUP BY has_pet.stuid
   - SELECT has_pet.stuid FROM has_pet ORDER BY has_pet.stuid DESC
   - SELECT student.age FROM student WHERE student.stuid NOT IN (SELECT has_pet.stuid FROM has_pet)
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - petid
 - []
-- - stuid
-  - petid
+- - petid
+  - stuid
 - - stuid
 - - stuid
 - []
@@ -120,26 +149,26 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
 ratsql_beam_constants:
 - []
 - []
@@ -150,6 +179,7 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1'
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -161,24 +191,24 @@ ratsql_beam_functions:
 - - avg
 - - avg
 ratsql_beam_columns:
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
-- - age
-  - stuid
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
+- - stuid
+  - age
 ratsql_beam_ieu:
 - []
 - []
@@ -221,6 +251,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(DISTINCT Student.Age) FROM Student WHERE Student.StuID NOT IN (SELECT Has_Pet.StuID FROM Has_Pet)
   - SELECT DISTINCT Avg(Student.Age) FROM Student WHERE Student.StuID NOT IN (SELECT Has_Pet.StuID FROM Has_Pet)
   - SELECT Avg(Student.Age) FROM Student WHERE Student.StuID NOT IN (SELECT Has_Pet.StuID FROM Has_Pet) LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10693693161010742
   - -0.10448837280273438

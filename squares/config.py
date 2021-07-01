@@ -38,6 +38,8 @@ class Config:
     split_complex_joins_ratio: float = 1/3
     deduce_cubes: bool = True
 
+    disambiguate: bool = False
+
     use_solution_dsl: bool = False
     use_solution_cube: bool = False
     use_solution_loc: bool = False
@@ -67,6 +69,7 @@ class Config:
 
     ignore_attrs: bool = False
     force_constants: bool = True
+    force_filters: bool = True
     force_summarise: bool = True
 
     z3_smt_phase: int = 3

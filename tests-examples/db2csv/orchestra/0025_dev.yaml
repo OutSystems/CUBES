@@ -1,18 +1,24 @@
 db: tests-examples/db2csv/orchestra/tables/orchestra.sqlite
 inputs:
- - tests-examples/db2csv/orchestra/tables/orchestra.csv
  - tests-examples/db2csv/orchestra/tables/conductor.csv
+ - tests-examples/db2csv/orchestra/tables/orchestra.csv
 output: tests-examples/db2csv/orchestra/tables/0025_dev.csv
 raw_question: Please show the name of the conductor that has conducted orchestras founded after 2008. 
 question_index: 846 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2008
 join_columns:
  - conductor_id
+groupby_columns: []
+functions: []
 columns:
  - year_of_founded
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT T1.Name
   FROM conductor AS T1
@@ -41,20 +47,20 @@ smbop_beam_groupby_columns:
 - - name
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
 smbop_beam_constants:
 - - 2008
 - - 2008
@@ -76,8 +82,8 @@ smbop_beam_columns:
 - - year_of_founded
 - - year_of_founded
 - - year_of_founded
-- - conductor_id
-  - year_of_founded
+- - year_of_founded
+  - conductor_id
 - - year_of_founded
 - - year_of_founded
 smbop_beam_ieu:
@@ -112,6 +118,30 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT conductor.name FROM orchestra, conductor WHERE conductor.conductor_id > orchestra.conductor_id AND orchestra.year_of_founded > 2008
   - SELECT conductor.name FROM conductor JOIN orchestra ON conductor.conductor_id = orchestra.conductor_id WHERE orchestra.year_of_founded > 2008 GROUP BY conductor.name
   - SELECT conductor.name FROM conductor JOIN orchestra ON conductor.conductor_id = orchestra.conductor_id WHERE orchestra.year_of_founded > 2008 ORDER BY conductor.name ASC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - conductor_id
 - - conductor_id
@@ -130,27 +160,29 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/show.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
   - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
   - tests-examples/db2csv/orchestra/tables/conductor.csv
-  - tests-examples/db2csv/orchestra/tables/performance.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/performance.csv
   - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
-- - tests-examples/db2csv/orchestra/tables/orchestra.csv
-  - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+  - tests-examples/db2csv/orchestra/tables/show.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
+- - tests-examples/db2csv/orchestra/tables/conductor.csv
+  - tests-examples/db2csv/orchestra/tables/orchestra.csv
 ratsql_beam_constants:
 - - 2008
 - - 2008
 - - 2008
 - - 2008
 - - 2008
+- - 2008
+  - '1'
 - - 2008
 ratsql_beam_functions:
 - []
@@ -196,6 +228,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT conductor.Name FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID WHERE DISTINCT orchestra.Year_of_Founded > 2008
   - SELECT conductor.Name FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID WHERE orchestra.Year_of_Founded > 2008 LIMIT 1
   - SELECT conductor.Conductor_ID FROM conductor JOIN orchestra ON conductor.Conductor_ID = orchestra.Conductor_ID WHERE orchestra.Year_of_Founded > 2008
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10421991348266602
   - -0.1054682731628418

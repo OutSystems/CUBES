@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0015_dev.csv
 raw_question: Which professionals have done at least two treatments? List the professional's id, role, and first name. 
 question_index: 932 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 2
 join_columns:
@@ -13,6 +16,9 @@ groupby_columns:
  - professional_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.professional_id,
          T1.role_code,
@@ -84,6 +90,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT professionals.professional_id , professionals.role_code , professionals.first_name FROM professionals JOIN treatments ON professionals.professional_id = treatments.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
   - SELECT professionals.professional_id , professionals.role_code , COUNT( DISTINCT professionals.first_name ) FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) >= 2
   - SELECT professionals.professional_id , professionals.role_code , professionals.first_name FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) > 2
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
@@ -113,6 +134,11 @@ ratsql_beam_constants:
 - - 2
 - - 2
 - - 2
+- - 2
+- - 2
+- - 2
+- - 2
+  - '1'
 ratsql_beam_functions:
 - - count
 - - count
@@ -157,6 +183,24 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Treatments.professional_id, Professionals.role_code, Professionals.first_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(DISTINCT *) >= 2
   - SELECT Treatments.professional_id, DISTINCT Professionals.role_code, Professionals.first_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2
   - SELECT Treatments.professional_id, Professionals.role_code, Professionals.first_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) >= 2 LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1048727035522461
   - -0.10473251342773438

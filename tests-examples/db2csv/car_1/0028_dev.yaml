@@ -5,17 +5,22 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0028_dev.csv
 raw_question: What is the number of makers of care in France? 
 question_index: 114 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - france
 join_columns:
- - countryid
  - country
+ - countryid
+groupby_columns: []
 functions:
  - count
 columns:
  - countryname
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM CAR_MAKERS AS T1
@@ -28,20 +33,20 @@ sql: |-
   JOIN COUNTRIES AS T2 ON T1.Country = T2.CountryId
   WHERE T2.CountryName = 'france';
 smbop_beam_join_columns:
-- - countryid
-  - country
-- - countryid
-  - country
-- - id
-  - maker
+- - country
   - countryid
-  - country
-- - id
-  - maker
+- - country
   - countryid
-  - country
 - - countryid
   - country
+  - id
+  - maker
+- - countryid
+  - country
+  - id
+  - maker
+- - country
+  - countryid
 smbop_beam_groupby_columns:
 - []
 - []
@@ -54,11 +59,11 @@ smbop_beam_tables:
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
 smbop_beam_constants:
@@ -74,16 +79,16 @@ smbop_beam_functions:
 - - count
 - - count
 smbop_beam_columns:
-- - maker
-  - countryname
-- - maker
-  - countryname
-- - model
+- - countryname
   - maker
-  - countryname
-- - model
+- - countryname
   - maker
-  - countryname
+- - countryname
+  - model
+  - maker
+- - countryname
+  - model
+  - maker
 - - countryname
 smbop_beam_ieu:
 - []
@@ -109,6 +114,24 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( DISTINCT car_makers.maker ) FROM model_list JOIN car_makers ON model_list.maker = car_makers.id JOIN countries ON car_makers.country = countries.countryid WHERE countries.countryname = 'France' AND model_list.model = 'care'
   - SELECT COUNT( DISTINCT car_makers.maker ) FROM model_list JOIN car_makers ON model_list.maker = car_makers.id JOIN countries ON car_makers.country = countries.countryid WHERE model_list.model = 'care' AND countries.countryname = 'France'
   - SELECT COUNT( * ) FROM car_makers JOIN countries ON car_makers.country = countries.countryid WHERE countries.countryname = 'care'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - country
   - countryid
@@ -120,25 +143,25 @@ ratsql_beam_join_columns:
   - countryid
 - - country
   - countryid
-- - model
-  - country
-  - countryid
-  - id
-  - maker
+- - country
   - makeid
-- - model
-  - country
   - countryid
-  - id
   - maker
+  - model
+  - id
+- - country
+  - countryid
+  - maker
+  - model
+  - id
 - - contid
   - country
   - continent
   - countryid
 - - country
   - maker
-  - id
   - countryid
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -161,25 +184,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 ratsql_beam_constants:
 - - france
 - - france
 - - france
 - - france
+- - france
+  - '1'
 - - france
 - - france
 - - france
@@ -196,23 +221,23 @@ ratsql_beam_functions:
 - - count
 - - count
 ratsql_beam_columns:
-- - maker
-  - countryname
-- - maker
-  - countryname
 - - countryname
-- - maker
-  - countryname
-- - maker
-  - countryname
-- - maker
-  - countryname
-- - maker
-  - countryname
-- - maker
-  - countryname
-- - maker
-  - countryname
+  - maker
+- - countryname
+  - maker
+- - countryname
+- - countryname
+  - maker
+- - countryname
+  - maker
+- - countryname
+  - maker
+- - countryname
+  - maker
+- - countryname
+  - maker
+- - countryname
+  - maker
 ratsql_beam_ieu:
 - []
 - []
@@ -255,6 +280,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT car_makers.Maker) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model WHERE countries.CountryName = 'france'
   - SELECT Count(DISTINCT car_makers.Maker) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country WHERE countries.CountryName = 'france'
   - SELECT Count(DISTINCT car_makers.Maker) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker WHERE countries.CountryName = 'france'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1045536994934082
   - -0.10445308685302734

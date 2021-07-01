@@ -1,20 +1,25 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/has_pet.csv
  - tests-examples/db2csv/pets_1/tables/student.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
 output: tests-examples/db2csv/pets_1/tables/0008_dev.csv
 raw_question: How many pets are owned by students that have an age greater than 20? 
 question_index: 52 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 20
 join_columns:
  - stuid
+groupby_columns: []
 functions:
  - count
 columns:
  - age
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT count(*)
   FROM student AS T1
@@ -39,14 +44,14 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
 smbop_beam_constants:
 - - 20
@@ -62,11 +67,11 @@ smbop_beam_functions:
 - []
 smbop_beam_columns:
 - - age
+- - petid
+  - age
 - - age
-  - petid
-- - age
-- - age
-  - petid
+- - petid
+  - age
 - - age
 smbop_beam_ieu:
 - []
@@ -92,36 +97,57 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM student JOIN has_pet ON student.stuid = has_pet.stuid WHERE student.age > 20
   - SELECT COUNT( DISTINCT has_pet.petid ) FROM student JOIN has_pet ON student.stuid = has_pet.stuid WHERE student.age > 20
   - SELECT student.stuid FROM student WHERE student.age > 20
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
+- - petid
+  - stuid
 - - stuid
-  - petid
-- - stuid
-- - stuid
-  - petid
-- - stuid
-  - petid
+- - petid
+  - stuid
+- - petid
+  - stuid
 ratsql_beam_groupby_columns:
 - []
 - []
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
 - - 20
 - - 20
 - - 20
 - - 20
+- - 20
+- - 20
+  - '1'
 ratsql_beam_functions:
 - - count
 - - count
@@ -156,6 +182,21 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT *) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Student.Age > 20
   - SELECT DISTINCT Count(*) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Student.Age > 20
   - SELECT Count(*) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Student.Age > 20 LIMIT 1
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10404443740844727
   - -0.10485076904296875

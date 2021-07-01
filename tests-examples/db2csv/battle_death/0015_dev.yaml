@@ -5,11 +5,16 @@ inputs:
 output: tests-examples/db2csv/battle_death/tables/0015_dev.csv
 raw_question: Show names, results and bulgarian commanders of the battles with no ships lost in the 'English Channel'. 
 question_index: 505 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - English Channel
 join_columns:
- - id
  - lost_in_battle
+ - id
+groupby_columns: []
+functions: []
 columns:
  - location
 filters:
@@ -42,14 +47,14 @@ sql: |-
   JOIN ship AS T2 ON T1.id = T2.lost_in_battle
   WHERE T2.location = 'English Channel'
 smbop_beam_join_columns:
-- - id
-  - lost_in_battle
+- - lost_in_battle
+  - id
 - []
 - []
-- - id
-  - lost_in_battle
-- - id
-  - lost_in_battle
+- - lost_in_battle
+  - id
+- - lost_in_battle
+  - id
 smbop_beam_groupby_columns:
 - []
 - []
@@ -107,21 +112,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel'
   - SELECT battle.name , battle.result , battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel'
   - SELECT battle.name , battle.result , battle.bulgarian_commander FROM ship JOIN battle ON ship.lost_in_battle = battle.id WHERE ship.location = 'English Channel'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - lost_in_battle
+- - lost_in_battle
+  - id
 - []
 - []
-- - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
+  - id
 - []
-- - id
-  - lost_in_battle
+- - lost_in_battle
+  - id
 - []
-- - id
-  - lost_in_battle
+- - lost_in_battle
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -142,8 +165,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
@@ -153,6 +176,7 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/battle.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
 ratsql_beam_constants:
+- - English Channel
 - - English Channel
 - - English Channel
 - - English Channel
@@ -173,24 +197,24 @@ ratsql_beam_functions:
 - []
 - []
 ratsql_beam_columns:
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
-- - id
-  - location
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
+- - location
+  - id
 ratsql_beam_ieu:
 - []
 - []
@@ -223,16 +247,46 @@ ratsql_beam_inferred_code:
   - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT DISTINCT ship.lost_in_battle FROM ship WHERE ship.location = 'terminal')
   - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'terminal')
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.location FROM ship WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id IN (SELECT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.name FROM ship WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM ship WHERE DISTINCT ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT DISTINCT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel'
-  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel'
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.location FROM ship WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id IN (SELECT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.name FROM ship WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT ship.lost_in_battle FROM ship WHERE DISTINCT ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id NOT IN (SELECT DISTINCT ship.lost_in_battle FROM ship WHERE ship.location = 'English Channel' )
+  - SELECT battle.name, battle.result, battle.bulgarian_commander FROM battle WHERE battle.id IN (SELECT battle.bulgarian_commander FROM battle JOIN ship ON battle.id = ship.lost_in_battle WHERE ship.location = 'English Channel' )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10643529891967773
   - -0.10508871078491211

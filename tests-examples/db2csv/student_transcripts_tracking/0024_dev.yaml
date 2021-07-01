@@ -5,13 +5,21 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0024_dev.csv
 raw_question: For each semester, what is the name and id of the one with the most students registered? 
 question_index: 530 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - semester_id
 groupby_columns:
  - semester_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.semester_name,
          T1.semester_id
@@ -72,21 +80,19 @@ smbop_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
 smbop_beam_constants:
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
-- - 1
+- - '1'
+- - '1'
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
 - []
 - []
 - []
@@ -150,6 +156,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT semesters.semester_id FROM semesters JOIN student_enrolment ON semesters.semester_id = student_enrolment.semester_id
   - SELECT semesters.semester_name , semesters.semester_id FROM student_enrolment JOIN semesters ON student_enrolment.semester_id = semesters.semester_id
   - SELECT semesters.semester_name , semesters.semester_id FROM semesters
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - semester_id
 - - student_id
@@ -162,12 +201,12 @@ ratsql_beam_join_columns:
   - course_id
   - semester_id
 - - semester_id
-- - address_id
-  - student_id
-  - current_address_id
+- - student_id
   - semester_id
-- - student_course_id
-  - student_enrolment_id
+  - address_id
+  - current_address_id
+- - student_enrolment_id
+  - student_course_id
   - semester_id
 ratsql_beam_groupby_columns:
 - - semester_id
@@ -186,55 +225,57 @@ ratsql_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 ratsql_beam_constants:
 - - 1
+  - '1'
+- - 1
+  - '1'
+- - 1
+  - '1'
+- - 1
+  - '1'
 - - 1
 - - 1
+  - '1'
 - - 1
+  - '1'
 - - 1
+  - '1'
 - - 1
+  - '1'
 - - 1
-- - 1
-- - 1
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -287,6 +328,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Semesters.semester_name, Student_Enrolment.semester_id FROM Addresses JOIN Semesters JOIN Students ON Addresses.address_id = Students.current_address_id AND Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.semester_id = Semesters.semester_id AND Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.semester_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Semesters.semester_name, Student_Enrolment.semester_id FROM Semesters JOIN Student_Enrolment ON Semesters.semester_id = Student_Enrolment.semester_id AND Semesters.semester_id = Student_Enrolment.semester_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id GROUP BY Student_Enrolment.semester_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Semesters.semester_name, DISTINCT Student_Enrolment.semester_id FROM Semesters JOIN Student_Enrolment ON Semesters.semester_id = Student_Enrolment.semester_id GROUP BY Student_Enrolment.semester_id ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10635805130004883
   - -0.10255146026611328

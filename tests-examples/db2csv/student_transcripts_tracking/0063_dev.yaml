@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0063_dev.csv
 raw_question: What is the last transcript release date? 
 question_index: 569 
-functions:
- - max
-columns:
- - transcript_date
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT transcript_date
   FROM Transcripts
@@ -53,39 +61,38 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 smbop_beam_constants:
+- - '1'
 - []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
 smbop_beam_functions:
+- []
 - - max
-- - max
-- - min
-- - max
-- - min
-- - min
+- []
+- []
+- []
+- []
 - []
 - - min
-  - max
-- - min
-- - min
+- []
+- []
 smbop_beam_columns:
-- - transcript_date
-- - transcript_date
-- - transcript_date
-- - other_details
-- - transcript_date
-- - other_details
 - []
 - - transcript_date
-- - other_details
+- []
+- []
+- []
+- []
+- []
 - - transcript_date
+- []
+- []
 smbop_beam_ieu:
 - []
 - []
@@ -130,33 +137,66 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MIN( transcripts.transcript_date ) FROM transcripts ORDER BY transcripts.transcript_date DESC LIMIT 1
   - SELECT transcripts.other_details FROM transcripts ORDER BY transcripts.other_details ASC LIMIT 1
   - SELECT transcripts.transcript_id FROM transcripts ORDER BY transcripts.transcript_date ASC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+smbop_beam_has_order_by:
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- []
+- -  asc 
+- -  desc 
+- -  asc 
+- -  asc 
+- []
+- -  desc 
+- -  asc 
+- -  asc 
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - student_enrolment_id
+- - degree_program_id
+  - student_course_id
   - department_id
-  - degree_program_id
-  - student_course_id
   - transcript_id
-- - student_enrolment_id
-  - student_course_id
+  - student_enrolment_id
+- - student_course_id
   - current_address_id
   - address_id
+  - transcript_id
+  - student_enrolment_id
   - student_id
-  - transcript_id
-- - student_course_id
+- - transcript_id
   - course_id
-  - transcript_id
-- - student_id
+  - student_course_id
+- - transcript_id
   - student_enrolment_id
   - student_course_id
-  - transcript_id
-- - student_course_id
-  - student_enrolment_id
+  - student_id
+- - transcript_id
   - degree_program_id
-  - transcript_id
+  - student_enrolment_id
+  - student_course_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -173,62 +213,63 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 ratsql_beam_constants:
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
+- []
 - []
 - - max
-- - max
-- - max
-- - max
-- - max
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - transcript_date
+- []
 - []
 - - transcript_date
-- - transcript_date
-- - transcript_date
-- - transcript_date
-- - transcript_date
-- - transcript_date
-- - transcript_date
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -271,6 +312,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Transcripts.transcript_date FROM Courses JOIN Sections ON Sections.course_id = Courses.course_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id ORDER BY Transcripts.transcript_date Desc LIMIT 1
   - SELECT Transcripts.transcript_date FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id ORDER BY Transcripts.transcript_date Desc LIMIT 1
   - SELECT Transcripts.transcript_date FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id ORDER BY Transcripts.transcript_date Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- []
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1089019775390625
   - -0.10417032241821289

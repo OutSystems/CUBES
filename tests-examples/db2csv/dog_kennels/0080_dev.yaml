@@ -4,6 +4,16 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0080_dev.csv
 raw_question: Find the distinct breed type and size type combinations for dogs. 
 question_index: 997 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT DISTINCT breed_code,
                   size_code
@@ -30,12 +40,12 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
 - - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 smbop_beam_constants:
 - []
 - []
@@ -52,11 +62,11 @@ smbop_beam_functions:
 - []
 smbop_beam_columns:
 - []
-- - size_code
-  - breed_code
+- - breed_code
+  - size_code
 - []
-- - size_code
-  - breed_code
+- - breed_code
+  - size_code
 - - breed_code
 - []
 smbop_beam_ieu:
@@ -87,22 +97,43 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( DISTINCT dogs.breed_code ) , COUNT( DISTINCT dogs.size_code ) FROM dogs GROUP BY dogs.size_code
   - SELECT COUNT( DISTINCT dogs.breed_code ) FROM dogs
   - SELECT DISTINCT dogs.breed_code , dogs.size_code FROM dogs JOIN sizes ON dogs.size_code = sizes.size_code GROUP BY dogs.size_code
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - breed_code
 - - breed_code
 - - breed_code
 - - professional_id
+  - breed_code
   - dog_id
-  - breed_code
-- - dog_id
-  - breed_code
+- - breed_code
+  - dog_id
 - - owner_id
   - breed_code
-- - size_code
-  - breed_code
-- - treatment_type_code
+- - breed_code
+  - size_code
+- - breed_code
   - dog_id
-  - breed_code
+  - treatment_type_code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -113,33 +144,35 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
   - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
+  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 ratsql_beam_constants:
 - []
 - []
 - []
+- []
+- - '1'
 - []
 - []
 - []
@@ -203,6 +236,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Breeds.breed_name, Dogs.size_code FROM Breeds JOIN Owners JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Dogs.owner_id = Owners.owner_id AND Breeds.breed_code = Dogs.breed_code
   - SELECT DISTINCT Breeds.breed_name, Dogs.size_code FROM Breeds JOIN Sizes JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Dogs.size_code = Sizes.size_code AND Breeds.breed_code = Dogs.breed_code
   - SELECT DISTINCT Breeds.breed_name, Dogs.size_code FROM Breeds JOIN Treatment_Types JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Breeds.breed_code = Dogs.breed_code JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.treatment_type_code = Treatment_Types.treatment_type_code
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10498189926147461
   - -0.10182809829711914

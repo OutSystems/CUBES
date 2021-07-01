@@ -4,14 +4,20 @@ inputs:
 output: tests-examples/db2csv/pets_1/tables/0002_dev.csv
 raw_question: How many pets have a greater weight than 10? 
 question_index: 46 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 10
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - weight
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT count(*)
   FROM pets
@@ -46,10 +52,10 @@ smbop_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/student.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
 - - 10
 - - 10
@@ -113,18 +119,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM student WHERE student.stuid > 10
   - SELECT COUNT( * ) FROM student, pets WHERE pets.weight<10
   - SELECT COUNT( * ) FROM has_pet, pets WHERE pets.weight<10
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - stuid
-  - petid
+- - petid
+  - stuid
 - - petid
 - []
 - []
 - []
-- - stuid
-  - petid
-- - stuid
-  - petid
+- - petid
+  - stuid
+- - petid
+  - stuid
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -136,26 +169,29 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
 - - 10
 - - 10
 - - 10
 - - 10
 - - 10
+- - 10
+- - 10
+  - '1'
 - - 10
 - - 10
 - - 10
@@ -174,12 +210,12 @@ ratsql_beam_columns:
 - - weight
 - - weight
 - - weight
-- - pettype
-  - weight
-- - fname
-  - weight
 - - weight
-  - lname
+  - pettype
+- - weight
+  - fname
+- - lname
+  - weight
 ratsql_beam_ieu:
 - []
 - []
@@ -220,6 +256,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT Pets.PetType) FROM Pets WHERE Pets.weight > 10
   - SELECT Count(DISTINCT Student.Fname) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.weight > 10
   - SELECT Count(DISTINCT Student.LName) FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.weight > 10
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10857343673706055
   - -0.1061563491821289

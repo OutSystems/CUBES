@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0057_dev.csv
 raw_question: What are airlines that have flights arriving at airport 'AHD'? 
 question_index: 235 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - AHD
 join_columns:
  - airline
  - uid
+groupby_columns: []
+functions: []
 columns:
  - destairport
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.Airline
   FROM AIRLINES AS T1
@@ -26,14 +32,14 @@ sql: |-
   JOIN FLIGHTS AS T2 ON T1.uid = T2.Airline
   WHERE T2.DestAirport = "AHD"
 smbop_beam_join_columns:
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
+  - destairport
   - uid
-- - sourceairport
-  - airline
-  - uid
+- - airline
   - airportcode
+  - sourceairport
+  - uid
 - []
 smbop_beam_groupby_columns:
 - []
@@ -75,6 +81,18 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT airlines.airline FROM flights JOIN airlines ON flights.destairport = airlines.uid JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.airportname = 'AHD'
   - SELECT airlines.airline FROM airlines JOIN flights ON airlines.uid = flights.airline JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.airportname = 'AHD'
   - SELECT flights.sourceairport FROM flights
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -82,8 +100,8 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -99,9 +117,9 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
@@ -114,6 +132,7 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 ratsql_beam_constants:
+- - AHD
 - - AHD
 - - AHD
 - - AHD
@@ -185,6 +204,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT flights.Airline FROM flights WHERE flights.SourceAirport = 'AHD'
   - SELECT flights.Airline FROM airlines JOIN flights WHERE flights.DestAirport = 'AHD'
   - SELECT flights.Airline FROM flights WHERE DISTINCT flights.SourceAirport = 'AHD'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10357427597045898
   - -0.10559558868408203

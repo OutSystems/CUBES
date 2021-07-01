@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0057_dev.csv
 raw_question: On average, when were the transcripts printed? 
 question_index: 563 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
  - transcript_date
+filters: []
+ieu: []
 comment: |-
   SELECT avg(transcript_date)
   FROM Transcripts
@@ -125,6 +133,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT transcripts.transcript_date FROM transcripts GROUP BY transcripts.transcript_date
   - SELECT transcripts.transcript_date FROM transcripts GROUP BY transcripts.transcript_date
   - SELECT transcripts.transcript_date FROM transcripts GROUP BY transcripts.other_details
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -132,19 +173,19 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - student_id
+- - transcript_id
   - student_enrolment_id
   - student_course_id
-  - transcript_id
-- - student_enrolment_id
-  - student_course_id
+  - student_id
+- - student_course_id
   - current_address_id
   - address_id
+  - transcript_id
+  - student_enrolment_id
   - student_id
-  - transcript_id
-- - student_course_id
+- - transcript_id
   - course_id
-  - transcript_id
+  - student_course_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -162,26 +203,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 ratsql_beam_constants:
 - []
 - []
 - []
+- - '1'
 - []
 - []
 - []
@@ -250,6 +292,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(Transcripts.transcript_date) FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id
   - SELECT Avg(Transcripts.transcript_date) FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id
   - SELECT Avg(Transcripts.transcript_date) FROM Courses JOIN Sections ON Sections.course_id = Courses.course_id JOIN Student_Enrolment_Courses ON Courses.course_id = Student_Enrolment_Courses.course_id JOIN Transcripts JOIN Transcript_Contents ON Student_Enrolment_Courses.student_course_id = Transcript_Contents.student_course_id AND Transcript_Contents.transcript_id = Transcripts.transcript_id
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10866641998291016
   - -0.10415840148925781

@@ -1,19 +1,25 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/model_list.csv
  - tests-examples/db2csv/car_1/tables/car_makers.csv
+ - tests-examples/db2csv/car_1/tables/model_list.csv
 output: tests-examples/db2csv/car_1/tables/0064_dev.csv
 raw_question: What are the names and ids of all makers with more than 3 models? 
 question_index: 150 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 3
 join_columns:
- - id
  - maker
+ - id
 groupby_columns:
  - id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.FullName,
          T1.Id
@@ -36,22 +42,22 @@ smbop_beam_join_columns:
   - maker
 - - id
   - maker
-- - id
-  - maker
+- - maker
+  - id
 smbop_beam_groupby_columns:
 - - maker
 - - maker
 - - maker
 - - maker
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 smbop_beam_constants:
 - - 3
 - - 3
@@ -87,19 +93,34 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT car_makers.fullname , model_list.maker FROM model_list JOIN car_makers ON model_list.maker = car_makers.id GROUP BY model_list.maker HAVING COUNT( * ) > 3
   - SELECT model_list.maker , car_makers.id FROM model_list JOIN car_makers ON model_list.maker = car_makers.id GROUP BY model_list.maker HAVING COUNT( * ) > 3
   - SELECT car_makers.fullname , car_makers.id FROM car_makers JOIN model_list ON car_makers.id = model_list.maker GROUP BY model_list.maker HAVING COUNT( * ) > 3
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
-- - id
-  - maker
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
+- - maker
+  - id
 ratsql_beam_groupby_columns:
 - - maker
 - - maker
@@ -108,23 +129,27 @@ ratsql_beam_groupby_columns:
 - - maker
 - - maker
 ratsql_beam_tables:
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/model_list.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
 ratsql_beam_constants:
 - - 3
 - - 3
 - - 3
 - - 3
+- - 3
+- - 3
+- - 3
+  - '1'
 - - 3
 - - 3
 ratsql_beam_functions:
@@ -175,6 +200,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT car_makers.Maker, model_list.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY model_list.Maker HAVING Count(*) > 3 LIMIT 1
   - SELECT car_makers.Maker, model_list.Maker FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY car_makers.Maker HAVING Count(*) > 3
   - SELECT car_makers.Maker, model_list.ModelId FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker GROUP BY model_list.Maker HAVING Count(*) > 3
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1037139892578125
   - -0.10465478897094727

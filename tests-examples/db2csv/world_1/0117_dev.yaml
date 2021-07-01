@@ -4,8 +4,12 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0117_dev.csv
 raw_question: What is the total number of countries where Spanish is spoken by the largest percentage of people? 
 question_index: 818 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Spanish
+join_columns: []
 groupby_columns:
  - countrycode
 functions:
@@ -16,6 +20,7 @@ columns:
  - language
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*),
          max(Percentage)
@@ -52,14 +57,14 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
 - - Spanish
+  - '1'
 - - Spanish
 - - Spanish
 - - Spanish
 - - Spanish
 - - Spanish
 smbop_beam_functions:
-- - max
-  - count
+- - count
 - - max
   - count
 - - count
@@ -67,8 +72,7 @@ smbop_beam_functions:
 - []
 - - count
 smbop_beam_columns:
-- - percentage
-  - language
+- - language
 - - percentage
   - language
 - - language
@@ -104,16 +108,37 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MAX( countrylanguage.percentage ) FROM countrylanguage WHERE countrylanguage.language = 'Spanish'
   - SELECT * FROM countrylanguage WHERE countrylanguage.language = 'Spanish'
   - SELECT COUNT( * ) FROM countrylanguage WHERE countrylanguage.language = 'Spanish' ORDER BY countrylanguage.percentage DESC
+smbop_beam_has_limit:
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -122,42 +147,44 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/city.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 ratsql_beam_constants:
 - - Spanish
+  - '1'
+- - Spanish
+  - '1'
+- - Spanish
+  - '1'
 - - Spanish
 - - Spanish
+  - '1'
 - - Spanish
+  - '1'
 - - Spanish
+  - '1'
+- - Spanish
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
-- - percentage
-  - language
-- - percentage
-  - language
-- - percentage
-  - language
 - - language
-- - percentage
-  - language
+- - language
+- - language
+- - language
+- - language
 ratsql_beam_ieu:
 - []
 - []
@@ -188,6 +215,24 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM countrylanguage WHERE countrylanguage.Language = 'Spanish' ORDER BY DISTINCT countrylanguage.Percentage Desc LIMIT 1
   - SELECT Count(*) FROM city JOIN country ON city.CountryCode = country.Code AND city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE countrylanguage.Language = 'Spanish' ORDER BY countrylanguage.Percentage Desc LIMIT 1
   - SELECT Count(DISTINCT *) FROM countrylanguage WHERE countrylanguage.Language = 'Spanish' ORDER BY countrylanguage.Percentage Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10818147659301758
   - -0.10502195358276367

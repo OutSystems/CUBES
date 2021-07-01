@@ -4,13 +4,20 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0112_dev.csv
 raw_question: Return the names of cities that have a population between 160000 and 900000 . 
 question_index: 813 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - 900000
  - 160000
+ - 900000
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - population
 filters:
  - ' between '
+ieu: []
 comment: |-
   select name
   from city
@@ -39,16 +46,16 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
 smbop_beam_constants:
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
 smbop_beam_functions:
 - []
 - []
@@ -86,19 +93,37 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT city.name FROM city WHERE city.population BETWEEN 160000 and 160000 and 900000
   - SELECT AVG( city.name ) FROM city WHERE city.population BETWEEN 160000 and 900000
   - SELECT city.name FROM city WHERE city.population BETWEEN 160000 and 900000 ORDER BY city.name ASC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - code
-  - countrycode
+- - countrycode
+  - code
 - []
-- - code
-  - countrycode
+- - countrycode
+  - code
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -114,32 +139,35 @@ ratsql_beam_tables:
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
-- - 900000
-  - 160000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+  - '1'
+- - 160000
+  - 900000
+- - 160000
+  - 900000
+- - 160000
+  - 900000
 ratsql_beam_functions:
 - []
 - []
@@ -187,15 +215,42 @@ ratsql_beam_inferred_code:
   - SELECT country.Code FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Population BETWEEN 'terminal' AND 'terminal'
   - SELECT countrylanguage.CountryCode FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Population BETWEEN 'terminal' AND 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT city.Name FROM city WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT DISTINCT city.Name FROM city WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT city.Name FROM city WHERE DISTINCT city.Population BETWEEN 900000 AND 160000
-  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT city.Name FROM city WHERE city.Population BETWEEN 900000 AND 160000 LIMIT 1
-  - SELECT city.District FROM city WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT country.Code FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Population BETWEEN 900000 AND 160000
-  - SELECT countrylanguage.CountryCode FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Population BETWEEN 900000 AND 160000
+  - SELECT city.Name FROM city WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT DISTINCT city.Name FROM city WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT city.Name FROM city WHERE DISTINCT city.Population BETWEEN 160000 AND 900000
+  - SELECT city.Name FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT city.Name FROM city WHERE city.Population BETWEEN 160000 AND 900000 LIMIT 1
+  - SELECT city.District FROM city WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT country.Code FROM city JOIN country ON city.CountryCode = country.Code WHERE city.Population BETWEEN 160000 AND 900000
+  - SELECT countrylanguage.CountryCode FROM city JOIN country ON city.CountryCode = country.Code JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE city.Population BETWEEN 160000 AND 900000
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10332298278808594
   - -0.1042938232421875

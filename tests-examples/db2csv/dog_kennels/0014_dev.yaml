@@ -5,13 +5,21 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0014_dev.csv
 raw_question: Return the owner id, first name and last name of the owner who has the most dogs. 
 question_index: 931 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - owner_id
 groupby_columns:
  - owner_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.owner_id,
          T2.first_name,
@@ -75,8 +83,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 smbop_beam_constants:
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -86,10 +94,8 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
 - []
 - []
 - []
@@ -153,6 +159,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.owner_id , owners.first_name , owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id ORDER BY owners.owner_id DESC
   - SELECT owners.owner_id , owners.first_name , owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id ORDER BY owners.owner_id ASC
   - SELECT owners.owner_id , owners.first_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id GROUP BY owners.owner_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - owner_id
 - - owner_id
@@ -182,24 +221,23 @@ ratsql_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -243,6 +281,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Owners.owner_id, Owners.first_name, Owners.last_name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id GROUP BY Owners.owner_id ORDER BY Count(*) Desc
   - SELECT Owners.owner_id, Owners.first_name, Owners.last_name FROM Owners GROUP BY Owners.owner_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Owners.owner_id, Owners.first_name, Owners.last_name FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id JOIN Treatments ON Dogs.dog_id = Treatments.dog_id GROUP BY Owners.owner_id ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10534429550170898
   - -0.10439920425415039

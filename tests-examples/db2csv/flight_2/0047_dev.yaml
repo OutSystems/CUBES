@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0047_dev.csv
 raw_question: What is the code of airport that has the highest number of flights? 
 question_index: 225 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
- - destairport
  - airportcode
+ - destairport
 groupby_columns:
  - airportcode
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.AirportCode
   FROM AIRPORTS AS T1
@@ -31,26 +39,26 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 smbop_beam_groupby_columns:
 - - airportcode
 - - sourceairport
@@ -84,37 +92,27 @@ smbop_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 smbop_beam_columns:
 - []
 - []
@@ -170,22 +168,55 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT flights.sourceairport FROM airports JOIN flights ON airports.airportcode = flights.sourceairport GROUP BY airports.airportcode ORDER BY COUNT( flights.flightno ) DESC LIMIT 1
   - SELECT airports.airportcode FROM flights JOIN airports ON flights.sourceairport = airports.airportcode GROUP BY airports.airportcode ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT flights.sourceairport FROM airports JOIN flights ON airports.airportcode = flights.sourceairport GROUP BY flights.sourceairport ORDER BY COUNT( flights.flightno ) DESC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 ratsql_beam_groupby_columns:
 - - sourceairport
 - - sourceairport
@@ -215,37 +246,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -301,6 +322,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.SourceAirport FROM airlines JOIN flights GROUP BY flights.SourceAirport ORDER BY Count(*) Desc LIMIT 1
   - SELECT flights.DestAirport FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY airports.AirportName ORDER BY Count(*) Desc LIMIT 1
   - SELECT airports.AirportCode FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY flights.SourceAirport ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10321426391601562
   - -0.10419464111328125

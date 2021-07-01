@@ -1,0 +1,28 @@
+db: tests-examples/spider/customers_and_addresses/tables/db.sqlite
+inputs:
+- tests-examples/spider/customers_and_addresses/tables/customers.csv
+output: tests-examples/spider/customers_and_addresses/tables/0007.csv
+functions:
+- count
+- max
+columns:
+- payment_method
+comment: |-
+  SELECT customer_name
+  FROM customers
+  WHERE payment_method =
+      (SELECT payment_method
+       FROM customers
+       GROUP BY payment_method
+       ORDER BY count(*) DESC
+       LIMIT 1)
+
+sql: |-
+  SELECT customer_name
+  FROM customers
+  WHERE payment_method =
+      (SELECT payment_method
+       FROM customers
+       GROUP BY payment_method
+       ORDER BY count(*) DESC
+       LIMIT 1)

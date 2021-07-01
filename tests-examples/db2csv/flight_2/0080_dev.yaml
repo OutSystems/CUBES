@@ -5,8 +5,16 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0080_dev.csv
 raw_question: Which airports do not have departing or arriving flights? 
 question_index: 258 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - airportcode
+filters: []
 ieu:
  - union
 comment: |-
@@ -27,25 +35,25 @@ sql: |-
        UNION SELECT DestAirport
        FROM Flights)
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- []
-- []
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
+- - airportcode
   - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- []
+- []
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+  - destairport
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
 smbop_beam_groupby_columns:
 - []
 - []
@@ -155,16 +163,49 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT airports.airportname FROM flights JOIN airports ON flights.destairport = airports.airportcode EXCEPT SELECT airports.airportname FROM airports JOIN flights ON airports.airportcode = flights.sourceairport
   - SELECT airports.airportname FROM airports EXCEPT SELECT airports.airportname FROM flights JOIN airports ON flights.destairport = airports.airportcode
   - SELECT airports.airportname FROM flights JOIN airports ON flights.sourceairport = airports.airportcode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 - []
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 - []
 - []
@@ -187,8 +228,8 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
@@ -275,6 +316,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT * FROM airports WHERE airports.AirportCode NOT IN (SELECT flights.DestAirport FROM flights)
   - SELECT airports.AirportName FROM airports WHERE airports.AirportCode NOT IN (SELECT DISTINCT flights.DestAirport FROM flights)
   - SELECT DISTINCT airports.AirportName FROM airports WHERE airports.AirportCode NOT IN (SELECT flights.DestAirport FROM flights)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10469341278076172
   - -0.10562372207641602

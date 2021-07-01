@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0074_dev.csv
 raw_question: Which African countries have a smaller population than that of any country in Asia? 
 question_index: 775 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - Africa
  - Asia
+ - Africa
+join_columns: []
+groupby_columns: []
 functions:
  - min
 columns:
- - continent
  - population
+ - continent
 filters:
  - '='
  - '<'
+ieu: []
 comment: |-
   SELECT Name
   FROM country
@@ -54,18 +60,18 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 smbop_beam_constants:
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
 smbop_beam_functions:
 - - min
 - - min
@@ -76,14 +82,14 @@ smbop_beam_functions:
 smbop_beam_columns:
 - - population
   - region
-- - continent
-  - population
+- - population
+  - continent
 - - population
   - region
-- - continent
-  - population
-- - continent
-  - population
+- - population
+  - continent
+- - population
+  - continent
 - - population
   - region
 smbop_beam_ieu:
@@ -116,6 +122,27 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MIN( country.population ) FROM country WHERE country.continent = 'Asia'
   - SELECT MAX( country.population ) FROM country WHERE country.continent = 'Asia'
   - SELECT MAX( country.population ) FROM country WHERE country.region = 'Asia'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -144,22 +171,26 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
 ratsql_beam_functions:
 - - min
 - - max
@@ -170,22 +201,22 @@ ratsql_beam_functions:
 - - min
 - - min
 ratsql_beam_columns:
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
-- - name
-  - population
-- - continent
-  - population
-- - name
-  - population
-- - continent
-  - population
-- - continent
-  - population
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - name
+- - population
+  - continent
+- - population
+  - name
+- - population
+  - continent
+- - population
+  - continent
 ratsql_beam_ieu:
 - []
 - []
@@ -224,16 +255,43 @@ ratsql_beam_inferred_code:
   - SELECT country.Name FROM country WHERE country.Population < (SELECT DISTINCT Min(country.Population) FROM country WHERE country.Continent = 'terminal')
   - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(DISTINCT country.Population) FROM country WHERE country.Continent = 'terminal')
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Avg(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Name = 'Apia'
-  - SELECT DISTINCT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Max(country.Population) FROM country WHERE country.Name = 'Apia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE DISTINCT country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE DISTINCT country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT DISTINCT Min(country.Population) FROM country WHERE country.Continent = 'Asia'
-  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(DISTINCT country.Population) FROM country WHERE country.Continent = 'Asia'
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Avg(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Name = 'Apia' )
+  - SELECT DISTINCT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Max(country.Population) FROM country WHERE country.Name = 'Apia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(country.Population) FROM country WHERE DISTINCT country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE DISTINCT country.Population < (SELECT Min(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT DISTINCT Min(country.Population) FROM country WHERE country.Continent = 'Asia' )
+  - SELECT country.Name FROM country WHERE country.Population < (SELECT Min(DISTINCT country.Population) FROM country WHERE country.Continent = 'Asia' )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10747289657592773
   - -0.10413599014282227

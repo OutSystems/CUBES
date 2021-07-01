@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0056_dev.csv
 raw_question: Return the first name, last name and email of the owners living in a state whose name contains the substring 'North'. 
 question_index: 973 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - North
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - state
 filters:
  - 'like'
+ieu: []
 comment: |-
   SELECT first_name,
          last_name,
@@ -54,8 +61,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 smbop_beam_constants:
@@ -135,18 +142,51 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.first_name , owners.last_name , owners.email_address FROM owners, professionals WHERE owners.state<'North'
   - SELECT owners.first_name , owners.last_name , owners.email_address FROM owners WHERE owners.state LIKE '%North%' ORDER BY owners.first_name , owners.last_name , owners.email_address ASC
   - SELECT owners.first_name , owners.last_name , owners.email_address , owners.email_address FROM owners WHERE owners.state = 'North'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
 - []
 - - owner_id
+  - dog_id
   - professional_id
-  - dog_id
 - []
-- - treatment_type_code
-  - owner_id
+- - owner_id
   - dog_id
+  - treatment_type_code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -160,20 +200,24 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 ratsql_beam_constants:
 - - North
 - - North
 - - North
+- - North
+- - North
+- - North
+  - '1'
 - - North
 - - North
 - - North
@@ -232,6 +276,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id WHERE Owners.state LIKE 'North'
   - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Charges JOIN Owners WHERE Owners.state LIKE 'North'
   - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Treatment_Types JOIN Owners JOIN Dogs ON Dogs.owner_id = Owners.owner_id JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.dog_id = Dogs.dog_id WHERE Owners.state LIKE 'North'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10546064376831055
   - -0.10414552688598633

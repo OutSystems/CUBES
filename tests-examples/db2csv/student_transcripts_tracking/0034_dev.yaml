@@ -1,17 +1,25 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0034_dev.csv
 raw_question: What is the program id and the summary of the degree that has the most students enrolled? 
 question_index: 540 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - degree_program_id
 groupby_columns:
  - degree_program_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.degree_program_id,
          T1.degree_summary_name
@@ -68,42 +76,32 @@ smbop_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 smbop_beam_columns:
 - []
 - []
@@ -159,6 +157,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT degree_programs.degree_program_id , student_enrolment.degree_program_id FROM degree_programs JOIN student_enrolment ON degree_programs.degree_program_id = student_enrolment.degree_program_id GROUP BY student_enrolment.degree_program_id ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT student_enrolment.degree_program_id , degree_programs.degree_summary_description FROM student_enrolment JOIN degree_programs ON student_enrolment.degree_program_id = degree_programs.degree_program_id GROUP BY student_enrolment.degree_program_id ORDER BY COUNT( * ) DESC LIMIT 1
   - SELECT student_enrolment.degree_program_id , degree_programs.degree_summary_description FROM student_enrolment JOIN degree_programs ON student_enrolment.degree_program_id = degree_programs.degree_program_id GROUP BY degree_programs.degree_program_id ORDER BY COUNT( * ) DESC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_join_columns:
 - - degree_program_id
 - - degree_program_id
@@ -183,21 +214,22 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -238,6 +270,24 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Student_Enrolment.degree_program_id, Degree_Programs.degree_summary_description FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id GROUP BY DISTINCT Student_Enrolment.degree_program_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT DISTINCT Student_Enrolment.degree_program_id, Degree_Programs.degree_summary_description FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id GROUP BY Student_Enrolment.degree_program_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Student_Enrolment.degree_program_id, Degree_Programs.degree_summary_description FROM Degree_Programs JOIN Student_Enrolment ON Degree_Programs.degree_program_id = Student_Enrolment.degree_program_id GROUP BY Student_Enrolment.degree_program_id ORDER BY Count(DISTINCT *) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10524702072143555
   - -0.10426473617553711

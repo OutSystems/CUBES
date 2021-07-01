@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0037_dev.csv
 raw_question: Show all template type codes with less than three templates. 
 question_index: 333 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 3
+join_columns: []
 groupby_columns:
  - template_type_code
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT template_type_code
   FROM Templates
@@ -71,6 +78,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT 3 FROM templates GROUP BY templates.template_type_code HAVING COUNT( * )<3
   - SELECT templates.template_type_code FROM templates GROUP BY templates.template_type_code HAVING COUNT( DISTINCT templates.template_type_code )<3
   - SELECT COUNT( DISTINCT templates.template_type_code ) FROM templates GROUP BY templates.template_type_code HAVING COUNT( * )<3
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -79,8 +101,8 @@ ratsql_beam_join_columns:
 - []
 - []
 - - template_id
-- - template_id
-  - document_id
+- - document_id
+  - template_id
 ratsql_beam_groupby_columns:
 - - template_type_code
 - - template_type_code
@@ -100,14 +122,17 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 ratsql_beam_constants:
 - - 3
 - - 3
 - - 3
 - - 3
 - - 3
+- - 3
+- - 3
+  - '1'
 - - 3
 - - 3
 - - 3
@@ -166,9 +191,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Templates.Template_Type_Code FROM Templates GROUP BY Templates.Template_Type_Code HAVING Count(*) < 3
   - SELECT Templates.Template_Type_Code FROM Templates GROUP BY Templates.Template_Type_Code HAVING Count(DISTINCT *) < 3
   - SELECT Templates.Template_Type_Code FROM Templates GROUP BY Templates.Template_Type_Code HAVING Count(*) < 3 LIMIT 1
-  - SELECT Templates.Template_Type_Code FROM Templates GROUP BY Templates.Template_Type_Code HAVING Count(Templates.Template_ID) < 3
+  - SELECT Templates.Template_Type_Code FROM Templates GROUP BY Templates.Template_Type_Code HAVING Count(Templates.Template_ID) < '3'
   - SELECT Templates.Template_Type_Code FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID GROUP BY Templates.Template_Type_Code HAVING Count(*) < 3
   - SELECT Templates.Template_Type_Code FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID GROUP BY Templates.Template_Type_Code HAVING Count(*) < 3
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10405778884887695
   - -0.10427093505859375

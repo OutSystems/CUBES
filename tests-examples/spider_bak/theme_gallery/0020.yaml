@@ -1,0 +1,27 @@
+db: tests-examples/spider/theme_gallery/tables/db.sqlite
+inputs:
+- tests-examples/spider/theme_gallery/tables/artist.csv
+- tests-examples/spider/theme_gallery/tables/exhibition.csv
+- tests-examples/spider/theme_gallery/tables/exhibition_record.csv
+output: tests-examples/spider/theme_gallery/tables/0020.csv
+constants:
+- '200'
+functions:
+- avg
+columns:
+- attendance
+comment: |-
+  SELECT T3.name
+  FROM exhibition_record AS T1
+  JOIN exhibition AS T2 ON T1.exhibition_id = T2.exhibition_id
+  JOIN artist AS T3 ON T3.artist_id = T2.artist_id
+  GROUP BY T3.artist_id
+  HAVING avg(T1.attendance) > 200
+
+sql: |-
+  SELECT T3.name
+  FROM exhibition_record AS T1
+  JOIN exhibition AS T2 ON T1.exhibition_id = T2.exhibition_id
+  JOIN artist AS T3 ON T3.artist_id = T2.artist_id
+  GROUP BY T3.artist_id
+  HAVING avg(T1.attendance) > 200

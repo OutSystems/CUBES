@@ -1,20 +1,26 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0030_dev.csv
 raw_question: What are the first, middle, and last names for everybody enrolled in a Bachelors program? 
 question_index: 536 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Bachelor
 join_columns:
- - student_id
  - degree_program_id
+ - student_id
+groupby_columns: []
+functions: []
 columns:
  - degree_summary_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT DISTINCT T1.first_name,
                   T1.middle_name,
@@ -33,14 +39,14 @@ sql: |-
   JOIN Degree_Programs AS T3 ON T2.degree_program_id = T3.degree_program_id
   WHERE T3.degree_summary_name = 'Bachelor'
 smbop_beam_join_columns:
-- - student_id
-  - degree_program_id
-- - student_id
-  - degree_program_id
-- - student_id
-  - degree_program_id
-- - student_id
-  - degree_program_id
+- - degree_program_id
+  - student_id
+- - degree_program_id
+  - student_id
+- - degree_program_id
+  - student_id
+- - degree_program_id
+  - student_id
 - []
 smbop_beam_groupby_columns:
 - []
@@ -49,18 +55,18 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 smbop_beam_constants:
 - - Bachelor
@@ -104,6 +110,24 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT students.first_name , students.middle_name , students.last_name FROM degree_programs JOIN student_enrolment ON degree_programs.degree_program_id = student_enrolment.degree_program_id JOIN students ON students.student_id = student_enrolment.student_id WHERE degree_programs.degree_summary_name = 'Bachelors'
   - SELECT students.first_name , students.middle_name , students.last_name FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id JOIN degree_programs ON student_enrolment.degree_program_id = degree_programs.degree_program_id WHERE degree_programs.degree_summary_name = 'Bachelors'
   - SELECT students.first_name , students.middle_name , students.last_name FROM students
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -204,16 +228,49 @@ ratsql_beam_inferred_code:
   - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.student_id = 'terminal'
   - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.first_name = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.middle_name = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.cell_mobile_number = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.permanent_address_id = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.date_first_registered = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.ssn = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.current_address_id = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.email_address = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.other_student_details = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.student_id = Bachelor
-  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.first_name = Bachelor
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.middle_name = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.cell_mobile_number = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.permanent_address_id = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.date_first_registered = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.ssn = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.current_address_id = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.email_address = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.other_student_details = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.student_id = 'Bachelor'
+  - SELECT Students.first_name, Students.middle_name, Students.last_name FROM Students WHERE Students.first_name = 'Bachelor'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10479021072387695
   - -0.10427331924438477

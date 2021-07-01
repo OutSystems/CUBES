@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/car_1/tables/0021_dev.csv
 raw_question: Which of the countries has the most car makers? List the country name. 
 question_index: 107 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1;'
 join_columns:
- - countryid
  - country
+ - countryid
 groupby_columns:
  - country
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.CountryName
   FROM CAR_MAKERS AS T1
@@ -33,18 +41,18 @@ smbop_beam_join_columns:
   - countryid
 - - country
   - countryid
-- - countryid
-  - country
-- - countryid
-  - country
 - - country
   - countryid
 - - country
   - countryid
 - - country
   - countryid
-- - countryid
-  - country
+- - country
+  - countryid
+- - country
+  - countryid
+- - country
+  - countryid
 - - country
   - countryid
 - - country
@@ -82,31 +90,24 @@ smbop_beam_tables:
 - - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 - []
 - []
@@ -165,6 +166,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT countries.countryname FROM car_makers JOIN countries ON car_makers.country = countries.countryid GROUP BY car_makers.country ORDER BY COUNT( * ) DESC
   - SELECT countries.countryid FROM countries JOIN car_makers ON countries.countryid = car_makers.country GROUP BY countries.countryid
   - SELECT countries.countryname FROM countries JOIN car_makers ON countries.countryid = car_makers.country GROUP BY car_makers.country
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - country
   - countryid
@@ -179,12 +213,12 @@ ratsql_beam_join_columns:
   - countryid
 - - contid
   - continent
-- - model
-  - country
-  - countryid
-  - id
-  - maker
+- - country
   - makeid
+  - countryid
+  - maker
+  - model
+  - id
 ratsql_beam_groupby_columns:
 - - countryname
 - - country
@@ -209,35 +243,30 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/car_names.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -287,6 +316,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT countries.CountryName FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY countries.CountryName ORDER BY Count(*) Desc
   - SELECT countries.CountryName FROM continents JOIN countries ON continents.ContId = countries.Continent GROUP BY countries.CountryName ORDER BY Count(*) Desc LIMIT 1
   - SELECT countries.CountryName FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id GROUP BY countries.CountryName ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1038064956665039
   - -0.1043558120727539

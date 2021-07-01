@@ -4,13 +4,20 @@ inputs:
 output: tests-examples/db2csv/pets_1/tables/0027_dev.csv
 raw_question: Find the average and maximum age for each type of pet. 
 question_index: 71 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
 groupby_columns:
  - pettype
 functions:
- - avg
  - max
+ - avg
 columns:
  - pet_age
+filters: []
+ieu: []
 comment: |-
   SELECT avg(pet_age),
          max(pet_age),
@@ -25,44 +32,44 @@ sql: |-
   FROM pets
   GROUP BY pettype
 smbop_beam_join_columns:
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
 smbop_beam_groupby_columns:
 - - pettype
 - - pettype
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
 - []
 - []
 - []
 - []
 smbop_beam_functions:
+- - max
+  - avg
 - - avg
-  - max
 - - avg
-- - avg
-- - avg
-  - max
+- - max
+  - avg
 smbop_beam_columns:
 - - age
 - - age
@@ -88,10 +95,25 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT pets.pettype , AVG( student.age ) FROM student JOIN has_pet ON student.stuid = has_pet.stuid JOIN pets ON has_pet.petid = pets.petid GROUP BY pets.pettype
   - SELECT pets.pettype , AVG( student.age ) FROM student JOIN has_pet ON student.stuid = has_pet.stuid JOIN pets ON has_pet.petid = pets.petid
   - SELECT pets.pettype , AVG( student.age ) , MAX( student.age ) FROM student JOIN has_pet ON student.stuid = has_pet.stuid JOIN pets ON has_pet.petid = pets.petid
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - stuid
-  - petid
+- - petid
+  - stuid
 - - petid
 - []
 - []
@@ -107,11 +129,11 @@ ratsql_beam_groupby_columns:
 - - pettype
 ratsql_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/pets.csv
@@ -123,22 +145,24 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1'
+- []
 - []
 ratsql_beam_functions:
-- - avg
-  - max
-- - avg
-  - max
-- - avg
-  - max
-- - avg
-  - max
-- - avg
-  - max
-- - avg
-  - max
-- - avg
-  - max
+- - max
+  - avg
+- - max
+  - avg
+- - max
+  - avg
+- - max
+  - avg
+- - max
+  - avg
+- - max
+  - avg
+- - max
+  - avg
 ratsql_beam_columns:
 - - pet_age
 - - pet_age
@@ -183,6 +207,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Avg(Pets.pet_age), Max(Pets.pet_age), Pets.PetType FROM Pets GROUP BY Pets.PetType LIMIT 1
   - SELECT Avg(DISTINCT Pets.pet_age), Max(Pets.pet_age), Pets.PetType FROM Pets GROUP BY Pets.PetType
   - SELECT DISTINCT Avg(Pets.pet_age), Max(Pets.pet_age), Pets.PetType FROM Pets GROUP BY Pets.PetType
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1032857894897461
   - -0.10081291198730469

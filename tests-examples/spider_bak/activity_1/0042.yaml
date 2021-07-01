@@ -1,0 +1,36 @@
+db: tests-examples/spider/activity_1/tables/db.sqlite
+inputs:
+- tests-examples/spider/activity_1/tables/activity.csv
+- tests-examples/spider/activity_1/tables/faculty_participates_in.csv
+- tests-examples/spider/activity_1/tables/faculty.csv
+output: tests-examples/spider/activity_1/tables/0042.csv
+constants:
+- Professor
+- Canoeing
+- Kayaking
+columns:
+- rank
+- activity_name
+comment: |-
+  SELECT lname
+  FROM faculty
+  WHERE rank = 'Professor'
+  EXCEPT
+  SELECT DISTINCT T1.lname
+  FROM Faculty AS T1
+  JOIN Faculty_participates_in AS T2 ON T1.facID = T2.facID
+  JOIN activity AS T3 ON T2.actid = T2.actid
+  WHERE T3.activity_name = 'Canoeing'
+    OR T3.activity_name = 'Kayaking'
+
+sql: |-
+  SELECT lname
+  FROM faculty
+  WHERE rank = 'Professor'
+  EXCEPT
+  SELECT DISTINCT T1.lname
+  FROM Faculty AS T1
+  JOIN Faculty_participates_in AS T2 ON T1.facID = T2.facID
+  JOIN activity AS T3 ON T2.actid = T2.actid
+  WHERE T3.activity_name = 'Canoeing'
+    OR T3.activity_name = 'Kayaking'

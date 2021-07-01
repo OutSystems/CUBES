@@ -4,11 +4,19 @@ inputs:
 output: tests-examples/db2csv/tvshow/tables/0034_dev.csv
 raw_question: What is the maximum and minimum share for the TV series? 
 question_index: 618 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
- - min
  - max
+ - min
 columns:
  - share
+filters: []
+ieu: []
 comment: |-
   SELECT max(SHARE),
          min(SHARE)
@@ -47,8 +55,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/cartoon.csv
   - tests-examples/db2csv/tvshow/tables/tv_series.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
 smbop_beam_constants:
 - []
@@ -61,20 +69,20 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
-- - min
-  - max
+- - max
+  - min
 - - count
 - - count
 - - max
 - - count
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
 smbop_beam_columns:
 - - share
 - - share
@@ -125,22 +133,52 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT MAX( tv_series.share ) , MIN( tv_series.share ) FROM cartoon , tv_series
   - SELECT MAX( tv_series.share ) , MIN( tv_series.share ) FROM tv_channel , tv_series
   - SELECT MAX( tv_series.share ) , MIN( tv_series.share ) FROM tv_series INTERSECT SELECT MAX( tv_series.share ) , MIN( tv_series.share ) FROM tv_series
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
-- - id
-  - channel
+- - channel
+  - id
 - - id
   - channel
 - []
 - []
 - []
 - []
-- - id
-  - channel
-- - id
-  - channel
-- - id
-  - channel
+- - channel
+  - id
+- - channel
+  - id
+- - channel
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -154,22 +192,22 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
   - tests-examples/db2csv/tvshow/tables/cartoon.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
 - - tests-examples/db2csv/tvshow/tables/tv_series.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
   - tests-examples/db2csv/tvshow/tables/cartoon.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
-- - tests-examples/db2csv/tvshow/tables/tv_series.csv
-  - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
+- - tests-examples/db2csv/tvshow/tables/tv_channel.csv
+  - tests-examples/db2csv/tvshow/tables/tv_series.csv
 ratsql_beam_constants:
 - []
 - []
@@ -177,31 +215,31 @@ ratsql_beam_constants:
 - []
 - []
 - []
-- []
+- - '1'
 - []
 - []
 - []
 ratsql_beam_functions:
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
-- - min
-  - max
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
+- - max
+  - min
 ratsql_beam_columns:
 - - share
 - - share
@@ -257,6 +295,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Max(TV_series.Share), Min(TV_series.Share) FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel JOIN Cartoon ON TV_Channel.id = Cartoon.Channel
   - SELECT Max(TV_series.Share), Min(DISTINCT TV_series.Share) FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel
   - SELECT Max(DISTINCT TV_series.Share), Min(TV_series.Share) FROM TV_Channel JOIN TV_series ON TV_Channel.id = TV_series.Channel
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10840225219726562
   - -0.10399675369262695

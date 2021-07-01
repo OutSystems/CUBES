@@ -5,15 +5,22 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0021_dev.csv
 raw_question: What is the description of the treatment type that costs the least money in total? 
 question_index: 938 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  asc 
+constants:
+ - '1'
 join_columns:
  - treatment_type_code
 groupby_columns:
  - treatment_type_code
 functions:
- - min
  - sum
 columns:
  - cost_of_treatment
+filters: []
+ieu: []
 comment: |-
   SELECT T1.treatment_type_description
   FROM Treatment_types AS T1
@@ -52,50 +59,46 @@ smbop_beam_groupby_columns:
 - - treatment_type_code
 - []
 smbop_beam_tables:
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 smbop_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 - []
-- []
-- []
-- []
-- []
-- []
+- - '1'
 smbop_beam_functions:
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
+- - sum
+- - sum
+- - sum
+- - sum
 - []
 - []
 - []
 - - sum
 - []
-- - min
+- []
 smbop_beam_columns:
 - - cost_of_treatment
 - - cost_of_treatment
@@ -106,7 +109,7 @@ smbop_beam_columns:
 - []
 - - cost_of_treatment
 - []
-- - cost_of_treatment
+- []
 smbop_beam_ieu:
 - []
 - []
@@ -151,22 +154,55 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT treatment_types.treatment_type_description FROM treatments JOIN treatment_types ON treatments.treatment_type_code = treatment_types.treatment_type_code GROUP BY treatment_types.treatment_type_code ORDER BY SUM( treatments.cost_of_treatment ) ASC
   - SELECT treatments.treatment_type_code FROM treatments GROUP BY treatments.treatment_type_code
   - SELECT treatments.treatment_type_code FROM treatments ORDER BY treatments.cost_of_treatment ASC LIMIT 1
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- -  asc 
 ratsql_beam_join_columns:
 - - treatment_type_code
 - - treatment_type_code
 - - treatment_type_code
-- - treatment_type_code
-  - owner_id
+- - owner_id
   - dog_id
+  - treatment_type_code
+- - professional_id
+  - treatment_type_code
 - - treatment_type_code
-  - professional_id
+- - dog_id
+  - treatment_type_code
 - - treatment_type_code
-- - treatment_type_code
-  - dog_id
-- - treatment_type_code
-- - treatment_type_code
+- - dog_id
   - size_code
-  - dog_id
+  - treatment_type_code
 ratsql_beam_groupby_columns:
 - - treatment_type_code
 - - treatment_type_code
@@ -178,58 +214,51 @@ ratsql_beam_groupby_columns:
 - - treatment_type_code
 - - treatment_type_code
 ratsql_beam_tables:
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
 - - sum
-- - min
-  - sum
-- - min
-  - sum
-- - min
-  - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
+- - sum
 ratsql_beam_columns:
 - - cost_of_treatment
 - - cost_of_treatment
@@ -282,6 +311,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Treatment_Types.treatment_type_description FROM Treatment_Types JOIN Dogs JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.dog_id = Dogs.dog_id AND Treatment_Types.treatment_type_code = Treatments.treatment_type_code GROUP BY Treatments.treatment_type_code ORDER BY Sum(Treatments.cost_of_treatment) Asc LIMIT 1
   - SELECT Treatment_Types.treatment_type_description FROM Treatment_Types JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code GROUP BY Treatment_Types.treatment_type_code ORDER BY Sum(Treatments.cost_of_treatment) Asc LIMIT 1
   - SELECT Treatment_Types.treatment_type_description FROM Sizes JOIN Treatment_Types JOIN Dogs ON Sizes.size_code = Dogs.size_code AND Sizes.size_code = Dogs.size_code JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.treatment_type_code = Treatment_Types.treatment_type_code AND Dogs.dog_id = Treatments.dog_id GROUP BY Treatments.treatment_type_code ORDER BY Sum(Treatments.cost_of_treatment) Asc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- -  asc 
+- -  asc 
+- -  asc 
 ratsql_beam_score_history:
 - - -0.108489990234375
   - -0.10480737686157227

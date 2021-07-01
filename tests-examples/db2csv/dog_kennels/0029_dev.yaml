@@ -5,8 +5,17 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0029_dev.csv
 raw_question: List the date of each treatment, together with the first name of the professional who operated it. 
 question_index: 946 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
  - professional_id
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.date_of_treatment,
          T2.first_name
@@ -43,9 +52,9 @@ smbop_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 smbop_beam_constants:
 - []
 - []
@@ -95,6 +104,27 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT professionals.first_name , treatments.date_of_treatment FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id
   - SELECT treatments.date_of_treatment , professionals.first_name FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id ORDER BY treatments.date_of_treatment , professionals.first_name ASC
   - SELECT treatments.date_of_treatment , professionals.first_name FROM treatment_types , treatments , professionals
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
@@ -102,17 +132,17 @@ ratsql_beam_join_columns:
 - - professional_id
   - dog_id
 - - owner_id
-  - professional_id
   - dog_id
-- - treatment_type_code
   - professional_id
 - - professional_id
-  - size_code
+  - treatment_type_code
+- - professional_id
   - dog_id
+  - size_code
 - []
 - - professional_id
-  - dog_id
   - breed_code
+  - dog_id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -130,31 +160,32 @@ ratsql_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
+- - tests-examples/db2csv/dog_kennels/tables/sizes.csv
   - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/sizes.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
   - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 ratsql_beam_constants:
 - []
 - []
 - []
+- - '1'
 - []
 - []
 - []
@@ -223,6 +254,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Treatments.date_of_treatment, Professionals.first_name FROM Sizes JOIN Dogs ON Sizes.size_code = Dogs.size_code AND Sizes.size_code = Dogs.size_code JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id AND Dogs.dog_id = Treatments.dog_id
   - SELECT Treatments.date_of_treatment, Professionals.first_name FROM Charges JOIN Professionals JOIN Treatments
   - SELECT Treatments.date_of_treatment, Professionals.first_name FROM Breeds JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Breeds.breed_code = Dogs.breed_code JOIN Professionals JOIN Treatments ON Dogs.dog_id = Treatments.dog_id AND Treatments.professional_id = Professionals.professional_id AND Dogs.dog_id = Treatments.dog_id
+ratsql_beam_has_limit:
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10477590560913086
   - -0.10468435287475586

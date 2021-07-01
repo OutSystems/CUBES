@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0068_dev.csv
 raw_question: Which flight numbers correspond to United Airlines flights? 
 question_index: 246 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - United Airlines
 join_columns:
  - airline
  - uid
+groupby_columns: []
+functions: []
 columns:
  - airline
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.FlightNo
   FROM FLIGHTS AS T1
@@ -29,6 +35,7 @@ smbop_beam_join_columns:
 - - airline
   - uid
 - []
+- []
 - - airline
   - uid
 - []
@@ -37,7 +44,10 @@ smbop_beam_groupby_columns:
 - []
 - []
 - []
+- []
 smbop_beam_tables:
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
+  - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
@@ -50,12 +60,15 @@ smbop_beam_constants:
 - - United Airlines
 - - United Airlines
 - - United Airlines
+- - United Airlines
 smbop_beam_functions:
 - []
 - []
 - []
 - []
+- []
 smbop_beam_columns:
+- - airline
 - - airline
 - - airline
 - - airline
@@ -65,21 +78,43 @@ smbop_beam_ieu:
 - []
 - []
 - []
+- []
 smbop_beam_filters:
+- - '='
 - - '='
 - - '='
 - - '='
 - []
 smbop_beam_inferred_code:
   - SELECT flights.flightno FROM flights JOIN airlines ON flights.airline = airlines.uid WHERE airlines.airline = 'United Airlines'
+  - SELECT flights.flightno FROM flights, airlines WHERE flights.airline = airlines.uid OR airlines.airline = 'United Airlines'
   - SELECT flights.flightno FROM airlines, flights WHERE flights.airline = airlines.uid OR airlines.airline = 'United Airlines'
   - SELECT flights.flightno FROM flights JOIN airlines ON flights.airline = airlines.uid WHERE airlines.airline = 'United Airlines' ORDER BY flights.flightno DESC
   - SELECT flights.flightno FROM flights
 smbop_beam_inferred_code_w_terminals:
   - SELECT flights.flightno FROM flights JOIN airlines ON flights.airline = airlines.uid WHERE airlines.airline = 'United Airlines'
+  - SELECT flights.flightno FROM flights, airlines WHERE flights.airline = airlines.uid OR airlines.airline = 'United Airlines'
   - SELECT flights.flightno FROM airlines, flights WHERE flights.airline = airlines.uid OR airlines.airline = 'United Airlines'
   - SELECT flights.flightno FROM flights JOIN airlines ON flights.airline = airlines.uid WHERE airlines.airline = 'United Airlines' ORDER BY flights.flightno DESC
   - SELECT flights.flightno FROM flights
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - True
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -99,9 +134,9 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
@@ -117,6 +152,8 @@ ratsql_beam_constants:
 - - United Airlines
 - - United Airlines
 - - United Airlines
+- - United Airlines
+  - '1'
 - - United Airlines
 - - United Airlines
 - - United Airlines
@@ -170,6 +207,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.DestAirport FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines'
   - SELECT flights.SourceAirport FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines'
   - SELECT airlines.Country FROM airlines JOIN flights WHERE airlines.Airline = 'United Airlines'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.1039743423461914
   - -0.10439920425415039

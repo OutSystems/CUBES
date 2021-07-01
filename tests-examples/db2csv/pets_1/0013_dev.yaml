@@ -1,21 +1,27 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/pets.csv
- - tests-examples/db2csv/pets_1/tables/has_pet.csv
  - tests-examples/db2csv/pets_1/tables/student.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
+ - tests-examples/db2csv/pets_1/tables/pets.csv
 output: tests-examples/db2csv/pets_1/tables/0013_dev.csv
 raw_question: Find the first name of students who have cat or dog pet. 
 question_index: 57 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - cat
  - dog
 join_columns:
- - stuid
  - petid
+ - stuid
+groupby_columns: []
+functions: []
 columns:
  - pettype
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT DISTINCT T1.Fname
   FROM student AS T1
@@ -32,14 +38,14 @@ sql: |-
   WHERE T3.pettype = 'cat'
     OR T3.pettype = 'dog'
 smbop_beam_join_columns:
-- - stuid
-  - petid
+- - petid
+  - stuid
 smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
 - - cat
   - dog
@@ -55,22 +61,28 @@ smbop_beam_inferred_code:
   - SELECT DISTINCT student.fname FROM student JOIN has_pet ON student.stuid = has_pet.stuid JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat' OR pets.pettype = 'dog'
 smbop_beam_inferred_code_w_terminals:
   - SELECT DISTINCT student.fname FROM student JOIN has_pet ON student.stuid = has_pet.stuid JOIN pets ON has_pet.petid = pets.petid WHERE pets.pettype = 'cat' OR pets.pettype = 'dog'
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
-- - stuid
-  - petid
 - - petid
-- - stuid
-  - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+  - stuid
+- - petid
+- - petid
+  - stuid
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -81,30 +93,30 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 ratsql_beam_constants:
 - - cat
   - dog
@@ -116,6 +128,11 @@ ratsql_beam_constants:
   - dog
 - - cat
   - dog
+- - cat
+  - dog
+- - cat
+  - dog
+  - '1'
 - - cat
   - dog
 - - cat
@@ -138,8 +155,8 @@ ratsql_beam_columns:
 - - pettype
 - - pettype
 - - pettype
-- - pettype
-  - stuid
+- - stuid
+  - pettype
 - - pettype
 ratsql_beam_ieu:
 - []
@@ -179,8 +196,35 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' OR DISTINCT Pets.PetType = 'cat'
   - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' OR Pets.PetType = 'cat' LIMIT 1
   - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' UNION SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
-  - SELECT Student.Fname FROM Student WHERE Student.StuID IN (SELECT Has_Pet.StuID FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog'
+  - SELECT Student.Fname FROM Student WHERE Student.StuID IN (SELECT Has_Pet.StuID FROM Has_Pet JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' )
   - SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'dog' INTERSECT SELECT Student.Fname FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID AND Student.StuID = Has_Pet.StuID JOIN Pets ON Has_Pet.PetID = Pets.PetID WHERE Pets.PetType = 'cat'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10394668579101562
   - -0.10380840301513672

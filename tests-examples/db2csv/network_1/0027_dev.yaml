@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0027_dev.csv
 raw_question: Show the names of high schoolers who have at least 3 friends. 
 question_index: 888 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 3
 join_columns:
@@ -14,6 +17,9 @@ groupby_columns:
  - student_id
 functions:
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.name
   FROM Friend AS T1
@@ -28,12 +34,12 @@ sql: |-
   GROUP BY T1.student_id
   HAVING count(*) >= 3
 smbop_beam_join_columns:
+- - student_id
+  - id
 - - id
   - student_id
-- - id
-  - student_id
-- - id
-  - friend_id
+- - friend_id
+  - id
 smbop_beam_groupby_columns:
 - - student_id
 - - student_id
@@ -73,24 +79,36 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.student_id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
   - SELECT highschooler.name FROM friend JOIN highschooler ON friend.student_id = highschooler.id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
   - SELECT highschooler.name FROM highschooler JOIN friend ON highschooler.id = friend.friend_id GROUP BY friend.student_id HAVING COUNT( * ) >= 3
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - liked_id
   - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-  - liked_id
-- - id
-  - student_id
-- - id
-  - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
 ratsql_beam_groupby_columns:
 - - student_id
 - - student_id
@@ -127,6 +145,9 @@ ratsql_beam_constants:
 - - 3
 - - 3
 - - 3
+- - 3
+  - '1'
+- - 3
 ratsql_beam_functions:
 - - count
 - - count
@@ -156,8 +177,8 @@ ratsql_beam_ieu:
 - []
 ratsql_beam_filters:
 - []
-- - '>='
-  - '>'
+- - '>'
+  - '>='
 - []
 - []
 - []
@@ -182,10 +203,37 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Highschooler.name HAVING Count(*) >= 3
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY DISTINCT Friend.student_id HAVING Count(*) >= 3
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(DISTINCT *) >= 3
-  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.ID) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.ID) >= '3'
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id GROUP BY Friend.student_id HAVING Count(*) >= 3
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(*) >= 3 LIMIT 1
-  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.grade) >= 3
+  - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id GROUP BY Friend.student_id HAVING Count(Highschooler.grade) >= '3'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10338926315307617
   - -0.10870647430419922

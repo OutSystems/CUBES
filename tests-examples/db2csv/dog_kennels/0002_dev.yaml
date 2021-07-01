@@ -1,10 +1,19 @@
 db: tests-examples/db2csv/dog_kennels/tables/dog_kennels.sqlite
 inputs:
- - tests-examples/db2csv/dog_kennels/tables/owners.csv
  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+ - tests-examples/db2csv/dog_kennels/tables/owners.csv
 output: tests-examples/db2csv/dog_kennels/tables/0002_dev.csv
 raw_question: Find the states where both owners and professionals live. 
 question_index: 919 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
 ieu:
  - intersect
 comment: |-
@@ -43,8 +52,8 @@ smbop_beam_groupby_columns:
 smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
@@ -129,12 +138,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT 2 FROM owners
   - SELECT professionals.professional_id FROM professionals
   - SELECT owners.state FROM owners GROUP BY owners.state
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - - owner_id
-  - professional_id
   - dog_id
+  - professional_id
 - []
 - []
 - - owner_id
@@ -148,21 +190,22 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 ratsql_beam_constants:
 - []
 - []
 - []
 - []
-- []
+- - '1'
+- - '1 intersect select professionals.state from professionals'
 - []
 ratsql_beam_functions:
 - []
@@ -208,6 +251,27 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Owners.state FROM Owners INTERSECT SELECT Professionals.state FROM Professionals LIMIT 1
   - SELECT Owners.state FROM Owners LIMIT 1 INTERSECT SELECT Professionals.state FROM Professionals
   - SELECT Owners.state FROM Owners JOIN Dogs ON Owners.owner_id = Dogs.owner_id INTERSECT SELECT Professionals.state FROM Professionals
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10705280303955078
   - -0.1042776107788086

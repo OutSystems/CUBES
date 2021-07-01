@@ -5,14 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0049_dev.csv
 raw_question: What is the code of airport that has fewest number of flights? 
 question_index: 227 
+has_limit: True 
+has_order_by: True 
+order_by_direction: []
+constants:
+ - '1'
 join_columns:
- - destairport
  - airportcode
+ - destairport
 groupby_columns:
  - airportcode
 functions:
- - min
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.AirportCode
   FROM AIRPORTS AS T1
@@ -31,25 +38,25 @@ sql: |-
   ORDER BY count(*)
   LIMIT 1
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 smbop_beam_groupby_columns:
 - - sourceairport
 - - airportcode
@@ -82,29 +89,23 @@ smbop_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 smbop_beam_functions:
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - []
 - []
 - []
@@ -164,6 +165,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT airports.airportcode FROM flights JOIN airports ON flights.sourceairport = airports.airportcode GROUP BY airports.airportcode
   - SELECT airports.airportcode FROM airports JOIN flights ON airports.airportcode = flights.sourceairport GROUP BY airports.airportcode
   - SELECT airports.airportcode FROM flights JOIN airports ON flights.destairport = airports.airportcode GROUP BY airports.airportcode
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -171,11 +205,11 @@ ratsql_beam_join_columns:
 - []
 - []
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
-- - sourceairport
-  - airportcode
+- - airportcode
+  - sourceairport
 - []
 ratsql_beam_groupby_columns:
 - - sourceairport
@@ -206,37 +240,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
-- - min
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -292,6 +316,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.DestAirport FROM airlines JOIN flights GROUP BY flights.SourceAirport ORDER BY Count(*) Asc LIMIT 1
   - SELECT flights.SourceAirport FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport GROUP BY flights.DestAirport ORDER BY Count(*) Asc LIMIT 1
   - SELECT flights.DestAirport FROM airlines JOIN flights GROUP BY flights.DestAirport ORDER BY Count(*) Asc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
 ratsql_beam_score_history:
 - - -0.10254144668579102
   - -0.10430717468261719

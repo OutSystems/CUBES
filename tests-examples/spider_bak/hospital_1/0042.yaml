@@ -1,0 +1,33 @@
+db: tests-examples/spider/hospital_1/tables/db.sqlite
+inputs:
+- tests-examples/spider/hospital_1/tables/physician.csv
+- tests-examples/spider/hospital_1/tables/procedures.csv
+- tests-examples/spider/hospital_1/tables/trained_in.csv
+output: tests-examples/spider/hospital_1/tables/0042.csv
+constants:
+- '1000'
+- John Wen
+columns:
+- cost
+- name
+comment: |-
+  SELECT name
+  FROM procedures
+  WHERE cost > 1000
+  UNION
+  SELECT T3.name
+  FROM physician AS T1
+  JOIN trained_in AS T2 ON T1.employeeid = T2.physician
+  JOIN procedures AS T3 ON T3.code = T2.treatment
+  WHERE T1.name = "John Wen"
+
+sql: |-
+  SELECT name
+  FROM procedures
+  WHERE cost > 1000
+  UNION
+  SELECT T3.name
+  FROM physician AS T1
+  JOIN trained_in AS T2 ON T1.employeeid = T2.physician
+  JOIN procedures AS T3 ON T3.code = T2.treatment
+  WHERE T1.name = "John Wen"

@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0013_dev.csv
 raw_question: List all song names by singers above the average age. 
 question_index: 12 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - avg
 columns:
  - age
 filters:
  - '>'
+ieu: []
 comment: |-
   SELECT song_name
   FROM singer
@@ -81,14 +88,14 @@ smbop_beam_functions:
 smbop_beam_columns:
 - - age
 - - age
+- - song_name
+  - age
 - - age
-  - song_name
+- - song_name
+  - age
 - - age
-- - age
-  - song_name
-- - age
-- - age
-  - song_name
+- - song_name
+  - age
 - - age
 - []
 - - age
@@ -136,6 +143,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT AVG( singer.age ) FROM singer GROUP BY singer.age
   - SELECT singer.age FROM singer
   - SELECT singer.song_name FROM singer WHERE singer.age > singer.age
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -164,20 +204,20 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/concert_singer/tables/singer.csv
 - - tests-examples/db2csv/concert_singer/tables/singer.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/singer.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
 - - tests-examples/db2csv/concert_singer/tables/singer.csv
 - - tests-examples/db2csv/concert_singer/tables/singer.csv
 ratsql_beam_constants:
@@ -190,6 +230,7 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1)'
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -252,6 +293,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT singer.Song_Name FROM singer WHERE singer.Age > (SELECT Avg(singer.Age) FROM stadium JOIN singer JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID JOIN singer_in_concert ON concert.concert_ID = singer_in_concert.concert_ID AND singer_in_concert.Singer_ID = singer.Singer_ID)
   - SELECT singer.Song_Name FROM singer WHERE singer.Age > (SELECT DISTINCT Avg(singer.Age) FROM singer)
   - SELECT singer.Song_Name FROM singer WHERE singer.Age > (SELECT Avg(singer.Age) FROM singer LIMIT 1)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10522985458374023
   - -0.10454511642456055

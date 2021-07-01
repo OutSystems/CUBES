@@ -4,10 +4,18 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0071_dev.csv
 raw_question: How many different addresses do the students currently live? 
 question_index: 577 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
+join_columns: []
+groupby_columns: []
 functions:
  - count
 columns:
  - current_address_id
+filters: []
+ieu: []
 comment: |-
   SELECT count(DISTINCT current_address_id)
   FROM Students
@@ -45,6 +53,15 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( DISTINCT students.current_address_id ) FROM students
   - SELECT COUNT( * ) FROM students
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - - address_id
@@ -56,18 +73,18 @@ ratsql_beam_join_columns:
   - current_address_id
 - []
 - []
-- - student_enrolment_id
-  - course_id
-  - current_address_id
+- - current_address_id
   - address_id
+  - course_id
+  - student_enrolment_id
   - student_id
-- - address_id
-  - student_id
+- - student_id
   - degree_program_id
+  - address_id
   - current_address_id
-- - department_id
-  - degree_program_id
+- - degree_program_id
   - current_address_id
+  - department_id
   - address_id
   - student_id
 ratsql_beam_groupby_columns:
@@ -92,21 +109,21 @@ ratsql_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/departments.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
 ratsql_beam_constants:
 - []
 - []
@@ -114,7 +131,7 @@ ratsql_beam_constants:
 - []
 - []
 - []
-- []
+- - '1'
 - []
 - []
 - []
@@ -184,6 +201,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT Addresses.address_id) FROM Addresses JOIN Courses JOIN Sections ON Courses.course_id = Sections.course_id JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id JOIN Student_Enrolment_Courses ON Student_Enrolment.student_enrolment_id = Student_Enrolment_Courses.student_enrolment_id AND Student_Enrolment_Courses.course_id = Courses.course_id
   - SELECT Count(DISTINCT Addresses.address_id) FROM Addresses JOIN Degree_Programs JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id
   - SELECT Count(DISTINCT Addresses.address_id) FROM Addresses JOIN Departments JOIN Degree_Programs ON Degree_Programs.department_id = Departments.department_id JOIN Students ON Addresses.address_id = Students.current_address_id JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id AND Student_Enrolment.degree_program_id = Degree_Programs.degree_program_id
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.12630224227905273
   - -0.1033773422241211

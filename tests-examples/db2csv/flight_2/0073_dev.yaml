@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/flight_2/tables/0073_dev.csv
 raw_question: What are flight numbers of flights departing from City "Aberdeen "? 
 question_index: 251 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Aberdeen
 join_columns:
- - sourceairport
  - airportcode
+ - sourceairport
+groupby_columns: []
+functions: []
 columns:
  - city
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.FlightNo
   FROM FLIGHTS AS T1
@@ -26,18 +32,18 @@ sql: |-
   JOIN AIRPORTS AS T2 ON T1.SourceAirport = T2.AirportCode
   WHERE T2.City = "Aberdeen"
 smbop_beam_join_columns:
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
-- - destairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - destairport
-  - airportcode
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
+- - airportcode
+  - destairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - destairport
 smbop_beam_groupby_columns:
 - []
 - []
@@ -60,17 +66,11 @@ smbop_beam_tables:
   - tests-examples/db2csv/flight_2/tables/flights.csv
 smbop_beam_constants:
 - - Aberdeen
-  - Aberdeen
 - - Aberdeen
-  - Aberdeen
 - - Aberdeen
-  - Aberdeen
 - - Aberdeen
-  - Aberdeen
 - - Aberdeen
-  - Aberdeen
 - - Aberdeen
-  - Aberdeen
 smbop_beam_functions:
 - []
 - []
@@ -113,24 +113,45 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT flights.flightno FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen' ORDER BY flights.flightno DESC
   - SELECT airports.city FROM flights JOIN airports ON flights.sourceairport = airports.airportcode WHERE airports.city = 'Aberdeen'
   - SELECT airports.city FROM flights JOIN airports ON flights.destairport = airports.airportcode WHERE airports.city = 'Aberdeen'
-ratsql_beam_join_columns:
-- - sourceairport
-  - airportcode
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
 - []
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
-- - sourceairport
-  - airportcode
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_join_columns:
+- - airportcode
+  - sourceairport
+- []
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
+- - airportcode
+  - sourceairport
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -144,9 +165,9 @@ ratsql_beam_groupby_columns:
 ratsql_beam_tables:
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
-- - tests-examples/db2csv/flight_2/tables/airports.csv
-  - tests-examples/db2csv/flight_2/tables/airlines.csv
+- - tests-examples/db2csv/flight_2/tables/airlines.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
+  - tests-examples/db2csv/flight_2/tables/airports.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
   - tests-examples/db2csv/flight_2/tables/flights.csv
 - - tests-examples/db2csv/flight_2/tables/airports.csv
@@ -170,6 +191,9 @@ ratsql_beam_constants:
   - Aberdeen
 - - Aberdeen
   - Aberdeen
+- - Aberdeen
+  - Aberdeen
+  - '1'
 - - Aberdeen
   - Aberdeen
 - - Aberdeen
@@ -242,6 +266,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT flights.DestAirport FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
   - SELECT flights.FlightNo FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE flights.Airline = 'Aberdeen'
   - SELECT airports.AirportCode FROM airports JOIN flights ON airports.AirportCode = flights.SourceAirport WHERE airports.City = 'Aberdeen'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10344982147216797
   - -0.10472631454467773

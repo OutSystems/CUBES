@@ -114,8 +114,7 @@ def is_float(o):
 
 
 def is_bool(o):
-    return False
-    return isinstance(o, str) and o.lower() in ['t', 'f', 'true', 'false']
+    return isinstance(o, str) and o.lower() in ['t', 'f', 'true', 'false', '0', '1']
 
 
 def is_none(o):
@@ -198,15 +197,19 @@ def get_pandas_type(t):
         raise NotImplementedError
 
 
-def to_r_repr(o):
+def to_r_repr(o, type_hint=None):
     if o is None:
         return 'NA'
     elif is_type(o, Type.DATETIME):
         return f"'{o}'"
+    elif type_hint is not None and type_hint == Type.FLOAT and (is_type(o, Type.INT) or is_type(o, Type.FLOAT)):
+        return str(o)
+    elif is_type(o, Type.INT):
+        return f'{o}L'
+    elif is_type(o, Type.FLOAT):
+        return str(o)
     elif is_type(o, Type.STRING):
         return f"'{o}'"
-    elif is_type(o, Type.INT) or is_type(o, Type.FLOAT):
-        return str(o)  # TODO should use R integers for ints but it needs to be tested first
     else:
         raise NotImplementedError  # TODO what about times and booleans??
 

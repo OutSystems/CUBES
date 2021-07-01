@@ -1,22 +1,28 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/pets.csv
- - tests-examples/db2csv/pets_1/tables/has_pet.csv
  - tests-examples/db2csv/pets_1/tables/student.csv
+ - tests-examples/db2csv/pets_1/tables/has_pet.csv
+ - tests-examples/db2csv/pets_1/tables/pets.csv
 output: tests-examples/db2csv/pets_1/tables/0039_dev.csv
 raw_question: Find the last name of the student who has a cat that is age 3. 
 question_index: 83 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - cat
  - 3
+ - cat
 join_columns:
- - stuid
  - petid
+ - stuid
+groupby_columns: []
+functions: []
 columns:
  - pettype
  - pet_age
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.lname
   FROM student AS T1
@@ -33,14 +39,14 @@ sql: |-
   WHERE T3.pet_age = 3
     AND T3.pettype = 'cat'
 smbop_beam_join_columns:
-- - stuid
-  - petid
+- - petid
+  - stuid
 smbop_beam_groupby_columns:
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 smbop_beam_constants:
 - - 3
   - cat
@@ -57,11 +63,17 @@ smbop_beam_inferred_code:
   - SELECT student.lname FROM has_pet JOIN pets ON has_pet.petid = pets.petid JOIN student ON has_pet.stuid = student.stuid WHERE pets.pettype = 'cat' AND student.age = 3
 smbop_beam_inferred_code_w_terminals:
   - SELECT student.lname FROM has_pet JOIN pets ON has_pet.petid = pets.petid JOIN student ON has_pet.stuid = student.stuid WHERE pets.pettype = 'cat' AND student.age = 3
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
 - []
 - - stuid
-- - stuid
-  - petid
+- - petid
+  - stuid
 - []
 - []
 - []
@@ -80,11 +92,11 @@ ratsql_beam_groupby_columns:
 - []
 ratsql_beam_tables:
 - - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
-- - tests-examples/db2csv/pets_1/tables/pets.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/has_pet.csv
-  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/student.csv
+  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/pets.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
 - - tests-examples/db2csv/pets_1/tables/student.csv
@@ -102,6 +114,9 @@ ratsql_beam_constants:
   - cat
 - - 3
   - cat
+- - 3
+  - cat
+  - '1'
 - - 3
   - cat
 - - 3
@@ -172,6 +187,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Student.StuID FROM Student WHERE Student.Age = 3
   - SELECT Student.LName FROM Student WHERE Student.StuID = 3
   - SELECT Student.city_code FROM Student WHERE Student.Age = 3
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10344505310058594
   - -0.10422277450561523

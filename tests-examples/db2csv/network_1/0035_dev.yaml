@@ -5,9 +5,17 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0035_dev.csv
 raw_question: Show names of all high school students who do not have any friends. 
 question_index: 896 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
  - id
  - student_id
+groupby_columns: []
+functions: []
+columns: []
+filters: []
 ieu:
  - except
 comment: |-
@@ -141,20 +149,53 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM highschooler WHERE highschooler.id NOT IN (SELECT friend.student_id FROM friend) ORDER BY highschooler.name ASC
   - SELECT friend.friend_id FROM friend INTERSECT SELECT friend.student_id FROM friend
   - SELECT friend.friend_id FROM friend EXCEPT SELECT friend.student_id FROM friend
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
-- - id
-  - liked_id
+- - liked_id
+  - id
 - []
 - []
-- - id
+- - liked_id
+  - id
   - student_id
-  - liked_id
 - []
 - []
-- - id
-  - student_id
+- - student_id
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -192,8 +233,9 @@ ratsql_beam_constants:
 - []
 - []
 - []
+- - '1'
 - []
-- []
+- - '1)'
 - []
 - []
 ratsql_beam_functions:
@@ -258,6 +300,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.name FROM Highschooler WHERE Highschooler.ID NOT IN (SELECT Friend.student_id FROM Friend LIMIT 1)
   - SELECT * FROM Highschooler WHERE Highschooler.ID NOT IN (SELECT Friend.student_id FROM Friend)
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id WHERE Highschooler.ID NOT IN (SELECT Friend.student_id FROM Friend)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10593652725219727
   - -0.10506248474121094

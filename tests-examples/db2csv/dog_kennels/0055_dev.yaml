@@ -4,12 +4,19 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0055_dev.csv
 raw_question: Which owners live in the state whose name contains the substring 'North'? List his first name, last name and email. 
 question_index: 972 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - North
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - state
 filters:
  - 'like'
+ieu: []
 comment: |-
   SELECT first_name,
          last_name,
@@ -54,8 +61,8 @@ smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
 smbop_beam_constants:
@@ -135,6 +142,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.first_name , owners.last_name , owners.email_address FROM owners, professionals WHERE owners.state<'North'
   - SELECT owners.first_name , owners.last_name , owners.email_address , owners.email_address FROM owners WHERE owners.state LIKE '%North%'
   - SELECT owners.first_name , owners.last_name , owners.email_address FROM owners WHERE owners.state LIKE '%North%' ORDER BY owners.first_name , owners.last_name , owners.email_address ASC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -158,6 +198,10 @@ ratsql_beam_constants:
 - - North
 - - North
 - - North
+- - North
+- - North
+- - North
+  - '1'
 - - North
 ratsql_beam_functions:
 - []
@@ -200,7 +244,25 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT DISTINCT Owners.first_name, Owners.last_name, Owners.email_address FROM Owners WHERE Owners.state LIKE 'North'
   - SELECT Owners.first_name, Owners.last_name, DISTINCT Owners.email_address FROM Owners WHERE Owners.state LIKE 'North'
   - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Owners WHERE Owners.state LIKE 'North' LIMIT 1
-  - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Owners WHERE Owners.state IN (SELECT Owners.email_address FROM Owners WHERE Owners.state LIKE 'North'
+  - SELECT Owners.first_name, Owners.last_name, Owners.email_address FROM Owners WHERE Owners.state IN (SELECT Owners.email_address FROM Owners WHERE Owners.state LIKE 'North' )
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10431432723999023
   - -0.10403633117675781

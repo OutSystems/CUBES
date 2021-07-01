@@ -4,6 +4,18 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0100_dev.csv
 raw_question: Return the names and surface areas of the 5 largest countries. 
 question_index: 801 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '5'
+join_columns: []
+groupby_columns: []
+functions: []
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT Name,
          SurfaceArea
@@ -19,19 +31,19 @@ sql: |-
   LIMIT 5
 smbop_beam_join_columns:
 - []
-- - code
-  - countrycode
-- - id
+- - countrycode
   - code
 - - id
   - code
-- - code
-  - countrycode
+- - id
+  - code
 - []
 - []
 - []
 - []
 - []
+- - countrycode
+  - code
 smbop_beam_groupby_columns:
 - []
 - []
@@ -39,8 +51,8 @@ smbop_beam_groupby_columns:
 - []
 - []
 - []
-- []
 - - surfacearea
+- []
 - []
 - []
 smbop_beam_tables:
@@ -51,26 +63,25 @@ smbop_beam_tables:
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
 smbop_beam_constants:
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-- - 5
-smbop_beam_functions:
+- - '5'
+- - '5'
+- - '5'
 - []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_functions:
 - []
 - []
 - []
@@ -80,13 +91,14 @@ smbop_beam_functions:
 - []
 - []
 - []
+- []
 smbop_beam_columns:
 - []
 - []
 - []
 - []
-- []
 - - surfacearea
+- []
 - []
 - []
 - []
@@ -118,31 +130,64 @@ smbop_beam_inferred_code:
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode ORDER BY country.surfacearea DESC LIMIT 5
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.id ORDER BY country.surfacearea DESC LIMIT 5
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.id ORDER BY country.surfacearea DESC
-  - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode ORDER BY country.surfacearea DESC
   - SELECT country.name , MAX( country.surfacearea ) FROM country
   - SELECT country.name , country.surfacearea FROM country
   - SELECT country.name , country.surfacearea FROM country GROUP BY country.surfacearea
   - SELECT country.name , country.surfacearea FROM country ORDER BY country.surfacearea DESC
   - SELECT country.name , country.surfacearea FROM country ORDER BY country.surfacearea ASC
+  - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode
 smbop_beam_inferred_code_w_terminals:
   - SELECT country.name , country.surfacearea FROM country ORDER BY country.surfacearea DESC LIMIT 5
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode ORDER BY country.surfacearea DESC LIMIT 5
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.id ORDER BY country.surfacearea DESC LIMIT 5
   - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.id ORDER BY country.surfacearea DESC
-  - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode ORDER BY country.surfacearea DESC
   - SELECT country.name , MAX( country.surfacearea ) FROM country
   - SELECT country.name , country.surfacearea FROM country
   - SELECT country.name , country.surfacearea FROM country GROUP BY country.surfacearea
   - SELECT country.name , country.surfacearea FROM country ORDER BY country.surfacearea DESC
   - SELECT country.name , country.surfacearea FROM country ORDER BY country.surfacearea ASC
+  - SELECT country.name , country.surfacearea FROM country JOIN city ON country.code = city.countrycode
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - []
-- - code
-  - countrycode
-- - code
-  - countrycode
+- - countrycode
+  - code
+- - countrycode
+  - code
 - []
 - []
 ratsql_beam_groupby_columns:
@@ -157,36 +202,46 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
 - - 5
+  - '1'
+- - 5
+  - '1'
+- - 5
+  - '1'
+- - 5
+  - '1'
 - - 5
 - - 5
+  - '1'
 - - 5
+  - '1'
 - - 5
+  - '1'
 - - 5
-- - 5
+  - '1'
 ratsql_beam_functions:
-- - max
-- - max
 - []
-- - max
-- - max
-- - max
-- - max
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - surfacearea
-- - surfacearea
 - []
-- - surfacearea
-- - surfacearea
-- - region
-- - surfacearea
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -223,6 +278,30 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT country.Name, country.SurfaceArea FROM city JOIN country ON city.CountryCode = country.Code ORDER BY country.SurfaceArea Desc LIMIT 1
   - SELECT country.Name, country.SurfaceArea FROM country ORDER BY country.Region Desc LIMIT 1
   - SELECT country.Code, country.SurfaceArea FROM country ORDER BY country.SurfaceArea Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- []
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.1087193489074707
   - -0.10452747344970703

@@ -1,23 +1,28 @@
 db: tests-examples/db2csv/battle_death/tables/battle_death.sqlite
 inputs:
  - tests-examples/db2csv/battle_death/tables/battle.csv
- - tests-examples/db2csv/battle_death/tables/death.csv
  - tests-examples/db2csv/battle_death/tables/ship.csv
+ - tests-examples/db2csv/battle_death/tables/death.csv
 output: tests-examples/db2csv/battle_death/tables/0009_dev.csv
 raw_question: What are the ids and names of the battles that led to more than 10 people killed in total. 
 question_index: 499 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 10
 join_columns:
- - id
- - caused_by_ship_id
  - lost_in_battle
+ - caused_by_ship_id
+ - id
 groupby_columns:
  - id
 functions:
  - sum
 columns:
  - killed
+filters: []
+ieu: []
 comment: |-
   SELECT T1.id,
          T1.name
@@ -67,37 +72,46 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT battle.id , battle.name FROM battle JOIN death ON battle.id = death.id GROUP BY battle.id HAVING SUM( death.killed ) > 10
   - SELECT battle.id , battle.name FROM battle JOIN death ON battle.id = death.id WHERE death.killed > 10
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
-- - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
-- - id
+  - id
+- - lost_in_battle
   - caused_by_ship_id
-  - lost_in_battle
+  - id
 ratsql_beam_groupby_columns:
 - - id
 - - id
@@ -111,35 +125,35 @@ ratsql_beam_groupby_columns:
 - - id
 ratsql_beam_tables:
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 - - tests-examples/db2csv/battle_death/tables/battle.csv
-  - tests-examples/db2csv/battle_death/tables/death.csv
   - tests-examples/db2csv/battle_death/tables/ship.csv
+  - tests-examples/db2csv/battle_death/tables/death.csv
 ratsql_beam_constants:
 - - 10
 - - 10
@@ -207,16 +221,49 @@ ratsql_beam_inferred_code:
   - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > 'terminal'
   - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.name HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.name HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.caused_by_ship_id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.caused_by_ship_id HAVING Sum(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > 10
-  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > 10
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.name HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.name HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.caused_by_ship_id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY death.caused_by_ship_id HAVING Sum(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > '10'
+  - SELECT battle.id, battle.name FROM battle JOIN ship ON battle.id = ship.lost_in_battle AND battle.id = ship.lost_in_battle JOIN death ON ship.id = death.caused_by_ship_id GROUP BY battle.id HAVING Avg(death.killed) > '10'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10369491577148438
   - -0.10517406463623047

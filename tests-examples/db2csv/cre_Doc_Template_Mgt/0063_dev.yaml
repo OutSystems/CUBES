@@ -1,20 +1,25 @@
 db: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/cre_Doc_Template_Mgt.sqlite
 inputs:
- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+ - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0063_dev.csv
 raw_question: How many paragraphs for the document with name 'Summer Show'? 
 question_index: 359 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Summer Show
 join_columns:
  - document_id
+groupby_columns: []
 functions:
  - count
 columns:
  - document_name
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT count(*)
   FROM Paragraphs AS T1
@@ -33,10 +38,10 @@ smbop_beam_groupby_columns:
 - []
 - []
 smbop_beam_tables:
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 smbop_beam_constants:
 - - Summer Show
 - - Summer Show
@@ -58,16 +63,25 @@ smbop_beam_inferred_code:
 smbop_beam_inferred_code_w_terminals:
   - SELECT COUNT( * ) FROM documents JOIN paragraphs ON documents.document_id = paragraphs.document_id WHERE documents.document_name = 'Summer Show'
   - SELECT COUNT( * ) FROM paragraphs JOIN documents ON paragraphs.document_id = documents.document_id WHERE documents.document_name = 'Summer Show'
+smbop_beam_has_limit:
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
 ratsql_beam_join_columns:
 - - document_id
 - - document_id
 - - template_id
 - - document_id
-- - template_id
-  - document_id
+- - document_id
   - template_type_code
-- - template_id
-  - template_type_code
+  - template_id
+- - template_type_code
+  - template_id
 - - document_id
 - - document_id
 ratsql_beam_groupby_columns:
@@ -80,25 +94,25 @@ ratsql_beam_groupby_columns:
 - []
 - []
 ratsql_beam_tables:
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/ref_template_types.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
-- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
+- - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 ratsql_beam_constants:
 - - Summer Show
 - - Summer Show
@@ -107,6 +121,9 @@ ratsql_beam_constants:
 - - Summer Show
 - - Summer Show
 - - Summer Show
+- - Summer Show
+- - Summer Show
+  - '1'
 - - Summer Show
 ratsql_beam_functions:
 - - count
@@ -119,11 +136,11 @@ ratsql_beam_functions:
 - - count
 ratsql_beam_columns:
 - - document_name
+- - paragraph_text
+  - document_name
 - - document_name
-  - paragraph_text
-- - document_name
-- - document_name
-  - paragraph_text
+- - paragraph_text
+  - document_name
 - - document_name
 - - document_name
 - - document_name
@@ -168,6 +185,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(DISTINCT *) FROM Documents JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID WHERE Documents.Document_Name = 'Summer Show'
   - SELECT Count(*) FROM Documents JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID WHERE Documents.Document_Name = 'Summer Show' LIMIT 1
   - SELECT DISTINCT Count(*) FROM Documents JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID WHERE Documents.Document_Name = 'Summer Show'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10370683670043945
   - -0.10492324829101562

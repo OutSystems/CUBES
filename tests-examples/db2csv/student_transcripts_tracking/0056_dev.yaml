@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0056_dev.csv
 raw_question: What is the id, line 1, and line 2 of the address with the most students? 
 question_index: 562 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - address_id
  - current_address_id
 groupby_columns:
  - address_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.address_id,
          T1.line_1,
@@ -33,26 +41,26 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - address_id
-  - permanent_address_id
-- - address_id
-  - permanent_address_id
-- - address_id
-  - current_address_id
-- - address_id
-  - permanent_address_id
-- - address_id
-  - permanent_address_id
+- - permanent_address_id
+  - address_id
+- - permanent_address_id
+  - address_id
 - - address_id
   - current_address_id
-- - address_id
-  - permanent_address_id
+- - permanent_address_id
+  - address_id
+- - permanent_address_id
+  - address_id
 - - address_id
   - current_address_id
+- - permanent_address_id
+  - address_id
 - - address_id
-  - permanent_address_id
-- - address_id
-  - permanent_address_id
+  - current_address_id
+- - permanent_address_id
+  - address_id
+- - permanent_address_id
+  - address_id
 smbop_beam_groupby_columns:
 - - address_id
 - - address_id
@@ -86,34 +94,21 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/addresses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 smbop_beam_constants:
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
-- - 1
-  - 2
+- - '1'
+- - '2'
+- - '1'
+- - '1'
+- - '2'
+- - '2'
+- []
+- []
+- []
+- []
 smbop_beam_functions:
-- - max
-  - count
 - - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
 - - count
 - - count
 - []
@@ -175,6 +170,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT addresses.address_id , addresses.line_1 , addresses.line_2 FROM addresses JOIN students ON addresses.address_id = students.current_address_id GROUP BY addresses.address_id
   - SELECT addresses.address_id , addresses.line_1 , addresses.line_2 FROM students JOIN addresses ON students.permanent_address_id = addresses.address_id GROUP BY addresses.address_id
   - SELECT addresses.address_id , addresses.line_1 , addresses.line_2 FROM addresses JOIN students ON addresses.address_id = students.permanent_address_id ORDER BY addresses.address_id ASC
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - address_id
   - current_address_id
@@ -206,24 +234,36 @@ ratsql_beam_tables:
 ratsql_beam_constants:
 - - 1
   - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
+- - 1
+  - 2
+  - '1'
 - - 1
   - 2
 - - 1
   - 2
-- - 1
-  - 2
-- - 1
-  - 2
+  - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
 - - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -262,6 +302,24 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Addresses.address_id, Addresses.line_1, DISTINCT Addresses.line_2 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Addresses.address_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Addresses.address_id, Addresses.line_1, Addresses.line_2 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Addresses.address_id ORDER BY Count(*) Desc
   - SELECT Addresses.address_id, Addresses.line_1, Addresses.line_2 FROM Addresses JOIN Students ON Addresses.address_id = Students.current_address_id GROUP BY Students.current_address_id ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10468816757202148
   - -0.10413837432861328

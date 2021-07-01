@@ -4,13 +4,20 @@ inputs:
 output: tests-examples/db2csv/cre_Doc_Template_Mgt/tables/0027_dev.csv
 raw_question: What are the ids of templates with template type code PP or PPT? 
 question_index: 323 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - PPT
  - PP
+ - PPT
+join_columns: []
+groupby_columns: []
+functions: []
 columns:
  - template_type_code
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT template_id
   FROM Templates
@@ -53,15 +60,24 @@ smbop_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
 smbop_beam_constants:
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
 smbop_beam_functions:
 - []
 - []
@@ -80,8 +96,8 @@ smbop_beam_columns:
 - - template_type_code
 - - template_type_code
 - - template_type_code
-- - template_id
-  - template_type_code
+- - template_type_code
+  - template_id
 - - template_type_code
 smbop_beam_ieu:
 - []
@@ -123,13 +139,43 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT templates.template_type_code FROM templates WHERE templates.template_type_code = 'PP' OR templates.template_type_code = 'PPT'
   - SELECT AVG( templates.template_id ) FROM templates WHERE templates.template_type_code = 'PP' OR templates.template_type_code = 'PPT'
   - SELECT templates.template_id FROM templates WHERE templates.template_type_code = 'PP' OR templates.template_type_code = 'PPT' ORDER BY templates.template_id ASC
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
 - - template_type_code
 - - template_id
-- - template_id
-  - document_id
+- - document_id
+  - template_id
 - []
 - []
 - - template_id
@@ -150,21 +196,34 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
-  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/paragraphs.csv
+  - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
 - - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/templates.csv
   - tests-examples/db2csv/cre_Doc_Template_Mgt/tables/documents.csv
 ratsql_beam_constants:
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
-- - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+- - PP
+  - PPT
+  - '1'
+- - PP
+  - PPT
+- - PP
+  - PPT
 ratsql_beam_functions:
 - []
 - []
@@ -181,10 +240,10 @@ ratsql_beam_columns:
 - - template_type_code
 - - template_type_code
 - - template_type_code
-- - template_id
-  - template_type_code
-- - template_id
-  - template_type_code
+- - template_type_code
+  - template_id
+- - template_type_code
+  - template_id
 ratsql_beam_ieu:
 - []
 - []
@@ -215,16 +274,43 @@ ratsql_beam_inferred_code:
   - SELECT Templates.Template_ID FROM Templates WHERE Templates.Template_ID = 'terminal' OR Templates.Template_Type_Code = 'terminal'
   - SELECT Templates.Template_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Documents.Template_ID = 'terminal' OR Templates.Template_Type_Code = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - SELECT Templates.Template_ID FROM Templates WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Templates WHERE DISTINCT Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Templates WHERE Templates.Template_Type_Code = 'PP' OR DISTINCT Templates.Template_Type_Code = 'PPT'
+  - SELECT DISTINCT Templates.Template_ID FROM Templates WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Ref_Template_Types JOIN Templates ON Ref_Template_Types.Template_Type_Code = Templates.Template_Type_Code WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID JOIN Paragraphs ON Documents.Document_ID = Paragraphs.Document_ID WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT'
+  - SELECT Templates.Template_ID FROM Templates WHERE Templates.Template_Type_Code = 'PP' OR Templates.Template_Type_Code = 'PPT' LIMIT 1
+  - SELECT Templates.Template_ID FROM Templates WHERE Templates.Template_ID = 'PPT' OR Templates.Template_Type_Code = 'PP'
+  - SELECT Templates.Template_ID FROM Templates JOIN Documents ON Templates.Template_ID = Documents.Template_ID WHERE Documents.Template_ID = 'PPT' OR Templates.Template_Type_Code = 'PP'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10322332382202148
   - -0.10565328598022461

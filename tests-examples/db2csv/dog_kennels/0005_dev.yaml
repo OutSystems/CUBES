@@ -5,6 +5,9 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0005_dev.csv
 raw_question: Which professionals live in the state of Indiana or have done treatment on more than 2 treatments? List his or her id, last name and cell phone. 
 question_index: 922 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - Indiana
  - 2
@@ -71,6 +74,12 @@ smbop_beam_inferred_code:
   - SELECT professionals.professional_id , professionals.last_name , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) > 2
 smbop_beam_inferred_code_w_terminals:
   - SELECT professionals.professional_id , professionals.last_name , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) > 2
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
 - - professional_id
 - - professional_id
@@ -105,6 +114,16 @@ ratsql_beam_constants:
   - 2
 - - Indiana
   - 2
+- - Indiana
+  - 2
+- - Indiana
+  - 2
+- - Indiana
+  - 2
+- - Indiana
+  - 2
+- - Indiana
+  - 2
 ratsql_beam_functions:
 - - count
 - - count
@@ -113,8 +132,8 @@ ratsql_beam_functions:
 - - count
 ratsql_beam_columns:
 - - state
-- - state
-  - treatment_id
+- - treatment_id
+  - state
 - - state
 - - state
 - - state
@@ -143,15 +162,33 @@ ratsql_beam_inferred_code:
   - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'terminal' GROUP BY Professionals.professional_id HAVING Count(*) > 'terminal' UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 'terminal'
 ratsql_beam_inferred_code_w_terminals:
   - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(Treatments.treatment_id) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals WHERE Professionals.state = 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Treatments.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.first_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) > 2
-  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > 2
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(Treatments.treatment_id) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id FROM Professionals WHERE Professionals.state = '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Treatments.professional_id FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.first_name FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Treatments.professional_id HAVING Count(*) > '2'
+  - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals WHERE Professionals.state = 'Indiana' GROUP BY Professionals.professional_id HAVING Count(*) > 2 UNION SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id GROUP BY Professionals.professional_id HAVING Count(*) > '2'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10331869125366211
   - -0.1044778823852539

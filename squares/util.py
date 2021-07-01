@@ -187,7 +187,7 @@ def create_argparser(all_inputs=False):
     g.add_argument('--subsume-conditions', dest='subsume_conditions', action='store_true', help='subsume conditions')
     g.add_argument('--no-transitive-blocking', dest='transitive_blocking', action='store_false',
                    help='disable transitive condition blocking')
-    g.add_argument('--no-cache', dest='cache_operations', action='store_false',
+    g.add_argument('--cache', dest='cache_operations', action='store_true',
                    help='increased memory usage, but possibly faster results')
 
     g = parser.add_argument_group('Debug arguments')
@@ -223,7 +223,7 @@ def parse_specification(filename):
         logger.warning('"const" field is deprecated. Please use "constants"')
         spec['constants'] = spec['const']
 
-    for field in ['constants', 'functions', 'columns', 'filters', 'join_columns', 'groupby_columns']:
+    for field in ['constants', 'functions', 'columns', 'filters', 'join_columns', 'groupby_columns', 'has_limit']:
         if field not in spec:
             spec[field] = None
 

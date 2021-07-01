@@ -5,14 +5,21 @@ inputs:
 output: tests-examples/db2csv/concert_singer/tables/0044_dev.csv
 raw_question: Find the number of concerts happened in the stadium with the highest capacity . 
 question_index: 43 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1)'
+join_columns: []
+groupby_columns: []
 functions:
- - max
  - count
 columns:
  - stadium_id
- - capacity
 filters:
  - '='
+ieu: []
 comment: |-
   select count(*)
   from concert
@@ -76,38 +83,36 @@ smbop_beam_constants:
 - []
 - []
 - []
+- - '1'
+- []
+- - '1'
 - []
 - []
 - []
-- []
-- []
-- []
-- []
+- - '1'
 smbop_beam_functions:
 - - max
   - count
 - - count
 - - count
-- - max
-  - count
-- - count
-- - max
-  - count
 - - count
 - - count
 - - count
-- - max
+- - count
+- - count
+- - count
+- []
 smbop_beam_columns:
 - - capacity
 - []
 - []
-- - capacity
-- []
-- - capacity
 - []
 - []
 - []
-- - capacity
+- []
+- []
+- []
+- []
 smbop_beam_ieu:
 - []
 - []
@@ -152,6 +157,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT concert.stadium_id , COUNT( * ) FROM concert JOIN stadium ON concert.stadium_id = stadium.stadium_id ORDER BY stadium.capacity DESC
   - SELECT concert.stadium_id , COUNT( * ) FROM concert JOIN stadium ON concert.stadium_id = stadium.stadium_id GROUP BY concert.stadium_id
   - SELECT stadium.stadium_id FROM stadium ORDER BY stadium.capacity DESC LIMIT 1
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - True
+  - False
+  - True
+  - False
+  - False
+  - False
+  - True
+smbop_beam_has_order_by:
+  - False
+  - True
+  - False
+  - True
+  - True
+  - True
+  - False
+  - True
+  - False
+  - True
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- -  desc 
+- []
+- -  desc 
+- []
+- []
+- []
+- -  desc 
 ratsql_beam_join_columns:
 - - stadium_id
 - []
@@ -181,24 +219,26 @@ ratsql_beam_tables:
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
-  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
-  - tests-examples/db2csv/concert_singer/tables/concert.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
-- - tests-examples/db2csv/concert_singer/tables/singer.csv
-  - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
+- - tests-examples/db2csv/concert_singer/tables/stadium.csv
+  - tests-examples/db2csv/concert_singer/tables/singer_in_concert.csv
+  - tests-examples/db2csv/concert_singer/tables/singer.csv
+  - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 - - tests-examples/db2csv/concert_singer/tables/stadium.csv
   - tests-examples/db2csv/concert_singer/tables/concert.csv
 ratsql_beam_constants:
+- []
+- []
 - []
 - []
 - []
@@ -273,6 +313,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Count(*) FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE DISTINCT stadium.Capacity = (SELECT Max(stadium.Capacity) FROM stadium)
   - SELECT Count(DISTINCT *) FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE stadium.Capacity = (SELECT Max(stadium.Capacity) FROM stadium)
   - SELECT Count(*) FROM stadium JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID WHERE stadium.Capacity = (SELECT DISTINCT Max(stadium.Capacity) FROM stadium)
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10612821578979492
   - -0.10503101348876953

@@ -5,15 +5,21 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0007_dev.csv
 raw_question: Which dogs have not cost their owner more than 1000 for treatment ? List the dog names . 
 question_index: 924 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
  - 1000
+join_columns: []
 groupby_columns:
  - dog_id
 functions:
  - sum
 columns:
- - cost_of_treatment
  - dog_id
+ - cost_of_treatment
+filters: []
+ieu: []
 comment: |-
   select name
   from dogs
@@ -51,6 +57,12 @@ smbop_beam_inferred_code:
   - SELECT MAX( charges.charge_amount ) FROM charges
 smbop_beam_inferred_code_w_terminals:
   - SELECT MAX( charges.charge_amount ) FROM charges
+smbop_beam_has_limit:
+  - False
+smbop_beam_has_order_by:
+  - False
+smbop_beam_order_by_direction:
+- []
 ratsql_beam_join_columns:
 - - dog_id
 - - dog_id
@@ -90,6 +102,9 @@ ratsql_beam_constants:
 - - 1000
 - - 1000
 - - 1000
+- - 1000
+- - 1000
+- - 1000
 ratsql_beam_functions:
 - []
 - []
@@ -101,10 +116,10 @@ ratsql_beam_functions:
 ratsql_beam_columns:
 - - cost_of_treatment
 - - cost_of_treatment
-- - cost_of_treatment
-  - dog_id
-- - cost_of_treatment
-  - dog_id
+- - dog_id
+  - cost_of_treatment
+- - dog_id
+  - cost_of_treatment
 - - cost_of_treatment
 - - cost_of_treatment
 - - cost_of_treatment
@@ -118,13 +133,13 @@ ratsql_beam_ieu:
 - - except
 ratsql_beam_filters:
 - - '>'
-- - '<'
-  - '<='
-- - '>'
-- - '>'
-- - '>'
-- - '>'
+- - '<='
   - '<'
+- - '>'
+- - '>'
+- - '>'
+- - '<'
+  - '>'
 - - '>'
 ratsql_beam_inferred_code:
   - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal' EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal'
@@ -138,16 +153,40 @@ ratsql_beam_inferred_code:
   - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal' EXCEPT SELECT DISTINCT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal'
   - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal' LIMIT 1 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
   - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment <= 1000
-  - SELECT Dogs.name FROM Dogs WHERE Dogs.dog_id IN (SELECT Treatments.dog_id FROM Treatments WHERE Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs WHERE Dogs.dog_id NOT IN (SELECT Treatments.dog_id FROM Treatments WHERE Treatments.cost_of_treatment > 1000
-  - SELECT DISTINCT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment < 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE DISTINCT Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE DISTINCT Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT DISTINCT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
-  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 LIMIT 1 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000
+  - SELECT Dogs.name FROM Dogs WHERE Dogs.dog_id IN (SELECT Treatments.dog_id FROM Treatments WHERE Treatments.cost_of_treatment > 1000 )
+  - SELECT Dogs.name FROM Dogs WHERE Dogs.dog_id NOT IN (SELECT Treatments.dog_id FROM Treatments WHERE Treatments.cost_of_treatment > 1000 )
+  - SELECT DISTINCT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment < 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE DISTINCT Treatments.cost_of_treatment > '1000'
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE DISTINCT Treatments.cost_of_treatment > 1000 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 EXCEPT SELECT DISTINCT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
+  - SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > 1000 LIMIT 1 EXCEPT SELECT Dogs.name FROM Dogs JOIN Treatments ON Dogs.dog_id = Treatments.dog_id WHERE Treatments.cost_of_treatment > '1000'
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.10842418670654297
   - -0.10418987274169922

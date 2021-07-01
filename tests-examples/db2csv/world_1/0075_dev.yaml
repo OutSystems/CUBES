@@ -4,17 +4,23 @@ inputs:
 output: tests-examples/db2csv/world_1/tables/0075_dev.csv
 raw_question: Which Asian countries have a population that is larger than any country in Africa? 
 question_index: 776 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
 constants:
- - Africa
  - Asia
+ - Africa
+join_columns: []
+groupby_columns: []
 functions:
  - max
 columns:
- - continent
  - population
+ - continent
 filters:
  - '='
  - '>'
+ieu: []
 comment: |-
   SELECT Name
   FROM country
@@ -48,14 +54,14 @@ smbop_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 smbop_beam_constants:
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
 smbop_beam_functions:
 - - max
 - - max
@@ -64,12 +70,12 @@ smbop_beam_functions:
 smbop_beam_columns:
 - - population
   - region
-- - continent
-  - population
+- - population
+  - continent
 - - population
   - region
-- - continent
-  - population
+- - population
+  - continent
 smbop_beam_ieu:
 - []
 - []
@@ -92,6 +98,21 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT country.name FROM country WHERE country.population > (SELECT MAX( country.population ) FROM country WHERE country.continent = 'Africa')
   - SELECT MAX( country.population ) FROM country WHERE country.region = 'Africa'
   - SELECT MAX( country.population ) FROM country WHERE country.continent = 'Africa'
+smbop_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - []
 - []
@@ -120,22 +141,28 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
-- - Africa
-  - Asia
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+- - Asia
+  - Africa
+  - '1)'
+- - Asia
+  - Africa
+  - '1'
+- - Asia
+  - Africa
 ratsql_beam_functions:
 - - max
 - - max
@@ -146,20 +173,20 @@ ratsql_beam_functions:
 - - max
 - - max
 ratsql_beam_columns:
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
-- - continent
-  - population
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
+- - population
+  - continent
 - - population
   - headofstate
 ratsql_beam_ieu:
@@ -200,16 +227,43 @@ ratsql_beam_inferred_code:
   - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'terminal') LIMIT 1
   - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.HeadOfState = 'terminal')
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa'
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' AND country.Continent = 'Asia'
-  - SELECT DISTINCT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa'
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE DISTINCT country.Continent = 'Africa'
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(DISTINCT country.Population) FROM country WHERE country.Continent = 'Africa'
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT DISTINCT Max(country.Population) FROM country WHERE country.Continent = 'Africa'
-  - SELECT country.Name FROM country WHERE DISTINCT country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa'
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' )
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' AND country.Continent = 'Asia' )
+  - SELECT DISTINCT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' )
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE DISTINCT country.Continent = 'Africa' )
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(DISTINCT country.Population) FROM country WHERE country.Continent = 'Africa' )
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT DISTINCT Max(country.Population) FROM country WHERE country.Continent = 'Africa' )
+  - SELECT country.Name FROM country WHERE DISTINCT country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' )
   - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' LIMIT 1)
-  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' LIMIT 1
+  - SELECT country.Name FROM country WHERE country.Population > (SELECT Max(country.Population) FROM country WHERE country.Continent = 'Africa' ) LIMIT 1
   - 
+ratsql_beam_has_limit:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+ratsql_beam_order_by_direction:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_score_history:
 - - -0.106658935546875
   - -0.10353755950927734

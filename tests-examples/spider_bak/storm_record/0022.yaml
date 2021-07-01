@@ -1,0 +1,32 @@
+db: tests-examples/spider/storm_record/tables/db.sqlite
+inputs:
+- tests-examples/spider/storm_record/tables/storm.csv
+- tests-examples/spider/storm_record/tables/region.csv
+- tests-examples/spider/storm_record/tables/affected_region.csv
+output: tests-examples/spider/storm_record/tables/0022.csv
+constants:
+- Afghanistan
+- Albania
+columns:
+- region_name
+comment: |-
+  SELECT T3.Name
+  FROM affected_region AS T1
+  JOIN region AS T2 ON T1.region_id = T2.region_id
+  JOIN storm AS T3 ON T1.storm_id = T3.storm_id
+  WHERE T2.Region_name = 'Afghanistan' INTERSECT
+    SELECT T3.Name
+    FROM affected_region AS T1
+    JOIN region AS T2 ON T1.region_id = T2.region_id
+    JOIN storm AS T3 ON T1.storm_id = T3.storm_id WHERE T2.Region_name = 'Albania'
+
+sql: |-
+  SELECT T3.Name
+  FROM affected_region AS T1
+  JOIN region AS T2 ON T1.region_id = T2.region_id
+  JOIN storm AS T3 ON T1.storm_id = T3.storm_id
+  WHERE T2.Region_name = 'Afghanistan' INTERSECT
+    SELECT T3.Name
+    FROM affected_region AS T1
+    JOIN region AS T2 ON T1.region_id = T2.region_id
+    JOIN storm AS T3 ON T1.storm_id = T3.storm_id WHERE T2.Region_name = 'Albania'

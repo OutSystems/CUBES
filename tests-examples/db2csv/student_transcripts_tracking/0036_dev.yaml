@@ -5,13 +5,21 @@ inputs:
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0036_dev.csv
 raw_question: What is the first, middle, and last name, along with the id and number of enrollments, for the student who enrolled the most in any program? 
 question_index: 542 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - student_id
 groupby_columns:
  - student_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T1.student_id,
          T1.first_name,
@@ -81,29 +89,23 @@ smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - - count
 - - count
 - - count
@@ -163,6 +165,39 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT students.first_name , students.last_name , students.student_id , COUNT( * ) FROM student_enrolment JOIN students ON student_enrolment.student_id = students.student_id
   - SELECT students.first_name , students.last_name , COUNT( * ) FROM student_enrolment JOIN students ON student_enrolment.student_id = students.student_id GROUP BY student_enrolment.student_id
   - SELECT students.first_name , students.last_name , COUNT( * ) FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - student_id
 - - student_id
@@ -207,37 +242,27 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
+- - count
 ratsql_beam_columns:
 - []
 - []
@@ -293,6 +318,39 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Students.first_name, Students.middle_name, Students.last_name, Count(*) FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.student_enrolment_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Students.first_name, Students.middle_name, Student_Enrolment.student_enrolment_id, Student_Enrolment.student_enrolment_id FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.student_enrolment_id ORDER BY Count(*) Desc LIMIT 1
   - SELECT Students.first_name, Students.middle_name, Student_Enrolment.other_details FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.student_enrolment_id ORDER BY Count(*) Desc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
 ratsql_beam_score_history:
 - - -0.10424041748046875
   - -0.10532760620117188

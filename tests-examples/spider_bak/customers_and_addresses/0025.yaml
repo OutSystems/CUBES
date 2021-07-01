@@ -1,0 +1,25 @@
+db: tests-examples/spider/customers_and_addresses/tables/db.sqlite
+inputs:
+- tests-examples/spider/customers_and_addresses/tables/customer_contact_channels.csv
+output: tests-examples/spider/customers_and_addresses/tables/0025.csv
+columns:
+- active_from_date
+comment: |-
+  SELECT channel_code,
+         contact_number
+  FROM customer_contact_channels
+  WHERE active_to_date - active_from_date =
+      (SELECT active_to_date - active_from_date
+       FROM customer_contact_channels
+       ORDER BY (active_to_date - active_from_date) DESC
+       LIMIT 1)
+
+sql: |-
+  SELECT channel_code,
+         contact_number
+  FROM customer_contact_channels
+  WHERE active_to_date - active_from_date =
+      (SELECT active_to_date - active_from_date
+       FROM customer_contact_channels
+       ORDER BY (active_to_date - active_from_date) DESC
+       LIMIT 1)

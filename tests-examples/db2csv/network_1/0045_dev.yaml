@@ -5,14 +5,22 @@ inputs:
 output: tests-examples/db2csv/network_1/tables/0045_dev.csv
 raw_question: What is the name of the high schooler who has the greatest number of likes? 
 question_index: 906 
+has_limit: True 
+has_order_by: True 
+order_by_direction:
+ -  desc 
+constants:
+ - '1'
 join_columns:
  - id
  - student_id
 groupby_columns:
  - student_id
 functions:
- - max
  - count
+columns: []
+filters: []
+ieu: []
 comment: |-
   SELECT T2.name
   FROM Likes AS T1
@@ -29,26 +37,26 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
+- - student_id
+  - id
+- - liked_id
+  - id
 - - id
   - student_id
-- - id
-  - liked_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - student_id
-- - id
-  - liked_id
-- - id
-  - student_id
-- - id
-  - liked_id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - student_id
+  - id
+- - liked_id
+  - id
+- - student_id
+  - id
+- - liked_id
+  - id
 smbop_beam_groupby_columns:
 - - student_id
 - - student_id
@@ -82,27 +90,22 @@ smbop_beam_tables:
 - - tests-examples/db2csv/network_1/tables/likes.csv
   - tests-examples/db2csv/network_1/tables/highschooler.csv
 smbop_beam_constants:
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 - []
 - []
 - []
 - []
 smbop_beam_functions:
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
-- - max
-  - count
+- - count
+- - count
+- - count
+- - count
+- - count
 - []
 - []
 - []
@@ -163,24 +166,57 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.liked_id GROUP BY likes.student_id
   - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.student_id ORDER BY likes.student_id DESC
   - SELECT highschooler.name FROM highschooler JOIN likes ON highschooler.id = likes.liked_id GROUP BY likes.student_id ORDER BY COUNT( * ) DESC
+smbop_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+  - True
+  - False
+  - True
+  - True
+smbop_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - student_id
+  - id
+- - liked_id
+  - id
+- - liked_id
+  - id
+- - liked_id
   - student_id
-- - id
-  - liked_id
-- - id
-  - liked_id
-- - id
-  - student_id
-  - liked_id
-- - id
-  - liked_id
+  - id
+- - liked_id
+  - id
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -209,32 +245,33 @@ ratsql_beam_tables:
 - - tests-examples/db2csv/network_1/tables/likes.csv
   - tests-examples/db2csv/network_1/tables/highschooler.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
 ratsql_beam_functions:
-- - max
-- - max
-- - max
-- - max
-- - max
-  - count
-- - max
-- - max
+- []
+- []
+- []
+- []
+- - count
+- []
+- []
 - []
 ratsql_beam_columns:
-- - grade
-- - liked_id
-- - student_id
-- - grade
 - []
-- - grade
-- - student_id
+- []
+- []
+- []
+- []
+- []
+- []
 - []
 ratsql_beam_ieu:
 - []
@@ -276,6 +313,33 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id ORDER BY * Desc LIMIT 1
   - SELECT Highschooler.name FROM Highschooler JOIN Friend ON Highschooler.ID = Friend.student_id JOIN Likes ON Highschooler.ID = Likes.liked_id ORDER BY Friend.student_id Desc LIMIT 1
   - SELECT Highschooler.name FROM Highschooler JOIN Likes ON Highschooler.ID = Likes.liked_id ORDER BY Highschooler.grade Desc
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - False
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- -  desc 
+- []
 ratsql_beam_score_history:
 - - -0.10248279571533203
   - -0.1040186882019043

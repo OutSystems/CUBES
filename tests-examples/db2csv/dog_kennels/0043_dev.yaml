@@ -5,14 +5,20 @@ inputs:
 output: tests-examples/db2csv/dog_kennels/tables/0043_dev.csv
 raw_question: List the last name of the owner owning the youngest dog. 
 question_index: 960 
+has_limit: False 
+has_order_by: False 
+order_by_direction: []
+constants: []
 join_columns:
  - owner_id
+groupby_columns: []
 functions:
  - max
 columns:
  - age
 filters:
  - '='
+ieu: []
 comment: |-
   SELECT T1.last_name
   FROM Owners AS T1
@@ -70,10 +76,10 @@ smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 smbop_beam_constants:
+- - '1'
 - []
-- []
-- []
-- []
+- - '1'
+- - '1'
 - []
 - []
 - []
@@ -81,11 +87,10 @@ smbop_beam_constants:
 - []
 - []
 smbop_beam_functions:
+- []
 - - min
-- - min
-- - min
-- - min
-  - count
+- []
+- - count
 - []
 - - count
 - - min
@@ -93,9 +98,9 @@ smbop_beam_functions:
 - []
 - - min
 smbop_beam_columns:
+- []
 - - age
-- - age
-- - age
+- []
 - - age
 - []
 - - age
@@ -147,22 +152,55 @@ smbop_beam_inferred_code_w_terminals:
   - SELECT owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id ORDER BY dogs.age DESC
   - SELECT owners.last_name FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id ORDER BY dogs.age ASC
   - SELECT MIN( dogs.age ) FROM owners JOIN dogs ON owners.owner_id = dogs.owner_id
+smbop_beam_has_limit:
+  - True
+  - False
+  - True
+  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+smbop_beam_has_order_by:
+  - True
+  - False
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+  - False
+smbop_beam_order_by_direction:
+- -  asc 
+- []
+- -  asc 
+- -  asc 
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_join_columns:
 - - owner_id
 - - owner_id
 - - owner_id
 - - owner_id
 - - owner_id
-  - professional_id
   - dog_id
+  - professional_id
 - - owner_id
   - dog_id
 - - owner_id
   - breed_code
 - []
-- - treatment_type_code
-  - owner_id
+- - owner_id
   - dog_id
+  - treatment_type_code
 ratsql_beam_groupby_columns:
 - []
 - []
@@ -182,53 +220,54 @@ ratsql_beam_tables:
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/owners.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/charges.csv
-- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
 ratsql_beam_constants:
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 - []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '1'
+- - '1'
+- - '1'
+- - '1'
+- - '1'
 ratsql_beam_functions:
-- - min
-- - min
-- - min
 - []
-- - min
-- - min
-- - min
-- - min
-- - min
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_columns:
-- - age
-- - age
-- - age
 - []
-- - age
-- - age
-- - age
-- - age
-- - age
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_ieu:
 - []
 - []
@@ -271,6 +310,36 @@ ratsql_beam_inferred_code_w_terminals:
   - SELECT Owners.last_name FROM Breeds JOIN Owners JOIN Dogs ON Breeds.breed_code = Dogs.breed_code AND Dogs.owner_id = Owners.owner_id AND Breeds.breed_code = Dogs.breed_code ORDER BY Dogs.age Asc LIMIT 1
   - SELECT Owners.last_name FROM Charges JOIN Owners JOIN Dogs ORDER BY Dogs.age Asc LIMIT 1
   - SELECT Owners.last_name FROM Treatment_Types JOIN Owners JOIN Dogs ON Dogs.owner_id = Owners.owner_id JOIN Treatments ON Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.dog_id = Dogs.dog_id AND Treatment_Types.treatment_type_code = Treatments.treatment_type_code AND Treatments.dog_id = Dogs.dog_id ORDER BY Dogs.age Asc LIMIT 1
+ratsql_beam_has_limit:
+  - True
+  - True
+  - True
+  - False
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_has_order_by:
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+  - True
+ratsql_beam_order_by_direction:
+- -  asc 
+- -  asc 
+- -  asc 
+- []
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
+- -  asc 
 ratsql_beam_score_history:
 - - -0.10686254501342773
   - -0.10361337661743164
