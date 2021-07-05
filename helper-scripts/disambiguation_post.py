@@ -1,15 +1,20 @@
 import argparse
+import csv
+import ctypes
 import glob
 import logging
 import multiprocessing
 import os.path
 import pathlib
 import re
+import resource
+import signal
 import sys
 from collections import defaultdict, Counter
 from contextlib import contextmanager
 from itertools import permutations
 from logging import getLogger
+from random import shuffle
 
 import chromalog
 import pandas
@@ -19,6 +24,7 @@ import yaml
 from TestSuiteEval.fuzz import fuzz
 from ordered_set import OrderedSet
 from pandas.core.util.hashing import hash_pandas_object
+from pebble import ProcessPool
 
 from squares.dsl import table
 from squares.dsl.table import Table
@@ -45,6 +51,11 @@ dsl_regex = r'\[MainProcess\]\[INFO\] Solution found: \[?(.*?)\]?'
 sql_regex = rf'{cubes_sql_sep}((?:.|\n)*){cubes_r_sep}'
 
 skipped = 0
+
+STATUS_OK = 0
+STATUS_NO_YAML = 1
+STATUS_NO_SQL = 2
+STATUS_MISMATCH_LENGTH = 3
 
 
 def do_not_print(msg):
@@ -97,6 +108,15 @@ class OutputGroup:
 
     def __repr__(self):
         return repr(self.occurrences)
+
+
+def askbool(message):
+    while True:
+        i = input(message + ' (y/n) ')
+        if i.lower() == 'y':
+            return True
+        if i.lower() == 'n':
+            return False
 
 
 @contextmanager
@@ -156,11 +176,24 @@ def df_soft_equal(df1, df2):
     return False
 
 
-def ask_user(df):
-    return True
+def ask_user(df, instance, engine):
+    print('Is the following output correct for instance', instance, '?')
+    print(df)
+    if args.interactive:
+        return askbool('> ')
+
+    with engine.begin() as connection:
+        gt_df = execute(connection, sql)
+        print('Automatic execution resulted in:')
+        print(gt_df)
+        return df_soft_equal(gt_df, df)
 
 
-def disambiguate(instance, spec, sql_list, fuzzy_level=1):
+def disambiguate(instance, spec, sql_list, splits=None, fuzzy_level=1, results=None):
+    if splits is None:
+        splits = []
+    if results is None:
+        results = []
     logger.debug('Fuzzing disambiguation for %s part %d (%d queries)', instance, fuzzy_level, len(sql_list))
 
     if 'db' not in spec:
@@ -194,6 +227,8 @@ def disambiguate(instance, spec, sql_list, fuzzy_level=1):
 
     outputs = defaultdict(OutputGroup)
 
+    fuzzied_engines = []
+
     for round_i in range(args.rounds):
         fuzzy_file = f'/tmp/fuzzy_{multiprocessing.current_process().ident}.sqlite3'
         try:
@@ -201,6 +236,7 @@ def disambiguate(instance, spec, sql_list, fuzzy_level=1):
                 fuzz.generate_random_db_with_queries_wrapper((db_file, fuzzy_file, sqls, {}))
 
             fuzzied_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{fuzzy_file}", connect_args={'timeout': args.timeout})
+            fuzzied_engines.append(fuzzied_engine)
         except Exception as e:
             logger.error('Error while fuzzing instance %s', instance)
             logger.error('%s', str(e))
@@ -208,7 +244,6 @@ def disambiguate(instance, spec, sql_list, fuzzy_level=1):
             connection = fuzzied_engine.connect()
             for sql in sqls:
                 df = execute(connection, sql)
-                print('exec')
 
                 outputs[round_i].add(sql, df)
             connection.close()
@@ -223,66 +258,121 @@ def disambiguate(instance, spec, sql_list, fuzzy_level=1):
             best_i = i
             distance = abs(bests[i][0] - target)
 
+    logger.debug('Best split found was %s', outputs[best_i].occurrences)
+
     if bests[best_i][0] == len(sqls):
         logger.debug('Disambiguated! (%d queries)', len(sqls))
-        return sqls
+        return sqls, fuzzy_level, splits, results
 
-    if ask_user(bests[best_i][1]):
-        return disambiguate(instance, spec, bests[best_i][2], fuzzy_level + 1)
+    if ask_user(bests[best_i][1], instance, fuzzied_engines[best_i]):
+        logger.debug('Output accepted. Reject %d queries. Continuing with %d.', len(bests[best_i][3]), len(bests[best_i][2]))
+        return disambiguate(instance, spec, bests[best_i][2], splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [True])
     else:
-        return disambiguate(instance, spec, bests[best_i][3], fuzzy_level + 1)
+        logger.debug('Output rejected. Reject %d queries. Continuing with %d.', len(bests[best_i][2]), len(bests[best_i][3]))
+        return disambiguate(instance, spec, bests[best_i][3], splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [False])
+
+
+def print_stats():
+    logger.debug('Time spent on {fuzz: %f, exec: %f}', fuzz_time.value, exec_time.value)
+
+
+def compute(file):
+    with open(file) as f:
+        content = f.read()
+
+    instance = file.replace(f'analysis/data/{args.run}/', '').replace('_0.log', '')
+    yaml_file = f'tests-examples/{instance}.yaml'
+
+    if not os.path.isfile(yaml_file):
+        logger.error('Instance %s skipped due to instance file not existing', instance)
+        return instance, 0, None, None
+
+    with open(yaml_file) as f:
+        spec = yaml.safe_load(f)
+
+    tmp1 = re.findall(dsl_regex, content)
+    tmp2 = re.findall(rf'{cubes_r_sep}((?:.|\n)*?)(?:$|(?={cubes_end_sep}))', content)
+
+    if len(tmp1) == len(tmp2):
+        dsl_list = []
+        sql_list = []
+
+        for dsl, cubes_sol in zip(tmp1, tmp2):
+            tmp3 = re.search(rf'{cubes_sql_sep}\n((?:.|\n)*?)(?:$|{cubes_end_sep})', cubes_sol)
+
+            if tmp3 is None:
+                skipped += 1
+                return
+
+            else:
+                for i, input_f in enumerate(spec['inputs']):
+                    table_name = table.get_table_name(input_f)
+                    dsl = re.sub(rf'\binput{i}', table_name, dsl)
+
+                sql = tmp3[1]
+                sql = re.sub(r'(\s|\n)+', ' ', sql).strip()
+                sql = sanitize_sql(sql, spec)
+
+                dsl_list.append(dsl)
+                sql_list.append(sql)
+
+        if sql_list:
+            disambiguate(instance, spec, sql_list)
+        else:
+            logger.info('No solutions found for %s', instance)
+
+    else:
+        logger.warning('Instance %s skipped due to mismatched lenghts: %d != %d', instance, len(tmp1), len(tmp2))
+        skipped += len(tmp2)
+
+
+def initializer():
+    """Set maximum amount of memory each worker process can allocate."""
+    soft, hard = resource.getrlimit(resource.RLIMIT_DATA)
+    resource.setrlimit(resource.RLIMIT_DATA, (args.m * 1024 * 1024, hard))
 
 
 if __name__ == '__main__':
+    fuzz_time = multiprocessing.Value(ctypes.c_double)
+    exec_time = multiprocessing.Value(ctypes.c_double)
+
+    signal.signal(signal.SIGALRM, print_stats)
+    signal.setitimer(signal.ITIMER_REAL, 0, 60)
 
     parser = argparse.parser = argparse.ArgumentParser()
     parser.add_argument('run', metavar='RUN')
     parser.add_argument('--rounds', type=int, default=16)
     parser.add_argument('--timeout', type=int, default=60)
+    parser.add_argument('--interactive', action='store_true')
     args = parser.parse_args()
 
-    for file in glob.glob(f'analysis/data/{args.run}/**/*.log', recursive=True):
-        with open(file) as f:
-            content = f.read()
+    output_file = f'analysis/fuzzy/{args.run}_dis.csv'
+    instances = list(glob.glob(f'analysis/data/{args.run}/**/*.log', recursive=True))
+    shuffle(instances)
 
-        instance = file.replace(f'analysis/data/{args.run}/', '').replace('_0.log', '')
-        yaml_file = f'tests-examples/{instance}.yaml'
+    with ProcessPool(max_workers=args.p, initializer=initializer) as pool:
+        with open(output_file, 'w') as results_f:
+            result_writer = csv.writer(results_f)
+            result_writer.writerow(('name', 'status', 'total_queries', 'n_questions', 'final_queries', 'splits', 'results'))
 
-        if not os.path.isfile(yaml_file):
-            logger.error('Instance %s skipped due to instance file not existing', instance)
-            continue
+            future = pool.map(compute, instances, chunksize=1, timeout=args.timeout * args.rounds)
 
-        with open(yaml_file) as f:
-            spec = yaml.safe_load(f)
+            iterator = future.result()
 
-        tmp1 = re.findall(dsl_regex, content)
-        tmp2 = re.findall(rf'{cubes_r_sep}((?:.|\n)*?)(?:$|(?={cubes_end_sep}))', content)
-
-        if len(tmp1) == len(tmp2):
-            dsl_list = []
-            sql_list = []
-
-            for dsl, cubes_sol in zip(tmp1, tmp2):
-                tmp3 = re.search(rf'{cubes_sql_sep}\n((?:.|\n)*?)(?:$|{cubes_end_sep})', cubes_sol)
-
-                if tmp3 is None:
-                    skipped += 1
-                    continue
-
-                else:
-                    for i, input_f in enumerate(spec['inputs']):
-                        table_name = table.get_table_name(input_f)
-                        dsl = re.sub(rf'\binput{i}', table_name, dsl)
-
-                    sql = tmp3[1]
-                    sql = re.sub(r'(\s|\n)+', ' ', sql).strip()
-                    sql = sanitize_sql(sql, spec)
-
-                    dsl_list.append(dsl)
-                    sql_list.append(sql)
-
-            disambiguate(instance, spec, sql_list)
-
-        else:
-            logger.warning('Instance %s skipped due to mismatched lenghts: %d != %d', instance, len(tmp1), len(tmp2))
-            skipped += len(tmp2)
+            while True:
+                try:
+                    comp_result = next(iterator)
+                    result_writer.writerow(comp_result)
+                except StopIteration:
+                    break
+                except TimeoutError as error:
+                    logger.error('Timeout while getting results...')
+                    logger.error("\n%s", error)
+                except MemoryError as error:
+                    logger.error('Memout while getting results...')
+                    logger.error("\n%s", error)
+                except Exception as error:
+                    logger.error('Error while getting results...')
+                    logger.error("\n%s", error)
+                finally:
+                    results_f.flush()
