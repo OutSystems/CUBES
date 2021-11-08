@@ -1,0 +1,2046 @@
+Starting log for run c62_16_all600
+No solution for instance scythe/recent_posts/026 (3)
+No solution for instance scythe/recent_posts/050 (7)
+No solution for instance scythe/recent_posts/003 (12)
+No solution for instance scythe/recent_posts/005 (16)
+No solution for instance scythe/recent_posts/032 (20)
+No solution for instance scythe/recent_posts/043 (27)
+No solution for instance scythe/recent_posts/049 (30)
+No solution for instance scythe/recent_posts/025 (38)
+No solution for instance scythe/recent_posts/029 (43)
+No solution for instance scythe/recent_posts/041 (46)
+No solution for instance scythe/recent_posts/009 (47)
+No solution for instance scythe/top_rated_posts/027 (76)
+No solution for instance scythe/top_rated_posts/014 (79)
+No solution for instance scythe/top_rated_posts/021 (86)
+No solution for instance scythe/top_rated_posts/048 (97)
+No solution for instance scythe/top_rated_posts/034 (99)
+No solution for instance scythe/top_rated_posts/054 (106)
+No solution for instance 55-tests/16 (123)
+No solution for instance 55-tests/55 (133)
+No solution for instance 55-tests/32 (144)
+No solution for instance 55-tests/50 (163)
+Wrong output for fuzzied solution in instance spider/club_1/0017 (166)
+	EXPECTED OUTPUT ====
+
+		SELECT clubdesc
+		FROM club
+		WHERE clubname = "Pen and Paper Gaming"
+
+	                                            clubdesc
+	0  Refurbish computers; teach kids and adults abo...
+	1  Refurbish computers; teach kids and adults abo...
+	ACTUAL OUTPUT ====
+
+		SELECT `clubdesc` FROM (SELECT `clubdesc` FROM `club` WHERE (`clubname` = 'Pen and Paper Gaming') INTERSECT SELECT `clubdesc` FROM `club` WHERE (`clubname` = 'Pen and Paper Gaming')) ORDER BY clubdesc
+
+	                                            clubdesc
+	0  Refurbish computers; teach kids and adults abo...
+Wrong output for fuzzied solution in instance spider/club_1/0030 (171)
+	EXPECTED OUTPUT ====
+
+		SELECT count(DISTINCT t1.clubname)
+		FROM club AS t1
+		JOIN member_of_club AS t2 ON t1.clubid = t2.clubid
+		JOIN student AS t3 ON t2.stuid = t3.stuid
+		WHERE t3.fname = "Eric"
+		  AND t3.lname = "Tai"
+
+	   count(distinct t1.clubname)
+	0                            8
+	ACTUAL OUTPUT ====
+
+		SELECT `n_distinct` AS `count_distinct_t1_clubname_` FROM (SELECT COUNT(DISTINCT `lname`) AS `n_distinct` FROM (SELECT `LHS`.`clubid` AS `clubid`, `LHS`.`clubname` AS `clubname`, `LHS`.`clubdesc` AS `clubdesc`, `LHS`.`clublocation` AS `clublocation`, `LHS`.`stuid` AS `stuid`, `LHS`.`position` AS `position`, `RHS`.`lname` AS `lname`, `RHS`.`fname` AS `fname`, `RHS`.`age` AS `age`, `RHS`.`sex` AS `sex`, `RHS`.`major` AS `major`, `RHS`.`advisor` AS `advisor`, `RHS`.`city_code` AS `city_code` FROM (SELECT `LHS`.`clubid` AS `clubid`, `LHS`.`clubname` AS `clubname`, `LHS`.`clubdesc` AS `clubdesc`, `LHS`.`clublocation` AS `clublocation`, `RHS`.`stuid` AS `stuid`, `RHS`.`position` AS `position` FROM `club` AS `LHS` INNER JOIN `member_of_club` AS `RHS` ON (`LHS`.`clubid` = `RHS`.`clubid`)) AS `LHS` INNER JOIN (SELECT * FROM `student` WHERE (`fname` = 'Eric' AND `lname` = 'Tai')) AS RHS ON (LHS.stuid = RHS.stuid))) ORDER BY count_distinct_t1_clubname_
+
+	   count_distinct_t1_clubname_
+	0                            1
+Error while getting results...
+
+[Errno 2] No such file or directory: 'fuzzy_1191.sqlite3'
+Wrong output for fuzzied solution in instance spider/swimming/0019 (229)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.name
+		FROM stadium AS t1
+		JOIN event AS t2 ON t1.id = t2.stadium_id
+		GROUP BY t2.stadium_id
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	                   name
+	0  Fisht Olympic Stadiu
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.capacity AS capacity, LHS.city AS city, LHS.country AS country, LHS.opening_year AS opening_year, LHS.stadium_id AS stadium_id, LHS.year AS YEAR, RHS.stadium_id AS stadium_id_other FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.capacity AS capacity, LHS.city AS city, LHS.country AS country, LHS.opening_year AS opening_year, RHS.stadium_id AS stadium_id, RHS.year AS YEAR FROM `stadium` AS LHS LEFT JOIN `event` AS RHS ON (LHS.id = RHS.id AND LHS.name = RHS.name)) AS LHS INNER JOIN (SELECT stadium_id, COUNT() AS n FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.capacity AS capacity, LHS.city AS city, LHS.country AS country, LHS.opening_year AS opening_year, RHS.stadium_id AS stadium_id, RHS.year AS YEAR FROM `stadium` AS LHS LEFT JOIN `event` AS RHS ON (LHS.id = RHS.id AND LHS.name = RHS.name)) GROUP BY stadium_id) AS RHS ON (LHS.id = RHS.n)) ORDER BY name
+
+	                        name
+	0  Baku Olympic StadiumJwkUR
+Wrong output for fuzzied solution in instance spider/swimming/0028 (241)
+	EXPECTED OUTPUT ====
+
+		SELECT t3.name
+		FROM record AS t1
+		JOIN event AS t2 ON t1.event_id = t2.id
+		JOIN stadium AS t3 ON t3.id = t2.stadium_id
+		GROUP BY t2.stadium_id
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	                   name
+	0  Fisht Olympic Stadiu
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT * FROM (SELECT * FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.capacity AS capacity, LHS.city AS city, LHS.country AS country, LHS.opening_year AS opening_year, LHS.result AS RESULT, LHS.swimmer_id AS swimmer_id, LHS.event_id AS event_id, RHS.year AS YEAR, RHS.n AS n FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.capacity AS capacity, LHS.city AS city, LHS.country AS country, LHS.opening_year AS opening_year, RHS.result AS RESULT, RHS.swimmer_id AS swimmer_id, RHS.event_id AS event_id FROM `stadium` AS LHS INNER JOIN `record` AS RHS ON (LHS.id = RHS.id)) AS LHS INNER JOIN (SELECT id, YEAR, COUNT() AS n FROM `event` GROUP BY id, YEAR) AS RHS ON (LHS.id = RHS.id)) ORDER BY YEAR) LIMIT 1)
+
+	                                       name
+	0  bcNNorthumberland Development Project6J0
+Wrong output for fuzzied solution in instance spider/perpetrator/0016 (252)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.Name
+		FROM people AS T1
+		JOIN perpetrator AS T2 ON T1.People_ID = T2.People_ID
+		ORDER BY T2.Year DESC
+
+	               name
+	0  9rnPfOvie Dotson
+	1      Gary Goodner
+	2  Jim KrivacsEun2W
+	3        John Danks
+	4        John Danks
+	5        John Danks
+	6   ZiiO5John Danks
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT name FROM (SELECT * FROM `people` AS LHS WHERE EXISTS (SELECT 1 FROM `perpetrator` AS RHS WHERE (LHS.people_id = RHS.people_id) )) INTERSECT SELECT name FROM (SELECT * FROM `people` AS LHS WHERE EXISTS (SELECT 1 FROM `perpetrator` AS RHS WHERE (LHS.people_id = RHS.people_id) ))) ORDER BY name
+
+	               name
+	0  9rnPfOvie Dotson
+	1      Gary Goodner
+	2  Jim KrivacsEun2W
+	3        John Danks
+	4   ZiiO5John Danks
+Wrong output for fuzzied solution in instance spider/pilot_record/0009 (308)
+	EXPECTED OUTPUT ====
+
+		SELECT POSITION
+		FROM pilot
+		WHERE Join_Year < 2000 INTERSECT
+		  SELECT POSITION
+		  FROM pilot WHERE Join_Year > 2005
+
+	      position
+	0  Center Team
+	ACTUAL OUTPUT ====
+
+		SELECT POSITION FROM (SELECT * FROM `pilot` AS LHS WHERE NOT EXISTS (SELECT 1 FROM (SELECT * FROM `pilot` WHERE (join_year >= 2000 OR join_year > 2005)) AS RHS WHERE (LHS.team = RHS.team) )) ORDER BY POSITION
+
+	                   position
+	0          4AL0xCenter Team
+	1               Center Team
+	2               Center Team
+	3               Center Team
+	4  Forward-Center TeamONeN4
+No solution for instance spider/pilot_record/0010 (310)
+No solution for instance spider/local_govt_in_alabama/0008 (312)
+Wrong output for fuzzied solution in instance spider/architecture/0008 (328)
+	EXPECTED OUTPUT ====
+
+		SELECT DISTINCT T1.type
+		FROM mill AS T1
+		JOIN architect AS t2 ON T1.architect_id = T2.id
+		WHERE T2.nationality = 'American'
+		  OR T2.nationality = 'Canadian'
+
+	               type
+	0  7vXISYa (8TNpv7G
+	1        Grondzeile
+	2  Grondzeiler0KlSO
+	3  Grondzeilerj1Otm
+	4  W3f(dkoiD)o5UGvl
+	ACTUAL OUTPUT ====
+
+		SELECT `type` FROM (SELECT `LHS`.`architect_id` AS `architect_id`, `LHS`.`id` AS `id`, `LHS`.`location` AS `location`, `LHS`.`name` AS `name`, `LHS`.`type` AS `type`, `LHS`.`built_year` AS `built_year`, `LHS`.`notes` AS `notes`, `RHS`.`id` AS `id_other`, `RHS`.`location` AS `location_other`, `RHS`.`name` AS `name_other`, `RHS`.`type` AS `type_other`, `RHS`.`notes` AS `notes_other` FROM (SELECT * FROM `mill` AS `LHS` WHERE NOT EXISTS (SELECT 1 FROM (SELECT * FROM `architect` WHERE (`nationality` != 'American' OR `nationality` != 'Canadian')) AS RHS WHERE (LHS.name = RHS.name) )) AS LHS INNER JOIN `mill` AS RHS ON (LHS.id = RHS.architect_id AND LHS.built_year = RHS.built_year)) ORDER BY TYPE
+
+	Empty DataFrame
+	Columns: [type]
+	Index: []
+No solution for instance spider/architecture/0003 (329)
+Wrong output for fuzzied solution in instance spider/architecture/0009 (340)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.id,
+		       T1.name
+		FROM architect AS T1
+		JOIN bridge AS T2 ON T1.id = T2.architect_id
+		GROUP BY T1.id
+		HAVING count(*) >= 3
+
+	Empty DataFrame
+	Columns: [id, name]
+	Index: []
+	ACTUAL OUTPUT ====
+
+		SELECT id, name FROM (SELECT * FROM (SELECT * FROM (SELECT id, name, COUNT() AS n FROM (SELECT * FROM `architect` AS LHS WHERE NOT EXISTS (SELECT 1 FROM `bridge` AS RHS WHERE (LHS.name = RHS.name) )) GROUP BY id, name) ORDER BY name) LIMIT 3)
+
+	        id              name
+	0  2y(3nXL  Frank GehryO5oGB
+	1   5BIQ)G        Frank Gehr
+	2  fyE40uo        Frank Gehr
+Wrong output for fuzzied solution in instance spider/election_representative/0019 (356)
+	EXPECTED OUTPUT ====
+
+		SELECT Party
+		FROM representative
+		WHERE State = "New York" INTERSECT
+		  SELECT Party
+		  FROM representative WHERE State = "Pennsylvania"
+
+	        party
+	0  Democratic
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT `party` FROM (SELECT * FROM `representative` AS `LHS` WHERE NOT EXISTS (SELECT 1 FROM (SELECT * FROM `representative` WHERE (`state` = 'New York' OR `state` != 'Pennsylvania')) AS RHS WHERE (LHS.lifespan = RHS.lifespan) )) ORDER BY party
+
+	             party
+	0  6Q3c9B27VnWLVOw
+No solution for instance spider/student_assessment/0006 (370)
+No solution for instance spider/student_assessment/0014 (385)
+Wrong output for fuzzied solution in instance spider/csu_1/0008 (408)
+	EXPECTED OUTPUT ====
+
+		SELECT campusfee
+		FROM campuses AS T1
+		JOIN csu_fees AS T2 ON T1.id = t2.campus
+		WHERE t1.campus = "San Francisco State University"
+		  AND T2.year = 1996
+
+	   campusfee
+	0       1816
+	ACTUAL OUTPUT ====
+
+		SELECT `campusfee` FROM (SELECT `LHS`.`id` AS `id`, `LHS`.`campus` AS `campus`, `LHS`.`location` AS `location`, `LHS`.`county` AS `county`, `LHS`.`year` AS `year`, `RHS`.`year` AS `year_other`, `RHS`.`campusfee` AS `campusfee` FROM (SELECT * FROM `campuses` WHERE (`campus` = 'San Francisco State University' AND YEAR != 1996)) AS LHS INNER JOIN `csu_fees` AS RHS ON (LHS.id = RHS.campus)) ORDER BY campusfee
+
+	   campusfee
+	0       1816
+	1       1916
+	2       2009
+Wrong output for fuzzied solution in instance spider/csu_1/0007 (422)
+	EXPECTED OUTPUT ====
+
+		SELECT campusfee
+		FROM campuses AS T1
+		JOIN csu_fees AS T2 ON T1.id = t2.campus
+		WHERE t1.campus = "San Jose State University"
+		  AND T2.year = 1996
+
+	   campusfee
+	0       1999
+	ACTUAL OUTPUT ====
+
+		SELECT `campusfee` FROM (SELECT `LHS`.`id` AS `id`, `LHS`.`campus` AS `campus`, `LHS`.`location` AS `location`, `LHS`.`county` AS `county`, `LHS`.`year` AS `year`, `RHS`.`year` AS `year_other`, `RHS`.`campusfee` AS `campusfee` FROM (SELECT * FROM `campuses` WHERE (`campus` = 'San Jose State University' AND YEAR != 1996)) AS LHS INNER JOIN `csu_fees` AS RHS ON (LHS.id = RHS.campus)) ORDER BY campusfee
+
+	   campusfee
+	0       1952
+	1       1999
+Wrong output for fuzzied solution in instance spider/customers_and_invoices/0041 (573)
+	EXPECTED OUTPUT ====
+
+		SELECT count(*)
+		FROM products
+		WHERE product_id NOT IN
+		    (SELECT product_id
+		     FROM Order_items)
+
+	   count(*)
+	0         0
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT COUNT(*) OVER () AS count___ FROM (SELECT * FROM `products` AS LHS WHERE NOT EXISTS (SELECT 1 FROM `order_items` AS RHS WHERE (LHS.product_id = RHS.product_id) )) ORDER BY count___
+
+	Empty DataFrame
+	Columns: [count___]
+	Index: []
+No solution for instance spider/baseball_1/0022 (626)
+No solution for instance spider/baseball_1/0019 (641)
+Wrong output for fuzzied solution in instance spider/store_product/0013 (682)
+	EXPECTED OUTPUT ====
+
+		SELECT t3.headquartered_city
+		FROM store AS t1
+		JOIN store_district AS t2 ON t1.store_id = t2.store_id
+		JOIN district AS t3 ON t2.district_id = t3.district_id
+		GROUP BY t3.headquartered_city
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	   headquartered_city
+	0  Crox Khanewal City
+	ACTUAL OUTPUT ====
+
+		SELECT headquartered_city FROM (SELECT LHS.store_id AS store_id, LHS.store_name AS store_name, LHS.type AS TYPE, LHS.area_size AS area_size, LHS.number_of_product_category AS number_of_product_category, LHS.ranking AS ranking, LHS.district_id AS district_id, LHS.district_name AS district_name, LHS.headquartered_city AS headquartered_city, LHS.city_population AS city_population, LHS.city_area AS city_area, LHS.n AS n, RHS.type AS type_other, RHS.area_size AS area_size_other, RHS.number_of_product_category AS number_of_product_category_other, RHS.ranking AS ranking_other FROM (SELECT LHS.store_id AS store_id, LHS.store_name AS store_name, LHS.type AS TYPE, LHS.area_size AS area_size, LHS.number_of_product_category AS number_of_product_category, LHS.ranking AS ranking, LHS.district_id AS district_id, LHS.district_name AS district_name, LHS.headquartered_city AS headquartered_city, LHS.city_population AS city_population, LHS.city_area AS city_area, RHS.n AS n FROM (SELECT LHS.store_id AS store_id, LHS.store_name AS store_name, LHS.type AS TYPE, LHS.area_size AS area_size, LHS.number_of_product_category AS number_of_product_category, LHS.ranking AS ranking, LHS.district_id AS district_id, LHS.district_name AS district_name, LHS.headquartered_city AS headquartered_city, LHS.city_population AS city_population, LHS.city_area AS city_area FROM (SELECT LHS.store_id AS store_id, LHS.store_name AS store_name, LHS.type AS TYPE, LHS.area_size AS area_size, LHS.number_of_product_category AS number_of_product_category, LHS.ranking AS ranking, RHS.district_id AS district_id, RHS.district_name AS district_name, RHS.headquartered_city AS headquartered_city, RHS.city_population AS city_population, RHS.city_area AS city_area FROM `store` AS LHS CROSS JOIN `district` AS RHS) AS LHS INNER JOIN `store_district` AS RHS ON (LHS.store_id = RHS.store_id AND LHS.district_id = RHS.district_id)) AS LHS INNER JOIN (SELECT city_area, COUNT() AS n FROM `district` GROUP BY city_area) AS RHS ON (LHS.city_area = RHS.city_area)) AS LHS INNER JOIN `store` AS RHS ON (LHS.n = RHS.store_id AND LHS.store_name = RHS.store_name)) ORDER BY headquartered_city
+
+	  headquartered_city
+	0        Jhelum City
+Wrong output for fuzzied solution in instance spider/small_bank_1/0012 (722)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.name
+		FROM accounts AS T1
+		JOIN checking AS T2 ON T1.custid = T2.custid
+		JOIN savings AS T3 ON T1.custid = T3.custid
+		ORDER BY T2.balance + T3.balance
+		LIMIT 1
+
+	     name
+	0  Porter
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT * FROM (SELECT * FROM (SELECT LHS.custid AS custid, LHS.name AS name, LHS.balance AS balance FROM (SELECT LHS.custid AS custid, LHS.name AS name, RHS.balance AS balance FROM `accounts` AS LHS INNER JOIN `checking` AS RHS ON (LHS.custid = RHS.custid)) AS LHS INNER JOIN (SELECT * FROM `accounts` AS LHS WHERE EXISTS (SELECT 1 FROM `savings` AS RHS WHERE (LHS.custid = RHS.custid) )) AS RHS ON (LHS.custid = RHS.custid AND LHS.name = RHS.name)) ORDER BY balance) LIMIT 1)
+
+	          name
+	0  PortertDdnG
+No solution for instance spider/small_bank_1/0024 (730)
+Wrong output for fuzzied solution in instance spider/small_bank_1/0023 (732)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.name
+		FROM accounts AS T1
+		JOIN checking AS T2 ON T1.custid = T2.custid
+		JOIN savings AS T3 ON T1.custid = T3.custid
+		WHERE T2.balance > T3.balance
+
+	          name
+	0  6DkBrowniBr
+	1        Brown
+	2        Brown
+	3        Weeks
+	4   Weeksaaw6n
+	5  Wesley5RX3(
+	6         eeks
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT name FROM (SELECT LHS.custid AS custid, LHS.balance AS balance, LHS.name AS name, LHS.balance_other AS balance_other, RHS.custid AS custid_other, RHS.balance AS balance_other_other FROM (SELECT LHS.custid AS custid, LHS.balance AS balance, RHS.name AS name, RHS.balance AS balance_other FROM `savings` AS LHS INNER JOIN (SELECT LHS.custid AS custid, LHS.name AS name, RHS.balance AS balance FROM `accounts` AS LHS LEFT JOIN `checking` AS RHS ON (LHS.custid = RHS.custid)) AS RHS ON (LHS.custid = RHS.custid)) AS LHS CROSS JOIN `savings` AS RHS) WHERE (balance < balance_other) ORDER BY name
+
+	          name
+	0  6DkBrowniBr
+	1        Brown
+	2        Weeks
+	3   Weeksaaw6n
+	4  Wesley5RX3(
+	5         eeks
+No solution for instance spider/customer_deliveries/0002 (757)
+No solution for instance spider/customer_deliveries/0011 (771)
+No solution for instance spider/tracking_grants_for_research/0033 (790)
+No solution for instance spider/tracking_grants_for_research/0037 (791)
+No solution for instance spider/tracking_grants_for_research/0002 (792)
+Wrong output for fuzzied solution in instance spider/tracking_grants_for_research/0019 (814)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.project_details,
+		       T1.project_id
+		FROM Projects AS T1
+		JOIN Project_outcomes AS T2 ON T1.project_id = T2.project_id
+		GROUP BY T1.project_id
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	  project_details  project_id
+	0     liNomnisC5r          13
+	ACTUAL OUTPUT ====
+
+		SELECT project_details, project_id FROM (SELECT LHS.outcome_details AS outcome_details, LHS.project_id AS project_id, LHS.n AS n, RHS.project_details AS project_details FROM (SELECT outcome_details, project_id, COUNT() AS n FROM `project_outcomes` GROUP BY outcome_details, project_id) AS LHS INNER JOIN `projects` AS RHS ON (LHS.project_id = RHS.project_id AND LHS.n = RHS.organisation_id)) ORDER BY project_details
+
+	Empty DataFrame
+	Columns: [project_details, project_id]
+	Index: []
+No solution for instance spider/tracking_grants_for_research/0001 (820)
+Wrong output for ground truth in instance spider/tracking_grants_for_research/0009 (822)
+Wrong output for fuzzied solution in instance spider/epinions_1/0018 (842)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.name
+		FROM useracct AS T1
+		JOIN review AS T2 ON T1.u_id = T2.u_id
+		GROUP BY T2.u_id
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	    name
+	0  Nancy
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT LHS.u_id AS u_id, LHS.name AS name, LHS.n AS n, RHS.i_id AS i_id, RHS.rating AS rating, RHS.rank AS rank FROM (SELECT u_id, name, COUNT(*) OVER () AS n FROM `useracct`) AS LHS INNER JOIN `review` AS RHS ON (LHS.u_id = RHS.u_id AND LHS.n = RHS.a_id)) ORDER BY name
+
+	Empty DataFrame
+	Columns: [name]
+	Index: []
+No solution for instance spider/epinions_1/0020 (843)
+Wrong output for fuzzied solution in instance spider/epinions_1/0019 (844)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.title,
+		       T1.i_id
+		FROM item AS T1
+		JOIN review AS T2 ON T1.i_id = T2.i_id
+		GROUP BY T2.i_id
+		ORDER BY avg(T2.rating) DESC
+		LIMIT 1
+
+	  title  i_id
+	0  comb     1
+	ACTUAL OUTPUT ====
+
+		SELECT title, i_id FROM (SELECT i_id, title, a_id, u_id, rating, a_id AS rank, meanrating FROM (SELECT LHS.i_id AS i_id, LHS.title AS title, LHS.a_id AS a_id, LHS.u_id AS u_id, LHS.rating AS rating, LHS.rank AS rank, RHS.meanrating AS meanrating FROM (SELECT LHS.i_id AS i_id, LHS.title AS title, RHS.a_id AS a_id, RHS.u_id AS u_id, RHS.rating AS rating, RHS.rank AS rank FROM `item` AS LHS INNER JOIN `review` AS RHS ON (LHS.i_id = RHS.i_id)) AS LHS INNER JOIN (SELECT rank, rating, AVG(rating) AS meanrating FROM `review` GROUP BY rank, rating) AS RHS ON (LHS.a_id = RHS.rank AND LHS.rank = RHS.rating))) ORDER BY title
+
+	  title  i_id
+	0   NG5     0
+No solution for instance spider/store_1/0047 (896)
+No solution for instance spider/store_1/0025 (899)
+Wrong output for fuzzied solution in instance spider/movie_1/0041 (953)
+	EXPECTED OUTPUT ====
+
+		SELECT mID,
+		       avg(stars)
+		FROM Rating
+		WHERE mID NOT IN
+		    (SELECT T1.mID
+		     FROM Rating AS T1
+		     JOIN Reviewer AS T2 ON T1.rID = T2.rID
+		     WHERE T2.name = "Brittany Harris")
+		GROUP BY mID
+
+	           mid    avg(stars)
+	0  -4428529116  2.000000e+00
+	1   5731738351  2.000000e+00
+	2   6464657963  2.000000e+00
+	3   6268701055  2.500000e+00
+	4   1344059767  3.500000e+00
+	5   2376501937  3.750000e+00
+	6          101  4.250000e+00
+	7    904306678  4.250000e+00
+	8   7986557291  4.333333e+00
+	9   2188642947  4.500000e+00
+	10   475739243  5.000000e+00
+	11  5190064626  5.000000e+00
+	12  6200806204  5.000000e+00
+	13         105  6.000000e+00
+	14  3937062840  3.684972e+08
+	15         102  1.629126e+09
+	16  4824915458  2.124226e+09
+	17  8073136845  2.136321e+09
+	18  8219704661  2.256413e+09
+	19  9504859083  2.671778e+09
+	20  9573239784  3.613453e+09
+	21  2375328978  6.368973e+09
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT `mid`, `meanstars` AS `avg_stars_` FROM (SELECT `LHS`.`rid` AS `rid`, `LHS`.`mid` AS `mid`, `LHS`.`stars` AS `stars`, `LHS`.`ratingdate` AS `ratingdate`, `LHS`.`name` AS `name`, `RHS`.`meanstars` AS `meanstars` FROM (SELECT `LHS`.`rid` AS `rid`, `LHS`.`mid` AS `mid`, `LHS`.`stars` AS `stars`, `LHS`.`ratingdate` AS `ratingdate`, `RHS`.`name` AS `name` FROM `rating` AS `LHS` INNER JOIN (SELECT * FROM `reviewer` WHERE (`name` != 'Brittany Harris')) AS RHS ON (LHS.rid = RHS.rid)) AS LHS INNER JOIN (SELECT mid, AVG(stars) AS meanstars FROM `rating` GROUP BY mid) AS RHS ON (LHS.mid = RHS.mid)) WHERE (meanstars >= mid OR meanstars >= stars) ORDER BY mid
+
+	           mid    avg_stars_
+	0  -4428529116  2.000000e+00
+	1   5731738351  2.000000e+00
+	2   6464657963  2.000000e+00
+	3   6268701055  2.500000e+00
+	4    833645847  2.666667e+00
+	5   1344059767  3.500000e+00
+	6   2376501937  3.750000e+00
+	7          101  4.250000e+00
+	8    904306678  4.250000e+00
+	9   7986557291  4.333333e+00
+	10  2188642947  4.500000e+00
+	11   475739243  5.000000e+00
+	12  5190064626  5.000000e+00
+	13  6200806204  5.000000e+00
+	14         105  6.000000e+00
+	15         100  1.910326e+08
+	16  3937062840  3.684972e+08
+	17  1509726688  1.564289e+09
+	18         102  1.629126e+09
+	19  4824915458  2.124226e+09
+	20  8073136845  2.136321e+09
+	21  8219704661  2.256413e+09
+	22          99  2.591842e+09
+	23  9504859083  2.671778e+09
+	24  9573239784  3.613453e+09
+	25         104  4.742614e+09
+	26  6863688486  6.255584e+09
+	27  2375328978  6.368973e+09
+Wrong output for fuzzied solution in instance spider/movie_1/0043 (963)
+	EXPECTED OUTPUT ====
+
+		SELECT mID,
+		       avg(stars)
+		FROM Rating
+		GROUP BY mID
+		HAVING count(*) >= 2
+
+	           mid    avg(stars)
+	0   8124467663  2.666667e+00
+	1   7369639185  2.750000e+00
+	2   2733693645  4.000000e+00
+	3  -9466258595  4.333333e+00
+	4   4743059254  4.400000e+00
+	5   2052103628  1.842486e+08
+	6   1217209795  5.730978e+08
+	7          105  7.947425e+08
+	8  -4869825066  9.132472e+08
+	9          101  1.096367e+09
+	10         104  1.169684e+09
+	11         102  5.183683e+09
+	12         103  5.912050e+09
+	ACTUAL OUTPUT ====
+
+		SELECT mid, meanstars AS avg_stars_ FROM (SELECT mid, meanstars, COUNT(*) OVER () AS n FROM (SELECT mid, AVG(stars) AS meanstars FROM `rating` GROUP BY mid)) WHERE (n <= 2 OR meanstars < n) ORDER BY mid
+
+	          mid  avg_stars_
+	0  8124467663    2.666667
+	1  7369639185    2.750000
+	2         100    3.000000
+	3         106    4.000000
+	4  2733693645    4.000000
+	5 -9466258595    4.333333
+	6  4743059254    4.400000
+No solution for instance spider/movie_1/0049 (974)
+Wrong output for ground truth in instance spider/customers_and_products_contacts/0009 (1079)
+No solution for instance spider/bike_1/0017 (1087)
+No solution for instance spider/bike_1/0052 (1088)
+No solution for instance spider/bike_1/0030 (1096)
+No solution for instance spider/bike_1/0045 (1107)
+No solution for instance spider/bike_1/0007 (1114)
+Wrong output for fuzzied solution in instance spider/flight_company/0012 (1141)
+	EXPECTED OUTPUT ====
+
+		SELECT TYPE,
+		       count(*)
+		FROM operate_company
+		GROUP BY TYPE
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	         type  count(*)
+	0  Subsidiary         3
+	ACTUAL OUTPUT ====
+
+		SELECT TYPE, n AS count___ FROM (SELECT * FROM (SELECT * FROM (SELECT TYPE, COUNT() AS n FROM `operate_company` GROUP BY TYPE) ORDER BY TYPE DESC) LIMIT 1)
+
+	        type  count___
+	0  ubsidiary         1
+No solution for instance spider/flight_company/0015 (1142)
+Wrong output for fuzzied solution in instance spider/insurance_and_eClaims/0013 (1157)
+	EXPECTED OUTPUT ====
+
+		SELECT DISTINCT t2.customer_details
+		FROM policies AS t1
+		JOIN customers AS t2 ON t1.customer_id = t2.customer_id
+		WHERE t1.policy_type_code = "Deputy"
+
+	     customer_details
+	0  Mrs. Liza Heller V
+	1   rs. Liza Heller V
+	ACTUAL OUTPUT ====
+
+		SELECT `customer_details` FROM (SELECT * FROM `customers` AS `LHS` WHERE EXISTS (SELECT 1 FROM (SELECT * FROM `policies` WHERE (`policy_type_code` = 'Deputy')) AS RHS WHERE (LHS.customer_id = RHS.customer_id) )) ORDER BY customer_details
+
+	     customer_details
+	0  Mrs. Liza Heller V
+	1  Mrs. Liza Heller V
+	2   rs. Liza Heller V
+No solution for instance spider/insurance_and_eClaims/0012 (1160)
+Wrong output for fuzzied solution in instance spider/insurance_and_eClaims/0014 (1169)
+	EXPECTED OUTPUT ====
+
+		SELECT DISTINCT t2.customer_details
+		FROM policies AS t1
+		JOIN customers AS t2 ON t1.customer_id = t2.customer_id
+		WHERE t1.policy_type_code = "Deputy"
+		  OR t1.policy_type_code = "Uniform"
+
+	     customer_details
+	0     Buddy Marquardt
+	1  Mrs. Liza Heller V
+	ACTUAL OUTPUT ====
+
+		SELECT `customer_details` FROM (SELECT * FROM `customers` AS `LHS` WHERE EXISTS (SELECT 1 FROM (SELECT * FROM `policies` WHERE (`policy_type_code` = 'Deputy')) AS RHS WHERE (LHS.customer_id = RHS.customer_id) )) ORDER BY customer_details
+
+	     customer_details
+	0     Buddy Marquardt
+	1     Buddy Marquardt
+	2  Mrs. Liza Heller V
+Wrong output for fuzzied solution in instance spider/e_government/0003 (1207)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.form_name
+		FROM forms AS t1
+		JOIN party_forms AS t2 ON t1.form_id = t2.form_id
+		GROUP BY t2.form_id
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	    form_name
+	0  Moving For
+	ACTUAL OUTPUT ====
+
+		SELECT form_name FROM (SELECT form_id, form_type_code, service_id, form_number, form_name, form_description, n, date_completion_started, form_status_code, date_fully_completed, service_id AS party_id FROM (SELECT LHS.form_id AS form_id, LHS.form_type_code AS form_type_code, LHS.service_id AS service_id, LHS.form_number AS form_number, LHS.form_name AS form_name, LHS.form_description AS form_description, LHS.n AS n, RHS.date_completion_started AS date_completion_started, RHS.form_status_code AS form_status_code, RHS.date_fully_completed AS date_fully_completed FROM (SELECT form_id, form_type_code, service_id, form_number, form_name, form_description, COUNT(*) OVER () AS n FROM `forms`) AS LHS INNER JOIN `party_forms` AS RHS ON (LHS.service_id = RHS.party_id AND LHS.n = RHS.form_id))) ORDER BY form_name
+
+	Empty DataFrame
+	Columns: [form_name]
+	Index: []
+No solution for instance spider/e_government/0012 (1211)
+No solution for instance spider/e_government/0015 (1212)
+Wrong output for fuzzied solution in instance spider/e_government/0019 (1217)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.organization_name
+		FROM organizations AS t1
+		JOIN organization_contact_individuals AS t2 ON t1.organization_id = t2.organization_id
+		GROUP BY t1.organization_name
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	  organization_name
+	0      Labour Party
+	ACTUAL OUTPUT ====
+
+		SELECT organization_name FROM (SELECT organization_id, organization_id AS n, date_formed, organization_name, uk_vat_number FROM (SELECT LHS.organization_id AS organization_id, LHS.n AS n, RHS.date_formed AS date_formed, RHS.organization_name AS organization_name, RHS.uk_vat_number AS uk_vat_number FROM (SELECT organization_id, COUNT() AS n FROM `organization_contact_individuals` GROUP BY organization_id) AS LHS INNER JOIN (SELECT organization_id, date_formed, organization_name, uk_vat_number, COUNT(*) OVER () AS n FROM `organizations`) AS RHS ON (LHS.organization_id = RHS.n AND LHS.n = RHS.organization_id))) ORDER BY organization_name
+
+	Empty DataFrame
+	Columns: [organization_name]
+	Index: []
+Wrong output for fuzzied solution in instance spider/cinema/0012 (1271)
+	EXPECTED OUTPUT ====
+
+		SELECT LOCATION
+		FROM cinema
+		WHERE capacity > 300
+		GROUP BY LOCATION
+		HAVING count(*) >= 2
+
+	           location
+	0      County Clare
+	1  County Tipperary
+	ACTUAL OUTPUT ====
+
+		SELECT LOCATION FROM (SELECT LOCATION, openning_year, COUNT(DISTINCT capacity) AS n_distinct FROM `cinema` GROUP BY LOCATION, openning_year) WHERE (n_distinct <= 300 AND n_distinct = 2) ORDER BY LOCATION
+
+	Empty DataFrame
+	Columns: [location]
+	Index: []
+Error while getting results...
+
+[Errno 2] No such file or directory: 'fuzzy_1191.sqlite3'
+Error while getting results...
+
+[Errno 2] No such file or directory: 'fuzzy_1191.sqlite3'
+No solution for instance spider/mountain_photos/0015 (1379)
+No solution for instance spider/mountain_photos/0016 (1381)
+Wrong output for fuzzied solution in instance spider/tracking_software_problems/0008 (1423)
+	EXPECTED OUTPUT ====
+
+		SELECT count(*),
+		       T1.product_name
+		FROM product AS T1
+		JOIN problems AS T2 ON T1.product_id = T2.product_id
+		GROUP BY T1.product_name
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	   count(*) product_name
+	0         5       yellow
+	ACTUAL OUTPUT ====
+
+		SELECT n AS count___, product_name FROM (SELECT LHS.product_id AS product_id, LHS.product_name AS product_name, LHS.n AS n, RHS.product_id AS product_id_other, RHS.product_details AS product_details, RHS.problem_id AS problem_id, RHS.closure_authorised_by_staff_id AS closure_authorised_by_staff_id, RHS.date_problem_reported AS date_problem_reported, RHS.date_problem_closed AS date_problem_closed, RHS.problem_description AS problem_description, RHS.other_problem_details AS other_problem_details FROM (SELECT product_id, product_name, COUNT() AS n FROM (SELECT LHS.product_id AS product_id, LHS.product_name AS product_name, LHS.product_details AS product_details, RHS.problem_id AS problem_id, RHS.closure_authorised_by_staff_id AS closure_authorised_by_staff_id, RHS.reported_by_staff_id AS reported_by_staff_id, RHS.date_problem_reported AS date_problem_reported, RHS.date_problem_closed AS date_problem_closed, RHS.problem_description AS problem_description, RHS.other_problem_details AS other_problem_details FROM `product` AS LHS INNER JOIN `problems` AS RHS ON (LHS.product_id = RHS.product_id)) GROUP BY product_id, product_name) AS LHS INNER JOIN (SELECT LHS.product_id AS product_id, LHS.product_name AS product_name, LHS.product_details AS product_details, RHS.problem_id AS problem_id, RHS.closure_authorised_by_staff_id AS closure_authorised_by_staff_id, RHS.reported_by_staff_id AS reported_by_staff_id, RHS.date_problem_reported AS date_problem_reported, RHS.date_problem_closed AS date_problem_closed, RHS.problem_description AS problem_description, RHS.other_problem_details AS other_problem_details FROM `product` AS LHS INNER JOIN `problems` AS RHS ON (LHS.product_id = RHS.product_id)) AS RHS ON (LHS.product_id = RHS.reported_by_staff_id AND LHS.product_name = RHS.product_name)) ORDER BY count___
+
+	   count___ product_name
+	0         1          log
+	1         1       yellow
+No solution for instance spider/tracking_software_problems/0019 (1434)
+No solution for instance spider/apartment_rentals/0010 (1479)
+Wrong output for fuzzied solution in instance spider/apartment_rentals/0040 (1480)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.apt_number
+		FROM Apartments AS T1
+		JOIN View_Unit_Status AS T2 ON T1.apt_id = T2.apt_id
+		WHERE T2.available_yn = 0 INTERSECT
+		  SELECT T1.apt_number
+		  FROM Apartments AS T1
+		  JOIN View_Unit_Status AS T2 ON T1.apt_id = T2.apt_id WHERE T2.available_yn = 1
+
+	         apt_number
+	0          Apt. 477
+	1     Apt. 4779shH3
+	2          Apt. 837
+	3     Apt. 837uUchd
+	4          Suite 63
+	5         Suite 634
+	6    Suite 634gqdR1
+	7    Suite 634hc4cd
+	8         Suite 749
+	9     TVT)EadFevCpz
+	10  VARfZJ2uYbO1ujL
+	11         adFevCpz
+	12        iA9Z8qHSZ
+	13   qMLApt. 837UXj
+	14         uite 634
+	15         uite 749
+	16  y OSuite 749jfg
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT apt_number FROM (SELECT LHS.apt_id AS apt_id, LHS.building_id AS building_id, LHS.apt_type_code AS apt_type_code, LHS.apt_number AS apt_number, LHS.bathroom_count AS bathroom_count, LHS.bedroom_count AS bedroom_count, LHS.room_count AS room_count, LHS.apt_booking_id AS apt_booking_id, LHS.status_date AS status_date, LHS.available_yn AS available_yn FROM (SELECT LHS.apt_id AS apt_id, LHS.building_id AS building_id, LHS.apt_type_code AS apt_type_code, LHS.apt_number AS apt_number, LHS.bathroom_count AS bathroom_count, LHS.bedroom_count AS bedroom_count, LHS.room_count AS room_count, RHS.apt_booking_id AS apt_booking_id, RHS.status_date AS status_date, RHS.available_yn AS available_yn FROM `apartments` AS LHS INNER JOIN `view_unit_status` AS RHS ON (LHS.apt_id = RHS.apt_id)) AS LHS INNER JOIN (SELECT * FROM `view_unit_status` WHERE (available_yn != 1)) AS RHS ON (LHS.apt_id = RHS.apt_id AND LHS.apt_booking_id = RHS.apt_booking_id AND LHS.status_date = RHS.status_date AND LHS.available_yn = RHS.available_yn)) ORDER BY apt_number
+
+	         apt_number
+	0     2IBXtApt. 837
+	1          Apt. 477
+	2     Apt. 4779shH3
+	3          Apt. 837
+	4     Apt. 837uUchd
+	5         DWLqbh2kO
+	6    Iv9Apt. 477nTa
+	7    JXxApt. 8376(s
+	8          Suite 63
+	9         Suite 634
+	10   Suite 634Jfgak
+	11   Suite 634gqdR1
+	12   Suite 634hc4cd
+	13        Suite 749
+	14    TVT)EadFevCpz
+	15  VARfZJ2uYbO1ujL
+	16    a2816Apt. 477
+	17         adFevCpz
+	18        iA9Z8qHSZ
+	19   qMLApt. 837UXj
+	20         uite 634
+	21         uite 749
+	22  y OSuite 749jfg
+No solution for instance spider/device/0013 (1527)
+Wrong output for fuzzied solution in instance spider/wine_1/0036 (1568)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.Winery
+		FROM GRAPES AS T1
+		JOIN WINE AS T2 ON T1.GRAPE = T2.GRAPE
+		WHERE T1.Color = "White"
+		GROUP BY T2.Winery
+		ORDER BY count(*) DESC
+		LIMIT 3
+
+	             winery
+	0          Altamura
+	1     Moon Mountain
+	2  Saucelito Canyon
+	ACTUAL OUTPUT ====
+
+		SELECT `winery` FROM (SELECT `LHS`.`id` AS `id`, `LHS`.`grape` AS `grape`, `LHS`.`color` AS `color`, `RHS`.`winery` AS `winery`, `RHS`.`n` AS `n` FROM `grapes` AS `LHS` LEFT JOIN (SELECT `grape`, `winery`, COUNT() AS `n` FROM `wine` GROUP BY `grape`, `winery`) AS `RHS` ON (`LHS`.`grape` = `RHS`.`grape`)) WHERE (`color` = 'White' AND n > 3) ORDER BY winery
+
+	Empty DataFrame
+	Columns: [winery]
+	Index: []
+No solution for instance spider/wine_1/0005 (1583)
+No solution for instance spider/wine_1/0031 (1605)
+No solution for instance spider/wrestler/0010 (1625)
+Wrong output for fuzzied solution in instance spider/tracking_orders/0013 (1633)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.customer_name
+		FROM customers AS T1
+		JOIN orders AS T2 ON T1.customer_id = T2.customer_id
+		WHERE T2.order_status = "On Road" INTERSECT
+		  SELECT T1.customer_name
+		  FROM customers AS T1
+		  JOIN orders AS T2 ON T1.customer_id = T2.customer_id WHERE T2.order_status = "Shipped"
+
+	   customer_name
+	0          Parke
+	1  bbqWmSavannah
+	ACTUAL OUTPUT ====
+
+		SELECT `customer_name` FROM (SELECT * FROM `customers` AS `LHS` WHERE EXISTS (SELECT 1 FROM (SELECT `customer_id` AS `order_id`, `customer_id`, `order_status`, `date_order_placed`, `order_details`, `customer_id_other`, `date_order_placed_other`, `order_details_other` FROM (SELECT `LHS`.`order_id` AS `order_id`, `LHS`.`customer_id` AS `customer_id`, `LHS`.`order_status` AS `order_status`, `LHS`.`date_order_placed` AS `date_order_placed`, `LHS`.`order_details` AS `order_details`, `RHS`.`customer_id` AS `customer_id_other`, `RHS`.`date_order_placed` AS `date_order_placed_other`, `RHS`.`order_details` AS `order_details_other` FROM (SELECT * FROM `orders` WHERE (`order_status` != 'On Road' AND `order_status` = 'Shipped')) AS `LHS` INNER JOIN (SELECT * FROM `orders` WHERE (`order_status` != 'On Road' AND `order_status` = 'Shipped')) AS RHS ON (LHS.customer_id = RHS.order_id AND LHS.order_status = RHS.order_status))) AS RHS WHERE (LHS.customer_id = RHS.customer_id) )) ORDER BY customer_name
+
+	Empty DataFrame
+	Columns: [customer_name]
+	Index: []
+No solution for instance spider/performance_attendance/0011 (1689)
+Wrong output for fuzzied solution in instance spider/tracking_share_transactions/0035 (1713)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.investor_id,
+		       T1.Investor_details
+		FROM INVESTORS AS T1
+		JOIN TRANSACTIONS AS T2 ON T1.investor_id = T2.investor_id
+		GROUP BY T2.investor_id
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	   investor_id investor_details
+	0           18                i
+	ACTUAL OUTPUT ====
+
+		SELECT investor_id, investor_details FROM (SELECT LHS.investor_id AS investor_id, LHS.investor_details AS investor_details, RHS.amount_of_transaction AS amount_of_transaction FROM `investors` AS LHS INNER JOIN (SELECT * FROM (SELECT amount_of_transaction, COUNT() AS n FROM `transactions` GROUP BY amount_of_transaction) WHERE (n > 1)) AS RHS ON (LHS.investor_id = RHS.n)) ORDER BY investor_id
+
+	Empty DataFrame
+	Columns: [investor_id, investor_details]
+	Index: []
+Wrong output for ground truth in instance spider/tracking_share_transactions/0014 (1722)
+No solution for instance spider/medicine_enzyme_interaction/0021 (1747)
+No solution for instance spider/medicine_enzyme_interaction/0011 (1751)
+Error while checking ground truth in instance spider/wedding/0012 (1759)
+Wrong output for fuzzied solution in instance spider/debate/0008 (1770)
+	EXPECTED OUTPUT ====
+
+		SELECT Party
+		FROM people
+		GROUP BY Party
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	                           party
+	0  pE7Anti-Lecompton Democrat1UZ
+	ACTUAL OUTPUT ====
+
+		SELECT party FROM (SELECT * FROM (SELECT * FROM (SELECT party, COUNT() AS n FROM `people` GROUP BY party) ORDER BY n DESC) LIMIT 1)
+
+	                     party
+	0  Anti-Lecompton Democrat
+No solution for instance spider/activity_1/0039 (1791)
+No solution for instance spider/gymnast/0017 (1829)
+Wrong output for fuzzied solution in instance spider/cre_Theme_park/0041 (1871)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.Name
+		FROM Tourist_Attractions AS T1
+		JOIN VISITORS AS T2
+		JOIN VISITS AS T3 ON T1.Tourist_Attraction_ID = T3.Tourist_Attraction_ID
+		AND T2.Tourist_ID = T3.Tourist_ID
+		WHERE T2.Tourist_Details = "Alison"
+		EXCEPT
+		SELECT T1.Name
+		FROM Tourist_Attractions AS T1
+		JOIN VISITORS AS T2
+		JOIN VISITS AS T3 ON T1.Tourist_Attraction_ID = T3.Tourist_Attraction_ID
+		AND T2.Tourist_ID = T3.Tourist_ID
+		WHERE T2.Tourist_Details = "Rosalind"
+
+	                    name
+	0       I0HUK gallerykWr
+	1              UK galler
+	2        UK galleryr7eoZ
+	3          fhSparkingbzJ
+	4        flying elephant
+	5   flying elephantGOX)f
+	6        h5lQWUK gallery
+	7    jWjjungle cruisefgd
+	8          jungle cruise
+	9       oApUK galleryITH
+	10         zR6MK9KMAZEAp
+	ACTUAL OUTPUT ====
+
+		SELECT `name` FROM (SELECT `LHS`.`tourist_id` AS `tourist_id`, `LHS`.`tourist_details` AS `tourist_details`, `LHS`.`tourist_attraction_id` AS `tourist_attraction_id`, `LHS`.`attraction_type_code` AS `attraction_type_code`, `LHS`.`location_id` AS `location_id`, `LHS`.`how_to_get_there` AS `how_to_get_there`, `LHS`.`name` AS `name`, `LHS`.`description` AS `description`, `LHS`.`opening_hours` AS `opening_hours`, `LHS`.`other_details` AS `other_details`, `LHS`.`visit_id` AS `visit_id`, `LHS`.`visit_date` AS `visit_date`, `LHS`.`visit_details` AS `visit_details` FROM (SELECT `LHS`.`tourist_id` AS `tourist_id`, `LHS`.`tourist_details` AS `tourist_details`, `LHS`.`tourist_attraction_id` AS `tourist_attraction_id`, `LHS`.`attraction_type_code` AS `attraction_type_code`, `LHS`.`location_id` AS `location_id`, `LHS`.`how_to_get_there` AS `how_to_get_there`, `LHS`.`name` AS `name`, `LHS`.`description` AS `description`, `LHS`.`opening_hours` AS `opening_hours`, `LHS`.`other_details` AS `other_details`, `RHS`.`visit_id` AS `visit_id`, `RHS`.`visit_date` AS `visit_date`, `RHS`.`visit_details` AS `visit_details` FROM (SELECT `LHS`.`tourist_id` AS `tourist_id`, `LHS`.`tourist_details` AS `tourist_details`, `RHS`.`tourist_attraction_id` AS `tourist_attraction_id`, `RHS`.`attraction_type_code` AS `attraction_type_code`, `RHS`.`location_id` AS `location_id`, `RHS`.`how_to_get_there` AS `how_to_get_there`, `RHS`.`name` AS `name`, `RHS`.`description` AS `description`, `RHS`.`opening_hours` AS `opening_hours`, `RHS`.`other_details` AS `other_details` FROM `visitors` AS `LHS` CROSS JOIN `tourist_attractions` AS `RHS`) AS `LHS` INNER JOIN `visits` AS `RHS` ON (`LHS`.`tourist_id` = `RHS`.`tourist_id` AND `LHS`.`tourist_attraction_id` = `RHS`.`tourist_attraction_id`)) AS `LHS` INNER JOIN (SELECT * FROM `visitors` WHERE (`tourist_details` = 'Alison' AND `tourist_details` != 'Rosalind')) AS RHS ON (LHS.tourist_id = RHS.tourist_id AND LHS.tourist_details = RHS.tourist_details)) ORDER BY name
+
+	                    name
+	0       I0HUK gallerykWr
+	1              UK galler
+	2        UK galleryr7eoZ
+	3          fhSparkingbzJ
+	4        flying elephant
+	5   flying elephantGOX)f
+	6        h5lQWUK gallery
+	7    jWjjungle cruisefgd
+	8    jWjjungle cruisefgd
+	9          jungle cruise
+	10      oApUK galleryITH
+	11         zR6MK9KMAZEAp
+Wrong output for fuzzied solution in instance spider/cre_Theme_park/0019 (1874)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.Royal_Family_Details,
+		       T2.How_to_Get_There
+		FROM ROYAL_FAMILY AS T1
+		JOIN TOURIST_ATTRACTIONS AS T2 ON T1.Royal_Family_ID = T2.Tourist_Attraction_ID
+
+	          royal_family_details how_to_get_there
+	0      99ThxOGcQ8RUjUJ)wPfEz0z    6)(shuttlefXn
+	1         a (8T)EU6QBwro2Phn7v         Hqn0zbus
+	2                          43j         K(jrcbus
+	3      HfzW6foxUMtBbHY2S4XqXz4     M7tzzshuttle
+	4           wE5AfyUFz)sydIkcTa              alk
+	5                      C6CQW59              bus
+	6                          Z (              bus
+	7                  eFxwJK1HwZO              bus
+	8             irA8JO)u8RthjUL7              bus
+	9           jDpKVokOdyzTbXKI7s              bus
+	10                    lt)FUJ9V              bus
+	11                     x GgHhx              bus
+	12                    MabBZoT1         busoUifB
+	13                        VbwA           huttle
+	14               )RlBXwTug5jwD     muM sshuttle
+	15             DGwO(c5Zt2Rva k           shuttl
+	16                        Vs55          shuttle
+	17               McZU9GC)OSwcl     shuttleO15Cv
+	18                       grCny    thyshuttleZQH
+	19                                           us
+	20               DOE2umvo3wqcQ               us
+	21  2oACe3QLzdAVR(Sngm 0dzWiGm              wal
+	22           8J1e4hZkj1OtmLKHD             walk
+	23                  lK4gCyn634             walk
+	ACTUAL OUTPUT ====
+
+		SELECT description AS royal_family_details, how_to_get_there FROM (SELECT LHS.tourist_attraction_id AS tourist_attraction_id, LHS.attraction_type_code AS attraction_type_code, LHS.location_id AS location_id, LHS.how_to_get_there AS how_to_get_there, LHS.name AS name, LHS.description AS description, LHS.opening_hours AS opening_hours, LHS.other_details AS other_details, LHS.royal_family_id AS royal_family_id, LHS.royal_family_details AS royal_family_details, RHS.attraction_type_code AS attraction_type_code_other, RHS.location_id AS location_id_other, RHS.how_to_get_there AS how_to_get_there_other, RHS.description AS description_other, RHS.opening_hours AS opening_hours_other, RHS.other_details AS other_details_other FROM (SELECT LHS.tourist_attraction_id AS tourist_attraction_id, LHS.attraction_type_code AS attraction_type_code, LHS.location_id AS location_id, LHS.how_to_get_there AS how_to_get_there, LHS.name AS name, LHS.description AS description, LHS.opening_hours AS opening_hours, LHS.other_details AS other_details, RHS.royal_family_id AS royal_family_id, RHS.royal_family_details AS royal_family_details FROM `tourist_attractions` AS LHS CROSS JOIN `royal_family` AS RHS) AS LHS INNER JOIN `tourist_attractions` AS RHS ON (LHS.royal_family_id = RHS.tourist_attraction_id AND LHS.name = RHS.name)) ORDER BY royal_family_details
+
+	   royal_family_details how_to_get_there
+	0         JEU9 z5OfDCt1    6)(shuttlefXn
+	1         JEU9 z5OfDCt1    6)(shuttlefXn
+	2         JEU9 z5OfDCt1    6)(shuttlefXn
+	3         G0C(GS3FfDBIE         Hqn0zbus
+	4         G0C(GS3FfDBIE         Hqn0zbus
+	5         G0C(GS3FfDBIE         Hqn0zbus
+	6              S3FfDBIE         K(jrcbus
+	7              S3FfDBIE         K(jrcbus
+	8              S3FfDBIE         K(jrcbus
+	9          JEU9 z5OfDCt     M7tzzshuttle
+	10             S3FfDBIE              alk
+	11             S3FfDBIE              alk
+	12             S3FfDBIE              alk
+	13              3FfDBIE              bus
+	14              3FfDBIE              bus
+	15         EU9 z5OfDCt1              bus
+	16         JEU9 z5OfDCt              bus
+	17        JEU9 z5OfDCt1              bus
+	18        JEU9 z5OfDCt1              bus
+	19        JEU9 z5OfDCt1              bus
+	20             S3FfDBIE              bus
+	21             S3FfDBIE              bus
+	22             S3FfDBIE              bus
+	23             S3FfDBIE              bus
+	24        JEU9 z5OfDCt1         busoUifB
+	25        JEU9 z5OfDCt1         busoUifB
+	26  TNxJEU9 z5OfDCt1f86           huttle
+	27        JEU9 z5OfDCt1     muM sshuttle
+	28        JEU9 z5OfDCt1           shuttl
+	29        JEU9 z5OfDCt1           shuttl
+	30        JEU9 z5OfDCt1           shuttl
+	31        JEU9 z5OfDCt1          shuttle
+	32       w()S3FfDBIE0gt     shuttleO15Cv
+	33       w()S3FfDBIE0gt     shuttleO15Cv
+	34             S3FfDBIE    thyshuttleZQH
+	35             S3FfDBIE    thyshuttleZQH
+	36        JEU9 z5OfDCt1               us
+	37        JEU9 z5OfDCt1               us
+	38        JEU9 z5OfDCt1               us
+	39             S3FfDBIE               us
+	40       B27S3FfDBIEVnW              wal
+	41        JEU9 z5OfDCt1             walk
+	42        JEU9 z5OfDCt1             walk
+	43   JEU9 z5OfDCt101W5m             walk
+Wrong output for ground truth in instance spider/cre_Theme_park/0025 (1883)
+Wrong output for fuzzied solution in instance spider/cre_Theme_park/0031 (1889)
+	EXPECTED OUTPUT ====
+
+		SELECT How_to_Get_There
+		FROM Tourist_Attractions
+		GROUP BY How_to_Get_There
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	  how_to_get_there
+	0             walk
+	ACTUAL OUTPUT ====
+
+		SELECT how_to_get_there FROM (SELECT * FROM (SELECT * FROM (SELECT how_to_get_there, COUNT() AS n FROM `tourist_attractions` GROUP BY how_to_get_there) ORDER BY n DESC) LIMIT 1)
+
+	  how_to_get_there
+	0          shuttle
+No solution for instance spider/manufactory_1/0019 (1994)
+Wrong output for fuzzied solution in instance spider/phone_market/0012 (2055)
+	EXPECTED OUTPUT ====
+
+		SELECT T3.Name
+		FROM phone_market AS T1
+		JOIN market AS T2 ON T1.Market_ID = T2.Market_ID
+		JOIN phone AS T3 ON T1.Phone_ID = T3.Phone_ID
+		WHERE T2.Num_of_shops > 50
+
+	       name
+	0  IPhone 6
+	1  IPhone 6
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT LHS.name AS name, LHS.phone_id AS phone_id, LHS.memory_in_g AS memory_in_g, LHS.carrier AS carrier, LHS.price AS price, RHS.market_id AS market_id, RHS.district AS district, RHS.num_of_employees AS num_of_employees, RHS.num_of_shops AS num_of_shops FROM `phone` AS LHS INNER JOIN (SELECT * FROM (SELECT * FROM `market` WHERE (num_of_shops != 50.0)) AS LHS WHERE EXISTS (SELECT 1 FROM `phone_market` AS RHS WHERE (LHS.market_id = RHS.market_id) )) AS RHS ON (LHS.phone_id = RHS.ranking)) ORDER BY name
+
+	             name
+	0  q9Bp2IPhone 5s
+	1  q9Bp2IPhone 5s
+No solution for instance spider/coffee_shop/0012 (2071)
+Wrong output for fuzzied solution in instance spider/hospital_1/0003 (2091)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.name,
+		       T2.position
+		FROM department AS T1
+		JOIN physician AS T2 ON T1.head = T2.EmployeeID
+		GROUP BY departmentID
+		ORDER BY count(departmentID)
+		LIMIT 1;
+
+	                name                           position
+	0  (E14UTodd Quinlan  FQQF6Surgical Attending Physician
+	ACTUAL OUTPUT ====
+
+		SELECT name, POSITION FROM (SELECT LHS.employeeid AS employeeid, LHS.name AS name, LHS.position AS POSITION, LHS.ssn AS ssn, RHS.departmentid AS departmentid, RHS.name AS name_other, RHS.n AS n FROM `physician` AS LHS INNER JOIN (SELECT * FROM (SELECT departmentid, name, head, COUNT(*) OVER () AS n FROM `department`) WHERE (departmentid <= 1 OR n < departmentid)) AS RHS ON (LHS.employeeid = RHS.head)) ORDER BY name
+
+	                     name                           position
+	0       (E14UTodd Quinlan  FQQF6Surgical Attending Physician
+	1             Elliot Reid       Surgical Attending Physician
+	2  kjBw2Keith Dudemeister                    Staff Internist
+Wrong output for fuzzied solution in instance spider/hospital_1/0013 (2096)
+	EXPECTED OUTPUT ====
+
+		SELECT T4.name
+		FROM stay AS T1
+		JOIN patient AS T2 ON T1.Patient = T2.SSN
+		JOIN Prescribes AS T3 ON T3.Patient = T2.SSN
+		JOIN Medication AS T4 ON T3.Medication = T4.Code
+		WHERE room = 111
+
+	                 name
+	0           A0lpnOAKo
+	1           A0lpnOAKo
+	2           A0lpnOAKo
+	3           A0lpnOAKo
+	4           A0lpnOAKo
+	..                ...
+	140  drUQlCrescavitin
+	141  drUQlCrescavitin
+	142  drUQlCrescavitin
+	143  drUQlCrescavitin
+	144  drUQlCrescavitin
+	
+	[145 rows x 1 columns]
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT code, name, brand, description, physician, `patient`, `medication`, date, appointment, dose, stayid, room, staystart, stayend, name_other, address, phone, insuranceid, code AS pcp FROM (SELECT LHS.code AS code, LHS.name AS name, LHS.brand AS brand, LHS.description AS description, LHS.physician AS physician, LHS.`patient` AS `patient`, LHS.`medication` AS `medication`, LHS.date AS date, LHS.appointment AS appointment, LHS.dose AS dose, LHS.stayid AS stayid, LHS.room AS room, LHS.staystart AS staystart, LHS.stayend AS stayend, RHS.name AS name_other, RHS.address AS address, RHS.phone AS phone, RHS.insuranceid AS insuranceid FROM (SELECT LHS.code AS code, LHS.name AS name, LHS.brand AS brand, LHS.description AS description, LHS.physician AS physician, LHS.`patient` AS `patient`, LHS.`medication` AS `medication`, LHS.date AS date, LHS.appointment AS appointment, LHS.dose AS dose, RHS.stayid AS stayid, RHS.room AS room, RHS.staystart AS staystart, RHS.stayend AS stayend FROM (SELECT LHS.code AS code, LHS.name AS name, LHS.brand AS brand, LHS.description AS description, RHS.physician AS physician, RHS.`patient` AS `patient`, RHS.`medication` AS `medication`, RHS.date AS date, RHS.appointment AS appointment, RHS.dose AS dose FROM `medication` AS LHS CROSS JOIN `prescribes` AS RHS) AS LHS INNER JOIN (SELECT * FROM `stay` WHERE (room = 111)) AS RHS ON (LHS.`patient` = RHS.`patient`)) AS LHS INNER JOIN `patient` AS RHS ON (LHS.code = RHS.pcp AND LHS.`patient` = RHS.ssn))) ORDER BY name
+
+	            name
+	0         Awakin
+	1         Awakin
+	2         Awakin
+	3         Awakin
+	4         Awakin
+	..           ...
+	140  Crescavitin
+	141  Crescavitin
+	142  Crescavitin
+	143  Crescavitin
+	144  Crescavitin
+	
+	[145 rows x 1 columns]
+Wrong output for fuzzied solution in instance spider/hospital_1/0014 (2119)
+	EXPECTED OUTPUT ====
+
+		SELECT patient
+		FROM stay
+		WHERE room = 111
+		ORDER BY staystart DESC
+		LIMIT 1
+
+	      patient
+	0 -4276224536
+	ACTUAL OUTPUT ====
+
+		SELECT `patient` FROM (SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT LHS.ssn AS ssn, LHS.name AS name, LHS.address AS address, LHS.phone AS phone, LHS.insuranceid AS insuranceid, LHS.pcp AS pcp, RHS.stayid AS stayid, RHS.`patient` AS `patient`, RHS.room AS room, RHS.staystart AS staystart, RHS.stayend AS stayend FROM `patient` AS LHS CROSS JOIN `stay` AS RHS) WHERE (room = 111)) ORDER BY pcp DESC) LIMIT 1)
+
+	      patient
+	0 -8958892831
+No solution for instance spider/department_store/0033 (2131)
+Wrong output for fuzzied solution in instance spider/department_store/0017 (2135)
+	EXPECTED OUTPUT ====
+
+		SELECT dept_store_chain_id
+		FROM department_stores
+		GROUP BY dept_store_chain_id
+		ORDER BY count(*) DESC
+		LIMIT 2
+
+	   dept_store_chain_id
+	0                    4
+	1                    5
+	ACTUAL OUTPUT ====
+
+		SELECT dept_store_chain_id FROM (SELECT * FROM (SELECT * FROM (SELECT dept_store_chain_id, COUNT() AS n FROM `department_stores` GROUP BY dept_store_chain_id) ORDER BY n DESC) LIMIT 2)
+
+	   dept_store_chain_id
+	0                   -1
+	1                    5
+No solution for instance spider/department_store/0015 (2148)
+Wrong output for ground truth in instance spider/hr_1/0007 (2236)
+Wrong output for fuzzied solution in instance spider/products_gen_characteristics/0038 (2265)
+	EXPECTED OUTPUT ====
+
+		SELECT t2.color_description
+		FROM products AS t1
+		JOIN ref_colors AS t2 ON t1.color_code = t2.color_code
+		GROUP BY t2.color_description
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	  color_description
+	0              gray
+	ACTUAL OUTPUT ====
+
+		SELECT color_description FROM (SELECT LHS.color_code AS color_code, LHS.typical_buying_price AS typical_buying_price, LHS.n AS n, RHS.color_description AS color_description FROM (SELECT * FROM (SELECT color_code, typical_buying_price, COUNT() AS n FROM `products` GROUP BY color_code, typical_buying_price) WHERE (n != 1)) AS LHS INNER JOIN `ref_colors` AS RHS ON (LHS.color_code = RHS.color_code)) ORDER BY color_description
+
+	Empty DataFrame
+	Columns: [color_description]
+	Index: []
+Wrong output for ground truth in instance spider/products_gen_characteristics/0019 (2283)
+Wrong output for fuzzied solution in instance spider/products_gen_characteristics/0010 (2296)
+	EXPECTED OUTPUT ====
+
+		SELECT count(*)
+		FROM products
+		WHERE product_category_code = "Spices"
+		  AND typical_buying_price > 1000
+
+	   count(*)
+	0         0
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT COUNT(*) OVER () AS `count___` FROM (SELECT `product_category_code`, COUNT() AS `n` FROM `products` GROUP BY `product_category_code`) WHERE (`product_category_code` != 'Spices' AND n != 1000) ORDER BY count___
+
+	   count___
+	0        11
+No solution for instance spider/flight_4/0036 (2321)
+No solution for instance spider/flight_4/0017 (2322)
+Wrong output for ground truth in instance spider/flight_4/0027 (2327)
+No solution for instance spider/flight_4/0013 (2330)
+No solution for instance spider/flight_4/0006 (2331)
+No solution for instance spider/flight_4/0035 (2341)
+Wrong output for fuzzied solution in instance spider/city_record/0005 (2368)
+	EXPECTED OUTPUT ====
+
+		SELECT T3.venue
+		FROM city AS T1
+		JOIN hosting_city AS T2 ON T1.city_id = T2.host_city
+		JOIN MATCH AS T3 ON T2.match_id = T3.match_id
+		WHERE T1.city = "Nanjing ( Jiangsu )"
+		  AND T3.competition = "1994 FIFA World Cup qualification"
+
+	Empty DataFrame
+	Columns: [venue]
+	Index: []
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT `venue` FROM (SELECT `LHS`.`city_id` AS `city_id`, `LHS`.`city` AS `city`, `LHS`.`hanzi` AS `hanzi`, `LHS`.`hanyu_pinyin` AS `hanyu_pinyin`, `LHS`.`regional_population` AS `regional_population`, `LHS`.`gdp` AS `gdp`, `LHS`.`match_id` AS `match_id`, `LHS`.`date` AS `date`, `LHS`.`venue` AS `venue`, `LHS`.`score` AS `score`, `LHS`.`result` AS `result`, `LHS`.`competition` AS `competition`, `RHS`.`year` AS `year`, `RHS`.`host_city` AS `host_city` FROM (SELECT `LHS`.`city_id` AS `city_id`, `LHS`.`city` AS `city`, `LHS`.`hanzi` AS `hanzi`, `LHS`.`hanyu_pinyin` AS `hanyu_pinyin`, `LHS`.`regional_population` AS `regional_population`, `LHS`.`gdp` AS `gdp`, `RHS`.`match_id` AS `match_id`, `RHS`.`date` AS `date`, `RHS`.`venue` AS `venue`, `RHS`.`score` AS `score`, `RHS`.`result` AS `result`, `RHS`.`competition` AS `competition` FROM `city` AS `LHS` CROSS JOIN `match` AS `RHS`) AS `LHS` INNER JOIN `hosting_city` AS `RHS` ON (`LHS`.`match_id` = `RHS`.`match_id`)) WHERE (`city` = 'Nanjing ( Jiangsu )' AND `competition` = '1994 FIFA World Cup qualification') ORDER BY venue
+
+	                                           venue
+	0  Estadio Rigoberto López , Managua , Nicaragua
+Wrong output for fuzzied solution in instance spider/culture_company/0008 (2400)
+	EXPECTED OUTPUT ====
+
+		SELECT category
+		FROM book_club
+		WHERE YEAR > 1989
+		GROUP BY category
+		HAVING count(*) >= 2
+
+	     category
+	0  Lesb. M/SF
+	ACTUAL OUTPUT ====
+
+		SELECT category FROM (SELECT category, YEAR, COUNT() AS n FROM `book_club` GROUP BY category, YEAR) WHERE (YEAR > 1989 AND n = 2) ORDER BY category
+
+	Empty DataFrame
+	Columns: [category]
+	Index: []
+No solution for instance spider/culture_company/0019 (2410)
+No solution for instance spider/race_track/0017 (2417)
+Wrong output for fuzzied solution in instance spider/race_track/0012 (2423)
+	EXPECTED OUTPUT ====
+
+		SELECT CLASS
+		FROM race
+		GROUP BY CLASS
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	  class
+	0    GT
+	ACTUAL OUTPUT ====
+
+		SELECT CLASS FROM (SELECT * FROM (SELECT * FROM (SELECT CLASS, name, COUNT() AS n FROM `race` GROUP BY CLASS, name) ORDER BY name DESC) LIMIT 1)
+
+	  class
+	0  P/GT
+No solution for instance spider/soccer_1/0003 (2457)
+No solution for instance spider/cre_Drama_Workshop_Groups/0033 (2469)
+No solution for instance spider/cre_Drama_Workshop_Groups/0027 (2478)
+No solution for instance spider/cre_Drama_Workshop_Groups/0016 (2488)
+No solution for instance spider/assets_maintenance/0006 (2518)
+Wrong output for fuzzied solution in instance spider/company_office/0018 (2551)
+	EXPECTED OUTPUT ====
+
+		SELECT Industry
+		FROM Companies
+		WHERE Headquarters = "USA" INTERSECT
+		  SELECT Industry
+		  FROM Companies WHERE Headquarters = "China"
+
+	Empty DataFrame
+	Columns: [industry]
+	Index: []
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT `industry` FROM (SELECT `LHS`.`id` AS `id`, `LHS`.`name` AS `name`, `LHS`.`headquarters` AS `headquarters`, `LHS`.`industry` AS `industry`, `LHS`.`sales_billion` AS `sales_billion`, `LHS`.`profits_billion` AS `profits_billion`, `LHS`.`assets_billion` AS `assets_billion`, `LHS`.`market_value_billion` AS `market_value_billion`, `RHS`.`id` AS `id_other`, `RHS`.`headquarters` AS `headquarters_other`, `RHS`.`industry` AS `industry_other`, `RHS`.`sales_billion` AS `sales_billion_other`, `RHS`.`profits_billion` AS `profits_billion_other`, `RHS`.`assets_billion` AS `assets_billion_other`, `RHS`.`market_value_billion` AS `market_value_billion_other` FROM `companies` AS `LHS` INNER JOIN (SELECT * FROM `companies` WHERE (`headquarters` != 'USA' AND `headquarters` = 'China')) AS RHS ON (LHS.name = RHS.name)) ORDER BY industry
+
+	           industry
+	0           Banking
+	1        Oil and ga
+	2       Oil and gas
+	3  Oil and gasX88F0
+	4            anking
+No solution for instance spider/college_1/0071 (2590)
+Wrong output for fuzzied solution in instance spider/college_1/0049 (2637)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.dept_name
+		FROM professor AS T1
+		JOIN department AS T2 ON T1.dept_code = T2.dept_code
+		GROUP BY T1.dept_code
+		ORDER BY count(*)
+		LIMIT 1
+
+	    dept_name
+	0  Psychology
+	ACTUAL OUTPUT ====
+
+		SELECT dept_name FROM (SELECT LHS.dept_extension AS dept_extension, LHS.dept_name AS dept_name, LHS.n AS n, RHS.emp_num AS emp_num, RHS.dept_code AS dept_code, RHS.prof_office AS prof_office, RHS.prof_high_degree AS prof_high_degree FROM (SELECT dept_extension, dept_name, COUNT() AS n FROM `department` GROUP BY dept_extension, dept_name) AS LHS INNER JOIN `professor` AS RHS ON (LHS.dept_extension = RHS.prof_extension)) ORDER BY dept_name
+
+	         dept_name
+	0  AccountingVnmTn
+	1  AccountingVnmTn
+	2  AccountingVnmTn
+	3  AccountingVnmTn
+	4  AccountingVnmTn
+	5  AccountingVnmTn
+	6  AccountingVnmTn
+	7  AccountingVnmTn
+	8  AccountingVnmTn
+No solution for instance spider/phone_1/0017 (2642)
+No solution for instance spider/phone_1/0016 (2654)
+No solution for instance spider/chinook_1/0016 (2688)
+No solution for instance spider/scientist_1/0009 (2727)
+Wrong output for fuzzied solution in instance spider/customers_card_transactions/0022 (2838)
+	EXPECTED OUTPUT ====
+
+		SELECT count(*)
+		FROM Customers_cards AS T1
+		JOIN Customers AS T2 ON T1.customer_id = T2.customer_id
+		WHERE T2.customer_first_name = "Blanche"
+		  AND T2.customer_last_name = "Huels"
+		  AND T1.card_type_code = "Credit"
+
+	   count(*)
+	0         0
+	ACTUAL OUTPUT ====
+
+		SELECT `n` AS `count___` FROM (SELECT COUNT() AS `n` FROM (SELECT * FROM (SELECT * FROM `customers` AS `LHS` WHERE EXISTS (SELECT 1 FROM (SELECT * FROM `customers_cards` WHERE (`card_type_code` = 'Credit')) AS `RHS` WHERE (`LHS`.`customer_id` = `RHS`.`customer_id`) )) WHERE (`customer_first_name` = 'Blanche' OR `customer_last_name` = 'Huels'))) ORDER BY count___
+
+	   count___
+	0         1
+Wrong output for fuzzied solution in instance spider/restaurant_1/0017 (2907)
+	EXPECTED OUTPUT ====
+
+		SELECT count(*)
+		FROM Restaurant
+		JOIN Type_Of_Restaurant ON Restaurant.ResID = Type_Of_Restaurant.ResID
+		JOIN Restaurant_Type ON Type_Of_Restaurant.ResTypeID = Restaurant_Type.ResTypeID
+		GROUP BY Type_Of_Restaurant.ResTypeID
+		HAVING Restaurant_Type.ResTypeName = 'Sandwich'
+
+	   count(*)
+	0        39
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT n AS count___ FROM (SELECT restypename, COUNT() AS n FROM (SELECT LHS.resid AS resid, LHS.resname AS resname, LHS.address AS address, LHS.rating AS rating, LHS.restypeid AS restypeid, RHS.restypename AS restypename, RHS.restypedescription AS restypedescription FROM (SELECT LHS.resid AS resid, LHS.resname AS resname, LHS.address AS address, LHS.rating AS rating, RHS.restypeid AS restypeid FROM `restaurant` AS LHS INNER JOIN `type_of_restaurant` AS RHS ON (LHS.resid = RHS.resid)) AS LHS INNER JOIN `restaurant_type` AS RHS ON (LHS.restypeid = RHS.restypeid)) GROUP BY restypename) ORDER BY count___
+
+	   count___
+	0        38
+	1        39
+	2        42
+	3        82
+Wrong output for fuzzied solution in instance spider/restaurant_1/0012 (2914)
+	EXPECTED OUTPUT ====
+
+		SELECT Advisor,
+		       count(*)
+		FROM Student
+		GROUP BY Advisor
+		ORDER BY count(Advisor) DESC
+		LIMIT 1;
+
+	   advisor  count(*)
+	0     8724         3
+	ACTUAL OUTPUT ====
+
+		SELECT advisor, n AS count___ FROM (SELECT * FROM (SELECT * FROM (SELECT advisor, COUNT() AS n FROM `student` GROUP BY advisor) ORDER BY n DESC) LIMIT 1)
+
+	   advisor  count___
+	0     8722         3
+Wrong output for fuzzied solution in instance spider/insurance_fnol/0015 (2935)
+	EXPECTED OUTPUT ====
+
+		SELECT customer_name
+		FROM customers
+		EXCEPT
+		SELECT t1.customer_name
+		FROM customers AS t1
+		JOIN first_notification_of_loss AS t2 ON t1.customer_id = t2.customer_id
+
+	          customer_name
+	0        7K9RiPbWKJhGOn
+	1        968kafVOaMFBpa
+	2              Cai Zhan
+	3        Cai ZhangGL75Q
+	4        Cai ZhanggQ5ro
+	5        Cai ZhangrUZkc
+	6          Dayana Robel
+	7     Dayana RobelCT(uy
+	8   Dr. Diana Rathnqu4x
+	9       JyBCai ZhangsZ 
+	10   LyGs5yWmPTYqjXJb8M
+	11             RemVezOk
+	12           V07XH2jYgs
+	13         Zz7IGuQTRWTG
+	14       aRCgdCai Zhang
+	15      e)P)4CxoesQIVgB
+	16       e5e6)Cai Zhang
+	17       gVDafCai Zhang
+	18      iwBCai ZhangjR3
+	19       mclGTBdKUuSDC1
+	20        r. Diana Rath
+	21      sc1)upfidxErzdS
+	22        wyZVb3JRjSE3b
+	23           xjolGCSaBb
+	24      yeGgshwH6cUuwfx
+	25    zdsi7iUVaoL3IUB2l
+	ACTUAL OUTPUT ====
+
+		SELECT customer_name FROM (SELECT customer_name FROM `customers` INTERSECT SELECT customer_name FROM (SELECT * FROM `customers` AS LHS WHERE NOT EXISTS (SELECT 1 FROM `first_notification_of_loss` AS RHS WHERE (LHS.customer_id = RHS.customer_id) ))) ORDER BY customer_name
+
+	          customer_name
+	0        7K9RiPbWKJhGOn
+	1        968kafVOaMFBpa
+	2              Cai Zhan
+	3             Cai Zhang
+	4        Cai ZhangGL75Q
+	5        Cai ZhanggQ5ro
+	6        Cai ZhangrUZkc
+	7          Dayana Robel
+	8     Dayana RobelCT(uy
+	9        Dr. Diana Rath
+	10  Dr. Diana Rathnqu4x
+	11      JyBCai ZhangsZ 
+	12   LyGs5yWmPTYqjXJb8M
+	13             RemVezOk
+	14           V07XH2jYgs
+	15         Zz7IGuQTRWTG
+	16       aRCgdCai Zhang
+	17             ai Zhang
+	18      e)P)4CxoesQIVgB
+	19       e5e6)Cai Zhang
+	20       gVDafCai Zhang
+	21      iwBCai ZhangjR3
+	22       mclGTBdKUuSDC1
+	23        r. Diana Rath
+	24      sc1)upfidxErzdS
+	25        wyZVb3JRjSE3b
+	26           xjolGCSaBb
+	27      yeGgshwH6cUuwfx
+	28    zdsi7iUVaoL3IUB2l
+Wrong output for fuzzied solution in instance spider/icfp_1/0020 (2965)
+	EXPECTED OUTPUT ====
+
+		SELECT t3.title
+		FROM authors AS t1
+		JOIN authorship AS t2 ON t1.authid = t2.authid
+		JOIN papers AS t3 ON t2.paperid = t3.paperid
+		JOIN inst AS t4 ON t2.instid = t4.instid
+		WHERE t4.country = "Japan"
+		  AND t2.authorder = 1
+		  AND t1.lname = "Ohori"
+
+	Empty DataFrame
+	Columns: [title]
+	Index: []
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT `title` FROM (SELECT `LHS`.`authid` AS `authid`, `LHS`.`lname` AS `lname`, `LHS`.`fname` AS `fname`, `LHS`.`paperid` AS `paperid`, `LHS`.`title` AS `title`, `LHS`.`instid` AS `instid`, `LHS`.`authorder` AS `authorder`, `RHS`.`country` AS `country` FROM (SELECT `LHS`.`authid` AS `authid`, `LHS`.`lname` AS `lname`, `LHS`.`fname` AS `fname`, `LHS`.`paperid` AS `paperid`, `LHS`.`title` AS `title`, `RHS`.`instid` AS `instid`, `RHS`.`authorder` AS `authorder` FROM (SELECT `LHS`.`authid` AS `authid`, `LHS`.`lname` AS `lname`, `LHS`.`fname` AS `fname`, `RHS`.`paperid` AS `paperid`, `RHS`.`title` AS `title` FROM `authors` AS `LHS` CROSS JOIN `papers` AS `RHS`) AS `LHS` INNER JOIN `authorship` AS `RHS` ON (`LHS`.`authid` = `RHS`.`authid` AND `LHS`.`paperid` = `RHS`.`paperid`)) AS `LHS` CROSS JOIN (SELECT `country` FROM `inst` INTERSECT SELECT `country` FROM `inst`) AS `RHS`) WHERE (`country` != 'Japan' AND `lname` = 'Ohori') ORDER BY title
+
+	                                               title
+	0                                 Nameless, Painless
+	1  Proving the Unique Fixed-Point Principle Corre...
+	2  TS Proving the Unique Fixed-Point Principle Co...
+	3  aB1B4Functional Pearl: Modular Rollback throug...
+	4                           htaNameless, Painless( e
+	5  roving the Unique Fixed-Point Principle Correc...
+Wrong output for fuzzied solution in instance spider/icfp_1/0021 (2969)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.lname
+		FROM authors AS t1
+		JOIN authorship AS t2 ON t1.authid = t2.authid
+		JOIN papers AS t3 ON t2.paperid = t3.paperid
+		GROUP BY t1.fname,
+		         t1.lname
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	  lname
+	0  Ueno
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT lname FROM (SELECT LHS.lname AS lname, LHS.n AS n, RHS.lname AS lname_other, RHS.n AS n_other FROM (SELECT lname, COUNT() AS n FROM (SELECT LHS.authid AS authid, LHS.lname AS lname, LHS.fname AS fname, LHS.paperid AS paperid, LHS.title AS title, RHS.instid AS instid, RHS.authorder AS authorder FROM (SELECT LHS.authid AS authid, LHS.lname AS lname, LHS.fname AS fname, RHS.paperid AS paperid, RHS.title AS title FROM `authors` AS LHS CROSS JOIN `papers` AS RHS) AS LHS INNER JOIN `authorship` AS RHS ON (LHS.authid = RHS.authid AND LHS.paperid = RHS.paperid)) GROUP BY lname) AS LHS CROSS JOIN (SELECT lname, COUNT() AS n FROM (SELECT LHS.authid AS authid, LHS.lname AS lname, LHS.fname AS fname, LHS.paperid AS paperid, LHS.title AS title, RHS.instid AS instid, RHS.authorder AS authorder FROM (SELECT LHS.authid AS authid, LHS.lname AS lname, LHS.fname AS fname, RHS.paperid AS paperid, RHS.title AS title FROM `authors` AS LHS CROSS JOIN `papers` AS RHS) AS LHS INNER JOIN `authorship` AS RHS ON (LHS.authid = RHS.authid AND LHS.paperid = RHS.paperid)) GROUP BY lname) AS RHS) WHERE (n > n_other) ORDER BY lname
+
+	            lname
+	0           Ahmed
+	1      AhmedhWGqk
+	2  KzZutPouillard
+	3            Ueno
+	4     wS1JameshT 
+Error while getting results...
+
+[Errno 2] No such file or directory: 'fuzzy_1191.sqlite3'
+No solution for instance spider/customers_and_addresses/0003 (3009)
+Error while getting results...
+
+[Errno 2] No such file or directory: 'fuzzy_1191.sqlite3'
+Wrong output for fuzzied solution in instance spider/college_2/0033 (3066)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.title,
+		       T3.name
+		FROM course AS T1
+		JOIN teaches AS T2 ON T1.course_id = T2.course_id
+		JOIN instructor AS T3 ON T2.id = T3.id
+		WHERE YEAR = 2008
+		ORDER BY T1.title
+
+	                          title         name
+	0   ERwInternational Financex4t    6jz DLent
+	1         International Finance    6jz DLent
+	2              Race Car Driving    6jz DLent
+	3                  Video Gaming    6jz DLent
+	4                  Video Gaming    6jz DLent
+	..                          ...          ...
+	68                 Video Gaming  uf1xzRomero
+	69                 Video Gaming  uf1xzRomero
+	70                 World Histor  uf1xzRomero
+	71                 World Histor  uf1xzRomero
+	72           tW3ZpWorld History  uf1xzRomero
+	
+	[73 rows x 2 columns]
+	ACTUAL OUTPUT ====
+
+		SELECT title, name FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.dept_name AS dept_name, LHS.salary AS salary, LHS.course_id AS course_id, LHS.sec_id AS sec_id, LHS.semester AS semester, LHS.year AS YEAR, RHS.title AS title, RHS.credits AS credits FROM (SELECT * FROM (SELECT LHS.id AS id, LHS.name AS name, LHS.dept_name AS dept_name, LHS.salary AS salary, RHS.course_id AS course_id, RHS.sec_id AS sec_id, RHS.semester AS semester, RHS.year AS YEAR FROM `instructor` AS LHS INNER JOIN `teaches` AS RHS ON (LHS.id = RHS.id)) WHERE (YEAR = 2008.0)) AS LHS LEFT JOIN `course` AS RHS ON (LHS.dept_name = RHS.dept_name AND LHS.course_id = RHS.course_id)) ORDER BY title
+
+	   title         name
+	0   None    6jz DLent
+	1   None    6jz DLent
+	2   None    6jz DLent
+	3   None    6jz DLent
+	4   None    6jz DLent
+	..   ...          ...
+	68  None  uf1xzRomero
+	69  None  uf1xzRomero
+	70  None  uf1xzRomero
+	71  None  uf1xzRomero
+	72  None  uf1xzRomero
+	
+	[73 rows x 2 columns]
+No solution for instance spider/college_2/0017 (3071)
+No solution for instance spider/college_2/0048 (3079)
+Wrong output for fuzzied solution in instance spider/college_2/0062 (3096)
+	EXPECTED OUTPUT ====
+
+		SELECT dept_name
+		FROM instructor
+		GROUP BY dept_name
+		ORDER BY avg(salary) DESC
+		LIMIT 1
+
+	   dept_name
+	0  Psycholog
+	ACTUAL OUTPUT ====
+
+		SELECT dept_name FROM (SELECT * FROM (SELECT * FROM (SELECT dept_name, AVG(salary) AS meansalary FROM `instructor` GROUP BY dept_name) ORDER BY meansalary DESC) LIMIT 1)
+
+	         dept_name
+	0  FFhwSComp. Sci.
+No solution for instance spider/college_2/0055 (3140)
+No solution for instance spider/station_weather/0010 (3218)
+Wrong output for fuzzied solution in instance spider/program_share/0014 (3252)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.owner
+		FROM program AS t1
+		JOIN broadcast AS t2 ON t1.program_id = t2.program_id
+		WHERE t2.Time_of_day = "Morning" INTERSECT
+		  SELECT t1.owner
+		  FROM program AS t1
+		  JOIN broadcast AS t2 ON t1.program_id = t2.program_id WHERE t2.Time_of_day = "Night"
+
+	                              owner
+	0   Hunan Broadcasting System (HBS)
+	1        Shanghai Media Group (SMG)
+	2  Southern Media Corporation (SMC)
+	ACTUAL OUTPUT ====
+
+		SELECT `owner` FROM (SELECT * FROM `program` AS `LHS` WHERE EXISTS (SELECT 1 FROM (SELECT * FROM `broadcast` WHERE (`time_of_day` != 'Morning' AND `time_of_day` = 'Night')) AS RHS WHERE (LHS.program_id = RHS.program_id) )) ORDER BY OWNER
+
+	                              owner
+	0   Hunan Broadcasting System (HBS)
+	1        Shanghai Media Group (SMG)
+	2        Shanghai Media Group (SMG)
+	3   Southern Media Corporation (SMC
+	4  Southern Media Corporation (SMC)
+Wrong output for fuzzied solution in instance spider/program_share/0010 (3255)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.name
+		FROM channel AS t1
+		JOIN broadcast AS t2 ON t1.channel_id = t2.channel_id
+		WHERE t2.time_of_day = 'Morning' INTERSECT
+		  SELECT t1.name
+		  FROM channel AS t1
+		  JOIN broadcast AS t2 ON t1.channel_id = t2.channel_id WHERE t2.time_of_day = 'Night'
+
+	                          name
+	0                       CCTV-1
+	1                      CCTV-13
+	2                        CTV-1
+	3  ruGShandong Satellite TVb1e
+	ACTUAL OUTPUT ====
+
+		SELECT `name` FROM (SELECT `LHS`.`channel_id` AS `channel_id`, `LHS`.`name` AS `name`, `LHS`.`owner` AS `owner`, `LHS`.`share_in_percent` AS `share_in_percent`, `LHS`.`rating_in_percent` AS `rating_in_percent`, `RHS`.`channel_id` AS `channel_id_other`, `RHS`.`name` AS `name_other`, `RHS`.`owner` AS `owner_other`, `RHS`.`share_in_percent` AS `share_in_percent_other`, `RHS`.`time_of_day` AS `time_of_day` FROM `channel` AS `LHS` INNER JOIN (SELECT `LHS`.`channel_id` AS `channel_id`, `LHS`.`name` AS `name`, `LHS`.`owner` AS `owner`, `LHS`.`share_in_percent` AS `share_in_percent`, `LHS`.`rating_in_percent` AS `rating_in_percent`, `RHS`.`program_id` AS `program_id`, `RHS`.`time_of_day` AS `time_of_day` FROM `channel` AS `LHS` INNER JOIN (SELECT * FROM `broadcast` WHERE (`time_of_day` = 'Morning' OR `time_of_day` != 'Night')) AS RHS ON (LHS.channel_id = RHS.channel_id)) AS RHS ON (LHS.channel_id = RHS.program_id AND LHS.rating_in_percent = RHS.rating_in_percent)) ORDER BY name
+
+	                          name
+	0                        CCTV-
+	1                       CCTV-1
+	2                       CCTV-1
+	3                       CCTV-1
+	4                       CCTV-1
+	5                        CTV-1
+	6                        CTV-1
+	7         Shandong Satellite T
+	8         Shandong Satellite T
+	9  ruGShandong Satellite TVb1e
+No solution for instance spider/e_learning/0013 (3317)
+Wrong output for ground truth in instance spider/e_learning/0006 (3318)
+No solution for instance spider/aircraft/0006 (3350)
+No solution for instance spider/aircraft/0005 (3354)
+Wrong output for fuzzied solution in instance spider/dorm_1/0047 (3428)
+	EXPECTED OUTPUT ====
+
+		SELECT dorm_name
+		FROM dorm
+		EXCEPT
+		SELECT T1.dorm_name
+		FROM dorm AS T1
+		JOIN has_amenity AS T2 ON T1.dormid = T2.dormid
+		JOIN dorm_amenity AS T3 ON T2.amenid = T3.amenid
+		WHERE T3.amenity_name = 'TV Lounge'
+
+	                    dorm_name
+	0          1TlwO)7X0ZGSQgittm
+	1              Bud Jones Hall
+	2        HpLPmGvl0YE2g5HVG1Jy
+	3  NQ5Anonymous Donor HalllmI
+	4       OO297qzr3Pbw0Q g 4bJL
+	5   b41Grad Student AsylumqUG
+	6  dymAnonymous Donor HallU1G
+	7         nonymous Donor Hall
+	8  o)OAnonymous Donor HallzT)
+	ACTUAL OUTPUT ====
+
+		SELECT `dorm_name` FROM (SELECT * FROM `dorm` AS `LHS` WHERE NOT EXISTS (SELECT 1 FROM (SELECT * FROM (SELECT `LHS`.`dormid` AS `dormid`, `LHS`.`dorm_name` AS `dorm_name`, `LHS`.`student_capacity` AS `student_capacity`, `LHS`.`gender` AS `gender`, `LHS`.`amenid` AS `amenid`, `LHS`.`amenity_name` AS `amenity_name` FROM (SELECT `LHS`.`dormid` AS `dormid`, `LHS`.`dorm_name` AS `dorm_name`, `LHS`.`student_capacity` AS `student_capacity`, `LHS`.`gender` AS `gender`, `RHS`.`amenid` AS `amenid`, `RHS`.`amenity_name` AS `amenity_name` FROM `dorm` AS `LHS` CROSS JOIN `dorm_amenity` AS `RHS`) AS `LHS` INNER JOIN `has_amenity` AS `RHS` ON (`LHS`.`dormid` = `RHS`.`dormid` AND `LHS`.`amenid` = `RHS`.`amenid`)) WHERE (`amenity_name` = 'TV Lounge')) AS RHS WHERE (LHS.dorm_name = RHS.dorm_name) )) ORDER BY dorm_name
+
+	                    dorm_name
+	0          1TlwO)7X0ZGSQgittm
+	1              Bud Jones Hall
+	2              Bud Jones Hall
+	3        HpLPmGvl0YE2g5HVG1Jy
+	4  NQ5Anonymous Donor HalllmI
+	5       OO297qzr3Pbw0Q g 4bJL
+	6   b41Grad Student AsylumqUG
+	7  dymAnonymous Donor HallU1G
+	8         nonymous Donor Hall
+	9  o)OAnonymous Donor HallzT)
+No solution for instance spider/school_finance/0021 (3456)
+No solution for instance spider/school_finance/0009 (3460)
+No solution for instance spider/gas_company/0009 (3518)
+Wrong output for fuzzied solution in instance spider/college_3/0024 (3559)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.Building
+		FROM COURSE AS T1
+		JOIN FACULTY AS T2 ON T1.Instructor = T2.FacID
+		GROUP BY T1.Instructor
+		ORDER BY count(*) DESC
+		LIMIT 1
+
+	        building
+	0  auPKriegerUBs
+	ACTUAL OUTPUT ====
+
+		SELECT building FROM (SELECT * FROM (SELECT * FROM (SELECT building, rank, COUNT() AS n FROM (SELECT LHS.facid AS facid, LHS.lname AS lname, LHS.fname AS fname, LHS.rank AS rank, LHS.sex AS sex, LHS.phone AS phone, LHS.room AS room, LHS.building AS building, RHS.cid AS cid, RHS.cname AS cname, RHS.credits AS credits, RHS.instructor AS instructor, RHS.days AS days, RHS.hours AS hours, RHS.dno AS dno FROM `faculty` AS LHS CROSS JOIN `course` AS RHS) GROUP BY building, rank) ORDER BY rank) LIMIT 1)
+
+	  building
+	0      NEB
+Wrong output for fuzzied solution in instance spider/film_rank/0016 (3596)
+	EXPECTED OUTPUT ====
+
+		SELECT Studio
+		FROM film
+		GROUP BY Studio
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	                studio
+	0  Paramount / Lorimar
+	ACTUAL OUTPUT ====
+
+		SELECT studio FROM (SELECT * FROM (SELECT * FROM (SELECT director, studio, COUNT() AS n FROM `film` GROUP BY director, studio) ORDER BY director DESC) LIMIT 1)
+
+	  studio
+	0    MGM
+No solution for instance spider/film_rank/0020 (3598)
+Wrong output for fuzzied solution in instance spider/film_rank/0011 (3607)
+	EXPECTED OUTPUT ====
+
+		SELECT DISTINCT T1.Director
+		FROM film AS T1
+		JOIN film_market_estimation AS T2 ON T1.Film_ID = T2.Film_ID
+		WHERE T2.Year = 1995
+
+	             director
+	0         John Huston
+	1  Sylvester Stallone
+	ACTUAL OUTPUT ====
+
+		SELECT director FROM (SELECT * FROM `film` AS LHS WHERE EXISTS (SELECT 1 FROM (SELECT * FROM `film_market_estimation` WHERE (YEAR = 1995)) AS RHS WHERE (LHS.film_id = RHS.film_id) )) ORDER BY director
+
+	             director
+	0         John Huston
+	1         John Huston
+	2  Sylvester Stallone
+Wrong output for fuzzied solution in instance spider/ship_mission/0008 (3610)
+	EXPECTED OUTPUT ====
+
+		SELECT TYPE
+		FROM ship
+		GROUP BY TYPE
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	         type
+	0  Cargo ship
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT TYPE FROM (SELECT LHS.nationality AS nationality, LHS.type AS TYPE, LHS.n AS n, RHS.name AS name, RHS.type AS type_other, RHS.tonnage AS tonnage FROM (SELECT nationality, TYPE, COUNT() AS n FROM `ship` GROUP BY nationality, TYPE) AS LHS INNER JOIN `ship` AS RHS ON (LHS.n = RHS.ship_id AND LHS.nationality = RHS.nationality)) ORDER BY TYPE
+
+	Empty DataFrame
+	Columns: [type]
+	Index: []
+Wrong output for ground truth in instance spider/product_catalog/0007 (3638)
+Wrong output for fuzzied solution in instance spider/news_report/0014 (3659)
+	EXPECTED OUTPUT ====
+
+		SELECT T3.Name
+		FROM news_report AS T1
+		JOIN event AS T2 ON T1.Event_ID = T2.Event_ID
+		JOIN journalist AS T3 ON T1.journalist_ID = T3.journalist_ID
+		GROUP BY T3.Name
+		HAVING COUNT(*) > 1
+
+	                 name
+	0  FZjIjFred Chandler
+	1       Fred Chandler
+	2   Herbert Swindells
+	3           om Briggs
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT * FROM (SELECT * FROM (SELECT LHS.journalist_id AS journalist_id, LHS.name AS name, LHS.nationality AS nationality, LHS.age AS age, LHS.years_working AS years_working, LHS.event_id AS event_id, LHS.work_type AS work_type, RHS.date AS date, RHS.n AS n FROM (SELECT LHS.journalist_id AS journalist_id, LHS.name AS name, LHS.nationality AS nationality, LHS.age AS age, LHS.years_working AS years_working, RHS.event_id AS event_id, RHS.work_type AS work_type FROM `journalist` AS LHS INNER JOIN `news_report` AS RHS ON (LHS.journalist_id = RHS.journalist_id)) AS LHS INNER JOIN (SELECT date, event_id, COUNT() AS n FROM `event` GROUP BY date, event_id) AS RHS ON (LHS.event_id = RHS.event_id)) ORDER BY date) LIMIT 1)
+
+	                name
+	0  Herbert Swindells
+Wrong output for fuzzied solution in instance spider/railway/0018 (3674)
+	EXPECTED OUTPUT ====
+
+		SELECT Country
+		FROM manager
+		WHERE Age > 50 INTERSECT
+		  SELECT Country
+		  FROM manager WHERE Age < 46
+
+	    country
+	0  ustralia
+	ACTUAL OUTPUT ====
+
+		SELECT country_other AS country FROM (SELECT LHS.manager_id AS manager_id, LHS.name AS name, LHS.country AS country, LHS.working_year_starts AS working_year_starts, LHS.age AS age, LHS.level AS LEVEL, RHS.manager_id AS manager_id_other, RHS.name AS name_other, RHS.country AS country_other, RHS.working_year_starts AS working_year_starts_other, RHS.age AS age_other FROM `manager` AS LHS INNER JOIN (SELECT * FROM `manager` WHERE (age > 50 AND age > 46)) AS RHS ON (LHS.manager_id = RHS.level)) ORDER BY country
+
+	     country
+	0  Australia
+	1  Australia
+	2    England
+	3   ustralia
+Wrong output for fuzzied solution in instance spider/railway/0014 (3680)
+	EXPECTED OUTPUT ====
+
+		SELECT Builder
+		FROM railway
+		GROUP BY Builder
+		ORDER BY COUNT(*) DESC
+		LIMIT 1
+
+	        builder
+	0  windon Works
+	ACTUAL OUTPUT ====
+
+		SELECT builder FROM (SELECT * FROM (SELECT * FROM (SELECT builder, COUNT() AS n FROM `railway` GROUP BY builder) ORDER BY n DESC) LIMIT 1)
+
+	         builder
+	0  Kszsop(6z Qh4
+Wrong output for fuzzied solution in instance spider/music_1/0013 (3698)
+	EXPECTED OUTPUT ====
+
+		SELECT artist_name
+		FROM artist
+		WHERE country = "UK" INTERSECT
+		  SELECT artist_name
+		  FROM song WHERE languages = "english"
+
+	    artist_name
+	0  auPMichelUBs
+	ACTUAL OUTPUT ====
+
+		SELECT `artist_name` FROM (SELECT `LHS`.`artist_name` AS `artist_name`, `LHS`.`country` AS `country`, `LHS`.`gender` AS `gender`, `LHS`.`preferred_genre` AS `preferred_genre`, `RHS`.`song_name` AS `song_name`, `RHS`.`artist_name` AS `artist_name_other`, `RHS`.`country` AS `country_other`, `RHS`.`f_id` AS `f_id`, `RHS`.`rating` AS `rating`, `RHS`.`languages` AS `languages`, `RHS`.`releasedate` AS `releasedate`, `RHS`.`resolution` AS `resolution` FROM `artist` AS `LHS` INNER JOIN (SELECT * FROM `song` WHERE (`country` = 'UK' AND `languages` = 'english')) AS RHS ON (LHS.preferred_genre = RHS.genre_is)) ORDER BY artist_name
+
+	Empty DataFrame
+	Columns: [artist_name]
+	Index: []
+Wrong output for fuzzied solution in instance spider/music_1/0006 (3699)
+	EXPECTED OUTPUT ====
+
+		SELECT DISTINCT T1.file_size,
+		                T1.formats
+		FROM files AS T1
+		JOIN song AS T2 ON T1.f_id = T2.f_id
+		WHERE T2.resolution < 800
+
+	        file_size   formats
+	0         3.69 MB        p3
+	1    3.69 MBzk2jW        p3
+	2         4.10 MB  mp4ZqtuT
+	3    4.10 MB9DOoN       mp4
+	4          4.12 M       mp4
+	5         4.12 MB       mp4
+	6          4.58 M       mp4
+	7         4.58 MB  mp3DPAeh
+	8         4.58 MB       mp4
+	9    GvYMx3.69 MB       mp4
+	10  Pg44.58 MB)TK       mp4
+	11   XtRRG4.10 MB        mp
+	12   lVsUy4.58 MB       mp3
+	13  oca3.69 MBV)x       mp4
+	ACTUAL OUTPUT ====
+
+		SELECT file_size, formats FROM (SELECT LHS.song_name AS song_name, LHS.artist_name AS artist_name, LHS.country AS country, LHS.f_id AS f_id, LHS.genre_is AS genre_is, LHS.rating AS rating, LHS.languages AS languages, LHS.releasedate AS releasedate, LHS.resolution AS resolution, RHS.f_id AS f_id_other, RHS.file_size AS file_size, RHS.duration AS duration, RHS.formats AS formats FROM (SELECT * FROM `song` WHERE (resolution <= 800.0)) AS LHS INNER JOIN `files` AS RHS ON (LHS.artist_name = RHS.artist_name)) ORDER BY file_size
+
+	        file_size   formats
+	0         3.69 MB        p3
+	1         3.69 MB        p3
+	2         3.69 MB        p3
+	3    3.69 MBzk2jW        p3
+	4    3.69 MBzk2jW        p3
+	5    3.69 MBzk2jW        p3
+	6         4.10 MB  mp4ZqtuT
+	7         4.10 MB  mp4ZqtuT
+	8    4.10 MB9DOoN       mp4
+	9    4.10 MB9DOoN       mp4
+	10   4.10 MB9DOoN       mp4
+	11         4.12 M       mp4
+	12         4.12 M       mp4
+	13         4.12 M       mp4
+	14        4.12 MB       mp4
+	15        4.12 MB       mp4
+	16        4.12 MB       mp4
+	17        4.12 MB       mp4
+	18        4.12 MB       mp4
+	19        4.12 MB       mp4
+	20        4.12 MB       mp4
+	21        4.12 MB       mp4
+	22        4.12 MB       mp4
+	23         4.58 M       mp4
+	24         4.58 M       mp4
+	25        4.58 MB  mp3DPAeh
+	26        4.58 MB  mp3DPAeh
+	27        4.58 MB       mp4
+	28        4.58 MB       mp4
+	29        4.58 MB       mp4
+	30  Pg44.58 MB)TK       mp4
+	31  Pg44.58 MB)TK       mp4
+	32   XtRRG4.10 MB        mp
+	33   lVsUy4.58 MB       mp3
+	34   lVsUy4.58 MB       mp3
+	35   lVsUy4.58 MB       mp3
+	36  oca3.69 MBV)x       mp4
+	37  oca3.69 MBV)x       mp4
+	38  oca3.69 MBV)x       mp4
+	39  oca3.69 MBV)x       mp4
+Wrong output for fuzzied solution in instance spider/music_1/0024 (3716)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.artist_name,
+		       T1.gender
+		FROM artist AS T1
+		JOIN song AS T2 ON T1.artist_name = T2.artist_name
+		WHERE T2.releasedate LIKE "%Mar%"
+
+	        artist_name        gender
+	0            1qBkm4     MaleU1C6F
+	1          4tHa9pI4         emale
+	2    8S FAShrikanta   LwjE5OKHdci
+	3    EbLOMShrikanta          Male
+	4               Fx           Male
+	5         H7N1McZU9       1ExxQOz
+	6    MwHhOShrikanta   21N2pFemale
+	7         Shrikanta        Female
+	8    Shrikanta(6t9e        Female
+	9        VO)u8RthjU           ale
+	10   a (8TShrikanta           ale
+	11       baCAoPVTLj  Q9 FemaleLlw
+	12  iZgShrikanta649        Female
+	13            vtJ9m          Male
+	14            vtJ9m          Male
+	ACTUAL OUTPUT ====
+
+		SELECT artist_name, gender FROM (SELECT LHS.artist_name AS artist_name, LHS.country AS country, LHS.gender AS gender, LHS.preferred_genre AS preferred_genre, LHS.song_name AS song_name, LHS.f_id AS f_id, LHS.genre_is AS genre_is, LHS.rating AS rating, LHS.languages AS languages, LHS.releasedate AS releasedate, LHS.resolution AS resolution, RHS.artist_name AS artist_name_other, RHS.country AS country_other, RHS.gender AS gender_other, RHS.preferred_genre AS preferred_genre_other, RHS.song_name AS song_name_other, RHS.f_id AS f_id_other, RHS.genre_is AS genre_is_other, RHS.languages AS languages_other, RHS.releasedate AS releasedate_other, RHS.resolution AS resolution_other FROM (SELECT LHS.artist_name AS artist_name, LHS.country AS country, LHS.gender AS gender, LHS.preferred_genre AS preferred_genre, RHS.song_name AS song_name, RHS.f_id AS f_id, RHS.genre_is AS genre_is, RHS.rating AS rating, RHS.languages AS languages, RHS.releasedate AS releasedate, RHS.resolution AS resolution FROM `artist` AS LHS INNER JOIN `song` AS RHS ON (LHS.artist_name = RHS.artist_name AND LHS.country = RHS.country)) AS LHS INNER JOIN (SELECT LHS.artist_name AS artist_name, LHS.country AS country, LHS.gender AS gender, LHS.preferred_genre AS preferred_genre, RHS.song_name AS song_name, RHS.f_id AS f_id, RHS.genre_is AS genre_is, RHS.rating AS rating, RHS.languages AS languages, RHS.releasedate AS releasedate, RHS.resolution AS resolution FROM `artist` AS LHS INNER JOIN `song` AS RHS ON (LHS.artist_name = RHS.artist_name AND LHS.country = RHS.country)) AS RHS ON (LHS.f_id = RHS.rating)) ORDER BY artist_name
+
+	  artist_name gender
+	0  oJ5sxqQzN2   pdV(
+Wrong output for ground truth in instance spider/cre_Doc_Tracking_DB/0033 (3734)
+Wrong output for ground truth in instance spider/cre_Doc_Tracking_DB/0005 (3752)
+Wrong output for fuzzied solution in instance spider/storm_record/0017 (3779)
+	EXPECTED OUTPUT ====
+
+		SELECT name
+		FROM storm
+		EXCEPT
+		SELECT T1.name
+		FROM storm AS T1
+		JOIN affected_region AS T2 ON T1.storm_id = T2.storm_id
+		GROUP BY T1.storm_id
+		HAVING count(*) >= 2
+
+	            name
+	0     1JyBsSeven
+	1       3kwXrSix
+	2   8OyaHruaR)dG
+	3            Fiv
+	4           Five
+	5      Fivexj3Lc
+	6            Fou
+	7      FourjFNOB
+	8    IQdSevenQ3Z
+	9          LL(20
+	10          Seve
+	11         Seven
+	12     WDKSix1tp
+	13        b3Xkje
+	14           ive
+	15            ix
+	16     tk2drFive
+	ACTUAL OUTPUT ====
+
+		SELECT name FROM (SELECT name, COUNT() AS n FROM (SELECT LHS.storm_id AS storm_id, LHS.name AS name, LHS.dates_active AS dates_active, LHS.max_speed AS max_speed, LHS.damage_millions_usd AS damage_millions_usd, LHS.number_deaths AS number_deaths, RHS.region_id AS region_id, RHS.number_city_affected AS number_city_affected FROM `storm` AS LHS LEFT JOIN `affected_region` AS RHS ON (LHS.storm_id = RHS.storm_id)) GROUP BY name) WHERE (n < 2) ORDER BY name
+
+	            name
+	0     1JyBsSeven
+	1       3kwXrSix
+	2   8OyaHruaR)dG
+	3            Fiv
+	4      Fivexj3Lc
+	5            Fou
+	6      FourjFNOB
+	7    IQdSevenQ3Z
+	8          LL(20
+	9           Seve
+	10     WDKSix1tp
+	11        b3Xkje
+	12           ive
+	13            ix
+	14     tk2drFive
+Wrong output for fuzzied solution in instance spider/game_injury/0008 (3802)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.id,
+		       T1.score,
+		       T1.date
+		FROM game AS T1
+		JOIN injury_accident AS T2 ON T2.game_id = T1.id
+		GROUP BY T1.id
+		HAVING count(*) >= 2
+
+	   id     score         date
+	0   4  aD8Tq1–1  26 June 201
+	ACTUAL OUTPUT ====
+
+		SELECT stadium_id AS id, score, date FROM (SELECT LHS.stadium_id AS stadium_id, LHS.id AS id, LHS.season AS season, LHS.date AS date, LHS.home_team AS home_team, LHS.away_team AS away_team, LHS.score AS score, LHS.competition AS competition, RHS.n AS n FROM `game` AS LHS INNER JOIN (SELECT * FROM (SELECT game_id, COUNT() AS n FROM `injury_accident` GROUP BY game_id) WHERE (n >= 2)) AS RHS ON (LHS.id = RHS.game_id)) ORDER BY id
+
+	   id     score         date
+	0   7  aD8Tq1–1  26 June 201
+Wrong output for fuzzied solution in instance spider/game_injury/0013 (3804)
+	EXPECTED OUTPUT ====
+
+		SELECT count(DISTINCT T1.injury)
+		FROM injury_accident AS T1
+		JOIN game AS T2 ON T1.game_id = T2.id
+		WHERE T2.season > 2010
+
+	   count(distinct t1.injury)
+	0                          2
+	ACTUAL OUTPUT ====
+
+		SELECT DISTINCT n_distinct AS count_distinct_t1_injury_ FROM (SELECT LHS.game_id AS game_id, LHS.id AS id, LHS.player AS player, LHS.injury AS injury, LHS.number_of_matches AS number_of_matches, LHS.source AS SOURCE, RHS.date AS date, RHS.n_distinct AS n_distinct FROM `injury_accident` AS LHS CROSS JOIN (SELECT date, COUNT(DISTINCT season) AS n_distinct FROM `game` WHERE (season != 2010) GROUP BY date) AS RHS) ORDER BY count_distinct_t1_injury_
+
+	   count_distinct_t1_injury_
+	0                          1
+No solution for instance spider/game_injury/0016 (3810)
+Wrong output for fuzzied solution in instance spider/game_injury/0014 (3814)
+	EXPECTED OUTPUT ====
+
+		SELECT T2.name
+		FROM game AS T1
+		JOIN stadium AS T2 ON T1.stadium_id = T2.id
+		JOIN injury_accident AS T3 ON T1.id = T3.game_id
+		WHERE T3.player = 'Walter Samuel' INTERSECT
+		  SELECT T2.name
+		  FROM game AS T1
+		  JOIN stadium AS T2 ON T1.stadium_id = T2.id
+		  JOIN injury_accident AS T3 ON T1.id = T3.game_id WHERE T3.player = 'Thiago Motta'
+
+	                      name
+	0  Bank of America Stadium
+	1           HwfLP Fieldcyy
+	2           Reliant Stadiu
+	ACTUAL OUTPUT ====
+
+		SELECT `name` FROM (SELECT `game_id`, `id`, `player`, `injury`, `number_of_matches`, `source`, `name`, `average_attendance`, `total_attendance`, `capacity_percentage`, `id` AS `home_games` FROM (SELECT `LHS`.`game_id` AS `game_id`, `LHS`.`id` AS `id`, `LHS`.`player` AS `player`, `LHS`.`injury` AS `injury`, `LHS`.`number_of_matches` AS `number_of_matches`, `LHS`.`source` AS `source`, `RHS`.`name` AS `name`, `RHS`.`average_attendance` AS `average_attendance`, `RHS`.`total_attendance` AS `total_attendance`, `RHS`.`capacity_percentage` AS `capacity_percentage` FROM (SELECT * FROM `injury_accident` WHERE (`player` = 'Walter Samuel' OR `player` = 'Thiago Motta')) AS LHS INNER JOIN (SELECT * FROM `stadium` AS LHS WHERE EXISTS (SELECT 1 FROM `game` AS RHS WHERE (LHS.id = RHS.id) )) AS RHS ON (LHS.id = RHS.home_games AND LHS.game_id = RHS.id))) ORDER BY name
+
+	Empty DataFrame
+	Columns: [name]
+	Index: []
+No solution for instance spider/inn_1/0036 (3820)
+No solution for instance spider/match_season/0003 (3892)
+Wrong output for fuzzied solution in instance spider/match_season/0021 (3908)
+	EXPECTED OUTPUT ====
+
+		SELECT Country_name,
+		       COUNT(*)
+		FROM country AS T1
+		JOIN match_season AS T2 ON T1.Country_id = T2.Country
+		GROUP BY T1.Country_name
+
+	    country_name  count(*)
+	0           Iraq         2
+	1         Irelan         2
+	2        9RwoEj2         3
+	3      IraqWeIAh         3
+	4            raq         3
+	5  United States         4
+	6        Ireland         5
+	7   nited States         8
+	ACTUAL OUTPUT ====
+
+		SELECT country_name, n AS count___ FROM (SELECT country_name, official_native_language, COUNT() AS n FROM (SELECT country_id, country_name, capital, official_native_language, season, player, POSITION, team, draft_pick_number, draft_class, college, country_id AS `country` FROM (SELECT LHS.country_id AS country_id, LHS.country_name AS country_name, LHS.capital AS capital, LHS.official_native_language AS official_native_language, RHS.season AS season, RHS.player AS player, RHS.position AS POSITION, RHS.team AS team, RHS.draft_pick_number AS draft_pick_number, RHS.draft_class AS draft_class, RHS.college AS college FROM `country` AS LHS INNER JOIN `match_season` AS RHS ON (LHS.country_id = RHS.`country`))) GROUP BY country_name, official_native_language) ORDER BY country_name
+
+	    country_name  count___
+	0           Iraq         2
+	1         Irelan         2
+	2        Ireland         2
+	3        9RwoEj2         3
+	4      IraqWeIAh         3
+	5        Ireland         3
+	6            raq         3
+	7  United States         4
+	8   nited States         8
+Wrong output for fuzzied solution in instance spider/soccer_2/0046 (3958)
+	EXPECTED OUTPUT ====
+
+		SELECT T1.state
+		FROM college AS T1
+		JOIN tryout AS T2 ON T1.cName = T2.cName
+		WHERE T2.pPos = 'mid'
+		EXCEPT
+		SELECT T1.state
+		FROM college AS T1
+		JOIN tryout AS T2 ON T1.cName = T2.cName
+		WHERE T2.pPos = 'goalie'
+
+	     state
+	0  LA3cv)u
+	1  LAMbehq
+	2  LAX1ZRi
+	ACTUAL OUTPUT ====
+
+		SELECT `state` FROM (SELECT * FROM `college` AS `LHS` WHERE NOT EXISTS (SELECT 1 FROM (SELECT * FROM `tryout` WHERE (`ppos` != 'mid' OR `ppos` = 'goalie')) AS RHS WHERE (LHS.cname = RHS.cname) )) ORDER BY state
+
+	  state
+	0    AZ
+	1    AZ
+	2    AZ
+	3     L
+	4    LA
+	5    LA
+	6    LA
+	7    LA
+	8    LA
+Wrong output for fuzzied solution in instance spider/customer_complaints/0003 (3974)
+	EXPECTED OUTPUT ====
+
+		SELECT town_city
+		FROM customers
+		WHERE customer_type_code = "Good Credit Rating"
+		GROUP BY town_city
+		ORDER BY count(*)
+		LIMIT 1
+
+	      town_city
+	0  Port Joshuah
+	ACTUAL OUTPUT ====
+
+		SELECT `town_city` FROM (SELECT * FROM (SELECT * FROM (SELECT * FROM (SELECT `customer_type_code`, `town_city`, COUNT(DISTINCT `customer_type_code`) AS `n_distinct` FROM `customers` GROUP BY `customer_type_code`, `town_city`) WHERE (`customer_type_code` = 'Good Credit Rating' OR n_distinct > 1)) ORDER BY customer_type_code DESC) LIMIT 1)
+
+	  town_city
+	0  Funkstad
+Wrong output for fuzzied solution in instance spider/customer_complaints/0007 (3985)
+	EXPECTED OUTPUT ====
+
+		SELECT t1.phone_number
+		FROM customers AS t1
+		JOIN complaints AS t2 ON t1.customer_id = t2.customer_id
+		ORDER BY t2.date_complaint_raised DESC
+		LIMIT 1
+
+	   phone_number
+	0  044-468-4549
+	ACTUAL OUTPUT ====
+
+		SELECT phone_number FROM (SELECT * FROM (SELECT * FROM (SELECT LHS.customer_id AS customer_id, LHS.customer_type_code AS customer_type_code, LHS.address_line_1 AS address_line_1, LHS.address_line_2 AS address_line_2, LHS.town_city AS town_city, LHS.state AS state, LHS.email_address AS email_address, LHS.phone_number AS phone_number, RHS.complaint_id AS complaint_id, RHS.product_id AS product_id, RHS.complaint_outcome_code AS complaint_outcome_code, RHS.complaint_status_code AS complaint_status_code, RHS.complaint_type_code AS complaint_type_code, RHS.date_complaint_raised AS date_complaint_raised, RHS.date_complaint_closed AS date_complaint_closed, RHS.staff_id AS staff_id FROM `customers` AS LHS INNER JOIN `complaints` AS RHS ON (LHS.customer_id = RHS.customer_id)) ORDER BY state) LIMIT 1)
+
+	            phone_number
+	0  Y7zsL997.698.4779x882
+No solution for instance textbook/1 (5027)
+No solution for instance textbook/14 (5031)
+No solution for instance textbook/23 (5032)
+No solution for instance textbook/34 (5055)
