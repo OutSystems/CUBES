@@ -165,7 +165,7 @@ def create_argparser(all_inputs=False):
     g.add_argument('--append', action='store_true', help='store the solution in the specification file')
     g.add_argument('--top', type=int, default=1, help='number of programs that should be returned')
     g.add_argument('--under', type=int, default=None, help='enumerate all programs found in under x seconds')
-    g.add_argument('--no-beam-info', dest='beam_info', action='store_false', help='disable beam info usage')
+    g.add_argument('--beam-info', dest='beam_info', action='store_true', help='disable beam info usage')
     g.add_argument('--beam-threshold', type=float, default=0.9, help='minimum percentage of beams that must agree for it to be considered a majority')
     g.add_argument('--beam-name', type=str, help='beam name')
 

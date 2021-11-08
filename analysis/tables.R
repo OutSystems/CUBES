@@ -25,8 +25,9 @@ benchmark_summary <- function(filename, ...) {
     relocate(info, .before = try) %>%
     rename('Run' = try) %>%
     rename('~' = info) %>%
-    select(-'~', -All) %>%
+    select(-'~') %>%
     xtable()
+  print(names(table))
   align(table) <- "llcccccc"
     print(table, include.rownames = FALSE, file = paste0('tables/', filename, ".tex"), sanitize.text.function = function(x) { x }, booktabs = TRUE, hline.after = c(0,length(tries),length(tries)*2))
 }

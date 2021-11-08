@@ -241,9 +241,9 @@ invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
     geom_step(size = step_size) +
     geom_point(size = point_size, data = pick(~id %% every_other == 0))
   if (full_x) {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = '\\%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = '%'))
   } else {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = '\\%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = '%'))
   }
   if (log) {
     if (any(data$real < 2)) {
@@ -321,10 +321,12 @@ invsolved_cpu <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, ever
     theme(legend.position = legend.position, legend.background = element_rect(fill = F), legend.key = element_rect(fill = F), legend.key.height = unit(.75, 'lines'))
 }
 
+minpositive <- function(x) min(x[x > 0])
+
 vbs <- function(..., timelimit = 600) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
-  data %>%
+  t <- data %>%
     group_by(name) %>%
     summarise(real = min(ifelse(solved, real, timelimit)),
               cpu = min(ifelse(solved, cpu, timelimit)),
@@ -338,10 +340,12 @@ vbs <- function(..., timelimit = 600) {
                                                      ifelse(all(status == 1),
                                                             1,
                                                             -1)))), levels = status_levels, exclude = NULL),
-              fuzzy = factor(ifelse(any(fuzzy == "Possibly Correct"), 1, ifelse(any(fuzzy == "Possibly Correct Top 5"), 2, ifelse(any(fuzzy == "Possibly Correct Any"), 3, ifelse(any(fuzzy == "Incorrect by Fuzzing"), 4, ifelse(any(fuzzy == "Incorrect"), 0, -2))))), fuzzy_levels, fuzzy_meanings),
+
               solved_by = paste(as.character(try[which(solved)]), collapse = ", "),
               status = status_t,
-              solved = is_solved_status(status)) %>%
+              solved = is_solved_status(status),
+              fuzzy = factor(ifelse(any(fuzzy == "Possibly Correct"), 1, ifelse(any(fuzzy == "Possibly Correct Top 5"), 2, ifelse(any(fuzzy == "Possibly Correct Any"), 3, ifelse(any(fuzzy == "Incorrect by Fuzzing"), 4, ifelse(any(fuzzy == "Incorrect"), 0, -2))))), fuzzy_levels, fuzzy_meanings))
+  t %>%
     select(-status_t) %>%
     mutate(try = 'VBS')
 }
@@ -476,12 +480,13 @@ plot_cells_time <- function(...) {
     mutate(real = ifelse(status == -2, 600, real), try = factor(try, levels = names(tries))) %>%
     mutate(status = ifelse(status == 0 | status == 2, 0, ifelse(status == -1, 1, 2)),
            real = ifelse(status == 2, 1000, real))
+  print(data %>% count(status))
   data %>% ggplot(aes(x = total_cells, y = real, color = factor(data$status, levels = c(2, 1, 0), labels = c('Other', 'Timeout', 'Solved'), exclude = NULL))) +
     geom_point(alpha = 0.3, size = 0.9) +
-    scale_x_log10(breaks = log_breaks()) +
+    scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000, 1000000), labels = function(x) { paste0('\\(10^{', log10(x), '}\\)') }) +
     scale_y_log10(breaks = c(.1, 1, 10, 60, 600)) +
     # annotation_logticks(sides='lb') +
-    facet_wrap(~try) +
+    facet_wrap(~try, scales='free_x') +
     scale_color_manual(drop = T, values = map2(c(0, 1, 2), c('#000000', '#cc241d', maincolor), c) %>%
       keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
       map(function(x) { x[2] })) +
@@ -558,30 +563,65 @@ plot_sql_size <- function(...) {
     facet_wrap(~try)
 }
 
-plot_fuzzy <- function(drop_error = F, drop_nones = F, fill_bars = F, filter_all = F, facet = F, refactor = F, facet_size = 4, ...) {
+levels(c62_16_full$fuzzy)
+
+plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_bars = F, filter_all = F, facet = F, refactor = F, facet_size = 4, ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try') %>%
-    filter(solved) %>%
+    # filter(solved) %>%
     mutate(try = factor(try, levels = names(tries)))
-  if (refactor) {
-    data <- data %>% mutate(fuzzy = fct_recode(fuzzy, "Fuzzing Accepted" = 'Possibly Correct', "Incorrect by Fuzzing" = 'Possibly Correct Top 3', "Incorrect by Fuzzing" = 'Possibly Correct Top 5', Unknown = "Error", Unknown = "Timeout", Unknown = "Fuzzer Error", Unknown = "GT Mismatch"))
-    print(data$fuzzy)
-  }
-  if (filter_all) {
+  if (drop_empties) {
     data <- data %>%
       group_by(name) %>%
-      filter(all(fuzzy != 'Error')) %>%
+      filter(all(status != 6)) %>%
       ungroup()
   }
   if (drop_error) {
-    data <- data %>% filter(fuzzy == 'Possibly Correct' |
+    data <- data %>% filter(fuzzy == 'Pre Possibly Correct' |
+                              fuzzy == 'Pre Possibly Correct Top 5' |
+                              fuzzy == 'Pre Possibly Correct Any' |
+                              fuzzy == 'Pre Incorrect by Fuzzing' |
+                              fuzzy == 'Possibly Correct' |
                               fuzzy == 'Possibly Correct Top 5' |
                               fuzzy == 'Possibly Correct Any' |
                               fuzzy == 'Incorrect' |
                               fuzzy == 'Incorrect by Fuzzing')
   }
   if (drop_nones) {
-    data <- data %>% filter(fuzzy != 'No solution', fuzzy != 'No database', fuzzy != 'No GT')
+    data <- data %>% filter(fuzzy != 'No solution', fuzzy != 'No database', fuzzy != 'No GT', fuzzy != 'GT Mismatch')
+  }
+  if (refactor) {
+    data <- data %>%
+      filter(fuzzy == 'Possibly Correct' |
+               fuzzy == 'Possibly Correct Top 5' |
+               fuzzy == 'Possibly Correct Any' |
+               fuzzy == 'Pre Possibly Correct' |
+               fuzzy == 'Pre Possibly Correct Top 5' |
+               fuzzy == 'Pre Possibly Correct Any' |
+               fuzzy == 'Incorrect' |
+               fuzzy == 'Incorrect by Fuzzing' |
+               fuzzy == 'Pre Incorrect by Fuzzing' |
+               fuzzy == 'Timeout' |
+               fuzzy == 'Exec. Error Base' |
+               fuzzy == 'No log file') %>%
+      mutate(fuzzy = fct_recode(fuzzy, "Pre Fuzzing Accepted" = "Pre Possibly Correct",
+                                "Pre Fuzzing Accepted" = "Pre Possibly Correct Top 5",
+                                "Pre Fuzzing Accepted" = "Pre Possibly Correct Any",
+                                "Fuzzing Accepted" = 'Possibly Correct',
+                                "Fuzzing Accepted" = 'Possibly Correct Top 5',
+                                "Fuzzing Accepted" = 'Possibly Correct Any',
+                                Timeout = "Timeout",
+                                Timeout = "Fuzzer Error",
+                                Timeout = "GT Mismatch",
+                                Timeout = "Exec. Error Fuzzied",
+                                Timeout = "No database", Timeout = "Exec. Error GT", Timeout = "No log file", Timeout = "No GT", Timeout = "No solution", 'Execution Error' = 'Incorrect', 'Execution Error' = "Exec. Error Base"))
+    print(unique(data$fuzzy))
+  }
+  if (filter_all) {
+    data <- data %>%
+      group_by(name) %>%
+      filter(all(fuzzy != 'Error')) %>%
+      ungroup()
   }
 
   pages <- ifelse(facet == T, ceiling(length(unique(data$benchmark)) / (facet_size * facet_size)), 1)
@@ -591,7 +631,7 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, fill_bars = F, filter_all
     tmp <- data %>% ggplot(aes(x = try, fill = fuzzy))
     if (fill_bars) {
       tmp <- tmp +
-        geom_bar(position = 'fill') +
+        geom_bar(position = 'fill', width=.7) +
         scale_y_continuous(labels = label_percent(accuracy = 1, suffix = '\\%')) +
         labs(y = 'Percentage of Instances', x = NULL, fill = 'Fuzzing Status')
     } else {
@@ -609,7 +649,7 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, fill_bars = F, filter_all
     if (!refactor) {
       tmp <- tmp + scale_fill_manual(values = map2(fuzzy_levels, fuzzy_colors, c) %>% map(function(x) { x[2] }), drop = F)
     } else {
-      tmp <- tmp + scale_fill_manual(values = map2(rev(c(0, 1, 2, -1)), rev(c("#57853C", "#B4560E", "#d79921", "#999999")), c) %>%
+      tmp <- tmp + scale_fill_manual(values = map2(rev(c(4, 5, 0, 3, -1, -2)), rev(c("#bfbfbf",  "#57853C", "#b221c2", "#d79921", "#3032ab", "#454545")), c) %>%
         map(function(x) { x[2] }), drop = F)
     }
     tmp +
@@ -621,8 +661,6 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, fill_bars = F, filter_all
     plots[[i]] <- tmp + my_theme
   }
   plots
-
-
 }
 
 different_solutions <- function(table) {
@@ -695,11 +733,11 @@ speedup <- function(data1, data2) {
     scale_x_log10() +
     annotation_logticks(sides = 'b') +
     geom_vline(xintercept = p25, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p25) - .075), label = "25\\%", y = 100, angle = 90, size = 2.5) +
+    annotate(geom = "text", x = 10^(log10(p25) - .075), label = "25\\%", y = 55, angle = 90, size = 2.5) +
     geom_vline(xintercept = p50, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p50) - .075), label = "50\\%", y = 100, angle = 90, size = 2.5) +
+    annotate(geom = "text", x = 10^(log10(p50) - .075), label = "50\\%", y = 55, angle = 90, size = 2.5) +
     geom_vline(xintercept = p75, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p75) - .075), label = "75\\%", y = 100, angle = 90, size = 2.5) +
+    annotate(geom = "text", x = 10^(log10(p75) - .075), label = "75\\%", y = 55, angle = 90, size = 2.5) +
     labs(x = 'Speedup', y = 'Number of Instances') +
     my_theme
 }
@@ -713,4 +751,19 @@ speedup_data <- function(data1, data2) {
   print(sprintf('Std Dev: %f', sd(data$speedup)))
   print(sprintf('Geom Mean: %f', gm_mean(data$speedup)))
   print(sprintf('Median: %f', median(data$speedup)))
+}
+
+if_fuzzy_ok <- function(a) {
+  a == 'Pre Possibly Correct' |
+    a == 'Pre Possibly Correct Top 5' |
+    a == 'Pre Possibly Correct Any' |
+    a == 'Possibly Correct' |
+    a == 'Possibly Correct Top 5' |
+    a == 'Possibly Correct Any'
+}
+
+is_fuzzy_ok_not_pre <- function(a) {
+  a == 'Possibly Correct' |
+    a == 'Possibly Correct Top 5' |
+    a == 'Possibly Correct Any'
 }

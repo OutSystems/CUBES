@@ -1,10 +1,10 @@
 import io
 import operator
+import time
 from functools import reduce
 from logging import getLogger
 from typing import Dict, Sequence, Any
 
-import moz_sql_parser
 import pandas
 from ordered_set import OrderedSet
 from rpy2 import robjects
@@ -57,12 +57,12 @@ class Specification:
         self.group_columns = OrderedSet(spec['groupby_columns']) or None
         self.dateorder = spec['dateorder'] or 'parse_datetime'
         self.filters = OrderedSet(spec['filters']) or OrderedSet()
-        self.use_limit = spec['has_limit'] or None
+        self.use_limit = spec['has_limit'] or True
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
             self.solution = None
-        self.sql_visitor = None
+        self.op_counts = None
 
         if util.get_config().use_beam_info:
 
@@ -136,9 +136,6 @@ class Specification:
             if f'{beam_name}_beam_groupby_columns' in spec:
                 self.group_columns = beam_helper(spec[f'{beam_name}_beam_groupby_columns'], self.group_columns, 'group_by columns')
 
-            if f'{beam_name}_beam_groupby_columns' in spec:
-                self.use_limit = beam_helper(spec[f'{beam_name}_beam_groupby_columns'], self.group_columns, 'group_by columns')
-
             if f'{beam_name}_beam_has_limit' in spec:
                 majority, majorant = util.at_least(spec[f'{beam_name}_beam_has_limit'], percentage=util.get_config().beam_threshold)
                 if majority:
@@ -148,6 +145,19 @@ class Specification:
                     self.use_limit = True
                     logger.debug('Beam was inconclusive. Enabling limit operation.')
 
+            if f'{beam_name}_beam_inferred_code_w_terminals' in spec:
+                start = time.time()
+                from ..codebert.codebert import transform
+                logger.debug('Model load time: %f', time.time()-start)
+                start = time.time()
+                sketches = list(map(transform, spec[f'{beam_name}_beam_inferred_code_w_terminals']))
+                logger.debug('Query translation time: %f', time.time() - start)
+                self.op_counts = dsl.count_ops(sketches)
+                logger.debug('Obtained op counts: %s', self.op_counts)
+                ops_to_disable = dsl.functions.difference(set(self.op_counts.keys())).difference(dsl.functions_always_on)
+                ops_to_disable_actual = ops_to_disable.difference(OrderedSet(util.get_config().disabled))
+                logger.debug('Beam queries parsed. Disabling the following operations: %s', list(ops_to_disable_actual))
+                util.get_config().disabled = OrderedSet(util.get_config().disabled) | ops_to_disable
 
         if util.get_config().use_solution_dsl and self.solution:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
@@ -162,7 +172,7 @@ class Specification:
             self.min_loc = max(self.min_loc, len(self.solution))
             util.get_config().maximum_loc = min(util.get_config().maximum_loc, len(self.solution))
 
-        self.attrs = list(map(lambda s: s.lower(), self.attrs))
+        self.attrs = list(map(lambda s: s.lower(), map(str, self.attrs)))
         if self.join_columns:
             self.join_columns = list(map(lambda s: s.lower(), self.join_columns))
         if self.group_columns:
@@ -201,6 +211,7 @@ class Specification:
         self.input_table_names = [table.name for table in self.input_tables]
 
         self.columns = OrderedSet(sorted(self.columns))
+        self.attrs = [attr for attr in self.attrs if attr in self.columns]
         self.all_columns = self.columns.copy()
 
         self.output_table = Table(self.output, name='expected_output')
@@ -258,7 +269,7 @@ class Specification:
             dsl.Col.set_domain([(column, self.get_bitvecnum([column])) for column in self.columns])
             type_spec.define_type(dsl.Col)
 
-        if 'anti_join' not in util.get_config().disabled or 'limit' not in util.get_config().disabled:
+        if 'anti_join' not in util.get_config().disabled:
             dsl.Cols.set_domain([('', 0)] + [(','.join(map(util.single_quote_str, cols)), self.get_bitvecnum(cols)) for cols in
                                              powerset_except_empty(self.columns, util.get_config().max_column_combinations)])
             type_spec.define_type(dsl.Cols)
@@ -322,7 +333,7 @@ class Specification:
         if 'cross_join' not in util.get_config().disabled:
             prod_spec.add_func_production(*dsl.cross_join)
 
-        if 'limit' not in util.get_config().disabled and (self.output_table.df.shape[0] in self.consts or str(self.output_table.df.shape[0]) in self.consts or self.use_limit):
+        if 'limit' not in util.get_config().disabled and self.use_limit and (self.output_table.df.shape[0] in self.consts or str(self.output_table.df.shape[0]) in self.consts or self.use_limit):
             tmp = []
             for col in self.all_columns:
                 tmp.append((col, self.get_bitvecnum([col])))
@@ -345,6 +356,20 @@ class Specification:
 
         if self.condition_generator.summarise_conditions and 'mutate' not in util.get_config().disabled:
             prod_spec.add_func_production(*dsl.mutate)
+
+        if self.op_counts:
+            for op in self.op_counts.keys():
+                if op in util.get_config().disabled:
+                    self.op_counts[op] = 0
+
+            if 'filter' in self.op_counts.keys() and not self.condition_generator.filter_conditions:
+                self.op_counts['filter'] = 0
+
+            if 'summarise' in self.op_counts.keys() and not self.condition_generator.summarise_conditions:
+                self.op_counts['summarise'] = 0
+
+            if 'mutate' in self.op_counts.keys() and not self.condition_generator.summarise_conditions:
+                self.op_counts['mutate'] = 0
 
         pred_spec = PredicateSpec()
 

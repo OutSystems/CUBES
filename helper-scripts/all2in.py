@@ -1,24 +1,26 @@
 #!/usr/bin/python3
 import argparse
+import csv
 
 import glob
 
 import os
 import re
-import shutil
 
 import yaml
+
+from squares.dsl.table import Table
 
 if __name__ == '__main__':
     parser = argparse.parser = argparse.ArgumentParser(description='Convert all yaml spec files to old \'.in\' file.')
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests/kaggle/*.yaml', recursive=True):
+    for file in glob.glob('tests/**/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
-        # print(file)
+        print(file)
 
         try:
             with open(file) as f:
@@ -27,9 +29,24 @@ if __name__ == '__main__':
             result = ''
 
             for input in spec['inputs']:
+                table = Table(input)
                 os.makedirs(os.path.dirname(re.sub('^tests', args.output, input)), exist_ok=True)
-                shutil.copy(input, re.sub('^tests', args.output, input))
-            shutil.copy(spec['output'], re.sub('^tests', args.output, spec['output']))
+                with open(input) as in_f, open(re.sub('^tests', args.output, input), 'w') as out_f:
+                    out_f.write(','.join(map(lambda t: f'{t}', table.col_names)) + '\n')
+                    reader = csv.reader(in_f)
+                    next(reader)  # skip header
+                    writer = csv.writer(out_f)
+                    for line in reader:
+                        writer.writerow((map(lambda x: x.replace('\n', '\\n'), line)))
+
+            table = Table(spec['output'])
+            with open(spec['output']) as in_f, open(re.sub('^tests', args.output, spec['output']), 'w') as out_f:
+                out_f.write(','.join(map(lambda t: f'{t}', table.col_names)) + '\n')
+                reader = csv.reader(in_f)
+                next(reader)  # skip header
+                writer = csv.writer(out_f)
+                for line in reader:
+                    writer.writerow((map(lambda x: x.replace('\n', '\\n'), line)))
 
             result += 'inputs: ' + ', '.join(spec['inputs']) + '\n'
             result += 'output: ' + spec['output'] + '\n'
@@ -52,6 +69,9 @@ if __name__ == '__main__':
             if 'aggrs' in spec and 'avg' in spec['aggrs']:
                 spec['aggrs'].remove('avg')
                 spec['aggrs'].append('mean')
+
+            if 'attrs' in spec:
+                spec['attrs'] = [a.lower() for a in spec['attrs']]
 
             for a in ['const', 'aggrs', 'attrs', 'bools']:
                 if a in spec:

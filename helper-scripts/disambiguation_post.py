@@ -2,51 +2,21 @@ import argparse
 import csv
 import ctypes
 import glob
-import logging
 import multiprocessing
 import os.path
-import pathlib
-import re
 import resource
 import signal
-import sys
-from collections import defaultdict, Counter
-from contextlib import contextmanager
-from itertools import permutations
-from logging import getLogger
+import traceback
 from random import shuffle
 
-import chromalog
-import pandas
-import rpy2
 import sqlalchemy
 import yaml
 from TestSuiteEval.fuzz import fuzz
-from ordered_set import OrderedSet
-from pandas.core.util.hashing import hash_pandas_object
 from pebble import ProcessPool
 
-from squares.dsl import table
+from fuzzing_utils import *
 from squares.dsl.table import Table
-from squares.tyrell.logger import TyrellLogFormatter
-from squares.util import pairwise
 
-getLogger('squares').setLevel(50)
-
-logger = getLogger('disambiguator')
-
-formatter = TyrellLogFormatter(fmt='[%(seconds)s][%(processName)s][%(levelname)s] %(message)s')
-handler = chromalog.ColorizingStreamHandler()
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-logger.setLevel(logging.DEBUG)
-
-cubes_sql_sep = r'\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+ SQL Solution \+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+'
-cubes_r_sep = r'(?:------------------------------------- R Solution ---------------------------------------)'
-cubes_end_sep = r'(?:------------------------------------- R Solution ---------------------------------------)|(?:All solutions of length \d+ found)|(?:Timeout reached)|(?:\[.*?\])'
-
-# dsl_regex = r'\[MainProcess\]\[INFO\] Solution found: \[(.*)\](?!\n.*\n.*\[ERROR\])'
 dsl_regex = r'\[MainProcess\]\[INFO\] Solution found: \[?(.*?)\]?'
 sql_regex = rf'{cubes_sql_sep}((?:.|\n)*){cubes_r_sep}'
 
@@ -56,14 +26,8 @@ STATUS_OK = 0
 STATUS_NO_YAML = 1
 STATUS_NO_SQL = 2
 STATUS_MISMATCH_LENGTH = 3
-
-
-def do_not_print(msg):
-    pass
-
-
-rpy2.rinterface_lib.callbacks.consolewrite_print = do_not_print
-rpy2.rinterface_lib.callbacks.consolewrite_warnerror = do_not_print
+STATUS_NO_DB = 4
+STATUS_FUZZER_ERROR = 5
 
 
 class OutputGroup:
@@ -71,7 +35,7 @@ class OutputGroup:
     def __init__(self):
         self.outputs = []
         self.occurrences = []
-        self.mapping = defaultdict(list)
+        self.mapping = []
 
     def add(self, sql, output_df):
         for i in range(len(self.outputs)):
@@ -82,7 +46,7 @@ class OutputGroup:
 
         self.outputs.append(output_df)
         self.occurrences.append(1)
-        self.mapping[len(self.outputs) - 1].append(sql)
+        self.mapping.append([sql])
 
     def closests(self):
         target = sum(self.occurrences) / 2
@@ -119,86 +83,32 @@ def askbool(message):
             return False
 
 
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:
-            yield
-        finally:
-            sys.stdout = old_stdout
-
-
-def sanitize_sql(result_sql, spec_in):
-    result_sql = result_sql.replace('df_', '')
-
-    for table_name in map(lambda x: pathlib.Path(x).stem, spec_in['inputs']):
-        result_sql = re.sub(table_name.replace('-', '[-_]'), table_name, result_sql)
-        result_sql = re.sub(fr'(?<!`)\b{table_name}\b(?!`)', f'`{table_name}`', result_sql)
-
-    for i, input in enumerate(spec_in['inputs']):
-        result_sql = result_sql.replace(f'input{i}', f'`{pathlib.Path(input).stem}`')
-
-    return result_sql
-
-
-def execute(connection, sql):
-    df = pandas.read_sql_query(sql, connection)
-    df = df.sort_values(by=sorted(list(df.columns))).reset_index(drop=True)
-    df.columns = df.columns.str.lower()
-    return df
-
-
-def print_df_diff(df1, df2):
-    logger.warning('\tEXPECTED OUTPUT ====')
-    logger.warning('\n\t%s', str(df1).replace('\n', '\n\t'))
-
-    logger.warning('\tACTUAL OUTPUT ====')
-    logger.warning('\n\t%s', str(df2).replace('\n', '\n\t'))
-
-
-def df_soft_equal(df1, df2):
-    for perm in permutations(list(df1.columns)):
-        actual_df_try = df2.copy()
-        actual_df_try.columns = perm
-        try:
-            pandas.testing.assert_frame_equal(df1, actual_df_try, check_dtype=False, check_names=False, check_like=True, check_datetimelike_compat=True)
-            return True
-        except:
-            actual_df_try = actual_df_try.sort_values(by=sorted(list(actual_df_try.columns))).reset_index(drop=True)
-            try:
-                pandas.testing.assert_frame_equal(df1, actual_df_try, check_dtype=False, check_names=False, check_like=True, check_datetimelike_compat=True)
-                return True
-            except:
-                pass
-
-    return False
-
-
-def ask_user(df, instance, engine):
+def ask_user(df, sql, instance, engine):
     print('Is the following output correct for instance', instance, '?')
     print(df)
     if args.interactive:
         return askbool('> ')
 
     with engine.begin() as connection:
+        print(sql)
         gt_df = execute(connection, sql)
         print('Automatic execution resulted in:')
         print(gt_df)
         return df_soft_equal(gt_df, df)
 
 
-def disambiguate(instance, spec, sql_list, splits=None, fuzzy_level=1, results=None):
+def disambiguate(instance, spec, sql_list, total_sql=None, splits=None, fuzzy_level=1, results=None):
     if splits is None:
         splits = []
     if results is None:
         results = []
+    if total_sql is None:
+        total_sql = sql_list
     logger.debug('Fuzzing disambiguation for %s part %d (%d queries)', instance, fuzzy_level, len(sql_list))
 
     if 'db' not in spec:
         logger.error('No database for instance %s', instance)
-        return
+        return instance, STATUS_NO_DB, 0, 0, None, None, None
     else:
         db_file = spec['db']
 
@@ -225,30 +135,35 @@ def disambiguate(instance, spec, sql_list, splits=None, fuzzy_level=1, results=N
             except Exception as e:
                 print(e)
 
-    outputs = defaultdict(OutputGroup)
+    if len(sqls) == 0:
+        return instance, STATUS_NO_SQL, 0, 0, None, None, None
 
+    outputs = []
     fuzzied_engines = []
 
+    random.seed(1)
+
     for round_i in range(args.rounds):
-        fuzzy_file = f'/tmp/fuzzy_{multiprocessing.current_process().ident}.sqlite3'
+        fuzzy_file = f'/tmp/fuzzy_{multiprocessing.current_process().ident}_{round_i}.sqlite3'
         try:
             with suppress_stdout():
                 fuzz.generate_random_db_with_queries_wrapper((db_file, fuzzy_file, sqls, {}))
 
             fuzzied_engine = sqlalchemy.create_engine(f"sqlite+pysqlite:///{fuzzy_file}", connect_args={'timeout': args.timeout})
-            fuzzied_engines.append(fuzzied_engine)
         except Exception as e:
             logger.error('Error while fuzzing instance %s', instance)
             logger.error('%s', str(e))
+            return instance, STATUS_FUZZER_ERROR, 0, 0, None, None, None
         else:
+            fuzzied_engines.append(fuzzied_engine)
             connection = fuzzied_engine.connect()
+            outputs.append(OutputGroup())
             for sql in sqls:
                 df = execute(connection, sql)
-
-                outputs[round_i].add(sql, df)
+                outputs[-1].add(sql, df)
             connection.close()
 
-    bests = [x.closests() for x in outputs.values()]
+    bests = [x.closests() for x in outputs]
 
     target = len(sqls) / 2
     best_i = None
@@ -262,14 +177,14 @@ def disambiguate(instance, spec, sql_list, splits=None, fuzzy_level=1, results=N
 
     if bests[best_i][0] == len(sqls):
         logger.debug('Disambiguated! (%d queries)', len(sqls))
-        return sqls, fuzzy_level, splits, results
+        return instance, STATUS_OK, len(total_sql), fuzzy_level, sqls, splits, results
 
-    if ask_user(bests[best_i][1], instance, fuzzied_engines[best_i]):
+    if ask_user(bests[best_i][1], spec['sql'], instance, fuzzied_engines[best_i]):
         logger.debug('Output accepted. Reject %d queries. Continuing with %d.', len(bests[best_i][3]), len(bests[best_i][2]))
-        return disambiguate(instance, spec, bests[best_i][2], splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [True])
+        return disambiguate(instance, spec, bests[best_i][2], total_sql, splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [True])
     else:
         logger.debug('Output rejected. Reject %d queries. Continuing with %d.', len(bests[best_i][2]), len(bests[best_i][3]))
-        return disambiguate(instance, spec, bests[best_i][3], splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [False])
+        return disambiguate(instance, spec, bests[best_i][3], total_sql, splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [False])
 
 
 def print_stats():
@@ -277,6 +192,8 @@ def print_stats():
 
 
 def compute(file):
+    random.seed('squares')
+
     with open(file) as f:
         content = f.read()
 
@@ -285,45 +202,33 @@ def compute(file):
 
     if not os.path.isfile(yaml_file):
         logger.error('Instance %s skipped due to instance file not existing', instance)
-        return instance, 0, None, None
+        return instance, STATUS_NO_YAML, 0, 0, None, None, None
 
     with open(yaml_file) as f:
         spec = yaml.safe_load(f)
 
-    tmp1 = re.findall(dsl_regex, content)
-    tmp2 = re.findall(rf'{cubes_r_sep}((?:.|\n)*?)(?:$|(?={cubes_end_sep}))', content)
+    tmp2 = re.findall(rf'{cubes_sql_sep}\n((?:.|\n)*?)(?:$|{cubes_r_sep})', content)
 
-    if len(tmp1) == len(tmp2):
-        dsl_list = []
-        sql_list = []
+    sql_list = []
 
-        for dsl, cubes_sol in zip(tmp1, tmp2):
-            tmp3 = re.search(rf'{cubes_sql_sep}\n((?:.|\n)*?)(?:$|{cubes_end_sep})', cubes_sol)
+    for sql_sol in tmp2:
+        # if tmp3 is None:
+        #     return instance, STATUS_NO_SQL, 0, 0, None, None, None
 
-            if tmp3 is None:
-                skipped += 1
-                return
+        sql = re.sub(r'(\s|\n)+', ' ', sql_sol).strip()
+        sql = sanitize_sql(sql, spec)
 
-            else:
-                for i, input_f in enumerate(spec['inputs']):
-                    table_name = table.get_table_name(input_f)
-                    dsl = re.sub(rf'\binput{i}', table_name, dsl)
+        sql_list.append(sql)
 
-                sql = tmp3[1]
-                sql = re.sub(r'(\s|\n)+', ' ', sql).strip()
-                sql = sanitize_sql(sql, spec)
-
-                dsl_list.append(dsl)
-                sql_list.append(sql)
-
-        if sql_list:
-            disambiguate(instance, spec, sql_list)
-        else:
-            logger.info('No solutions found for %s', instance)
-
+    if sql_list:
+        return disambiguate(instance, spec, sql_list)
     else:
-        logger.warning('Instance %s skipped due to mismatched lenghts: %d != %d', instance, len(tmp1), len(tmp2))
-        skipped += len(tmp2)
+        logger.info('No solutions found for %s', instance)
+        return instance, STATUS_NO_SQL, 0, 0, None, None, None
+
+    # else:
+    #     logger.warning('Instance %s skipped due to mismatched lenghts: %d != %d', instance, len(tmp1), len(tmp2))
+    #     return instance, STATUS_MISMATCH_LENGTH, 0, 0, None, None, None
 
 
 def initializer():
@@ -341,16 +246,20 @@ if __name__ == '__main__':
 
     parser = argparse.parser = argparse.ArgumentParser()
     parser.add_argument('run', metavar='RUN')
+    parser.add_argument('-m', default=65536, type=int, help='memout')
     parser.add_argument('--rounds', type=int, default=16)
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--interactive', action='store_true')
+    parser.add_argument('--save-alt', action='store_true')
     args = parser.parse_args()
 
-    output_file = f'analysis/fuzzy/{args.run}_dis.csv'
-    instances = list(glob.glob(f'analysis/data/{args.run}/**/*.log', recursive=True))
+    random.seed('squares')
+
+    output_file = f'analysis/fuzzy/{args.run}_dis{"_" if args.save_alt else ""}.csv'
+    instances = list(glob.glob(f'analysis/data/{args.run}/spider/allergy_1/0029_0.log', recursive=True))
     shuffle(instances)
 
-    with ProcessPool(max_workers=args.p, initializer=initializer) as pool:
+    with ProcessPool(max_workers=1, initializer=initializer) as pool:
         with open(output_file, 'w') as results_f:
             result_writer = csv.writer(results_f)
             result_writer.writerow(('name', 'status', 'total_queries', 'n_questions', 'final_queries', 'splits', 'results'))
@@ -374,5 +283,6 @@ if __name__ == '__main__':
                 except Exception as error:
                     logger.error('Error while getting results...')
                     logger.error("\n%s", error)
+                    print(traceback.format_exc())
                 finally:
                     results_f.flush()

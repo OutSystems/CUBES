@@ -1,83 +1,80 @@
-# SQUARES - A SQL Synthesizer Using Query Reverse Engineering
+# CUBES - A New Dimension in Query Synthesis From Examples
 
-Given a set of input-output examples (tables), SQUARES returns the desired query in R and in SQL. SQUARES is built on top of [Trinity](https://github.com/fredfeng/Trinity).
+# Setup
 
-    
+## Requirements
+
+- Working installation of conda/miniconda (https://docs.conda.io/en/latest/miniconda.html)
+
+## Instructions
+
+1. Create a new conda environment based on the package list at `conda.txt`:
+
+    ```conda create --name cubes --file conda.txt```
+
+2. Activate the conda environment:
+
+    ```conda activate cubes```
+
+    From now on all commands should be run with the conda environment activated.
+
+3. Install required Python packages through pip:
+
+    ```pip install psutil z3-solver chromalog pylru frozendict sqlalchemy libs/TestSuiteEval-1.0.3-py3-none-any.whl pebble```
+
 # Usage
 
-## Using Jupyter Notebook:
-    - Go to jupyter-notebook folder and launch the jupyter notebook and select demo.ipynb:
-        ```
-        jupyter notebook
-        ```
-  
-## Using [Google Colab](https://colab.research.google.com/drive/1wPwP1iWBLqmNTk9ffxNPR0mj3GbbUZr2):
-    - save the google colab doc to your account and run it.
+Instance files are in the `tests-examples` folder.
 
-## Using CLI:
-```
-usage: squares [-h] [-d] [--symm-on | --symm-off] [--r | --no-r] [--tree | --lines] [--limit LIMIT] [--seed SEED] SPECIFICATION
+## Sequential
 
-A SQL Synthesizer Using Query Reverse Engineering
+```python ./sequential.py path-to-yaml-file```
 
-positional arguments:
-  SPECIFICATION  specification file
+You can use `--help` to see all configuration options available in cubes.
 
-optional arguments:
-  -h, --help     show this help message and exit
-  -d, --debug    Print debug info.
-  --symm-on      compute symmetries online
-  --symm-off     compute symmetries offline
-  --r            output R program
-  --no-r         don't output R program
-  --tree         use tree encoding
-  --lines        use line encoding
-  --limit LIMIT  maximum program size
-  --seed SEED
-```
+## Parallel
 
+```python ./cubes.py path-to-yaml-file```
 
-# Installation
+You can use `--help` to see all configuration options available in cubes (parallel version).
 
-### Prerequisites
-- Python 3.6+
-- R
+## Running all benchmarks
 
-## Using [anaconda](https://www.anaconda.com)
+In order to select which instances you would like to benchmark, you need to create a folder `tests`. You can then copy the desired instances from `tests-examples` or symlink them, if you desire.
 
-- Install [anaconda](https://www.anaconda.com)
-- run 
-  ```
-  TODO
-  ```
- 
-- every time before using SQUARES run:
-    ```
-    conda activate squares
-    ```
+```PYTHONPATH=. ./helper-scripts/benchmark.py execution-descriptor```
 
-## Using `setup.py` and `setup.r`
+Here `execution-descriptor` is any string that is a valid filename and is used to store the results in the folder `./analysis/data/execution-descriptor`.
+You can use `--help` to see all configuration options available in the benchmark script.
 
-- Create a new virtual environment (strongly recommended):
-  ```
-  python3 -m venv env
-  ```
+## Disambiguation
 
-- Install python dependencies:
-  ```
-  pip install .
-  ```
-  
-- Install R dependencies:
-  ```
-  Rscript setup.r
-  ```
+At this point disambiguation is implemented as a post-processing step after cubes has generated all solution under the desired time limit and requires the benchmark script to have been used.
 
-References
+To perform disambiguation you can use the following command:
 
- - Pedro Orvalho, Miguel Terra-Neves, Miguel Ventura, Ruben Martins and Vasco Manquinho. Encodings for Enumeration-Based Program Synthesis. CP'19
- - Pedro Orvalho. SQUARES : A SQL Synthesizer Using Query Reverse Engineering. MSc Thesis. Instituto Superior Técnico - Universidade de Lisboa. 2019.
- - Ruben Martins, Jia Chen, Yanju Chen, Yu Feng, Isil Dillig. Trinity: An Extensible Synthesis Framework for Data Science. VLDB'19
-- Yu Feng, Ruben Martins, Osbert Bastani, Isil Dillig. Program Synthesis using Conflict-Driven Learning. PLDI'18.
- - Yu Feng, Ruben Martins, Jacob Van Geffen, Isil Dillig, Swarat Chaudhuri. Component-based Synthesis of Table Consolidation and Transformation Tasks from Examples. PLDI'17
+```PYTHONPATH=. ./helper-scripts/disambiguation-post.py execution-descriptor```
 
+You can use `--help` to see all configuration options available in the disambiguation script.
+
+## Accuracy
+
+Like the disambiguation script, accuracy requires instances to have been run using the benchmark script introduced before.
+
+To perform accuracy analysis you can use the following command:
+
+```PYTHONPATH=. ./helper-scripts/fuzzy-check.py --run=execution-descriptor```
+
+If you want to perform accuracy analysis over the results of a previous disambiguation you can use:
+
+```PYTHONPATH=. ./helper-scripts/fuzzy-check.py --from-dis --run=execution-descriptor```
+
+You can use `--help` to see other configuration options available in the accuracy analysis script.
+
+# Final notes
+
+- The file `cubes_500.instances` contains the list of instances used for evaluation in the parts where only a subset of instances was used. This file can be passed as the `--instances` argument to the benchmark script.
+
+- The folder `analysis` contains all code use to analyse the results obtained and produced all graphs included in the paper.
+
+- The folders `analysis/data` and `analysis/fuzzy` come pre-packaged with all logs used in the evaluation section of the paper.

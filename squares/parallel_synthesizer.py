@@ -87,6 +87,7 @@ class ChildSynthesizer(Process, Synthesizer):
     def solve(self, cube):
         logger.debug('Solving cube %s', repr(cube))
 
+        core = None
         try:
             if isinstance(self._enumerator, BitEnumerator):
                 self._enumerator.z3_solver.push()
@@ -126,6 +127,7 @@ class ChildSynthesizer(Process, Synthesizer):
     def resume_solve(self):
         logger.debug('Resuming solving previous cube')
 
+        core = None
         try:
             ret, attempts = next(self.synthesize())
 
@@ -145,7 +147,7 @@ class ChildSynthesizer(Process, Synthesizer):
 
         finally:
             self._enumerator.blocked_models = {}
-            if not ret:
+            if isinstance(self._enumerator, BitEnumerator) and not ret:
                 self._enumerator.z3_solver.pop()
 
 

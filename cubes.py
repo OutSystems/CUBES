@@ -146,7 +146,8 @@ def main():
                 write_specification(spec, f)
 
         if not first:
-            results.specification = Specification(spec)
+            specification.generate_r_init()
+            # results.specification = Specification(spec)
         else:
             first = False
 

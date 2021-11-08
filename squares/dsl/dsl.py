@@ -1,3 +1,5 @@
+import re
+from collections import Counter
 from typing import Any
 
 from ordered_set import OrderedSet
@@ -20,6 +22,30 @@ class Helper:
         raise AttributeError
 
 
+def count_ops(dsl_program: List[str]) -> Dict[str, int]:
+    cubes = []
+    for program in dsl_program:
+        lines = re.split(r'(?<=\))\s*,\s+(?=\w)', program)
+        cube = [re.search(r'(.*?)\(.*\)', line.strip())[1] for line in lines]
+        cubes.append(cube)
+
+    counts = [Counter(cube) for cube in cubes]
+    final_counts = {}
+
+    for counter in counts:
+        for op, count in counter.items():
+            if op not in final_counts:
+                final_counts[op] = count
+            else:
+                final_counts[op] = min(final_counts[op], count)
+
+        for op in set(final_counts.keys()).difference(counter.keys()):
+            final_counts[op] = 0
+
+
+    return final_counts
+
+
 h = Helper()
 
 Table = ValueType('Table',
@@ -38,7 +64,8 @@ SummariseCondition = EnumType('SummariseCondition')
 # SortOrder = EnumType('SortOrder')
 LimitCols = EnumType('LimitCols')
 
-functions = OrderedSet(['natural_join', 'natural_join3', 'natural_join4', 'inner_join', 'anti_join', 'left_join', 'union', 'intersect', 'semi_join', 'cross_join', 'unite', 'filter', 'filters', 'summarise', 'mutate'])
+functions = OrderedSet(['natural_join', 'natural_join3', 'natural_join4', 'inner_join', 'anti_join', 'left_join', 'union', 'intersect', 'semi_join', 'cross_join', 'unite', 'filter', 'filters', 'summarise', 'mutate', 'limit'])
+functions_always_on = OrderedSet(['natural_join', 'natural_join3', 'natural_join4', 'inner_join', 'filter', 'summarise', 'mutate', 'limit'])
 
 natural_join = ('natural_join',
                 Table,
