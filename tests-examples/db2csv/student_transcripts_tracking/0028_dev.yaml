@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0028_dev.csv
 raw_question: What are the first, middle, and last names, along with the ids, of all students who enrolled in 2 degree programs in one semester? 
 question_index: 534 
@@ -14,10 +14,12 @@ join_columns:
  - student_id
 groupby_columns:
  - student_id
+orderby_columns: []
 functions:
  - count
 columns: []
-filters: []
+filters:
+ - '='
 ieu: []
 comment: |-
   SELECT T1.first_name,
@@ -44,11 +46,14 @@ smbop_beam_join_columns:
 smbop_beam_groupby_columns:
 - - student_id
 - - student_id
+smbop_beam_orderby_columns:
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 smbop_beam_constants:
 - - 2
 - - 2
@@ -62,8 +67,8 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- []
-- []
+- - '='
+- - '='
 smbop_beam_inferred_code:
   - SELECT students.first_name , students.last_name , students.student_id FROM student_enrolment JOIN students ON student_enrolment.student_id = students.student_id GROUP BY students.student_id HAVING COUNT( * ) = 2
   - SELECT students.first_name , students.last_name , students.student_id FROM students JOIN student_enrolment ON students.student_id = student_enrolment.student_id GROUP BY students.student_id HAVING COUNT( * ) = 2
@@ -100,26 +105,36 @@ ratsql_beam_groupby_columns:
 - - student_id
 - - semester_id
 - - first_name
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/semesters.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
 ratsql_beam_constants:
 - - 1
   - 2
@@ -172,15 +187,15 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
+- - '='
 ratsql_beam_inferred_code:
   - SELECT Students.first_name, Students.middle_name, Student_Enrolment.semester_id FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.semester_id HAVING Count(*) = 'terminal'
   - SELECT Students.first_name, Students.middle_name, Student_Enrolment.semester_id FROM Students JOIN Student_Enrolment ON Students.student_id = Student_Enrolment.student_id GROUP BY Student_Enrolment.student_id HAVING Count(*) = 'terminal'

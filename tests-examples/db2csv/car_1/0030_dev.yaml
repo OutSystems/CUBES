@@ -1,8 +1,8 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
+ - tests-examples/db2csv/car_1/tables/model_list.csv
  - tests-examples/db2csv/car_1/tables/countries.csv
  - tests-examples/db2csv/car_1/tables/car_makers.csv
- - tests-examples/db2csv/car_1/tables/model_list.csv
 output: tests-examples/db2csv/car_1/tables/0030_dev.csv
 raw_question: What is the count of the car models produced in the United States? 
 question_index: 116 
@@ -12,11 +12,12 @@ order_by_direction: []
 constants:
  - usa
 join_columns:
- - countryid
- - country
  - id
+ - countryid
  - maker
+ - country
 groupby_columns: []
+orderby_columns: []
 functions:
  - count
 columns:
@@ -38,13 +39,13 @@ sql: |-
   JOIN COUNTRIES AS T3 ON T2.Country = T3.CountryId
   WHERE T3.CountryName = 'usa';
 smbop_beam_join_columns:
-- - countryid
-  - id
+- - id
+  - countryid
   - maker
-- - countryid
+- - id
+  - countryid
+  - maker
   - country
-  - id
-  - maker
 - - countryid
   - maker
 - []
@@ -53,15 +54,20 @@ smbop_beam_groupby_columns:
 - []
 - []
 - []
+smbop_beam_orderby_columns:
+- []
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
+- - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
 - - tests-examples/db2csv/car_1/tables/countries.csv
 smbop_beam_constants:
 - - usa
@@ -116,27 +122,38 @@ smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
 - - model
 - - model
-- - model
-  - makeid
+- - makeid
   - id
+  - model
 - []
-- - model
-  - makeid
+- - makeid
   - id
-- - model
-  - makeid
+  - model
+- - makeid
   - id
-- - model
-  - makeid
+  - model
+- - makeid
   - id
-- - model
+  - model
+- - id
   - maker
-  - id
+  - model
 - []
-- - model
-  - makeid
+- - makeid
   - id
+  - model
 ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_orderby_columns:
 - []
 - []
 - []
@@ -198,18 +215,18 @@ ratsql_beam_columns:
 - - make
   - model
 - - make
-- - year
-  - model
+- - model
+  - year
 - - make
 - - year
 - - edispl
   - model
-- - year
+- - model
+  - year
+- - maker
   - model
-- - model
-  - maker
-- - model
-  - maker
+- - maker
+  - model
 - - edispl
 ratsql_beam_ieu:
 - []

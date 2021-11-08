@@ -11,6 +11,7 @@ constants:
  - Republic
 join_columns: []
 groupby_columns: []
+orderby_columns: []
 functions:
  - count
 columns:
@@ -40,6 +41,14 @@ smbop_beam_join_columns:
   - code
 - []
 smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+smbop_beam_orderby_columns:
 - []
 - []
 - []
@@ -157,26 +166,35 @@ ratsql_beam_groupby_columns:
 - []
 - []
 - []
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/city.csv
   - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
-- []
-- []
-- []
-- []
-- - '1'
-- []
-- []
-- []
-- []
+- - Republic
+- - Republic
+- - Republic
+- - Republic
+- - Republic
+  - '1'
+- - Republic
+- - Republic
+- - Republic
+- - Republic
 ratsql_beam_functions:
 - - count
 - - count
@@ -221,15 +239,15 @@ ratsql_beam_inferred_code:
   - SELECT Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.HeadOfState = 'terminal'
   - SELECT Count(*) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.HeadOfState = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - SELECT Count(*) FROM country WHERE country.HeadOfState = 'Republic'
+  - SELECT Count(DISTINCT country.Name) FROM country WHERE country.HeadOfState = 'Republic'
+  - SELECT Count(*) FROM country WHERE DISTINCT country.HeadOfState = 'Republic'
+  - SELECT Count(DISTINCT *) FROM country WHERE country.HeadOfState = 'Republic'
+  - SELECT Count(*) FROM country WHERE country.HeadOfState = 'Republic' LIMIT 1
+  - SELECT DISTINCT Count(*) FROM country WHERE country.HeadOfState = 'Republic'
+  - SELECT Count(*) FROM country WHERE country.GovernmentForm = 'Republic'
+  - SELECT Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode WHERE country.HeadOfState = 'Republic'
+  - SELECT Count(*) FROM city JOIN country ON city.CountryCode = country.Code WHERE country.HeadOfState = 'Republic'
 ratsql_beam_has_limit:
   - False
   - False

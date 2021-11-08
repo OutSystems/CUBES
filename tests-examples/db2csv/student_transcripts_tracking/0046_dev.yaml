@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/student_transcripts_tracking/tables/student_transcripts_tracking.sqlite
 inputs:
- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+ - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
 output: tests-examples/db2csv/student_transcripts_tracking/tables/0046_dev.csv
 raw_question: What is the date and id of the transcript with at least 2 courses listed? 
 question_index: 552 
@@ -14,10 +14,12 @@ join_columns:
  - transcript_id
 groupby_columns:
  - transcript_id
+orderby_columns: []
 functions:
  - count
 columns: []
-filters: []
+filters:
+ - '>='
 ieu: []
 comment: |-
   SELECT T2.transcript_date,
@@ -42,13 +44,17 @@ smbop_beam_groupby_columns:
 - - transcript_id
 - - transcript_id
 - - transcript_id
+smbop_beam_orderby_columns:
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
 smbop_beam_constants:
 - - 2
 - - 2
@@ -66,9 +72,9 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- []
-- []
-- []
+- - '>='
+- - '>='
+- - '>'
 smbop_beam_inferred_code:
   - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcripts JOIN transcript_contents ON transcripts.transcript_id = transcript_contents.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
   - SELECT transcripts.transcript_id , transcripts.transcript_date FROM transcript_contents JOIN transcripts ON transcript_contents.transcript_id = transcripts.transcript_id GROUP BY transcripts.transcript_id HAVING COUNT( * ) >= 2
@@ -99,15 +105,20 @@ ratsql_beam_groupby_columns:
 - - transcript_id
 - - transcript_id
 - - transcript_id
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/transcripts.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
 ratsql_beam_constants:
 - - 2
 - - 2
@@ -133,10 +144,10 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
+- - '>='
+- - '>='
+- - '>='
+- - '>'
 ratsql_beam_inferred_code:
   - SELECT Transcripts.transcript_date, Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal'
   - SELECT Transcripts.transcript_date, DISTINCT Transcripts.transcript_id FROM Transcripts JOIN Transcript_Contents ON Transcripts.transcript_id = Transcript_Contents.transcript_id GROUP BY Transcripts.transcript_id HAVING Count(*) >= 'terminal'

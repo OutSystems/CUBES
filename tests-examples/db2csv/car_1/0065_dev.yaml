@@ -1,9 +1,9 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
- - tests-examples/db2csv/car_1/tables/car_makers.csv
  - tests-examples/db2csv/car_1/tables/car_names.csv
- - tests-examples/db2csv/car_1/tables/cars_data.csv
  - tests-examples/db2csv/car_1/tables/model_list.csv
+ - tests-examples/db2csv/car_1/tables/cars_data.csv
+ - tests-examples/db2csv/car_1/tables/car_makers.csv
 output: tests-examples/db2csv/car_1/tables/0065_dev.csv
 raw_question: Which distinctive models are produced by maker with the full name General Motors or weighing more than 3500? 
 question_index: 151 
@@ -14,18 +14,19 @@ constants:
  - 3500
  - General Motors
 join_columns:
- - model
- - makeid
  - id
  - maker
+ - makeid
+ - model
 groupby_columns: []
+orderby_columns: []
 functions: []
 columns:
- - weight
  - fullname
+ - weight
 filters:
- - '='
  - '>'
+ - '='
 ieu: []
 comment: |-
   SELECT DISTINCT T2.Model
@@ -46,6 +47,7 @@ sql: |-
     OR T4.weight > 3500;
 smbop_beam_join_columns:
 smbop_beam_groupby_columns:
+smbop_beam_orderby_columns:
 smbop_beam_tables:
 smbop_beam_constants:
 smbop_beam_functions:
@@ -58,41 +60,49 @@ smbop_beam_has_limit:
 smbop_beam_has_order_by:
 smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
-- - model
+- - id
   - maker
   - makeid
-  - id
-- - model
-  - maker
-  - makeid
-  - id
-- - model
-  - maker
-  - makeid
-  - id
-- - country
-  - makeid
-  - countryid
-  - maker
   - model
-  - id
-- - country
-  - makeid
-  - countryid
+- - id
   - maker
-  - contid
+  - makeid
   - model
+- - id
+  - maker
+  - makeid
+  - model
+- - countryid
+  - id
+  - makeid
+  - country
+  - model
+  - maker
+- - countryid
   - id
   - continent
-- - model
+  - makeid
+  - country
+  - model
+  - contid
+  - maker
+- - id
   - maker
   - makeid
-  - id
-- - model
+  - model
+- - id
   - maker
   - makeid
-  - id
+  - model
 ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_orderby_columns:
 - []
 - []
 - []
@@ -114,15 +124,15 @@ ratsql_beam_tables:
   - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
@@ -163,20 +173,20 @@ ratsql_beam_functions:
 - []
 - []
 ratsql_beam_columns:
-- - weight
-  - fullname
-- - weight
-  - fullname
-- - weight
-  - fullname
-- - weight
-  - fullname
-- - weight
-  - fullname
-- - weight
-  - fullname
-- - weight
-  - fullname
+- - fullname
+  - weight
+- - fullname
+  - weight
+- - fullname
+  - weight
+- - fullname
+  - weight
+- - fullname
+  - weight
+- - fullname
+  - weight
+- - fullname
+  - weight
 ratsql_beam_ieu:
 - []
 - []
@@ -186,20 +196,20 @@ ratsql_beam_ieu:
 - []
 - - union
 ratsql_beam_filters:
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '='
-  - '>'
-- - '='
-  - '>'
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
 ratsql_beam_inferred_code:
   - SELECT DISTINCT model_list.Model FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_makers.FullName = 'terminal' OR cars_data.Weight > 'terminal'
   - SELECT model_list.Model FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_makers.FullName = 'terminal' OR cars_data.Weight > 'terminal'

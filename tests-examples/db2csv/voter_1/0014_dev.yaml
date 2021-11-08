@@ -1,8 +1,8 @@
 db: tests-examples/db2csv/voter_1/tables/voter_1.sqlite
 inputs:
- - tests-examples/db2csv/voter_1/tables/contestants.csv
  - tests-examples/db2csv/voter_1/tables/votes.csv
  - tests-examples/db2csv/voter_1/tables/area_code_state.csv
+ - tests-examples/db2csv/voter_1/tables/contestants.csv
 output: tests-examples/db2csv/voter_1/tables/0014_dev.csv
 raw_question: List the area codes in which voters voted both for the contestant 'Tabatha Gehling' and the contestant 'Kelly Clauss'. 
 question_index: 700 
@@ -10,12 +10,13 @@ has_limit: False
 has_order_by: False 
 order_by_direction: []
 constants:
- - Kelly Clauss
  - Tabatha Gehling
+ - Kelly Clauss
 join_columns:
- - state
  - contestant_number
+ - state
 groupby_columns: []
+orderby_columns: []
 functions: []
 columns:
  - contestant_name
@@ -45,14 +46,19 @@ sql: |-
     JOIN votes AS T2 ON T1.contestant_number = T2.contestant_number
     JOIN area_code_state AS T3 ON T2.state = T3.state WHERE T1.contestant_name = 'Kelly Clauss'
 smbop_beam_join_columns:
-- - state
-  - contestant_number
-- - state
-  - contestant_number
+- - contestant_number
+  - state
+- - contestant_number
+  - state
 - []
-- - state
-  - contestant_number
+- - contestant_number
+  - state
 smbop_beam_groupby_columns:
+- []
+- []
+- []
+- []
+smbop_beam_orderby_columns:
 - []
 - []
 - []
@@ -69,14 +75,14 @@ smbop_beam_tables:
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
   - tests-examples/db2csv/voter_1/tables/contestants.csv
 smbop_beam_constants:
-- - Kelly Clauss
-  - Tabatha Gehling
-- - Kelly Clauss
-  - Tabatha Gehling
-- - Kelly Clauss
-  - Tabatha Gehling
-- - Kelly Clauss
-  - Tabatha Gehling
+- - Tabatha Gehling
+  - Kelly Clauss
+- - Tabatha Gehling
+  - Kelly Clauss
+- - Tabatha Gehling
+  - Kelly Clauss
+- - Tabatha Gehling
+  - Kelly Clauss
 smbop_beam_functions:
 - []
 - []
@@ -123,26 +129,30 @@ smbop_beam_order_by_direction:
 - []
 - []
 ratsql_beam_join_columns:
-- - state
-  - contestant_number
-- - state
-  - contestant_number
-- - state
-  - contestant_number
+- - contestant_number
+  - state
+- - contestant_number
+  - state
+- - contestant_number
+  - state
 ratsql_beam_groupby_columns:
 - []
 - []
 - []
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
 ratsql_beam_constants:
 - - Kelly Clauss
   - Tabatha Gehling
@@ -177,11 +187,11 @@ ratsql_beam_inferred_code:
   - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'terminal' INTERSECT SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'terminal'
   - SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'terminal' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss'
-  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE DISTINCT CONTESTANTS.contestant_name = 'Kelly Clauss'
-  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE DISTINCT CONTESTANTS.contestant_name = 'Tabatha Gehling' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss'
-  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling' INTERSECT SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss'
-  - SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss'
+  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling'
+  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE DISTINCT CONTESTANTS.contestant_name = 'Tabatha Gehling'
+  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE DISTINCT CONTESTANTS.contestant_name = 'Kelly Clauss' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling'
+  - SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss' INTERSECT SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling'
+  - SELECT DISTINCT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Kelly Clauss' INTERSECT SELECT AREA_CODE_STATE.area_code FROM AREA_CODE_STATE JOIN CONTESTANTS JOIN VOTES ON AREA_CODE_STATE.state = VOTES.state AND VOTES.contestant_number = CONTESTANTS.contestant_number AND AREA_CODE_STATE.state = VOTES.state WHERE CONTESTANTS.contestant_name = 'Tabatha Gehling'
 ratsql_beam_has_limit:
   - False
   - False

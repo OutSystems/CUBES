@@ -1,8 +1,8 @@
 db: tests-examples/db2csv/car_1/tables/car_1.sqlite
 inputs:
+ - tests-examples/db2csv/car_1/tables/continents.csv
  - tests-examples/db2csv/car_1/tables/countries.csv
  - tests-examples/db2csv/car_1/tables/car_makers.csv
- - tests-examples/db2csv/car_1/tables/continents.csv
 output: tests-examples/db2csv/car_1/tables/0043_dev.csv
 raw_question: Which countries in europe have at least 3 car manufacturers? 
 question_index: 129 
@@ -10,20 +10,22 @@ has_limit: False
 has_order_by: False 
 order_by_direction: []
 constants:
- - 3
  - europe
+ - 3
 join_columns:
+ - continent
  - contid
  - country
- - continent
  - countryid
 groupby_columns:
  - countryname
+orderby_columns: []
 functions:
  - count
 columns:
  - continent
 filters:
+ - '>='
  - '='
 ieu: []
 comment: |-
@@ -44,12 +46,12 @@ sql: |-
   GROUP BY T1.CountryName
   HAVING count(*) >= 3;
 smbop_beam_join_columns:
-- - country
-  - countryid
-- - country
-  - countryid
-- - country
-  - countryid
+- - countryid
+  - country
+- - countryid
+  - country
+- - countryid
+  - country
 - []
 - []
 - []
@@ -60,32 +62,39 @@ smbop_beam_groupby_columns:
 - - countryid
 - - continent
 - - country
+smbop_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
 smbop_beam_constants:
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
 smbop_beam_functions:
 - - count
 - - count
@@ -108,12 +117,18 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- - '='
-- - '='
-- - '='
-- - '='
-- - '='
-- - '='
+- - '>='
+  - '='
+- - '>='
+  - '='
+- - '>='
+  - '='
+- - '>='
+  - '='
+- - '>='
+  - '='
+- - '>='
+  - '='
 smbop_beam_inferred_code:
   - SELECT countries.countryname FROM countries JOIN car_makers ON countries.countryid = car_makers.country WHERE countries.continent = 'europe' GROUP BY countries.countryid HAVING COUNT( * ) >= 3
   - SELECT countries.countryname FROM countries JOIN car_makers ON countries.countryid = car_makers.country WHERE countries.continent = 'europe' GROUP BY car_makers.country HAVING COUNT( * ) >= 3
@@ -151,22 +166,22 @@ smbop_beam_order_by_direction:
 - []
 ratsql_beam_join_columns:
 - []
-- - country
-  - countryid
-- - country
-  - countryid
-- - country
-  - countryid
-- - country
-  - countryid
+- - countryid
+  - country
+- - countryid
+  - country
+- - countryid
+  - country
+- - countryid
+  - country
 - []
 - []
 - - contid
+  - countryid
   - country
   - continent
-  - countryid
-- - country
-  - countryid
+- - countryid
+  - country
 ratsql_beam_groupby_columns:
 - - country
 - - countryname
@@ -177,44 +192,54 @@ ratsql_beam_groupby_columns:
 - - id
 - - continent
 - - continent
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
-  - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/countries.csv
-- - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
+- - tests-examples/db2csv/car_1/tables/car_makers.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
 ratsql_beam_constants:
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
-- - 3
-  - europe
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
+- - europe
+  - 3
 ratsql_beam_functions:
 - - count
 - - count
@@ -246,15 +271,15 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
 ratsql_beam_inferred_code:
   - SELECT car_makers.Country FROM car_makers GROUP BY car_makers.Country HAVING Count(*) >= 'terminal'
   - SELECT car_makers.Country FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country GROUP BY countries.CountryName HAVING Count(*) >= 'terminal'

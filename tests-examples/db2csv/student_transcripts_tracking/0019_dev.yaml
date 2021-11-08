@@ -14,10 +14,12 @@ join_columns:
  - course_id
 groupby_columns:
  - course_id
+orderby_columns: []
 functions:
  - count
 columns: []
-filters: []
+filters:
+ - '<='
 ieu: []
 comment: |-
   SELECT T1.course_name,
@@ -38,6 +40,8 @@ smbop_beam_join_columns:
 - - course_id
 smbop_beam_groupby_columns:
 - - course_name,
+smbop_beam_orderby_columns:
+- []
 smbop_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
@@ -50,7 +54,7 @@ smbop_beam_columns:
 smbop_beam_ieu:
 - []
 smbop_beam_filters:
-- []
+- - '<='
 smbop_beam_inferred_code:
   - SELECT courses.course_name , courses.course_id FROM courses JOIN sections ON courses.course_id = sections.course_id GROUP BY courses.course_name , sections.course_id HAVING COUNT( * ) <= 2
 smbop_beam_inferred_code_w_terminals:
@@ -66,12 +70,12 @@ ratsql_beam_join_columns:
 - - course_id
 - - course_id
 - - course_id
-- - student_enrolment_id
+- - course_id
+  - student_enrolment_id
   - degree_program_id
-  - course_id
-- - student_enrolment_id
-  - course_id
+- - course_id
   - student_id
+  - student_enrolment_id
 - - course_id
   - student_course_id
 ratsql_beam_groupby_columns:
@@ -82,6 +86,14 @@ ratsql_beam_groupby_columns:
 - - course_id
 - - course_id
 - - course_id
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
 - - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
@@ -93,18 +105,18 @@ ratsql_beam_tables:
   - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/degree_programs.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
 - - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment.csv
-- - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/students.csv
+- - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
+  - tests-examples/db2csv/student_transcripts_tracking/tables/courses.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/sections.csv
   - tests-examples/db2csv/student_transcripts_tracking/tables/transcript_contents.csv
-  - tests-examples/db2csv/student_transcripts_tracking/tables/student_enrolment_courses.csv
 ratsql_beam_constants:
 - - 2
 - - 2
@@ -142,13 +154,13 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '<='
+- - '<='
+- - '<='
+- - '<='
+- - '<='
+- - '<='
+- - '<='
 ratsql_beam_inferred_code:
   - SELECT Courses.course_name, Sections.course_id FROM Courses JOIN Sections ON Courses.course_id = Sections.course_id GROUP BY Sections.course_id HAVING Count(*) <= 'terminal'
   - SELECT Courses.course_name, Courses.course_id FROM Courses JOIN Sections ON Courses.course_id = Sections.course_id GROUP BY Sections.course_id HAVING Count(*) <= 'terminal'

@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/pets_1/tables/pets_1.sqlite
 inputs:
- - tests-examples/db2csv/pets_1/tables/student.csv
  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+ - tests-examples/db2csv/pets_1/tables/student.csv
 output: tests-examples/db2csv/pets_1/tables/0038_dev.csv
 raw_question: What is the first name and gender of the all the students who have more than one pet? 
 question_index: 82 
@@ -14,10 +14,12 @@ join_columns:
  - stuid
 groupby_columns:
  - stuid
+orderby_columns: []
 functions:
  - count
 columns: []
-filters: []
+filters:
+ - '>'
 ieu: []
 comment: |-
   SELECT T1.fname,
@@ -48,19 +50,26 @@ smbop_beam_groupby_columns:
 - - stuid
 - - stuid
 - - stuid
+smbop_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
 smbop_beam_constants:
 - - 1
 - - 1
@@ -90,12 +99,12 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
+- - '>'
+- - '>'
+- - '>'
+- - '>='
+- - '>='
+- - '>'
 smbop_beam_inferred_code:
   - SELECT student.fname , student.sex FROM student JOIN has_pet ON student.stuid = has_pet.stuid GROUP BY has_pet.stuid HAVING COUNT( * ) > 1
   - SELECT student.fname , student.sex FROM student JOIN has_pet ON student.stuid = has_pet.stuid GROUP BY student.stuid HAVING COUNT( * ) > 1
@@ -148,22 +157,30 @@ ratsql_beam_groupby_columns:
 - - stuid
 - - fname
 - - stuid
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
   - tests-examples/db2csv/pets_1/tables/pets.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
-- - tests-examples/db2csv/pets_1/tables/student.csv
-  - tests-examples/db2csv/pets_1/tables/has_pet.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
+- - tests-examples/db2csv/pets_1/tables/has_pet.csv
+  - tests-examples/db2csv/pets_1/tables/student.csv
 ratsql_beam_constants:
 - - 1
 - - 1
@@ -201,13 +218,13 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+- - '>'
 ratsql_beam_inferred_code:
   - SELECT Student.Fname, Student.Sex FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID GROUP BY Has_Pet.StuID HAVING Count(*) > 'terminal'
   - SELECT Student.Fname, Student.Sex FROM Student JOIN Has_Pet ON Student.StuID = Has_Pet.StuID GROUP BY Student.StuID HAVING Count(*) > 'terminal'

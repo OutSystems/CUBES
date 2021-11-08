@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/voter_1/tables/voter_1.sqlite
 inputs:
- - tests-examples/db2csv/voter_1/tables/contestants.csv
  - tests-examples/db2csv/voter_1/tables/votes.csv
+ - tests-examples/db2csv/voter_1/tables/contestants.csv
 output: tests-examples/db2csv/voter_1/tables/0008_dev.csv
 raw_question: What are the contestant numbers and names of the contestants who had at least two votes? 
 question_index: 694 
@@ -14,10 +14,12 @@ join_columns:
  - contestant_number
 groupby_columns:
  - contestant_number
+orderby_columns: []
 functions:
  - count
 columns: []
-filters: []
+filters:
+ - '>='
 ieu: []
 comment: |-
   SELECT T1.contestant_number,
@@ -44,13 +46,18 @@ smbop_beam_groupby_columns:
 - - contestant_number
 - - contestant_number
 - - contestant_number
+smbop_beam_orderby_columns:
+- []
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/contestants.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
 - - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/contestants.csv
 smbop_beam_constants:
@@ -74,10 +81,10 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- []
-- []
-- []
-- []
+- - '>='
+- - '>='
+- - '>='
+- - '>='
 smbop_beam_inferred_code:
   - SELECT contestants.contestant_number , contestants.contestant_name FROM contestants JOIN votes ON contestants.contestant_number = votes.contestant_number GROUP BY contestants.contestant_number HAVING COUNT( * ) >= 2
   - SELECT contestants.contestant_number , contestants.contestant_name FROM votes JOIN contestants ON votes.contestant_number = contestants.contestant_number GROUP BY contestants.contestant_number HAVING COUNT( * ) >= 2
@@ -106,8 +113,8 @@ smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
 - - contestant_number
 - - contestant_number
-- - state
-  - contestant_number
+- - contestant_number
+  - state
 - - contestant_number
 - - contestant_number
 - - contestant_number
@@ -120,22 +127,30 @@ ratsql_beam_groupby_columns:
 - - contestant_number
 - - contestant_number
 - - contestant_number
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
   - tests-examples/db2csv/voter_1/tables/area_code_state.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
-- - tests-examples/db2csv/voter_1/tables/contestants.csv
-  - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
+- - tests-examples/db2csv/voter_1/tables/votes.csv
+  - tests-examples/db2csv/voter_1/tables/contestants.csv
 ratsql_beam_constants:
 - - 2
 - - 2
@@ -173,13 +188,13 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
-- []
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
+- - '>='
 ratsql_beam_inferred_code:
   - SELECT CONTESTANTS.contestant_number, CONTESTANTS.contestant_name FROM CONTESTANTS JOIN VOTES ON CONTESTANTS.contestant_number = VOTES.contestant_number GROUP BY VOTES.contestant_number HAVING Count(*) >= 'terminal'
   - SELECT CONTESTANTS.contestant_number, CONTESTANTS.contestant_name FROM CONTESTANTS JOIN VOTES ON CONTESTANTS.contestant_number = VOTES.contestant_number GROUP BY CONTESTANTS.contestant_name HAVING Count(*) >= 'terminal'

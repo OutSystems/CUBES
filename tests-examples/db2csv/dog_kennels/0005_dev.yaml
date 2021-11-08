@@ -15,11 +15,13 @@ join_columns:
  - professional_id
 groupby_columns:
  - professional_id
+orderby_columns: []
 functions:
  - count
 columns:
  - state
 filters:
+ - '>'
  - '='
 ieu:
  - union
@@ -56,9 +58,11 @@ smbop_beam_join_columns:
 - - professional_id
 smbop_beam_groupby_columns:
 - - professional_id
+smbop_beam_orderby_columns:
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/professionals.csv
 smbop_beam_constants:
 - - Indiana
   - 2
@@ -69,7 +73,7 @@ smbop_beam_columns:
 smbop_beam_ieu:
 - []
 smbop_beam_filters:
-- []
+- - '>'
 smbop_beam_inferred_code:
   - SELECT professionals.professional_id , professionals.last_name , professionals.cell_number FROM treatments JOIN professionals ON treatments.professional_id = professionals.professional_id GROUP BY professionals.professional_id HAVING COUNT( * ) > 2
 smbop_beam_inferred_code_w_terminals:
@@ -92,6 +96,12 @@ ratsql_beam_groupby_columns:
 - - professional_id
 - - professional_id
 - - professional_id
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
@@ -144,11 +154,16 @@ ratsql_beam_ieu:
 - - union
 - - union
 ratsql_beam_filters:
-- - '='
-- - '='
-- - '='
-- - '='
-- - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
+- - '>'
+  - '='
 ratsql_beam_inferred_code:
   - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'terminal' GROUP BY Professionals.professional_id HAVING Count(*) > 'terminal'
   - SELECT Professionals.professional_id, Professionals.last_name, Professionals.cell_number FROM Professionals JOIN Treatments ON Professionals.professional_id = Treatments.professional_id WHERE Professionals.state = 'terminal' GROUP BY Professionals.professional_id HAVING Count(Treatments.treatment_id) > 'terminal'

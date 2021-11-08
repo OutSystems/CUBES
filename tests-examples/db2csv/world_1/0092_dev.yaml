@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/world_1/tables/world_1.sqlite
 inputs:
- - tests-examples/db2csv/world_1/tables/country.csv
  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+ - tests-examples/db2csv/world_1/tables/country.csv
 output: tests-examples/db2csv/world_1/tables/0092_dev.csv
 raw_question: What are the names of countries that speak more than 2 languages, as well as how many languages they speak? 
 question_index: 793 
@@ -15,11 +15,13 @@ join_columns:
  - code
 groupby_columns:
  - name
+orderby_columns: []
 functions:
  - count
 columns:
  - language
-filters: []
+filters:
+ - '>'
 ieu: []
 comment: |-
   SELECT COUNT(T2.Language),
@@ -50,13 +52,18 @@ smbop_beam_groupby_columns:
 - - countrycode
 - - name
 - - name
+smbop_beam_orderby_columns:
+- []
+- []
+- []
+- []
 smbop_beam_tables:
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
 - - tests-examples/db2csv/world_1/tables/country.csv
   - tests-examples/db2csv/world_1/tables/countrylanguage.csv
 smbop_beam_constants:
@@ -80,10 +87,10 @@ smbop_beam_ieu:
 - []
 - []
 smbop_beam_filters:
-- []
-- []
-- []
-- []
+- - '>'
+- - '>'
+- - '>'
+- - '>'
 smbop_beam_inferred_code:
   - SELECT country.name , COUNT( * ) FROM country JOIN countrylanguage ON country.code = countrylanguage.countrycode GROUP BY countrylanguage.countrycode HAVING COUNT( * ) > 2
   - SELECT country.name , COUNT( * ) FROM countrylanguage JOIN country ON countrylanguage.countrycode = country.code GROUP BY countrylanguage.countrycode HAVING COUNT( * ) > 2
@@ -128,19 +135,26 @@ ratsql_beam_groupby_columns:
 - - name
 - - name
 - - countrycode
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-- - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
-- - tests-examples/db2csv/world_1/tables/city.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
   - tests-examples/db2csv/world_1/tables/country.csv
-  - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
+- - tests-examples/db2csv/world_1/tables/countrylanguage.csv
+  - tests-examples/db2csv/world_1/tables/city.csv
+  - tests-examples/db2csv/world_1/tables/country.csv
 ratsql_beam_constants:
 - - 2
 - - 2
@@ -173,12 +187,12 @@ ratsql_beam_ieu:
 - []
 - []
 ratsql_beam_filters:
-- []
-- []
-- []
-- []
-- []
-- []
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+- - '>'
+- - '>'
 ratsql_beam_inferred_code:
   - SELECT country.Name, Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY country.Name HAVING Count(*) > 'terminal'
   - SELECT country.Name, Count(*) FROM country JOIN countrylanguage ON country.Code = countrylanguage.CountryCode GROUP BY countrylanguage.CountryCode HAVING Count(*) > 'terminal'

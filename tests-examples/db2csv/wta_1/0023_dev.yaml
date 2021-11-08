@@ -1,7 +1,7 @@
 db: tests-examples/db2csv/wta_1/tables/wta_1.sqlite
 inputs:
- - tests-examples/db2csv/wta_1/tables/players.csv
  - tests-examples/db2csv/wta_1/tables/matches.csv
+ - tests-examples/db2csv/wta_1/tables/players.csv
 output: tests-examples/db2csv/wta_1/tables/0023_dev.csv
 raw_question: What are the country code and first name of the players who won in both tourney WTA Championships and Australian Open? 
 question_index: 451 
@@ -9,12 +9,13 @@ has_limit: False
 has_order_by: False 
 order_by_direction: []
 constants:
- - WTA Championships
  - Australian Open
+ - WTA Championships
 join_columns:
- - player_id
  - winner_id
+ - player_id
 groupby_columns: []
+orderby_columns: []
 functions: []
 columns:
  - tourney_name
@@ -44,30 +45,34 @@ sql: |-
     FROM players AS T1
     JOIN matches AS T2 ON T1.player_id = T2.winner_id WHERE T2.tourney_name = 'Australian Open'
 smbop_beam_join_columns:
-- - player_id
-  - winner_id
-- - player_id
-  - winner_id
-- - player_id
-  - winner_id
+- - winner_id
+  - player_id
+- - winner_id
+  - player_id
+- - winner_id
+  - player_id
 smbop_beam_groupby_columns:
 - []
 - []
 - []
+smbop_beam_orderby_columns:
+- []
+- []
+- []
 smbop_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
 smbop_beam_constants:
-- - WTA Championships
-  - Australian Open
-- - WTA Championships
-  - Australian Open
-- - WTA Championships
-  - Australian Open
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
+- - Australian Open
+  - WTA Championships
 smbop_beam_functions:
 - []
 - []
@@ -121,19 +126,25 @@ ratsql_beam_groupby_columns:
 - []
 - []
 - []
+ratsql_beam_orderby_columns:
+- []
+- []
+- []
+- []
+- []
 ratsql_beam_tables:
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/rankings.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
   - tests-examples/db2csv/wta_1/tables/rankings.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
-- - tests-examples/db2csv/wta_1/tables/players.csv
-  - tests-examples/db2csv/wta_1/tables/matches.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
+- - tests-examples/db2csv/wta_1/tables/matches.csv
+  - tests-examples/db2csv/wta_1/tables/players.csv
 ratsql_beam_constants:
 - - Australian Open
   - WTA Championships
@@ -191,16 +202,16 @@ ratsql_beam_inferred_code:
   - SELECT players.country_code, DISTINCT players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
   - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal' LIMIT 1 INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT DISTINCT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT DISTINCT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, DISTINCT players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, DISTINCT players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
-  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open' LIMIT 1 INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id JOIN rankings ON players.player_id = rankings.player_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT DISTINCT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT DISTINCT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE DISTINCT matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, DISTINCT players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, DISTINCT players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
+  - SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'WTA Championships' LIMIT 1 INTERSECT SELECT players.country_code, players.first_name FROM players JOIN matches ON players.player_id = matches.loser_id WHERE matches.tourney_name = 'Australian Open'
 ratsql_beam_has_limit:
   - False
   - False

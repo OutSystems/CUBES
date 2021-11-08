@@ -14,6 +14,7 @@ join_columns:
  - makeid
  - id
 groupby_columns: []
+orderby_columns: []
 functions:
  - avg
 columns:
@@ -34,13 +35,17 @@ sql: |-
   JOIN CARS_DATA AS T2 ON T1.MakeId = T2.Id
   WHERE T1.Model = 'volvo';
 smbop_beam_join_columns:
-- - makeid
-  - id
-- - makeid
-  - id
-- - makeid
-  - id
+- - id
+  - makeid
+- - id
+  - makeid
+- - id
+  - makeid
 smbop_beam_groupby_columns:
+- []
+- []
+- []
+smbop_beam_orderby_columns:
 - []
 - []
 - []
@@ -62,8 +67,8 @@ smbop_beam_functions:
 smbop_beam_columns:
 - - edispl
   - model
-- - edispl
-  - make
+- - make
+  - edispl
 - - model
 smbop_beam_ieu:
 - []
@@ -96,52 +101,63 @@ smbop_beam_order_by_direction:
 ratsql_beam_join_columns:
 - - makeid
   - id
-- - model
-  - makeid
+- - makeid
   - id
-- - model
-  - makeid
-  - id
-- - model
-  - makeid
-  - id
-- - model
-  - maker
-  - makeid
-  - id
-- - country
-  - makeid
-  - countryid
-  - maker
-  - contid
   - model
+- - makeid
+  - id
+  - model
+- - makeid
+  - id
+  - model
+- - id
+  - maker
+  - makeid
+  - model
+- - countryid
   - id
   - continent
-- - model
-  - maker
   - makeid
-  - id
-- - country
-  - makeid
-  - countryid
-  - maker
+  - country
   - model
-  - id
-- - country
-  - makeid
-  - countryid
-  - maker
   - contid
+  - maker
+- - id
+  - maker
+  - makeid
   - model
+- - countryid
+  - id
+  - makeid
+  - country
+  - model
+  - maker
+- - countryid
   - id
   - continent
-- - country
   - makeid
-  - countryid
-  - maker
+  - country
   - model
+  - contid
+  - maker
+- - countryid
   - id
+  - makeid
+  - country
+  - model
+  - maker
 ratsql_beam_groupby_columns:
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+ratsql_beam_orderby_columns:
 - []
 - []
 - []
@@ -170,51 +186,41 @@ ratsql_beam_tables:
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
   - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/continents.csv
   - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 - - tests-examples/db2csv/car_1/tables/car_makers.csv
-  - tests-examples/db2csv/car_1/tables/countries.csv
-  - tests-examples/db2csv/car_1/tables/model_list.csv
   - tests-examples/db2csv/car_1/tables/car_names.csv
+  - tests-examples/db2csv/car_1/tables/model_list.csv
+  - tests-examples/db2csv/car_1/tables/countries.csv
   - tests-examples/db2csv/car_1/tables/cars_data.csv
 ratsql_beam_constants:
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 - - volvo
-  - capri
 ratsql_beam_functions:
 - - avg
 - - avg
@@ -281,16 +287,16 @@ ratsql_beam_inferred_code:
   - SELECT Avg(cars_data.Edispl) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'terminal'
   - SELECT Avg(cars_data.Edispl) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'terminal'
 ratsql_beam_inferred_code_w_terminals:
-  - SELECT Avg(cars_data.Edispl) FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'capri'
-  - SELECT Avg(cars_data.Edispl) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'capri'
+  - SELECT Avg(cars_data.Edispl) FROM car_names JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM model_list JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM car_makers JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model AND model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE car_names.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM continents JOIN countries ON continents.ContId = countries.Continent AND continents.ContId = countries.Continent JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'volvo'
+  - SELECT Avg(cars_data.Edispl) FROM countries JOIN car_makers ON countries.CountryId = car_makers.Country AND countries.CountryId = car_makers.Country JOIN model_list ON car_makers.Id = model_list.Maker AND car_makers.Id = model_list.Maker JOIN car_names ON model_list.Model = car_names.Model JOIN cars_data ON car_names.MakeId = cars_data.Id WHERE model_list.Model = 'volvo'
 ratsql_beam_has_limit:
   - False
   - False

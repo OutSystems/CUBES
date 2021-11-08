@@ -1,8 +1,8 @@
 db: tests-examples/db2csv/dog_kennels/tables/dog_kennels.sqlite
 inputs:
- - tests-examples/db2csv/dog_kennels/tables/owners.csv
- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+ - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+ - tests-examples/db2csv/dog_kennels/tables/owners.csv
 output: tests-examples/db2csv/dog_kennels/tables/0020_dev.csv
 raw_question: Tell me the owner id and last name of the owner who spent the most on treatments of his or her dogs. 
 question_index: 937 
@@ -13,9 +13,11 @@ order_by_direction:
 constants:
  - '1'
 join_columns:
- - owner_id
  - dog_id
+ - owner_id
 groupby_columns:
+ - owner_id
+orderby_columns:
  - owner_id
 functions:
  - count
@@ -42,30 +44,30 @@ sql: |-
   ORDER BY count(*) DESC
   LIMIT 1
 smbop_beam_join_columns:
-- - owner_id
+- - charge_id
   - dog_id
-  - charge_id
-- - owner_id
+  - owner_id
+- - charge_id
   - dog_id
-  - charge_id
-- - owner_id
+  - owner_id
+- - dog_id
+  - owner_id
+- - charge_id
   - dog_id
+  - owner_id
 - - owner_id
+- - charge_id
   - dog_id
-  - charge_id
+  - owner_id
+- - dog_id
+  - owner_id
 - - owner_id
-- - owner_id
+- - charge_id
   - dog_id
-  - charge_id
-- - owner_id
+  - owner_id
+- - charge_id
   - dog_id
-- - owner_id
-- - owner_id
-  - dog_id
-  - charge_id
-- - owner_id
-  - dog_id
-  - charge_id
+  - owner_id
 smbop_beam_groupby_columns:
 - - owner_id
 - - owner_id
@@ -77,36 +79,47 @@ smbop_beam_groupby_columns:
 - []
 - []
 - []
+smbop_beam_orderby_columns:
+- - order
+- - order
+- []
+- []
+- []
+- []
+- []
+- []
+- []
+- []
 smbop_beam_tables:
 - - tests-examples/db2csv/dog_kennels/tables/charges.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/charges.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/charges.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/charges.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/charges.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 smbop_beam_constants:
 - - '1'
 - - '1'
@@ -219,21 +232,21 @@ smbop_beam_order_by_direction:
 - []
 ratsql_beam_join_columns:
 - - owner_id
-- - owner_id
-  - dog_id
-- - owner_id
-  - dog_id
+- - dog_id
+  - owner_id
+- - dog_id
+  - owner_id
   - treatment_type_code
-- - owner_id
-  - dog_id
-- - owner_id
-  - dog_id
+- - dog_id
+  - owner_id
+- - dog_id
   - professional_id
+  - owner_id
 - - owner_id
 - - owner_id
   - size_code
-- - owner_id
-  - breed_code
+- - breed_code
+  - owner_id
 ratsql_beam_groupby_columns:
 - - owner_id
 - - owner_id
@@ -243,31 +256,40 @@ ratsql_beam_groupby_columns:
 - - owner_id
 - - owner_id
 - - owner_id
+ratsql_beam_orderby_columns:
+- - order
+- - order
+- - order
+- - order
+- - order
+- - order
+- - order
+- - order
 ratsql_beam_tables:
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-  - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatment_types.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/treatments.csv
+  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/professionals.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
   - tests-examples/db2csv/dog_kennels/tables/treatments.csv
-- - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 - - tests-examples/db2csv/dog_kennels/tables/sizes.csv
-  - tests-examples/db2csv/dog_kennels/tables/owners.csv
   - tests-examples/db2csv/dog_kennels/tables/dogs.csv
-- - tests-examples/db2csv/dog_kennels/tables/breeds.csv
   - tests-examples/db2csv/dog_kennels/tables/owners.csv
-  - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+- - tests-examples/db2csv/dog_kennels/tables/dogs.csv
+  - tests-examples/db2csv/dog_kennels/tables/breeds.csv
+  - tests-examples/db2csv/dog_kennels/tables/owners.csv
 ratsql_beam_constants:
 - - '1'
 - - '1'
