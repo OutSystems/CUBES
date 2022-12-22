@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/10.sqlite
+db: tests-examples/textbook/tables/10.sqlite3
 inputs:
   - tests-examples/textbook/tables/10-1.txt
   - tests-examples/textbook/tables/10-2.txt
@@ -15,14 +15,14 @@ solution:
   - natural_join3
   - filter
 sql: |
-  SELECT DISTINCT S.sname
-  FROM Student S
-  WHERE S.snum IN (SELECT E.snum
-  FROM Enrolled E
-  GROUP BY E.snum
-  HAVING COUNT (*) >= ALL (SELECT COUNT (*)
-  FROM Enrolled E2
-  GROUP BY E2.snum ))
+  SELECT DISTINCT S.S_name
+  FROM "10-2" AS S
+  WHERE S.S_key IN (SELECT E.S_key
+                    FROM "10-1" AS E
+                    GROUP BY E.S_key
+                    HAVING COUNT(*) >= ALL (SELECT COUNT (*)
+                        FROM "10-1" AS E2
+                        GROUP BY E2.S_key ))
 comment: |
   5.1.10 optimal solution
 

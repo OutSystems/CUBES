@@ -73,8 +73,8 @@ You can use `--help` to see other configuration options available in the accurac
 
 # Final notes
 
-- The file `cubes_500.instances` contains the list of instances used for evaluation in the parts where only a subset of instances was used. This file can be passed as the `--instances` argument to the benchmark script.
+- The file `groups/cubes_500.instances` contains the list of instances used for evaluation in the parts where only a subset of instances was used. This file can be passed as the `--instances` argument to the benchmark script.
 
-- The folder `analysis` contains all code use to analyse the results obtained and produced all graphs included in the paper.
+- The folder `analysis` contains all code used to analyse the results obtained and produced all graphs included in the paper.
 
 - The folders `analysis/data` and `analysis/fuzzy` come pre-packaged with all logs used in the evaluation section of the paper.

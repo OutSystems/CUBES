@@ -36,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='OUTPUT')
     args = parser.parse_args()
 
-    for file in glob.glob('tests/**/*.yaml', recursive=True):
+    for file in glob.glob('tests/db2csv/**/*.yaml', recursive=True):
         if 'schema.yaml' in file:
             continue
 
@@ -95,6 +95,7 @@ if __name__ == '__main__':
 
             result += '\n}\n'
 
+            print("G")
             output_file = file.replace('tests/', args.output + '/').replace('.yaml', '')
             os.makedirs(os.path.dirname(output_file), exist_ok=True)
             with open(output_file, 'w') as f:

@@ -93,7 +93,7 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
                     queue.put((util.Message.SOLUTION, id, prog, loc, True))
                     found = True
 
-        if found:
+        if found and util.get_config().enum_until is None:
             queue.put((util.Message.DONE, loc, None, None, None))
             return
         else:

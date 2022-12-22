@@ -9,13 +9,13 @@ solution:
   - natural_join
 sql: |
   SELECT M1.*,
-  (SELECT calls From mytable1 M2 where M2.ts=M1.ts and M2.s_no=M1.s_no) as calls
+  (SELECT calls From "027" M2 where M2.ts=M1.ts and M2.s_no=M1.s_no) as calls
   FROM
   (
       select m.s_no, m.bucket_window, max(m.ts) ts
       from (
           select m.*, datepart(hour, m.ts)*2 + floor(datepart(minute, m.ts)/30) bucket_window
-          from mytable1 m
+          from "027" m
           where m.ts >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
       ) m
       group by m.s_no, m.bucket_window

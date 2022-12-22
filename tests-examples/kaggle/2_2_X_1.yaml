@@ -1,3 +1,4 @@
+db: tests-examples/kaggle/tables/2_2_X_1.sqlite3
 inputs:
   - tests-examples/kaggle/tables/taxi_trips_4.csv
 output: tests-examples/kaggle/tables/2_2_X_1.csv
@@ -16,9 +17,10 @@ sql:
   WITH trips_by_day AS
   (
   SELECT DATE(trip_start_timestamp) AS trip_date,
-  COUNT(*) as num_trips
-  FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
-  WHERE trip_start_timestamp >= '2016-01-01' AND trip_start_timestamp < '2018-01-01'
+  COUNT(*)                   as num_trips
+  FROM taxi_trips_4
+  WHERE trip_start_timestamp >= '2016-01-01'
+  AND trip_start_timestamp < '2018-01-01'
   GROUP BY trip_date
   ORDER BY trip_date
   )

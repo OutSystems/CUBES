@@ -30,6 +30,7 @@ parser.add_argument('--save-alt', action='store_true')
 parser.add_argument('--fuzzies', type=int, default=16)
 parser.add_argument('--simulate', type=str, default=None)
 parser.add_argument('--from-dis', action='store_true')
+parser.add_argument('--dis-suffix')
 
 args = parser.parse_args()
 
@@ -49,7 +50,7 @@ is_squares = run.startswith('squares')
 is_cubes = not is_patsql and not is_scythe and not is_squares
 is_from_spec = run == 'ratsql' or run == 'smbop'
 
-scythe_sep = r'\[Query No\.\d]==============================='
+scythe_sep = r'\[Query No\.\d+]==============================='
 
 fuzzies = args.fuzzies
 
@@ -90,6 +91,7 @@ def check(connection, expected_sql, actual_sql, instance='', verbose=False, base
         actual_df = execute(connection, actual_sql)
     except Exception as e:
         if verbose:
+            logger.error(actual_sql)
             logger.error('Error while executing solution for instance %s (%d)', instance, n)
             logger.error('\n%s', str(e))
         return base_error_code if base else fuzzied_error_code
@@ -218,7 +220,11 @@ def load_sql_from_log(run, instance, execution, n=None) -> list:
         elif is_scythe:
             return re.findall(rf'(?:{scythe_sep})\n((?:.|\n)*?)(?:(?:{scythe_sep})|$)', inst_log_file.read())
         else:
-            return [inst_log_file.read().strip()]
+            log_file_content = inst_log_file.read()
+            if re.search(scythe_sep, log_file_content) is not None:
+                return re.findall(rf'(?:{scythe_sep})\n((?:.|\n)*?)(?:(?:{scythe_sep})|$)', log_file_content)
+            else:
+                return [log_file_content.strip()]
 
 
 def compare(instance_file: str, n: int):
@@ -304,8 +310,8 @@ if __name__ == '__main__':
     print(instances)
     # instances = list(glob.glob('tests/spider/club_1/*.yaml', recursive=True))
 
-    output_file = f'analysis/fuzzy/{run}{"_dis_fuzz" if args.from_dis else ""}{"_" if args.save_alt else ""}.csv'
-    log_file = f'analysis/fuzzy/{run}{"_dis_fuzz" if args.from_dis else ""}{"_" if args.save_alt else ""}.log'
+    output_file = f'analysis/fuzzy/{run}{"_dis_fuzz" if args.from_dis else ""}{"_" + args.dis_suffix if args.dis_suffix else ""}{"_" if args.save_alt else ""}.csv'
+    log_file = f'analysis/fuzzy/{run}{"_dis_fuzz" if args.from_dis else ""}{"_" + args.dis_suffix if args.dis_suffix else ""}{"_" if args.save_alt else ""}.log'
 
     if os.path.exists(log_file):
         os.remove(log_file)
@@ -318,13 +324,12 @@ if __name__ == '__main__':
     dis_sqls = {}
     if args.from_dis:
         csv.field_size_limit(sys.maxsize)
-        dis_file = f'analysis/fuzzy/{run}_dis.csv'
+        dis_file = f'analysis/fuzzy/{run}_dis{"_" + args.dis_suffix if args.dis_suffix else ""}.csv'
         with open(dis_file) as dis_f:
             reader = csv.reader(dis_f)
             next(reader) # skip header
             for line in reader:
                 dis_sqls[line[0]] = eval(line[4]) if line[4] else None
-
 
     with ProcessPool(max_workers=args.p, initializer=initializer) as pool:
         with open(output_file, 'w') as results_f:

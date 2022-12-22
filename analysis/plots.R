@@ -24,13 +24,13 @@ pick <- function(condition) {
 solved_not_solved <- function(a, b) {
   inner_join(a, b, by = c('name', 'benchmark')) %>%
     filter(solved.x & !solved.y) %>%
-    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
+    select(name, status.x, real.x, status.y, real.y)
 }
 
 solved_slower <- function(a, b) {
   inner_join(a, b, by = c('name', 'benchmark')) %>%
     filter(solved.x & solved.y & real.x >= real.y * 1.1) %>%
-    select(name, status.x, real.x, blocked.x, attempts.x, loc_reached.x, status.y, real.y, blocked.y, attempts.y, loc_reached.y)
+    select(name, status.x, real.x, attempts.x, loc_reached.x, status.y, real.y, attempts.y, loc_reached.y)
 }
 
 basic_solved_not_solved <- function(a, b) {
@@ -110,12 +110,15 @@ scatter_ram <- function(exclude = NULL, ...) {
   args <- list(...)
   stopifnot(length(args) == 2)
   data <- inner_join(args[[1]], args[[2]], by = c('name', 'benchmark'), suffix = c("_A", "_B")) %>%
-    filter(!(benchmark %in% exclude))
+    filter(!(benchmark %in% exclude)) %>%
+    filter(ram_A > 0 & ram_B > 0) %>%
+    mutate(ram_A = ifelse(ram_A == 0, 1, ram_A),
+           ram_B = ifelse(ram_B == 0, 1, ram_B))
   data %>%
     ggplot(aes(x = ram_A * 1000, y = ram_B * 1000)) +
     geom_point(color = maincolor, alpha = 0.2, size = 1) +
-    scale_x_continuous(trans = log10_trans(), breaks = log_breaks(n = 4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
-    scale_y_continuous(trans = log10_trans(), breaks = log_breaks(n = 4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
+    scale_x_continuous(trans = pseudo_log_trans(base = 10), breaks = log_breaks(n = 4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
+    scale_y_continuous(trans = pseudo_log_trans(base = 10), breaks = log_breaks(n = 4), labels = label_bytes(), limits = c(min(data$ram_A, data$ram_B) * 1000, max(data$ram_A, data$ram_B) * 1000)) +
     geom_abline() +
     annotation_logticks() +
     labs(y = names(args)[2], x = names(args)[1]) +
@@ -229,21 +232,22 @@ invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
   if (use_vbs) {
     data <- data %>% bind_rows(vbs(...))
   }
+  num_instances <- n_distinct(data$name)
   data <- data %>%
     filter(!(benchmark %in% exclude)) %>%
     arrange(real) %>%
     group_by(try) %>%
-    mutate(val = cumsum(solved) / n_distinct(name)) %>%
     filter(solved) %>%
+    mutate(val = cumsum(solved) / num_instances) %>%
     mutate(id = row_number()) %>%
     ungroup()
   tmp <- ggplot(data, aes(y = val, x = real, color = try, group = try, shape = try)) +
     geom_step(size = step_size) +
     geom_point(size = point_size, data = pick(~id %% every_other == 0))
   if (full_x) {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = '%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = '\\%'))
   } else {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = '%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = '\\%'))
   }
   if (log) {
     if (any(data$real < 2)) {
@@ -347,7 +351,8 @@ vbs <- function(..., timelimit = 600) {
               fuzzy = factor(ifelse(any(fuzzy == "Possibly Correct"), 1, ifelse(any(fuzzy == "Possibly Correct Top 5"), 2, ifelse(any(fuzzy == "Possibly Correct Any"), 3, ifelse(any(fuzzy == "Incorrect by Fuzzing"), 4, ifelse(any(fuzzy == "Incorrect"), 0, -2))))), fuzzy_levels, fuzzy_meanings))
   t %>%
     select(-status_t) %>%
-    mutate(try = 'VBS')
+    mutate(try = 'VBS') %>%
+    left_join(instance_info)
 }
 
 bars <- function(use_vbs = T, facet = F, facet_size = 4, ...) {
@@ -356,6 +361,13 @@ bars <- function(use_vbs = T, facet = F, facet_size = 4, ...) {
   if (use_vbs) {
     solved <- solved %>% bind_rows(vbs(...))
   }
+  solved <- solved %>%
+    mutate(status = ifelse(status == 5, -1, status)) %>%
+    mutate(benchmark = recode_factor(benchmark, "scythe/recent-posts" = "\\texttt{recent-posts}",
+                                     "scythe/top-rated-posts" = "\\texttt{top-rated-posts}",
+                                     textbook = "\\texttt{textbook}",
+                                     spider = "\\texttt{spider}",
+                                     kaggle = "\\texttt{kaggle}"))
   results <- factor(solved$status, levels = status_levels, labels = status_meanings, exclude = NULL)
 
   pages <- ifelse(facet, ceiling(length(unique(solved$benchmark)) / (facet_size * facet_size)), 1)
@@ -474,82 +486,66 @@ time_part_dist <- function(filter = NULL, col = NULL, wrap = F, ...) {
     my_theme
 }
 
-plot_cells_time <- function(...) {
+plot_cells <- function(x_expr, y_expr, log_x = T, log_y = T, beeswarm = F, use_vbs = F, x_lab = NA, y_lab = NA, x_label = waiver(), ...) {
   tries <- list(...)
-  data <- bind_rows(tries, .id = 'try') %>%
+  data <- bind_rows(tries, .id = 'try')
+  if (use_vbs) {
+    data <- data %>% bind_rows(vbs(...))
+  }
+  data <- data %>%
     mutate(real = ifelse(status == -2, 600, real), try = factor(try, levels = names(tries))) %>%
-    mutate(status = ifelse(status == 0 | status == 2, 0, ifelse(status == -1, 1, 2)),
-           real = ifelse(status == 2, 1000, real))
-  print(data %>% count(status))
-  data %>% ggplot(aes(x = total_cells, y = real, color = factor(data$status, levels = c(2, 1, 0), labels = c('Other', 'Timeout', 'Solved'), exclude = NULL))) +
-    geom_point(alpha = 0.3, size = 0.9) +
-    scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000, 1000000), labels = function(x) { paste0('\\(10^{', log10(x), '}\\)') }) +
-    scale_y_log10(breaks = c(.1, 1, 10, 60, 600)) +
+    mutate(real = ifelse(status == 5, 600, real), try = factor(try, levels = names(tries))) %>%
+    mutate(real = ifelse(status == 2, 1000, real)) %>%
+    mutate(status = ifelse(status == 5, -1, status))
+  print(data %>% group_by(try) %>% count(status))
+  data %>% ggplot(aes(x = { { x_expr } }, y = { { y_expr } }, color = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+  { if (!beeswarm) geom_point(alpha = 0.3, size = 0.9) } +
+  { if (beeswarm) geom_quasirandom(alpha = 0.3, size = 0.9, varwidth = TRUE) } +
+    # scale_x_log10(labels = function(x) { paste0('\\(10^{', log10(x), '}\\)') }) +
+  { if (log_x) scale_x_log10(label = x_label) } +
+  { if (!log_x & !beeswarm) scale_x_continuous(label = x_label) } +
+  { if (!log_x & beeswarm) scale_x_discrete(label = x_label) } +
+  { if (log_y) scale_y_log10() } +
+  { if (log_x & log_y) annotation_logticks(size = .25) } +
     # annotation_logticks(sides='lb') +
-    facet_wrap(~try, scales='free_x') +
-    scale_color_manual(drop = T, values = map2(c(0, 1, 2), c('#000000', '#cc241d', maincolor), c) %>%
+    facet_wrap(~try, scales = 'fixed') +
+    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
       keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
       map(function(x) { x[2] })) +
-    labs(y = 'Time (s)', x = '\\# Total Cells') +
+  { if (!is.na(x_lab)) labs(x = x_lab) } +
+  { if (!is.na(y_lab)) labs(y = y_lab) } +
+    # labs(y = 'Time (s)', x = '\\# Total Cells') +
     guides(colour = guide_legend(override.aes = list(alpha = 1))) +
     my_theme
 }
 
-plot_cells_ram <- function(...) {
+plot_solved <- function(x_expr, log_x = T, use_vbs = F, discrete_x = F, x_lab = NA, y_lab = NA, x_label = waiver(), ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
-  data %>% ggplot(aes(x = total_cells, y = ram * 1000, color = factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_point(alpha = 0.4, size = 1) +
-    scale_x_log10(breaks = log_breaks()) +
-    scale_y_log10(breaks = log_breaks(), labels = label_bytes()) +
-    annotation_logticks(sides = 'lb') +
-    facet_wrap(~try) +
-    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
+  if (use_vbs) {
+    data <- data %>% bind_rows(vbs(...))
+  }
+  data <- data %>%
+    mutate(real = ifelse(status == -2, 600, real), try = factor(try, levels = names(tries))) %>%
+    mutate(real = ifelse(status == 5, 600, real), try = factor(try, levels = names(tries))) %>%
+    mutate(real = ifelse(status == 2, 1000, real)) %>%
+    mutate(status = ifelse(status == 5, -1, status))
+  print(data %>% group_by(try) %>% count(status))
+  data %>% ggplot(aes(x = { { x_expr } }, fill = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+  { if (!discrete_x)  geom_histogram(position = "fill") } +
+  { if (discrete_x)  geom_bar(position = "fill") } +
+    # scale_x_log10(labels = function(x) { paste0('\\(10^{', log10(x), '}\\)') }) +
+  { if (log_x) scale_x_log10(label = x_label) } +
+    scale_y_continuous(labels = label_percent(accuracy = 1, suffix = '\\%')) +
+    # annotation_logticks(sides='lb') +
+    facet_wrap(~try, scales = 'free_x') +
+    scale_fill_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
       keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
       map(function(x) { x[2] })) +
-    labs(y = 'Time (s)', x = '# Total Cells') +
+  { if (!is.na(x_lab)) labs(x = x_lab) } +
+  { if (!is.na(y_lab)) labs(y = y_lab) } +
+    # labs(y = 'Time (s)', x = '\\# Total Cells') +
     guides(colour = guide_legend(override.aes = list(alpha = 1))) +
-    my_theme
-}
-
-scatter_real_cpu <- function(...) {
-  tries <- list(...)
-  data <- bind_rows(tries, .id = 'try')
-  data %>% ggplot(aes(x = real, y = cpu, color = factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_point(alpha = 0.4, size = 1) +
-    geom_abline(size = .25) +
-    annotate(x = 0.5, y = 0.8, "text", label = 'slope=1', angle = 30, size = 2.5) +
-    geom_abline(intercept = log10(4), size = .25) +
-    annotate(x = 0.5, y = 3.5, "text", label = 'slope=4', angle = 30, size = 2.5) +
-    geom_abline(intercept = log10(16), size = .25) +
-    annotate(x = 0.5, y = 15, "text", label = 'slope=16', angle = 30, size = 2.5) +
-    scale_x_continuous(trans = 'log10', breaks = log_breaks()) +
-    scale_y_log10(breaks = log_breaks()) +
-    annotation_logticks(sides = 'lb') +
-    facet_wrap(~try) +
-    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
-      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
-      map(function(x) { x[2] })) +
-    labs(y = 'CPU Time', x = 'Real Time') +
-    guides(colour = guide_legend(override.aes = list(alpha = 1))) +
-    my_theme
-}
-
-scatter_equiv <- function(x, ...) {
-  tries <- list(...)
-  data <- bind_rows(tries, .id = 'try')
-  data %>% ggplot(aes(x = !!as.name(x), y = real, color = factor(data$status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-    geom_point(alpha = 0.2, size = 1) +
-    scale_x_log10(breaks = log_breaks()) +
-    # scale_y_log10(breaks = log_breaks()) +
-    annotation_logticks(sides = 'b') +
-    facet_wrap(~try) +
-    scale_color_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
-      keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
-      map(function(x) { x[2] })) +
-    labs(y = 'cpu/real', x = x) +
-    guides(colour = guide_legend(override.aes = list(alpha = 1))) +
-    scale_y_log10() +
     my_theme
 }
 
@@ -563,9 +559,7 @@ plot_sql_size <- function(...) {
     facet_wrap(~try)
 }
 
-levels(c62_16_full$fuzzy)
-
-plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_bars = F, filter_all = F, facet = F, refactor = F, facet_size = 4, ...) {
+plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_bars = F, filter_all = F, facet = F, refactor = F, refactor_2 = F, facet_size = 4, ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try') %>%
     # filter(solved) %>%
@@ -589,6 +583,31 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_ba
   }
   if (drop_nones) {
     data <- data %>% filter(fuzzy != 'No solution', fuzzy != 'No database', fuzzy != 'No GT', fuzzy != 'GT Mismatch')
+  }
+  if (refactor_2) {
+    data <- data %>%
+      filter(fuzzy == 'Possibly Correct' |
+               fuzzy == 'Possibly Correct Top 5' |
+               fuzzy == 'Possibly Correct Any' |
+               fuzzy == 'Incorrect' |
+               fuzzy == 'Incorrect by Fuzzing' |
+               fuzzy == 'Timeout' |
+               fuzzy == 'Exec. Error Base' |
+               fuzzy == 'No log file') %>%
+      mutate(fuzzy = fct_recode(fuzzy,
+                                "Fuzzing Accepted" = 'Possibly Correct',
+                                "Fuzzing Accepted (top 5)" = 'Possibly Correct Top 5',
+                                "Fuzzing Accepted (>5)" = 'Possibly Correct Any',
+                                Timeout = "Pre Possibly Correct",
+                                Timeout = "Pre Possibly Correct Top 5",
+                                Timeout = "Pre Possibly Correct Any",
+                                Timeout = "Pre Incorrect by Fuzzing",
+                                Timeout = "Timeout",
+                                Timeout = "Fuzzer Error",
+                                Timeout = "GT Mismatch",
+                                Timeout = "Exec. Error Fuzzied",
+                                Timeout = "No database", Timeout = "Exec. Error GT", Timeout = "No log file", Timeout = "No GT", Timeout = "No solution", 'Execution Error' = 'Incorrect', 'Execution Error' = "Exec. Error Base"))
+    print(unique(data$fuzzy))
   }
   if (refactor) {
     data <- data %>%
@@ -631,7 +650,7 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_ba
     tmp <- data %>% ggplot(aes(x = try, fill = fuzzy))
     if (fill_bars) {
       tmp <- tmp +
-        geom_bar(position = 'fill', width=.7) +
+        geom_bar(position = 'fill', width = .7) +
         scale_y_continuous(labels = label_percent(accuracy = 1, suffix = '\\%')) +
         labs(y = 'Percentage of Instances', x = NULL, fill = 'Fuzzing Status')
     } else {
@@ -646,10 +665,13 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_ba
         tmp <- tmp + facet_wrap(~benchmark, scales = "free_y")
       }
     }
-    if (!refactor) {
+    if (!refactor & !refactor_2) {
       tmp <- tmp + scale_fill_manual(values = map2(fuzzy_levels, fuzzy_colors, c) %>% map(function(x) { x[2] }), drop = F)
+    } else if (refactor) {
+      tmp <- tmp + scale_fill_manual(values = map2(rev(c(4, 5, 0, 3, -1, -2)), rev(c("#bfbfbf", "#57853C", "#b221c2", "#d79921", "#3032ab", "#454545")), c) %>%
+        map(function(x) { x[2] }), drop = F)
     } else {
-      tmp <- tmp + scale_fill_manual(values = map2(rev(c(4, 5, 0, 3, -1, -2)), rev(c("#bfbfbf",  "#57853C", "#b221c2", "#d79921", "#3032ab", "#454545")), c) %>%
+      tmp <- tmp + scale_fill_manual(values = map2(rev(c(4, 5, 6, 7, 3, -1, -2)), rev(c("#bfbfbf", "#57853C", "#085F05", "#052C03", "#d79921", "#3032ab", "#454545")), c) %>%
         map(function(x) { x[2] }), drop = F)
     }
     tmp +
@@ -662,6 +684,52 @@ plot_fuzzy <- function(drop_error = F, drop_nones = F, drop_empties = T, fill_ba
   }
   plots
 }
+
+plot_fuzzy_new_data <- function(..., has_dis_data = F, short_bars = F) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  # data <- data %>% mutate(fuzzy = factor(ifelse(sql_solutions == 0 | !solved, -2, fuzzy_levels[as.integer(fuzzy)]), fuzzy_levels, fuzzy_meanings))
+  if (has_dis_data) {
+    data <- data %>% mutate(fuzzy = factor(ifelse((status.dis == 2 | is.na(status.dis)) & sql_solutions != 0, -7, fuzzy_levels[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
+                            # fuzzy = factor(ifelse(status.dis == 5 & sql_solutions != 0, -7, c(-7, fuzzy_levels)[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
+                            fuzzy = factor(ifelse(solved, c(-7, fuzzy_levels)[as.integer(fuzzy)], -2), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)))
+  } else {
+    data <- data %>%
+      mutate(fuzzy = factor(ifelse(solved, fuzzy_levels[as.integer(fuzzy)], -2), fuzzy_levels, fuzzy_meanings))
+  }
+  data <- data %>% mutate(fuzzy = fct_recode(fuzzy, Timeout = "GT Mismatch", Timeout = "Exec. Error GT", Timeout = "No GT", Timeout = "Incorrect", Timeout = "No log file", "Execution Error" = "Exec. Error Base"),
+                          fuzzy = fct_recode(fuzzy, "\\texttt{FuzzyCheck} Timeout" = "Timeout"),
+                          fuzzy = fct_relevel(fuzzy, "No solution"),
+                          try = factor(try, levels = names(tries)))
+}
+
+plot_fuzzy_new <- function(..., has_dis_data = F, short_bars = F) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  # data <- data %>% mutate(fuzzy = factor(ifelse(sql_solutions == 0 | !solved, -2, fuzzy_levels[as.integer(fuzzy)]), fuzzy_levels, fuzzy_meanings))
+  if (has_dis_data) {
+    data <- data %>% mutate(fuzzy = factor(ifelse((status.dis == 2 | is.na(status.dis) | status.dis == 5) & sql_solutions != 0, -7, fuzzy_levels[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
+                            # fuzzy = factor(ifelse(status.dis == 5 & sql_solutions != 0, -7, c(-7, fuzzy_levels)[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
+                            fuzzy = factor(ifelse(solved, c(-7, fuzzy_levels)[as.integer(fuzzy)], -2), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)))
+  } else {
+    data <- data %>%
+      mutate(fuzzy = factor(ifelse(solved, fuzzy_levels[as.integer(fuzzy)], -2), fuzzy_levels, fuzzy_meanings))
+  }
+  data <- data %>% mutate(fuzzy = fct_recode(fuzzy, Timeout = "GT Mismatch", Timeout = "Exec. Error GT", Timeout = "No GT", Timeout = "Incorrect", Timeout = "No log file", "Execution Error" = "Exec. Error Base"),
+                          fuzzy = fct_recode(fuzzy, "\\texttt{FuzzyCheck} Timeout" = "Timeout"),
+                          fuzzy = fct_relevel(fuzzy, "No solution"),
+                          try = factor(try, levels = names(tries)))
+  print(data %>% group_by(fuzzy) %>% summarise(a = n()))
+  data %>%
+    ggplot(aes(x = try, fill = fuzzy)) +
+  { if (!short_bars) geom_bar() } +
+  { if (short_bars) geom_bar(width = .8) } +
+    labs(y = 'Number of Instances', x = NULL, fill = 'Fuzzing Status') +
+  { if (!has_dis_data) scale_fill_manual(values = c("#CCCCCC", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
+  { if (has_dis_data) scale_fill_manual(values = c("#CCCCCC", "#E7298A", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
+    my_theme
+}
+
 
 different_solutions <- function(table) {
   table %>% ggplot(aes(x = solution_n)) +
@@ -681,8 +749,8 @@ non_determinism_plot <- function(data) {
     geom_tile() +
     geom_text(aes(label = n), size = 2.5) +
     scale_fill_gradient(low = 'white', high = maincolor) +
-    scale_x_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
-    scale_y_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+    scale_x_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), expand = c(0, 0)) +
+    scale_y_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), expand = c(0, 0)) +
     labs(x = 'Times Solved', y = 'Different Solutions') +
     my_theme +
     theme(panel.grid.major = element_blank())
@@ -716,6 +784,10 @@ solution_min_top_size <- function(data) {
     theme(panel.grid.major = element_blank())
 }
 
+gm_mean <- function(x, na.rm = TRUE) {
+  exp(sum(log(x[x > 0]), na.rm = na.rm) / length(x))
+}
+
 speedup <- function(data1, data2) {
   data <- data1 %>%
     inner_join(data2, by = 'name') %>%
@@ -728,18 +800,23 @@ speedup <- function(data1, data2) {
     # group_by(hard) %>%
     # summarise(speedup = gm_mean(speedup)) %>%
     # ungroup() %>%
-    ggplot(aes(x = speedup)) +
-    geom_histogram(fill = maincolor, bins = 15) +
+    ggplot(aes(x = speedup, y = 0, fill = factor(stat(quantile)))) +
+    stat_density_ridges(
+      geom = "density_ridges_gradient", calc_ecdf = TRUE,
+      quantiles = 4, quantile_lines = TRUE
+    ) +
+    scale_fill_brewer(name = "Quartiles", palette = 'Dark2') +
     scale_x_log10() +
     annotation_logticks(sides = 'b') +
     geom_vline(xintercept = p25, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p25) - .075), label = "25\\%", y = 55, angle = 90, size = 2.5) +
+    # annotate(geom = "text", x = 10^(log10(p25) - .075), label = "25\\%", y = 55, angle = 90, size = 2.5) +
     geom_vline(xintercept = p50, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p50) - .075), label = "50\\%", y = 55, angle = 90, size = 2.5) +
+    # annotate(geom = "text", x = 10^(log10(p50) - .075), label = "50\\%", y = 55, angle = 90, size = 2.5) +
     geom_vline(xintercept = p75, color = '#555555') +
-    annotate(geom = "text", x = 10^(log10(p75) - .075), label = "75\\%", y = 55, angle = 90, size = 2.5) +
-    labs(x = 'Speedup', y = 'Number of Instances') +
-    my_theme
+    # annotate(geom = "text", x = 10^(log10(p75) - .075), label = "75\\%", y = 55, angle = 90, size = 2.5) +
+    labs(x = 'Speedup', y = 'Density', fill = 'Quartile') +
+    my_theme +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'right', legend.title = element_text())
 }
 
 speedup_data <- function(data1, data2) {
@@ -750,6 +827,7 @@ speedup_data <- function(data1, data2) {
   print(sprintf('Mean: %f', mean(data$speedup)))
   print(sprintf('Std Dev: %f', sd(data$speedup)))
   print(sprintf('Geom Mean: %f', gm_mean(data$speedup)))
+  print(sprintf('Harmonic Mean: %f', harmonic.mean(data$speedup)))
   print(sprintf('Median: %f', median(data$speedup)))
 }
 
@@ -766,4 +844,109 @@ is_fuzzy_ok_not_pre <- function(a) {
   a == 'Possibly Correct' |
     a == 'Possibly Correct Top 5' |
     a == 'Possibly Correct Any'
+}
+
+beam_acc <- function(use_vbs = F, exclude = NULL, ...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  if (use_vbs) {
+    data <- data %>% bind_rows(vbs(...))
+  }
+  data <- data %>%
+    filter(!(benchmark %in% exclude)) %>%
+    arrange(top_i) %>%
+    group_by(try) %>%
+    mutate(tmp = 1,
+           val = cumsum(tmp) / n_distinct(name)) %>%
+    ungroup()
+  ggplot(data, aes(y = val, x = top_i, color = try, group = try, shape = try)) +
+    geom_step() +
+    my_theme
+}
+
+questions_by_queries_plot <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try') %>%
+    mutate(try = factor(try, levels = names(tries)))
+  data %>%
+    filter(n_questions > 0) %>%
+    group_by(try) %>%
+    mutate(total_queries_cat = cut(total_queries, c(0, 10, 100, 1000, 100000), c('A1 to 10', 'B11 to 100', 'C101 to 1000', 'D> 1000'))) %>%
+    group_by(total_queries_cat) %>%
+    mutate(name = paste0(total_queries_cat)) %>%
+    # mutate(name = paste0(total_queries_cat, '\nn=', n())) %>%
+    mutate(name = factor(name)) %>%
+    mutate(name = fct_relabel(name, ~sub('.', '', .x))) %>%
+    ggplot(aes(x = name, y = n_questions, fill = try)) +
+    geom_boxplot(outlier.size = 0.5) +
+    stat_boxplot(geom = 'errorbar') +
+    scale_fill_brewer(palette = 'Dark2') +
+    labs(x = 'Number of queries pre-disambiguation', y = 'Questions asked') +
+    my_theme
+}
+
+questions_by_queries_plot('\\textsc{Cubes-Seq}' = seq_600_dis_data,
+                                   '\\textsc{Cubes-DC16}' = cubes_16_600_dis_data)
+
+instance_info_dist <- function(expr, y_expr, two_d = F, continuous = T, log_x = F, facet = F, group_status = F, density_adjust = 1, x_lab = NA, y_lab = NA, data = instance_info) {
+  data <- data %>%
+    mutate(benchmark = recode_factor(benchmark, "scythe/recent-posts" = "\\texttt{recent-posts}",
+                                     "scythe/top-rated-posts" = "\\texttt{top-rated-posts}",
+                                     textbook = "\\texttt{textbook}",
+                                     spider = "\\texttt{spider}",
+                                     kaggle = "\\texttt{kaggle}"))
+
+  if (!facet & !group_status) {
+    tmp <- data %>% ggplot(aes(x = { { expr } }, color = benchmark, fill = benchmark))
+  } else if (!facet & group_status) {
+    tmp <- data %>% ggplot(aes(x = { { expr } }, color = status, fill = status))
+  } else {
+    tmp <- data %>% ggplot(aes(x = { { expr } }))
+  }
+
+  tmp +
+  { if (continuous & !two_d)  geom_density(alpha = .1, adjust = density_adjust) } +
+  { if (continuous & two_d)  geom_density_2d_filled(aes(y = { { y_expr } })) } +
+  { if (!continuous)  geom_bar() } +
+  { if (log_x)  scale_x_log10() } +
+  { if (!facet)  scale_color_brewer(palette = "Dark2") } +
+  { if (!facet)  scale_fill_brewer(palette = "Dark2") } +
+    # { if (log_x)  annotation_logticks(sides="b") } +
+  { if (facet)  facet_wrap(~benchmark, scales = "free_y") } +
+  { if (!is.na(x_lab)) labs(x = x_lab) } +
+  { if (!is.na(y_lab)) labs(y = y_lab) } +
+    my_theme +
+  { if (continuous & !two_d)  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) }
+}
+
+compute_fuzzy_table <- function(..., has_dis_data = F) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try')
+  if (has_dis_data) {
+    data <- data %>% mutate(fuzzy = factor(ifelse(status.dis == 2 | is.na(status.dis), -7, fuzzy_levels[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("Disambiguation Timeout", fuzzy_meanings)),
+                            fuzzy = factor(ifelse(solved, c(-7, fuzzy_levels)[as.integer(fuzzy)], -2), c(-7, fuzzy_levels), c("Disambiguation Timeout", fuzzy_meanings)))
+  } else {
+    data <- data %>%
+      mutate(fuzzy = factor(ifelse(solved, fuzzy_levels[as.integer(fuzzy)], -2), fuzzy_levels, fuzzy_meanings))
+  }
+  data <- data %>% mutate(fuzzy = fct_recode(fuzzy, Timeout = "Exec. Error GT", Timeout = "No GT", Timeout = "Incorrect", Timeout = "No log file", "Execution Error" = "Exec. Error Base"),
+                          fuzzy = fct_relevel(fuzzy, "No solution"),
+                          try = factor(try, levels = names(tries)))
+  data %>%
+    mutate(total_instances = n_distinct(name),
+           correct = fuzzy == 'Possibly Correct' |
+             fuzzy == 'Possibly Correct Top 5' |
+             fuzzy == 'Possibly Correct Any',
+           incorrect = fuzzy == 'Incorrect by Fuzzing',
+           inconclusive = fuzzy == 'Timeout' |
+             fuzzy == 'Execution Error' |
+             fuzzy == 'No Solution') %>%
+    select(try, solved, correct, incorrect, inconclusive) %>%
+    gather("key", "value", -try) %>%
+    group_by(try, key, value) %>%
+    summarise(c = n()) %>%
+    group_by(try, key) %>%
+    mutate(t = sum(c), f = c / t) %>%
+    filter(value) %>%
+    select(-value, -c, -t)
 }

@@ -61,6 +61,7 @@ def handle_timeout(signal, stackframe):
     children = current_process.children(recursive=True)
     for child in children:
         child.kill()
+    print_results()
     exit(exit_code)
 
 
@@ -124,6 +125,9 @@ def print_results():
             print(beautifier(str(sql_query)[6:]))
         else:
             print('Failed to generate SQL query')
+
+        sys.stdout.flush()
+
     else:
         if exceeded_max_loc:
             exit_code = ExitCode.END_SEARCH_SPACE

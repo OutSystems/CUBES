@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/15.sqlite
+db: tests-examples/textbook/tables/15.sqlite3
 inputs:
   - tests-examples/textbook/tables/15-1.txt
   - tests-examples/textbook/tables/15-2.txt
@@ -19,6 +19,18 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT S.S_name
+  FROM "15-3" AS S
+  WHERE NOT EXISTS(SELECT P.P_id
+                   FROM "15-2" AS P
+                   WHERE P.color = 'red'
+                   EXCEPT
+                   SELECT C.P_id
+                   FROM "15-1" AS C JOIN "15-2" AS P
+                   WHERE C.S_key = S.S_key
+                     AND C.P_id = P.P_id
+                     AND P.color = 'red')
 comment: |
   5.2.3 optimal solution
 

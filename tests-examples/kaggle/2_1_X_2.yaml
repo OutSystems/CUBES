@@ -1,3 +1,4 @@
+db: tests-examples/kaggle/tables/2_1_X_2.sqlite3
 inputs:
   - tests-examples/kaggle/tables/posts_questions_3.csv
   - tests-examples/kaggle/tables/posts_answers_4.csv
@@ -11,15 +12,17 @@ columns:
   - creation_date
 loc: 1
 sql:
-  SELECT q.owner_user_id AS owner_user_id,
+  SELECT q.owner_user_id      AS owner_user_id,
   MIN(q.creation_date) AS q_creation_date,
   MIN(a.creation_date) AS a_creation_date
-  FROM `bigquery-public-data.stackoverflow.posts_questions` AS q
-  FULL JOIN `bigquery-public-data.stackoverflow.posts_answers` AS a
+  FROM posts_questions_3 AS q
+  JOIN posts_answers_4 AS a
   ON q.owner_user_id = a.owner_user_id
-  WHERE q.creation_date >= '2019-01-01' AND q.creation_date < '2019-02-01'
-  AND a.creation_date >= '2019-01-01' AND a.creation_date < '2019-02-01'
-  GROUP BY owner_user_id
+  WHERE q.creation_date >= '2019-01-01'
+  AND q.creation_date < '2019-02-01'
+  AND a.creation_date >= '2019-01-01'
+  AND a.creation_date < '2019-02-01'
+  GROUP BY q.owner_user_id
 comment:
   df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
   df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")

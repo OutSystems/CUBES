@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/18.sqlite
+db: tests-examples/textbook/tables/18.sqlite3
 inputs:
   - tests-examples/textbook/tables/18-1.txt
   - tests-examples/textbook/tables/18-3.txt
@@ -13,6 +13,13 @@ loc: 2
 solution:
   - summarise
   - natural_join3
+sql: |
+  SELECT C.P_id, S.S_name
+  FROM "18-3" AS S JOIN "18-1" AS C
+  WHERE C.S_key = S.S_key
+    AND C.cost = (SELECT MAX(C1.cost)
+                  FROM "18-1" AS C1
+                  WHERE C1.P_id = C.P_id)
 comment: |
   5.2.6 optimal solution
 

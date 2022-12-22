@@ -187,17 +187,22 @@ def disambiguate(instance, spec, sql_list, total_sql=None, splits=None, fuzzy_le
         return disambiguate(instance, spec, bests[best_i][3], total_sql, splits + [outputs[best_i].occurrences], fuzzy_level + 1, results + [False])
 
 
-def print_stats():
-    logger.debug('Time spent on {fuzz: %f, exec: %f}', fuzz_time.value, exec_time.value)
+def process_worker_sighandler(signum, frame):
+    print("ABC")
+    print(frame)
+    signame = signal.Signals(signum).name
+    print(f'Signal handler called with signal {signame} ({signum})')
 
 
 def compute(file):
+    signal.signal(signal.SIGTERM, process_worker_sighandler)
+
     random.seed('squares')
 
     with open(file) as f:
         content = f.read()
 
-    instance = file.replace(f'analysis/data/{args.run}/', '').replace('_0.log', '')
+    instance = file.replace(f'analysis/data/{args.run}/', '').replace('_0.log', '').replace('.log', '')
     yaml_file = f'tests-examples/{instance}.yaml'
 
     if not os.path.isfile(yaml_file):
@@ -238,28 +243,41 @@ def initializer():
 
 
 if __name__ == '__main__':
-    fuzz_time = multiprocessing.Value(ctypes.c_double)
-    exec_time = multiprocessing.Value(ctypes.c_double)
-
-    signal.signal(signal.SIGALRM, print_stats)
-    signal.setitimer(signal.ITIMER_REAL, 0, 60)
-
     parser = argparse.parser = argparse.ArgumentParser()
     parser.add_argument('run', metavar='RUN')
     parser.add_argument('-m', default=65536, type=int, help='memout')
+    parser.add_argument('-p', default=1, type=int, help='number of processes')
     parser.add_argument('--rounds', type=int, default=16)
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--interactive', action='store_true')
     parser.add_argument('--save-alt', action='store_true')
+    parser.add_argument('--suffix')
+    parser.add_argument('--instances')
     args = parser.parse_args()
 
     random.seed('squares')
 
-    output_file = f'analysis/fuzzy/{args.run}_dis{"_" if args.save_alt else ""}.csv'
-    instances = list(glob.glob(f'analysis/data/{args.run}/spider/allergy_1/0029_0.log', recursive=True))
+    output_file = f'analysis/fuzzy/{args.run}_dis{"_" + args.suffix if args.suffix else ""}{"_" if args.save_alt else ""}.csv'
+    if not args.instances:
+        instances = list(glob.glob(f'analysis/data/{args.run}/**/*.log', recursive=True))
+    else:
+        all_instances = list(glob.glob(f'analysis/data/{args.run}/**/*.log', recursive=True))
+        allowed_instances = []
+        with open(args.instances) as inst_list:
+            for inst in inst_list.readlines():
+                if inst[:-1]:
+                    allowed_instances.append(inst[:-1])
+        instances = []
+        for instance in all_instances:
+            for allowed in allowed_instances:
+                if allowed in instance:
+                    instances.append(instance)
+                    break
+
+    print(instances)
     shuffle(instances)
 
-    with ProcessPool(max_workers=1, initializer=initializer) as pool:
+    with ProcessPool(max_workers=args.p, initializer=initializer) as pool:
         with open(output_file, 'w') as results_f:
             result_writer = csv.writer(results_f)
             result_writer.writerow(('name', 'status', 'total_queries', 'n_questions', 'final_queries', 'splits', 'results'))

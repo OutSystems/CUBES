@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/23.sqlite
+db: tests-examples/textbook/tables/23.sqlite3
 inputs:
   - tests-examples/textbook/tables/23-1.txt
   - tests-examples/textbook/tables/23-2.txt
@@ -12,6 +12,14 @@ functions:
 columns:
   - cost
   - color
+sql: |
+  SELECT S.S_name, MAX(C.cost) as MaxCost
+  FROM "23-3" AS S JOIN "23-2" AS P JOIN "23-1" AS C
+  WHERE P.P_id = C.P_id
+    AND C.S_key = S.S_key
+  GROUP BY S.S_name, S.S_key
+  HAVING ANY(P.color = 'green')
+     AND ANY(P.color = 'red')
 comment: |
   5.2.11 optimal solution
 
