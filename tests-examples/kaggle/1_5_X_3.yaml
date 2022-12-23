@@ -1,3 +1,4 @@
+db: tests-examples/kaggle/tables/1_5_X_3.sqlite3
 inputs:
   - tests-examples/kaggle/tables/taxi_trips_3.csv
 output: tests-examples/kaggle/tables/1_5_X_3.csv
@@ -14,17 +15,17 @@ loc: 1
 sql:
   WITH RelevantRides AS
   (
-    SELECT EXTRACT(HOUR FROM trip_start_timestamp) AS hour_of_day,
-    trip_miles,
-    trip_seconds
-    FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips`
-    WHERE trip_start_timestamp > '2017-01-01' AND
-    trip_start_timestamp < '2017-07-01' AND
-    trip_seconds > 0 AND
-    trip_miles > 0
+  SELECT EXTRACT(HOUR FROM trip_start_timestamp) AS hour_of_day,
+  trip_miles,
+  trip_seconds
+  FROM taxi_trips_3
+  WHERE trip_start_timestamp > '2017-01-01'
+  AND trip_start_timestamp < '2017-07-01'
+  AND trip_seconds > 0
+  AND trip_miles > 0
   )
   SELECT hour_of_day,
-  COUNT(1) AS num_trips,
+  COUNT(1)                                   AS num_trips,
   3600 * SUM(trip_miles) / SUM(trip_seconds) AS avg_mph
   FROM RelevantRides
   GROUP BY hour_of_day

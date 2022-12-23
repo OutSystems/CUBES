@@ -181,7 +181,6 @@ class Specification:
         self.aggrs_use_const = False
 
         self.input_tables = []
-        self.data_frames = {}
 
         self.columns = OrderedSet()
         self.generated_columns = {}

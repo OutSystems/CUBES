@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/14.sqlite
+db: tests-examples/textbook/tables/14.sqlite3
 inputs:
   - tests-examples/textbook/tables/14-1.txt
   - tests-examples/textbook/tables/14-2.txt
@@ -15,6 +15,15 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT S.S_name
+  FROM "14-3" AS S
+  WHERE NOT EXISTS(SELECT P.P_id
+                   FROM "14-2" AS P
+                   EXCEPT
+                   SELECT C.P_id
+                   FROM "14-1" AS C
+                   WHERE C.S_key = S.S_key)
 comment: |
   5.2.2 optimal solution
 

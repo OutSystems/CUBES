@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/24.sqlite
+db: tests-examples/textbook/tables/24.sqlite3
 inputs:
   - tests-examples/textbook/tables/aircraft.txt
   - tests-examples/textbook/tables/employees.txt
@@ -14,13 +14,13 @@ solution:
   - filter
 sql: |
   SELECT DISTINCT A.aname
-  FROM aircraft A
+  FROM aircraft AS A
   WHERE A.Aid IN (SELECT C.aid
-                  FROM certified C,
-                       employees E
+                  FROM certified AS C JOIN
+                       employees AS E
                   WHERE C.eid = E.eid
                     AND NOT EXISTS (SELECT *
-                                    FROM employees E1
+                                    FROM employees AS E1
                                     WHERE E1.eid = E.eid
                                       AND E1.salary < 80000))
 comment: |

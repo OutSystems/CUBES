@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/19.sqlite
+db: tests-examples/textbook/tables/19.sqlite3
 inputs:
   - tests-examples/textbook/tables/19-1.txt
   - tests-examples/textbook/tables/19-2.txt
@@ -16,6 +16,15 @@ solution:
   - natural_join3
   - filter
   - anti_join
+sql: |
+  SELECT S.S_name
+  FROM "19-1" AS C JOIN "19-3" AS S
+  WHERE C.S_key = S.S_key
+    AND NOT EXISTS(SELECT *
+                   FROM "19-2" AS P JOIN "19-1" AS C1
+                   WHERE P.P_id = C1.P_id
+                     AND C.S_key = C1.S_key
+                     AND P.color != 'red')
 comment: |
   # 5.2.7 optimal solution
 

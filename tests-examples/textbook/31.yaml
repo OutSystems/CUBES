@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/31.sqlite
+db: tests-examples/textbook/tables/31.sqlite3
 inputs:
   - tests-examples/textbook/tables/aircraft.txt
   #  - tests-examples/textbook/tables/flights.txt
@@ -20,15 +20,15 @@ solution:
   - anti_join
 sql: |
   SELECT DISTINCT E.ename
-  FROM Employees E
+  FROM Employees AS E
   WHERE E.eid IN (SELECT C.eid
-                  FROM Certified C
+                  FROM Certified AS C
                   WHERE EXISTS(SELECT A.aid
-                               FROM Aircraft A
+                               FROM Aircraft AS A
                                WHERE A.aid = C.aid
                                  AND A.crusingrange > 3000)
                     AND NOT EXISTS(SELECT A1.aid
-                                   FROM Aircraft A1
+                                   FROM Aircraft AS A1
                                    WHERE A1.aid = C.aid
                                      AND A1.aname LIKE 'Boeing%'))
 comment: |

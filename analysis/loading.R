@@ -1,6 +1,7 @@
 status_levels <- rev(c(0, 3, 2, 4, 6, -2, -1, 5, 1, 143))
 status_meanings <- rev(c('Solved', 'Non-optimal', 'Solved (Just R)', 'Just R Non-optimal', 'Empty output', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
-status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#59235F", "#4B44CC", "#cc241d", "#653e9c", "#3c3836", '#000000'))
+# status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#59235F", "#4B44CC", "#cc241d", "#653e9c", "#3c3836", '#000000'))
+status_colors <- rev(c("#66a61e", "#296429", "#d79921", "#B4560E", "#59235F", "#7570B3", "#D95F02", "#653e9c", "#666666", '#000000'))
 
 fuzzy_combo <- rev(list(
   list(5, 'Pre Possibly Correct', "#21afc2"),
@@ -28,14 +29,16 @@ fuzzy_levels <- unlist(map(fuzzy_combo, function(x) { x[1] }))
 fuzzy_meanings <- unlist(map(fuzzy_combo, function(x) { x[2] }))
 fuzzy_colors <- unlist(map(fuzzy_combo, function(x) { x[3] }))
 
-test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set', 'outsystems', 'leetcode')
+test_filter <- c('scythe/demo-example', 'scythe/sqlsynthesizer', 'scythe/test-examples', 'scythe/newposts', 'scythe/dev-set', 'outsystems', 'leetcode', '55-tests')
+instance_blocklist <- c('textbook/30')
 
 instance_info <- read_csv('instances.csv', col_types = cols(
   name = col_character(),
   loc = col_number(),
   .default = '?'
-)) %>% mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
-    mutate(benchmark = ifelse(str_detect(benchmark, 'spider'), 'spider', benchmark))
+)) %>% mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)),
+              benchmark = ifelse(str_detect(benchmark, 'spider'), 'spider', benchmark),
+              sql_hardness = factor(sql_hardness, levels = c('easy', 'medium', 'hard', 'extra', NA)))
 
 prr <- function(x) {
   print(x)
@@ -52,7 +55,7 @@ getmode <- function(v) {
 }
 
 max_non_inf <- function(...) {
-  tmp <- max(...)
+  tmp <- suppressWarnings(max(...))
   if (is.finite(tmp)) {
     tmp
   } else {
@@ -61,7 +64,7 @@ max_non_inf <- function(...) {
 }
 
 min_non_inf <- function(...) {
-  tmp <- min(...)
+  tmp <- suppressWarnings(min(...))
   if (is.finite(tmp)) {
     tmp
   } else {
@@ -78,7 +81,7 @@ is_solved_status <- function(status) {
 }
 
 
-load_result_squares <- function(file, dis_fuzz = F) {
+load_result_squares <- function(file, dis_fuzz = F, remove_empties=F) {
   result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?')) %>%
     mutate(status = factor(status, levels = status_levels)) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)),
@@ -92,7 +95,19 @@ load_result_squares <- function(file, dis_fuzz = F) {
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     mutate(benchmark = ifelse(str_detect(benchmark, 'spider'), 'spider', benchmark)) %>%
     filter(!(benchmark %in% test_filter)) %>%
-    left_join(instance_info)
+    filter(!(name %in% instance_blocklist)) %>%
+    left_join(instance_info) %>%
+    mutate(log = paste0('data/', file, '/', name, '.log'),
+           log_content = map(log, function(x) { ifelse(file.exists(x), read_file(x), NA) }))
+
+  if (remove_empties) {
+    result <- result %>%
+      mutate(status = ifelse(log_content == '' & solved, 5, status),
+             solved = is_solved_status(status))
+  }
+
+  result <- result %>%
+    select(-log_content)
   if (file.exists(paste0('fuzzy/', file, ifelse(dis_fuzz, '_dis_fuzz', ''), '.csv'))) {
     result_fuzzy <- read_csv(paste0('fuzzy/', file, ifelse(dis_fuzz, '_dis_fuzz', ''), '.csv'), col_types = cols(.default = '?', base_eq = 'c', top_i = 'i'))
     result <- left_join(result, result_fuzzy, by = 'name')
@@ -115,20 +130,22 @@ load_result_squares <- function(file, dis_fuzz = F) {
   result
 }
 
-load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F) {
+load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F, use_log_suff = T) {
   result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?')) %>%
     mutate(status = factor(status, levels = status_levels)) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2))) %>%
     mutate(benchmark = ifelse(str_detect(benchmark, 'spider'), 'spider', benchmark)) %>%
     filter(!(benchmark %in% test_filter)) %>%
+    filter(!(name %in% instance_blocklist)) %>%
     group_by(name) %>%
     mutate(run_number = 0:(n() - 1)) %>%
     ungroup() %>%
     mutate(several_runs = any(run_number > 0),
            status = ifelse(is.na(status), 1, as.character(status)),  # *sighs* factors are weird
            status = ifelse(timeout, ifelse(status == 3 | status == 4, as.character(status), -1), as.character(status)),  # *sighs* factors are weird
-           status = ifelse(memout, -2, as.character(status)),  # *sighs* factors are weird
-           log_suff = paste0('_', run_number),
+           status = ifelse(memout, -2, as.character(status)),  # *sighs* factors are weird,
+           use_log_suff = use_log_suff,
+           log_suff = ifelse(use_log_suff, paste0('_', run_number), ''),
            log = paste0('data/', file, '/', name, log_suff, '.log'),
            log_content = map(log, function(x) { ifelse(file.exists(x), read_file(x), NA) }),
            # hard_h = unlist(map(log_content, function(x) { str_match(x, '\\[(.*)\\]\\[.*\\]\\[INFO\\] Hard problem!')[, 2] })),
@@ -139,13 +156,17 @@ load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F) {
            enum = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in enumerator: (.*) \\(approx\\)')[, 2] }))),
            eval = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent in evaluation & testing: (.*) \\(approx\\)')[, 2] }))),
            block = parse_number(unlist(map(log_content, function(x) { str_match(x, 'Total time spent blocking cubes/programs: (.*) \\(approx\\)')[, 2] }))),
-           eval_p = eval / (init + enum + eval + block),
+           init_p = init / cpu,
+           eval_p = eval / cpu,
+           enum_p = enum / cpu,
+           block_p = block / cpu,
            blocked = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Blocked programs: (.*) \\(.*\\) \\(approx\\)')[, 2] }))),
            cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Generated cubes: (.*)')[, 2] }))),
            blocked_cubes = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Blocked cubes: (.*) \\(.*\\)')[, 2] }))),
            attempts = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Attempted programs: (.*) \\(approx\\)')[, 2] }))),
            cache_hits = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Cache hits: (.*) \\(approx\\)')[, 2] }))),
            cache_misses = parse_integer(unlist(map(log_content, function(x) { str_match(x, 'Cache misses: (.*) \\(approx\\)')[, 2] }))),
+           empties_percentage = parse_double(unlist(map(log_content, function(x) { str_match(x, 'Empty outputs: \\d+ \\((.*)%\\) \\(approx\\)')[, 2] }))),
            cache_hit_ratio = cache_hits / (cache_hits + cache_misses),
            solution = map(log_content, function(x) { map(str_match_all(x, '\\[MainProcess\\]\\[INFO\\] Solution found: (.*)'), function(x) { x[, 2] }) }),
            solution = ifelse(solution != '', solution, NA),
@@ -153,6 +174,7 @@ load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F) {
            min_sol_loc = unlist(map(sol_sizes, function(x) { min_non_inf(x) })),
            max_sol_loc = unlist(map(sol_sizes, function(x) { max_non_inf(x) })),
            solutions = unlist(map(log_content, function(x) { str_count(x, fixed('------------------------------------- R Solution ---------------------------------------')) })),
+           sql_solutions = unlist(map(log_content, function(x) { str_count(x, fixed('+++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++')) })),
            timeout_reached = unlist(map(log_content, function(x) { str_detect(x, fixed('Timeout reached')) })),
            status = ifelse(solutions == 0 & timeout_reached, -1, as.character(status)),  # *sighs* factors are weird
            status = ifelse(solutions > 0, 0, as.character(status)),  # *sighs* factors are weird
@@ -165,8 +187,11 @@ load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F) {
     select(-log_content, -log_suff, -several_runs) %>%
     left_join(instance_info)
   if (file.exists(paste0('fuzzy/', file, ifelse(dis_fuzz, '_dis_fuzz', ''), '.csv'))) {
+    print("A")
     result_fuzzy <- read_csv(paste0('fuzzy/', file, ifelse(dis_fuzz, '_dis_fuzz', ''), '.csv'), col_types = cols(.default = '?', base_eq = 'c', top_i = 'i'))
+    print("B")
     result <- left_join(result, result_fuzzy, by = 'name')
+    print("C")
   }
   for (f in fuzzies) {
     if (file.exists(paste0('fuzzy/', f, '.csv'))) {
@@ -176,7 +201,8 @@ load_result_file <- function(file, top_n = F, fuzzies = NULL, dis_fuzz = F) {
                base_eq = coalesce(base_eq, base_eq.o),
                fuzzy_eq = coalesce(fuzzy_eq, fuzzy_eq.o),
                fuzzy_neq = coalesce(fuzzy_neq, fuzzy_neq.o),
-               fuzzy_err = coalesce(fuzzy_err, fuzzy_err.o)) %>%
+               fuzzy_err = coalesce(fuzzy_err, fuzzy_err.o)
+        ) %>%
         select(-fuzzies.o, -base_eq.o, -fuzzy_eq.o, -fuzzy_neq.o, -fuzzy_err.o)
     }
   }
@@ -284,150 +310,14 @@ load_fuzzy_results <- function(run) {
            solved = T, status = '0',
            fuzzy = base_eq, fuzzy = base_eq, fuzzy = ifelse(is.na(fuzzy), -1, ifelse(fuzzy == 1, ifelse(fuzzy_eq < fuzzies, 4, 1), ifelse(fuzzy == 2, ifelse(fuzzy_eq < fuzzies, 8, 5), fuzzy))),
            fuzzy = ifelse(!is.na(top_i) &
-                                                   fuzzy == 1 &
-                                                   top_i > 1 &
-                                                   top_i <= 5, 2, ifelse(!is.na(top_i) &
-                                                                           fuzzy == 5 &
-                                                                           top_i > 1 &
-                                                                           top_i <= 5, 6, fuzzy)),
-                                  fuzzy = ifelse(!is.na(top_i) & fuzzy == 1 & top_i > 5, 3, ifelse(!is.na(top_i) & fuzzy == 5 & top_i > 5, 7, fuzzy)),
+                            fuzzy == 1 &
+                            top_i > 1 &
+                            top_i <= 5, 2, ifelse(!is.na(top_i) &
+                                                    fuzzy == 5 &
+                                                    top_i > 1 &
+                                                    top_i <= 5, 6, fuzzy)),
+           fuzzy = ifelse(!is.na(top_i) & fuzzy == 1 & top_i > 5, 3, ifelse(!is.na(top_i) & fuzzy == 5 & top_i > 5, 7, fuzzy)),
            fuzzy = factor(fuzzy, fuzzy_levels, fuzzy_meanings),
            status = as.character(ifelse(fuzzy != 'No solution', 0, -1))) %>%
     filter(fuzzy != 'No log file')
-}
-
-{
-  scythe <- load_result_squares('scythe_4') %>% filter(benchmark != 'kaggle')
-  patsql <- load_result_squares('patsql_6') %>% filter(benchmark != 'kaggle')
-  squares <- load_result_squares('squares_3') %>%
-    filter(benchmark != 'kaggle') %>%
-    semi_join(scythe, by = 'name')
-
-
-  #single <- load_result_file('single')
-  #single_np <- load_result_file('single_np')
-  #bitenum <- load_result_file('bitenum')
-  #bitenum_nobit <- load_result_file('bitenum_nobit')
-  #bitenum_nosub <- load_result_file('bitenum_nosub')
-  #bitenum_nofd <- load_result_file('bitenum_nofd')
-
-  #sequential1 <- load_result_file('sequential')
-  # sequential <- load_result_file('sequential_2')
-  # sequential_3 <- load_result_file('sequential_3')
-  # sequential <- load_result_file('sequential_semantics')
-  # sequential_top5 <- load_result_file('sequential_sem_top_5_2')
-  # sequential_subsume <- load_result_file('sequential_subsume')
-  # sequential_no_qffd <- load_result_file('sequential_no_qffd')
-  # sequential_simple_dsl <- load_result_file('sequential_simple_dsl')
-  # sequential_no_bitvec <- load_result_file('sequential_no_bitvec')
-
-  ratsql <- load_fuzzy_results('ratsql')
-  smbop <- load_fuzzy_results('smbop')
-
-  # db2csv_1 <- load_result_file('db2csv_dev_basic_1')
-  # db2csv_2 <- load_result_file('db2csv_dev_basic_2')
-  # db2csv_3 <- load_result_file('db2csv_dev_basic_3')
-  # db2csv_4 <- load_result_file('db2csv_dev_basic_4')
-  # db2csv_5 <- load_result_file('db2csv_dev_basic_5')
-  # db2csv_6 <- load_result_file('db2csv_dev_basic_6')
-  # db2csv_7 <- load_result_file('db2csv_dev_basic_7')
-  # db2csv_8 <- load_result_file('db2csv_dev_basic_8')
-  # db2csv_9 <- load_result_file('db2csv_dev_basic_9')
-  # db2csv_10 <- load_result_file('db2csv_dev_basic_10')
-  # db2csv_2_c20 <- load_result_file('db2csv_dev_basic_2_c20')
-  # db2csv_3_c20 <- load_result_file('db2csv_dev_basic_3_c20')
-  # db2csv_9_c20 <- load_result_file('db2csv_dev_basic_9_c20')
-  # db2csv_beam_1 <- load_result_file('db2csv_dev_beam_1')
-  # db2csv_beam_2 <- load_result_file('db2csv_dev_beam_2')
-  # db2csv_beam_3 <- load_result_file('db2csv_dev_beam_3')
-  # db2csv_beam_10 <- load_result_file('db2csv_dev_beam_10')
-  # db2csv_beam_11 <- load_result_file('db2csv_dev_beam_11')
-  # db2csv_beam_12_p51 <- load_result_file('db2csv_dev_beam_12_p51')
-  # db2csv_beam_12_p75 <- load_result_file('db2csv_dev_beam_12')
-  # db2csv_beam_12_p9 <- load_result_file('db2csv_dev_beam_12_p9')
-  # db2csv_beam_12_p9_max_filter1 <- load_result_file('db2csv_dev_beam_12_p9_max_filter-1')
-  # db2csv_beam_12_p9_max_join1 <- load_result_file('db2csv_dev_beam_12_p9_max_join-1')
-  # db2csv_beam_12_p9_no_antijoin <- load_result_file('db2csv_dev_beam_12_p9_no_anti-join')
-  # db2csv_beam_12_p9_no_crossjoin <- load_result_file('db2csv_dev_beam_12_p9_no_cross-join')
-  # db2csv_beam_12_p9_no_leftjoin <- load_result_file('db2csv_dev_beam_12_p9_no_left-join')
-  # db2csv_beam_12_p9_no_mutate <- load_result_file('db2csv_dev_beam_12_p9_no_mutate')
-  # db2csv_beam_12_p9_no_naturaljoin4 <- load_result_file('db2csv_dev_beam_12_p9_no_natural-join4')
-  # db2csv_beam_12_p9_no_semijoin <- load_result_file('db2csv_dev_beam_12_p9_no_semi-join')
-  # db2csv_beam_12_p9_no_union <- load_result_file('db2csv_dev_beam_12_p9_no_union')
-  # db2csv_beam_12_p9_no_intersect <- load_result_file('db2csv_dev_beam_12_p9_no_intersect')
-  # db2csv_beam_12_p9_combo <- load_result_file('db2csv_dev_beam_12_p9_max_filter1_no_naturaljoin4_leftjoin_crossjoin')
-  # db2csv_beam_13_combo <- load_result_file('db2csv_dev_beam_13_p9_max_filter1_no_naturaljoin4_leftjoin_crossjoin')
-  # db2csv_beam_15_combo <- load_result_file('db2csv_dev_beam_15_combo')
-#   db2csv_beam_16_combo <- load_result_file('db2csv_dev_beam_16_combo')
-  # db2csv_beam_2_c20 <- load_result_file('db2csv_dev_beam_2_c20')
-  # db2csv_beam_3_c20 <- load_result_file('db2csv_dev_beam_3_c20')
-  # db2csv_beam_12_p9_combo_c20 <- load_result_file('db2csv_dev_beam_12_p9_max_filter1_no_naturaljoin4_leftjoin_crossjoin_c20')
-  # db2csv_beam_12_combo_c20 <- load_result_file('db2csv_dev_beam_12_p9_max_filter1_no_naturaljoin4_leftjoin_crossjoin_c20_no_split')
-  # db2csv_beam_14_combo_c20 <- load_result_file('db2csv_dev_beam_14_combo_c20')
-  # db2csv_ratsql_17_combo_c20 <- load_result_file('db2csv_beam_ratsql_17_c20')
-  # db2csv_ratsql_17_combo_c20_all300 <- load_result_file('db2csv_beam_ratsql_17_c20_all300')
-  # db2csv_smbop_17_combo_c20 <- load_result_file('db2csv_beam_smbop_17_c20')
-#   db2csv_smbop_17_combo_c20_all300 <- load_result_file('db2csv_beam_smbop_17_c20_all300')
-#   db2csv_smbop_18_combo_c20_all300 <- load_result_file('db2csv_beam_smbop_18_c20_all300')
-#   db2csv_smbop_20_combo_c20_all300 <- load_result_file('db2csv_beam_smbop_20_c20_all300')
-  db2csv_smbop_21_combo_c20_all300 <- load_result_file('db2csv_beam_smbop_21_c20_all300')
-  db2csv_ratsql_21_combo_c20_all300 <- load_result_file('db2csv_beam_ratsql_21_c20_all300')
-  db2csv_nobeam_21_combo_c20_all300 <- load_result_file('db2csv_no_beam_21_c20_all300')
-
-  mutate_smbop <- load_fuzzy_results('test_2_smbop')
-  mutate_ratsql <- load_fuzzy_results('test_2')
-
-  # db2csv_beam_no_conserv <- load_result_file('db2csv_dev_beam_1_no_conserv')
-
-  s62 <- load_result_file('s62') %>% semi_join(scythe, by = 'name')
-
-  # c50_4 <- load_result_file('c50_4')
-  # c50_8 <- load_result_file('c50_8')
-  #c50_16_1 <- load_result_file('c50_16')
-#   c50_16 <- load_result_file('c50_16_2')
-  # c51_16 <- load_result_file('c51_16')
-  # c52_16 <- load_result_file('c52_16_2')
-  # c52_16_all600 <- load_result_file('c52_16')
-  # c53_16 <- load_result_file('c53_16')
-  # c53_16_all600 <- load_result_file('c53_16_all600')
-  # c54_16 <- load_result_file('c54_16')
-  # c55_16 <- load_result_file('c55_16')
-  # c56_16 <- load_result_file('c56_16')
-  # c57_16 <- load_result_file('c57_16')
-  # c57_16_no_cache <- load_result_file('c57_16_no-cache')
-  # c58_16 <- load_result_file('c58_16')
-  # c59_16 <- load_result_file('c59_16')
-#   c59_16_all600 <- load_result_file('c59_16_all600')
-#   c60_16 <- load_result_file('c60_16')
-#   c61_16 <- load_result_file('c61_16')
-#   c62_16 <- load_result_file('c62_16')
-#   c62_4_full <- load_result_file('c62_4_full') %>% semi_join(scythe, by = 'name')
-#   c62_8_full <- load_result_file('c62_8_full') %>% semi_join(scythe, by = 'name')
-  c62_16_full <- load_result_file('c62_16_full') %>%
-    filter(!str_detect(benchmark, 'db2csv')) %>%
-    semi_join(scythe, by = 'name')
-#   c62_16_full_static <- load_result_file('c62_16_full_static') %>% semi_join(scythe, by = 'name')
-#   c62_16_full_no_split <- load_result_file('c62_16_full_no_split') %>% semi_join(scythe, by = 'name')
-#   c62_16_full_no_bitvec <- load_result_file('c62_16_full_no_bitvec') %>% semi_join(scythe, by = 'name')
-#   c62_16_full_random <- load_result_file('c62_16_full_random') %>% semi_join(scythe, by = 'name')
-#   c62_16_n10 <- load_result_file_median('c62_16_n10')
-#   c62_16_all600 <- load_result_file('c62_16_all600')
-  c62_16_all600_dis <- load_result_file('c62_16_all600', dis_fuzz = T)
-#   c62_16_all600_dis_simple <- read_csv('fuzzy/c62_16_all600_dis.csv') %>% mutate(status = as.character(status))
-  # c50_16_top5 <- load_result_file('c50_16_top5')
-  # c50_16_optimal <- load_result_file('c50_16_optimal')
-  # c50_16_optimal <- load_result_file('c50_16_optimal_2')
-  # c50_16_static <- load_result_file('c50_16_static')
-  # c50_16_no_dedu <- load_result_file('c50_16_no_dedu')
-  # c50_16_no_split <- load_result_file('c50_16_no_split')
-
-  # determ <- load_result_file_median('determinism')
-  # determ2 <- load_result_file_median('determinism_2')
-
-  # determ5 <- load_result_file('determinism_5')
-  # determ5 <- load_result_file_median('determinism_5')
-
-  squares_500 <- semi_join(squares, c62_16, by = 'name')
-  scythe_500 <- semi_join(scythe, c62_16, by = 'name')
-  patsql_500 <- semi_join(patsql, c62_16, by = 'name')
 }

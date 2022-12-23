@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/22.sqlite
+db: tests-examples/textbook/tables/22.sqlite3
 inputs:
   - tests-examples/textbook/tables/22-1.txt
   - tests-examples/textbook/tables/22-2.txt
@@ -19,6 +19,13 @@ solution:
   - natural_join3
   - filter
   - anti_join
+sql: |
+  SELECT S.S_name, COUNT(*) as PartCount
+  FROM "22-3" AS S JOIN "22-2" AS P JOIN "22-1" AS C
+  WHERE P.P_id = C.P_id
+    AND C.S_key = S.S_key
+  GROUP BY S.S_name, S.S_key
+  HAVING EVERY(P.color = 'green')
 comment: |
   5.2.10 optimal solution
 

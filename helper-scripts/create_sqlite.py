@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     spec = parse_specification(args.input)
 
-    sqlite_name = os.path.join(os.path.dirname(args.input), 'tables', Path(args.input).stem + '.sqlite')
+    sqlite_name = os.path.join(os.path.dirname(args.input), 'tables', Path(args.input).stem + '.sqlite3')
 
     print(sqlite_name)
 

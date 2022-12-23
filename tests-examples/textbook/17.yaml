@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/17.sqlite
+db: tests-examples/textbook/tables/17.sqlite3
 inputs:
   - tests-examples/textbook/tables/17-1.txt
   - tests-examples/textbook/tables/17-3.txt
@@ -14,6 +14,13 @@ solution:
   - summarise
   - natural_join3
   - filter
+sql: |
+  SELECT DISTINCT C.P_id, S.S_name
+  FROM "17-1" AS C JOIN "17-3" AS S
+  WHERE C.S_key = S.S_key
+    AND C.cost > (SELECT AVG(C1.cost)
+                  FROM "17-1" AS C1
+                  WHERE C1.P_id = C.P_id)
 comment: |
   5.2.5 optimal solution
   catalog <- read.table("tests-examples/textbook/tables/17-1.txt", sep =",", header=T)

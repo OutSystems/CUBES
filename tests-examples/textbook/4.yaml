@@ -1,4 +1,4 @@
-db: tests-examples/textbook/tables/4.sqlite
+db: tests-examples/textbook/tables/4.sqlite3
 inputs:
   - tests-examples/textbook/tables/4-1.txt
   - tests-examples/textbook/tables/4-2.txt
@@ -16,13 +16,18 @@ solution:
   - summarise
   - filter
 sql: |
-  SELECT DISTINCT S.sname
-  FROM Student S
-  WHERE S.snum IN (SELECT E1.snum
-  FROM Enrolled E1, Enrolled E2, Class C1, Class C2
-  WHERE E1.snum = E2.snum AND E1.cname <> E2.cname
-  AND E1.cname = C1.name
-  AND E2.cname = C2.name AND C1.meets at = C2.meets at)
+  SELECT DISTINCT S.S_name
+  FROM "4-3" AS S
+  WHERE S.S_key IN (SELECT E1.S_key
+                    FROM "4-2" AS E1 JOIN
+                         "4-2" AS E2 JOIN
+                         "4-1" AS C1 JOIN
+                         "4-1" AS C2
+                    WHERE E1.S_key = E2.S_key
+                      AND E1.C_name != E2.C_name
+                      AND E1.C_name = C1.C_name
+                      AND E2.C_name = C2.C_name
+                      AND C1.meets_at = C2.meets_at)
 comment: |
   5.1.4 optimal solution
 

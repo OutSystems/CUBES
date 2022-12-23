@@ -1,3 +1,4 @@
+db: tests-examples/kaggle/tables/1_4_X_2.sqlite3
 inputs:
   - tests-examples/kaggle/tables/international_education_2.csv
 output: tests-examples/kaggle/tables/1_4_X_2.csv
@@ -10,11 +11,11 @@ columns:
   - year
 loc: 2
 sql:
-  SELECT indicator_code, indicator_name, COUNT(1) AS num_rows
-  FROM `bigquery-public-data.world_bank_intl_education.international_education`
+  SELECT indicator_code, COUNT(1) AS num_rows
+  FROM international_education_2
   WHERE year = 2016
-  GROUP BY indicator_name, indicator_code
-  HAVING COUNT(1) >= 175
+  GROUP BY year, indicator_code
+  HAVING COUNT(1) >= 5
   ORDER BY COUNT(1) DESC
 comment:
   df1 <- df_international_education_2 %>% group_by(indicator_code,year) %>% summarise(n = n()) %>% ungroup()
