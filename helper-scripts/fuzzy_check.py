@@ -306,7 +306,7 @@ def initializer():
 
 if __name__ == '__main__':
 
-    instances = list(glob.glob('tests/spider/**/*.yaml', recursive=True))
+    instances = list(glob.glob('tests/**/*.yaml', recursive=True))
     print(instances)
     # instances = list(glob.glob('tests/spider/club_1/*.yaml', recursive=True))
 

@@ -6,6 +6,7 @@ scythe_top100 <- load_result_squares('scythe_5_top100')
 patsql <- load_result_squares('patsql_8', remove_empties = T)
 patsql_5 <- load_result_squares('patsql_8_5', remove_empties = T)
 squares <- load_result_squares('squares_3') %>% semi_join(scythe, by = 'name')
+libra <- load_result_squares('libra_1', is_libra=T)
 seq <- load_result_file('sequential_5', use_log_suff = F) %>% semi_join(scythe, by = 'name')
 
 seq_600 <- load_result_file('sequential_6_all600', use_log_suff = F) %>% semi_join(scythe, by = 'name')
@@ -19,10 +20,18 @@ cubes_8 <- load_result_file('c62_8_full') %>% semi_join(scythe, by = 'name')
 cubes_16 <- load_result_file('c62_16_full') %>%
   filter(!str_detect(benchmark, 'db2csv')) %>%
   semi_join(scythe, by = 'name')
+cubes_32 <- load_result_file('major_rev_j32') %>%
+  filter(!str_detect(benchmark, 'db2csv')) %>%
+  semi_join(scythe, by = 'name')
 
 cubes_16_no_split <- load_result_file('c62_16_full_no_split') %>% semi_join(scythe, by = 'name')
 cubes_16_no_bitvec <- load_result_file('c62_16_full_no_bitvec') %>% semi_join(scythe, by = 'name')
 cubes_16_random <- load_result_file('c62_16_full_random') %>% semi_join(scythe, by = 'name')
+cubes_16_no_extra_score_update <- load_result_file('major_rev_no_extra_score_update') %>% semi_join(scythe, by = 'name')
+
+cubes_32_no_split <- load_result_file('major_rev_j32_no_split') %>% semi_join(scythe, by = 'name')
+cubes_32_no_bitvec <- load_result_file('major_rev_j32_no_bitvec') %>% semi_join(scythe, by = 'name')
+cubes_32_random <- load_result_file('major_rev_j32_random') %>% semi_join(scythe, by = 'name')
 
 
 cubes_16_600 <- load_result_file('c62_16_all600_full') %>% semi_join(scythe, by = 'name')

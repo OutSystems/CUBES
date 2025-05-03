@@ -19,16 +19,16 @@ library(ggbeeswarm)
 
 setwd('analysis')
 
-options(tikzDefaultEngine = 'xetex',
-        tikzXelatexPackages = c(
-          "\\usepackage{tikz}\n",
-          "\\usepackage[active,tightpage,xetex]{preview}\n",
-          "\\usepackage{fontspec,xunicode}\n",
-          "\\PreviewEnvironment{pgfpicture}\n",
-          "\\setlength\\PreviewBorder{0pt}\n",
-          "\\RequirePackage[T1]{fontenc}\n",
-          "\\RequirePackage[tt=false, type1=true]{libertine}\n",
-          "\\RequirePackage[varqu]{zi4}\n"
+options(tikzDefaultEngine = 'pdftex',
+        tikzLatexPackages  = c(
+          "\\usepackage{tikz}",
+          "\\usepackage[active,tightpage]{preview}",
+          "\\PreviewEnvironment{pgfpicture}",
+          "\\setlength\\PreviewBorder{0pt}",
+          "\\RequirePackage[T1]{fontenc}",
+          "\\RequirePackage[tt=false, type1=true]{libertine}",
+          "\\RequirePackage[varqu]{zi4}",
+          "\\RequirePackage[libertine]{newtxmath}"
         ),
         tikzMetricsDictionary = './metrics_cache_acm',
         standAlone = T)
@@ -328,10 +328,8 @@ seq_600_dis_data %>%
   summarise(a = median(n_questions))
 
 seq_600_dis_data %>%
-  filter(total_queries <= 1000) %>%
   summarise(a = mean(n_questions))
 cubes_16_600_dis_data %>%
-  filter(total_queries <= 1000) %>%
   summarise(a = mean(n_questions))
 
 cubes_16_600_dis_data %>%
