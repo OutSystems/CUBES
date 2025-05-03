@@ -279,6 +279,7 @@ plot_emf("n_questions", 6, 3.375,
                                    'Cubes-DC16' = cubes_16_600_dis_data))
 
 
+
 benchmark_summary('extended_abstract_summary',
                   "\\textsc{Squares}" = squares,
                   '\\textsc{Scythe}' = scythe,
