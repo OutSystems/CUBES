@@ -31,6 +31,7 @@ class Config:
 
     static_search: bool = False
     program_weigth_decay_rate: float = 0.99999
+    score_extra_update_reordering: bool = True
 
     probing_threads: int = 2
     cube_freedom: int = 0

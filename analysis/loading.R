@@ -2,6 +2,8 @@ status_levels <- rev(c(0, 3, 2, 4, 6, -2, -1, 5, 1, 143))
 status_meanings <- rev(c('Solved', 'Non-optimal', 'Solved (Just R)', 'Just R Non-optimal', 'Empty output', 'Memout', 'Timeout', 'No solution', 'Fail', 'Scythe ERR'))
 # status_colors <- rev(c("#57853C", "#296429", "#d79921", "#B4560E", "#59235F", "#4B44CC", "#cc241d", "#653e9c", "#3c3836", '#000000'))
 status_colors <- rev(c("#66a61e", "#296429", "#d79921", "#B4560E", "#59235F", "#7570B3", "#D95F02", "#653e9c", "#666666", '#000000'))
+status_colors_2 <- rev(c("#648fff", "#296429", "#ffb000", "#B4560E", "#59235F", "#fe6100", "#dc267f", "#653e9c", "#333333", '#000000'))
+# status_colors_2 <- rev(c("#1b9e77", "#296429", "#d79921", "#B4560E", "#59235F", "#7570B3", "#E7298A", "#653e9c", "#444444", '#000000'))
 
 fuzzy_combo <- rev(list(
   list(5, 'Pre Possibly Correct', "#21afc2"),
@@ -81,7 +83,7 @@ is_solved_status <- function(status) {
 }
 
 
-load_result_squares <- function(file, dis_fuzz = F, remove_empties=F) {
+load_result_squares <- function(file, dis_fuzz = F, remove_empties=F, is_libra=F) {
   result <- read_csv(paste0('data/', file, '.csv'), col_types = cols(.default = '?')) %>%
     mutate(status = factor(status, levels = status_levels)) %>%
     mutate(benchmark = gsub("_", "-", str_sub(str_extract(name, '.*/'), end = -2)),
@@ -89,6 +91,9 @@ load_result_squares <- function(file, dis_fuzz = F, remove_empties=F) {
            status = ifelse(timeout, -1, as.character(status)))
   if ('memout' %in% names(result)) {
     result <- result %>% mutate(status = ifelse(memout, -2, as.character(status)))
+  }
+  if (is_libra) {
+    result <- result %>% mutate(name = str_remove(name, "/op0.rules.small.dl"))
   }
   result <- result %>%
     mutate(solved = is_solved_status(status)) %>%

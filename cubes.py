@@ -67,6 +67,9 @@ def main():
     g.add_argument('--probing-threads', type=int, default=2,
                    help='number of threads that should be used to randomly explore the search space')
 
+    g.add_argument('--no-extra-score-update-reordering', dest="score_extra_update_reordering", action='store_false',
+                   help="disable extra score update which are meant to improve chances of operation reordering")
+
     g.add_argument('--split-search', action='store_true',
                    help='use an heuristic to determine if search should be split among multiple lines of code')
     g.add_argument('--split-search-threshold', type=int, default=500, help='instance hardness threshold')
@@ -101,7 +104,7 @@ def main():
                     split_complex_joins=args.split_complex_joins, bitenum_enabled=args.bitenum, split_complex_joins_ratio=args.split_ratio,
                     deduce_cubes=args.deduce_cubes, z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, top_programs=args.top,
                     use_beam_info=args.beam_info, beam_threshold=args.beam_threshold, enum_until=args.under, max_min_gen_cols=args.max_min_use_gen_cols,
-                    beam_name=args.beam_name)
+                    beam_name=args.beam_name, score_extra_update_reordering=args.score_extra_update_reordering)
     util.store_config(config)
 
     specification = Specification(spec)

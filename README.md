@@ -22,6 +22,9 @@
 
     ```pip install psutil z3-solver chromalog pylru frozendict sqlalchemy libs/TestSuiteEval-1.0.3-py3-none-any.whl pebble```
 
+## Replication
+
+
 # Usage
 
 Instance files are in the `tests-examples` folder.
@@ -42,7 +45,7 @@ You can use `--help` to see all configuration options available in cubes (parall
 
 In order to select which instances you would like to benchmark, you need to create a folder `tests`. You can then copy the desired instances from `tests-examples` or symlink them, if you desire.
 
-```PYTHONPATH=. ./helper-scripts/benchmark.py execution-descriptor```
+```PYTHONPATH=. python ./helper-scripts/benchmark.py execution-descriptor```
 
 Here `execution-descriptor` is any string that is a valid filename and is used to store the results in the folder `./analysis/data/execution-descriptor`.
 You can use `--help` to see all configuration options available in the benchmark script.
@@ -53,7 +56,7 @@ At this point disambiguation is implemented as a post-processing step after cube
 
 To perform disambiguation you can use the following command:
 
-```PYTHONPATH=. ./helper-scripts/disambiguation-post.py execution-descriptor```
+```PYTHONPATH=. python ./helper-scripts/disambiguation_post.py execution-descriptor```
 
 You can use `--help` to see all configuration options available in the disambiguation script.
 
@@ -63,11 +66,11 @@ Like the disambiguation script, accuracy requires instances to have been run usi
 
 To perform accuracy analysis you can use the following command:
 
-```PYTHONPATH=. ./helper-scripts/fuzzy-check.py --run=execution-descriptor```
+```PYTHONPATH=. python ./helper-scripts/fuzzy_check.py --run=execution-descriptor```
 
 If you want to perform accuracy analysis over the results of a previous disambiguation you can use:
 
-```PYTHONPATH=. ./helper-scripts/fuzzy-check.py --from-dis --run=execution-descriptor```
+```PYTHONPATH=. python ./helper-scripts/fuzzy_check.py --from-dis --run=execution-descriptor```
 
 You can use `--help` to see other configuration options available in the accuracy analysis script.
 
