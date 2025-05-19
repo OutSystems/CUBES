@@ -12,7 +12,7 @@ plot_pdf <- function(filename, width, height, plot) {
   print(plot)
   dev.off()
   setwd('plots')
-  system(paste0('xelatex ', filename, ".tex"))
+  system(paste0('pdflatex ', filename, ".tex"))
   setwd('..')
 }
 
@@ -226,7 +226,7 @@ cumsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
     my_theme
 }
 
-invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other = 50, step_size = .5, point_size = .75, facet = F, legend.position = 'bottom', ...) {
+invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other = 50, step_size = .5, point_size = .75, facet = F, legend.position = 'bottom', use_ibm = F, perecentage_suffix = "\\%", ...) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   if (use_vbs) {
@@ -245,9 +245,9 @@ invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
     geom_step(size = step_size) +
     geom_point(size = point_size, data = pick(~id %% every_other == 0))
   if (full_x) {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = '\\%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), limits = c(0, 1), labels = label_percent(accuracy = 1, suffix = perecentage_suffix))
   } else {
-    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = '\\%'))
+    tmp <- tmp + scale_y_continuous(breaks = extended_breaks(n = 6), labels = label_percent(accuracy = 1, suffix = perecentage_suffix))
   }
   if (log) {
     if (any(data$real < 2)) {
@@ -260,20 +260,24 @@ invsolved <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_ot
         annotation_logticks(sides = 'b')
     }
   } else {
-    tmp <- tmp + facet_zoom(xy = real <= 10, zoom.size = 2 / 3)
+    # tmp <- tmp + facet_zoom(xy = real <= 10, zoom.size = 2 / 3)
   }
   if (facet) {
     tmp <- tmp + facet_wrap(~benchmark)
   }
+  if (use_ibm) {
+    tmp <- tmp + scale_color_manual(values = ibm_palette(n = length(tries) + 1), breaks = c(names(tries), 'VBS'), drop = F)
+  } else {
+    tmp <- tmp + scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop = F)
+  }
   tmp +
-    scale_color_manual(values = colorRampPalette(brewer.pal(name = "Dark2", n = 8))(max(length(tries) + 1, 8))[0:length(tries) + 1], breaks = c(names(tries), 'VBS'), drop = F) +
     scale_shape(breaks = c(names(tries), 'VBS'), drop = F) +
     labs(y = 'Instances Solved', x = 'Time (s)') +
     #geom_vline(xintercept = n_distinct(data$name), linetype = "longdash") +
     #annotation_logticks(sides = 'l') +
     #geom_vline(xintercept = 600) +
     my_theme +
-    theme(legend.position = legend.position, legend.background = element_rect(fill = F), legend.key = element_rect(fill = F), legend.key.height = unit(.75, 'lines'))
+    theme(legend.position = legend.position, legend.background = element_rect(fill = F), legend.key = element_rect_round(fill = F), legend.key.height = unit(.75, 'lines'))
 }
 
 invsolved_cpu <- function(use_vbs = F, full_x = F, exclude = NULL, log = T, every_other = 50, step_size = .5, point_size = .75, facet = F, legend.position = 'bottom', ...) {
@@ -531,8 +535,11 @@ plot_solved <- function(x_expr, log_x = T, use_vbs = F, discrete_x = F, x_lab = 
     mutate(real = ifelse(status == 2, 1000, real)) %>%
     mutate(status = ifelse(status == 5, -1, status))
   print(data %>% group_by(try) %>% count(status))
-  data %>% ggplot(aes(x = { { x_expr } }, fill = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
-  { if (!discrete_x)  geom_histogram(position = "fill") } +
+  data %>% ggplot(aes(x = { { x_expr } }, pattern = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL),
+                      pattern_angle = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL),
+                      pattern_shape = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL),
+                      fill = factor(status, levels = status_levels, labels = status_meanings, exclude = NULL))) +
+  { if (!discrete_x)  geom_histogram_pattern(position = "fill", bins = 15, pattern_fill="#333333", pattern_color=NA, pattern_key_scale_factor = 0.4) } +
   { if (discrete_x)  geom_bar(position = "fill") } +
     # scale_x_log10(labels = function(x) { paste0('\\(10^{', log10(x), '}\\)') }) +
   { if (log_x) scale_x_log10(label = x_label) } +
@@ -542,6 +549,7 @@ plot_solved <- function(x_expr, log_x = T, use_vbs = F, discrete_x = F, x_lab = 
     scale_fill_manual(drop = T, values = map2(status_levels, status_colors, c) %>%
       keep(function(x) { any(x[1] == as.character(data$status)) }) %>%
       map(function(x) { x[2] })) +
+     # scale_pattern_manual(values=c('pch', 'stripe', 'crosshatch', 'weave', "polygon_tiling")) +
   { if (!is.na(x_lab)) labs(x = x_lab) } +
   { if (!is.na(y_lab)) labs(y = y_lab) } +
     # labs(y = 'Time (s)', x = '\\# Total Cells') +
@@ -703,12 +711,14 @@ plot_fuzzy_new_data <- function(..., has_dis_data = F, short_bars = F) {
                           try = factor(try, levels = names(tries)))
 }
 
-plot_fuzzy_new <- function(..., has_dis_data = F, short_bars = F) {
+plot_fuzzy_new <- function(..., has_dis_data = F, bar_width = 1, use_ibm = F, bar_position = "stack", use_percentage = F) {
   tries <- list(...)
   data <- bind_rows(tries, .id = 'try')
   # data <- data %>% mutate(fuzzy = factor(ifelse(sql_solutions == 0 | !solved, -2, fuzzy_levels[as.integer(fuzzy)]), fuzzy_levels, fuzzy_meanings))
   if (has_dis_data) {
-    data <- data %>% mutate(fuzzy = factor(ifelse((status.dis == 2 | is.na(status.dis) | status.dis == 5) & sql_solutions != 0, -7, fuzzy_levels[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
+    data <- data %>% mutate(fuzzy = factor(ifelse((status.dis == 2 |
+      is.na(status.dis) |
+      status.dis == 5) & sql_solutions != 0, -7, fuzzy_levels[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
                             # fuzzy = factor(ifelse(status.dis == 5 & sql_solutions != 0, -7, c(-7, fuzzy_levels)[as.integer(fuzzy)]), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)),
                             fuzzy = factor(ifelse(solved, c(-7, fuzzy_levels)[as.integer(fuzzy)], -2), c(-7, fuzzy_levels), c("\\texttt{Disambiguate} Timeout", fuzzy_meanings)))
   } else {
@@ -719,14 +729,18 @@ plot_fuzzy_new <- function(..., has_dis_data = F, short_bars = F) {
                           fuzzy = fct_recode(fuzzy, "\\texttt{FuzzyCheck} Timeout" = "Timeout"),
                           fuzzy = fct_relevel(fuzzy, "No solution"),
                           try = factor(try, levels = names(tries)))
-  print(data %>% group_by(fuzzy) %>% summarise(a = n()))
+  print(data %>%
+          group_by(try, fuzzy) %>%
+          summarise(a = n()), n = 100, width = 200)
   data %>%
     ggplot(aes(x = try, fill = fuzzy)) +
-  { if (!short_bars) geom_bar() } +
-  { if (short_bars) geom_bar(width = .8) } +
+    geom_bar(width = bar_width, position = bar_position) +
     labs(y = 'Number of Instances', x = NULL, fill = 'Fuzzing Status') +
-  { if (!has_dis_data) scale_fill_manual(values = c("#CCCCCC", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
-  { if (has_dis_data) scale_fill_manual(values = c("#CCCCCC", "#E7298A", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
+  { if (use_percentage) scale_y_continuous(labels = label_percent(accuracy = 1, suffix = '%')) } +
+  { if (!has_dis_data & use_ibm) scale_fill_manual(values = c("#CCCCCC", "#fe6100", "#b0741a", "#ffb000", "#785ef0", "#6e77f8", "#648fff")) } +
+  { if (has_dis_data & use_ibm) scale_fill_manual(values = c("#CCCCCC", "#dc267f", "#fe6100", "#b0741a", "#ffb000", "#785ef0", "#6e77f8", "#648fff")) } +
+  { if (!has_dis_data & !use_ibm) scale_fill_manual(values = c("#CCCCCC", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
+  { if (has_dis_data & !use_ibm) scale_fill_manual(values = c("#CCCCCC", "#E7298A", "#D95F02", "#A6761D", "#E6AB02", "#7570B3", "#1B9E77", "#66A61E")) } +
     my_theme
 }
 
@@ -885,8 +899,23 @@ questions_by_queries_plot <- function(...) {
     my_theme
 }
 
+questions_by_queries_plot_no_cats <- function(...) {
+  tries <- list(...)
+  data <- bind_rows(tries, .id = 'try') %>%
+    mutate(try = factor(try, levels = names(tries)))
+  data %>%
+    filter(n_questions > 0) %>%
+    group_by(try) %>%
+    ggplot(aes(x = "All Queries", y = n_questions, fill = try)) +
+    geom_boxplot(outlier.size = 0.5) +
+    stat_boxplot(geom = 'errorbar') +
+    scale_fill_brewer(palette = 'Dark2') +
+    labs(x = 'Number of queries pre-disambiguation', y = 'Questions asked') +
+    my_theme
+}
+
 questions_by_queries_plot('\\textsc{Cubes-Seq}' = seq_600_dis_data,
-                                   '\\textsc{Cubes-DC16}' = cubes_16_600_dis_data)
+                          '\\textsc{Cubes-DC16}' = cubes_16_600_dis_data)
 
 instance_info_dist <- function(expr, y_expr, two_d = F, continuous = T, log_x = F, facet = F, group_status = F, density_adjust = 1, x_lab = NA, y_lab = NA, data = instance_info) {
   data <- data %>%
@@ -897,7 +926,7 @@ instance_info_dist <- function(expr, y_expr, two_d = F, continuous = T, log_x = 
                                      kaggle = "\\texttt{kaggle}"))
 
   if (!facet & !group_status) {
-    tmp <- data %>% ggplot(aes(x = { { expr } }, color = benchmark, fill = benchmark))
+    tmp <- data %>% ggplot(aes(x = { { expr } }, color = benchmark))
   } else if (!facet & group_status) {
     tmp <- data %>% ggplot(aes(x = { { expr } }, color = status, fill = status))
   } else {

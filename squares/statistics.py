@@ -6,6 +6,7 @@ from logging import getLogger
 
 from . import util
 from .util import pairwise
+from . import config
 
 logger = getLogger('squares')
 
@@ -71,8 +72,9 @@ class BigramStatistics(Statistics):
             self.bigram_scores[bigram[0]][bigram[1]] += score
         if program:
             self.base_scores[program[0]] += score
-        for i, prod in enumerate(program):
-            self.base_scores[prod] += score / ((i + 1) ** 2)
+        if util.get_config().score_extra_update_reordering:
+            for i, prod in enumerate(program):
+                self.base_scores[prod] += score / ((i + 1) ** 2)
 
     def sort_productions(self, allowed_productions, cube, is_probe):
         if is_probe:

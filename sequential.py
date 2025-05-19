@@ -83,7 +83,7 @@ def main():
         if packet[0] == util.Message.DONE:
             print()
             if util.get_config().enum_until is not None:
-                print('All solutions of length', packet[1], 'found')
+                print('All solutions found')
             break
         elif packet[0] == util.Message.DEBUG_STATS:
             results.update_stats(*packet[1:])
